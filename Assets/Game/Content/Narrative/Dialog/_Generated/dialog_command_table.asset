@@ -1,0 +1,2663 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecd611c5c28b4641870027e8b09c8411, type: 3}
+  m_Name: dialog_command_table
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.DialogCommandTableDefinition
+  id: dialog_command_table
+  formerIds: []
+  entries:
+  - Text: abort_beat
+    Effect:
+      source:
+      - abort_beat
+      sourceHash: 7472656006362242452
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866944
+  - Text: add_fact rep_ark 1
+    Effect:
+      source:
+      - add_fact rep_ark 1
+      sourceHash: 2003153193040071939
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866945
+  - Text: add_fact rep_vanguard_ghosts 1
+    Effect:
+      source:
+      - add_fact rep_vanguard_ghosts 1
+      sourceHash: 2663687784441994378
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866946
+  - Text: add_fact research_points 10
+    Effect:
+      source:
+      - add_fact research_points 10
+      sourceHash: 11512252657765678755
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866947
+  - Text: add_fact research_points 100
+    Effect:
+      source:
+      - add_fact research_points 100
+      sourceHash: 2764660644565917837
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866948
+  - Text: add_fact research_points 25
+    Effect:
+      source:
+      - add_fact research_points 25
+      sourceHash: 3823520719377885733
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866949
+  - Text: add_fact research_points 50
+    Effect:
+      source:
+      - add_fact research_points 50
+      sourceHash: 14875512316085511459
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866950
+  - Text: complete_beat beat_shady_man
+    Effect:
+      source:
+      - complete_beat beat_shady_man
+      sourceHash: 12791120813172506256
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866951
+  - Text: complete_quest quest_debug_fail_sandbox
+    Effect:
+      source:
+      - complete_quest quest_debug_fail_sandbox
+      sourceHash: 13418878502443864371
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866952
+  - Text: complete_quest quest_signal_trace
+    Effect:
+      source:
+      - complete_quest quest_signal_trace
+      sourceHash: 800744938075063982
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866953
+  - Text: damage_ship 10
+    Effect:
+      source:
+      - damage_ship 10
+      sourceHash: 2529962408496813342
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866954
+  - Text: damage_ship 15
+    Effect:
+      source:
+      - damage_ship 15
+      sourceHash: 7566882723713588605
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866955
+  - Text: damage_ship 20
+    Effect:
+      source:
+      - damage_ship 20
+      sourceHash: 1724275060793372335
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866956
+  - Text: damage_ship 5
+    Effect:
+      source:
+      - damage_ship 5
+      sourceHash: 13541047710096020531
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866957
+  - Text: fail_quest quest_debug_fail_sandbox
+    Effect:
+      source:
+      - fail_quest quest_debug_fail_sandbox
+      sourceHash: 392438344729795941
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866958
+  - Text: give_credits 150
+    Effect:
+      source:
+      - give_credits 150
+      sourceHash: 2056615630233723050
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866959
+  - Text: give_credits 200
+    Effect:
+      source:
+      - give_credits 200
+      sourceHash: 16875262185111002870
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866960
+  - Text: give_credits 250
+    Effect:
+      source:
+      - give_credits 250
+      sourceHash: 9474278643785534327
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866961
+  - Text: give_credits 300
+    Effect:
+      source:
+      - give_credits 300
+      sourceHash: 4799123555841036516
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866962
+  - Text: give_credits 400
+    Effect:
+      source:
+      - give_credits 400
+      sourceHash: 10520700574191816927
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866963
+  - Text: give_credits 500
+    Effect:
+      source:
+      - give_credits 500
+      sourceHash: 13283637073683303577
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866964
+  - Text: give_item item_ai_core_data 1
+    Effect:
+      source:
+      - give_item item_ai_core_data 1
+      sourceHash: 3905355234123690628
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866965
+  - Text: give_item item_ancient_data_log 1
+    Effect:
+      source:
+      - give_item item_ancient_data_log 1
+      sourceHash: 5170273048693551882
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866966
+  - Text: give_item item_blueprint_glass_beam 1
+    Effect:
+      source:
+      - give_item item_blueprint_glass_beam 1
+      sourceHash: 6821960555006680323
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866967
+  - Text: give_item item_blueprint_vanguard_plating 1
+    Effect:
+      source:
+      - give_item item_blueprint_vanguard_plating 1
+      sourceHash: 2911466848637563510
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866968
+  - Text: give_item item_genetic_stimulants 1
+    Effect:
+      source:
+      - give_item item_genetic_stimulants 1
+      sourceHash: 1797887870842584758
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866969
+  - Text: give_item item_mining_beam_mk2 1
+    Effect:
+      source:
+      - give_item item_mining_beam_mk2 1
+      sourceHash: 18111897161680734743
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866970
+  - Text: give_item item_psycho_gas 1
+    Effect:
+      source:
+      - give_item item_psycho_gas 1
+      sourceHash: 8719388419818624461
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866971
+  - Text: give_item item_reality_anchor 1
+    Effect:
+      source:
+      - give_item item_reality_anchor 1
+      sourceHash: 15260580726877600088
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866972
+  - Text: give_item item_research_blueprint 1
+    Effect:
+      source:
+      - give_item item_research_blueprint 1
+      sourceHash: 919127245688814157
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866973
+  - Text: give_item item_research_data 1
+    Effect:
+      source:
+      - give_item item_research_data 1
+      sourceHash: 11950923665184062700
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866974
+  - Text: give_item item_scrap_cannon 1
+    Effect:
+      source:
+      - give_item item_scrap_cannon 1
+      sourceHash: 14409740556956384859
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866975
+  - Text: give_item item_seed_bank 1
+    Effect:
+      source:
+      - give_item item_seed_bank 1
+      sourceHash: 16434317093725137608
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866976
+  - Text: give_item item_stealth_patch 1
+    Effect:
+      source:
+      - give_item item_stealth_patch 1
+      sourceHash: 3293872050946991179
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866977
+  - Text: give_item item_strange_matter_container_full 1
+    Effect:
+      source:
+      - give_item item_strange_matter_container_full 1
+      sourceHash: 3709328533385754395
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866978
+  - Text: give_item item_terraforming_seed 1
+    Effect:
+      source:
+      - give_item item_terraforming_seed 1
+      sourceHash: 5279710211824211427
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866979
+  - Text: give_item item_vanguard_thruster 1
+    Effect:
+      source:
+      - give_item item_vanguard_thruster 1
+      sourceHash: 14238627663940524436
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866980
+  - Text: give_item resource_crew 1
+    Effect:
+      source:
+      - give_item resource_crew 1
+      sourceHash: 1427361084332371467
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866981
+  - Text: give_item resource_fuel 1
+    Effect:
+      source:
+      - give_item resource_fuel 1
+      sourceHash: 11806604234822700510
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866982
+  - Text: give_item resource_fuel 10
+    Effect:
+      source:
+      - give_item resource_fuel 10
+      sourceHash: 9011696965866733281
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866983
+  - Text: give_item resource_fuel 3
+    Effect:
+      source:
+      - give_item resource_fuel 3
+      sourceHash: 4921260452212648619
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866984
+  - Text: give_item resource_fuel 5
+    Effect:
+      source:
+      - give_item resource_fuel 5
+      sourceHash: 15815516692273165746
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866985
+  - Text: give_item resource_palladium 2
+    Effect:
+      source:
+      - give_item resource_palladium 2
+      sourceHash: 5468737346240989225
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866986
+  - Text: give_item resource_palladium 3
+    Effect:
+      source:
+      - give_item resource_palladium 3
+      sourceHash: 16638491963492325923
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866987
+  - Text: give_loot loot_base 3
+    Effect:
+      source:
+      - give_loot loot_base 3
+      sourceHash: 17403327890781125692
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866988
+  - Text: give_loot loot_salvage_module 1
+    Effect:
+      source:
+      - give_loot loot_salvage_module 1
+      sourceHash: 15414109819267259480
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866989
+  - Text: give_ship ship_fighter
+    Effect:
+      source:
+      - give_ship ship_fighter
+      sourceHash: 10602730144407947791
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866990
+  - Text: give_ship ship_frigate
+    Effect:
+      source:
+      - give_ship ship_frigate
+      sourceHash: 14145579570064257310
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866991
+  - Text: give_ship ship_vestari
+    Effect:
+      source:
+      - give_ship ship_vestari
+      sourceHash: 93681182172986471
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866992
+  - Text: open_merchant merchant_shady_trader
+    Effect:
+      source:
+      - open_merchant merchant_shady_trader
+      sourceHash: 11703836546533378301
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866993
+  - Text: open_merchant merchant_station_market
+    Effect:
+      source:
+      - open_merchant merchant_station_market
+      sourceHash: 17763600831164988185
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866994
+  - Text: open_ship_editor
+    Effect:
+      source:
+      - open_ship_editor
+      sourceHash: 2110527369067045681
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866995
+  - Text: play_sfx cue_ui_click
+    Effect:
+      source:
+      - play_sfx cue_ui_click
+      sourceHash: 2801684178301700058
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866996
+  - Text: play_sfx cue_ui_fail
+    Effect:
+      source:
+      - play_sfx cue_ui_fail
+      sourceHash: 18402499788444032649
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866997
+  - Text: play_sfx cue_ui_success
+    Effect:
+      source:
+      - play_sfx cue_ui_success
+      sourceHash: 13999435795522856002
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866998
+  - Text: play_sfx cue_ui_view_open
+    Effect:
+      source:
+      - play_sfx cue_ui_view_open
+      sourceHash: 15620540171615494255
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518866999
+  - Text: quest_log quest_hostile_blackbox legacy_1
+    Effect:
+      source:
+      - quest_log quest_hostile_blackbox legacy_1
+      sourceHash: 10980394345008732987
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867000
+  - Text: quest_log quest_relation_watch legacy_1
+    Effect:
+      source:
+      - quest_log quest_relation_watch legacy_1
+      sourceHash: 17450530155459582962
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867001
+  - Text: quest_log quest_station_boarding_trial legacy_1
+    Effect:
+      source:
+      - quest_log quest_station_boarding_trial legacy_1
+      sourceHash: 11656076314341413876
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867002
+  - Text: queue_beat beat_choose_start_ship
+    Effect:
+      source:
+      - queue_beat beat_choose_start_ship
+      sourceHash: 7552807310086582708
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867003
+  - Text: remove_body
+    Effect:
+      source:
+      - remove_body
+      sourceHash: 12166175540565130994
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867004
+  - Text: repair_ship 100
+    Effect:
+      source:
+      - repair_ship 100
+      sourceHash: 8250996161200592476
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867005
+  - Text: repair_ship 50
+    Effect:
+      source:
+      - repair_ship 50
+      sourceHash: 16878340304146727701
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867006
+  - Text: request_lane_jump starsys_whisper
+    Effect:
+      source:
+      - request_lane_jump starsys_whisper
+      sourceHash: 14556548319371415043
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867007
+  - Text: reveal_clue clue_ark_mission_12
+    Effect:
+      source:
+      - reveal_clue clue_ark_mission_12
+      sourceHash: 13014018674135208993
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867008
+  - Text: reveal_clue clue_ark_mutiny
+    Effect:
+      source:
+      - reveal_clue clue_ark_mutiny
+      sourceHash: 13324799279044952127
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867009
+  - Text: reveal_clue clue_fragmented_warning
+    Effect:
+      source:
+      - reveal_clue clue_fragmented_warning
+      sourceHash: 8947557750659259898
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867010
+  - Text: reveal_clue clue_message_from_self
+    Effect:
+      source:
+      - reveal_clue clue_message_from_self
+      sourceHash: 5966841311117734486
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867011
+  - Text: reveal_clue clue_seen_the_loop
+    Effect:
+      source:
+      - reveal_clue clue_seen_the_loop
+      sourceHash: 2534594480373801955
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867012
+  - Text: reveal_clue clue_vanguard_forge
+    Effect:
+      source:
+      - reveal_clue clue_vanguard_forge
+      sourceHash: 17200061642829916893
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867013
+  - Text: reveal_clue clue_vanguard_spire
+    Effect:
+      source:
+      - reveal_clue clue_vanguard_spire
+      sourceHash: 12512178322896017478
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867014
+  - Text: reveal_clue rumor_hidden_cache
+    Effect:
+      source:
+      - reveal_clue rumor_hidden_cache
+      sourceHash: 11142430268828771799
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867015
+  - Text: reveal_clue rumor_hidden_planet
+    Effect:
+      source:
+      - reveal_clue rumor_hidden_planet
+      sourceHash: 2969389343965958561
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867016
+  - Text: reveal_clue rumor_hidden_research_station
+    Effect:
+      source:
+      - reveal_clue rumor_hidden_research_station
+      sourceHash: 1007053480353499119
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867017
+  - Text: reveal_clue rumor_satellite_array
+    Effect:
+      source:
+      - reveal_clue rumor_satellite_array
+      sourceHash: 10904358705915591898
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867018
+  - Text: reveal_clue rumor_silence_incursions
+    Effect:
+      source:
+      - reveal_clue rumor_silence_incursions
+      sourceHash: 10231054287440301113
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867019
+  - Text: reveal_clue rumor_two_sectors_ahead
+    Effect:
+      source:
+      - reveal_clue rumor_two_sectors_ahead
+      sourceHash: 16636729495956670831
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867020
+  - Text: set_fact gate_ark_start_active true
+    Effect:
+      source:
+      - set_fact gate_ark_start_active true
+      sourceHash: 7213935399447052533
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867021
+  - Text: set_fact intro_awake true
+    Effect:
+      source:
+      - set_fact intro_awake true
+      sourceHash: 16940094643516907496
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867022
+  - Text: set_fact intro_ship_chosen true
+    Effect:
+      source:
+      - set_fact intro_ship_chosen true
+      sourceHash: 1682141215558757357
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867023
+  - Text: set_fact morale_boost true
+    Effect:
+      source:
+      - set_fact morale_boost true
+      sourceHash: 6791867731737393506
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867024
+  - Text: set_fact pirate_bounty_accepted true
+    Effect:
+      source:
+      - set_fact pirate_bounty_accepted true
+      sourceHash: 2238866728630197560
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867025
+  - Text: set_fact station_boarding_trial_decode_tip true
+    Effect:
+      source:
+      - set_fact station_boarding_trial_decode_tip true
+      sourceHash: 5870655572168477873
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867026
+  - Text: set_fact station_boarding_trial_meet_shady_contact true
+    Effect:
+      source:
+      - set_fact station_boarding_trial_meet_shady_contact true
+      sourceHash: 2631103413710616326
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867027
+  - Text: set_fact story_survey_complete true
+    Effect:
+      source:
+      - set_fact story_survey_complete true
+      sourceHash: 5223973395258319488
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867028
+  - Text: set_fact trait_existential_dread true
+    Effect:
+      source:
+      - set_fact trait_existential_dread true
+      sourceHash: 12695621289230475828
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867029
+  - Text: set_fact trait_shaken true
+    Effect:
+      source:
+      - set_fact trait_shaken true
+      sourceHash: 11006742875294627667
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867030
+  - Text: set_fact trait_solar_charged_engines true
+    Effect:
+      source:
+      - set_fact trait_solar_charged_engines true
+      sourceHash: 10400502733681028489
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867031
+  - Text: spawn_encounter encounter_xeno_probe_tutorial ark_station 1
+    Effect:
+      source:
+      - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
+      sourceHash: 14386878107608388616
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867032
+  - Text: start_combat encounter_doppelganger
+    Effect:
+      source:
+      - start_combat encounter_doppelganger
+      sourceHash: 14010469036791055024
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867033
+  - Text: start_combat encounter_extraction_guardians
+    Effect:
+      source:
+      - start_combat encounter_extraction_guardians
+      sourceHash: 11633892543866697910
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867034
+  - Text: start_combat encounter_glass_worms
+    Effect:
+      source:
+      - start_combat encounter_glass_worms
+      sourceHash: 15208548701379579557
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867035
+  - Text: start_combat encounter_jungle_beasts
+    Effect:
+      source:
+      - start_combat encounter_jungle_beasts
+      sourceHash: 2789551386242998142
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867036
+  - Text: start_combat encounter_raiders
+    Effect:
+      source:
+      - start_combat encounter_raiders
+      sourceHash: 16653456157414380769
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867037
+  - Text: start_combat encounter_scavenger_king
+    Effect:
+      source:
+      - start_combat encounter_scavenger_king
+      sourceHash: 14042621863407810053
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867038
+  - Text: start_combat encounter_solar_parasite
+    Effect:
+      source:
+      - start_combat encounter_solar_parasite
+      sourceHash: 1618196645665683797
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867039
+  - Text: start_quest contract_bounty_probe
+    Effect:
+      source:
+      - start_quest contract_bounty_probe
+      sourceHash: 10294674842400871157
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867040
+  - Text: start_quest contract_material_sweep
+    Effect:
+      source:
+      - start_quest contract_material_sweep
+      sourceHash: 14544653456377953472
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867041
+  - Text: start_quest contract_signal_relay
+    Effect:
+      source:
+      - start_quest contract_signal_relay
+      sourceHash: 12899478383173930737
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867042
+  - Text: start_quest quest_debug_fail_sandbox
+    Effect:
+      source:
+      - start_quest quest_debug_fail_sandbox
+      sourceHash: 17355484958801866271
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867043
+  - Text: start_quest quest_hostile_blackbox
+    Effect:
+      source:
+      - start_quest quest_hostile_blackbox
+      sourceHash: 16277629263238702391
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867044
+  - Text: start_quest quest_signal_trace
+    Effect:
+      source:
+      - start_quest quest_signal_trace
+      sourceHash: 14594092279709006322
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867045
+  - Text: start_quest quest_station_boarding_trial
+    Effect:
+      source:
+      - start_quest quest_station_boarding_trial
+      sourceHash: 10892324697997923000
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867046
+  - Text: start_quest quest_station_data_delivery
+    Effect:
+      source:
+      - start_quest quest_station_data_delivery
+      sourceHash: 8374341308182628947
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867047
+  - Text: start_quest quest_survey_local_materials
+    Effect:
+      source:
+      - start_quest quest_survey_local_materials
+      sourceHash: 5939192710101066814
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867048
+  - Text: start_quest quest_whisper_chain
+    Effect:
+      source:
+      - start_quest quest_whisper_chain
+      sourceHash: 17649527872807858440
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867049
+  - Text: take_credits 100
+    Effect:
+      source:
+      - take_credits 100
+      sourceHash: 5701294552014682055
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867050
+  - Text: take_credits 20
+    Effect:
+      source:
+      - take_credits 20
+      sourceHash: 2026604578607426516
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867051
+  - Text: take_credits 50
+    Effect:
+      source:
+      - take_credits 50
+      sourceHash: 6547416828474723235
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867052
+  - Text: take_credits 500
+    Effect:
+      source:
+      - take_credits 500
+      sourceHash: 3928242409405655661
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867053
+  - Text: take_item item_strange_matter_container_full 1
+    Effect:
+      source:
+      - take_item item_strange_matter_container_full 1
+      sourceHash: 15603075080646588627
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867054
+  - Text: take_item resource_crew 1
+    Effect:
+      source:
+      - take_item resource_crew 1
+      sourceHash: 17809462914382481364
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867055
+  - Text: take_item resource_fuel 2
+    Effect:
+      source:
+      - take_item resource_fuel 2
+      sourceHash: 122596599202662485
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867056
+  - Text: take_item resource_fuel 3
+    Effect:
+      source:
+      - take_item resource_fuel 3
+      sourceHash: 13501146580374542506
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867057
+  - Text: take_item resource_fuel 5
+    Effect:
+      source:
+      - take_item resource_fuel 5
+      sourceHash: 13726837981148594784
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867058
+  - Text: take_item resource_palladium 1
+    Effect:
+      source:
+      - take_item resource_palladium 1
+      sourceHash: 9401724414868571093
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867059
+  - Text: take_item resource_palladium 3
+    Effect:
+      source:
+      - take_item resource_palladium 3
+      sourceHash: 12717802617857348109
+      compilerVersion: 1
+      hasErrors: 0
+      effects:
+      - rid: 6548929068518867060
+  sourcesHash: 5413496878118589984
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 6548929068518866944
+      type: {class: AbortBeatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers: []
+          Booleans: []
+          Text: []
+    - rid: 6548929068518866945
+      type: {class: AddFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867061
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - rep_ark
+          - 
+    - rid: 6548929068518866946
+      type: {class: AddFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867062
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - rep_vanguard_ghosts
+          - 
+    - rid: 6548929068518866947
+      type: {class: AddFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867063
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - research_points
+          - 
+    - rid: 6548929068518866948
+      type: {class: AddFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867064
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - research_points
+          - 
+    - rid: 6548929068518866949
+      type: {class: AddFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867065
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - research_points
+          - 
+    - rid: 6548929068518866950
+      type: {class: AddFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867066
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - research_points
+          - 
+    - rid: 6548929068518866951
+      type: {class: CompleteBeatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - beat_shady_man
+    - rid: 6548929068518866952
+      type: {class: CompleteQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_debug_fail_sandbox
+    - rid: 6548929068518866953
+      type: {class: CompleteQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_signal_trace
+    - rid: 6548929068518866954
+      type: {class: DamageShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867067
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866955
+      type: {class: DamageShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867068
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866956
+      type: {class: DamageShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867069
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866957
+      type: {class: DamageShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867070
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866958
+      type: {class: FailQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_debug_fail_sandbox
+    - rid: 6548929068518866959
+      type: {class: GiveCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867071
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866960
+      type: {class: GiveCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867072
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866961
+      type: {class: GiveCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867073
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866962
+      type: {class: GiveCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867074
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866963
+      type: {class: GiveCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867075
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866964
+      type: {class: GiveCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867076
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518866965
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867077
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_ai_core_data
+          - 
+    - rid: 6548929068518866966
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867078
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_ancient_data_log
+          - 
+    - rid: 6548929068518866967
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867079
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_blueprint_glass_beam
+          - 
+    - rid: 6548929068518866968
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867080
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_blueprint_vanguard_plating
+          - 
+    - rid: 6548929068518866969
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867081
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_genetic_stimulants
+          - 
+    - rid: 6548929068518866970
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867082
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_mining_beam_mk2
+          - 
+    - rid: 6548929068518866971
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867083
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_psycho_gas
+          - 
+    - rid: 6548929068518866972
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867084
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_reality_anchor
+          - 
+    - rid: 6548929068518866973
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867085
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_research_blueprint
+          - 
+    - rid: 6548929068518866974
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867086
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_research_data
+          - 
+    - rid: 6548929068518866975
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867087
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_scrap_cannon
+          - 
+    - rid: 6548929068518866976
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867088
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_seed_bank
+          - 
+    - rid: 6548929068518866977
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867089
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_stealth_patch
+          - 
+    - rid: 6548929068518866978
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867090
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_strange_matter_container_full
+          - 
+    - rid: 6548929068518866979
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867091
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_terraforming_seed
+          - 
+    - rid: 6548929068518866980
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867092
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_vanguard_thruster
+          - 
+    - rid: 6548929068518866981
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867093
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_crew
+          - 
+    - rid: 6548929068518866982
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867094
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518866983
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867095
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518866984
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867096
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518866985
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867097
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518866986
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867098
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_palladium
+          - 
+    - rid: 6548929068518866987
+      type: {class: GiveItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867099
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_palladium
+          - 
+    - rid: 6548929068518866988
+      type: {class: GiveLootEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867100
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - loot_base
+          - 
+    - rid: 6548929068518866989
+      type: {class: GiveLootEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867101
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - loot_salvage_module
+          - 
+    - rid: 6548929068518866990
+      type: {class: GiveShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - ship_fighter
+    - rid: 6548929068518866991
+      type: {class: GiveShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - ship_frigate
+    - rid: 6548929068518866992
+      type: {class: GiveShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - ship_vestari
+    - rid: 6548929068518866993
+      type: {class: OpenMerchantEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - merchant_shady_trader
+    - rid: 6548929068518866994
+      type: {class: OpenMerchantEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - merchant_station_market
+    - rid: 6548929068518866995
+      type: {class: OpenShipEditorEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers: []
+          Booleans: []
+          Text: []
+    - rid: 6548929068518866996
+      type: {class: PlaySfxEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - cue_ui_click
+    - rid: 6548929068518866997
+      type: {class: PlaySfxEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - cue_ui_fail
+    - rid: 6548929068518866998
+      type: {class: PlaySfxEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - cue_ui_success
+    - rid: 6548929068518866999
+      type: {class: PlaySfxEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - cue_ui_view_open
+    - rid: 6548929068518867000
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_hostile_blackbox
+          - legacy_1
+    - rid: 6548929068518867001
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_relation_watch
+          - legacy_1
+    - rid: 6548929068518867002
+      type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - quest_station_boarding_trial
+          - legacy_1
+    - rid: 6548929068518867003
+      type: {class: QueueBeatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - beat_choose_start_ship
+    - rid: 6548929068518867004
+      type: {class: RemoveBodyEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers: []
+          Booleans: []
+          Text: []
+    - rid: 6548929068518867005
+      type: {class: RepairShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867102
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518867006
+      type: {class: RepairShipEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867103
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518867007
+      type: {class: RequestLaneJumpEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - starsys_whisper
+    - rid: 6548929068518867008
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_ark_mission_12
+    - rid: 6548929068518867009
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_ark_mutiny
+    - rid: 6548929068518867010
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_fragmented_warning
+    - rid: 6548929068518867011
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_message_from_self
+    - rid: 6548929068518867012
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_seen_the_loop
+    - rid: 6548929068518867013
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_vanguard_forge
+    - rid: 6548929068518867014
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - clue_vanguard_spire
+    - rid: 6548929068518867015
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - rumor_hidden_cache
+    - rid: 6548929068518867016
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - rumor_hidden_planet
+    - rid: 6548929068518867017
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - rumor_hidden_research_station
+    - rid: 6548929068518867018
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - rumor_satellite_array
+    - rid: 6548929068518867019
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - rumor_silence_incursions
+    - rid: 6548929068518867020
+      type: {class: RevealClueEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - rumor_two_sectors_ahead
+    - rid: 6548929068518867021
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867104
+          Text:
+          - gate_ark_start_active
+          - 
+    - rid: 6548929068518867022
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867105
+          Text:
+          - intro_awake
+          - 
+    - rid: 6548929068518867023
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867106
+          Text:
+          - intro_ship_chosen
+          - 
+    - rid: 6548929068518867024
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867107
+          Text:
+          - morale_boost
+          - 
+    - rid: 6548929068518867025
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867108
+          Text:
+          - pirate_bounty_accepted
+          - 
+    - rid: 6548929068518867026
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867109
+          Text:
+          - station_boarding_trial_decode_tip
+          - 
+    - rid: 6548929068518867027
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867110
+          Text:
+          - station_boarding_trial_meet_shady_contact
+          - 
+    - rid: 6548929068518867028
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867111
+          Text:
+          - story_survey_complete
+          - 
+    - rid: 6548929068518867029
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867112
+          Text:
+          - trait_existential_dread
+          - 
+    - rid: 6548929068518867030
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867113
+          Text:
+          - trait_shaken
+          - 
+    - rid: 6548929068518867031
+      type: {class: SetFactEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          Booleans:
+          - rid: -2
+          - rid: 6548929068518867114
+          Text:
+          - trait_solar_charged_engines
+          - 
+    - rid: 6548929068518867032
+      type: {class: SpawnEncounterEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: -2
+          - rid: 6548929068518867115
+          Booleans:
+          - rid: -2
+          - rid: -2
+          - rid: -2
+          Text:
+          - encounter_xeno_probe_tutorial
+          - ark_station
+          - 
+    - rid: 6548929068518867033
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_doppelganger
+    - rid: 6548929068518867034
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_extraction_guardians
+    - rid: 6548929068518867035
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_glass_worms
+    - rid: 6548929068518867036
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_jungle_beasts
+    - rid: 6548929068518867037
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_raiders
+    - rid: 6548929068518867038
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_scavenger_king
+    - rid: 6548929068518867039
+      type: {class: StartCombatEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - encounter_solar_parasite
+    - rid: 6548929068518867040
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - contract_bounty_probe
+    - rid: 6548929068518867041
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - contract_material_sweep
+    - rid: 6548929068518867042
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - contract_signal_relay
+    - rid: 6548929068518867043
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_debug_fail_sandbox
+    - rid: 6548929068518867044
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_hostile_blackbox
+    - rid: 6548929068518867045
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_signal_trace
+    - rid: 6548929068518867046
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_station_boarding_trial
+    - rid: 6548929068518867047
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_station_data_delivery
+    - rid: 6548929068518867048
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_survey_local_materials
+    - rid: 6548929068518867049
+      type: {class: StartQuestEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          Booleans:
+          - rid: -2
+          Text:
+          - quest_whisper_chain
+    - rid: 6548929068518867050
+      type: {class: TakeCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867116
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518867051
+      type: {class: TakeCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867117
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518867052
+      type: {class: TakeCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867118
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518867053
+      type: {class: TakeCreditsEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: 6548929068518867119
+          Booleans:
+          - rid: -2
+          Text:
+          - 
+    - rid: 6548929068518867054
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867120
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - item_strange_matter_container_full
+          - 
+    - rid: 6548929068518867055
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867121
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_crew
+          - 
+    - rid: 6548929068518867056
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867122
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518867057
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867123
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518867058
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867124
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_fuel
+          - 
+    - rid: 6548929068518867059
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867125
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_palladium
+          - 
+    - rid: 6548929068518867060
+      type: {class: TakeItemEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        arguments:
+          Integers:
+          - rid: -2
+          - rid: 6548929068518867126
+          Booleans:
+          - rid: -2
+          - rid: -2
+          Text:
+          - resource_palladium
+          - 
+    - rid: 6548929068518867061
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867062
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867063
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 10
+    - rid: 6548929068518867064
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 6548929068518867065
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 25
+    - rid: 6548929068518867066
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 6548929068518867067
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 10
+    - rid: 6548929068518867068
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 15
+    - rid: 6548929068518867069
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 20
+    - rid: 6548929068518867070
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 5
+    - rid: 6548929068518867071
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 150
+    - rid: 6548929068518867072
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 200
+    - rid: 6548929068518867073
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 250
+    - rid: 6548929068518867074
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 300
+    - rid: 6548929068518867075
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 400
+    - rid: 6548929068518867076
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 500
+    - rid: 6548929068518867077
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867078
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867079
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867080
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867081
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867082
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867083
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867084
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867085
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867086
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867087
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867088
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867089
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867090
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867091
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867092
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867093
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867094
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867095
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 10
+    - rid: 6548929068518867096
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 6548929068518867097
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 5
+    - rid: 6548929068518867098
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 2
+    - rid: 6548929068518867099
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 6548929068518867100
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 6548929068518867101
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867102
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 6548929068518867103
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 6548929068518867104
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867105
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867106
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867107
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867108
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867109
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867110
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867111
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867112
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867113
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867114
+      type: {class: BoolLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867115
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867116
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 100
+    - rid: 6548929068518867117
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 20
+    - rid: 6548929068518867118
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 50
+    - rid: 6548929068518867119
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 500
+    - rid: 6548929068518867120
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867121
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867122
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 2
+    - rid: 6548929068518867123
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 6548929068518867124
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 5
+    - rid: 6548929068518867125
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 1
+    - rid: 6548929068518867126
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3

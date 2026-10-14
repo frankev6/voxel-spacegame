@@ -131,7 +131,7 @@ namespace Game.Tests.EditMode.Editor.Narrative
             {
                 var row = (info.IsEffect ? ysls.commands : ysls.functions).Single(item => item.yarnName == info.Name);
                 Assert.AreEqual(info.Params.Length, row.parameters.Length);
-                Assert.AreEqual(!info.IsEffect, row.@return != null);
+                Assert.AreEqual(!info.IsEffect, row.@return?.type != null);
             }
             var snapshot = registry.Snapshot(); snapshot[0].Name = "changed"; snapshot[0].Params = Array.Empty<LogicParamInfo>();
             Assert.IsFalse(registry.Snapshot().Any(info => info.Name == "changed"));

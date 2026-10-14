@@ -1,0 +1,565 @@
+{
+  "version": 1,
+  "commands": [
+    {
+      "yarnName": "abort_beat",
+      "parameters": [],
+      "async": false
+    },
+    {
+      "yarnName": "add_fact",
+      "parameters": [
+        {
+          "name": "fact",
+          "type": "string"
+        },
+        {
+          "name": "delta",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "adjust_relation",
+      "parameters": [
+        {
+          "name": "faction",
+          "type": "string",
+          "documentation": "Content reference: Faction"
+        },
+        {
+          "name": "delta",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "complete_beat",
+      "parameters": [
+        {
+          "name": "beat",
+          "type": "string",
+          "documentation": "Content reference: Beat"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "complete_quest",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "damage_ship",
+      "parameters": [
+        {
+          "name": "amount",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "fail_quest",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "give_credits",
+      "parameters": [
+        {
+          "name": "amount",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "give_item",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "string",
+          "documentation": "Content reference: Item"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "defaultValue": "1"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "give_loot",
+      "parameters": [
+        {
+          "name": "table",
+          "type": "string",
+          "documentation": "Content reference: LootTable"
+        },
+        {
+          "name": "picks",
+          "type": "number",
+          "defaultValue": "-1"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "give_ship",
+      "parameters": [
+        {
+          "name": "blueprint",
+          "type": "string",
+          "documentation": "Content reference: Blueprint"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "notify",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "open_merchant",
+      "parameters": [
+        {
+          "name": "merchant",
+          "type": "string",
+          "documentation": "Content reference: Merchant"
+        }
+      ],
+      "async": true
+    },
+    {
+      "yarnName": "open_ship_editor",
+      "parameters": [],
+      "async": false
+    },
+    {
+      "yarnName": "play_sfx",
+      "parameters": [
+        {
+          "name": "cue",
+          "type": "string",
+          "documentation": "Content reference: AudioCue"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "quest_log",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        },
+        {
+          "name": "entry",
+          "type": "string"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "queue_beat",
+      "parameters": [
+        {
+          "name": "beat",
+          "type": "string",
+          "documentation": "Content reference: Beat"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "remove_body",
+      "parameters": [],
+      "async": false
+    },
+    {
+      "yarnName": "repair_ship",
+      "parameters": [
+        {
+          "name": "percent",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "replace_body",
+      "parameters": [
+        {
+          "name": "template",
+          "type": "string",
+          "documentation": "Content reference: Entity"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "request_lane_jump",
+      "parameters": [
+        {
+          "name": "system",
+          "type": "string",
+          "documentation": "Content reference: StarSystem"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "reveal_clue",
+      "parameters": [
+        {
+          "name": "clue",
+          "type": "string",
+          "documentation": "Content reference: Clue"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "set_fact",
+      "parameters": [
+        {
+          "name": "fact",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "spawn_encounter",
+      "parameters": [
+        {
+          "name": "encounter",
+          "type": "string",
+          "documentation": "Content reference: Encounter"
+        },
+        {
+          "name": "anchor",
+          "type": "string",
+          "defaultValue": "here"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "defaultValue": "1"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "start_combat",
+      "parameters": [
+        {
+          "name": "encounter",
+          "type": "string",
+          "documentation": "Content reference: Encounter"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "start_quest",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "take_credits",
+      "parameters": [
+        {
+          "name": "amount",
+          "type": "number"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "take_item",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "string",
+          "documentation": "Content reference: Item"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "defaultValue": "1"
+        }
+      ],
+      "async": false
+    },
+    {
+      "yarnName": "track_quest",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "async": false
+    }
+  ],
+  "functions": [
+    {
+      "yarnName": "beat_count",
+      "parameters": [
+        {
+          "name": "beat",
+          "type": "string",
+          "documentation": "Content reference: Beat"
+        }
+      ],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "clue_known",
+      "parameters": [
+        {
+          "name": "clue",
+          "type": "string",
+          "documentation": "Content reference: Clue"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "credits",
+      "parameters": [],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "game_hours",
+      "parameters": [],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "has_item",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "string",
+          "documentation": "Content reference: Item"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "defaultValue": "1"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "in_star_system",
+      "parameters": [
+        {
+          "name": "system",
+          "type": "string",
+          "documentation": "Content reference: StarSystem"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "item_count",
+      "parameters": [
+        {
+          "name": "item",
+          "type": "string",
+          "documentation": "Content reference: Item"
+        }
+      ],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "mystery_solved",
+      "parameters": [
+        {
+          "name": "mystery",
+          "type": "string",
+          "documentation": "Content reference: Mystery"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "objective_done",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        },
+        {
+          "name": "objective",
+          "type": "string"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "quest_active",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "quest_completed",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "quest_failed",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "quest_not_started",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "quest_stage",
+      "parameters": [
+        {
+          "name": "quest",
+          "type": "string",
+          "documentation": "Content reference: Quest"
+        }
+      ],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "relation",
+      "parameters": [
+        {
+          "name": "faction",
+          "type": "string",
+          "documentation": "Content reference: Faction"
+        }
+      ],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "roll",
+      "parameters": [
+        {
+          "name": "sides",
+          "type": "number"
+        }
+      ],
+      "return": {
+        "type": "number"
+      }
+    },
+    {
+      "yarnName": "star_system_owned",
+      "parameters": [],
+      "return": {
+        "type": "bool"
+      }
+    },
+    {
+      "yarnName": "visited_count",
+      "parameters": [
+        {
+          "name": "node",
+          "type": "string"
+        }
+      ],
+      "return": {
+        "type": "number"
+      }
+    }
+  ]
+}
