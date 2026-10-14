@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 53 | 12 | 0 | 0 | 116 | 0 | 181 | 7 |
+| M3 | 51 | 15 | 0 | 0 | 115 | 0 | 181 | 6 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -468,7 +468,7 @@
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | no | todo |  |  |  |  |
 | HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, EDT-001 | no | todo |  |  |  |  |
-| HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, EDT-001 | no | todo |  |  |  | partial in HUD-002: root view-model binding and Back command routing / editor screen and acceptance remain |
+| HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | partial in HUD-002: root view-model binding and Back command routing / editor screen and acceptance remain |
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-010, SYS-001, ECO-001, EDT-001 | no | todo |  |  |  | partial in HUD-002: loading view, progress presenter and UXML / composition polling, dock screen and full acceptance remain |
 | HUD-020 | Full-screen layout regression suite | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-003, HUD-004, HUD-005, HUD-006, HUD-007, HUD-011, HUD-012, HUD-013, HUD-014, HUD-016, HUD-017, HUD-018, HUD-019 | no | todo |  |  |  |  |
 | CAM-006 | Origin warp and teleport cut | [SPEC-62](specs/SPEC-62-camera.md) | M3 | frontier | CAM-005, GAL-001 | yes | done | astra (gpt-6) | 2026-10-13 | 710a668 | Origin warp preserves framing and residual teleport cuts; five required tests; full 1051 EM /146 PM passed. |
@@ -1029,6 +1029,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 428 | SPEC-51 Q47: blueprint store/browser defaults | Resolved: accepted ADR-0093; profile VOXS files use safe IDs and collision-safe writes, catalog content stays read-only, replacement uses one reversible batch; all five required cases pass. | Tech lead |
 | 429 | SPEC-30 Q37: galaxy completion and reproducible authoring | Resolved: existing content retained; 1000 m belt sectors and scoped import compilation explicit; all three real production smoke cases pass. | Tech lead |
 | 430 | SPEC-70 Q31: command completion versus staged menu routing | Resolved: real save/load/PLOC and travel/event command acceptance passes; menu retains its normal seed default and explicit seed requests fail until a seed UI exists; toworld acceptance remains pending HUD-002 routing. | Tech lead |
+| 431 | SPEC-61 Q31: inventory construction | Resolved: ADR-0094 accepted; actual InventoryModel/Wallet presenter rebind and pooled screen. | Tech lead |
+| 432 | SPEC-61 Q32: editor host prerequisites | Resolved: ADR-0068 concrete completed UI/panel prerequisites, production root integration stays HUD-002. | Tech lead |
 
 ## Measurements
 
