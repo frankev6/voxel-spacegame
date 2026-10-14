@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Selection/transforms accepted:** EDT-016dd5467a7 clean compile and14 focused checks pass (six required, seven basic tools, core limit). Damage survives movement/rotation/chiral mirroring; blocked moves are atomic. Clipboard/stamp EDT-017 now ready. Existing workers continue EDT-015, EDT-021 and TRV-009; lead next renderer/connectivity and delivery integration. No Unity active.
+
 - **Selection transactions authored:** EDT-0165c3d54af adds atomic damage-preserving move/rotate/mirror/delete and replacement transactions, with canonical same-origin lookup. Select gestures/controller actions and six required cases remain next; uncompiled/unaccepted. EDT-015, EDT-021 and TRV-009 workers all active; travel source nearly ready. No Unity active.
 
 - **All three workers dispatched:** EDT-015 combat (claim7ee734e1), EDT-021 economy (e7cb992b), TRV-009 presentation. SPEC-51 Q39 reserved economy, Q40 combat; next lead question Q41. Lead next EDT-016 selection/transforms; no Unity active.

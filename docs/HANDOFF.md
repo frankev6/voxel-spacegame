@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-14)
 
+- **Selection/transforms accepted:** EDT-016dd5467a7 clean compile and14 focused checks pass (six required, seven basic tools, core limit). Damage survives movement/rotation/chiral mirroring; blocked moves are atomic. Clipboard/stamp EDT-017 now ready. Existing workers continue EDT-015, EDT-021 and TRV-009; lead next renderer/connectivity and delivery integration. No Unity active.
+
 - **Selection transactions authored:** EDT-0165c3d54af adds atomic damage-preserving move/rotate/mirror/delete and replacement transactions, with canonical same-origin lookup. Select gestures/controller actions and six required cases remain next; uncompiled/unaccepted. EDT-015, EDT-021 and TRV-009 workers all active; travel source nearly ready. No Unity active.
 
 - **Editor controller/basic tools accepted:** EDT-014175c78cb clean compile and seven required cases plus core-limit regression pass; pointer-cache follow-up also passes. Placement, removal, paint, eyedropper, rotation and cancel chain now use the draft session. EDT-015 and EDT-021 are ready for the existing workers; lead continues selection/transform prerequisites. TRV-009 active. No Unity active.
@@ -341,6 +343,6 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 3. Next
 
-- Immediate: lead EDT-016 selection/transforms; existing combat worker EDT-015 line/box/fill, economy EDT-021 editor panels, presentation TRV-009 travel cover/emission. Controller accepted; all three workers dispatched. Validate compatible deliveries together.
+- Immediate: lead renderer/connectivity prerequisites and worker integration; existing combat EDT-015, economy EDT-021, presentation TRV-009. EDT-017 clipboard/stamp ready for the next available worker. Controller and selection accepted; validate compatible deliveries together.
 
 Finish DEV-011 integration and dispatch DLG-013 to the existing combat worker. Lead supplies DLG-006 dialog runtime and SYS-009 pose/docking persistence; both unlock live gameplay and standard follow-ups. NAR-019 remains partial until its real owners are wired. Keep focused batch validation and existing art restrictions.

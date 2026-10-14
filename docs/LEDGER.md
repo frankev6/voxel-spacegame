@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 60 | 13 | 0 | 0 | 107 | 0 | 180 | 7 |
+| M3 | 60 | 12 | 0 | 0 | 108 | 0 | 180 | 8 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -436,8 +436,8 @@
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | done | astra (gpt-6) | 2026-10-13 | 94110337 | Chiral mirrors, canonical damage remapping, atomic copies, exact removal; seven required checks pass |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | done | astra (gpt-6) | 2026-10-13 | 175c78cb | Controller, palette, previews, place/remove/paint/eyedropper; seven required checks pass; spec-required:7,extra:0 |
 | EDT-015 | Line, box and fill tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Reusable combat worker: line, box and fill tools |
-| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead: exact selection, damage-preserving transforms and replacement |
-| EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | no | todo |  |  |  |  |
+| EDT-016 | Replace and select/transform tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014 | yes | done | astra (gpt-6) | 2026-10-14 | dd5467a7 | Native selection, atomic damage-preserving transforms, replacement and controller gestures; six required checks pass |
+| EDT-017 | Copy, cut, paste and stamp | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-016 | yes | todo |  |  |  |  |
 | EDT-018 | Draft renderer | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005, SPEC-11 | yes | todo |  |  |  |  |
 | EDT-019 | Overlay renderer and shader | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-014, EDT-018 | no | todo |  |  |  |  |
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, SPEC-60 | no | todo |  |  |  |  |
@@ -1117,6 +1117,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-016 selection and transforms accepted — astra (gpt-6)
+
+- dd5467a7 connects click/Ctrl-click, bounded box selection, select-all, movement, Y rotation, X mirror and deletion to the controller. Native selection captures all exact records at an origin in canonical order, and rebuilds origins only after a successful all-or-nothing transform. Replace handles selected matching types or exact mirror copies, preserving colours and skipping incompatible footprints. SPEC-51 Q41/global413 records lattice rounding; four rotations and two chiral mirrors restore exact damaged draft hashes.
+- Compile96423 terminal0, zero CS warnings. Focused EditMode32149 terminal0:14 passed,0 failed,0 skipped (0.291553s test bodies), covering all six required selection cases, seven existing basic-tool cases and core-limit regression. Evidence Logs/playtest/editor-selection. spec-required:6,extra:0. No PlayMode/full-suite/perf runs for pure editor logic; host/rendered editor integration is still later work.
+- All three workers remain active: EDT-015 area tools, EDT-021 panels, TRV-009 travel presentation. EDT-017 clipboard/stamp now unlocks and is the next standard assignment when a worker completes. Lead next renderer/connectivity prerequisites and compatible worker integrations. Previous selection transactions and current acceptance are progress. No Unity active; full roadmap goal remains active.
 
 ### 2026-10-14 — EDT-016 selection transactions authored — astra (gpt-6)
 
