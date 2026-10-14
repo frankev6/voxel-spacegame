@@ -6,9 +6,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-006 | Complete pause view/presenter and four cases; ENC-005 delivered 0322c7f9 pending integration | Ready standard implementation |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 | Complete main menu/new-game prompt and five cases; HUD-013 delivered 6222e0a3 pending integration | Ready standard implementation |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-007 | Full flight HUD implementation; HUD-017 delivered e7f4a957, pending lead integration | Ready UI work after delivery |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-006 | Complete pause view/presenter and four cases; ENC-005 accepted de3f1ee/0f00dd27 | Ready standard implementation |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | HUD-003 | Complete main menu/new-game prompt and five cases; HUD-013 accepted f3eea58 | Ready standard implementation |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-007 | Full flight HUD implementation; HUD-017 accepted 0f00dd27 with live fleet area | Ready UI work after delivery |
 
 ## Operating rules
 
@@ -29,3 +29,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - EDT-008 accepted c86bd67b: incremental connectivity and bounded/async split jobs integrated into edit lifecycle, six required cases passed. Lead next EDT-009 validation/removal then EDT-011 commit. All three existing worker handles confirmed active during this delivery.
 
 - EDT-009 accepted 56d65d57: full validation, throttled issues and atomic floating removal; all 11 explicit acceptance cases pass. Lead next compatible integration includes ENC-005 0322c7f9, HUD-017 e7f4a957 and HUD-013 6222e0a3, then EDT-011 commit/host. Worker assignments in the table supersede historical completed-task notes above.
+
+- Compatible territory/dialog/fleet integration accepted0f00dd27;16 distinct focused cases pass after documented fixture/live-layout fixes. Seventh playground fleet area visually verified at Logs/playtest/playground-fleet-live.png; game left running there. Next lead EDT-011 commit, then overlays/host/root.
