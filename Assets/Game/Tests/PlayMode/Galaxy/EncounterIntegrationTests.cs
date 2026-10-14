@@ -43,19 +43,19 @@ using Debug = UnityEngine.Debug;
 namespace Game.Tests.PlayMode.Galaxy
 {
     /// <summary>ENC-011: actual M3 content, production boot/streaming/spawning, fixed-step AI/weapons and ENCT round trip.</summary>
-    public sealed class EncounterIntegrationTests : GameFlowFixture
+    public abstract class EncounterScenarioFixture : GameFlowFixture
     {
-        ContentCatalog Catalog => Service<ContentService>().Catalog;
-        EncounterDirectorService Director => Service<EncounterDirectorService>();
-        EncounterDefinition Raiders => Catalog.Get<EncounterDefinition>(new ContentId("encounter_raiders"));
-        SimClock Clock { get { using var q = Em.CreateEntityQuery(typeof(SimClock)); return q.GetSingleton<SimClock>(); } }
-        double3 Origin { get { using var q = Em.CreateEntityQuery(typeof(FrameOrigin)); return q.GetSingleton<FrameOrigin>().OriginInStarSystem; } }
-        GalaxyFrameContext Context(float seconds = 0) => new(Em, Clock.UniversalTime, Clock.Tick, seconds, Time.frameCount);
+        protected ContentCatalog Catalog => Service<ContentService>().Catalog;
+        protected EncounterDirectorService Director => Service<EncounterDirectorService>();
+        protected EncounterDefinition Raiders => Catalog.Get<EncounterDefinition>(new ContentId("encounter_raiders"));
+        protected SimClock Clock { get { using var q = Em.CreateEntityQuery(typeof(SimClock)); return q.GetSingleton<SimClock>(); } }
+        protected double3 Origin { get { using var q = Em.CreateEntityQuery(typeof(FrameOrigin)); return q.GetSingleton<FrameOrigin>().OriginInStarSystem; } }
+        protected GalaxyFrameContext Context(float seconds = 0) => new(Em, Clock.UniversalTime, Clock.Tick, seconds, Time.frameCount);
 
         // The production fixed group, including physics, advances exactly once per request.
         // Automatic fixed updates stay disabled while streaming/init frames are yielded.
         // Borrow/restore the group's time and rewindable allocator as Entities rate managers do.
-        sealed unsafe class FixedTicks : IDisposable
+        protected sealed unsafe class FixedTicks : IDisposable
         {
             sealed class Rate : IRateManager
             {
@@ -109,7 +109,7 @@ namespace Game.Tests.PlayMode.Galaxy
             public void Dispose()
             { world.EntityManager.CompleteAllTrackedJobs(); rate.Restore(group); group.RateManager = previous; group.Enabled = enabled; }
         }
-        IEnumerator StartIn(EncounterDirectorTests.Fields fields, string id, string bodyKey)
+        private protected IEnumerator StartIn(EncounterDirectorTests.Fields fields, string id, string bodyKey)
         {
             Director.Enabled = false;
             var galaxy = Service<GalaxyService>(); var definition = Catalog.Get<AuthoredStarSystemDefinition>(new ContentId(id));
@@ -120,39 +120,39 @@ namespace Game.Tests.PlayMode.Galaxy
             yield return NewGame(42);
             Assert.AreEqual(StarSystemId.FromAuthored(definition.Id.Hash), Service<StarSystemLoader>().Loaded);
         }
-        void OneShip(EncounterDirectorTests.Fields fields, EncounterDefinition definition)
+        private protected void OneShip(EncounterDirectorTests.Fields fields, EncounterDefinition definition)
         {
             var ship = definition.Ships[0]; ship.countMin = ship.countMax = 1;
             fields.Set(definition, "ships", new List<EncounterShipEntry> { ship });
         }
-        List<Entity> Members(ContentHash encounter)
+        protected List<Entity> Members(ContentHash encounter)
         {
             var result = new List<Entity>();
             using var q = Em.CreateEntityQuery(typeof(EncounterTag)); using var roots = q.ToEntityArray(Allocator.Temp);
             foreach (var root in roots) if (Em.GetComponentData<EncounterTag>(root).Encounter == encounter) result.Add(root);
             return result;
         }
-        bool Ready(Entity root)
+        protected bool Ready(Entity root)
             => Em.Exists(root) && Em.HasComponent<LocalTransform>(root) && Em.HasBuffer<BlockInstance>(root) &&
                 Em.HasComponent<PhysicsCollider>(root) && Em.GetComponentData<PhysicsCollider>(root).IsValid &&
                 Em.HasComponent<GridSpawning>(root) && !Em.IsComponentEnabled<GridSpawning>(root);
-        IEnumerator Ready(List<Entity> roots)
+        protected IEnumerator Ready(List<Entity> roots)
         {
             yield return WaitUntil(() => { foreach (var root in roots) if (!Ready(root)) return false; return true; }, 10,
                 "Real encounter grids become collidable");
         }
-        Entity Station(BodyId body)
+        protected Entity Station(BodyId body)
         {
             using var q = Em.CreateEntityQuery(typeof(BodyGridOwner)); using var roots = q.ToEntityArray(Allocator.Temp);
             foreach (var root in roots) if (Em.GetComponentData<BodyGridOwner>(root).Body.Equals(body)) return root;
             return Entity.Null;
         }
-        BodyId Outpost()
+        protected BodyId Outpost()
         {
             Assert.IsTrue(Service<GalaxyService>().TryResolveBody(new ContentId("starsys_whisper"), "whisper_outpost", out var body));
             return body;
         }
-        void Place(Entity root, float3 position, float yaw)
+        protected void Place(Entity root, float3 position, float yaw)
         {
             // Initial fixture placement goes through the real request before conversion, or initializes a ready pose.
             if (!Em.HasComponent<LocalTransform>(root))
@@ -163,7 +163,7 @@ namespace Game.Tests.PlayMode.Galaxy
             else Em.SetComponentData(root, LocalTransform.FromPositionRotation(position, quaternion.RotateY(yaw)));
             if (Em.HasComponent<UniversePosition>(root)) Em.SetComponentData(root, new UniversePosition { Value = Origin + (double3)position });
         }
-        void Freeze(Entity root)
+        protected void Freeze(Entity root)
         {
             Assert.IsTrue(Ready(root));
             if (!Em.HasComponent<PhysicsVelocity>(root)) return; // The real outpost is static.
@@ -171,7 +171,7 @@ namespace Game.Tests.PlayMode.Galaxy
             if (Em.HasComponent<PhysicsMassOverride>(root)) Em.SetComponentData(root, new PhysicsMassOverride { IsKinematic = 1, SetVelocityToZero = 1 });
             else Em.AddComponentData(root, new PhysicsMassOverride { IsKinematic = 1, SetVelocityToZero = 1 });
         }
-        void EmptyShield(Entity root)
+        protected void EmptyShield(Entity root)
         {
             if (!Em.HasComponent<ShieldState>(root)) return;
             var shield = Em.GetComponentData<ShieldState>(root);
@@ -179,13 +179,13 @@ namespace Game.Tests.PlayMode.Galaxy
             shield.Flags = (shield.Flags & ~ShieldFlags.FillOnNextUpdate) | ShieldFlags.Collapsed;
             Em.SetComponentData(root, shield); // Initial weak-target fixture charge; subsequent damage is real weapon damage.
         }
-        void FireRate(Entity root, float multiplier)
+        protected void FireRate(Entity root, float multiplier)
         {
             using var q = Em.CreateEntityQuery(typeof(StatusChannels));
             q.GetSingleton<StatusChannels>().StatModifiers.PostFromMainThread(new StatModifierRequest
             { Root = root, Stat = StatId.FireRate, Producer = ProducerKind.Test, SourceId = 11, Multiplier = multiplier, UntilTick = uint.MaxValue, Sequence = 1 });
         }
-        uint Shots(Entity root)
+        protected uint Shots(Entity root)
         {
             if (!Em.Exists(root) || !Em.HasBuffer<BlockInstance>(root)) return 0;
             uint shots = 0;
@@ -194,23 +194,23 @@ namespace Game.Tests.PlayMode.Galaxy
                     shots += Em.GetComponentData<WeaponState>(instance.Functional).ShotCounter;
             return shots;
         }
-        float3 Center(Entity root)
+        protected float3 Center(Entity root)
         {
             var grid = Em.GetComponentData<VoxelGrid>(root);
             return Em.GetComponentData<LocalTransform>(root).TransformPoint(((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
         }
-        void PlayerFire(Entity target, bool firing)
+        protected void PlayerFire(Entity target, bool firing)
         {
             using var q = Em.CreateEntityQuery(typeof(PlayerCommand));
             q.SetSingleton(new PlayerCommand { AimWorld = Center(target), AimValid = firing ? (byte)1 : (byte)0, FireGroups = firing ? (byte)7 : (byte)0 });
         }
-        bool DamagedBy(Entity target, Entity attacker, float before)
+        protected bool DamagedBy(Entity target, Entity attacker, float before)
         {
             if (!Em.Exists(target) || !Em.HasComponent<GridDamageStats>(target)) return false;
             var damage = Em.GetComponentData<GridDamageStats>(target);
             return damage.DamageTaken > before && damage.LastDamageInstigator == attacker;
         }
-        void Until(FixedTicks ticks, Func<bool> completed, int limit, string what)
+        protected void Until(FixedTicks ticks, Func<bool> completed, int limit, string what)
         {
             for (int i = 0; i < limit && !completed(); i++)
             {
@@ -219,7 +219,7 @@ namespace Game.Tests.PlayMode.Galaxy
             }
             Assert.IsTrue(completed(), what + "; bounded at " + limit + " actual fixed ticks");
         }
-        IEnumerator Jump(StarSystemId target, FixedTicks ticks)
+        protected IEnumerator Jump(StarSystemId target, FixedTicks ticks)
         {
             var travel = Service<TravelService>(); var result = travel.RequestJump(target, JumpSource.Narrative);
             Assert.IsTrue(result.Accepted, result.Reason);
@@ -237,12 +237,21 @@ namespace Game.Tests.PlayMode.Galaxy
             Director.Tick(Context()); EventHub.DrainAll();
             Assert.AreEqual(target, Service<StarSystemLoader>().Loaded);
         }
-        IEnumerator Flow(Awaitable<FlowResult> operation, string what)
+        protected IEnumerator Flow(Awaitable<FlowResult> operation, string what)
         {
             var awaiter = operation.GetAwaiter(); yield return WaitUntil(() => awaiter.IsCompleted, 10, what);
             Assert.AreEqual(FlowResult.Ok, awaiter.GetResult(), what);
         }
 
+        protected EncounterInstanceInfo Instance(Entity root)
+        {
+            Assert.IsTrue(Director.TryGetInstanceByMember(MemberId(root), out var info)); return info;
+        }
+        protected ulong MemberId(Entity root) => Em.HasComponent<PersistentId>(root)
+            ? Em.GetComponentData<PersistentId>(root).Value : Em.GetComponentData<GridSpawnRequest>(root).PersistentId;
+    }
+    public sealed class EncounterIntegrationTests : EncounterScenarioFixture
+    {
         [UnityTest] public IEnumerator Raiders_Engage()
         {
             using var fields = new EncounterDirectorTests.Fields(); OneShip(fields, Raiders);
@@ -256,6 +265,8 @@ namespace Game.Tests.PlayMode.Galaxy
             Assert.AreEqual(1, Director.ActiveInstanceCount);
             var roots = Members(Raiders.Id.Hash); Assert.AreEqual(1, roots.Count);
             var player = PlayerRoot; var pose = Em.GetComponentData<LocalTransform>(player);
+            // Clear the nearby neutral derelict's hull so real friendly-fire avoidance can permit this shot.
+            pose.Position += new float3(2000, 0, 0); Place(player, pose.Position, 0);
             Place(roots[0], pose.Position + new float3(0, 0, 100), math.PI);
             yield return Ready(roots); Freeze(player); Freeze(roots[0]); ticks.Step(); ticks.Step();
             EmptyShield(player); FireRate(roots[0], 4);
@@ -265,12 +276,6 @@ namespace Game.Tests.PlayMode.Galaxy
                 "A real director raider targets, fires at and damages the player");
             Assert.AreEqual(EncounterSource.Director, Instance(roots[0]).Source); ticks.Report(nameof(Raiders_Engage));
         }
-        EncounterInstanceInfo Instance(Entity root)
-        {
-            Assert.IsTrue(Director.TryGetInstanceByMember(MemberId(root), out var info)); return info;
-        }
-        ulong MemberId(Entity root) => Em.HasComponent<PersistentId>(root)
-            ? Em.GetComponentData<PersistentId>(root).Value : Em.GetComponentData<GridSpawnRequest>(root).PersistentId;
         [UnityTest] public IEnumerator StationDefends()
         {
             using var fields = new EncounterDirectorTests.Fields(); OneShip(fields, Raiders);
@@ -368,6 +373,9 @@ namespace Game.Tests.PlayMode.Galaxy
                 ticks.Report(nameof(PendingStory_SurvivesSaveLoad) + ".return");
             }
         }
+    }
+    public sealed class EncounterBattlePerformanceTests : EncounterScenarioFixture
+    {
         [UnityTest, Category("Performance")] public IEnumerator ThirtyShips_CombatGate()
         {
             // Advisory, opt-in only: actual render frames after real M3 spawns, 60 warm-up + 300 measured frames.
