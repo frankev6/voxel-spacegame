@@ -1,5 +1,7 @@
 using System;
 using Game.ShipEditor.Data;
+using Game.ShipEditor.Jobs;
+using Unity.Jobs;
 using Game.Voxel.Model;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -15,6 +17,28 @@ namespace Game.ShipEditor.Services
         {
             this.structure = structure ?? throw new ArgumentNullException(nameof(structure));
             this.context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+        public void Enumerate(NativeList<BlockRecord> blocks)
+        {
+            structure.Pin();
+            try
+            {
+                using var order = structure.SortedBrickOrder(Allocator.TempJob);
+                new BlockEnumerateJob { Source = VoxelStructureReadView.From(structure), BrickOrder = order, Blocks = blocks }.Schedule().Complete();
+            }
+            finally { structure.Unpin(); }
+        }
+        public ulong ComputeDraftHash()
+        {
+            structure.Pin();
+            try
+            {
+                using var order = structure.SortedBrickOrder(Allocator.TempJob);
+                using var result = new NativeReference<ulong>(Allocator.TempJob);
+                new DraftHashJob { Source = VoxelStructureReadView.From(structure), BrickOrder = order, Result = result }.Schedule().Complete();
+                return result.Value;
+            }
+            finally { structure.Unpin(); }
         }
         public bool TryGetBlockAt(int3 cell, out BlockRecord record)
         {

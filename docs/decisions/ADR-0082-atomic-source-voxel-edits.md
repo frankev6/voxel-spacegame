@@ -12,6 +12,8 @@ Game.Voxel.Model owns VoxelEditKind/VoxelEdit and VoxelStructure.ApplyEdits(Nati
 
 RemoveBlock/SetFunctionHp carry original Block/Orient along with origin, permitting footprint-bounded lookup when the root cell is missing. SetCellHp requires a surviving cell and nonzero HP; ClearCell removes a cell and adjusts instance CellsAlive. A batch may not leave a non-tombstoned instance with zero surviving cells: remove the whole block explicitly. No whole-ship rollback clone or second writer is introduced. New API is source-only; runtime ECS damage remains its existing owner.
 
+VoxelStructureReadView exposes borrowed read-only native arrays plus canonical dense/uniform/sparse reads for Burst source jobs. DraftReader pins the structure while its scheduled enumeration/hash jobs run and completes them before unpinning. Enumeration emits palette cells and each live instance once, then sorts by origin; it must not require a surviving origin cell. Zero-cell/tombstoned instances are not placed blocks. DraftWriter accepts native diff/damage views directly; EDT-004/005 own the command containers.
+
 ## Consequences
 
 EDT-003 can translate forward/inverse commands into a single atomic store call. Existing single-operation APIs are unchanged. The required adapter round-trip case will also assert rejected batches leave the source untouched; no additional test methods are added. Native reads/jobs and final adapter acceptance remain unfinished at this checkpoint.
