@@ -137,7 +137,7 @@ namespace Game.Narrative.Clues
             }
             restoredEvaluation = false;
         }
-        public void AfterEvaluation(bool playerFree) { } // TODO(QST-006): marker composition belongs to the ship-log owner; no dialog pumping here.
+        public void AfterEvaluation(bool playerFree) { } // ShipLogQuery consumes marker dirtiness through BeatService's final hook.
         internal bool ConsumeMarkersDirty() { bool result = MarkersDirty; MarkersDirty = false; return result; }
         internal void CaptureState(List<ContentId> seen, List<ContentId> resolved)
         {

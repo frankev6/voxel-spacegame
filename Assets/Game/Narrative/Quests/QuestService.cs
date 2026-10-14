@@ -52,6 +52,7 @@ namespace Game.Narrative.Quests
         public int Order => 10;
         public int TrackedQuestIndex { get; private set; }
         public event Action<int> QuestChanged;
+        internal event Action<int> ReadModelInvalidated;
         bool Valid(int q) => q > 0 && q < definitions.Length && definitions[q] != null;
         QuestInstance Latest(int q) => Valid(q) && instances[q].Count != 0 ? instances[q][instances[q].Count - 1] : null;
         public QuestStatus GetStatus(int questIndex) => Latest(questIndex)?.Status ?? QuestStatus.NotStarted;
@@ -199,6 +200,7 @@ namespace Game.Narrative.Quests
                     if (!dirty.Remove(q)) continue;
                     var i = Latest(q); if (i == null || i.Status != QuestStatus.Active) continue;
                     EvaluateQuest(i, restorePass);
+                    ReadModelInvalidated?.Invoke(q);
                 }
             }
             finally { restoring = false; }

@@ -207,15 +207,19 @@ namespace Game.Narrative.Beats
         }
         public void AfterEvaluation(bool playerFree)
         {
-            if (!playerFree || current != 0 || dialog.IsActive) return;
-            if (gameStartPending)
+            try
             {
-                gameStartPending = false;
-                foreach (int index in triggers[(int)BeatTrigger.GameStart]) if (Eligible(index, default, CurrentSystem(), 0, true)) Enqueue(index, default);
+                if (!playerFree || current != 0 || dialog.IsActive) return;
+                if (gameStartPending)
+                {
+                    gameStartPending = false;
+                    foreach (int index in triggers[(int)BeatTrigger.GameStart]) if (Eligible(index, default, CurrentSystem(), 0, true)) Enqueue(index, default);
+                }
+                if (QueueState.TryPop(out var entry)) Play(entry.Beat, entry.Scope);
             }
-            if (QueueState.TryPop(out var entry)) Play(entry.Beat, entry.Scope);
-            // TODO(QST-006): forward coalesced ShipLogQuery notifications after evaluation.
+            finally { ShipLogAfterEvaluation?.Invoke(); }
         }
+        internal event Action ShipLogAfterEvaluation;
         void Trace(LogicTraceKind kind, int index) => facts.Trace?.Add(new LogicTraceEntry
         { Frame = UnityEngine.Time.frameCount, UniversalTime = context.World.UniversalTime, Kind = kind, Source = FactWriteSource.Beat, Subject = index });
         public void Dispose() { if (disposed) return; disposed = true; dialog.Ended -= Ended; }
