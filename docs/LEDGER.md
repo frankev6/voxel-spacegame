@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 40 | 14 | 0 | 0 | 128 | 0 | 182 | 5 |
+| M3 | 40 | 13 | 0 | 0 | 129 | 0 | 182 | 5 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -432,7 +432,7 @@
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-14 | c86bd67b | Incremental islands, bounded split/Burst async relabel, disconnected-cell job; integrated exact damage masks through apply/undo/redo/discard. Six required cases pass; advisory timing deferred. |
 | EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | yes | done | astra (gpt-6) | 2026-10-14 | 56d65d57 | Full validation, throttled issue cache and one-command remove-floating; 11 required cases pass; ADR-0095/Q447. |
 | EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
-| EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, ECO-003 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Lead isolated implementation: atomic item costs/refunds, target ownership and R15 commit/discard. |
+| EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, ECO-003 | yes | done | astra (gpt-6) | 2026-10-14 | b60fde52 | Atomic costs/refunds, exact cargo rollback and committed baseline; eight required cases plus ten inventory regressions pass. ADR-0096/Q452. |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | done | astra (gpt-6) | 2026-10-13 | 94110337 | Chiral mirrors, canonical damage remapping, atomic copies, exact removal; seven required checks pass |
 | EDT-014 | Controller, tool framework and basic tools | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-012, EDT-013 | yes | done | astra (gpt-6) | 2026-10-13 | 175c78cb | Controller, palette, previews, place/remove/paint/eyedropper; seven required checks pass; spec-required:7,extra:0 |
@@ -1051,6 +1051,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 449 | SPEC-61 Q37: fleet projection and unavailable actions | Resolved: real committed fleet/stat/docking owners, pooled rows and explicit missing launcher/switch reasons. Registered with session rebind and playground fleet trigger. | Tech lead |
 | 450 | SPEC-61 Q38: dialog host and existing story-page compatibility | Resolved: preserve SPEC-41 page/overflow hooks, prebuild nine rows, numbered commands and scroll reset, separate portrait; actual story runner remains DLG-007. | Tech lead |
 | 451 | SPEC-51 Q52: commit concrete prerequisites | Resolved: EDT-009/010 plus ECO-003; no merchant/performance prerequisite. | Tech lead |
+| 452 | SPEC-51 Q53 / SPEC-50 Q29: rejected commits lose slot/overflow state with inverse deltas | Resolved: inventory-owned checkpoint restores exact slots and capacity; preallocate baseline and reject reentrant edits. ADR-0096. | Tech lead |
 
 ## Measurements
 
@@ -1161,6 +1162,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-14 — EDT-011 atomic editor commits — astra (gpt-6)
+
+- b60fde52 implements full validation, item costs/refunds, target ownership, exact rejected-commit rollback, creative commits and a fresh editing baseline after success. ADR-0096/Q452 replaces inverse deltas with inventory-owned slot/capacity checkpoints because inverse deltas cannot restore overflow. No new owner gate.
+- Focused acceptance: `Logs/playtest/editor-commit/commit.xml` 8 passed (0.59 s total), `inventory.xml` 10 existing inventory cases passed; compile clean with zero CS warnings after correcting a missing test namespace. spec-required: 8, extra: 0. No full suite, soak or benchmark. Capacity fixtures use the real minimum of one slot; full cargo is filled with a different item, rejection consumes overflow before restoring it.
+- HUD-007 delivered d0ac700a, pending central integration; presentation worker reused for existing HUD-005/004 completion, other two actively implement pause/main menu. Editor host and overlays still required for a playable edit trigger. Unrelated QualitySettings and two content metas excluded.
 
 ### 2026-10-14 — Territory, dialog and live fleet playground integration — astra (gpt-6)
 
