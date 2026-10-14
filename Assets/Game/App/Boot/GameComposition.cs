@@ -180,6 +180,29 @@ namespace Game.App.Boot
             inputBridge.BindBack(UI.HandleBackPressed);
             Step("9 ui");
 
+            // Narrative owners are bound after the real UI exists, before any session can start.
+            var narrativeConfig = Content.Catalog.All<NarrativeConfigDefinition>();
+            var economyConfig = Content.Catalog.All<EconomyConfigDefinition>();
+            if (narrativeConfig.Count != 1 || economyConfig.Count != 1)
+                throw new InvalidOperationException("Narrative boot requires exactly one narrative and economy config.");
+            var logicWorld = Push(new LogicWorldAdapter(Content.Catalog, Session, campaignGalaxy, Blueprints,
+                Audio, UI.Notifications, world, narrativeConfig[0]));
+            var economy = new Game.Economy.EconomyService(Content.Catalog, economyConfig[0],
+                () => Session.CampaignSeed, () => logicWorld.UniversalTime);
+            Register(economy); Register<Game.Data.Logic.ILogicEconomy>(economy);
+            Session.RegisterModel(economy); Session.RegisterNewGameInitializer(economy);
+            // TODO(ECO-006): register the real INVT participant once its binary owner is implemented.
+            var narrativeOwner = new Game.Narrative.ShipLog.NarrativeLogicAdapter();
+            // TODO(QST-006): narrativeOwner routes remain task-owned shells until quest/beat services exist.
+            var narrative = NarrativeBootstrap.Build(Content.Catalog, config.ContentDatabase.Definitions,
+                facts => new LogicContext(facts, economy, narrativeOwner, logicWorld, () => Session.CampaignSeed));
+            Register(narrative); Register(narrative.Facts); Register<Game.Data.Logic.ILogicContext>(narrative.Context);
+            Save.Register(new Game.Narrative.FactSaveParticipant(narrative.Facts));
+            Session.BindNarrative(narrative);
+            Push(new NarrativeEconomyDependencies(economy, narrative));
+            // TODO(QST-002/003/004/005): register implemented INarrativeSystem owners here before sessions begin.
+            // TODO(NAR-012): register the world-event/counter bridge once implemented.
+
             // 10. App-lifetime UI models and implemented presenter bindings (HUD-002).
             Screens = Push(new UiComposition(UI));
             Register(Screens);
@@ -246,6 +269,20 @@ namespace Game.App.Boot
             readonly FxRig rig;
             public FxLifetime(FxRig rig) { this.rig = rig; }
             public void Dispose() { if (rig == null) return; rig.Dispose(); UnityEngine.Object.Destroy(rig.gameObject); }
+        }
+
+        sealed class NarrativeEconomyDependencies : IDisposable
+        {
+            readonly Game.Data.Logic.ILogicEconomy economy;
+            readonly Game.Narrative.NarrativeService narrative;
+            internal NarrativeEconomyDependencies(Game.Data.Logic.ILogicEconomy economy, Game.Narrative.NarrativeService narrative)
+            {
+                this.economy = economy; this.narrative = narrative;
+                economy.ItemCountChanged += ItemChanged; economy.CreditsChanged += CreditsChanged;
+            }
+            void ItemChanged(int index) => narrative.NotifyDependency(new Game.Data.Logic.LogicDependency(Game.Data.Logic.LogicDependencyKind.Item, index));
+            void CreditsChanged() => narrative.NotifyDependency(new Game.Data.Logic.LogicDependency(Game.Data.Logic.LogicDependencyKind.Credits, 0));
+            public void Dispose() { economy.ItemCountChanged -= ItemChanged; economy.CreditsChanged -= CreditsChanged; }
         }
 
         sealed class CameraSceneHook : ISceneReady

@@ -161,6 +161,9 @@ namespace Game.App.Session
         public void OnSceneReady(in SceneReadyContext context) => worldReady = context.Scene == GameScene.World;
         public bool IsSceneReadyComplete(in SceneReadyContext context) => true;
 
+        Game.Narrative.NarrativeService narrative;
+        internal void BindNarrative(Game.Narrative.NarrativeService value) => narrative = value;
+
         internal void BeginNewGame(in NewGameArgs args) => ResetForNewSession(args, false);
         internal void BeginSandbox(ulong seed)
             => ResetForNewSession(new NewGameArgs(gameConfig.DefaultCommanderName, seed == 0 ? 1ul : seed, true, ContentId.None), true);
@@ -183,6 +186,7 @@ namespace Game.App.Session
                 Galaxy.PlayerLocation = galaxyService.GetStartLocation(); Galaxy.HasPlayerLocation = true;
             }
             if (FleetParticipant != null) Fleet.Add(FleetParticipant.CreateStartShip(), true);
+            narrative?.BeginNewGame();
             if (!sandbox) foreach (var initializer in initializers) initializer.InitializeNewGame(args);
             EventBus<SessionReset>.Publish(new SessionReset(SessionResetReason.NewGame));
             HasActiveSession = true;
@@ -209,12 +213,14 @@ namespace Game.App.Session
                     save.ReportRestoreWarning("GAL-W002", "PLOC", "PlayerLocation", "Missing player location; return to the start body when World is ready.");
                 }
             }
+            narrative?.OnSessionRestored();
             HasActiveSession = true;
             if (report.ErrorCount > 0) GameLog.Warn(LogCategories.Flow, "Loaded with " + report.ErrorCount + " problems; see the log");
             // TODO(UI-003): surface the report through the notification service when it exists.
         }
         internal void EndSession()
         {
+            if (narrative != null) { narrative.SetWorldReady(false); narrative.Facts.ResetToDefaults(); }
             ResetPersistentIds(1, false); worldReady = false; PlayerDefeated = false;
             IsSandbox = false; SpawnPlayerInWorld = true;
             ReleaseFleetWorld();
