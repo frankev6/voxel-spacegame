@@ -8,7 +8,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-008 | ECO-008bad3f9b7/HUD-019795cc3fb delivered; implements actual story registration/bridge/gating | Lead integrates economy delivery; no Unity |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-010 | QST-0091bce8069 delivered; implements real opening scenario against incoming QST-008 | Pipeline source work; acceptance awaits real registration/import |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-005 / HUD-004 | HUD-01000fe7938 delivered; completes remaining settings/save live navigation | No Unity; preserve incoming economy/HUD composition |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-014 | HUD-004/005 source already wired; implements actual ship-log view/presenter and binding hook | Map route remains HUD-015/016; no fake map; ADR0108 reserved |
 
 ## Operating rules
 
@@ -79,3 +79,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - QST-0064738dc21/f71186b4 accepted: six required cases plus four save regressions pass. ADR-0107 unlocks concrete QST-008 routing; same combat worker implementing it. Lead next integrates delivered merchant/salvage/dock batch, then real story composition. Other workers QST-009/HUD-010 active.
 
 - Economy/dock/HUD batch00094da7/188ecaae/92d9da23 accepted: nineteen focused cases pass including regressions, compile clean. Next lead QST-009 import/actual story integration; same three workers implement QST-008/QST-010/HUD-004/005.
+
+- QST-009f468139e accepted: actual98-node opening program, two required content checks and fourteen existing regression cases pass across corrections. Compiler/validator array traversal and actual adapter namespace fixed. QST-010 worker fixes real missing hand-in reward (Q19/global489 reserved); QST-008 and HUD-014 active.

@@ -37,10 +37,10 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 - CAM-0078da588cd adds physical camera obstruction pull-in and smooth release; four required checks and seven flight regressions pass. Real-ray performance measurement remains advisory/deferred.
 
-- Economy/dock/HUD batch accepted00094da7/188ecaae/92d9da23: faction-aware merchant and salvage composition, actual dock Trade and notification/hotkey bindings. Nineteen focused cases pass including regressions; no broad suites. Three workers continue QST-008, QST-010 and HUD-004/005; QST-009 opening import is next lead integration.
+- Economy/dock/HUD batch accepted00094da7/188ecaae/92d9da23: faction-aware merchant and salvage composition, actual dock Trade and notification/hotkey bindings. Nineteen focused cases pass including regressions; no broad suites. QST-009f468139e opening content is imported and validated; actual opening playthrough/reward correction remains QST-010. Three workers continue QST-008, QST-010 and HUD-014. HUD-004/005 navigation source is already wired; live acceptance reconciliation remains.
 
 ## 3. Next
 
 Keep all three recorded workers on their current substantial assignments and integrate compatible deliveries locally. Lead next remaining narrative registration/save prerequisites and real playground/editor interactions; no substitute owners or text-only feature pads. ENC-011's actual test-dialog scenario still depends on QST-008; DLG-007 is accepted; other real gameplay scenarios proceed.
 
-Retain full roadmap. Procedural territory461ffc36 is accepted (four required cases plus five regressions); authored seeds remain0. Pending compatible deliveries include escort2e03c4cb and HUD hotkeys aee6a04d (its ADR number needs reconciliation). HUD-019 needs actual ECO-008 trade launcher; ECO-007 salvage is accepted; ECO-008 production registration is accepted. HUD-009 production binding is live, with three opt-in performance fixture definitions remaining. Focused batches only, performance advisory, no routine full suites or soaks.
+Retain full roadmap. Procedural territory461ffc36 is accepted (four required cases plus five regressions); authored seeds remain0. Pending compatible deliveries include escort2e03c4cb; HUD hotkeys/dock launchers are accepted. ECO-007 salvage is accepted; ECO-008 production registration is accepted. HUD-009 production binding is live, with three opt-in performance fixture definitions remaining. Focused batches only, performance advisory, no routine full suites or soaks.

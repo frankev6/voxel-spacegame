@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 17 | 15 | 0 | 0 | 150 | 0 | 182 | 6 |
+| M3 | 17 | 14 | 0 | 0 | 151 | 0 | 182 | 6 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -409,7 +409,7 @@
 | QST-006 | Adapter, ship log and markers | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f71186b4 | Actual adapter/log/markers4738dc21; six required cases pass across initial/fix and four save regressions; live registration QST-008. |
 | QST-007 | QUST participant | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | frontier | QST-003, QST-004, QST-005, PERS-001 | yes | done | astra (gpt-6) | 2026-10-14 | 8e16b5e7 | QUST version1, raw IDs/name baselines, atomic restore; three required functional plus malformed-state case pass; capture advisory deferred. App registration QST-008. |
 | QST-008 | Bridge rules, player-free gating and registration | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-005, QST-006, QST-007, NAR-011, NAR-012, TRV-006, ENC-007, ENC-009, DLG-008 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | ADR-0107 concrete completed dependencies; combat worker implements actual registration/bridge/gating. |
-| QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same economy worker reconciling e987aae8 opening assets/import with accepted actual DLG-007 compiler; lead import and two required checks pending. |
+| QST-009 | Opening chapter content | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-002, GAL-003, NAR-013, DLG-003, ENC-002, ECO-002 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f468139e | Real opening content imported; two required checks plus fourteen existing regressions pass across fixes. Actual opening path/reward repair remains QST-010. |
 | QST-010 | Opening chapter playthrough | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-008, QST-009, QST-007, SPEC-70, SPEC-32, SPEC-50 | no | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Source pipeline per owner substantial-work correction; actual scenario acceptance awaits QST-008 registration and QST-009 import. No substitute owners. |
 | ECO-001 | Public contract types | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | CORE-001, DATA-001, NAR-001, VOX-001, DMG-001, SYS-001, FLT-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | a81ff41 | Economy contracts and serialized tradeable defaults; 2 required tests. Runtime ECO-002 onward remains open. Full 1027 EM / 145 PM passed. |
 | ECO-002 | Definitions, config and validators | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | db5d72e | Strict economy validators/config and canonical scrap; 15 required tests; partial ECO-009 scrap only |
@@ -1084,6 +1084,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 482 | SPEC-33 Q29: procedural territory and lifecycle | Canonical seeded FIFO expansion; exhaust seeds without looping; first/different owned entry emits, reset clears previous system, disposal unsubscribes. Production Push owns lifetime. Four functional checks pass; existing zero seed content retained, advisory100k deferred. | Tech lead |
 | 485 | SPEC-50 Q31: merchant and economy composition | Actual faction owner precedence; malformed/missing routes release continuation; shared economy uses live clock; own/dispose salvage and bind real dock launchers. Two required cases accepted. | Tech lead |
 | 486 | SPEC-61 Q49: loading/dock lifecycle | Synchronize current docking and flow state; actual launchers, real merchant route and close, unavailable reasons only for missing owners; four required cases pass. | Tech lead |
+| 488 | SPEC-42 Q17: opening import and content ownership | Preserve authored IDs/lore; facts_opening owns opening facts, derelict uses Inspect, actual DialogMenu compiles program and command table with matching current hashes. Imported98 nodes/2079 instructions; array wrappers traversed by element in compiler/validator. | Tech lead |
 | 487 | SPEC-61 Q50: HUD lifetime and input | Accepted ADR-0106; app-owned subscriptions and actual registered screens only, no blank log/map views. Canonical objective query binding via QST-008; nine required cases pass. | Tech lead |
 | 484 | SPEC-42 Q16: adapter and ship-log ownership | ADR-0103; bind actual owners, coalesce changes after evaluation, latest quest instance lists, cached journal labels and progress-only invalidation. Raw save history stays QUST-owned. | Tech lead |
 | 483 | SPEC-42 Q18: QUST snapshot/restore boundaries | ADR-0105; parse/validate completely before mutation, preserve missing IDs/baseline names and dormant queue entries; changed unusable quest histories remain raw. No restore effects or fact writes; host owns OnRestored. Existing registry QUST/order40 reused; production registration QST-008. | Tech lead |
@@ -1199,6 +1200,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — QST-009 opening content imported — astra (gpt-6)
+
+- Worker1bce8069 integrateddb092cd6; actual generated content and fixesf468139e. Opening cache/gate beats and facts, derelict Inspect, preserved clue/rumor/mystery text and topology. Stored program has98 nodes/2079 instructions and matches command-table source hash17193394340164812408. Canonical whole-database validation:0 errors,36 warnings (remaining authoring/advisory warnings retained). Q488 mirrors SPEC-42 Q17. Temporary import script removed; reusable recipe remains tools/jobs/QST-009-import-opening.cs.
+- Real import exposed collection containers mistaken for individual CompiledCondition/IntExpr wrappers in both postprocessor stamps and validator invalidation. Both now descend into array elements. Validator reflection also uses the actual Game.App.Services.LogicWorldAdapter namespace. Two required stored-content checks pass; three existing postprocessor, seven validator and four converter regressions pass across initial/focused corrections. Test count: spec-required: 2, extra: 0. Existing fixture corrections wait for the real delayed Editor callback (bounded1s, not a frame-count assumption), and CLI validates the matching production catalog because full providers read production dialogue sources. Assertions retained; initial failures preserved. Compile clean/zero CS warnings; no broad/performance/soak runs. Evidence Logs/playtest/qst009-content; test bodies short, no tuning passes.
+- Actual playthrough remains QST-010. Its worker found the reachable survey hand-in lacks the gate item that an unreachable legacy beat grants. Tech-lead correction: move the existing authored reward to the reachable once-only hand-in, preserve text/lore and converter regeneration, no fixture grant. Worker implements it with scenario delivery; SPEC-42 Q19/global489 reserved. Other workers QST-008 story registration and HUD-014 ship log continue. HUD-004/005 source navigation confirmed already wired; final live acceptance/ledger reconciliation remains lead-owned.
 
 ### 2026-10-14 — Economy, dock and HUD integration accepted — astra (gpt-6)
 
