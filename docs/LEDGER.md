@@ -497,7 +497,7 @@
 | TRV-014 | Escort transfer hooks | [SPEC-32](specs/SPEC-32-travel.md) | M4 | standard | TRV-012, AI-001, FND-001 | no | todo |  |  |  |  |
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
-| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Existing combat worker; editing tools and explicit missing beat/dialog owner integration |
+| NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial editor controls integrated under ADR-0062; fact editing/Debug menus implemented. Baseline/Play beat acceptance awaits QST-003/005/006 and DLG-006; validation pending compatible batch. |
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
@@ -940,6 +940,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 366 | SPEC-70 Q25: dev world-command defaults | Explicit factions require canonical FactionIndexMap (ENC-003/004); coordinates use actual origin plus pose, strict argument forms and persistent-ID ties. Missing optional owners fail clearly. | Tech lead |
 | 367 | SPEC-70 Q26: sandbox NPC commands | ADR-0079 permits unscoped public spawn only for composition-bound GameSession.IsSandbox; campaign/interface requests remain strict. No fake galaxy or second spawner. | Tech lead |
 | 368 | SPEC-50 Q27: inventory save normalization and unknown merchants | **Resolved:** INVT v1 follows SPEC-50 §5.5: capacity is derived and excluded; correct SPEC-05 registry prose without changing bytes. Merchant state is keyed internally by ContentId, so unknown merchants retain restock time and ordered rows without opening/restocking a session. Unknown merchants preserve all original row IDs, including known item aliases. Missing placeholders cannot be bought or sold, preventing identity loss through ordinary item-only trade APIs. Preserve stock counts (including unlimited), price float bits and buyback flags; resolve missing items while retaining OriginalId. Resolve known merchant aliases to canonical IDs before duplicate detection/opening; unknown IDs remain unchanged. Byte identity applies to canonical valid payloads within current item stack limits; the specified inventory clamp/drop repairs intentionally change invalid or newly over-limit data. Reject known-merchant counts below -1 (unknown merchant rows stay raw), unsupported versions, duplicate slots/merchants, empty merchant IDs, impossible counts and trailing data as SaveFormatException; version zero resets models. No public API or chunk layout change. | Tech lead |
+| 369 | SPEC-40 Q32: debugger editing runtime dependencies | Fact editing is implemented; baselines and Play beat route through canonical quest/beat/dialog owners and report unavailable while those owners are unfinished. NAR-018 remains in progress, not accepted. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1072,6 +1073,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-018 partial source integration — astra (gpt-6)
+
+- Worker2751035d integrated4ca00b3 under ADR-0062: selected fact edits and debug_menus use Debugger writes; baselines and Play beat call canonical owners. Q369 mirrors SPEC-40 Q32. Status remains in progress because QST-003/005/006 and DLG-006 are unfinished; unavailable controls do not satisfy live acceptance.
+- Spec-required: 1 newly authored fact-write case, extra: 0. Lead source review found no immediate defect; Unity validation is deferred to the next compatible implementation batch, not claimed passed. No Unity active.
+- Combat audits the real quest/dialog prerequisite cycle. Economy/presentation reviews are complete and have dependency waits. Previous turn accepted ECO-006; this source integration is progress. Next unlock ClueService and implement frontier quest/world-event owners.
 
 ### 2026-10-13 — ECO-006 done: inventory and merchant persistence — astra (gpt-6)
 
