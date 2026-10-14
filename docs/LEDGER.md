@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 15 | 15 | 0 | 0 | 152 | 0 | 182 | 5 |
+| M3 | 14 | 16 | 0 | 0 | 152 | 0 | 182 | 5 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -467,7 +467,7 @@
 | HUD-013 | Dialog host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, DLG-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f3eea58 | Complete dialog host; five required plus four preserved DLG-009 cases pass. Production story driver remains DLG-007; no fake dialog pad. |
 | HUD-014 | Ship log screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-002, SPEC-42 | no | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Source pipeline against accepted QST-006; actual view/query presenter and composition hook. Map navigation acceptance waits HUD-015/016; no substitute map. |
 | HUD-015 | MapCanvas control | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | frontier | HUD-001, SPEC-62 | yes | done | astra (gpt-6) | 2026-10-14 | f2df90b8 | Retained Painter2D maps, transform-only pan/small zoom, 64 labels, token colours and captured point selection; five required cases pass, two advisory fixtures deferred. |
-| HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, SPEC-30, SPEC-31, TRV-001, QST-001 | no | todo |  |  |  |  |
+| HUD-016 | Galaxy map and star-system map screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-015, GAL-008, GAL-011, SYS-007, SYS-008, TRV-006, QST-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | ADR-0111 concrete owners; combat worker builds real galaxy/system views, routes and query markers. |
 | HUD-017 | Fleet screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, FND-010, SYS-008, EDT-001, EDT-010 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 0f00dd27 | Fleet view/presenter, canonical committed stats and actual playground trigger; three required cases plus live screenshot pass. Actual edit launcher remains EDT-023; switch unavailable. |
 | HUD-018 | Ship editor host screen | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-012, EDT-001, EDT-021 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 46d844de | Four-region editor host mounts accepted panels; four required graphics cases pass. Playable editor launcher remains EDT-023/HUD-002. |
 | HUD-019 | Loading and dock screens | [SPEC-61](specs/SPEC-61-screens-hud.md) | M3 | standard | HUD-001, UI-003, UI-004, UI-005, UI-006, UI-007, UI-008, UI-009, UI-010, UI-011, FND-006, SYS-008, ECO-001, EDT-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 188ecaae | Actual loading/dock screen and merchant/editor launchers; four required production cases pass, no Ignore. |

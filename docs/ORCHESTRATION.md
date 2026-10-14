@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | QST-008 | ECO-008bad3f9b7/HUD-019795cc3fb delivered; implements actual story registration/bridge/gating | Lead integrates economy delivery; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | HUD-016 | QST-00855981e06 delivered pending lead acceptance; implements actual galaxy/system maps | HUD-015f2df90b8 accepted; real owners ADR0111; no Unity |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | QST-010 | QST-0091bce8069 delivered; implements real opening scenario against incoming QST-008 | Pipeline source work; acceptance awaits real registration/import |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-014 | HUD-004/005 source already wired; implements actual ship-log view/presenter and binding hook | Map route remains HUD-015/016; no fake map; ADR0108 reserved |
 

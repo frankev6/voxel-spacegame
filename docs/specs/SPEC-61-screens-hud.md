@@ -622,7 +622,7 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
 ### HUD-016 — Galaxy map and star-system map screens
 - **Milestone:** M3
 - **Tier:** standard — views on existing view models using `MapCanvas`
-- **Depends on:** `HUD-015`, `SPEC-30`, `SPEC-31`, `TRV-001`, `QST-001`
+- **Depends on:** `HUD-015`, `GAL-008`, `GAL-011`, `SYS-007`, `SYS-008`, `TRV-006`, `QST-006` (ADR-0111)
 - **Do:** `GalaxyMapView`, `StarSystemMapView`, `GalaxyMapPresenter`, `StarSystemMapPresenter` (system map uses XZ of `double3` star-system positions as `double2`), per §5.4: destination and route through SPEC-32, owner colours through `MapPoint.ColorToken`, SPEC-42 markers.
 - **Files:** `Assets/Game/UI/Views/{GalaxyMapView,StarSystemMapView}.cs`, `Assets/Game/UI/Views/Uxml/{GalaxyMapView,StarSystemMapView}.uxml`, `Assets/Game/Presentation/Presenters/{GalaxyMapPresenter,StarSystemMapPresenter}.cs`
 - **Acceptance criteria:**
