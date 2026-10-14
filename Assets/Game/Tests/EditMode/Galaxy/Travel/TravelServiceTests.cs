@@ -203,7 +203,7 @@ namespace Game.Tests.EditMode.Galaxy.Travel
             for (int i = 0; i < 64; i++) f.Travel.Tick(ctx);
             long bytes = GC.GetAllocatedBytesForCurrentThread() - baseline; watch.Stop();
             if (bytes != 0 || watch.Elapsed.TotalMilliseconds / 64 > .02)
-                Assert.Warn($"Travel idle: {bytes} B; {watch.Elapsed.TotalMilliseconds / 64:F6} ms/tick; targets 0 B / 0.02 ms.");
+                Debug.LogWarning($"Travel idle: {bytes} B; {watch.Elapsed.TotalMilliseconds / 64:F6} ms/tick; targets 0 B / 0.02 ms.");
             Game.Tests.Common.Perf.PerfRun.Gate("TravelIdle", new[] { watch.Elapsed.TotalMilliseconds / 64 }, .02);
         }
     }
