@@ -1098,6 +1098,13 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-009 restore integration verified; final review pending — astra (gpt-6)
+
+- 045d096b defers restored docking to successful World SceneTransitionFinished; 4b8ba5d5 moves the required Docked_Restored case to the actual loader. Compile16567 terminal0, zero warning CS; EditMode32698 terminal0 two required binary cases pass.
+- PlayMode45764 failed because voxel station interaction lives on its streamed grid, not anchor. ef4d3227 fixes canonical target resolution; retry56841 terminal0 passes real-loader restore, silent failed transition and exactly one successful notification. Evidence Logs/playtest/ploc retains initial failure and passing retry.
+- e266f620 adds reviewed nonfinite-pose rejection before mutation plus edge coverage inside RoundTrip_ByteIdentical. That modified EditMode case still needs execution in the next compatible batch; final compile/review pending, task stays in progress. spec-required: 3, extra: 0. No broad/performance runs.
+- DLG-0085d27d43b delivered270, combat reviews presenter. Economy309 reviews save lifecycle; presentation waits for acceptance to unlock DLG-009. Previous persistence implementation and this real-loader proof are progress. No Unity active.
+
 ### 2026-10-13 — SYS-009 player pose/docking restore authored — astra (gpt-6)
 
 - 95715e15 implements PLOC binary capture/atomic restore, silent docking, shared boot registration and a validated one-time docking notification after player/camera readiness (ADR-0085/Q393). Pending restored docking survives loader teardown; missing-GLXY regeneration preserves independently restored pose.
