@@ -43,18 +43,20 @@ namespace Game.Tests.EditMode.Presentation
             internal readonly InputService Input = new(new ControlSettingsData());
             internal readonly Keyboard Keyboard = InputSystem.AddDevice<Keyboard>();
             internal readonly UINavigator Navigator;
+            readonly InputServiceBridge bridge;
             internal readonly UIScreen Hud = new View<HudTag>("hud"), Inventory = new View<InventoryTag>("inventory"), Map = new View<MapTag>("galaxy-map"), Fleet = new View<FleetTag>("fleet"), Pause = new View<ModalTag>("pause");
             internal readonly ScreenHotkeyRouter Router;
             internal Fixture()
             {
-                Navigator = new UINavigator(new PauseTokens(), Input, new Clock(), new VisualElement());
+                bridge = new InputServiceBridge(Input);
+                Navigator = new UINavigator(new PauseTokens(), bridge, new Clock(), new VisualElement());
                 foreach (var screen in new[] { Hud, Inventory, Map, Fleet, Pause }) Navigator.Register(screen);
                 Router = new ScreenHotkeyRouter(Navigator, Input, key => key == "inventory" ? Inventory : key == "galaxy-map" ? Map : key == "fleet" ? Fleet : null);
                 Router.Bind(); Navigator.SetRoot(Hud);
             }
             internal void Tap(Key key)
             { InputSystem.QueueStateEvent(Keyboard, new KeyboardState(key)); InputSystem.Update(); InputSystem.QueueStateEvent(Keyboard, new KeyboardState()); InputSystem.Update(); }
-            public void Dispose() { Router.Dispose(); Navigator.DisposeOwnedScreens(); Input.Dispose(); }
+            public void Dispose() { Router.Dispose(); Navigator.DisposeOwnedScreens(); bridge.Dispose(); Input.Dispose(); }
         }
         [Test] public void FromHud_Opens()
         { using var f = new Fixture(); f.Tap(Key.I); Assert.AreSame(f.Inventory, f.Navigator.Top); Assert.AreEqual(InputContext.Menu, f.Input.CurrentContext); }

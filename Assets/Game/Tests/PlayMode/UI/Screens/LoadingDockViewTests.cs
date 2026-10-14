@@ -7,6 +7,7 @@ using Game.Core;
 using Game.Core.Events;
 using Game.Core.Flow;
 using Game.Economy;
+using Game.Data.Definitions;
 using Game.Galaxy.Data;
 using Game.Galaxy.Services;
 using Game.Tests.Common;

@@ -6,6 +6,7 @@ using Game.Core.Audio;
 using Game.Core.Components;
 using Game.Core.Settings;
 using Game.Data.Economy;
+using Game.Data.Components;
 using Game.Data.Logic;
 using Game.Data.Logic.Compiler;
 using Game.Input;

@@ -58,9 +58,12 @@ namespace Game.Tests.EditMode.App
             Assert.AreEqual(1, session.Session.Fleet.Flagship.Structure.SolidCellCount);
             adapter.PlaySfx(catalog.IndexOf(cue)); Assert.AreEqual(1, audio.Calls); Assert.AreEqual(cue.Id, audio.Last);
             adapter.Notify("Narrative route fixture");
-            if (GameLog.GetOnceCount("Narrative.Editor.Rejected") == 0)
-                LogAssert.Expect(LogType.Warning, new Regex("OpenShipEditor was rejected"));
-            adapter.OpenShipEditor(); // Real flow rejects MainMenu fleet entry; it must be observed, not thrown away.
+            Assert.IsFalse(Services.TryGet<Game.App.EditorHost.ShipEditorLauncher>(out _));
+            int editorWarnings = GameLog.GetOnceCount("Narrative.Editor.Unavailable");
+            if (editorWarnings == 0)
+                LogAssert.Expect(LogType.Warning, new Regex("Ship editor launcher is unavailable"));
+            adapter.OpenShipEditor();
+            Assert.AreEqual(editorWarnings + 1, GameLog.GetOnceCount("Narrative.Editor.Unavailable"));
             var content = galaxy.GetContent(galaxy.State.CurrentStarSystem); var body = content.Bodies[0];
             var scope = new LogicScope(LogicUsage.BeatEffect, 0, 0, 1, true,
                 new LogicBodyHandle(body.Id.System.Value, (byte)body.Id.Role, body.Id.Slot, body.Id.SubSlot, default));
@@ -102,6 +105,10 @@ namespace Game.Tests.EditMode.App
                 if (before == 0) LogAssert.Expect(LogType.Error, new Regex(name + " not wired:"));
                 calls[name](); calls[name](); Assert.AreEqual(before + 2, GameLog.GetOnceCount(key));
             }
+            // ECO-008 is wired; malformed content must still release the blocking continuation.
+            if (GameLog.GetOnceCount("Narrative.OpenMerchant.Definition") == 0)
+                LogAssert.Expect(LogType.Error, new Regex("open_merchant requires a known merchant"));
+            adapter.OpenMerchant(0, scope, () => closed = true);
             Assert.IsTrue(closed);
         }
         sealed class RecordingSink : IGalaxyLiveDeltaSink
