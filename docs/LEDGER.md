@@ -396,7 +396,7 @@
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
 | DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | done | astra (gpt-6) | 2026-10-13 | 99290d38 | Queued lifecycle, scoped blocking/terminal flow, detour-safe rolls and DLGS; seven direct cases pass; production runner/registration DLG-007; spec-required: 7, extra: 0 |
 | DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-005, DLG-006, DLG-003 | no | todo |  |  |  |  |
-| DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | todo |  |  |  |  |
+| DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Presentation worker; five required direct cases; lead batches validation |
 | DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | no | todo |  |  |  |  |
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |

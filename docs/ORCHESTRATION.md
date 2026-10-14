@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-013 | Delivered0d09a8cf; bounded review of DEV-01162f2c25e active | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-011 | Correction62f2c25e delivered; bounded review of DLG-0130d09a8cf active | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-019 | Delivered310332f7/a1fbc3cb; reviewing DLG-0061925068d lifecycle | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DLG-008 | Claimed after DLG-006 acceptance; presenter dispatched | HUD-003/006/007 once ready |
 
 ## Operating rules
 
