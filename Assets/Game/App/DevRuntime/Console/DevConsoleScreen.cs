@@ -26,6 +26,7 @@ namespace Game.App.DevRuntime.Console
             var panel = new VisualElement { name = "panel-dev-console" }; panel.AddToClassList("panel"); panel.AddToClassList("grow"); Root.Add(panel);
             var header = new VisualElement { name = "panel-dev-console-header" }; header.AddToClassList("panel__header"); panel.Add(header);
             var title = new Label("Developer console") { name = "lbl-dev-console-title" }; title.AddToClassList("panel__title"); header.Add(title);
+            var close = new Button(console.Toggle) { text = "Close", name = "btn-dev-console-close" }; close.AddToClassList("btn"); close.AddToClassList("btn--secondary"); header.Add(close);
             var hint = new Label("F1 close · ↑/↓ history · Tab complete") { name = "lbl-dev-console-hint" }; hint.AddToClassList("text-muted"); header.Add(hint);
             var body = new VisualElement { name = "panel-dev-console-body" }; body.AddToClassList("panel__body"); panel.Add(body);
             output = new ListView { name = "list-dev-console-output", itemsSource = console.Lines, selectionType = SelectionType.None,

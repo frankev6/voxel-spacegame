@@ -18,6 +18,8 @@ namespace Game.App.Presenters
         readonly LoadingPresenter loadingPresenter;
         readonly SaveSlotsPresenter saveSlotsPresenter;
         readonly SettingsPresenter settingsPresenter;
+        readonly Game.Presentation.Presenters.InventoryPresenter inventoryPresenter;
+        readonly Game.Presentation.Presenters.MerchantPresenter merchantPresenter;
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
@@ -56,12 +58,22 @@ namespace Game.App.Presenters
             pausePresenter = new PausePresenter(ui, PauseModel, Game.Core.Services.Get<IGameFlow>(), ShowSaveSlots, ShowSettings);
             ui.Register(new PauseView(PauseModel, pausePresenter));
             pausePresenter.Bind();
+            var economy = Game.Core.Services.Get<Game.Economy.EconomyService>();
+            inventoryPresenter = new Game.Presentation.Presenters.InventoryPresenter(InventoryModel);
+            inventoryPresenter.Bind(economy.Inventory, economy.Wallet);
+            ui.Register(new InventoryView(InventoryModel, inventoryPresenter));
+            merchantPresenter = new Game.Presentation.Presenters.MerchantPresenter(ui, MerchantModel, economy.Inventory, economy.Wallet);
+            ui.Register(new MerchantView(MerchantModel, merchantPresenter));
+            merchantPresenter.Bind();
+            Game.Core.Services.Register(merchantPresenter);
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
         public UIScreen FlightHud => ui.Navigator.Get<FlightHudView>();
         public UIScreen ShipEditor => ui.Navigator.Get<ShipEditorView>();
         public UIScreen Loading { get; }
+
+        internal void ShowInventory() => ui.Navigator.Push<InventoryView>();
 
         internal void ShowSettings() => settingsPresenter.Show();
 
@@ -114,7 +126,10 @@ namespace Game.App.Presenters
             settingsPresenter.Bind();
             loadingPresenter.Dispose();
             loadingPresenter.Bind();
-            // TODO(HUD-009/010/011/012/013/014/015/016/017/018/019): rebind the owning feature presenters
+            var economy = Game.Core.Services.Get<Game.Economy.EconomyService>();
+            inventoryPresenter.Bind(economy.Inventory, economy.Wallet);
+            merchantPresenter.ResetSession();
+            // TODO(HUD-009/010/013/014/015/016/017/018/019): rebind the owning feature presenters
             // to the new session models here when those features install their production bindings.
         }
         internal void Tick()
@@ -135,6 +150,9 @@ namespace Game.App.Presenters
             loadingPresenter.Dispose();
             saveSlotsPresenter.Dispose();
             settingsPresenter.Dispose();
+            inventoryPresenter.Dispose();
+            Game.Core.Services.Unregister(merchantPresenter);
+            merchantPresenter.Dispose();
             pausePresenter?.Dispose();
             menuPresenter?.Dispose();
             if (rootsBound) flow.SetRootScreens(null);

@@ -20,6 +20,8 @@ namespace Game.DevTools.Editor.Commands
         public static Task<string> Sandbox([CliArg("player", "Spawn the player ship")] bool player = true,
             [CliArg("seed", "Unsigned sandbox seed")] string seed = "1")
             => Start("sandbox player=" + (player ? "true" : "false") + " seed=" + DevJsonWriter.Quote(seed), false);
+        [CliCommand("gh_playground", "Start the interactive playground, entering Play if needed.")]
+        public static Task<string> Playground() => Start("playground", false);
         static async Task<string> Start(string line, bool intro)
         {
             try

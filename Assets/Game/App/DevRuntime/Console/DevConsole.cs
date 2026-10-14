@@ -28,7 +28,8 @@ namespace Game.App.DevRuntime.Console
             Screen = new DevConsoleScreen(this); ui.Register(Screen);
             toggle = input.Controls.Global.DevConsole; toggle.performed += OnToggle;
         }
-        void OnToggle(InputAction.CallbackContext context)
+        void OnToggle(InputAction.CallbackContext context) => Toggle();
+        internal void Toggle()
         {
             if (disposed) return;
             if (Screen.IsOpen) navigator.Pop(Screen); else navigator.Push(Screen);

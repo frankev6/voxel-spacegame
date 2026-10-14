@@ -115,10 +115,21 @@ W/S requests forward/reverse thrust, A/D turns, Shift+A/D strafes while the turn
 
 ## Interactive development playground (DEV-021)
 
-Run Boot or World in the Editor, press **F1**, enter **`playground`**, then close the console with F1. Fly into a labeled ring and press **F** (the rebindable Flight/Interact action). There are no hostile ships until you activate the combat ring.
+**Open World and press Play.** Direct Editor launches of World automatically enter the isolated playground. From any running scene, click **Enter playground** at the upper right. Click **Console** to type commands; F1 is optional and the console has a Close control.
 
-**Reset everything with `playground reset` in the F1 console.** This recreates the session, restoring the player and procedural station and clearing enemies, broken pieces, projectiles, inventory grants, facts and pad activation state. It uses a separate `dev-playground` save profile; entering from a real campaign saves that campaign before changing profiles. A blocked/failed save stops entry instead of discarding that campaign.
+From a terminal at the repository root, run `tools/playtest/playground.sh`. This enters Play if necessary, starts the playground and waits for readiness. No manual console setup is needed.
 
-`playground goto=<id>` instantly moves you to a ring: `flight`, `range`, `combat`, `cargo`, `facts`, `grid`, `campaign`, `features`. `playground status` lists the directory. Range exercises shooting/breakup/VFX/audio; combat adds one real hostile fighter per reset; cargo grants fuel/credits; facts/grid inspect real runtime state. Campaign starts the real seeded galaxy in the same isolated profile. Unfinished screen/gameplay integrations are labeled as pending, never represented by fake working controls.
+**Reset everything with `playground reset` in Console.** This restores the player and procedural station and clears enemies, broken pieces, projectiles, inventory grants, facts and trial state. Reset remains a command. Entry uses the separate `dev-playground` profile and saves any prior real campaign before switching; a failed save stops entry safely.
 
-CLI equivalent in Play: `tools/playtest/g.sh dev --cmd "playground"` (or `"playground reset"`); poll the returned operation with `g.sh op --id N`.
+Fly into a ring and press **F**:
+
+- `flight`: begin a four-checkpoint course; fly through each highlighted ring.
+- `range`: align with the stationary target; hold Space to shoot and break off its structures.
+- `combat`: spawn one actual hostile fighter per reset.
+- `cargo`: grant test fuel/credits and open the inventory; drag, inspect, sort or stack cargo.
+- `settings`: open the real settings screen and change settings.
+- `merchant`: open ARK Station Market; buy/sell actual cargo and stock. First visit grants 2,000 test credits.
+
+`playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. Campaign travel, story and editor gameplay still need integration before becoming playable areas here.
+
+CLI while playing: `tools/playtest/g.sh dev --cmd "playground reset"`; poll its returned operation with `tools/playtest/g.sh op --id N`.
