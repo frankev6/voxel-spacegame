@@ -89,7 +89,10 @@ namespace Game.Voxel.Model
                         var instance = Instance(slot);
                         float max = content.Blocks.Value.Blocks[instance.Block].FunctionHp;
                         if (edit.FunctionHp < 0 || edit.FunctionHp > max) return false;
-                        instance.FunctionHp = edit.FunctionHp; instances[slot] = instance; return true;
+                        instance.FunctionHp = edit.FunctionHp;
+                        bool destroyed = content.Blocks.Value.Blocks[instance.Block].Kind == Game.Data.Blocks.BlockKind.Functional && edit.FunctionHp <= 0;
+                        instance.Flags = destroyed ? instance.Flags | BlockInstanceFlags.Destroyed : instance.Flags & ~BlockInstanceFlags.Destroyed;
+                        instances[slot] = instance; return true;
                     }
                     default: return false;
                 }

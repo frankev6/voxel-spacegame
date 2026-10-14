@@ -58,7 +58,7 @@ namespace Game.Tests.EditMode.ShipEditor
             f.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Multi, Color = 2 },
                 new VoxelEdit { Kind = VoxelEditKind.ClearCell },
                 new VoxelEdit { Kind = VoxelEditKind.SetCellHp, Cell = new int3(1, 0, 0), Hp = 41 },
-                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Multi, FunctionHp = 13 });
+                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Multi, FunctionHp = 0 });
             Assert.IsTrue(f.Reader.TryGetBlockAt(new int3(1, 0, 0), out var record));
             using var damage = new NativeList<byte>(Allocator.TempJob);
             record.DamageOffset = f.Reader.CaptureDamage(record, damage); Assert.AreEqual(0, record.DamageOffset);
@@ -71,6 +71,8 @@ namespace Game.Tests.EditMode.ShipEditor
             f.Writer.Apply(operations, damage.AsArray(), true, touched); Assert.AreEqual(0, f.Draft.SolidCellCount);
             f.Writer.Apply(operations, damage.AsArray(), false, touched); Assert.AreEqual(before, f.Reader.ComputeDraftHash());
             Assert.IsFalse(f.Draft.IsPinned);
+            Assert.IsTrue(f.Draft.TryGetBlockAt(new int3(1, 0, 0), out _, out int restored));
+            Assert.AreEqual(BlockInstanceFlags.Destroyed, f.Draft.Data.Instances[restored].Flags & BlockInstanceFlags.Destroyed);
             using var invalid = new NativeArray<VoxelEdit>(new[] {
                 new VoxelEdit { Kind = VoxelEditKind.SetCellHp, Cell = new int3(1, 0, 0), Hp = 1 },
                 new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Multi, Cell = new int3(1, 0, 0) } }, Allocator.Temp);

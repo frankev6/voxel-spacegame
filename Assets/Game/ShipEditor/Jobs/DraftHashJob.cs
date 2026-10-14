@@ -50,7 +50,13 @@ namespace Game.ShipEditor.Jobs
         struct OriginOrder : IComparer<BlockInstance>
         {
             public int Compare(BlockInstance a, BlockInstance b)
-            { int c = a.Origin.z.CompareTo(b.Origin.z); if (c != 0) return c; c = a.Origin.y.CompareTo(b.Origin.y); return c != 0 ? c : a.Origin.x.CompareTo(b.Origin.x); }
+            {
+                int c = a.Origin.z.CompareTo(b.Origin.z); if (c != 0) return c;
+                c = a.Origin.y.CompareTo(b.Origin.y); if (c != 0) return c;
+                c = a.Origin.x.CompareTo(b.Origin.x); if (c != 0) return c;
+                // Damaged footprints may share an origin; hash order must not depend on storage slots.
+                return math.asuint(a.FunctionHp).CompareTo(math.asuint(b.FunctionHp));
+            }
         }
     }
 }
