@@ -151,7 +151,8 @@ namespace Game.App.Boot
             Register(systemLoader); galaxyTicker.Register(systemLoader);
             Flow.RegisterReady(systemLoader); Flow.RegisterExiting(systemLoader);
             Session.RegisterWriteback(new GalaxyFlushWriteback(systemLoader));
-            // TODO(SYS-009): register PLOC before claiming restored world pose/docking.
+            Save.Register(new PlayerLocationSaveParticipant(Session.Galaxy, docking));
+            Flow.RegisterReady(docking);
 
             Session.BindFleet(Blueprints, Registry, Content.Catalog); Save.Register(Session.FleetParticipant);
             Register(Session.Fleet);

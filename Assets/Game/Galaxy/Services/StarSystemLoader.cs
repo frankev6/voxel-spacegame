@@ -54,6 +54,7 @@ namespace Game.Galaxy.Services
         {
             this.galaxy = galaxy ?? throw new ArgumentNullException(nameof(galaxy));
             this.docking = docking ?? new DockingService();
+            this.docking.ValidateRestoredBody = IsRestoredDockAvailable;
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             this.registry = registry != null ? registry : throw new ArgumentNullException(nameof(registry));
             if (blueprints == null || ids == null || catalog == null) throw new ArgumentNullException("Loader dependencies");
@@ -182,6 +183,14 @@ namespace Game.Galaxy.Services
             world.EntityManager.CompleteAllTrackedJobs();
             t2?.Flush(); foreach (var old in retiring) old.Flush();
         }
+        bool IsRestoredDockAvailable(BodyId body)
+        {
+            if (disposed || !IsReady || !body.System.Equals(Loaded) || !world.IsCreated ||
+                !bodies.TryGetValue(body.LocalKey, out var loaded)) return false;
+            var em = world.EntityManager;
+            return em.Exists(loaded.Anchor) && em.HasComponent<Interactable>(loaded.Anchor) &&
+                em.GetComponentData<Interactable>(loaded.Anchor).Kind == InteractionKind.Dock;
+        }
         void OnBodyInteracted(BodyInteracted value)
         {
             if (disposed || !IsReady || value.StarSystemValue != Loaded.Value ||
@@ -196,7 +205,7 @@ namespace Game.Galaxy.Services
         }
         void Unload()
         {
-            docking.Undock();
+            if (!docking.HasPendingRestore) docking.Undock();
             if (!world.IsCreated) return;
             State = LoaderState.Unloading; var em = world.EntityManager;
             FlushStructures(); RetireStreaming(); em.CompleteAllTrackedJobs();

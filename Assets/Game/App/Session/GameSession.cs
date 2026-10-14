@@ -202,11 +202,19 @@ namespace Game.App.Session
                 if (Galaxy.Seed == 0)
                 {
                     // Older saves predate GLXY. Preserve their fleet and session identity, regenerate the world explicitly.
+                    bool hadLocation = Galaxy.HasPlayerLocation;
+                    var restoredLocation = Galaxy.PlayerLocation;
+                    var restoredSystem = Galaxy.CurrentStarSystem;
                     galaxyService.NewGame(CampaignSeed);
+                    if (hadLocation)
+                    {
+                        Galaxy.HasPlayerLocation = true; Galaxy.PlayerLocation = restoredLocation;
+                        Galaxy.CurrentStarSystem = restoredSystem;
+                    }
                     save.ReportRestoreWarning("GAL-W001", "GLXY", "Seed", "Missing galaxy state; regenerated from the saved campaign seed.");
                 }
                 else galaxyService.OnSessionRestored();
-                // TODO(SYS-009): PLOC restores current system/pose; until then use the real start location.
+                // Missing PLOC retains the documented start-body fallback.
                 if (!Galaxy.HasPlayerLocation)
                 {
                     Galaxy.CurrentStarSystem = galaxyService.Galaxy.StartStarSystem;
