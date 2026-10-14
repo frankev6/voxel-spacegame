@@ -23,6 +23,9 @@ namespace Game.ShipEditor.Services
         readonly BillOfMaterials bom = new();
         bool bomDirty = true;
         internal PlacementIndexes Placement => placement;
+        StatsCalculator originalStats, draftStats;
+        StatTotals originalTotals, draftTotals;
+        bool originalStatsDirty = true, draftStatsDirty = true;
         internal BlockCountTables OriginalCounts { get; private set; }
         internal BlockCountTables DraftCounts { get; private set; }
         bool disposed;
@@ -39,11 +42,12 @@ namespace Game.ShipEditor.Services
                 Original = args.Source.Clone(); Draft = args.Source.Clone();
                 History = new EditHistory(context.Config.HistoryBudgetBytes, context.Config.HistoryMaxEntries);
                 MarkAllBricks(Draft);
-                OriginalCounts = new BlockCountTables(context.Items.Count); OriginalCounts.Initialize(Original, context);
+                originalStats = new StatsCalculator(context); draftStats = new StatsCalculator(context);
+                OriginalCounts = new BlockCountTables(context.Items.Count); OriginalCounts.Initialize(Original, context, originalStats.AddInitial);
                 DraftCounts = new BlockCountTables(context.Items.Count); DraftCounts.CopyFrom(OriginalCounts);
-                placement.Initialize(Draft, context);
+                placement.Initialize(Draft, context); draftStats.CopyFrom(originalStats);
                 if (!Options.Creative && entry.Inventory != null) entry.Inventory.Changed += InvalidateBom;
-                // TODO(EDT-008/010): initialize connectivity/stat indexes; share the opening enumeration.
+                // TODO(EDT-008): initialize connectivity; share the opening enumeration.
                 Notify(EditChangeKind.Opened, 0);
             }
             catch { Dispose(); throw; }
@@ -132,7 +136,8 @@ namespace Game.ShipEditor.Services
                 foreach (var cell in context.Footprints.Get(op.Record.Block, op.Record.Orient).Cells)
                     dirty.AddCell(op.Record.Origin + cell);
             DraftCounts.Apply(command, forward, context); placement.Apply(command, forward, context); InvalidateBom();
-            // TODO(EDT-008/010): update connectivity and stats indexes in operation order.
+            draftStats.Apply(command, forward); draftStatsDirty = true;
+            // TODO(EDT-008): update connectivity in operation order.
         }
         void MarkAllBricks(VoxelStructure source)
         {
@@ -152,8 +157,17 @@ namespace Game.ShipEditor.Services
             }
             return bom;
         }
-        // TODO(EDT-010): original/draft stats.
-        public StatTotals GetStats(bool original) => throw new System.NotImplementedException("EDT-010");
+        public StatTotals GetStats(bool original)
+        {
+            CheckAlive();
+            if (original)
+            {
+                if (originalStatsDirty) { originalTotals = originalStats.Calculate(OriginalCounts, Original); originalStatsDirty = false; }
+                return originalTotals;
+            }
+            if (draftStatsDirty) { draftTotals = draftStats.Calculate(DraftCounts, Draft); draftStatsDirty = false; }
+            return draftTotals;
+        }
         // TODO(EDT-009): full validation and issue list.
         public void GetIssues(System.Collections.Generic.List<EditIssue> result) => throw new System.NotImplementedException("EDT-009");
         // TODO(EDT-011): atomic inventory/target commit.
@@ -164,7 +178,8 @@ namespace Game.ShipEditor.Services
             MarkAllBricks(Draft); MarkAllBricks(replacement);
             Draft.Dispose(); Draft = replacement; History.Clear();
             DraftCounts.CopyFrom(OriginalCounts); placement.Initialize(Draft, context); InvalidateBom();
-            // TODO(EDT-008/010): reset connectivity/stat indexes from Original alongside the clone.
+            draftStats.CopyFrom(originalStats); draftStatsDirty = true;
+            // TODO(EDT-008): reset connectivity from Original alongside the clone.
             Notify(EditChangeKind.Discarded, 0);
         }
         public void CompleteRelabel()

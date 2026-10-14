@@ -6,6 +6,7 @@ namespace Game.Data.Blocks
         public CargoParams Params;
         public override BlockModuleId Id => BlockModuleId.Cargo;
         protected override CargoParams Bake(in BlockModuleBakeContext ctx) => Params;
+        public override void ContributeStats(ref BlockStatContribution stats, byte orient) => stats.CargoUnits += Params.Capacity;
         public override void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report)
         { ModuleChecks.Positive(report, "Params.Capacity", Params.Capacity); }
     }

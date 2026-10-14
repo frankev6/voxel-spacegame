@@ -6,6 +6,7 @@ namespace Game.Data.Blocks
         public PowerStorageParams Params;
         public override BlockModuleId Id => BlockModuleId.PowerStorage;
         protected override PowerStorageParams Bake(in BlockModuleBakeContext ctx) => Params;
+        public override void ContributeStats(ref BlockStatContribution stats, byte orient) => stats.PowerStorage += Params.Storage;
         public override void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report)
         { ModuleChecks.Positive(report, "Params.Storage", Params.Storage); }
     }

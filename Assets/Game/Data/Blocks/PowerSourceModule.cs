@@ -6,6 +6,7 @@ namespace Game.Data.Blocks
         public PowerSourceParams Params;
         public override BlockModuleId Id => BlockModuleId.PowerSource;
         protected override PowerSourceParams Bake(in BlockModuleBakeContext ctx) => Params;
+        public override void ContributeStats(ref BlockStatContribution stats, byte orient) => stats.PowerGeneration += Params.Generation;
         public override void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report)
         { ModuleChecks.Positive(report, "Params.Generation", Params.Generation); }
     }

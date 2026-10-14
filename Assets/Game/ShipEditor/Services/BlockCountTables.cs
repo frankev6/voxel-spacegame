@@ -22,7 +22,7 @@ namespace Game.ShipEditor.Services
             Array.Copy(source.intact, intact, intact.Length); Array.Copy(source.damaged, damaged, damaged.Length);
             orientations.Clear(); foreach (var pair in source.orientations) orientations.Add(pair.Key, pair.Value);
         }
-        internal void Initialize(VoxelStructure source, EditorContext context)
+        internal void Initialize(VoxelStructure source, EditorContext context, Action<BlockRecord> onBlock = null)
         {
             Array.Clear(intact, 0, intact.Length); Array.Clear(damaged, 0, damaged.Length); orientations.Clear();
             var reader = new DraftReader(source, context);
@@ -33,6 +33,7 @@ namespace Game.ShipEditor.Services
             {
                 bytes.Clear(); bool isDamaged = reader.CaptureDamage(record, bytes) >= 0;
                 Add(record, isDamaged, 1);
+                onBlock?.Invoke(record);
             }
         }
         internal void Apply(DiffCommand command, bool forward, EditorContext context)
