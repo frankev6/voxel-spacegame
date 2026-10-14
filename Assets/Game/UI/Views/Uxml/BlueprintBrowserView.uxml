@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="../../Theme/screens/blueprint-browser.uss" />
+    <ui:VisualElement class="blueprint-browser-screen" picking-mode="Ignore">
+        <ui:VisualElement name="blueprint-browser-panel" class="panel blueprint-browser-panel">
+            <ui:VisualElement class="panel__header" picking-mode="Ignore">
+                <ui:Label name="blueprint-browser-title" text="Blueprints" class="panel__title text-display" picking-mode="Ignore" />
+                <ui:Button name="blueprint-browser-close" text="Close" class="btn btn--ghost" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__body blueprint-browser-body" picking-mode="Ignore">
+                <ui:Label name="blueprint-browser-empty" text="No blueprints saved." class="list__empty" picking-mode="Ignore" />
+                <ui:ListView name="blueprint-browser-list" class="list blueprint-browser-list" fixed-item-height="72" virtualization-method="FixedHeight" selection-type="Single" show-border="false" show-add-remove-footer="false" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel__footer blueprint-browser-actions" picking-mode="Ignore">
+                <ui:Button name="blueprint-browser-delete" text="Delete" class="btn btn--danger" />
+                <ui:VisualElement class="spacer" picking-mode="Ignore" />
+                <ui:Button name="blueprint-browser-replace" text="Replace draft" class="btn btn--secondary" />
+                <ui:Button name="blueprint-browser-stamp" text="Place stamp" class="btn btn--primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -62,6 +62,9 @@ MonoBehaviour:
   - Key: editor-footer-fragment
     Uxml: {fileID: 9197481963319205126, guid: 6ac73af85c9e460d851980a7e29ecafa, type: 3}
     Prewarm: 0
+  - Key: blueprint-browser
+    Uxml: {fileID: 9197481963319205126, guid: 7d2dec1331b64a91aa1ba1a567531aa2, type: 3}
+    Prewarm: 0
   TooltipDelaySeconds: 0.35
   MaxVisibleToasts: 4
   MaxQueuedToasts: 32

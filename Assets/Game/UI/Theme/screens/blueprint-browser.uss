@@ -1,0 +1,10 @@
+/* SPEC-51 EDT-020: appearance inherits the approved NOCTURNE theme. */
+.blueprint-browser-screen { flex-grow: 1; align-items: center; justify-content: center; }
+.blueprint-browser-panel { width: 720px; max-width: 90%; height: 560px; max-height: 90%; }
+.blueprint-browser-body, .blueprint-browser-list { flex-grow: 1; min-height: 0; flex-basis: 0; }
+.blueprint-row { height: 72px; justify-content: center; padding: var(--space-2); }
+.blueprint-row-name { min-width: 0; -unity-font-definition: var(--font-body-strong); }
+.blueprint-row-details { flex-direction: row; }
+.blueprint-row-details > .text-muted { margin-left: var(--space-4); }
+.blueprint-browser-actions > .btn { margin-left: var(--space-2); }
+.blueprint-browser-actions > .btn:first-child { margin-left: 0; }
