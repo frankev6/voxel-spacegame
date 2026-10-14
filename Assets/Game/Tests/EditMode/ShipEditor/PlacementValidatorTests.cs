@@ -7,6 +7,7 @@ using Game.Tests.EditMode.Data;
 using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Mathematics;
+using Unity.Collections;
 using UnityEngine;
 using static Game.Tests.EditMode.Data.TestContentFactory;
 
@@ -114,6 +115,20 @@ namespace Game.Tests.EditMode.ShipEditor
             b.Clear(); Remove(b, Record(other.Multi)); Accepts(shared, b);
             Assert.AreEqual(1, shared.Draft.SolidCellCount); Assert.AreEqual(other.Hull, new DraftReader(shared.Draft, other.Context).TryGetBlockAt(int3.zero, out var survivor) ? survivor.Block : 0);
             Assert.IsTrue(shared.Undo()); Assert.AreEqual(4, shared.Draft.SolidCellCount);
+            using var colors = Fixture();
+            colors.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = colors.Multi, Color = 1 },
+                new VoxelEdit { Kind = VoxelEditKind.ClearCell }, new VoxelEdit { Kind = VoxelEditKind.ClearCell, Cell = new int3(0, 1, 0) });
+            using var damage = new NativeArray<byte>(8, Allocator.Temp);
+            damage[0] = damage[2] = 255;
+            uint hp = math.asuint(colors.Context.Definitions.Value.Blocks[colors.Multi].FunctionHp);
+            for (int i = 0; i < 4; i++) damage[4 + i] = (byte)(hp >> (i * 8));
+            using var edits = new NativeArray<VoxelEdit>(new[] { new VoxelEdit { Kind = VoxelEditKind.RestoreBlock, Block = colors.Multi, Color = 2 } }, Allocator.Temp);
+            using var touched = new NativeList<int3>(Allocator.Temp);
+            Assert.IsTrue(colors.Draft.ApplyEdits(edits, damage, colors.Content, touched));
+            using var colored = Session(colors); b.Clear(); var red = Record(colors.Multi); red.Color = 1; Remove(b, red); Accepts(colored, b);
+            Assert.AreEqual(2, colored.Draft.SolidCellCount);
+            Assert.IsTrue(new DraftReader(colored.Draft, colors.Context).TryGetBlockAt(int3.zero, out var remaining)); Assert.AreEqual(2, remaining.Color);
+            Assert.IsTrue(colored.Undo()); Assert.AreEqual(4, colored.Draft.SolidCellCount);
         }
         [Test] public void PerGroup_RollsBackFailedGroup()
         {

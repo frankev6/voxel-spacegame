@@ -30,7 +30,7 @@ namespace Game.Voxel.Model
             readonly NativeArray<byte> damage;
             readonly Dictionary<int3, Cell> cells = new();
             readonly Dictionary<int, BlockInstance> instances = new();
-            readonly Dictionary<(int3, ushort, byte), int> origins = new();
+            readonly Dictionary<(int3, ushort, byte, byte), int> origins = new();
             readonly List<PaletteEntry> palettes = new();
             readonly List<int> released = new();
             int freeCursor, instanceLength;
@@ -45,12 +45,13 @@ namespace Game.Voxel.Model
             bool ValidBlock(ushort block) => block > 0 && block < content.Blocks.Value.Blocks.Length;
             int3 Position(in BlockInstance block, int cell) => block.Origin + content.Orientations.Value.Rotate(content.Blocks.Value.Blocks[block.Block].Cells[cell], block.Orient);
             static bool Matches(in VoxelEdit edit, in BlockInstance instance) => instance.Block != 0 &&
-                (edit.Block == 0 || (instance.Block == edit.Block && instance.Orient == edit.Orient && instance.Origin.Equals(edit.Cell)));
+                (edit.Block == 0 || (instance.Block == edit.Block && instance.Orient == edit.Orient && instance.Origin.Equals(edit.Cell) &&
+                    (edit.Kind != VoxelEditKind.RemoveBlock || instance.Color == edit.Color)));
             int ResolveInstance(in VoxelEdit edit)
             {
                 var cell = Read(edit.Cell);
                 if (!cell.IsAir && cell.IsInstance && Matches(edit, Instance(cell.InstanceIndex))) return cell.InstanceIndex;
-                if (origins.TryGetValue((edit.Cell, edit.Block, edit.Orient), out int slot) && Matches(edit, Instance(slot))) return slot;
+                if (origins.TryGetValue((edit.Cell, edit.Block, edit.Orient, edit.Color), out int slot) && Matches(edit, Instance(slot))) return slot;
                 // Remove/HP operations carry block/orientation identity, so a destroyed root needs no whole-structure search.
                 if (!ValidBlock(edit.Block) || edit.Orient >= 24) return -1;
                 ref var def = ref content.Blocks.Value.Blocks[edit.Block];
@@ -59,7 +60,7 @@ namespace Game.Voxel.Model
                     cell = Read(edit.Cell + content.Orientations.Value.Rotate(def.Cells[i], edit.Orient));
                     if (cell.IsAir || !cell.IsInstance) continue;
                     var instance = Instance(cell.InstanceIndex);
-                    if (instance.Block == edit.Block && instance.Orient == edit.Orient && instance.Origin.Equals(edit.Cell)) return cell.InstanceIndex;
+                    if (Matches(edit, instance)) return cell.InstanceIndex;
                 }
                 return -1;
             }
@@ -85,7 +86,7 @@ namespace Game.Voxel.Model
                             var instance = Instance(value.InstanceIndex);
                             if (instance.CellsAlive == 0) return false;
                             instance.CellsAlive--; instances[value.InstanceIndex] = instance;
-                            origins[(instance.Origin, instance.Block, instance.Orient)] = value.InstanceIndex;
+                            origins[(instance.Origin, instance.Block, instance.Orient, instance.Color)] = value.InstanceIndex;
                         }
                         cells[edit.Cell] = default; return true;
                     }
@@ -148,7 +149,7 @@ namespace Game.Voxel.Model
                 var instance = new BlockInstance { Block = edit.Block, Orient = edit.Orient, Color = edit.Color,
                     Origin = edit.Cell, FunctionHp = functionHp, CellsAlive = (ushort)alive };
                 if (def.Kind == BlockKind.Functional && functionHp <= 0) instance.Flags |= BlockInstanceFlags.Destroyed;
-                instances[slot] = instance; origins[(edit.Cell, edit.Block, edit.Orient)] = slot;
+                instances[slot] = instance; origins[(edit.Cell, edit.Block, edit.Orient, edit.Color)] = slot;
                 for (int i = 0; i < def.Cells.Length; i++)
                 {
                     byte hp = restore ? damage[edit.DamageOffset + i] : (byte)255;
@@ -173,7 +174,7 @@ namespace Game.Voxel.Model
                     int3 p = Position(instance, i); var cell = Read(p);
                     if (!cell.IsAir && cell.IsInstance && cell.InstanceIndex == slot) cells[p] = default;
                 }
-                origins.Remove((instance.Origin, instance.Block, instance.Orient)); instances[slot] = default; released.Add(slot); return true;
+                origins.Remove((instance.Origin, instance.Block, instance.Orient, instance.Color)); instances[slot] = default; released.Add(slot); return true;
             }
             public bool ValidateFinal()
             {
