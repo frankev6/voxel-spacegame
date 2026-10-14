@@ -1117,6 +1117,10 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-14 — Orchestration: editor worker dispatch — astra (gpt-6)
+
+- Claimed EDT-0157ee734e1 and EDT-021e7cb992b on main and sent implementation orders to the exact existing combat/economy threads. Presentation remains active on TRV-009. No replacement threads or Unity work. SPEC-51 Q39 reserved for panels, Q40 for area tools; lead Q41 next. Lead next EDT-016. Dispatch-only test count: spec-required:0,extra:0.
+
 ### 2026-10-14 — EDT-014 controller/basic tools accepted — astra (gpt-6)
 
 - 2fffad89 wires discrete input, allowed-orientation rotation, mirror/core defaults, slice/X-ray/box state, pointer-safe tools, cached previews and cancel chain. Remove supports click/drag and bounded-volume Shift box removal. Paint retains canonical cell/function damage through session transactions. ADR-0091/SPEC-51 Q37/global411 adds constructor and read-only state; placement core identities are now incrementally indexed. Later advanced, selection and clipboard behavior retains TODO owners.

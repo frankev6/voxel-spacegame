@@ -29,7 +29,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Ship lines follow Starsector's depth without copying it.** Approved 2D silhouettes come before any 3D build. Form follows function. Use asymmetry with a reason, and refit variants. Human hulls are blocky, alien hulls smooth. Factions come from the existing lore in `Import/Legacy/content/Factions` and the DESIGN-GUIDE faction section.
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
-## 2. Where things stand (2026-10-13)
+## 2. Where things stand (2026-10-14)
 
 - **Editor controller/basic tools accepted:** EDT-014175c78cb clean compile and seven required cases plus core-limit regression pass; pointer-cache follow-up also passes. Placement, removal, paint, eyedropper, rotation and cancel chain now use the draft session. EDT-015 and EDT-021 are ready for the existing workers; lead continues selection/transform prerequisites. TRV-009 active. No Unity active.
 
@@ -338,5 +338,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Milestones/owner boundaries:** M0 passed **71/71**; M1 built systems are reviewed, its gameplay exit checks pass, and **107/109 tasks are done**, with DEV-009/012 awaiting later world-location/current-system support. No new owner decision in the latest tasks. Existing review items remain Q6(b), Q6(c), Q7, Q30, Q48, Q57, DATA-012 tuning, ADR-0033, the provisional Fighter starter/legacy flight tuning and CAM-012 close-zoom feel. Use documented defaults. ART-004 remains in review for the 150 m glyph criterion; preserve unmerged `task/ART-007-brick-tools` and its unfinished validator. No new hulls or AI assets.
 
 ## 3. Next
+
+- Immediate: lead EDT-016 selection/transforms; existing combat worker EDT-015 line/box/fill, economy EDT-021 editor panels, presentation TRV-009 travel cover/emission. Controller accepted; all three workers dispatched. Validate compatible deliveries together.
 
 Finish DEV-011 integration and dispatch DLG-013 to the existing combat worker. Lead supplies DLG-006 dialog runtime and SYS-009 pose/docking persistence; both unlock live gameplay and standard follow-ups. NAR-019 remains partial until its real owners are wired. Keep focused batch validation and existing art restrictions.

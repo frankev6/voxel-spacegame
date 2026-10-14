@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-012 | Mirror review318 clear; genuine implementation dependency wait | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-010 | Stats accepted and visual review done; genuine implementation dependency wait; DLG-012 waits DLG-007 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-015 | Line/box/fill implementation dispatched after controller acceptance; finish review320 first | EDT-017 after EDT-016 |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | EDT-021 | Editor panels dispatched from completed concrete UI owners | DLG-012 after DLG-007 |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | TRV-009 | Travel cover/emission dispatched after SYS-011 acceptance | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **All three workers dispatched:** EDT-015 combat (claim7ee734e1), EDT-021 economy (e7cb992b), TRV-009 presentation. SPEC-51 Q39 reserved economy, Q40 combat; next lead question Q41. Lead next EDT-016 selection/transforms; no Unity active.
 
 - **Editor controller/basic tools accepted:** EDT-014175c78cb clean compile and seven required cases plus core-limit regression pass; pointer-cache follow-up also passes. Placement, removal, paint, eyedropper, rotation and cancel chain now use the draft session. EDT-015 and EDT-021 are ready for the existing workers; lead continues selection/transform prerequisites. TRV-009 active. No Unity active.
 
