@@ -1006,7 +1006,7 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 ### TRV-009 — Travel presentation
 - **Milestone:** M3
 - **Tier:** standard — UI element, USS and an emission writer, all specified in §5.8
-- **Depends on:** `TRV-006`, `SPEC-60`, `SPEC-63`, `SPEC-64`, `SPEC-31`
+- **Depends on:** `TRV-006`, `SYS-011`, `UI-003`, `UI-007`, `UI-012`, `VFX-014`, `AUD-006`
 - **Do:**
   1. Implement `TravelPresentationSystem`: the cover element and class toggle, and the gate emission writer (§5.8).
   2. Add `screens/travel.uss`.
@@ -1132,6 +1132,8 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 | 19 | Jump timeline waits for whole galaxy/streaming specs including later presentation and advisory measurements | Under ADR-0068 use completed lane/config, arrival, control lock, galaxy/cache/origin, belt/T2 loader, pose/docking and jump-hook owners as direct dependencies. All timeline acceptance remains required. CanJump must not undock or rebuild watchers: evaluate the current compiled lane condition without cache mutation, read economy without emitting warnings, and defer narrative undocking to accepted RequestJump. | Tech lead — resolved; ledger Q396 |
 
 | 21 | Destination cache lifetime, diagnostics and missing-content defaults | Keep one read-only route view and one service-owned RouteScratch, disposed with TravelService. Rebuild input flags on state revision or galaxy generation; copy gate state for each search. RouteComputations and LastRouteMs count actual displayed-path recomputations, excluding validation, empty destinations, removed destinations and arrival clears. An absent galaxy clears the transient cache while retaining saved destination state; no destination touches no loader. Saturate aggregate fuel at int.MaxValue. If generated content has no matching first-lane gate, keep the valid path but return false from TryGetNextHop rather than invent a position. Exactly the five required tests use two/three-system live fixtures, real facts/watchers/planner and direct ticks; no travel execution or performance run. | Tech lead — resolved; ledger Q402. |
+
+| 22 | Travel presentation waits for whole specs including unrelated future work and owner licence sign-off | Under ADR-0068 use completed TRV-006, SYS-011, UI-003/007/012, VFX-014 and AUD-006 as concrete prerequisites. Preserve all cover timing, actual gate emission and layout criteria; future art and audio-licence decisions remain separate owner work. | Tech lead — resolved; ledger Q408 |
 
 ## 11. References
 

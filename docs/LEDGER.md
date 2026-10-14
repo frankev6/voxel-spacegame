@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 66 | 11 | 0 | 0 | 103 | 0 | 180 | 8 |
+| M3 | 66 | 9 | 0 | 0 | 105 | 0 | 180 | 9 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -342,7 +342,7 @@
 | SYS-008 | InteractionQuerySystem, docking and BodyInteracted | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, INP-005, AI-004, CORE-006 | yes | done | astra (gpt-6) | 2026-10-13 | 499de6e3 | Surface query, wrapped press counters, shared docking and loader interaction persistence; four direct PlayMode cases pass. |
 | SYS-009 | PLOC participant | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-008, PERS-001 | yes | done | astra (gpt-6) | 2026-10-13 | efe6dfff | PLOC raw-bit atomic restore, boot registration and validated deferred docking; reset/disposal cleanup; three required cases pass; spec-required: 3, extra: 0 |
 | SYS-010 | IShipSpawner contract for Galaxy services | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-001, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | adcf164 | Spawner contract forwarding only; 2 required tests. FND-012 runtime remains open. Full 1027 EM / 145 PM passed. |
-| SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, CAM-004, CAM-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Presentation worker implements real celestial visual owner |
+| SYS-011 | Celestial visuals and distance compression | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-004, CAM-004, CAM-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | d76a9039 | Real registered visuals/T1 links, compression and impostor toggles; three Metal cases pass; spec-required: 3, extra: 0 |
 | SYS-012 | Regression scenarios R9, R28 | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | standard | SYS-006, SYS-009, FND-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c1acaa03 | Both real loader/GLXY-PLOC regressions pass; spec-required: 2, extra: 0 |
 | SYS-013 | Jump integration hooks | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-006, SYS-008 | yes | done | astra (gpt-6) | 2026-10-13 | 05b87f54 | Real prefetch/unload/origin placement; three direct jump cases pass; spec-required: 3, extra: 0 |
 | SYS-014 | World gates: streaming performance and soak | [SPEC-31](specs/SPEC-31-star-system-streaming.md) | M3 | frontier | SYS-007, SYS-013, TST-001 | yes | todo |  |  |  |  |
@@ -354,7 +354,7 @@
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, GAL-008, GAL-009, SYS-007, SYS-009, SYS-013, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | 2430de6e | Jump lifecycle/boot and map lane binding; eight direct cases pass, review fixes readiness; advisory fixture compiled only; spec-required: 8, extra: 0 |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
 | TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 6, extra: 0 |
-| TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SPEC-60, SPEC-63, SPEC-64, SPEC-31 | no | todo |  |  |  |  |
+| TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SYS-011, UI-003, UI-007, UI-012, VFX-014, AUD-006 | yes | todo |  |  |  |  |
 | TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 5, extra: 0 |
 | TRV-011 | Narrative, dev probes and the R30 scenario | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-008, TRV-010, SPEC-40, SPEC-70 | no | todo |  |  |  |  |
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
@@ -430,7 +430,7 @@
 | EDT-007 | Placement validator | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | done | astra (gpt-6) | 2026-10-13 | 633e952c | Placement checks, atomic group rollback, exact damaged identity/restore; 17 required cases pass; spec-required: 17, extra: 0 |
 | EDT-008 | Connectivity tracker | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-005 | yes | todo |  |  |  |  |
 | EDT-009 | Full validation, issues and remove-floating | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-006, EDT-007, EDT-008 | no | todo |  |  |  |  |
-| EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Reusable economy worker; incremental stats and exact moments, four required cases |
+| EDT-010 | Stats accumulator and diff | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-006, PWR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 73bcc085 | Exact moments, canonical sorted stats and deltas; four required cases pass; spec-required: 4, extra: 0 |
 | EDT-011 | Commit pipeline and R15 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-009, EDT-010, SPEC-50 | no | todo |  |  |  |  |
 | EDT-012 | DDA picker and placement origin | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | ed61500 | Bounded DDA, slice/X-ray, working plane and placement origin; seven required methods (12 parameterized cases) pass; spec-required: 7, extra: 0 |
 | EDT-013 | Mirror symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-007 | yes | todo |  |  |  |  |
@@ -977,6 +977,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 403 | SPEC-51 Q31: picker signatures and boundary defaults | Stateless grid-ray picker with immutable hit; normalize direction, begin traversal at expanded bounds, canonical XYZ ties and opposite dominant normal for inside hits. Clamp configured steps to1..4096; plane reach4096. | Tech lead — resolved |
 | 404 | SPEC-51 Q33: placement index lifetime and out-of-window source bounds | Fixed histograms plus sparse overflow retain removable imported drafts; complete native block identities and missing-cell reference counts preserve damaged-root removal; checked clearance counts and native orientation map ownership. | Tech lead — resolved |
 | 405 | SPEC-51 Q34: staged placement errors and exact damaged restoration | Complete block identity, journaled native rollback, own-cell removal and overlapping missing reservations; ADR-0089 restores only surviving cells, preserving neighbours and colour identity. Tool-specific errors stay with their tool tasks. | Tech lead — resolved |
+| 406 | SPEC-51 Q32: canonical stats and exact mass moments | Sorted native pair totals, signed milli-mass moments, specified module contributions, lazy caches and numerical rows with improvement signs; four required cases pass. | Tech lead — resolved |
+| 407 | SPEC-31 Q25: registered celestial lifetime and compression | World-owned registered IDs/prototypes, loader-owned children, render-only compression/visibility and emission preservation; ADR-0090 adds installed engine bounds reference. Three actual Metal cases pass. | Tech lead — resolved |
+| 408 | SPEC-32 Q22: travel presentation whole-spec prerequisite overreach | Under ADR-0068 depend on completed travel timeline, celestial visuals, root/theme/controls/layout audit and warp/audio owners. Retain cover timing, live gate emission and layout acceptance. Owner audio licence gate remains pending independently. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1109,6 +1112,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — EDT-010 / SYS-011 accepted: stats and celestial visuals — astra (gpt-6)
+
+- Stats73bcc085 integrates91fcc6b7 with placement hooks preserved: exact mass moments, sorted count totals, lazy original/draft caches and numerical delta rows. Cross-task contribution bodies completed in Data/Blocks/BlockStatMath, ThrusterModule, PowerSourceModule, PowerStorageModule, ShieldEmitterModule and CargoModule; signatures unchanged, SPEC-04 formulas retained. SPEC-51 Q32/global406. Review316 found no defects.
+- Visuals42acf058 integratesf46a75a4: loader T1 factory/cleanup, registered meshes/materials, separate child transforms, distance compression and reversible impostor visibility. Integration fixes a3a53440/a8a61905/d76a9039 add missing native import, qualify existing audio/VFX ECS World types, and accept engine AABB reference ADR-0090. SPEC-31 Q25/global407. Review340 found no rendering defects; earlier loader ownership review309 also clear.
+- Compile17566 terminal0, zero warning CS. Focused EditMode10981 terminal0:17 passed (0.573157s bodies), covering four stats, existing session/BOM and assembly rules. Graphics PlayMode87038 terminal0:3 passed,0 skipped (0.1090463s bodies), Metal Apple M5 Pro registration/compression/hide cases. QualitySettings restored byte-for-byte from pre-run backup, preserving owner's dirt. Evidence Logs/playtest/stats-celestial. EDT-010 spec-required:4,extra:0; SYS-011 spec-required:3,extra:0. No full suite or benchmark.
+- TRV-009 exact prerequisite resolution recordedQ408 under ADR-0068, enabling the existing presentation worker. Next lead editor mirror/controller/connectivity prerequisites. Previous placement acceptance and current integration/acceptance are progress; goal remains active. No Unity active.
 
 ### 2026-10-13 — EDT-007 / EDT-012 accepted: placement, rollback and picking — astra (gpt-6)
 

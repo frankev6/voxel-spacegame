@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Stats and celestial visuals accepted:** EDT-01073bcc085 and SYS-011d76a9039 compile clean;17 focused EditMode plus3 Metal PlayMode checks pass. Real registration/compression/hide behavior verified; quality settings preserved. Travel presentation now has concrete completed prerequisites and is next for the existing presentation worker. Lead continues editor mirror/controller/connectivity prerequisites. No Unity active.
+
 - **Placement and picking accepted:** EDT-007633e952c and EDT-012ed61500 pass required functional cases; damaged undo now preserves neighbours through ADR-0089. EDT-01091fcc6b7 stats and SYS-011f46a75a4 visuals delivered, pending integration/validation; combat/economy review those deliveries, presentation awaits acceptance. Next integrate them and unlock travel presentation; lead editor prerequisites continue. No Unity active.
 
 - **Placement indexes authored:** EDT-00771fd04e4 owns clearance/missing-cell/origin indexes and exact shrinking bounds; validation/rollback and required cases still next. EDT-006 native-map correction181b1cd1 and integrated picker await compatible validation. EDT-010 stats and SYS-011 visuals active; combat worker has a real dependency wait after review309. No Unity active.
