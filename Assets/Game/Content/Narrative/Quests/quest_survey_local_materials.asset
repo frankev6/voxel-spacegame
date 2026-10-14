@@ -29,11 +29,11 @@ MonoBehaviour:
         Gather 3 units of raw materials.'
       doneWhen:
         source: (has_item("resource_palladium", 3)) or (($story_survey_complete) or $survey_local_materials_deliver_to_ark)
-        sourceHash: 0
-        compilerVersion: 0
-        hasErrors: 1
+        sourceHash: 17118262913297781798
+        compilerVersion: 1
+        hasErrors: 0
         root:
-          rid: 6548929066013557115
+          rid: 6548929078554264105
       progress:
         source: item_count("resource_palladium")
         sourceHash: 1589212930537717302
@@ -60,7 +60,7 @@ MonoBehaviour:
         root:
           rid: 6548929066013557117
       progress:
-        source:
+        source: 
         sourceHash: 3244421341483603138
         compilerVersion: 1
         hasErrors: 0
@@ -71,8 +71,8 @@ MonoBehaviour:
       optional: 0
       marker:
         starSystem: {fileID: 0}
-        bodyTag:
-        label:
+        bodyTag: 
+        label: 
     onComplete:
       source:
       - quest_log quest_survey_local_materials legacy_2
@@ -84,7 +84,7 @@ MonoBehaviour:
       - rid: 6548929066013557118
       - rid: 6548929066013557119
   failWhen:
-    source:
+    source: 
     sourceHash: 3244421341483603138
     compilerVersion: 1
     hasErrors: 0
@@ -126,19 +126,6 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6548929066013557115
-      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
-      data:
-        function: has_item
-        intArgs:
-        - rid: -2
-        - rid: 6548929066013557122
-        boolArgs:
-        - rid: -2
-        - rid: -2
-        textArgs:
-        - resource_palladium
-        - ""
     - rid: 6548929066013557116
       type: {class: IntFunctionExpr, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
@@ -181,7 +168,7 @@ MonoBehaviour:
           - rid: 6548929066013557125
           Text:
           - story_survey_complete
-          - ""
+          - 
     - rid: 6548929066013557120
       type: {class: QuestLogEffect, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
@@ -208,10 +195,6 @@ MonoBehaviour:
           Text:
           - quest_survey_local_materials
           - legacy_3
-    - rid: 6548929066013557122
-      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
-      data:
-        value: 3
     - rid: 6548929066013557123
       type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
@@ -236,8 +219,47 @@ MonoBehaviour:
           - rid: -2
           Text:
           - item_strange_matter_container_full
-          - ""
+          - 
     - rid: 6548929077924594107
       type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
       data:
         value: 1
+    - rid: 6548929078554264105
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929078554264106
+        right:
+          rid: 6548929078554264107
+    - rid: 6548929078554264106
+      type: {class: BoolFunctionCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        function: has_item
+        intArgs:
+        - rid: -2
+        - rid: 6548929078554264108
+        boolArgs:
+        - rid: -2
+        - rid: -2
+        textArgs:
+        - resource_palladium
+        - 
+    - rid: 6548929078554264107
+      type: {class: OrCondition, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        left:
+          rid: 6548929078554264109
+        right:
+          rid: 6548929078554264110
+    - rid: 6548929078554264108
+      type: {class: IntLiteral, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        value: 3
+    - rid: 6548929078554264109
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: story_survey_complete
+    - rid: 6548929078554264110
+      type: {class: FactBoolRead, ns: Game.Data.Logic.Nodes, asm: Game.Data}
+      data:
+        name: survey_local_materials_deliver_to_ark

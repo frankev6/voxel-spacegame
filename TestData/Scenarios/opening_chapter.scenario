@@ -180,6 +180,7 @@ let intro_completed = fact("beat_waking_up")
 let starter_completed = fact("beat_choose_start_ship")
 assert $cache_completed == 1 && $mutiny_completed == 1
 assert $intro_completed == 1 && $starter_completed == 1
+wait save.allowed == 1 timeout=15
 save slot=manual_001
 load slot=manual_001
 wait player.ready && travel.phase == "Idle" timeout=30

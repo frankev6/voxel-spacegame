@@ -20,10 +20,19 @@ namespace Game.App.DevRuntime.Scenarios
         sealed class Probe : IScenarioProbe
         {
             public string Name { get; }
-            public int ArgCount => 1;
+            public int ArgCount => Name == "save.allowed" ? 0 : 1;
             internal Probe(string name) { Name = name; }
             public ScenarioValue Read(DevContext ctx, ReadOnlySpan<ScenarioValue> args)
             {
+                if (Name == "save.allowed")
+                {
+                    if (!ctx.TryGetService<Game.Core.Flow.IGameFlow>(out var flow) ||
+                        !ctx.TryGetService<Game.Persistence.Services.SaveService>(out var save))
+                        throw new InvalidOperationException("production save/flow services unavailable");
+                    return Number(!flow.IsTransitioning && !save.IsBusy && flow.HasActiveSession &&
+                        flow.CurrentScene == Game.Core.Flow.GameScene.World &&
+                        flow.GetSaveBlock() == Game.Core.Save.SaveBlockReason.None ? 1 : 0);
+                }
                 if (Name.StartsWith("dialog.", StringComparison.Ordinal))
                 {
                     if (!ctx.TryGetService<DialogService>(out var dialog) || !ctx.TryGetService<DialogPresenter>(out var presenter))
@@ -62,7 +71,7 @@ namespace Game.App.DevRuntime.Scenarios
         {
             registry.Register(new Probe("quest")); registry.Register(new Probe("clue"));
             registry.Register(new Probe("dialog.option"));
-            registry.Register(new Probe("star_system_id"));
+            registry.Register(new Probe("star_system_id")); registry.Register(new Probe("save.allowed"));
         }
     }
 }

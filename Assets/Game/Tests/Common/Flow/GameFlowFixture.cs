@@ -126,7 +126,7 @@ namespace Game.Tests.Common
             yield return Complete(Service<SceneFlow>().EnterSandboxAsync(new SandboxArgs(true, 42)), "Enter sandbox");
             yield return WaitUntil(() => PlayerReady, 60, "Sandbox player ready");
         }
-        IEnumerator Complete(Awaitable<FlowResult> operation, string what)
+        protected IEnumerator Complete(Awaitable<FlowResult> operation, string what)
         {
             var awaiter = operation.GetAwaiter();
             yield return WaitUntil(() => awaiter.IsCompleted, 60, what);

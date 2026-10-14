@@ -50,6 +50,10 @@ namespace Game.Tests.PlayMode.Narrative
                 "The real quest owns the existing gate reward.");
             Assert.IsFalse(survey.OnCompleted.IsStale || survey.OnCompleted.HasErrors,
                 "Lead must compile the Q19 reward change with the real content importer.");
+            // Waiting ten wall-clock seconds after incidental probe damage is not the feature
+            // under test. Preserve the real save guard with a short, restored fixture cooldown.
+            using var fields = new EncounterDirectorTests.Fields();
+            fields.Set(Catalog.Get<GameConfigDefinition>(new ContentId("config_game")), "combatDamageWindowSeconds", .1f);
             var host = Service<DevRuntimeHost>();
             var dialog = Service<DialogService>();
             var onceStarts = new Dictionary<int, int>();
@@ -67,7 +71,7 @@ namespace Game.Tests.PlayMode.Narrative
             Entity modifiedPlayer = Entity.Null;
             try
             {
-                string source = File.ReadAllText(ScenarioPath).Replace("timeout=15", "timeout=3").Replace("timeout=10", "timeout=3");
+                string source = File.ReadAllText(ScenarioPath).Replace("timeout=15", "timeout=3").Replace("timeout=10", "timeout=3").Replace("timeout=30", "timeout=5");
                 int marker = source.IndexOf(DriftMarker, StringComparison.Ordinal);
                 Assert.Greater(marker, 0, "The second case runs the same route through its actual save/load checkpoint.");
                 if (stopAtDrift) source = source.Substring(0, marker);
