@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
-| M3 | 13 | 16 | 0 | 0 | 153 | 0 | 182 | 4 |
+| M3 | 13 | 15 | 0 | 0 | 154 | 0 | 182 | 4 |
 | M4 | 8 | 2 | 0 | 0 | 4 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -444,7 +444,7 @@
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, VOX-009, UI-003, UI-005, UI-007, UI-008, UI-009, HUD-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | 97440534 | Profile VOXS store/browser, read-only content and atomic replacement; all 5 required cases pass; ADR-0093 accepted; Q428; host integration stays EDT-022 |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f0e774dc | Pooled editor panels, real UXML/theme and current-identity bindings; four graphics-enabled cases pass |
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, CAM-009, INP-006, HUD-018, UI-011 | yes | done | astra (gpt-6) | 2026-10-14 | 1448b2fb | Actual scene host/input/camera/renderers, persistent UI command binding, presenter and leave/browser flows; six required cases accepted across focused runs. Launcher remains EDT-023. |
-| EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, FND-010, FND-012, GAL-008, SYS-008, SYS-013 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | partial 56209106: launcher and actual commit targets, frame-aware pose capture/return; composition/root wiring and five scenario cases remain. Actual dialog acceptance needs DLG-007. |
+| EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, FND-010, FND-012, GAL-008, SYS-008, SYS-013 | yes | done | astra (gpt-6) | 2026-10-14 | 71bbad74 | Actual station-dialog/fleet editor: five required scenarios pass, removal persists, pose/id exact, three trips stable, Lab saves. Release successful dev interaction key immediately. |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | yes | todo |  |  |  |  |
 | UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 90c13ad | Meter, Slot and scrolling TabBar; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c777fd7 | Pooled tooltips, scheduler and lifecycle; fixture repair a34c3c3; spec-required: 7, extra: 0 |
@@ -1202,6 +1202,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — EDT-023 actual fleet-editor round trips accepted — astra (gpt-6)
+
+- 71bbad74 completes the four outstanding cases over actual campaign, station interaction, compiled station dialog, BeatService terminal effects, editor host/commit and fleet respawn. All five required EditorRoundTripScenarioTests pass in4.2s: one non-functional hull block removed/committed and refunded through real validation; same PersistentId and pose within0.01m/0.1deg; station interaction works after return; three trips preserve body count/pose; DialogEnded precedes transition; real creative Lab save/reload/menu case remains green. HUD stack returns to Flight alone with no pause token. Test count: spec-required: 5, extra: 0. Compile clean/zero CS warnings, no broad/performance/soak loop.
+- Initial fixture incorrectly used a beatless direct dialog, which cannot own the pending terminal effect; corrected to actual station interaction and canonical BeatService. Subsequent interaction exposed the dev command retaining the successful simulated key for0.1s, swallowing an immediate repeated press; runtime now releases on success. Fixture undocks through DockingService before a new F interaction because the real dock view otherwise retains input. Opening-story state is reset/suspended solely in this editor fixture; real body/beat/dialog owners remain active. Initial failures retained at Logs/playtest/editor-roundtrip/initial.xml; corrected dialog.xml and functional.xml establish acceptance. No new tests beyond the five prescribed.
+- Worker deliveries pending lead acceptance: HUD-01695ecdaf8 real maps, QST-0108bb1bcd1 full chapter/reward/ordering. Same workers immediately recycled to NAR-018 debugger and ECO-010 economy scenarios; presentation continues HUD-014 ship log. No duplicate threads or owner gates.
 
 ### 2026-10-14 — DEV-021 playable Blueprint Lab beacon — astra (gpt-6)
 

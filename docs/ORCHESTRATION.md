@@ -87,3 +87,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - QST-008841a3882/64156bf6 accepted: five routing checks plus playground entry/reset pass; actual sandbox lifecycle fixed. Live campaign initial territory greeting precedes waking-up: assigned to QST-010 (Q22/global493), not claimed full opening acceptance. HUD-016 owns accepted Route flag ADR0112/global492, HUD-014 continues real log.
 
 - DEV-0215871d067 adds actual creative Blueprint Lab beacon (eight areas); expanded existing playground test passes, live Lab screenshot inspected, reset returns from MainMenu. Same three workers actively implement maps/log/chapter. Remaining docked fleet scenarios are EDT-023, not claimed by the creative beacon.
+
+- EDT-02371bbad74 accepted: all five actual station-dialog/editor/respawn cases pass in4.2s; successful interaction key release fixed. HUD01695ecdaf8 and QST0108bb1bcd1 ready for compatible integration; same workers recycled to NAR018/ECO010, HUD014 still active.
