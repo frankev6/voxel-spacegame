@@ -15,8 +15,8 @@
 |---|---|---|---|---|---|---|---|---|
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
-| M2 | 8 | 2 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 23 | 17 | 0 | 0 | 142 | 0 | 182 | 5 |
+| M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
+| M3 | 23 | 16 | 0 | 0 | 143 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -301,7 +301,7 @@
 | AUD-013 | Audio performance and allocation tests | [SPEC-64](specs/SPEC-64-audio.md) | M2 | standard | AUD-008, AUD-009 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 8a24a71f | 4 required measurements; zero warmed GC; performance deferred: drain500/4096 misses, zero optimization passes |
 | DEV-010 | aim and fire commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, WPN-001, INP-001, CAM-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-13 | c5c7fc15 | Aim/tracking/fire CLI accepted; two real-input/weapon PlayMode cases pass; Q379. |
 | DEV-011 | perf command and gh_perf extensions | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-009, VFX-001, AUD-001, TST-001 | yes | in-progress | economy (gpt-6.1-sol high) | 2026-10-13 |  | Source integrated2d39e5aa; JSON passes; marker real-work483542ns but headless Count0 inconclusive; no more blind retries; interactive verification pending |
-| DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Assigned same reusable worker after accepted DEV-012; no Unity runs in worker checkout. |
+| DEV-013 | Overlays: islands and spatial hash | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M2 | standard | DEV-012, AI-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 38d812a3 | Combined source accepted; real overlays and input interaction, five required checks pass; Q477/Q478. |
 | TST-005 | Determinism runner and the combat determinism gate | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | frontier | TST-002, TST-003, SPEC-13, SPEC-20, SPEC-21, SPEC-22, SPEC-23 | no | todo |  |  |  |  |
 | TST-006 | Ten-minute combat soak | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M2 | standard | TST-005, SPEC-70 | no | todo |  |  |  |  |
 | MIG-009 | Weapon converter and weapon links | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-006, MIG-011, WPN-001, DATA-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 132a02a | Nine weapons and canonical mount links; content 8204e88; spec-required: 3, extra: 0 |
@@ -480,7 +480,7 @@
 | VFX-014 | Warp effect and strict config validation | [SPEC-63](specs/SPEC-63-vfx.md) | M3 | standard | VFX-004, TRV-001 | yes | done | astra (gpt-6) | 2026-10-13 | b575efe | 600-particle pooled warp with oldest stealing, all 13 defaults strict; travel gameplay remains open; spec-required: 3, extra: 0 |
 | AUD-011 | GATE: Owner confirms licences of the carried-over audio | [SPEC-64](specs/SPEC-64-audio.md) | M3 | standard | AUD-010 | yes | todo |  |  |  |  |
 | AUD-012 | Floating-origin shift and clears | [SPEC-64](specs/SPEC-64-audio.md) | M3 | frontier | AUD-006, GAL-001, SYS-001 | yes | done | astra (gpt-6) | 2026-10-13 | f9fed29a | Three required origin/system/reset audio checks pass; spatial shifts and clears preserve appropriate music lifecycle |
-| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Assigned same reusable worker after accepted DEV-012; no Unity runs in worker checkout. |
+| DEV-014 | interact command and interaction overlay | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, SYS-008, DEV-012, INP-005 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | 38d812a3 | Combined source accepted; real overlays and input interaction, five required checks pass; Q477/Q478. |
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
 | DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 54734103 | Direct World Play, visible Console/entry and launcher; six actual trials/screens. 15-case compatible batch green; broader campaign/story/editor areas remain absent. |
@@ -1076,6 +1076,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 474 | SPEC-41 Q22: pending Yarn gate and playable dialogue | ADR-0101 uses the documented fallback now; actual spike and owner adoption remain open. Same format/interface and eleven conformance checks retained. | Tech lead |
 | 475 | SPEC-41 Q23: graph encoding and runtime defaults | Four successive A operands carry each option record; executed Option instructions preserve outer visibility. 10,000-instruction guard, stable generated asset, matching command-table hash and explicit dialog adapter binding. Effect-only beats have no runner start node. | Tech lead |
 | 476 | SPEC-42 Q15: beat scheduler edge defaults | ADR-0102 concrete prerequisites; bounded queue refuses incoming work when no Condition entry can be evicted, warns; completion recursion guard/current-count latch; authored-system resolver; preserved internal save state. QST-006/008 retain integration ownership. | Tech lead |
+| 477 | SPEC-70 Q33: bounded islands and spatial overlays | 2M inclusive address-volume cap; 60-draw local-bounds cache; immediate invalidation for target/world/serial/toggle; largest white bounds first; guarded occupied hash buckets within1km. | Tech lead |
+| 478 | SPEC-70 Q34: real input interaction tools | Body lookup by key/name/tag, nearest deterministic target, legal surface offset, actual bound press and matching BodyInteracted success. Shared range circles reserve largest island box budget; no direct interaction calls. | Tech lead |
 
 ## Measurements
 
@@ -1187,6 +1189,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-14 — DEV-013/014 compatible tools accepted — astra (gpt-6)
+
+- 38d812a3 integrates worker02d3990e/c4c89b91 combined as bdbefa75: actual solid-mask island flood/cache, spatial buckets, range circles and target line in the one bounded renderer; body lookup/teleport and bound-input Interact command/probes. Lead fixed missing Game.Core import for InputContext. Q477/Q478 mirror resolved defaults.
+- Three EditMode island/cache/size/spatial cases and two PlayMode actual station/input-unbound cases pass. Real station case proves legal surface position, input sampling, matching BodyInteracted and docking. Test count DEV-013: spec-required: 3, extra: 0; DEV-014: spec-required: 2, extra: 0. Compile clean/zero CS warnings. Logs/playtest/interaction-overlays/{islands,interaction}.xml. No broad/performance/soak runs.
+- Live screenshot inspected at Logs/playtest/islands-spatial-live.png: one ship island and eight spatial cells, 44 total edges, zero new errors/warnings. Overlays disabled afterwards; playground left running. F1 supports overlay name=islands/spatial/interaction/none; campaign body interaction via interact body=ark_station. This does not claim the sandbox has campaign bodies or automatic dialogue yet.
 
 ### 2026-10-14 — QST-005 beat runtime accepted — astra (gpt-6)
 

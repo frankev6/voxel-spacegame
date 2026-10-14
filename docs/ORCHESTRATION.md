@@ -64,4 +64,4 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 - DLG-007 d835fa49 accepted: eleven conformance checks and live dialog choice/pause verified. Combat worker recycled to now-ready DLG-011; DEV-013 and ENC-011 continue. Pending compatible overlays remain for lead integration. Next frontier BeatService unlocks automatic story interactions.
 
-- QST-00530762271 accepted with nine required functional cases; two advisory fixtures deferred. Presentation recycled to ready QST-006. Combined DEV-013/014bdbefa75 awaits lead review/validation; other workers DLG-011 and ENC-011 remain active.
+- QST-00530762271 accepted with nine required functional cases; two advisory fixtures deferred. Presentation recycled to ready QST-006. Combined DEV-013/014 accepted38d812a3 with five focused cases and live rendering; other workers DLG-011 and ENC-011 remain active.
