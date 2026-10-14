@@ -6,8 +6,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-012 | Picker dispatched; TRV-00840452bf0 delivery awaits route batch | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-010 | Destination/route service dispatched; DLG-012 live acceptance waits DLG-007 | narrative follow-ups |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | EDT-012 | Picker active; TRV-008 accepted | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-010 | TRV-010 accepted; dependency wait for next ready standard gameplay task; DLG-012 waits DLG-007 | narrative follow-ups |
 
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-011 | Celestial visual owner dispatched; TRV-009 waits this actual prerequisite | HUD-003/006/007 once ready |
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Gate and route slice accepted:** TRV-008/TRV-010 integrated through8c2e7cd8; compile clean and11 required focused checks pass. EDT-012 picker and SYS-011 celestial visuals active; route worker has a genuine dependency wait. Next lead editor count/BOM prerequisite to unlock stats work. No Unity active.
 
 - **Draft editor session accepted:** EDT-0055520be15 final compile clean, six required direct cases passed; source review304 found no defects. Next editor dependencies and gate/route delivery integration. TRV-00840452bf0 waiting for route326 delivery; SYS-011 factory implementation active. No Unity active.
 

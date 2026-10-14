@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 70 | 12 | 0 | 0 | 98 | 0 | 180 | 10 |
+| M3 | 69 | 11 | 0 | 0 | 100 | 0 | 180 | 9 |
 | M4 | 11 | 1 | 0 | 0 | 2 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -353,9 +353,9 @@
 | TRV-005 | Arrival solver | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, GAL-002, GAL-008 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 6f940373 | Analytic jump/cruise arrival; five required functional checks pass; Perf_512Bodies authored, measurement deferred |
 | TRV-006 | TravelService jump timeline | [SPEC-32](specs/SPEC-32-travel.md) | M3 | frontier | TRV-003, TRV-005, TRV-007, GAL-008, GAL-009, SYS-007, SYS-009, SYS-013, FND-001 | yes | done | astra (gpt-6) | 2026-10-13 | 2430de6e | Jump lifecycle/boot and map lane binding; eight direct cases pass, review fixes readiness; advisory fixture compiled only; spec-required: 8, extra: 0 |
 | TRV-007 | PlayerControlLock consumption | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-001, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 75ba22b | Movement/action lock consumption without press replay; 4 required tests. TRV-006 owns lifecycle. Full 1027 EM / 145 PM passed. |
-| TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing worker; lead validates compatible gate/route batch |
+| TRV-008 | Gate interaction, gate info and notices | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 6, extra: 0 |
 | TRV-009 | Travel presentation | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-006, SPEC-60, SPEC-63, SPEC-64, SPEC-31 | no | todo |  |  |  |  |
-| TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Existing worker; lead validates compatible gate/route batch |
+| TRV-010 | Destination and route service | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-004, TRV-006 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 8c2e7cd8 | Integrated real gate/destination routing; focused batch 11/11 passes, compile clean; spec-required: 5, extra: 0 |
 | TRV-011 | Narrative, dev probes and the R30 scenario | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-008, TRV-010, SPEC-40, SPEC-70 | no | todo |  |  |  |  |
 | TRV-012 | Jump integration, R30 regression and budget | [SPEC-32](specs/SPEC-32-travel.md) | M3 | standard | TRV-009, TRV-011, TST-001 | no | todo |  |  |  |  |
 | ENC-001 | Public contract types | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M3 | standard | CORE-001, DATA-001, GAL-001, SYS-001, TRV-001, WPN-001, AI-001, NAR-001, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 101ff7b | Encounter contracts and faction event channel; 2 required tests; runtime ENC-002 onward remains |
@@ -973,6 +973,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 399 | SPEC-31 Q23: concrete celestial visual prerequisites | Use completed anchor and camera-state owners under ADR-0068; all visual lifecycle and angular-size acceptance remains required. | Tech lead |
 | 400 | SPEC-31 Q24: celestial rendering creation boundary | ADR-0087 supplies Galaxy interface/Presentation implementation and App injection; loader retains visual-link/lifetime ownership, including refresh cleanup. | Tech lead |
 | 401 | SPEC-51 Q30: batch/report storage contract | ADR-0088 defines native input ownership and per-group reports; dirty cells mark only owning/face-neighbour bricks. Later placement rules remain EDT-007. | Tech lead |
+| 402 | SPEC-32 Q21: destination cache lifetime and missing-content defaults | One service-owned scratch/read-only route view; stamp state, generation and lanes; count displayed recomputations only. Missing galaxy retains saved destination, removed destination clears, fuel saturates, missing gate yields no next hop. | Tech lead — resolved |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1105,6 +1106,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — TRV-008 / TRV-010 accepted: gates and destination routing — astra (gpt-6)
+
+- Gate source6327e32f and route sourcebcc779a integrated on local main;47e8e322/333cc48e/8c2e7cd8 fix fixture imports, a malformed GUID, System.Math qualification and the destination out-result call. Actual gate interactions resolve neighbour jumps and prompt data; stamped routes expose fuel, next gate, block/restore notices and arrival clearing. Review330 found the corrected signature issue and no other confirmed defects.
+- Compile67089 terminal0, zero warning CS; focused EditMode42019 terminal0:11 passed,0 failed. TRV-008 spec-required:6,extra:0; TRV-010 spec-required:5,extra:0. Tiny real service fixtures/direct ticks, no combat waits, broad suites or benchmarks. Evidence Logs/playtest/gate-route. SPEC-32 Q21 mirrored as Q402.
+- EDT-012 and SYS-011 workers remain active. Route worker has a real ready-task dependency wait (remaining ready standard rows are advisory performance or owner licence confirmation), not an invented benchmark assignment. Next lead editor prerequisites to unlock stats work. Integration/validation changed authoritative state; goal remains active.
 
 ### 2026-10-13 — EDT-005 done: draft editing session — astra (gpt-6)
 
