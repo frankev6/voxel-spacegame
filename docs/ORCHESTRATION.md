@@ -7,9 +7,9 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | NAR-017 | Claimed after NAR-010 acceptance; existing worker receives read-only debugger implementation | narrative follow-ups |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Delivered37d1d116, pending integration; bounded sandbox diagnosis dispatched | narrative follow-ups |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Delivered37d1d116; sandbox diagnosis267 delivered; integration wait | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | NAR-011 removal review | Bounded source lifetime / tombstone review dispatched | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Removal review224 complete; no ready standard implementation | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Narrative boot/session wired:** NAR-01119839c0e binds content, registers live owners/FACT saving and new/restore lifecycle. Still uncompiled/unaccepted: frame bridge and remaining3 cases next. Economy saving remains ECO-006, quest facade remains QST-006; explicit TODOs preserved. No Unity active. NAR-017 active245; DEV-00937d1d116 pending integration, sandbox diagnosis267 delivered; removal review224 found no defect/presentation dependency wait. Previous removal and current composition are progress.
 
 - **Narrative removal authored:** NAR-011 bb10c347 implements ADR-0077/Q364 persistent removal using existing tombstones and safe source retirement; uncompiled/unaccepted. Next boot/session/tick wiring and remaining3 cases, including removal, before focused validation. No Unity active. NAR-017 active244; DEV-00937d1d116 pending integration/sandbox diagnosis266; presentation assigned removal lifetime review. Previous routing work and this source change are progress.
 

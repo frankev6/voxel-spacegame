@@ -416,7 +416,7 @@
 | ECO-003 | InventoryModel and Wallet | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-001 | yes | done | astra (gpt-6) | 2026-10-13 | 80a8bd18 | Twelve functional inventory/wallet checks pass; advisory Apply40 unmeasured (ADR-0070) |
 | ECO-004 | Loot and EconomyService | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003, ECO-005, NAR-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9d457784 | Seeded loot and stable economy lifecycle facade; clean compile, eight required checks pass |
 | ECO-005 | Merchants | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-003 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | f4cae431 | Merchant pricing, stock/restock and trading; eight required checks pass; sale rounding repaired |
-| ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | todo |  |  |  |  |
+| ECO-006 | INVT participant | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-004, ECO-005, PERS-001 | yes | todo |  |  |  | NAR-011 composes EconomyService; INVT participant/registration remain wholly ECO-006, inventory persistence not yet supported |
 | ECO-007 | Salvage | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | frontier | ECO-003, SPEC-13, SPEC-31, SPEC-12 | no | todo |  |  |  |  |
 | ECO-008 | App glue and wiring | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-004, ECO-005, ECO-007, SPEC-33, SPEC-01 | no | todo |  |  |  |  |
 | ECO-009 | M3 economy content | [SPEC-50](specs/SPEC-50-economy-inventory.md) | M3 | standard | ECO-002, SPEC-72 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | c0f0c244 | 17 assets plus existing Scrap; real catalog/readback zero errors; two required checks pass; three existing quest-item warnings retained |
@@ -1068,6 +1068,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — NAR-011 boot and session composition authored — astra (gpt-6)
+
+- 19839c0e adds NarrativeBootstrap with ordered content binding and hard ContentValidationException on catalog/binding errors. Composition builds live context/world/economy owners, registers NarrativeService/ILogicContext/FactStore and FACT saving, forwards economy dependency changes, and binds session new/restore/reset lifecycle. Existing unfinished QST owner, NAR-012 event bridge and ECO-006 INVT registration retain TODO markers.
+- Source uncompiled/unaccepted; frame bridge and remaining three required cases still open. Economy facade is now composed but inventory saving remains ECO-006 and must not be described as supported until that owner exists. Spec-required: 1 authored of4, extra: 0. No Unity run this turn. Removal lifetime review224 found no concrete defects.
+- NAR-017 active245. DEV-009 sandbox diagnosis267 recommends an explicit GameSession.IsSandbox exception only on the public dev spawn path, leaving campaign and IShipSpawner validation strict; delivery37d1d116 remains pending integration. Presentation review complete/dependency wait. Previous removal turn and current composition work are progress.
 
 ### 2026-10-13 — NAR-011 persistent body removal authored — astra (gpt-6)
 
