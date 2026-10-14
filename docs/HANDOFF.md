@@ -33,7 +33,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 - Playground has seven functional areas, visible Console/entry controls and `playground reset`; direct World Play auto-enters. Real inventory/settings/trading/fleet interactions are wired. Production flight HUD and creative Lab work; four fleet/dialog editor scenarios remain open. Campaign/story/editor pads are not advertised as complete.
 - This batch accepted ENCT persistence f9c6f0d5, encounter commands a9adf708, authored formations078e8058, narrative routes aae617cd and live voxel overlays53b1466a. All focused functional checks passed; compile clean. Overlay screenshot: Logs/playtest/voxel-overlays-live.png. F1: `overlay name=bricks`, `overlay name=colliders`, `overlay name=none`.
-- Same three Sol6.1-high chats now implement DEV-014 real interaction tools, DEV-013 islands/spatial overlays and ENC-011 encounter scenarios. Missing actual dialogue/BeatService/bridge composition remains explicit for dialogue scenarios. Preserve owner QualitySettings and two untracked content metas. Exact status/evidence in LEDGER and ORCHESTRATION.
+- DLG-007 d835fa49 now supplies the actual compiled dialog/service/presenter: eleven conformance checks pass and live opening choices work (Logs/playtest/dialog-runner-live.png). Same three Sol6.1-high chats implement DLG-011 input scenarios, DEV-013 islands/spatial overlays and ENC-011 encounter scenarios; DEV-014 c4c89b91 delivered for integration. Missing actual dialogue/BeatService/bridge composition remains explicit for dialogue scenarios. Preserve owner QualitySettings and two untracked content metas. Exact status/evidence in LEDGER and ORCHESTRATION.
 
 ## 3. Next
 

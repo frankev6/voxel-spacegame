@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 2 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 26 | 15 | 0 | 0 | 141 | 0 | 182 | 6 |
+| M3 | 25 | 16 | 0 | 0 | 141 | 0 | 182 | 5 |
 | M4 | 8 | 3 | 0 | 0 | 3 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -399,7 +399,7 @@
 | DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | b1057490 | Pooled presenter and conditional composition; five direct cases pass; runner DLG-007 and authored view DLG-009 pending; spec-required: 5, extra: 0 |
 | DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | f2f3aa39 | Authored view/input/recycling; four required cases pass across batch and layout retry; spec-required: 4, extra: 0 |
 | DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
-| DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | yes | todo |  |  |  |  |
+| DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Same combat worker; four real input/presenter scenarios now unblocked by accepted DLG-007. |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Integrated fedb7e70; required direct case passes; live intro acceptance still needs DLG-007 |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
 | QST-002 | Definitions, logic compile/bind and validator rules | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | QST-001, NAR-003, NAR-004, NAR-006, NAR-009, NAR-013 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | 9ca0b84 | Real definitions, compile/bind and validation; 24 prior cases plus repaired Usage_Enforced pass; generated content compiled except separate TRV-003 owner stub. |

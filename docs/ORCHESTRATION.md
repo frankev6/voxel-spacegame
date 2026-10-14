@@ -6,7 +6,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
-| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DEV-014 | Dispatched main0dcf5555: real interaction command/probes/circle overlay | Complete actual input-path feature; no Unity |
+| Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | DLG-011 | DEV-014 c4c89b91 delivered; now four real dialog/input scenarios | DLG-007 accepted d835fa49; no Unity |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | ENC-011 | Dispatched main959819dd: integrated encounter scenarios | Real gameplay; dialogue case retains DLG-007/QST-008 dependency |
 | Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | DEV-013 | Dispatched main0dcf5555: island/spatial overlays | Additive renderer/command hunks; lead reconciles with DEV-014 |
 
@@ -61,3 +61,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - ENC-012a9adf708 and ENC-013078e8058 accepted with two focused cases each. Those two workers have genuine ready-standard dependency waits; ENC-009 worker still finishing source. Next lead DEV-012 unlocks standard overlay/interaction work; ENC-009 acceptance unlocks ENC-011.
 
 - DEV-01253b1466a accepted with three focused cases and real GPU screenshot; ENC-009aae617cd accepted with five routing cases. All three same workers now dispatched implementation: DEV-014 interaction, DEV-013 island/spatial overlays, ENC-011 actual encounter scenarios. Prior dependency waits superseded; only dialogue scenario remains genuinely dependent on DLG-007/QST-008. Lead next actual dialogue owner and remaining playground integration.
+
+- DLG-007 d835fa49 accepted: eleven conformance checks and live dialog choice/pause verified. Combat worker recycled to now-ready DLG-011; DEV-013 and ENC-011 continue. Pending compatible overlays remain for lead integration. Next frontier BeatService unlocks automatic story interactions.
