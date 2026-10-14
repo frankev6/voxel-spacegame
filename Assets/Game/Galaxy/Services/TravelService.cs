@@ -160,7 +160,16 @@ namespace Game.Galaxy.Services
         }
         void OnBodyInteracted(BodyInteracted interaction)
         {
-            // TODO(TRV-008): resolve gate interaction and publish refusal notices.
+            if (disposed || interaction.Kind != (byte)InteractionKind.LaneGate ||
+                interaction.StarSystemValue != loader.Loaded.Value || galaxy.Galaxy == null || !loader.Loaded.IsValid) return;
+            if (!TryResolveGate(interaction.BodyKey, out _, out var target))
+            {
+                GameLog.WarnOnce("TRV.Gate.NoLane", LogCategories.Travel, "The interacted gate has no lane.");
+                return;
+            }
+            var result = RequestJump(target, JumpSource.Gate);
+            if (!result.Accepted && result.Refusal != JumpRefusal.Busy)
+                EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.JumpRefused, target.Value, result.Reason));
         }
         void CommitJump()
         {
@@ -210,7 +219,36 @@ namespace Game.Galaxy.Services
             var stats = Stats; stats.JumpsAborted++; Stats = stats;
             if (!silent) EventBus<TravelNotice>.Publish(new TravelNotice(TravelNoticeKind.JumpAborted, target.Value, text));
         }
-        public bool TryGetGateInfo(ulong gateKey, out GateInfo info) => throw new NotImplementedException("TRV-008");
+        bool TryResolveGate(ulong key, out int laneIndex, out StarSystemId target)
+        {
+            laneIndex = -1; target = default;
+            var g = galaxy.Galaxy;
+            if (disposed || g == null || !loader.Loaded.IsValid || !g.TryGetIndex(loader.Loaded, out _)) return false;
+            var content = galaxy.GetContent(loader.Loaded);
+            if (!content.TryFind(key, out int index)) return false;
+            var body = content.Bodies[index];
+            if (body.Id.Role != BodyRole.LaneGate || body.LaneIndex == GalaxyConstants.NoIndex ||
+                body.LaneIndex >= g.Lanes.Length) return false;
+            var lane = g.Lanes[body.LaneIndex];
+            if (!lane.A.Equals(loader.Loaded) && !lane.B.Equals(loader.Loaded)) return false;
+            laneIndex = body.LaneIndex; target = GalaxyDef.Neighbour(lane, loader.Loaded);
+            return true;
+        }
+        public bool TryGetGateInfo(ulong gateKey, out GateInfo info)
+        {
+            info = default;
+            if (!TryResolveGate(gateKey, out int lane, out var target)) return false;
+            bool known = galaxy.State.IsKnown(target);
+            int cost = GetFuelCost(lane), held = FuelHeld;
+            info = new GateInfo {
+                LaneIndex = lane, Target = target, Known = known,
+                TargetName = known ? galaxy.GetStarSystemName(target) : "Uncharted",
+                Open = IsLaneOpen(lane), LockedMessage = GetLockedMessage(lane),
+                FuelCost = cost, FuelHeld = held, CanAfford = held < 0 || held >= cost,
+                OnRoute = TryGetNextHop(out var hop) && hop.LaneIndex == lane
+            };
+            return true;
+        }
 
         public StarSystemId Destination => throw new NotImplementedException("TRV-010");
         public RouteStatus RouteStatus => throw new NotImplementedException("TRV-010");
