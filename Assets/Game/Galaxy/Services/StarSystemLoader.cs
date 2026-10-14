@@ -13,6 +13,7 @@ using Game.Galaxy.Bodies;
 using Game.Galaxy.Components;
 using Game.Galaxy.Data;
 using Game.Galaxy.Streaming;
+using Game.Galaxy.Travel;
 using Game.Voxel.Damage;
 using Game.Voxel.Grid;
 using Game.Voxel.Model;
@@ -23,7 +24,7 @@ using Collider = Unity.Physics.Collider;
 namespace Game.Galaxy.Services
 {
     /// <summary>Owns star-system T1 lifetime; SYS-006/007 extend its voxel/belt streaming.</summary>
-    public sealed class StarSystemLoader : IGalaxyFrameTick, IGalaxyLiveDeltaSink, ISceneReady, ISceneExiting, IDisposable
+    public sealed class StarSystemLoader : ITravelLoader, IGalaxyFrameTick, IGalaxyLiveDeltaSink, ISceneReady, ISceneExiting, IDisposable
     {
         readonly GalaxyService galaxy;
         readonly DockingService docking;

@@ -11,6 +11,9 @@ using Game.Core.Components;
 using Game.Data.Services;
 using Game.Galaxy.Data;
 using Game.Galaxy.Travel;
+using Game.Simulation.Commands;
+using Game.Voxel.Damage;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -27,7 +30,7 @@ namespace Game.Galaxy.Services
         readonly IPauseService pause;
         readonly IAudioService audio;
         readonly LaneAccessTable lanes = new();
-        readonly EntityQuery worldScene;
+        readonly EntityQuery worldScene, players;
         readonly int fuelIndex;
         uint lastRefreshTick;
         bool disposed;
@@ -46,19 +49,65 @@ namespace Game.Galaxy.Services
             fuelIndex = catalog.IndexOf(Config.FuelItem);
             if (fuelIndex == 0) GameLog.WarnOnce("TRV.Fuel.NoItem", LogCategories.Travel, "Travel fuel is not in the catalog; fuel costs are not enforced.");
             worldScene = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<WorldSceneActive>());
+            players = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>());
             EventBus<StarSystemEntered>.Subscribe(OnStarSystemEntered);
         }
         public int TickOrder => 200;
         public int SceneExitOrder => 90;
-        public TravelPhase Phase => throw new NotImplementedException("TRV-006");
-        public TravelKind Kind => throw new NotImplementedException("TRV-006");
-        public StarSystemId Target => throw new NotImplementedException("TRV-006");
-        public bool CoverRequested => throw new NotImplementedException("TRV-006");
-        public ArrivalPlan LastArrival => throw new NotImplementedException("TRV-006");
-        public TravelStats Stats => throw new NotImplementedException("TRV-006");
+        public TravelPhase Phase { get; private set; }
+        public TravelKind Kind { get; private set; }
+        public StarSystemId Target { get; private set; }
+        public bool CoverRequested { get; private set; }
+        public ArrivalPlan LastArrival { get; private set; }
+        public TravelStats Stats { get; private set; }
         public TravelConfigDefinition Config { get; }
 
-        public JumpRequestResult CanJump(StarSystemId target, JumpSource source) => throw new NotImplementedException("TRV-006");
+        public JumpRequestResult CanJump(StarSystemId target, JumpSource source)
+        {
+            var g = galaxy.Galaxy;
+            if (g == null) return JumpRequestResult.Refuse(JumpRefusal.NoGalaxy, "No galaxy is loaded.");
+            if (disposed || !world.IsCreated || worldScene.IsEmptyIgnoreFilter)
+                return JumpRequestResult.Refuse(JumpRefusal.NotInWorld, "You can only travel in space.");
+            if (Phase != TravelPhase.Idle || !loader.IsReady)
+                return JumpRequestResult.Refuse(JumpRefusal.Busy, "Already travelling.");
+            if (!g.TryGetIndex(target, out _)) return JumpRequestResult.Refuse(JumpRefusal.UnknownTarget, "Unknown destination.");
+            if (target.Equals(loader.Loaded)) return JumpRequestResult.Refuse(JumpRefusal.SameStarSystem, "You are already there.");
+            Entity player = FindPlayer();
+            if (player == Entity.Null || world.EntityManager.HasComponent<Hulk>(player))
+                return JumpRequestResult.Refuse(JumpRefusal.NoPlayerShip, "Your ship cannot jump.");
+            if (docking.IsDocked && source != JumpSource.Narrative)
+                return JumpRequestResult.Refuse(JumpRefusal.Docked, "Undock first.");
+            bool hasLane = g.TryFindLane(loader.Loaded, target, out int lane);
+            if (source == JumpSource.Narrative) return JumpRequestResult.Ok();
+            if (!hasLane) return JumpRequestResult.Refuse(JumpRefusal.NoLane, "No lane leads there from here.");
+            Game.Core.Services.TryGet<ILogicContext>(out var context);
+            int gate = g.Lanes[lane].GateIndex;
+            if (gate != 0)
+            {
+                var spec = g.LaneGates[gate - 1];
+                var condition = spec.Condition;
+                bool open = condition == null || condition.IsAlwaysTrue ||
+                    !condition.HasErrors && context != null && condition.Evaluate(context);
+                if (!open) return JumpRequestResult.Refuse(JumpRefusal.LaneLocked,
+                    string.IsNullOrEmpty(spec.LockedMessage) ? "This lane is locked." : spec.LockedMessage);
+            }
+            if (source == JumpSource.Gate)
+            {
+                int cost = FuelMath.Cost(g.Lanes[lane], Config.FuelPerLy, Config.FuelMinPerJump, Config.AncientGateFuel);
+                int held = fuelIndex == 0 ? -1 : context?.Economy?.GetItemCount(fuelIndex) ?? -1;
+                if (held >= 0 && held < cost) return JumpRequestResult.Refuse(JumpRefusal.NotEnoughFuel,
+                    $"Not enough fuel: {cost} needed, {held} in the hold.");
+            }
+            return JumpRequestResult.Ok();
+        }
+        Entity FindPlayer()
+        {
+            using var entities = players.ToEntityArray(Allocator.Temp);
+            Entity selected = Entity.Null;
+            foreach (var entity in entities)
+                if (selected == Entity.Null || entity.Index < selected.Index) selected = entity;
+            return selected;
+        }
         public JumpRequestResult RequestJump(StarSystemId target, JumpSource source) => throw new NotImplementedException("TRV-006");
         public bool TryGetGateInfo(ulong gateKey, out GateInfo info) => throw new NotImplementedException("TRV-008");
 
@@ -156,7 +205,7 @@ namespace Game.Galaxy.Services
         {
             if (disposed) return;
             disposed = true; EventBus<StarSystemEntered>.Unsubscribe(OnStarSystemEntered); lanes.Dispose();
-            if (world.IsCreated) worldScene.Dispose();
+            if (world.IsCreated) { worldScene.Dispose(); players.Dispose(); }
             // TRV-006 owns any later execution resources, pause token and control lock.
         }
     }
