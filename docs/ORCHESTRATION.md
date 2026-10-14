@@ -9,7 +9,7 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | dependency wait | NAR-016 accepted: focused tests and actual 225-file raw-byte stability pass; waiting ready narrative work | narrative follow-ups |
 | Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | DEV-009 | Dispatched from claim5f510f02; world commands/probes, no Unity | narrative follow-ups |
 
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | SYS-007 integration review | Bounded review of793cb5e1 job limits, retirement, destruction and identities dispatched | HUD-003/006/007 once ready |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | dependency wait | Review220 complete, no runtime findings; belt acceptance batch active on lead | HUD-003/006/007 once ready |
 
 ## Operating rules
 
@@ -20,6 +20,8 @@ Revised native goal is active. Heartbeat `spaceship-implementation-coordinator` 
 All three workers received Frank's fast-fixture correction: shorten incidental combat setup with fixture-only health/damage/cadence/distance changes, preserve required outcomes and production balance, use bounded fixed ticks and batch focused checks after implementation. No routine performance/soak runs. Budget test wall time as well as simulation time: use the smallest fixture and direct ticks that prove the requirement, avoid real-time combat waits, and run focused checks once per compatible implementation batch. Keep functional assertions intact; production balance is independent of fixture acceleration.
 
 ## Current lead state
+
+- **Belt acceptance batch active:**96127285 adds exactly four small belt cases (deterministic descriptors/shape hashes, actual depletion event/no return, bubble retirement, deferred job pipeline). Compile98274 terminal0, zero CS warnings after fixing one missing fixture import; PlayMode61443 runs4 belt+5 affected T2 cases. Poll that exact handle before further Unity/source changes. Presentation review220 found no runtime defects; DEV-009 active259; combat/presentation genuine dependency waits. Previous turn connected the runtime pipeline (progress).
 
 - **Belt runtime connected:**793cb5e1 wires bounded sector/shape jobs, ordered spawns, destruction filtering and delayed retirement into StarSystemLoader. T2 returns its spawn count; T3 uses remaining per-frame budget and requires a real player. Ordinary retirement polls jobs; system shutdown joins before release. Still uncompiled/unaccepted; next four required cases plus bounded presentation integration review, then one focused validation batch. No Unity active. DEV-009 active257; combat dependency wait; presentation review dispatched. Previous turn authored asteroid source ownership (progress).
 

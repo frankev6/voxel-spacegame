@@ -1067,6 +1067,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — SYS-007 focused belt acceptance authored and compiled — astra (gpt-6)
+
+-96127285 adds the four specified cases using two half-metre asteroids and direct ECS updates: deterministic sector descriptors plus structure hashes; depletion through real body watch/loader and no respawn; sector-centre unload bound; deferred descriptor→shape→grid pipeline. Two-second real-time bounds only guard async completion; no combat/soak waits. Spec-required: 4, extra: 0.
+- Compile28409 found a missing PlayerShip namespace in the test; repaired. Compile98274 terminal0, zero CS warnings (Logs/playtest/belt-streaming/compile.log). PlayMode61443 active with4 belt+5 T2 cases; poll same handle before further Unity/source changes. No acceptance claim yet.
+- Presentation review220 found no concrete defects in job accounting, shared budget, identity reservation or retirement/shutdown. DEV-009 active259, other workers genuine dependency waits. Previous turn connected the runtime pipeline (progress).
+
 ### 2026-10-13 — SYS-007 belt runtime connected — astra (gpt-6)
 
 -793cb5e1 adds BeltStreamer with canonical sorted sector keys, bounded outstanding sector/shape work, persistent descriptor ownership, destroyed-key filtering after deterministic draws and again before spawn, delayed nonblocking ordinary retirement, and explicit shutdown joins. Loader owns both streamers, shared spawn budget (T2 first), body destruction events and refresh/exit retirement. T3 skips initial entry until a real player exists. Added specified T2/T3 profiler markers; no tuning passes.
