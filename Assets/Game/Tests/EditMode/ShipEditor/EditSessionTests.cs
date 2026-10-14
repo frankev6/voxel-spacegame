@@ -53,7 +53,7 @@ namespace Game.Tests.EditMode.ShipEditor
             for (int i = 0; i < 100; i++)
             {
                 using var batch = Add(f.Hull, new int3(i, 0, 0));
-                var op = batch.Ops[0]; op.Record.Color = (byte)random.NextInt(16); batch.Ops[0] = op;
+                var ops = batch.Ops; var op = ops[0]; op.Record.Color = (byte)random.NextInt(16); ops[0] = op;
                 Assert.IsTrue(session.TryApply(batch, AtomicityMode.AllOrNothing, 0, ToolId.Place, "place", new ApplyReport()));
                 Assert.AreEqual(original, new DraftReader(session.Original, f.Context).ComputeDraftHash());
             }
