@@ -4,6 +4,7 @@ using Game.Galaxy.Bodies;
 using Game.Galaxy.Components;
 using Game.Galaxy.Data;
 using Game.Galaxy.Interaction;
+using Game.Galaxy.Services;
 using Game.Simulation.Spatial;
 using Game.Voxel.PhysicsBody;
 using Unity.Collections;
@@ -18,7 +19,8 @@ namespace Game.Galaxy.Streaming
     internal static class AnchorBuilder
     {
         internal static void Create(World world, GalaxyDef galaxy, StarSystemContent content, StarSystemDelta delta, double time, double3 origin,
-            Dictionary<ulong, LoadedBody> loaded, Dictionary<float, BlobAssetReference<Collider>> colliders)
+            Dictionary<ulong, LoadedBody> loaded, Dictionary<float, BlobAssetReference<Collider>> colliders,
+            ICelestialVisualFactory visuals = null)
         {
             var em = world.EntityManager; em.CompleteAllTrackedJobs();
             var groups = new SortedDictionary<int, List<BodySpec>>();
@@ -66,10 +68,20 @@ namespace Game.Galaxy.Streaming
                             TemplateIndex = spec.TemplateIndex, DistanceM = template.InteractionDistanceM, Body = spec.Id });
                         loaded.Add(spec.Id.LocalKey, new LoadedBody { Anchor = entity, StructureHandle = -1,
                             WantsGrid = (byte)(template.StructureSource != StructureSource.None ? 1 : 0) });
+                        if (visuals != null && (spec.State & BodyStateFlags.Destroyed) == 0)
+                        {
+                            var child = visuals.Create(entity, template.Visual, spec.RadiusM);
+                            if (child != Entity.Null)
+                            {
+                                // Link before subsequent work so error cleanup owns every returned child.
+                                all.Add(child);
+                                var body = em.GetComponentData<StarSystemBody>(entity); body.Visual = child;
+                                em.SetComponentData(entity, body);
+                            }
+                        }
                     }
                 }
                 em.AddSharedComponent(all.AsArray(), new StarSystemMember { Id = content.Id });
-                // TODO(SYS-012): registered visual children join this T1 batch; no synthetic meshes or second rendering owner.
             }
             catch
             {

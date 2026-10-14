@@ -28,6 +28,7 @@ namespace Game.Galaxy.Services
     {
         readonly GalaxyService galaxy;
         readonly DockingService docking;
+        readonly ICelestialVisualFactory visuals;
         readonly World world;
         readonly VoxelStructureRegistry registry;
         readonly StarSystemSpawnHook hook = new();
@@ -51,10 +52,12 @@ namespace Game.Galaxy.Services
         uint originSerial;
         bool disposed, anchorsDirty;
         public StarSystemLoader(GalaxyService galaxy, World world, VoxelStructureRegistry registry,
-            BlueprintLibrary blueprints, IPersistentIdAllocator ids, ContentCatalog catalog, DockingService docking = null)
+            BlueprintLibrary blueprints, IPersistentIdAllocator ids, ContentCatalog catalog, DockingService docking = null,
+            ICelestialVisualFactory visuals = null)
         {
             this.galaxy = galaxy ?? throw new ArgumentNullException(nameof(galaxy));
             this.docking = docking ?? new DockingService();
+            this.visuals = visuals;
             this.world = world ?? throw new ArgumentNullException(nameof(world));
             this.registry = registry != null ? registry : throw new ArgumentNullException(nameof(registry));
             if (blueprints == null || ids == null || catalog == null) throw new ArgumentNullException("Loader dependencies");
@@ -157,7 +160,7 @@ namespace Game.Galaxy.Services
                 try
                 {
                     var content = galaxy.GetContent(Loaded);
-                    AnchorBuilder.Create(world, galaxy.Galaxy, content, galaxy.State.GetOrCreateDelta(content.Id), ctx.UniversalTime, origin.OriginInStarSystem, bodies, colliders);
+                    AnchorBuilder.Create(world, galaxy.Galaxy, content, galaxy.State.GetOrCreateDelta(content.Id), ctx.UniversalTime, origin.OriginInStarSystem, bodies, colliders, visuals);
                     var delta = galaxy.State.GetOrCreateDelta(Loaded); delta.IncrementVisit(); galaxy.MarkVisited(Loaded);
                     galaxy.State.CurrentStarSystem = Loaded;
                     info.SetSingleton(new CurrentStarSystemInfo { Id = Loaded, Loaded = 1, BodyCount = checked((ushort)bodies.Count) });
@@ -179,6 +182,7 @@ namespace Game.Galaxy.Services
         public void PrepareBodyRemoval(BodyId body)
         {
             CheckAlive(); world.EntityManager.CompleteAllTrackedJobs();
+            if (body.System.Equals(Loaded) && bodies.TryGetValue(body.LocalKey, out var loaded)) DestroyVisual(loaded.Anchor);
             t2?.DiscardBody(body);
             foreach (var old in retiring) old.DiscardBody(body);
         }
@@ -187,10 +191,11 @@ namespace Game.Galaxy.Services
         void RefreshAnchors(double time)
         {
             FlushStructures(); RetireStreaming(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            DestroyVisuals();
             foreach (var body in bodies.Values) if (em.Exists(body.Anchor)) em.DestroyEntity(body.Anchor);
             bodies.Clear(); RetireColliders();
             AnchorBuilder.Create(world, galaxy.Galaxy, galaxy.GetContent(Loaded), galaxy.State.GetOrCreateDelta(Loaded), time,
-                origins.GetSingleton<FrameOrigin>().OriginInStarSystem, bodies, colliders);
+                origins.GetSingleton<FrameOrigin>().OriginInStarSystem, bodies, colliders, visuals);
             info.SetSingleton(new CurrentStarSystemInfo { Id = Loaded, Loaded = 1, BodyCount = checked((ushort)bodies.Count) });
             anchorsDirty = false;
             if (docking.IsDocked && !docking.HasPendingRestore && !IsRestoredDockAvailable(docking.DockedBody)) docking.Undock();
@@ -200,6 +205,26 @@ namespace Game.Galaxy.Services
             if (!world.IsCreated || worldActive.IsEmptyIgnoreFilter) return;
             world.EntityManager.CompleteAllTrackedJobs();
             t2?.Flush(); foreach (var old in retiring) old.Flush();
+        }
+        void DestroyVisual(Entity anchor)
+        {
+            var em = world.EntityManager;
+            if (!em.Exists(anchor) || !em.HasComponent<StarSystemBody>(anchor)) return;
+            var body = em.GetComponentData<StarSystemBody>(anchor);
+            if (em.Exists(body.Visual)) em.DestroyEntity(body.Visual);
+            body.Visual = Entity.Null; em.SetComponentData(anchor, body);
+        }
+        void DestroyVisuals()
+        {
+            var em = world.EntityManager;
+            using var children = new NativeList<Entity>(Allocator.Temp);
+            foreach (var loaded in bodies.Values)
+                if (em.Exists(loaded.Anchor) && em.HasComponent<StarSystemBody>(loaded.Anchor))
+                {
+                    var child = em.GetComponentData<StarSystemBody>(loaded.Anchor).Visual;
+                    if (em.Exists(child)) children.Add(child);
+                }
+            if (children.Length > 0) em.DestroyEntity(children.AsArray());
         }
         void OnSessionReset(SessionReset value)
         {
@@ -239,6 +264,7 @@ namespace Game.Galaxy.Services
             if (!world.IsCreated) return;
             State = LoaderState.Unloading; var em = world.EntityManager;
             FlushStructures(); RetireStreaming(); em.CompleteAllTrackedJobs();
+            DestroyVisuals();
             if (Loaded.IsValid)
             {
                 // Adopt last-frame pieces before destroying the system's members.
