@@ -622,6 +622,19 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [ ] The test passes on main and fails when a test file removes the `#if` from one DevRuntime file.
 - **Tests:** `DevReleaseStripTests.ReleaseScripts_ContainNoDevRuntime`, `DevReleaseStripTests.ReleaseScripts_NoDevToolsAssembly`.
 
+### DEV-021 — Interactive development playground
+- **Milestone:** M3
+- **Tier:** standard — composes existing dev commands and canonical session flow
+- **Depends on:** `DEV-008`, `DEV-009`, `DEV-010`, `DEV-017`, `FND-021`
+- **Do:** Owner-requested quiet World playground with labeled spatial interaction pads, opt-in stationary target and hostile fighter trials, flight, cargo/credits, facts/diagnostics and a real campaign entry. F1 `playground` enters; `playground reset` recreates the isolated session through normal cleanup. F activates the nearby pad; `playground goto=<id>` relocates to a pad for accessibility and quick testing. Show unfinished feature entry points honestly.
+- **Files:** `Assets/Game/App/DevRuntime/Playground/DevPlayground.cs`, `Assets/Game/App/DevRuntime/Commands/PlaygroundDevCommand.cs`, existing host/registry, `Assets/Game/Tests/PlayMode/App/PlaygroundTests.cs`, `tools/playtest/README.md`
+- **Acceptance criteria:**
+  - [ ] Entry isolates the sandbox profile, preserves any prior campaign with its normal exit-save, and spawns no hostile until interaction.
+  - [ ] Labeled pads invoke real APIs; activation requires proximity and flight context. Combat can be activated once per reset; no accidental growing enemy wave.
+  - [ ] Reset rebuilds player/station and clears session entities, pad activation state, inventory and facts through scene/session owners. Reset is a command, never a UI button.
+  - [ ] Normal World behavior is unchanged; temporary presentation cleans up on session exit; release builds exclude the playground.
+- **Tests:** `PlaygroundTests.Enter_Interact_Reset` (one owner-feature functional test; direct operations, no combat soak).
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
