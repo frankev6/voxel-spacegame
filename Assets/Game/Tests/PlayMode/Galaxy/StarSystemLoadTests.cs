@@ -53,7 +53,7 @@ namespace Game.Tests.PlayMode.Galaxy
             internal BodySpec Station;
             internal Entity Player;
             internal static SceneReadyContext Entry => new(GameScene.World, SceneEntryReason.NewGame, default);
-            internal Fixture(bool streaming = false, int persistLimit = 64)
+            internal Fixture(bool streaming = false, int persistLimit = 64, DockingService docking = null)
             {
                 var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>("Assets/Game/Content/ContentDatabase.asset");
                 var report = new ValidationReport("Loader fixture");
@@ -128,7 +128,7 @@ namespace Game.Tests.PlayMode.Galaxy
                     content.Bodies.Clear(); content.Bodies.Add(Station);
                     State.PlayerLocation = new PlayerLocation { StarSystem = State.CurrentStarSystem, PositionM = double3.zero };
                 }
-                Loader = new StarSystemLoader(Galaxy, World, Registry, blueprints, new Ids(), catalog);
+                Loader = new StarSystemLoader(Galaxy, World, Registry, blueprints, new Ids(), catalog, docking);
             }
             internal void Load()
             {

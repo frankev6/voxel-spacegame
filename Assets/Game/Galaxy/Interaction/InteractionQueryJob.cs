@@ -46,7 +46,8 @@ namespace Game.Galaxy.Interaction
                     int proxy = Spatial.FindIndex(Player);
                     if (proxy >= 0) { var value = Spatial.Get(proxy); center = value.Center; radius = value.HullRadius; }
                     using var hits = new NativeList<DistanceHit>(Allocator.Temp);
-                    var collector = new AllHitsCollector<DistanceHit>(QueryRadius + radius, hits);
+                    var hitStorage = hits;
+                    var collector = new AllHitsCollector<DistanceHit>(QueryRadius + radius, ref hitStorage);
                     Physics.CalculateDistance(new PointDistanceInput { Position = center, MaxDistance = QueryRadius + radius,
                         Filter = PhysicsLayers.InteractionQuery }, ref collector);
                     for (int i = 0; i < hits.Length; i++)
