@@ -1101,6 +1101,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — TRV-006 ordered eligibility authored — astra (gpt-6)
+
+- Claimed bb5a9a17 after explicit completed dependency resolution (SPEC-32 Q19/global396). 28dd59c5 implements ordered pure CanJump checks without watcher rebuild, narrative undock or fuel mutation; selects the lowest player entity index and connects the existing StarSystemLoader to ITravelLoader. Properties now expose idle state rather than throw. RequestJump and execution remain explicit unfinished TRV-006 work.
+- Uncompiled/unaccepted. Next acceptance, spool/commit/transit/arrival/abort, lock/pause/fuel/FX, boot wiring and required fixtures. spec-required: 8 functional planned, extra: 0; advisory idle measurement remains opt-in. No Unity launched. All three recorded worker states inspected: two scoped source reviews active, dialog view active. Previous compatible integration and current runtime source are progress.
+
 ### 2026-10-13 — SYS-012 / DLG-012 source integrated — astra (gpt-6)
 
 - SYS-012 c1acaa03 adds two real-loader generation/GLXY-PLOC regression cases using bounded direct ticks; spec-required: 2, extra: 0. DLG-012 fedb7e70 adds JSON inspection and real presenter option selection, with internal read-only owner diagnostics; spec-required: 1, extra: 0. Both remain in-progress, uncompiled/unaccepted pending one compatible batch with the authored dialog view.

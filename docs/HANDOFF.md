@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Travel eligibility authored:** TRV-006 claimed bb5a9a17; 28dd59c5 adds ordered read-only jump refusals, lowest-index player selection and the existing loader interface. Uncompiled/unaccepted; RequestJump/timeline, lock/pause/fuel/FX, boot wiring and eight required functional cases remain next. SYS-012/DLG-012 source awaits compatible validation; DLG-009 worker active. No Unity active.
+
 - **Compatible deliveries integrated:** SYS-012 c1acaa03 and DLG-012 fedb7e70 are on local main, uncompiled/unaccepted pending focused batch with DLG-009. Combat reviews actual travel seams; economy reviews loader regressions; presentation implements the view. Next lead TRV-006 dependency resolution/timeline. No Unity active.
 
 - **Star-system jump integration accepted:** SYS-01305b87f54 compile clean, three real origin/loader cases pass. Player arrives at requested pose, source entities/debris retire, and entry is emitted once. SYS-012 regression and DLG-009/012 workers active. Next travel timeline integration and compatible deliveries. No Unity active.
