@@ -151,7 +151,8 @@ namespace Game.App.Boot
             var galaxyTicker = new GalaxyFrameTicker(); Register(galaxyTicker);
             var campaignGalaxy = Push(new GalaxyService(Content.Catalog, Session.Galaxy, world, galaxyTicker));
             Register(campaignGalaxy); Session.BindGalaxy(campaignGalaxy);
-            var territory = new TerritoryService(campaignGalaxy, factions, Content.Catalog);
+            // ENC-014 owns entry/reset subscriptions; dispose it before its galaxy/faction dependencies.
+            var territory = Push(new TerritoryService(campaignGalaxy, factions, Content.Catalog));
             Register(territory); Register<IStarSystemOwnership>(territory); galaxyTicker.Register(territory);
             Save.Register(new GalaxySaveParticipant(Session.Galaxy, Content.Catalog));
             var docking = new DockingService(); Register(docking);
