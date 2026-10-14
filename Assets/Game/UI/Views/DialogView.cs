@@ -23,7 +23,8 @@ namespace Game.UI.Views
         public override bool BlocksWorldPointer => true;
         public override bool HidesHud => true;
         public override bool IsRoot => false;
-        // TODO(HUD-013): wire this screen's authored elements and behavior.
+        public override bool OnBack() => commands.Back();
+        // TODO(DLG-009): wire authored elements, synthetic UXML labels and Dialog input actions.
         protected override void OnBuild() { }
     }
 }

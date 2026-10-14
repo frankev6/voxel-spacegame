@@ -43,6 +43,7 @@ namespace Game.Presentation.Systems
             int hostiles = combat.IsEmptyIgnoreFilter ? 0 : combat.GetSingleton<PlayerCombatStatus>().HostilesEngaging;
             narrative.SetPlayerFree(!modal && !screen && dialogFree && idle && !players.IsEmptyIgnoreFilter && hostiles == 0);
             narrative.Tick();
+            if (Game.Core.Services.TryGet<Game.Presentation.Bridges.DialogPresenter>(out var presenter)) presenter.Tick();
         }
     }
 }

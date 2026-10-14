@@ -21,6 +21,7 @@ namespace Game.App.Presenters
         MainMenuPresenter menuPresenter;
         PausePresenter pausePresenter;
         bool rootsBound, disposed;
+        internal Game.Presentation.Bridges.DialogPresenter DialogPresenter { get; private set; }
         internal MainMenuViewModel MainMenuModel { get; } = new MainMenuViewModel();
         internal SaveSlotsViewModel SaveSlotsModel { get; } = new SaveSlotsViewModel();
         internal SettingsViewModel SettingsModel { get; } = new SettingsViewModel();
@@ -63,6 +64,13 @@ namespace Game.App.Presenters
         public UIScreen Loading { get; }
 
         internal void ShowSettings() => settingsPresenter.Show();
+
+        internal void BindDialog(Game.Narrative.Dialog.DialogService service, Game.Data.Services.ContentCatalog content, IUISoundSink sound)
+        {
+            CheckAlive();
+            if (DialogPresenter != null) throw new InvalidOperationException("Dialog presenter is already installed.");
+            DialogPresenter = new Game.Presentation.Bridges.DialogPresenter(service, content, DialogModel, ui.Navigator, sound);
+        }
 
         internal void ShowSaveSlots(SaveSlotsMode mode) => saveSlotsPresenter.Show(mode);
 
@@ -123,6 +131,7 @@ namespace Game.App.Presenters
             if (disposed) return;
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
+            DialogPresenter?.Dispose();
             loadingPresenter.Dispose();
             saveSlotsPresenter.Dispose();
             settingsPresenter.Dispose();

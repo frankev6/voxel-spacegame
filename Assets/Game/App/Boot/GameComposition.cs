@@ -207,6 +207,13 @@ namespace Game.App.Boot
             // 10. App-lifetime UI models and implemented presenter bindings (HUD-002).
             Screens = Push(new UiComposition(UI));
             Register(Screens);
+            // DLG-007 installs the actual runner/service before this point; DLG-009 owns the authored view.
+            if (Game.Core.Services.TryGet<Game.Narrative.Dialog.DialogService>(out var dialog))
+            {
+                Screens.BindDialog(dialog, Content.Catalog, new AppUiSoundSink(Audio, config.UiConfig));
+                Register(Screens.DialogPresenter);
+            }
+            // TODO(DLG-007): construct/register the production DialogService; do not use a substitute runner.
             // TODO(HUD-002): install real destination/editor bindings and replace the M1 adapter before SetRootScreens.
             Step("10 ui composition");
 
