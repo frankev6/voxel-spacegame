@@ -116,13 +116,17 @@ Shader "Game/Voxel/PropInstanced"
             o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=a.uv; o.paint=a.paint; o.blink=a.blink.x;
             return o;
         }
-        half4 PropFrag(PropVaryings v):SV_Target
+        void DraftSliceClip(PropVaryings v)
         {
-            UNITY_SETUP_INSTANCE_ID(v); UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(v);
 #if !defined(UNITY_PROCEDURAL_INSTANCING_ENABLED)
             if (_DraftSliceEnabled > .5)
                 clip(_DraftSliceTop - mul(_DraftWorldToCells, float4(v.positionWS, 1)).y);
 #endif
+        }
+        half4 PropFrag(PropVaryings v):SV_Target
+        {
+            UNITY_SETUP_INSTANCE_ID(v); UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(v);
+            DraftSliceClip(v);
             half dissolve=BrickDissolve(v.uv);
             half3 albedo=SAMPLE_TEXTURE2D(_PropAlbedo,sampler_PropAlbedo,v.uv).rgb;
             half4 mask=SAMPLE_TEXTURE2D(_PropMask,sampler_PropMask,v.uv);
@@ -168,10 +172,10 @@ Shader "Game/Voxel/PropInstanced"
             o.positionCS=ApplyShadowClamping(TransformWorldToHClip(ApplyShadowBias(o.positionWS,o.normalWS,direction)));
             return o;
         }
-        half4 PropDepthFrag(PropVaryings v):SV_Target { UNITY_SETUP_INSTANCE_ID(v); BrickDissolve(v.uv); return 0; }
+        half4 PropDepthFrag(PropVaryings v):SV_Target { UNITY_SETUP_INSTANCE_ID(v); DraftSliceClip(v); BrickDissolve(v.uv); return 0; }
         half4 PropNormalsFrag(PropVaryings v):SV_Target
         {
-            UNITY_SETUP_INSTANCE_ID(v); BrickDissolve(v.uv);
+            UNITY_SETUP_INSTANCE_ID(v); DraftSliceClip(v); BrickDissolve(v.uv);
             half2 xy=SAMPLE_TEXTURE2D(_PropNormal,sampler_PropNormal,v.uv).rg*2-1;
             float3 n=normalize(xy.x*v.tangentWS+xy.y*v.bitangentWS+sqrt(saturate(1-dot(xy,xy)))*v.normalWS);
 #if defined(_GBUFFER_NORMALS_OCT)

@@ -28,8 +28,8 @@ MonoBehaviour:
   PreviewOutlineThreshold: 4096
   PresenterRefreshSeconds: 0.1
   MaxPickSteps: 4096
-  BrickMaterial: {fileID: 0}
-  BrickXRayMaterial: {fileID: 0}
+  BrickMaterial: {fileID: 2100000, guid: 8a9cb611ab59423782f8267899e1fdc2, type: 2}
+  BrickXRayMaterial: {fileID: 2100000, guid: 321688d17cb048a7998133111e9897f3, type: 2}
   OverlayMaterial: {fileID: 0}
   ValidColor: {r: 0.239215686, g: 0.839215686, b: 0.639215686, a: 1}
   InvalidColor: {r: 1.000000000, g: 0.360784314, b: 0.478431373, a: 1}
