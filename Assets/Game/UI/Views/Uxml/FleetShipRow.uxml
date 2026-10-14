@@ -4,6 +4,6 @@
             <ui:Label name="fleet-ship-name" class="text-m text-ellipsis fleet-row-name" picking-mode="Ignore" />
             <ui:Label name="fleet-ship-active" text="Active" class="text-xs text-muted fleet-active-tag" picking-mode="Ignore" />
         </ui:VisualElement>
-        <controls:Meter name="fleet-ship-hull" caption="Hull" show-numbers="false" variant="health" class="fleet-row-hull" />
+        <controls:Meter name="fleet-ship-hull" caption="Hull" show-numbers="false" variant="hull" class="fleet-row-hull" />
     </ui:VisualElement>
 </ui:UXML>

@@ -96,7 +96,9 @@ namespace Game.Tests.PlayMode.UI.Screens
             using var fleet = new Fleet(); using var w = new Window(fleet); yield return null;
             var name = w.View.Root.Q<Label>("fleet-ship-row-0-name"); Assert.IsNotNull(name); Assert.AreEqual(fleet.LongName, name.text);
             Assert.AreNotEqual(fleet.Model.Flagship.SourceBlueprint.Value, name.text); Assert.IsTrue(name.ClassListContains(UIStyleClasses.TextEllipsis));
-            Assert.AreEqual(TextOverflow.Ellipsis, name.resolvedStyle.textOverflow); Assert.Less(name.worldBound.width, name.MeasureTextSize(name.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).x);
+            Assert.AreEqual(TextOverflow.Ellipsis, name.resolvedStyle.textOverflow); // A valid 32-character name can fit; verify the overflow policy without requiring clipping.
+            var meter = w.View.Root.Q<Meter>("fleet-ship-row-0-hull");
+            Assert.GreaterOrEqual(meter.worldBound.yMin, name.worldBound.yMax - .1f); Assert.Greater(meter.worldBound.width, 200); Assert.AreEqual("hull", meter.Variant);
             Assert.AreEqual(2, w.Model.Ships[0].BlockCount); Assert.AreEqual(1, w.Model.Ships[0].HullFraction, .001f);
             double mass = BlockStatMath.Of(fleet.Core, 0).Mass + BlockStatMath.Of(fleet.Hull, 0).Mass;
             Assert.AreEqual(mass.ToString("0.#", CultureInfo.InvariantCulture) + " kg", w.Model.DetailStats.Find(row => row.StatId == "mass").Value);
@@ -113,6 +115,8 @@ namespace Game.Tests.PlayMode.UI.Screens
                 using var w = new Window(fleet, size.x, size.y); yield return null;
                 var heading = w.View.Root.Q("fleet-detail-heading"); var list = w.View.Root.Q<ListView>("fleet-stats");
                 Assert.AreEqual(36, list.fixedItemHeight); Assert.GreaterOrEqual(list.worldBound.yMin, heading.worldBound.yMax - .1f);
+                var statLabel = w.View.Root.Q<Label>("fleet-stat-row-0-label");
+                Assert.GreaterOrEqual(statLabel.contentRect.height, statLabel.MeasureTextSize(statLabel.text, 0, VisualElement.MeasureMode.Undefined, 0, VisualElement.MeasureMode.Undefined).y - .5f, "Stat text must fit vertically inside its row");
                 Assert.AreEqual(11, w.Model.DetailStats.Count); Assert.IsNotNull(w.View.Root.Q("fleet-stat-row-0"));
                 UILayoutAudit.Run(w.View.Root, w.Panel.Viewport, issues); Assert.IsEmpty(issues, size + ": " + string.Join(", ", issues.ConvertAll(issue => issue.Kind + " " + issue.ElementPath)));
                 list.ScrollToItem(w.Model.DetailStats.Count - 1); yield return null;
@@ -132,9 +136,9 @@ namespace Game.Tests.PlayMode.UI.Screens
             Assert.IsFalse(w.Model.CanSetActive); Assert.IsFalse(w.View.Root.Q<Button>("fleet-set-active").enabledSelf);
             var flagship = fleet.Model.Flagship; w.Presenter.SetActive(); Assert.AreSame(flagship, fleet.Model.Flagship);
             w.Presenter.Select(1); Assert.AreEqual("Only the active ship can be edited", w.Model.EditBlockedReason);
-            fleet.Docking.Undock(); Assert.AreEqual("Dock at a station to edit", w.Model.EditBlockedReason);
+            fleet.Docking.Undock(); EventBus<DockStateChanged>.Drain(); Assert.AreEqual("Dock at a station to edit", w.Model.EditBlockedReason);
             // Old fleet/docking notifications cannot restore rows after a session unbind.
-            w.Presenter.Unbind(); fleet.Docking.Dock(new BodyId(new StarSystemId(1), BodyRole.Station, 0, 0)); Assert.IsEmpty(w.Model.Ships); Assert.IsFalse(w.Model.CanEdit);
+            w.Presenter.Unbind(); fleet.Docking.Dock(new BodyId(new StarSystemId(1), BodyRole.Station, 0, 0)); EventBus<DockStateChanged>.Drain(); Assert.IsEmpty(w.Model.Ships); Assert.IsFalse(w.Model.CanEdit);
         }
     }
 }

@@ -47,6 +47,11 @@ namespace Game.Tests.PlayMode.App
             Assert.NotNull(Services.Get<EconomyService>().Merchants.Current);
             ui.Navigator.Pop(ui.Navigator.Get<MerchantView>());
             Assert.IsNull(Services.Get<EconomyService>().Merchants.Current);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=fleet", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.IsTrue(ui.Navigator.Get<FleetView>().IsOpen, "Fleet trial must open the real fleet screen");
+            Assert.Greater(Services.Get<Game.App.Session.GameSession>().Fleet.Ships.Count, 0);
+            ui.Navigator.Pop(ui.Navigator.Get<FleetView>());
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=combat", Host.Context).Kind);
             yield return RunCommand("playground activate");
             EM.CompleteAllTrackedJobs();

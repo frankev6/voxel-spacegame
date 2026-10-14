@@ -150,6 +150,8 @@ namespace Game.App.Boot
             var galaxyTicker = new GalaxyFrameTicker(); Register(galaxyTicker);
             var campaignGalaxy = Push(new GalaxyService(Content.Catalog, Session.Galaxy, world, galaxyTicker));
             Register(campaignGalaxy); Session.BindGalaxy(campaignGalaxy);
+            var territory = new TerritoryService(campaignGalaxy, factions, Content.Catalog);
+            Register(territory); Register<IStarSystemOwnership>(territory); galaxyTicker.Register(territory);
             Save.Register(new GalaxySaveParticipant(Session.Galaxy, Content.Catalog));
             var docking = new DockingService(); Register(docking);
             var celestialVisuals = world.GetOrCreateSystemManaged<Game.Presentation.World.CelestialVisualSystem>();
@@ -177,7 +179,7 @@ namespace Game.App.Boot
             }
             // SPEC-30 permits absent lane/ownership services until their implementations are composed.
             // TODO(TRV-006/ENC-007): pass their actual interfaces here when those services are installed above.
-            Register(new GalaxyMapModel(campaignGalaxy, travel, null));
+            Register(new GalaxyMapModel(campaignGalaxy, travel, territory));
             // Remaining travel/faction/economy/narrative bindings follow SPEC-01 §5.2.
 
             // 9. Persistent UI document and root (UI-003). Navigation owns pause/context (UI-004).

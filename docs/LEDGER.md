@@ -1047,6 +1047,9 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 445 | SPEC-61 Q41: pause-screen concrete prerequisites | Resolved under ADR-0072: completed UI/pause/session contracts unblock implementation; lead retains root wiring. | Tech lead |
 | 446 | SPEC-61 Q42: main-menu concrete prerequisites | Resolved under ADR-0072: completed UI/save/flow contracts unblock complete menu/prompt; lead retains root wiring. | Tech lead |
 | 447 | SPEC-51 Q51: full validation and removal contract | Resolved: ADR-0095 session action, surviving-cell ownership, throttled display/immediate commit validation; four omitted issue-kind cases follow explicit acceptance (11 required). | Tech lead |
+| 448 | SPEC-33 Q27: authored territory generation cache | Resolved: canonical authored ownership; rebuild at construction/tick/query when generation changes, clear when galaxy disappears; production IStarSystemOwnership/map/ticker registration. | Tech lead |
+| 449 | SPEC-61 Q37: fleet projection and unavailable actions | Resolved: real committed fleet/stat/docking owners, pooled rows and explicit missing launcher/switch reasons. Registered with session rebind and playground fleet trigger. | Tech lead |
+| 450 | SPEC-61 Q38: dialog host and existing story-page compatibility | Resolved: preserve SPEC-41 page/overflow hooks, prebuild nine rows, numbered commands and scroll reset, separate portrait; actual story runner remains DLG-007. | Tech lead |
 
 ## Measurements
 

@@ -7,12 +7,12 @@
 .fleet-detail { flex-grow: 1; flex-basis: 0; min-width: 0; margin-left: var(--space-4); }
 .fleet-detail-heading { flex-shrink: 0; margin-bottom: var(--space-3); }
 .fleet-detail-name, .fleet-detail-class { min-width: 0; }
-.fleet-row { height: 88px; justify-content: center; padding: var(--space-2); }
+.fleet-row.list__item { height: 88px; flex-direction: column; align-items: stretch; justify-content: center; padding: var(--space-2); }
 .fleet-row-heading { flex-direction: row; align-items: center; }
 .fleet-row-name { flex-grow: 1; min-width: 0; }
 .fleet-active-tag { flex-shrink: 0; margin-left: var(--space-2); }
 .fleet-row-hull { margin-top: var(--space-2); }
-.fleet-stat-row { height: 36px; flex-direction: row; align-items: center; padding: var(--space-2); }
+.fleet-stat-row { height: 36px; flex-direction: row; align-items: center; padding: 0 var(--space-2); }
 .fleet-stat-label { flex-grow: 1; min-width: 0; }
 .fleet-stat-value { width: 140px; flex-shrink: 0; -unity-text-align: middle-right; }
 .fleet-edit-reason { flex-grow: 1; min-width: 0; white-space: normal; }

@@ -18,6 +18,7 @@ namespace Game.App.Presenters
         readonly LoadingPresenter loadingPresenter;
         readonly SaveSlotsPresenter saveSlotsPresenter;
         readonly SettingsPresenter settingsPresenter;
+        readonly FleetPresenter fleetPresenter;
         readonly Game.Presentation.Presenters.InventoryPresenter inventoryPresenter;
         readonly Game.Presentation.Presenters.MerchantPresenter merchantPresenter;
         MainMenuPresenter menuPresenter;
@@ -66,12 +67,19 @@ namespace Game.App.Presenters
             ui.Register(new MerchantView(MerchantModel, merchantPresenter));
             merchantPresenter.Bind();
             Game.Core.Services.Register(merchantPresenter);
+            var session = Game.Core.Services.Get<Game.App.Session.GameSession>();
+            var docking = Game.Core.Services.Get<Game.Galaxy.Services.DockingService>();
+            fleetPresenter = new FleetPresenter(FleetModel, Game.Core.Services.Get<Game.Data.Services.ContentService>().Catalog);
+            fleetPresenter.Bind(session.Fleet, docking);
+            ui.Register(new FleetView(FleetModel, fleetPresenter));
             EventBus<SessionReset>.Subscribe(OnSessionReset);
         }
         public UIScreen MainMenu => ui.Navigator.Get<MainMenuView>();
         public UIScreen FlightHud => ui.Navigator.Get<FlightHudView>();
         public UIScreen ShipEditor => ui.Navigator.Get<ShipEditorView>();
         public UIScreen Loading { get; }
+
+        internal void ShowFleet() { fleetPresenter.Refresh(); ui.Navigator.Push<FleetView>(); }
 
         internal void ShowInventory() => ui.Navigator.Push<InventoryView>();
 
@@ -129,7 +137,8 @@ namespace Game.App.Presenters
             var economy = Game.Core.Services.Get<Game.Economy.EconomyService>();
             inventoryPresenter.Bind(economy.Inventory, economy.Wallet);
             merchantPresenter.ResetSession();
-            // TODO(HUD-009/010/013/014/015/016/017/018/019): rebind the owning feature presenters
+            fleetPresenter.Bind(Game.Core.Services.Get<Game.App.Session.GameSession>().Fleet, Game.Core.Services.Get<Game.Galaxy.Services.DockingService>());
+            // TODO(HUD-009/010/013/014/015/016/018/019): rebind the owning feature presenters
             // to the new session models here when those features install their production bindings.
         }
         internal void Tick()
@@ -151,6 +160,7 @@ namespace Game.App.Presenters
             saveSlotsPresenter.Dispose();
             settingsPresenter.Dispose();
             inventoryPresenter.Dispose();
+            fleetPresenter.Dispose();
             Game.Core.Services.Unregister(merchantPresenter);
             merchantPresenter.Dispose();
             pausePresenter?.Dispose();

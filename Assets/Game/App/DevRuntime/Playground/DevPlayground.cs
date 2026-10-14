@@ -44,7 +44,8 @@ namespace Game.App.DevRuntime.Playground
             new Pad("combat", "03  OPT-IN ENEMY", 560, 0, "F starts one hostile fighter facing you. Real AI, weapons, damage, power and player-death flow.\nOne enemy per reset. It can pursue you: finish the trial or use playground reset before another trial."),
             new Pad("cargo", "04  CARGO / CREDITS", -160, -180, "F grants fuel and 1000 credits through the real inventory/wallet owners. Repeat to exercise stacking/capacity.\nOpens your inventory: drag items, inspect, sort and stack cargo."),
             new Pad("settings", "05  SETTINGS", 0, -180, "F opens real settings. Change audio, display, accessibility and control settings; close to return to flight."),
-            new Pad("merchant", "06  TRADE", 160, -180, "F opens ARK Station Market with real stock, prices, Buy and Sell. First visit grants 2000 test credits; trades change your actual cargo and wallet.")
+            new Pad("merchant", "06  TRADE", 160, -180, "F opens ARK Station Market with real stock, prices, Buy and Sell. First visit grants 2000 test credits; trades change your actual cargo and wallet."),
+            new Pad("fleet", "07  FLEET", -320, -180, "F opens your actual fleet. Select a ship to inspect hull condition, blocks, thrust, power, shields and cargo capacity. Ship editing is still being connected.")
         };
         InputService input;
         UIRoot ui;
@@ -205,6 +206,11 @@ namespace Game.App.DevRuntime.Playground
                         result = DevCommandResult.Ok("ARK Station Market opened. Buy and sell against real stock and cargo.");
                     }
                     else result = DevCommandResult.Fail("Merchant services unavailable");
+                    break;
+                case "fleet":
+                    if (host.Context.TryGetService<UiComposition>(out var fleetUi))
+                    { fleetUi.ShowFleet(); result = DevCommandResult.Ok("Fleet opened. Select a ship to inspect its committed design and condition."); }
+                    else result = DevCommandResult.Fail("UI unavailable");
                     break;
                 case "settings":
                     if (host.Context.TryGetService<UiComposition>(out var screens))
