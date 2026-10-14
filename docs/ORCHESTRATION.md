@@ -21,6 +21,8 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 
 ## Current lead state
 
+- **Dialog authoring accepted:** DLG-00332bbc244 done; generated real command table/facts/YSLS repeat byte-identically. Four required cases pass across initial3-pass run and single corrected JSON-fixture retry. Compile clean, no Unity active; evidence Logs/playtest/dialog-validator. DLG-0106629f3aa metadata integrated,7 sprites still deferred. Next integrate DEV-0115f154755, implement DLG-006 runtime/SYS-009 pose persistence; dispatch newly ready DLG-013. NAR-019 delivery pending actual live owners.
+
 - **Dialog source integrated:** DLG-0036120691e on task/DLG-003-validator-integration, uncompiled/unaccepted. Next review/generate real authoring outputs, verify repeat-generation stability and four required EditMode cases; mirror SPEC-41Q14 in ledger. No Unity active. SYS-008 accepted on main ea853edc; NAR-019 delivery remains pending.
 
 - **Station interaction accepted:** SYS-008499de6e3 done; hull-to-surface query, counter edges and shared loader docking pass all four required direct PlayMode cases (0.2253s bodies). Compile clean, handle18770 terminal0; evidence Logs/playtest/interaction. No Unity active. Next integrate DLG-0037f14ca33. Combat audits runtime prerequisites; economy DEV-011 active; presentation258 completes lifetime review. NAR-019 delivery queued with live-owner gaps preserved.

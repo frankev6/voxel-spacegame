@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 83 | 9 | 0 | 0 | 88 | 0 | 180 | 7 |
-| M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 4 |
+| M3 | 83 | 8 | 0 | 0 | 89 | 0 | 180 | 8 |
+| M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -391,14 +391,14 @@
 | NAR-020 | LogicWatcher | [SPEC-40](specs/SPEC-40-narrative-core.md) | M3 | standard | NAR-004 | yes | done | sol (gpt-6.1-sol high) | 2026-10-13 | b4344a9 | Sorted/deduplicated dependency watcher; 4 focused tests pass |
 | DLG-001 | Public contract types | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | NAR-001, UI-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 67e0ffd | Dialog contracts, one required test; full suites green |
 | DLG-002 | Dialog script parser | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, NAR-003, NAR-016 | yes | done | astra (gpt-6) | 2026-10-13 | 179603ec | Parser and seven required cases accepted; 38 converted files parse cleanly; focused separator review fix passes. |
-| DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-13 |  | Existing combat worker: full validator/generated tables and four required cases; lead owns Unity validation. |
+| DLG-003 | Dialog validator rules and generated files | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-002 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | 32bbc244 | Validator/tagger/generators; real outputs byte-identical on repeat; four required cases pass across focused run and one retry. |
 | DLG-004 | Yarn Spinner 3 compatibility spike | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-002 | yes | todo |  |  |  |  |
 | DLG-005 | GATE: Yarn Spinner adoption | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-004 | no | todo |  |  |  |  |
-| DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | no | todo |  |  |  |  |
+| DLG-006 | DialogService, memory and DLGS chunk | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-001, DLG-003, NAR-011, CORE-003, CORE-007 | yes | todo |  |  |  |  |
 | DLG-007 | Production dialog runner (path chosen by DLG-005) | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | frontier | DLG-005, DLG-006, DLG-003 | no | todo |  |  |  |  |
 | DLG-008 | Dialog presenter | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-006 | no | todo |  |  |  |  |
 | DLG-009 | Dialog view screen | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, UI-001, INP-001 | no | todo |  |  |  |  |
-| DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 |  | Reusable combat worker; existing approved/own-work placeholders only; no art generation |
+| DLG-010 | Speakers and illustrations | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-001 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 6629f3aa | Metadata integrated; all converted tag IDs resolve. Seven approved portrait/illustration sprites unavailable; remains partial, no new art or owner gate. |
 | DLG-011 | Dialog PlayMode scenarios | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-007, DLG-009, QST-001 | no | todo |  |  |  |  |
 | DLG-012 | Harness commands for dialog | [SPEC-41](specs/SPEC-41-dialog.md) | M3 | standard | DLG-008, DEV-001 | no | todo |  |  |  |  |
 | QST-001 | Public contract types | [SPEC-42](specs/SPEC-42-quests-mystery.md) | M3 | standard | CORE-001, DATA-001, NAR-001, DLG-001, GAL-001, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 95f80410 | Public quest/mystery contracts and required assembly test; behavior remains QST-002 onward |
@@ -498,7 +498,7 @@
 | ENC-013 | Encounter formations | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011, AI-001 | no | todo |  |  |  |  |
 | ENC-014 | Procedural territory and TerritoryEntered | [SPEC-33](specs/SPEC-33-encounters-factions.md) | M4 | standard | ENC-011 | no | todo |  |  |  |  |
 | NAR-018 | Narrative Debugger editing tools | [SPEC-40](specs/SPEC-40-narrative-core.md) | M4 | standard | NAR-017 | yes | in-progress | sol (gpt-6.1-sol) | 2026-10-13 | 4ca00b3 | Partial4ca00b3 +6d6e1ce9; fact editing required case passes39710, formatter also green. Baseline/Play beat live acceptance still awaits QST-005/006 and DLG-006; remains in progress. |
-| DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | no | todo |  |  |  |  |
+| DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | todo |  |  |  |  |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | no | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
@@ -958,6 +958,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 384 | SPEC-31 Q20: SYS-008 direct prerequisites | Accepted SYS-006, INP-005, AI-004, CORE-006 supply actual owners; later AI/perf work does not block interaction. | Tech lead |
 | 385 | SPEC-70 Q29: DEV-014 missing behavior dependencies | Require SYS-008, DEV-012 and INP-005; contract-only SYS-001 cannot provide real interaction acceptance. | Tech lead |
 | 386 | SPEC-31 Q21: shared docking composition | ADR-0083 supplies shared production docking owner, compatible loader injection and canonical interaction event handling. PLOC restore remains SYS-009. | Tech lead |
+| 387 | SPEC-41 Q14: generated dialog metadata defaults | Internal cloned registry snapshot, canonical source/facts hash, stable UTF-8 outputs, append-only line IDs and Edit-mode menus. Real output generation verified. | Tech lead |
+| 388 | SPEC-41 Q15: missing approved dialog sprites | Integrate existing eight metadata identities; leave seven unavailable sprite fields null. DLG-010 stays partial; no art generation or new gate. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1090,6 +1092,13 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-003 done: real dialog authoring outputs — astra (gpt-6)
+
+- 6120691e/bfd0d4db/32bbc244 integrates validator, append-only tagger, command/facts/YSLS generators and required cases. Production generation16391 terminal0 verified all three artifacts plus metadata byte-identical on repeat. YSLS exposes29 commands/18 functions; declarations1151 bytes. Compile42509 clean, zero warning CS; temporary Editor job removed.
+- Required EditMode17891: three passed, one JSON-fixture interpretation failure; JsonUtility materializes missing nested objects, so check return.type presence. Only the failing case reran75171 and passed (0.6928s). spec-required: 4, extra: 0. Evidence Logs/playtest/dialog-validator. No full/perf/soak run.
+- Initial production generation exposed11 unresolved tag references. Existing partial DLG-01038b2bb08 was never integrated: cherry-picked as6629f3aa, preserving exact metadata and null artwork; all7 referenced IDs now resolve. DLG-010 remains partial for7 unavailable approved sprites. Q387/388 mirror defaults; no new owner gate/art created.
+- SYS-008 review follow-up62742908 adds required watch-after-query ordering. DEV-0115f154755 and NAR-019310332f7/a1fbc3cb deliveries remain pending integration. Previous turn accepted interaction; this turn accepts dialog authoring and recovers missing delivered content. No Unity active.
 
 ### 2026-10-13 — SYS-008 done: station interaction and docking — astra (gpt-6)
 
