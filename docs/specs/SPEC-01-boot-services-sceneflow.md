@@ -856,7 +856,7 @@ If no save exists, "Load last save" is disabled.
 ### FND-015 — Boot from any scene and the defeat flow
 - **Milestone:** M3
 - **Tier:** standard — behaviour fully given in §5.4.6 and §5.9
-- **Depends on:** `FND-011`, `HUD-001`
+- **Depends on:** `FND-010`, `HUD-001`
 - **Do:**
   1. Implement the `StartupAsync` mapping (§5.4.6) and `DefeatWatcher` (§5.9).
   2. Write PlayMode tests that start from each of the four scenes.
@@ -998,6 +998,8 @@ If no save exists, "Load last save" is disabled.
 | 30 | FND-012 can construct against canonical galaxy contracts before GAL-008 installs the live service; fleet spawning already owns a registry borrow | Implement the real service, requester state, profiles, hook-backed root map, adapter and six direct-conversion tests now. Row 8.3 constructs/registers ShipSpawnService and IShipSpawner once the actual GalaxyService is installed at row 8.1; no substitute galaxy service or fabricated NPC membership. Reject NPC requests lacking a valid current/supplied system. Existing PlayerShipSpawner and its single fleet handle remain unchanged until the lead coordinates the service handoff and GAL-008 location binding; do not claim unified production routing complete before those are integrated. Registered structure sources remain caller-owned: service releases its borrow after dead-root lookup or disposal, never disposes the source; canonical Despawn acts on converted grids only. IDisposable removes the hook and owned query/maps. Test fixtures use one-cell encoded VOXS, real source assets and setup APIs, and one direct conversion update, with only the required despawn update added where needed. | Tech lead — FND-012 implementation default; central mirror pending |
 
 | 31 | §5.7 registers the fleet structure in both PlayerShipSpawner and ShipSpawnService, leaving two borrows for one source | FleetShipRecord retains its existing handle and release ownership. PlayerShipSpawner uses an internal SpawnRegistered path that validates handle/source identity and passes that same handle to GridSpawnApi. The service only releases handles it registered itself; public Spawn retains its existing contract. Extend the required Player_NoMember case to assert handle identity and survival after service disposal. | Tech lead |
+
+| 32 | FND-015 waits on aggregate world integration rather than its implemented session owner | Use FND-010 and HUD-001. Actual Lab startup remains dependent on EDT-023 integration and cannot be claimed passing before that exists. | Tech lead | Resolved under ADR-0068; ledger Q459. |
 
 ## 11. References
 

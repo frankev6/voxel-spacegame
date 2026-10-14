@@ -7,8 +7,8 @@ Coordinator thread: `01a12ab8-8b1d-7263-ac71-aa447e6af284`.
 | Worker | Model | Thread | Worktree | Active task | State | Eligible follow-up candidates |
 |---|---|---|---|---|---|---|
 | Combat support | gpt-6.1-sol high | `01a133d2-c73e-7d11-a378-844fc4839836` | `/Users/frank/.codex/worktrees/6d4c/spaceship-game-v2` | ENC-014 | Loading/dock delivered 4e48193c; now implementing procedural territory BFS/events | HUD-019 actual trade acceptance waits on ECO-008 |
-| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-014 | Main menu delivered 95638c8e pending validation; implementing travel escort lifecycle hooks | Actual fleet owner remains SPEC-01 |
-| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | HUD-010 | HUD-007 delivered d0ac700a; settings/save source confirmed complete, now implementing notifications/hotkeys/objective hook | Actual root/sync/query integration remains lead-owned |
+| Power and abilities | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41a7a8c1d570` | `/Users/frank/.codex/worktrees/5fab/spaceship-game-v2` | TRV-014 delivered | 2e03c4cb pending integration; real dependency wait for next standard feature | EncounterDirector, BeatService/dialog runner, MapCanvas or dev overlay must exist before dependent work |
+| Presentation and content | gpt-6.1-sol high | `01a133d2-c73f-73f0-b8d9-41823de6795b` | `/Users/frank/.codex/worktrees/1369/spaceship-game-v2` | FND-015 | HUD-010 delivered aee6a04d; implementing actual defeat watcher and startup scenarios | Lead owns SceneFlow/GameSession and Lab startup |
 
 ## Operating rules
 
@@ -37,3 +37,5 @@ All three workers received Frank's fast-fixture correction: shorten incidental c
 - EDT-019 accepted 38c38243: all four required overlay checks pass, including Metal support and 65,536 instances in one category draw. Next EDT-022 host and compatible pending HUD deliveries; updated active table is authoritative.
 
 - EDT-022 accepted 1448b2fb/b5922750: six required host behaviors pass across initial and focused lifetime results. Native check attributes Toolkit caches explicitly and forbids editor allocations; launcher remains EDT-023. Pending compatible HUD003/006/007 hashes in ledger; active table tracks recycled workers.
+
+- EDT-023 claimed: real launcher/commit targets/world return. TRV-014 delivery 2e03c4cb received; economy worker has a recorded dependency wait (no ready standard implementation without missing frontier owners). FND-015 active on the same presentation thread.

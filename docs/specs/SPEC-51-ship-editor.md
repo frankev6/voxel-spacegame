@@ -957,7 +957,7 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 ### EDT-023 — Lab and ship-edit scene flow; R16/R19 regression
 - **Milestone:** M3
 - **Tier:** frontier — F5: scene transition, pose capture, respawn, navigator and interaction across SPEC-01/31/51
-- **Depends on:** `EDT-022`, `SPEC-01`, `SPEC-31`
+- **Depends on:** `EDT-022`, `FND-010`, `FND-012`, `GAL-008`, `SYS-008`, `SYS-013`
 - **Do:** `ShipEditorLauncher` (§5.15), `FleetCommitTarget`, `BlueprintCommitTarget`; PlayMode scenario tests.
 - **Files:** `Assets/Game/App/EditorHost/{ShipEditorLauncher,FleetCommitTarget,BlueprintCommitTarget}.cs`, `Assets/Game/Tests/PlayMode/ShipEditor/EditorRoundTripScenarioTests.cs`
 - **Acceptance criteria:**
@@ -1091,3 +1091,5 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 | 54 | Editor host waits on unrelated camera occlusion | Use completed editor orbit, editor sampler and UI host/modal tasks as concrete dependencies under ADR-0068. Flight occlusion does not participate in the editor host. | Tech lead | Resolved; ledger Q455. |
 
 | 55 | Scene-owned host versus persistent screen registration | EditorHostServices registers editor/browser models once and forwards to the active scene presenter. Launcher owns real leave/settings/name callbacks; detach before native disposal. Controller exposes read-only SelectedCount. Palette/props use actual render content. ADR-0097. | Tech lead | Resolved; ledger Q456. |
+
+| 56 | EDT-023 whole-spec prerequisites include unrelated aggregate checks and later work | Use completed host, session/fleet, spawn, galaxy, docking and transition owners: EDT-022, FND-010, FND-012, GAL-008, SYS-008, SYS-013. Actual dialog integration remains explicitly pending DLG-007; no substitute runner. | Tech lead — resolved; ledger Q460 |

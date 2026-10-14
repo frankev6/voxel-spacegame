@@ -16,7 +16,7 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 36 | 15 | 0 | 0 | 131 | 0 | 182 | 5 |
+| M3 | 34 | 17 | 0 | 0 | 131 | 0 | 182 | 5 |
 | M4 | 9 | 3 | 0 | 0 | 2 | 0 | 14 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
@@ -309,7 +309,7 @@
 | MIG-011 | Audio cue converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M2 | standard | MIG-004, AUD-001 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | ca37e33 | 20 generated cues; lead fixture fix ed77024; one required + three migration safety tests. Full batch green. |
 | FND-011 | Load flow end to end (R28) | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-010, SPEC-30, SPEC-31 | no | todo |  |  |  |  |
 | FND-013 | Blueprint Lab entry and exit | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | frontier | FND-011, EDT-001 | no | todo |  |  |  |  |
-| FND-015 | Boot from any scene and the defeat flow | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | standard | FND-011, HUD-001 | no | todo |  |  |  |  |
+| FND-015 | Boot from any scene and the defeat flow | [SPEC-01](specs/SPEC-01-boot-services-sceneflow.md) | M3 | standard | FND-010, HUD-001 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-14 |  | Presentation worker: defeat watcher and required startup cases; lead owns Lab/startup integration. |
 | PERS-013 | Regression scenario R28: load from the pause menu | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-009, PERS-010, SPEC-01, SPEC-20, SPEC-31, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-014 | Regression scenario 04-B1: load after a content change (end to end) | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | standard | PERS-010, SPEC-01, SPEC-50, SPEC-61, TST-001 | no | todo |  |  |  |  |
 | PERS-015 | Full-world round trip with all real participants | [SPEC-05](specs/SPEC-05-persistence.md) | M3 | frontier | PERS-011, PERS-012, SPEC-01, SPEC-30, SPEC-31, SPEC-33, SPEC-40, SPEC-41, SPEC-42, SPEC-50 | no | todo |  |  |  |  |
@@ -444,7 +444,7 @@
 | EDT-020 | Blueprint store, browser and name sanitising | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-017, PERS-001, VOX-009, UI-003, UI-005, UI-007, UI-008, UI-009, HUD-001 | yes | done | presentation (gpt-6.1-sol high) | 2026-10-14 | 97440534 | Profile VOXS store/browser, read-only content and atomic replacement; all 5 required cases pass; ADR-0093 accepted; Q428; host integration stays EDT-022 |
 | EDT-021 | Editor UI panels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | standard | EDT-001, UI-003, UI-005, UI-006, UI-007, UI-008, UI-009, UI-012, HUD-001 | yes | done | sol (gpt-6.1-sol high) | 2026-10-14 | f0e774dc | Pooled editor panels, real UXML/theme and current-identity bindings; four graphics-enabled cases pass |
 | EDT-022 | Editor host, input, presenter and leave prompt | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-011, EDT-015, EDT-019, EDT-021, CAM-009, INP-006, HUD-018, UI-011 | yes | done | astra (gpt-6) | 2026-10-14 | 1448b2fb | Actual scene host/input/camera/renderers, persistent UI command binding, presenter and leave/browser flows; six required cases accepted across focused runs. Launcher remains EDT-023. |
-| EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, SPEC-01, SPEC-31 | no | todo |  |  |  |  |
+| EDT-023 | Lab and ship-edit scene flow; R16/R19 regression | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, FND-010, FND-012, GAL-008, SYS-008, SYS-013 | yes | in-progress | astra (gpt-6) | 2026-10-14 |  | Launcher, commit targets and world return; actual dialog acceptance pending DLG-007. |
 | EDT-024 | Editor performance gates | [SPEC-51](specs/SPEC-51-ship-editor.md) | M3 | frontier | EDT-022, TST-001 | yes | todo |  |  |  |  |
 | UI-008 | Meter, Slot and TabBar controls | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-007 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 90c13ad | Meter, Slot and scrolling TabBar; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | UI-009 | Tooltip service | [SPEC-60](specs/SPEC-60-ui-framework.md) | M3 | standard | UI-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | c777fd7 | Pooled tooltips, scheduler and lifecycle; fixture repair a34c3c3; spec-required: 7, extra: 0 |
@@ -1058,6 +1058,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 456 | SPEC-51 Q55: scene host and persistent editor bindings | ADR-0097: register persistent views once, forward only to active presenter, detach before native disposal; read-only SelectedCount. | Tech lead |
 | 457 | SPEC-32 Q25: escort hook prerequisites | Use completed travel timeline/presentation contracts; R30/benchmark task is unrelated to construction. | Tech lead |
 | 458 | SPEC-33 Q28: procedural territory concrete prerequisites | Use ENC-005, GAL-008 and CORE-003; encounter integration scenarios are unrelated to BFS and ownership events. | Tech lead |
+| 459 | SPEC-01 Q32: defeat/startup concrete prerequisites | FND-010 and HUD-001 provide actual owners; Lab acceptance waits for EDT-023 integration. | Tech lead |
+| 460 | SPEC-51 Q56: editor launcher concrete prerequisites | Completed host/fleet/spawn/galaxy/docking/transition owners; real dialog case remains DLG-007-dependent. | Tech lead |
 
 ## Measurements
 
