@@ -38,7 +38,14 @@ namespace Game.ShipEditor.Jobs
             { var instance = Source.Instances[i]; if (instance.Block != 0 && instance.CellsAlive != 0) instances.Add(instance); }
             instances.AsArray().Sort(new OriginOrder());
             for (int i = 0; i < instances.Length; i++)
-            { hash = Coordinate(hash, instances[i].Origin); hash = StableHash.Combine(hash, math.asuint(instances[i].FunctionHp)); }
+            {
+                var instance = instances[i];
+                hash = Coordinate(hash, instance.Origin);
+                hash = StableHash.Combine(hash, instance.Block);
+                hash = StableHash.Combine(hash, instance.Orient);
+                hash = StableHash.Combine(hash, instance.Color);
+                hash = StableHash.Combine(hash, math.asuint(instance.FunctionHp));
+            }
             Result.Value = hash;
         }
         static ulong Coordinate(ulong hash, int3 cell)
@@ -54,7 +61,10 @@ namespace Game.ShipEditor.Jobs
                 int c = a.Origin.z.CompareTo(b.Origin.z); if (c != 0) return c;
                 c = a.Origin.y.CompareTo(b.Origin.y); if (c != 0) return c;
                 c = a.Origin.x.CompareTo(b.Origin.x); if (c != 0) return c;
-                // Damaged footprints may share an origin; hash order must not depend on storage slots.
+                // Keep HP associated with its block identity when damaged footprints share an origin.
+                c = a.Block.CompareTo(b.Block); if (c != 0) return c;
+                c = a.Orient.CompareTo(b.Orient); if (c != 0) return c;
+                c = a.Color.CompareTo(b.Color); if (c != 0) return c;
                 return math.asuint(a.FunctionHp).CompareTo(math.asuint(b.FunctionHp));
             }
         }

@@ -88,7 +88,9 @@ namespace Game.Voxel.Model
                         int slot = ResolveInstance(edit); if (slot < 0 || !math.isfinite(edit.FunctionHp)) return false;
                         var instance = Instance(slot);
                         float max = content.Blocks.Value.Blocks[instance.Block].FunctionHp;
-                        if (edit.FunctionHp < 0 || edit.FunctionHp > max) return false;
+                        // Damage can leave negative HP on surviving non-functional instances.
+                        // Preserve that exact state for undo, as VOXS does.
+                        if (edit.FunctionHp > max) return false;
                         instance.FunctionHp = edit.FunctionHp;
                         bool destroyed = content.Blocks.Value.Blocks[instance.Block].Kind == Game.Data.Blocks.BlockKind.Functional && edit.FunctionHp <= 0;
                         instance.Flags = destroyed ? instance.Flags | BlockInstanceFlags.Destroyed : instance.Flags & ~BlockInstanceFlags.Destroyed;

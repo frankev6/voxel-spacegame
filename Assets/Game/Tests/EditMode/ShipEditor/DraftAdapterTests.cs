@@ -27,7 +27,7 @@ namespace Game.Tests.EditMode.ShipEditor
             public readonly VoxelStructure Draft = new();
             public readonly DraftReader Reader;
             public readonly DraftWriter Writer;
-            public readonly ushort Multi, Single, Hull;
+            public readonly ushort Multi, Single, Hull, Prop;
             public VoxelContent Content => new VoxelContent { Blocks = definitions, Orientations = rotations };
             public Fixture()
             {
@@ -39,6 +39,7 @@ namespace Game.Tests.EditMode.ShipEditor
                 Context = new EditorContext(config, catalog, definitions, rotations, 16);
                 Multi = catalog.GetBlockIndex(catalog.Get<Game.Data.Definitions.BlockDefinition>(new ContentId("block_capacitor_small")));
                 Single = catalog.GetBlockIndex(single);
+                Prop = catalog.GetBlockIndex(catalog.Get<Game.Data.Definitions.BlockDefinition>(new ContentId("block_chiral_l")));
                 Hull = catalog.GetBlockIndex(catalog.Get<Game.Data.Definitions.BlockDefinition>(new ContentId("block_hull")));
                 Reader = new DraftReader(Draft, Context); Writer = new DraftWriter(Draft, Context);
             }
@@ -78,6 +79,18 @@ namespace Game.Tests.EditMode.ShipEditor
                 new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Multi, Cell = new int3(1, 0, 0) } }, Allocator.Temp);
             int count = touched.Length; Assert.IsFalse(f.Draft.ApplyEdits(invalid, f.Content, touched));
             Assert.AreEqual(count, touched.Length); Assert.AreEqual(before, f.Reader.ComputeDraftHash());
+            // Non-functional instances can retain negative function HP after damage; undo must preserve it.
+            var origin = new int3(100, 0, 0);
+            f.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Prop, Cell = origin },
+                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Prop, Cell = origin, FunctionHp = -7 });
+            Assert.IsTrue(f.Reader.TryGetBlockAt(origin, out var prop));
+            prop.DamageOffset = f.Reader.CaptureDamage(prop, damage);
+            ulong propHash = f.Reader.ComputeDraftHash();
+            using var propOps = new NativeArray<DiffOp>(new[] { new DiffOp { Kind = DiffOpKind.Remove, Record = prop } }, Allocator.Temp);
+            f.Writer.Apply(propOps, damage.AsArray(), true, touched);
+            f.Writer.Apply(propOps, damage.AsArray(), false, touched);
+            Assert.AreEqual(propHash, f.Reader.ComputeDraftHash());
+
         }
         [Test] public void PaletteOrder_DoesNotChangeHash()
         {
@@ -99,6 +112,13 @@ namespace Game.Tests.EditMode.ShipEditor
             Assert.AreEqual(0, damage[offset]); Assert.AreEqual(255, damage[offset + 1]);
             // A different functional block occupies the missing root; A's identity must still select A.
             f.Edits(new VoxelEdit { Kind = VoxelEditKind.PlaceBlock, Block = f.Single });
+            f.Edits(new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Multi, FunctionHp = 10 },
+                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Single, FunctionHp = 20 });
+            ulong first = f.Reader.ComputeDraftHash();
+            f.Edits(new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Multi, FunctionHp = 20 },
+                new VoxelEdit { Kind = VoxelEditKind.SetFunctionHp, Block = f.Single, FunctionHp = 10 });
+            Assert.AreNotEqual(first, f.Reader.ComputeDraftHash(), "HP belongs to a specific block even when origins coincide.");
+
             f.Edits(new VoxelEdit { Kind = VoxelEditKind.RemoveBlock, Block = f.Multi });
             Assert.IsTrue(f.Reader.TryGetBlockAt(int3.zero, out var survivor)); Assert.AreEqual(f.Single, survivor.Block);
             f.Edits(new VoxelEdit { Kind = VoxelEditKind.ClearCell }, new VoxelEdit { Kind = VoxelEditKind.RemoveBlock, Block = f.Single });

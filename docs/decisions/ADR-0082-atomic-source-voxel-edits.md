@@ -14,6 +14,8 @@ RemoveBlock/SetFunctionHp carry original Block/Orient along with origin, permitt
 
 VoxelStructureReadView exposes borrowed read-only native arrays plus canonical dense/uniform/sparse reads for Burst source jobs. DraftReader pins the structure while its scheduled enumeration/hash jobs run and completes them before unpinning. Enumeration emits palette cells and each live instance once, then sorts by origin; it must not require a surviving origin cell. Zero-cell/tombstoned instances are not placed blocks. DraftWriter accepts native diff/damage views directly; EDT-004/005 own the command containers.
 
+SetFunctionHp accepts finite damage-produced negative values (including surviving non-functional blocks), rejects values above the definition maximum, and derives Destroyed using the same functional-kind/HP rule as VOXS loading. Canonical instance hashing sorts by origin, block, orientation, color, then HP bits and includes each identity alongside its HP. Damaged instances can share origins; sorting HP alone would erase the association.
+
 ## Consequences
 
 EDT-003 can translate forward/inverse commands into a single atomic store call. Existing single-operation APIs are unchanged. The required adapter round-trip case will also assert rejected batches leave the source untouched; no additional test methods are added. Native reads/jobs and final adapter acceptance remain unfinished at this checkpoint.
