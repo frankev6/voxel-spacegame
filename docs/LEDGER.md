@@ -1069,6 +1069,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-13 — NAR-011 persistent body removal authored — astra (gpt-6)
+
+- bb10c347 implements ADR-0077/Q364/SPEC-40Q30: GalaxyService.RemoveBody suppresses streaming capture, transfers any live delta-owned source back to its retiring lease, clears the snapshot, and retains existing destroyed/story tombstones. Anchor creation skips destroyed bodies without snapshots on refresh/restore; surviving saved hulks remain supported. No GLXY format change.
+- Uncompiled/unaccepted; presentation worker assigned bounded source-lifetime review. Next boot/session composition and tick bridge, remaining three functional cases (including removal/snapshot suppression), then compatible focused validation. Spec-required: 1 authored of4, extra: 0. No Unity run this turn.
+- NAR-017 active244; DEV-009 delivery37d1d116 awaiting integration, sandbox diagnosis266 active. Prior gameplay routing turn and this removal implementation are progress.
+
 ### 2026-10-13 — NAR-011 gameplay routes authored — astra (gpt-6)
 
 - 39b6abf7 adds narrative repair/damage request translation: heal existing cells through Restores; deterministic reservoir selection of a live solid surface cell, cell-size-scaled radius and configured damage through Damage. a6474598 routes current authored system/time, fleet grants with owned clones, body replacement, editor flow, audio and notifications. Missing faction/territory/encounter/travel/merchant owners report explicit task-owned fallbacks.

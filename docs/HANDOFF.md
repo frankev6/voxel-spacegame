@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Narrative removal authored:** NAR-011 bb10c347 implements ADR-0077/Q364 persistent removal using existing tombstones and safe source retirement; uncompiled/unaccepted. Next boot/session/tick wiring and remaining3 cases, including removal, before focused validation. No Unity active. NAR-017 active244; DEV-00937d1d116 pending integration/sandbox diagnosis266; presentation assigned removal lifetime review. Previous routing work and this source change are progress.
+
 - **Narrative gameplay routes authored:** NAR-011 39b6abf7/a6474598 add hull request translation and available world-owner routing, uncompiled/unaccepted. General RemoveBody still needs owner semantics (destruction can leave a hulk), then boot/session/tick wiring and remaining3 cases before validation. No Unity active. NAR-017 active243; DEV-00937d1d116 delivery pending, sandbox diagnosis265 active; presentation API review223 complete/dependency wait. Previous context turn and current routing work are progress.
 
 - **Live narrative context started:** NAR-011 claimed bef52421; 4e20b697 adds context/scope and ADR-0075 hooks plus one required fixture, uncompiled/unaccepted. Next world routing, boot/session and tick bridge, then one focused batch. No Unity active. NAR-017 active242; DEV-009 delivered37d1d116 (integration pending, sandbox diagnosis dispatched); presentation review221 inventories routing APIs. Previous turn accepted NAR-010; this turn adds source implementation.
