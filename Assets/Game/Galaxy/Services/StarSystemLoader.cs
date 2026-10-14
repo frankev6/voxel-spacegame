@@ -38,6 +38,8 @@ namespace Game.Galaxy.Services
         readonly ContentCatalog catalog;
         readonly List<T2Streamer> retiring = new();
         T2Streamer t2;
+        BeltStreamer t3;
+        readonly List<BeltStreamer> retiringBelts = new();
         bool applyingDestruction;
         readonly Entity infoEntity;
         readonly bool ownsInfo;
@@ -147,9 +149,8 @@ namespace Game.Galaxy.Services
             {
                 if (anchorsDirty) RefreshAnchors(ctx.UniversalTime);
                 SplitAdoption.Apply(world.EntityManager, splits, Loaded);
-                TickT2(ctx.UniversalTime);
+                TickStreaming(ctx.UniversalTime);
             }
-            // TODO(SYS-007): T3 asteroid streaming.
         }
         public bool IsSceneReadyComplete(in SceneReadyContext context)
             => context.Scene != GameScene.World || IsArrivalReady;
@@ -158,7 +159,7 @@ namespace Game.Galaxy.Services
         { CheckAlive(); if (!applyingDestruction && body.System.Equals(Loaded)) anchorsDirty = true; }
         void RefreshAnchors(double time)
         {
-            FlushStructures(); RetireT2(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            FlushStructures(); RetireStreaming(); var em = world.EntityManager; em.CompleteAllTrackedJobs();
             foreach (var body in bodies.Values) if (em.Exists(body.Anchor)) em.DestroyEntity(body.Anchor);
             bodies.Clear(); RetireColliders();
             AnchorBuilder.Create(world, galaxy.Galaxy, galaxy.GetContent(Loaded), time,
@@ -176,7 +177,7 @@ namespace Game.Galaxy.Services
         {
             if (!world.IsCreated) return;
             State = LoaderState.Unloading; var em = world.EntityManager;
-            FlushStructures(); RetireT2(); em.CompleteAllTrackedJobs();
+            FlushStructures(); RetireStreaming(); em.CompleteAllTrackedJobs();
             if (Loaded.IsValid)
             {
                 // Adopt last-frame pieces before destroying the system's members.
@@ -185,27 +186,35 @@ namespace Game.Galaxy.Services
                 try { em.DestroyEntity(members); } finally { members.ResetFilter(); }
                 em.DestroyEntity(chunks);
             }
-            registry.ReconcileAbandonedReads(em); DrainRetired();
+            registry.ReconcileAbandonedReads(em);
+            foreach (var belt in retiringBelts) belt.CompleteJobs();
+            DrainRetired();
             RetireColliders();
             if (Loaded.IsValid && galaxy.Galaxy != null) galaxy.ReleaseContent(Loaded);
             bodies.Clear(); Loaded = default; target = default; anchorsDirty = false; State = LoaderState.Idle;
             if (em.Exists(infoEntity)) info.SetSingleton(default(CurrentStarSystemInfo));
         }
-        void TickT2(double time)
+        void TickStreaming(double time)
         {
-            if (retiring.Count != 0 || streaming.IsEmptyIgnoreFilter || blockDefs.IsEmptyIgnoreFilter || orientations.IsEmptyIgnoreFilter) return;
+            if (retiring.Count != 0 || retiringBelts.Count != 0 || streaming.IsEmptyIgnoreFilter || blockDefs.IsEmptyIgnoreFilter || orientations.IsEmptyIgnoreFilter) return;
             var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            var content = new VoxelContent { Blocks = blockDefs.GetSingleton<BlockDefsRef>().Value,
+                Orientations = orientations.GetSingleton<OrientationTablesRef>().Value };
             if (t2 == null)
             {
-                var content = new VoxelContent { Blocks = blockDefs.GetSingleton<BlockDefsRef>().Value,
-                    Orientations = orientations.GetSingleton<OrientationTablesRef>().Value };
                 t2 = new T2Streamer(em, galaxy, new BodyGridSpawner(em, registry, blueprints, catalog, content, ids),
                     galaxy.State.GetOrCreateDelta(Loaded), bodies);
             }
             // Initial entry has no player until scene-ready completes. Stream at the actual requested arrival first.
             double3 origin = origins.GetSingleton<FrameOrigin>().OriginInStarSystem;
             double3 position = players.IsEmptyIgnoreFilter ? arrival.PositionM : origin + (double3)players.GetSingleton<LocalTransform>().Position;
-            t2.Tick(galaxy.GetContent(Loaded), position, origin, time, streaming.GetSingleton<StreamingConfig>());
+            var config = streaming.GetSingleton<StreamingConfig>();
+            var systemContent = galaxy.GetContent(Loaded);
+            int budget = config.MaxGridSpawnsPerFrame - t2.Tick(systemContent, position, origin, time, config);
+            if (players.IsEmptyIgnoreFilter) return; // T3 requires a real player; arrival readiness belongs to T2.
+            t3 ??= new BeltStreamer(galaxy, galaxy.State.GetOrCreateDelta(Loaded),
+                new AsteroidBuilder(catalog, content), new AsteroidGridSpawner(em, registry, ids, bodies));
+            t3.Tick(systemContent, position, origin, config, ref budget);
         }
         void DrainBodyEvents()
         {
@@ -228,15 +237,17 @@ namespace Game.Galaxy.Services
                     GridSpawnApi.RequestDespawn(em, change.Grid);
             }
         }
-        void RetireT2()
+        void RetireStreaming()
         {
-            if (t2 == null) return;
-            t2.BeginRetirement(); retiring.Add(t2); t2 = null;
+            if (t2 != null) { t2.BeginRetirement(); retiring.Add(t2); t2 = null; }
+            if (t3 != null) { t3.BeginRetirement(); retiringBelts.Add(t3); t3 = null; }
         }
         void DrainRetired()
         {
             for (int i = retiring.Count - 1; i >= 0; i--)
                 if (retiring[i].DrainRetired()) { retiring[i].Dispose(); retiring.RemoveAt(i); }
+            for (int i = retiringBelts.Count - 1; i >= 0; i--)
+                if (retiringBelts[i].DrainRetired()) { retiringBelts[i].Dispose(); retiringBelts.RemoveAt(i); }
         }
         void RetireColliders()
         {
@@ -253,7 +264,7 @@ namespace Game.Galaxy.Services
         {
             if (disposed) return;
             Unload(); DrainRetired();
-            if (retiring.Count != 0) throw new InvalidOperationException("Loader disposal requires completed grid/read retirement.");
+            if (retiring.Count != 0 || retiringBelts.Count != 0) throw new InvalidOperationException("Loader disposal requires completed grid/read retirement.");
             disposed = true; registry.RemoveSpawnHook(hook); galaxy.SetLiveDeltaSink(null);
             if (!world.IsCreated) return;
             if (ownsInfo && world.EntityManager.Exists(infoEntity)) world.EntityManager.DestroyEntity(infoEntity);

@@ -7,12 +7,14 @@ using Game.Voxel.Grid;
 using Game.Voxel.Model;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Profiling;
 
 namespace Game.Galaxy.Streaming
 {
     /// <summary>Ordered, bounded T2 transitions; retired grids keep their sources until despawn completes.</summary>
     internal sealed class T2Streamer : IDisposable
     {
+        static readonly ProfilerMarker TickMarker = new ProfilerMarker(ProfilerCategory.Scripts, "StarSystemLoader.T2");
         readonly EntityManager em;
         readonly GalaxyService galaxy;
         readonly BodyGridSpawner spawner;
@@ -26,9 +28,10 @@ namespace Game.Galaxy.Streaming
             StarSystemDelta delta, Dictionary<ulong, LoadedBody> bodies)
         { this.em = em; this.galaxy = galaxy; this.spawner = spawner; this.delta = delta; this.bodies = bodies; }
 
-        internal void Tick(StarSystemContent content, double3 positionM, double3 origin, double time, in StreamingConfig config)
+        internal int Tick(StarSystemContent content, double3 positionM, double3 origin, double time, in StreamingConfig config)
         {
-            DrainRetired(); if (closing) return;
+            using var marker = TickMarker.Auto();
+            DrainRetired(); if (closing) return 0;
             int spawned = 0;
             foreach (var spec in content.Bodies)
             {
@@ -58,6 +61,7 @@ namespace Game.Galaxy.Streaming
                 state.Grid = lease.Root; state.Flags |= BodyFlags.HasGrid | BodyFlags.GridPending;
                 em.SetComponentData(body.Anchor, state); bodies[key] = body;
             }
+            return spawned;
         }
         internal void Flush()
         {
