@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-10-13)
 
+- **Dialog runtime started:** DLG-006dc15f7b0 supplies guarded concrete effect lookup and ordinal visit/raw memory under ADR-0084/Q390. Uncompiled/unaccepted; next lifecycle, blocking/terminal flow, rolls and DLGS before seven focused cases. No Unity active. DEV-011 marker fixture correction assigned to economy; DLG-013 combat active; presentation reviews NAR-019.
+
 - **Dialog authoring accepted:** DLG-00332bbc244 done; generated real command table/facts/YSLS repeat byte-identically. Four required cases pass across initial3-pass run and single corrected JSON-fixture retry. Compile clean, no Unity active; evidence Logs/playtest/dialog-validator. DLG-0106629f3aa metadata integrated,7 sprites still deferred. Next integrate DEV-0115f154755, implement DLG-006 runtime/SYS-009 pose persistence; dispatch newly ready DLG-013. NAR-019 delivery pending actual live owners.
 
 - **Station interaction accepted:** SYS-008499de6e3 done; hull-to-surface query, counter edges and shared loader docking pass all four required direct PlayMode cases (0.2253s bodies). Compile clean, handle18770 terminal0; evidence Logs/playtest/interaction. No Unity active. Next integrate DLG-0037f14ca33. Combat audits runtime prerequisites; economy DEV-011 active; presentation258 completes lifetime review. NAR-019 delivery queued with live-owner gaps preserved.

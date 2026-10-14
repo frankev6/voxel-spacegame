@@ -16,8 +16,8 @@
 | M0 | 0 | 0 | 0 | 0 | 71 | 0 | 71 | 0 |
 | M1 | 1 | 0 | 0 | 0 | 108 | 0 | 109 | 1 |
 | M2 | 9 | 1 | 0 | 0 | 82 | 0 | 92 | 6 |
-| M3 | 83 | 8 | 0 | 0 | 89 | 0 | 180 | 8 |
-| M4 | 12 | 1 | 0 | 0 | 1 | 0 | 14 | 5 |
+| M3 | 82 | 9 | 0 | 0 | 89 | 0 | 180 | 7 |
+| M4 | 11 | 2 | 0 | 0 | 1 | 0 | 14 | 4 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -961,6 +961,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 387 | SPEC-41 Q14: generated dialog metadata defaults | Internal cloned registry snapshot, canonical source/facts hash, stable UTF-8 outputs, append-only line IDs and Edit-mode menus. Real output generation verified. | Tech lead |
 | 388 | SPEC-41 Q15: missing approved dialog sprites | Integrate existing eight metadata identities; leave seven unavailable sprite fields null. DLG-010 stays partial; no art generation or new gate. | Tech lead |
 | 389 | SPEC-70 Q30: diagnostic counter ownership/availability | Use existing owner APIs and explicit unavailable values, canonical JSON, bounded marker list and disposable host-owned recorders/queries. No benchmark runs. | Tech lead |
+| 390 | SPEC-41 Q17: runtime command effect access and memory | ADR-0084 preserves concrete effect identity through guarded access; fail closed on bad table rows. Ordinal visit/raw memory retains exact save values. | Tech lead |
 | 359 | SPEC-31 Q16: initial T2 arrival deadlock | Resolved: before player creation, stream T2 at the requested arrival; use player position afterward. Persisted hulks require completed nearby grids too. T3 still waits for player. | Tech lead |
 | 358 | SPEC-31 Q15: T2 direct prerequisites | Resolved: SYS-003/004, DMG-014, WPN-012 and AI-010 cover required runtime; advisory gates, balance and M4 tasks do not block T2. Keep all functional acceptance and real composition. | Tech lead |
 | 357 | SPEC-31 Q14: T1/T2 scene composition cycle | Resolved: five validated T1 cases close SYS-004; SYS-006 installs the actual loader with T2 arrival readiness. Missing nearby grids still block IsAreaReady; no fake completion or partial production registration. | Tech lead |
@@ -1093,6 +1094,12 @@ The acceleration target remains unmet: Beetle, Frigate, Shuttle and Striker exce
 Medium/large class tuning and the choice of a flyable starter remain unvalidated/unapproved. FLT-010's deliverable is the complete measurement/proposal and applied provisional config; its completion does not claim owner approval or that every balancing target passed.
 
 ## Log
+
+### 2026-10-13 — DLG-006 runtime foundation authored — astra (gpt-6)
+
+- Claimed90cbd07d; dc15f7b0 implements guarded concrete command lookup (ADR-0084/Q390) and deterministic visit/raw memory. Rejects stale/malformed/duplicate compiled commands; no runtime parsing or wrapper that loses terminal/abort identity.
+- Uncompiled/unaccepted. Next service lifecycle, non-reentrant blocking/terminal flow, deterministic rolls and DLGS save, then all seven required functional cases in one batch. spec-required: 7 planned, extra: 0; one advisory fixture remains opt-in. No Unity run for this source.
+- DEV-0117f6f58e remains partial: clean compile/JSON pass, worker corrects actual-frame marker fixture after one failure. Combat277 implements DLG-013; presentation reviews NAR-019. Previous dialog authoring acceptance and current runtime source are progress. No Unity active.
 
 ### 2026-10-13 — DEV-011 integrated; marker fixture correction delegated — astra (gpt-6)
 
