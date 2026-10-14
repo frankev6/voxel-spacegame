@@ -16,7 +16,7 @@ namespace Game.Editor.Art
             "Assets/Game/Content/Config/BrickPool.mat", "Assets/Game/ShipEditor/Rendering/EditorBrick.mat",
             "Assets/Game/Art/_Placeholder/Materials/BrickPlaceholder.mat"
         };
-        public const int Hull = 0, Armour = 1, Engine = 2, Weapon = 3, Power = 4, Shield = 5, Cargo = 6, Utility = 7;
+        public const int Hull = 0, Armour = 1, Engine = 2, Weapon = 3, Power = 4, Shield = 5, Cargo = 6, Utility = 7, XenoTissue = 8, XenoOrgan = 9;
 
         struct Layer
         {
@@ -34,6 +34,9 @@ namespace Game.Editor.Art
             new Layer { Index = Shield, Style = 3, Relief = 1, Metallic = .6f, Override = "3E4A46", Emission = "9FE0C8", Glow = 4 },
             new Layer { Index = Cargo, Style = 4, Relief = 1, Metallic = .4f, Override = "5E6448" },
             new Layer { Index = Utility, Style = 3, Relief = 1, Metallic = .7f, Override = "34362F", Emission = "FFAE4A", Glow = 2 },
+            // ADR-0115 Xeno, colourway Obsidian & acid (§7): style 5 shades grown tissue; row 0 is the vein colour, Windows = organ glow.
+            new Layer { Index = XenoTissue, Style = 5, Windows = 0, Metallic = .05f, Override = "121315", Emission = "B8FF2E", Glow = 1 },
+            new Layer { Index = XenoOrgan, Style = 5, Windows = .45f, Metallic = .05f, Override = "121315", Emission = "B8FF2E", Glow = 1 },
         };
 
         [MenuItem("Game/Art/Bake NOCTURNE Brick Look")]
@@ -85,6 +88,7 @@ namespace Game.Editor.Art
         static int LayerFor(string id)
         {
             if (id == "block_missing") return -1;
+            if (id.Contains("xeno")) return id == "block_xeno_tissue" || id == "block_xeno_sac" ? XenoTissue : XenoOrgan;
             if (id.StartsWith("block_hull", StringComparison.Ordinal)) return Hull;
             if (id.Contains("thruster")) return Engine;
             if (id.StartsWith("weapon_", StringComparison.Ordinal)) return Weapon;

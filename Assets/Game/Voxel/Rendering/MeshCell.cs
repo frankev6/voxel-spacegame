@@ -18,6 +18,10 @@ namespace Game.Voxel.Rendering
         public static int Class(uint c) => (int)(c & 3);
         public static int Shape(uint c) => (int)((c >> 2) & 7);
         public static int Orient(uint c) => (int)((c >> 5) & 31);
+        public const int XenoShape = 5;
+        public static bool IsXeno(uint c) => (c & 3) == 1 && ((c >> 2) & 7) == XenoShape;
+        /// <summary>ADR-0115: a Xeno cell's orient field is its depth in eighths of a cell.</summary>
+        public static float XenoDepthCells(uint c) => ((c >> 5) & 31) / 8f;
         public static int Layer(uint c) => (int)((c >> 10) & 63);
         public static int Colour(uint c) => (int)((c >> 16) & 255);
         public static int Damage(uint c) => (int)((c >> 24) & 3);

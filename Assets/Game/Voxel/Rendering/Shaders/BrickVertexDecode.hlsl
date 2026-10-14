@@ -103,20 +103,56 @@ struct BrickVertex
     float ao;
     uint damage;
     uint scorched;
+    float3 normal, tangent;   // face table normal/tangent, or the smooth Xeno normal (ADR-0115)
+    uint smooth;
+    float xenoDepth;          // cells below the grown surface of the deepest tissue sample (exposed flesh glows)
 };
+
+float3 BrickOctDecode(float2 e)
+{
+    e = e * 2 - 1;
+    float3 n = float3(e.x, 1 - abs(e.x) - abs(e.y), e.y);
+    if (n.y < 0) n.xz = (1 - abs(n.zx)) * (n.xz >= 0 ? 1 : -1);
+    return normalize(n);
+}
+// Shared decode of the packed bytes (positions, normal byte, high Lo byte, flags) for both drawing paths.
+void BrickDecodeShared(inout BrickVertex v, uint3 position, uint normalByte, uint loTop, uint flags)
+{
+    v.smooth = (flags >> 5u) & 1u;
+    if (v.smooth != 0)
+    {
+        v.positionCells = position / 8.0 - .5;
+        v.normal = BrickOctDecode(float2(normalByte, loTop) / 255.0);
+        float3 helper = abs(v.normal.y) < .95 ? float3(0, 1, 0) : float3(1, 0, 0);
+        v.tangent = normalize(cross(helper, v.normal));
+        v.xenoDepth = ((flags & 3u) | (((flags >> 6u) & 3u) << 2u)) / 4.0;
+        v.ao = 1; v.normalIndex = 2; v.scorched = 0;
+    }
+    else
+    {
+        v.positionCells = position * 0.5;
+        v.normal = kBrickNormals[normalByte]; v.tangent = kBrickTangents[normalByte];
+        v.xenoDepth = 0; v.ao = (flags & 3u) / 3.0; v.normalIndex = normalByte; v.scorched = (flags >> 4u) & 1u;
+    }
+    v.damage = (flags >> 2u) & 3u;
+}
 
 BrickVertex DecodeBrickVertex(float4 posRaw, float4 uvRaw)
 {
     uint4 attributes = (uint4)round(uvRaw * 255.0);
-    BrickVertex v;
-    v.positionCells = round(posRaw.xyz * 255.0) * 0.5;
-    v.normalIndex = attributes.x;
+    uint4 position = (uint4)round(posRaw * 255.0);
+    BrickVertex v = (BrickVertex)0;
     v.layer = attributes.y;
     v.colour = attributes.z;
-    v.ao = (attributes.w & 3u) / 3.0;
-    v.damage = (attributes.w >> 2u) & 3u;
-    v.scorched = (attributes.w >> 4u) & 1u;
+    BrickDecodeShared(v, position.xyz, attributes.x, position.w, attributes.w);
     return v;
+}
+
+// Smooth surfaces have no face plane: project on the dominant axis of the normal.
+float2 BrickSmoothUV(float3 positionCells, float3 n)
+{
+    float3 a = abs(n);
+    return a.x > a.y && a.x > a.z ? positionCells.zy : a.y > a.z ? positionCells.xz : positionCells.xy;
 }
 
 float2 BrickFaceUV(float3 positionCells, uint normalIndex, float tileCells)

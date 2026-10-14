@@ -1021,3 +1021,6 @@ cue_stinger_message_from_yourself,definition,Assets/Game/Content/Audio/cue_sting
 cue_stinger_silence_presence,definition,Assets/Game/Content/Audio/cue_stinger_silence_presence.asset,cue_stinger_silence_presence,,AST-032,own,-,planned
 cue_stinger_vanguard,definition,Assets/Game/Content/Audio/cue_stinger_vanguard.asset,cue_stinger_vanguard,,AST-032,own,-,planned
 cue_stinger_whisper,definition,Assets/Game/Content/Audio/cue_stinger_whisper.asset,cue_stinger_whisper,,AST-032,own,-,planned
+MSH_xeno_sac,mesh,Assets/Game/Art/Xeno/Meshes/xeno_sac.asset,block_xeno_heart,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
+MSH_xeno_eye,mesh,Assets/Game/Art/Xeno/Meshes/xeno_eye.asset,weapon_xeno_spitter,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
+MSH_xeno_vent,mesh,Assets/Game/Art/Xeno/Meshes/xeno_vent.asset,block_xeno_fin,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review

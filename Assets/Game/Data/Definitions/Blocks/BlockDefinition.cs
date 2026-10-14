@@ -142,16 +142,16 @@ namespace Game.Data.Definitions
             int count = shapes?.Length ?? 0;
             if (count != 0 && count != (cells?.Length ?? 0))
             { scope.Error("DATA-E051", nameof(shapes), "Explicit shapes must be parallel to cells."); return; }
-            bool valuesOk = (byte)shape <= (byte)Game.Data.Blocks.BlockShape.LongSlopeLow;
+            bool valuesOk = (byte)shape <= (byte)Game.Data.Blocks.BlockShape.Xeno;
             for (int i = 0; i < count; i++) valuesOk &= (byte)shapes[i] <= (byte)Game.Data.Blocks.BlockShape.LongSlopeLow;
-            if (!valuesOk) { scope.Error("DATA-E050", nameof(shapes), "Only the five approved cell shapes are valid."); return; }
+            if (!valuesOk) { scope.Error("DATA-E050", nameof(shapes), "Only the five approved cell shapes and Xeno tissue are valid."); return; }
             if (kind != Game.Data.Blocks.BlockKind.Structural)
             {
                 if (count != 0) scope.Error("DATA-E052", nameof(shapes), "Per-cell shape overrides are structural only.");
                 return;
             }
             if (cells == null || cells.Length == 0) return; // footprint validation reports this
-            bool approved = cells.Length == 1 && GetShape(0) <= Game.Data.Blocks.BlockShape.HipCorner;
+            bool approved = cells.Length == 1 && (GetShape(0) <= Game.Data.Blocks.BlockShape.HipCorner || GetShape(0) == Game.Data.Blocks.BlockShape.Xeno);
             if (cells.Length == 2 && shape == Game.Data.Blocks.BlockShape.LongSlopeHigh)
             {
                 int high = System.Array.IndexOf(cells, UnityEngine.Vector3Int.zero);

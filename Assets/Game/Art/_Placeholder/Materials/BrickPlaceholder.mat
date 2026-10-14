@@ -64,6 +64,7 @@ Material:
     - _AOStrength: 0.75
     - _CrackTiling: 2
     - _Dissolve01: 0
+    - _DraftCellsValid: 0
     - _EmberFadeSeconds: 8
     - _EmberIntensity: 4
     - _EmissiveIntensity: 1

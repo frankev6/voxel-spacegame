@@ -4,6 +4,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "BrickMaterial.hlsl"
 #include "NocturnePlating.hlsl"
+#include "XenoSurface.hlsl"
 
 struct BrickSurfaceInput
 {
@@ -13,6 +14,7 @@ struct BrickSurfaceInput
     uint layer, colour, damage, scorched;
     float ao;
     float3 faceNormal;   // grid-space face normal (QA-001 plating); positionCells and uv are grid-local
+    float xenoDepth;     // ADR-0115: cells below the grown surface at this smooth vertex (0 for block faces)
 };
 float BrickHash(float2 p)
 {
@@ -53,7 +55,14 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     half3 paint = p2.a > .5h ? p3.rgb : BrickPaint(i.colour);
     albedo = lerp(albedo, paint * Luminance(albedo) / max(mean, .02h), mask.b);
     PlatingResult plating = (PlatingResult)0;
-    if (style > 0)
+    half3 xenoEmission = 0;
+    if (style == 5)
+    {
+        // ADR-0115 Xeno tissue: row 3 shell colour, row 0 vein colour, row 2 g = organ glow (sacs, hearts).
+        XenoResult xeno = XenoShade(i.positionCells, (half)i.xenoDepth, p2.g, p3.rgb, p3.rgb * 2.2h, p0.rgb, half3(.66, 1, .144));
+        albedo = xeno.albedo; mask.r = xeno.metallic; mask.g = xeno.smoothness; xenoEmission = xeno.emission;
+    }
+    else if (style > 0)
     {
         float3 n = normalize(i.faceNormal);
         float faceId = dot(abs(n), float3(1, 2, 3)) * 31 + round(dot(i.positionCells, n) * 2);
@@ -104,7 +113,7 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     half fresnel = 1 - saturate(dot(normalWS, GetWorldSpaceNormalizeViewDir(i.positionWS)));
     half powered = Brick_GridPowered();
     half3 layerEmission = p0.a > .5 ? Brick_TeamAccent().rgb * max(p0.r, max(p0.g, p0.b)) : p0.rgb;
-    s.emission = layerEmission * (mask.a + plating.emission) * _EmissiveIntensity * powered;
+    s.emission = layerEmission * (mask.a + plating.emission) * _EmissiveIntensity * powered + xenoEmission * _EmissiveIntensity;
     if (_SeamEmission > 0 && i.layer < 16)
     {
         float2 panel = frac(uv); float d = min(min(panel.x, 1 - panel.x), min(panel.y, 1 - panel.y));

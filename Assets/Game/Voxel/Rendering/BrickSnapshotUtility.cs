@@ -51,7 +51,9 @@ namespace Game.Voxel.Rendering
                 if (footprintIndex < 0) return Missing(cell, ref warnings);
                 shape = (int)def.GetShape(footprintIndex);
             }
-            if (shape > (int)BlockShape.LongSlopeLow) return Missing(cell, ref warnings);
+            if (shape > (int)BlockShape.Xeno) return Missing(cell, ref warnings);
+            // ADR-0115: Xeno tissue has no orientation; its orient field carries the depth (eighths of a cell, 0..31).
+            if (shape == (int)BlockShape.Xeno) orient = (byte)((cell.Flags & XenoDepth.Mask) >> (XenoDepth.Shift + 1));
             isPropRoot = def.Kind == BlockKind.Prop && (!cell.IsInstance || (cell.Flags & (byte)CellFlags.InstanceRoot) != 0);
             prop = new BrickPropInstance { Block = block, Orient = orient, Color = colour };
             return MeshCell.Encode(def.Kind == BlockKind.Structural ? 1 : 2, def.Kind == BlockKind.Structural ? shape : 0,

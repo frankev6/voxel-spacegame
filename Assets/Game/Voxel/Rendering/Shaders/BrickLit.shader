@@ -70,6 +70,7 @@ Shader "Game/Voxel/BrickLit"
             float3 bitangentWS:TEXCOORD4;
             float2 uv:TEXCOORD5;
             nointerpolation float3 faceNormal:TEXCOORD8;
+            float xenoDepth:TEXCOORD9;
             nointerpolation uint4 attributes:TEXCOORD6;
             float ao:TEXCOORD7;
             UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -84,10 +85,10 @@ Shader "Game/Voxel/BrickLit"
             // QA-001: the editor draft supplies its world-to-grid-cells matrix so plating is continuous across bricks.
             o.positionCells=_DraftCellsValid>.5?mul(_DraftWorldToCells,float4(o.positionWS,1)).xyz:b.positionCells;
             o.positionCS=TransformWorldToHClip(o.positionWS);
-            float3 n=kBrickNormals[b.normalIndex], t=kBrickTangents[b.normalIndex]; o.faceNormal=n;
+            float3 n=b.normal, t=b.tangent; o.faceNormal=n; o.xenoDepth=b.xenoDepth;
             o.normalWS=TransformObjectToWorldNormal(n); o.tangentWS=TransformObjectToWorldDir(t);
             o.bitangentWS=TransformObjectToWorldDir(cross(n,t));
-            o.uv=BrickFaceUV(o.positionCells,b.normalIndex,1);
+            o.uv=b.smooth!=0?BrickSmoothUV(o.positionCells,n):BrickFaceUV(o.positionCells,b.normalIndex,1);
             o.attributes=uint4(b.layer,b.colour,b.damage,b.scorched); o.ao=b.ao;
             return o;
         }
@@ -97,7 +98,7 @@ Shader "Game/Voxel/BrickLit"
             i.positionCells=v.positionCells; i.positionWS=v.positionWS; i.positionCS=v.positionCS;
             i.normalWS=normalize(v.normalWS); i.tangentWS=normalize(v.tangentWS); i.bitangentWS=normalize(v.bitangentWS);
             i.uv=v.uv; i.layer=v.attributes.x; i.colour=v.attributes.y; i.damage=v.attributes.z; i.scorched=v.attributes.w; i.ao=v.ao;
-            i.faceNormal=v.faceNormal;
+            i.faceNormal=v.faceNormal; i.xenoDepth=v.xenoDepth;
             return i;
         }
         half4 BrickFrag(BrickVaryings v):SV_Target

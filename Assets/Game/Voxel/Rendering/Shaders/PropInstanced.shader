@@ -155,8 +155,14 @@ Shader "Game/Voxel/PropInstanced"
             // in mesh space; the legacy meshes carry no paint channels, so their summed paint weights read as white.
             uint layer=(uint)round(Brick_PropLayer());
             half4 l2=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,2)), l3=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,3));
-            half glowSlot=0;
-            if(l2.r>.5h)
+            half glowSlot=0; half3 xenoGlow=0;
+            if(round(l2.r)==5)
+            {
+                // ADR-0115 organs (hearts, spitters, vents): Xeno tissue shading in mesh space, glowing by the layer's amount.
+                XenoResult x=XenoShade(v.objectPos*6,0,l2.g,l3.rgb,l3.rgb*2.2h,LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,0)).rgb,half3(.66,1,.144));
+                s.albedo=x.albedo; s.metallic=x.metallic; s.smoothness=x.smoothness; xenoGlow=x.emission;
+            }
+            else if(l2.r>.5h)
             {
                 float3 on=normalize(v.objectNormal), an=abs(on);
                 float2 puv=(an.x>an.y&&an.x>an.z?v.objectPos.zy:an.y>an.z?v.objectPos.xz:v.objectPos.xy)*2.5;
@@ -171,6 +177,7 @@ Shader "Game/Voxel/PropInstanced"
             half powered=Brick_Powered();
             s.emission=Brick_TeamAccent().rgb*mask.a*_EmissiveIntensity*powered*blink*(1+Brick_Throttle());
             s.emission+=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,0)).rgb*glowSlot*_EmissiveIntensity*powered*(.6+Brick_Throttle());
+            s.emission+=xenoGlow*_EmissiveIntensity*(1+Brick_Throttle());
             half fade=_EmberFadeSeconds>0 ? saturate(1-(_Time.y-Brick_LastHitTime())/_EmberFadeSeconds) : 0;
             s.emission+=_EmberColor.rgb*_EmberIntensity*(fade*crack*(stage==3 ? 1 : .35)+dissolve);
             float3 n=normalize(s.normalTS.x*v.tangentWS+s.normalTS.y*v.bitangentWS+s.normalTS.z*v.normalWS);

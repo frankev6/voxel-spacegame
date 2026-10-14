@@ -18,7 +18,7 @@ namespace Game.Voxel.Rendering
             public uint Add(PackedBrickVertex vertex)
             {
                 uint index = (uint)Vertices.Length; Vertices.Add(vertex);
-                float3 position = new float3(vertex.Lo & 255, (vertex.Lo >> 8) & 255, (vertex.Lo >> 16) & 255) * .5f;
+                float3 position = vertex.Position;
                 Min = math.min(Min, position); Max = math.max(Max, position); return index;
             }
         }
@@ -86,6 +86,7 @@ namespace Game.Voxel.Rendering
                     }
                 }
             }
+            MeshXeno(snapshot, 1, ref output);
             min = vertices.Length == 0 ? float3.zero : output.Min; max = vertices.Length == 0 ? float3.zero : output.Max;
         }
         static void BuildMasks(NativeArray<uint> snapshot, ref BrickShapeTables shapes, NativeArray<uint> masks)
@@ -94,6 +95,8 @@ namespace Game.Voxel.Rendering
             {
                 uint cell = snapshot[MeshCell.SnapIndex(x,y,z)]; int cls = MeshCell.Class(cell); if (cls == 0) continue;
                 int row = y + 1 + 18 * (z + 1); uint bit = 1u << (x + 1); masks[row] |= bit;
+                // ADR-0115: Xeno tissue hides neighbouring faces like a cube but emits none; the surface-nets pass shells it.
+                if (MeshCell.IsXeno(cell)) { for (int f = 0; f < 6; f++) masks[(2 + f) * Rows + row] |= bit; continue; }
                 int table = MeshCell.Shape(cell) * 24 + MeshCell.Orient(cell);
                 int full = cls == 1 ? shapes.FullFaces[table] : 63;
                 for (int f = 0; f < 6; f++) if ((full & (1 << f)) != 0) masks[(2 + f) * Rows + row] |= bit;
@@ -163,9 +166,130 @@ namespace Game.Voxel.Rendering
                 BuildFaceKeys(snapshot, super, direction, slice, faceKeys);
                 Greedy(faceKeys, direction, slice, ref output);
             }
+            MeshXeno(snapshot, 2, ref output);
             min = vertices.Length == 0 ? float3.zero : output.Min; max = vertices.Length == 0 ? float3.zero : output.Max;
         }
         static int SuperIndex(int3 p) => p.x + 8 * p.y + 64 * p.z;
+
+        // ---------------------------------------------------------------------------------------------------------------
+        // ADR-0115 Xeno surface nets. Samples sit at cell centres: air +0.5, Xeno tissue -(depth + 1/16), other solids -0.5
+        // (functional cells inside a Xeno brick count as tissue so organs never leave holes). A vertex sits in every dual
+        // cube with a sign change, at the mean of its edge crossings; a quad is emitted for each sign-changing edge whose
+        // inside end is tissue, owned by the brick holding the edge's lower sample. Stride 2 meshes LOD1 from 2x2x2 means.
+        static float XenoSample(NativeArray<uint> snapshot, int3 s, int stride, bool organs, out uint value, out bool tissue)
+        {
+            float sum = 0; int solid = 0, count = 0; value = 0; tissue = false;
+            for (int i = 0; i < stride * stride * stride; i++)
+            {
+                int3 c = s * stride + new int3(i % stride, (i / stride) % stride, i / (stride * stride));
+                c = math.clamp(c, -1, 16); count++;
+                uint v = snapshot[MeshCell.SnapIndex(c.x, c.y, c.z)]; int cls = MeshCell.Class(v);
+                if (cls == 0) { sum += .5f; continue; }
+                bool xeno = MeshCell.IsXeno(v) || organs && cls == 2;
+                sum -= xeno ? (MeshCell.IsXeno(v) ? MeshCell.XenoDepthCells(v) : .5f) + 1f / 16 : .5f; solid++;
+                if (xeno && (!tissue || MeshCell.IsXeno(v) && !MeshCell.IsXeno(value))) { value = v; tissue = true; }
+            }
+            return stride == 1 ? sum : solid * 2 >= count ? math.min(sum / count, -1f / 16) : math.max(sum / count, 1f / 16);
+        }
+        static void MeshXeno(NativeArray<uint> snapshot, int stride, ref Output output)
+        {
+            bool any = false;
+            for (int i = 0; i < MeshCell.SnapCells && !any; i++) any = MeshCell.IsXeno(snapshot[i]);
+            if (!any) return;
+            int n = 16 / stride;                       // samples -1..n (n + 2 per axis)
+            int side = n + 2;
+            int cubes = side - 1;                      // cube min corners -1..n-1
+            var field = new NativeArray<float>(side * side * side, Allocator.Temp);
+            var values = new NativeArray<uint>(side * side * side, Allocator.Temp);
+            var tissue = new NativeArray<bool>(side * side * side, Allocator.Temp);
+            var vertexOf = new NativeArray<int>(cubes * cubes * cubes, Allocator.Temp);
+            try
+            {
+                for (int z = -1; z <= n; z++) for (int y = -1; y <= n; y++) for (int x = -1; x <= n; x++)
+                {
+                    int k = (x + 1) + side * (y + 1) + side * side * (z + 1);
+                    field[k] = XenoSample(snapshot, new int3(x, y, z), stride, true, out uint v, out bool t);
+                    values[k] = v; tissue[k] = t;
+                }
+                MeshXenoQuads(field, values, tissue, vertexOf, side, cubes, n, stride, ref output);
+            }
+            finally { field.Dispose(); values.Dispose(); tissue.Dispose(); vertexOf.Dispose(); }
+        }
+        static void MeshXenoQuads(NativeArray<float> field, NativeArray<uint> values, NativeArray<bool> tissue, NativeArray<int> vertexOf,
+            int side, int cubes, int n, int stride, ref Output output)
+        {
+            for (int i = 0; i < vertexOf.Length; i++) vertexOf[i] = -1;
+            float half = stride * .5f;
+            for (int z = -1; z < n; z++) for (int y = -1; y < n; y++) for (int x = -1; x < n; x++)
+            {
+                float3 crossing = 0; int crossings = 0; uint attribute = 0; bool haveAttribute = false; float shallowest = float.MaxValue;
+                FixedList64Bytes<float> corner = default;
+                for (int c = 0; c < 8; c++)
+                {
+                    int3 s = new int3(x + (c & 1), y + ((c >> 1) & 1), z + (c >> 2));
+                    int k = (s.x + 1) + side * (s.y + 1) + side * side * (s.z + 1);
+                    corner.Add(field[k]);
+                    if (field[k] < 0 && tissue[k])
+                    {
+                        if (!haveAttribute) { attribute = values[k]; haveAttribute = true; }
+                        // The shallowest tissue corner says how deep this surface cuts: ~0 on the grown shell, > 1 in a wound.
+                        shallowest = math.min(shallowest, -field[k]);
+                    }
+                }
+                if (!haveAttribute) continue;
+                for (int e = 0; e < 12; e++)
+                {
+                    int axis = e / 4, a = e % 4;
+                    int3 p0 = axis == 0 ? new int3(0, a & 1, a >> 1) : axis == 1 ? new int3(a & 1, 0, a >> 1) : new int3(a & 1, a >> 1, 0);
+                    int3 p1 = p0; p1[axis] = 1;
+                    float v0 = corner[p0.x + 2 * p0.y + 4 * p0.z], v1 = corner[p1.x + 2 * p1.y + 4 * p1.z];
+                    if (v0 < 0 == v1 < 0) continue;
+                    float t = v0 / (v0 - v1);
+                    crossing += math.lerp((float3)p0, (float3)p1, t); crossings++;
+                }
+                if (crossings == 0) continue;
+                float3 local = crossing / crossings;
+                // Trilinear gradient of the field at the vertex: points from tissue (negative) to air (positive), i.e. outward.
+                float3 l = local, il = 1 - local;
+                float3 g = new float3(
+                    (corner[1] - corner[0]) * il.y * il.z + (corner[3] - corner[2]) * l.y * il.z + (corner[5] - corner[4]) * il.y * l.z + (corner[7] - corner[6]) * l.y * l.z,
+                    (corner[2] - corner[0]) * il.x * il.z + (corner[3] - corner[1]) * l.x * il.z + (corner[6] - corner[4]) * il.x * l.z + (corner[7] - corner[5]) * l.x * l.z,
+                    (corner[4] - corner[0]) * il.x * il.y + (corner[5] - corner[1]) * l.x * il.y + (corner[6] - corner[2]) * il.x * l.y + (corner[7] - corner[3]) * l.x * l.y);
+                float3 normal = math.lengthsq(g) > 1e-10f ? math.normalize(g) : new float3(0, 1, 0);
+                // Sample s sits at the centre of its (stride-sized) cell: brick position = (s + local) * stride + stride/2.
+                float3 position = (new float3(x, y, z) + local) * stride + half;
+                int depth = (int)math.round(math.max(0, shallowest - 1f / 16) * 4);
+                vertexOf[(x + 1) + cubes * (y + 1) + cubes * cubes * (z + 1)] = (int)output.Add(PackedBrickVertex.PackSmooth(position, normal,
+                    MeshCell.Layer(attribute), MeshCell.Colour(attribute), depth, MeshCell.Damage(attribute)));
+            }
+            for (int z = 0; z < n; z++) for (int y = 0; y < n; y++) for (int x = 0; x < n; x++)
+            {
+                int k0 = (x + 1) + side * (y + 1) + side * side * (z + 1);
+                for (int axis = 0; axis < 3; axis++)
+                {
+                    int3 q = new int3(x, y, z); q[axis]++;
+                    int k1 = (q.x + 1) + side * (q.y + 1) + side * side * (q.z + 1);
+                    float v0 = field[k0], v1 = field[k1];
+                    if (v0 < 0 == v1 < 0) continue;
+                    bool insideFirst = v0 < 0;
+                    if (!(insideFirst ? tissue[k0] : tissue[k1])) continue;
+                    int u = (axis + 1) % 3, v = (axis + 2) % 3;
+                    int4 ids = default; bool ok = true;
+                    for (int c = 0; c < 4; c++)
+                    {
+                        int3 cube = new int3(x, y, z); cube[u] -= (c == 1 || c == 2) ? 1 : 0; cube[v] -= c >= 2 ? 1 : 0;
+                        if (math.any(cube < -1) || math.any(cube >= n)) { ok = false; break; }
+                        int id = vertexOf[(cube.x + 1) + cubes * (cube.y + 1) + cubes * cubes * (cube.z + 1)];
+                        if (id < 0) { ok = false; break; }
+                        ids[c] = id;
+                    }
+                    if (!ok) continue;
+                    // ids walk (0,0) -> (-u) -> (-u,-v) -> (-v) around the edge; flip so the quad faces the outside.
+                    if (insideFirst) { Triangle((uint)ids.x, (uint)ids.y, (uint)ids.z, ref output); Triangle((uint)ids.x, (uint)ids.z, (uint)ids.w, ref output); }
+                    else { Triangle((uint)ids.x, (uint)ids.z, (uint)ids.y, ref output); Triangle((uint)ids.x, (uint)ids.w, (uint)ids.z, ref output); }
+                }
+            }
+        }
         static void Downsample(NativeArray<uint> snapshot, NativeArray<uint> super)
         {
             for (int z = 0; z < 8; z++) for (int y = 0; y < 8; y++) for (int x = 0; x < 8; x++)
@@ -175,7 +299,7 @@ namespace Game.Voxel.Rendering
                 {
                     uint child = snapshot[MeshCell.SnapIndex(2*x+(c&1), 2*y+((c>>1)&1), 2*z+(c>>2))];
                     int cls = MeshCell.Class(child); if (cls != 0) solids++;
-                    if (cls == 1) keys.Add((uint)(MeshCell.Layer(child) * 256 + MeshCell.Colour(child)));
+                    if (cls == 1 && !MeshCell.IsXeno(child)) keys.Add((uint)(MeshCell.Layer(child) * 256 + MeshCell.Colour(child)));
                 }
                 if (solids < 4) continue;
                 uint best = uint.MaxValue; int bestCount = 0;

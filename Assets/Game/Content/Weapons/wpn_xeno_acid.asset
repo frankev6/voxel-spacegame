@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2391fa89db9241018145925faab91112, type: 3}
+  m_Name: wpn_xeno_acid
+  m_EditorClassIdentifier: 
+  id: wpn_xeno_acid
+  formerIds: []
+  displayName: Acid spitter
+  delivery: 0
+  damageType: 0
+  damage: 45
+  penetrationCells: 1
+  explosionRadius: 0
+  explosionDamage: 0
+  explodeOnExpire: 0
+  impulsePerHit: 120
+  fireRate: 1.6
+  burstCount: 1
+  burstInterval: 0
+  pelletsPerRound: 1
+  spreadDeg: 3
+  projectileSpeed: 340
+  projectileRadius: 0.1
+  lifetimeMin: 1.5
+  lifetimeMax: 1.5
+  homingTurnRateDeg: 0
+  beamRange: 0
+  beamPulseSeconds: 0.5
+  beamWidth: 0.3
+  traverseHalfArcDeg: 5
+  traverseRateDeg: 360
+  maxElevationDeg: 20
+  fireConeDeg: 3
+  powerDraw: 1.5
+  defaultFireGroups: 1
+  visual: 0
+  tracerColor: {r: 0.72, g: 1, b: 0.18, a: 1}
+  fireCue: {fileID: 11400000, guid: 284a5183071d5443bb21f9a5eec78c66, type: 2}
+  muzzleFx: {fileID: 0}
+  hitFx: {fileID: 0}
+  deliveryData:
+    rid: -2
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }

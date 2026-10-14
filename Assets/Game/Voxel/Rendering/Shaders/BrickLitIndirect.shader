@@ -72,14 +72,14 @@ Shader "Game/Voxel/BrickLitIndirect"
             nointerpolation uint attributes:TEXCOORD6;
             half ao:TEXCOORD7;
             nointerpolation half3 faceNormal:TEXCOORD8;
+            half xenoDepth:TEXCOORD9;
         };
         BrickVertex DecodePoolVertex(uint2 packed)
         {
             // Raw buffers already contain bytes: avoid the registered mesh's UNorm conversion/round trip.
-            BrickVertex b;
-            b.positionCells=float3(packed.x&255u,(packed.x>>8)&255u,(packed.x>>16)&255u)*.5;
-            b.normalIndex=packed.y&255u; b.layer=(packed.y>>8)&255u; b.colour=(packed.y>>16)&255u;
-            b.ao=((packed.y>>24)&3u)/3.0; b.damage=(packed.y>>26)&3u; b.scorched=(packed.y>>28)&1u;
+            BrickVertex b=(BrickVertex)0;
+            b.layer=(packed.y>>8)&255u; b.colour=(packed.y>>16)&255u;
+            BrickDecodeShared(b,uint3(packed.x&255u,(packed.x>>8)&255u,(packed.x>>16)&255u),packed.y&255u,packed.x>>24,packed.y>>24);
             return b;
         }
         BrickVaryings BrickVert(BrickAttributes a)
@@ -93,9 +93,9 @@ Shader "Game/Voxel/BrickLitIndirect"
             float3 gridCells=b.positionCells+brickToWorld[3].xyz;
             o.positionCells=gridCells; o.positionWS=mul(brickToWorld,float4(b.positionCells,1)).xyz;
             o.positionCS=TransformWorldToHClip(o.positionWS);
-            float3 n=kBrickNormals[b.normalIndex], t=kBrickTangents[b.normalIndex];
+            float3 n=b.normal, t=b.tangent;
             o.normalWS=normalize(mul((float3x3)brickToWorld,n)); o.tangentWS=normalize(mul((float3x3)brickToWorld,t));
-            o.uv=BrickFaceUV(gridCells,b.normalIndex,1); o.faceNormal=n;
+            o.uv=b.smooth!=0?BrickSmoothUV(gridCells,n):BrickFaceUV(gridCells,b.normalIndex,1); o.faceNormal=n; o.xenoDepth=b.xenoDepth;
             o.attributes=packed.y>>8; o.ao=b.ao;
             return o;
         }
@@ -106,7 +106,7 @@ Shader "Game/Voxel/BrickLitIndirect"
             i.normalWS=normalize(v.normalWS); i.tangentWS=normalize(v.tangentWS); i.bitangentWS=normalize(cross(i.normalWS,i.tangentWS));
             // Brick transforms have positive uniform scale; the orthonormal bitangent is derived, not interpolated again.
             i.uv=v.uv; i.layer=v.attributes&255u; i.colour=(v.attributes>>8)&255u; i.damage=(v.attributes>>18)&3u; i.scorched=(v.attributes>>20)&1u; i.ao=v.ao;
-            i.faceNormal=v.faceNormal;
+            i.faceNormal=v.faceNormal; i.xenoDepth=v.xenoDepth;
             return i;
         }
         half4 BrickFrag(BrickVaryings v):SV_Target
@@ -144,7 +144,7 @@ Shader "Game/Voxel/BrickLitIndirect"
             BrickDepthVaryings o;
             BrickVertex b; float4x4 brickToWorld; BrickGeometry(a.vertexID,b,brickToWorld);
             float3 positionWS=mul(brickToWorld,float4(b.positionCells,1)).xyz;
-            float3 normalWS=normalize(mul((float3x3)brickToWorld,kBrickNormals[b.normalIndex]));
+            float3 normalWS=normalize(mul((float3x3)brickToWorld,b.normal));
 #if defined(_CASTING_PUNCTUAL_LIGHT_SHADOW)
             float3 direction=normalize(_LightPosition-positionWS);
 #else
@@ -159,8 +159,8 @@ Shader "Game/Voxel/BrickLitIndirect"
             BrickNormalVaryings o;
             BrickVertex b; float4x4 brickToWorld; BrickGeometry(a.vertexID,b,brickToWorld);
             o.positionCS=TransformWorldToHClip(mul(brickToWorld,float4(b.positionCells,1)).xyz);
-            o.normalWS=normalize(mul((float3x3)brickToWorld,kBrickNormals[b.normalIndex]));
-            o.tangentWS=normalize(mul((float3x3)brickToWorld,kBrickTangents[b.normalIndex]));
+            o.normalWS=normalize(mul((float3x3)brickToWorld,b.normal));
+            o.tangentWS=normalize(mul((float3x3)brickToWorld,b.tangent));
             o.uv=BrickFaceUV(b.positionCells+brickToWorld[3].xyz,b.normalIndex,1); o.layer=b.layer;
             return o;
         }

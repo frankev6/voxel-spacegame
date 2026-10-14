@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: block_xeno_fin
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: block_xeno_fin
+  formerIds: []
+  displayName: Xeno fin
+  description: A pulsing propulsion vent.
+  category: 0
+  rarity: 0
+  basePrice: 0
+  maxStack: 999
+  icon: {fileID: 1773087282, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  tradeable: 0
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  - {x: 1, y: 0, z: 0}
+  - {x: 2, y: 0, z: 0}
+  - {x: 1, y: 1, z: 0}
+  - {x: 1, y: -1, z: 0}
+  - {x: 0, y: 0, z: 1}
+  - {x: 1, y: 0, z: 1}
+  - {x: 2, y: 0, z: 1}
+  - {x: 1, y: 1, z: 1}
+  - {x: 1, y: -1, z: 1}
+  shapes: 
+  clearance: []
+  allowedOrientations:
+    Bits: 65535
+  attachFaces: 47
+  mirrorPartner: {fileID: 0}
+  cellHp: 100
+  functionHp: 1000
+  cellMass: 30
+  armorClass: 0
+  materialLayer: 9
+  propMesh: {fileID: 4300000, guid: 4705ee82704ed48389d69d12cca7d646, type: 2}
+  blockCategory: 3
+  modules:
+  - rid: 4
+  grantedAbilities:
+  - {fileID: 11400000, guid: 35ab7995a9ebc44388dc90283da496f5, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 4
+      type: {class: ThrusterModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          ThrustNewtons: 90000
+          PowerDraw: 0
