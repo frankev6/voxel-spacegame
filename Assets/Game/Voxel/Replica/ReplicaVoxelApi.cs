@@ -59,6 +59,8 @@ namespace Game.Voxel.Replica
             }
         }
 
+        const int BurstWriteThreshold = 64;
+
         /// <summary>Applies one brick's replicated writes. Returns false when the brick does not exist here (a desync). Removed cells are
         /// appended to <paramref name="removed"/> for debris, VFX and audio; emptied bricks are destroyed like the host's resolver does.</summary>
         public static bool WriteBrick(EntityManager em, Entity root, int3 coord, NativeArray<ReplicaCellWrite> writes, NativeList<CellRemoved> removed,
@@ -78,7 +80,20 @@ namespace Game.Voxel.Replica
             var dirty = em.GetComponentData<BrickDirty>(entity);
             var dense = em.GetBuffer<BrickCells>(entity); var sparse = em.GetBuffer<BrickSparseCells>(entity); var mask = em.GetBuffer<BrickSolidMask>(entity);
             bool changed = false; BlockFaceMask neighbours = default;
-            for (int i = 0; i < writes.Length; i++)
+            if (writes.Length > BurstWriteThreshold)
+            {
+                // Whole bricks and big diffs: dense, in Burst. Managed, a 4096-cell brick cost a guest 3-4 ms.
+                if (dense.Length == 0)
+                {
+                    dense.Resize(BrickMath.CellsPerBrick, NativeArrayOptions.ClearMemory);
+                    foreach (var entry in sparse) dense[entry.Local] = new BrickCells { Value = entry.Value };
+                    sparse.Clear(); sparse.TrimExcess();
+                }
+                var result = ReplicaJobs.WriteDense(dense, mask, writes, palette, instances, brick, dirty, grid.Revision + 1, root, coord, grid.CellSize,
+                    transform, velocity, quiet, removed, touchedInstances);
+                brick = result.Brick; dirty = result.Dirty; changed = result.Changed != 0; neighbours = result.Neighbours;
+            }
+            else for (int i = 0; i < writes.Length; i++)
             {
                 int local = writes[i].Local; if (local >= BrickMath.CellsPerBrick) continue;
                 var old = BrickWrite.Get(dense, sparse, local);
@@ -148,16 +163,24 @@ namespace Game.Voxel.Replica
         {
             var slots = em.GetBuffer<BrickSlot>(root, true);
             int3 lo = BrickMath.BrickOf(origin - 8), hi = BrickMath.BrickOf(origin + 8);
+            var bricks = new NativeList<Entity>(8, Allocator.Temp);
+            int sparseCount = 0;
             for (int z = lo.z; z <= hi.z; z++) for (int y = lo.y; y <= hi.y; y++) for (int x = lo.x; x <= hi.x; x++)
             {
                 int slot = BrickMath.SlotIndex(new int3(x, y, z), grid.BrickMin, grid.BrickDims);
                 if (slot < 0 || slot >= slots.Length) continue;
                 Entity brick = slots[slot].Brick;
                 if (brick == Entity.Null || !em.Exists(brick)) continue;
-                ReadBrick(em, brick, cells);
-                for (int i = 0; i < cells.Length; i++) if (cells[i].Ref == reference) return true;
+                bricks.Add(brick); if (ReplicaJobs.IsSparse(em, brick)) sparseCount++;
             }
-            return false;
+            var views = new NativeList<BrickView>(bricks.Length, Allocator.TempJob);
+            var sparse = new NativeList<Cell>(sparseCount * BrickMath.CellsPerBrick, Allocator.TempJob);
+            sparse.Resize(sparseCount * BrickMath.CellsPerBrick, NativeArrayOptions.UninitializedMemory);
+            int next = 0;
+            foreach (var brick in bricks) views.Add(ReplicaJobs.View(em, brick, sparse, ref next));
+            bool found = ReplicaJobs.ContainsRef(views.AsArray(), reference);
+            views.Dispose(); sparse.Dispose(); bricks.Dispose();
+            return found;
         }
 
         static void TouchNeighbours(EntityManager em, Entity root, VoxelGrid grid, int3 coord, BlockFaceMask faces)
@@ -229,9 +252,9 @@ namespace Game.Voxel.Replica
             if (!accumulate) quiet.Clear();
             using var query = em.CreateEntityQuery(ComponentType.ReadOnly<DamageStreams>());
             if (query.IsEmptyIgnoreFilter) return;
-            em.CompleteAllTrackedJobs();
             var data = query.GetSingleton<DamageStreams>().Data;
             if (data == null) return;
+            data->RemovedWriteHandle.Complete();   // only the resolver's write, not every job in flight
             var removed = data->Removed;
             for (int i = 0; i < removed.Length; i++)
             {
@@ -277,7 +300,7 @@ namespace Game.Voxel.Replica
         {
             using var configs = em.CreateEntityQuery(ComponentType.ReadOnly<DamageConfig>());
             int maxBoxes = configs.IsEmptyIgnoreFilter ? 16 : configs.GetSingleton<DamageConfig>().ChunkMaxBoxes;
-            var blob = ChunkBoxBuilder.CreateCollider(cells, cellSize, localOrigin, maxBoxes);
+            var blob = ReplicaJobs.ChunkCollider(cells, cellSize, localOrigin, maxBoxes);   // Burst; managed it cost a guest ~20 ms
             var entity = em.CreateEntity(typeof(LocalTransform), typeof(LocalToWorld), typeof(PhysicsVelocity),
                 typeof(PhysicsMass), typeof(PhysicsCollider), typeof(PhysicsWorldIndex), typeof(PhysicsGraphicalSmoothing),
                 typeof(PhysicsGraphicalInterpolationBuffer), typeof(ChunkBody), typeof(ChunkContactState), typeof(ChunkCell), typeof(ChunkColliderBlob),
@@ -306,23 +329,13 @@ namespace Game.Voxel.Replica
         /// <summary>Order-independent hash of a grid's solid cells by brick coordinate, for host/guest comparison (SPEC-90 NET-007).</summary>
         public static ulong HashCells(EntityManager em, Entity root)
         {
-            var slots = em.GetBuffer<BrickSlot>(root, true);
-            var cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
-            ulong total = 0;
-            for (int s = 0; s < slots.Length; s++)
-            {
-                Entity entity = slots[s].Brick; if (entity == Entity.Null || !em.Exists(entity)) continue;
-                var coord = em.GetComponentData<Brick>(entity).Coord;
-                ReadBrick(em, entity, cells);
-                ulong h = Game.Core.StableHash.Combine((ulong)(uint)coord.x, Game.Core.StableHash.Combine((ulong)(uint)coord.y, (ulong)(uint)coord.z));
-                for (int i = 0; i < cells.Length; i++)
-                {
-                    var c = cells[i]; if (c.IsAir) continue;
-                    h = Game.Core.StableHash.Combine(h, ((ulong)(uint)i << 32) | ((ulong)c.Ref << 16) | ((ulong)c.Hp << 8) | c.Flags);
-                }
-                total += h;   // sum: independent of slot order, which differs when guest bounds are tighter
-            }
-            cells.Dispose();
+            // Per brick: hash of its coordinate and solid cells in index order. Summed, so slot order (which differs when guest bounds
+            // are tighter) does not matter. Burst, in parallel.
+            var views = new NativeList<BrickView>(64, Allocator.TempJob);
+            var sparse = new NativeList<Cell>(0, Allocator.TempJob);
+            ReplicaJobs.ViewBricks(em, root, views, sparse);
+            ulong total = ReplicaJobs.Hash(views.AsArray());
+            views.Dispose(); sparse.Dispose();
             return total;
         }
     }

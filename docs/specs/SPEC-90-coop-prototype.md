@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Spike complete: NET-002…011 working end to end in the co-op worktree |
+| **Status** | Spike complete: NET-002…012 working end to end in the co-op worktree |
 | **Area code** | NET (task IDs are `NET-001`, `NET-002`, …) |
 | **Module(s)** | `Game.Net` (folder `Assets/Game/Net/`), with session wiring in `Game.App` |
 | **Depends on specs** | SPEC-10, SPEC-12, SPEC-13 (grids, bodies, damage and splits), SPEC-20, SPEC-21 (commands, weapons), SPEC-05 (VOXS), SPEC-70 (dev commands) |
@@ -245,6 +245,22 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - [x] At 100 ms latency, the guest's ship responds on the same frame as its input, with no visible rubber-banding in normal flight (0.00 m error, 0 snaps at 167 ms RTT with jitter and loss).
 - **Tests:** `PredictionTests` (EditMode).
 
+### NET-012 — Co-op hardening: cost, big hits, target lock, aim compensation
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-011`
+- **Do:**
+  - Time the co-op layer per frame (`net status` costs, `tools/playtest/coop-cost.sh`) and move the hot loops to Burst: cell hashing, the host's brick diff against its shadow, guests' whole-brick writes, the orphaned-instance check and chunk colliders. Complete only the jobs capture reads instead of every job.
+  - Predict knockback on the guest's own ship from its cosmetic hits' impulse requests, and glide instead of snapping on large corrections.
+  - Send the guest's target lock and weapon mode to the host, which never ran targeting for guest ships.
+  - Lag-compensate player aim: send it as a point on the grid under it, rebuilt on every machine from the pose that machine shows.
+- **Files:** `Assets/Game/Voxel/Replica/ReplicaJobs.cs`, `Assets/Game/Net/Replication/AimAnchor.cs`, `Assets/Game/Voxel/Replica/ReplicaDamageDrainSystem.cs`, `tools/playtest/coop-cost.sh`, `tools/playtest/coop-aim.sh`
+- **Acceptance criteria:**
+  - [x] A big cut costs a guest under 8 ms outside joins (was 24 ms), with 0 hash mismatches.
+  - [x] Large hits on a guest's ship do not snap it (53 snaps before, 0 after, in the same cut scenario).
+  - [x] A guest's autofire and target-lead weapons work on the host.
+- **Tests:** `PredictionTests` (EditMode), `coop-soak.sh`, `coop-cost.sh`, `coop-aim.sh`.
+
 ## 10. Open questions
 | # | Question | Default | Decider | Answer |
 |---|---|---|---|---|
@@ -273,11 +289,25 @@ NET-010 scenario (`coop-soak.sh 12`: two guests weaving and firing at an AI ship
 
 Bugs found and fixed while testing: a double free of replica chunk colliders (crashed a guest after chunks expired), debris sprayed for cells that left as detached bodies (pods showed a cloud of cubes), AI weapons idle on guests until the target and weapon mode were replicated, a duplicate thruster left hanging where a pod split off, per-frame command matching that made prediction error grow with frame-rate differences (now one command per tick), and a command buffer that trimmed itself into constant starvation under jitter (now adaptive).
 
+NET-012 hardening (2026-10-15; `coop-cost.sh`: range station loaded, AI combat, two guests firing, five 500k cuts across the range bridges, worst single frame outside joins):
+
+| Work | Before | After |
+|---|---|---|
+| Guest apply, worst frame | 23.6 ms | 5–7 ms (first use of each job now paid at join) |
+| Guest cell hash check | 10–14 ms | under 4 ms |
+| Guest chunk spawn | 20 ms (managed collider build) | under 1 ms after warm-up |
+| Guest whole-brick write | 3–4.5 ms per brick | about 0.2 ms |
+| Host capture / hash, worst frame | 2.0 / 1.8 ms | 1.9 / 0.4 ms |
+| Steady state per frame | host 0.2 ms, guest 0.1 ms | unchanged |
+| Snaps on a guest ship in the cut scenario | 53 | 0 (2 from `net bring` teleports) |
+
+Lag-compensated aim, measured with guest 2 circling while guest 1 tracked it by cursor at 120 ms round trip: the host moved guest 1's aim by up to 4.9 m to where guest 2 actually was, about half a fighter's width (`coop-aim.sh` also reports damage dealt with anchors off and on).
+
 Known gaps:
-1. Capture, apply and snapshots are managed main-thread code. The host completes all jobs once per frame while guests are connected. Burst jobs and per-system timing are the optimisation pass.
-2. Prediction does not replay: forces only the host applies (impact impulses, ability stat boosts) show as corrections, and very large hits (a 500k test charge) snap the guest's ship. Normal combat showed no snaps.
-3. A guest's own ship is host-authoritative, so its HUD target lock is local only.
-4. Remote players' projectiles are cosmetic copies fired from the interpolated (100 ms old) pose, so they can look slightly offset from what the host simulates.
+1. Prediction does not replay: forces only the host applies (ram contacts, damage-driven impulses, ability stat boosts) still arrive as corrections, now as a glide over a few snapshots rather than a jump.
+2. A guest whose window macOS throttles (covered by another window) simulates fewer than 60 ticks a second; the host repeats its commands, which costs small corrections (under 0.5 m measured). In `coop-soak.sh` with two windows on one screen, the covered guest ran at 23 ticks a second.
+3. Joining costs a guest one 15–30 ms frame while it builds the replicated grids.
+4. Remote shots' sparks are still cosmetic: with aim anchors they aim at the same spot as on the host, but hit or miss is decided by each machine's own copy, so an occasional spark may show without host damage or the reverse.
 
 ## 11. References
 - [ADR-0116](../decisions/ADR-0116-coop-prototype-host-authority.md).

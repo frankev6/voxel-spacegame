@@ -59,9 +59,9 @@ namespace Game.App.DevRuntime.Commands
             }
             error = Move(ctx, point);
             if (error != null) return DevCommandResult.Fail(error);
-            if (seconds == 0) return DevCommandResult.Ok("aim position queued");
+            if (seconds == 0) return DevCommandResult.Ok("aim position queued" + (id != 0 ? " id:" + id.ToString(CultureInfo.InvariantCulture) : ""));
             int operation = ctx.Host.AddOperation(new TrackOperation(ctx.World, player, id, point, seconds, now));
-            return DevCommandResult.Pending(operation, "tracking aim target");
+            return DevCommandResult.Pending(operation, "tracking aim target" + (id != 0 ? " id:" + id.ToString(CultureInfo.InvariantCulture) : ""));
         }
         static Entity Nearest(DevContext ctx, Entity player, bool hostile)
         {

@@ -3,6 +3,16 @@ using Game.Simulation.Commands;
 
 namespace Game.Net.Replication
 {
+    /// <summary>One guest tick's input: the sampled command plus the guest's own target lock (by network id) and weapon mode, which
+    /// the guest owns as HUD state (SPEC-90 §10a; the host's targeting system runs only for its own ship).</summary>
+    public struct PilotCommand
+    {
+        public PlayerCommand Command;
+        public ulong Target;
+        public byte Autofire, AimMode;
+        public ulong AimAnchor; public Unity.Mathematics.float3 AimLocal;   // AimAnchor.cs: aim as a point on a grid, 0 = open space
+    }
+
     /// <summary>Host side of NET-011: one guest's commands, one per guest fixed tick, played back one per host fixed tick so the host
     /// applies each command for exactly one tick, as the guest's prediction did. An empty queue repeats the last command (the
     /// acknowledged sequence does not advance). An adaptive jitter buffer: a starve raises the depth the queue keeps, a quiet stretch
@@ -11,13 +21,13 @@ namespace Game.Net.Replication
     public sealed class PilotCommandQueue
     {
         public const int MaxDepth = 12, MinTarget = 1, MaxTarget = 6, WindowTicks = 120;
-        readonly Queue<(uint Sequence, PlayerCommand Command)> queue = new();
+        readonly Queue<(uint Sequence, PilotCommand Command)> queue = new();
         uint newestQueued;
         bool any;
         int windowTicks, windowMin = int.MaxValue, windowStarves;
 
         public uint Applied { get; private set; }
-        public PlayerCommand Current { get; private set; }
+        public PilotCommand Current { get; private set; }
         public bool HasCommand => any;
         public int Depth => queue.Count;
         public int Target { get; private set; } = 2;   // commands kept waiting before this tick's pop
@@ -25,7 +35,7 @@ namespace Game.Net.Replication
         public int Skipped { get; private set; }
 
         /// <summary>Adds a received command; repeats and anything older than the newest queued are ignored (packets carry redundancy).</summary>
-        public void Push(uint sequence, in PlayerCommand command)
+        public void Push(uint sequence, in PilotCommand command)
         {
             if (any && unchecked((int)(sequence - newestQueued)) <= 0) return;
             if (!any) { Applied = sequence - 1; Current = command; }

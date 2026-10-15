@@ -1,4 +1,5 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Game.App.Session;
@@ -13,7 +14,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class NetDevCommand : IDevCommand
     {
         public string Name => "net";
-        public string Usage => "net host [port] [ship=<blueprint>] | net join <ip> [port] | net leave | net status | net sim <latencyMs> <jitterMs> <lossPct> | net hash | net guest <slot> \"<command>\" | net reply | net shot [file.png]";
+        public string Usage => "net host [port] [ship=<blueprint>] | net join <ip> [port] | net leave | net status | net sim <latencyMs> <jitterMs> <lossPct> | net hash | net guest <slot> \"<command>\" | net reply | net shot [file.png] | net bring <slot> | net costreset | net anchor [on|off]";
         public string Summary => "Co-op spike: host or join a session, show traffic, simulate a bad network";
         readonly List<CoopPeer> peers = new();
 
@@ -36,6 +37,12 @@ namespace Game.App.DevRuntime.Commands
                 }
                 case "leave": coop.Leave("net leave"); return DevCommandResult.Ok(coop.StatusText);
                 case "status": return DevCommandResult.Ok(Status(coop));
+                case "anchor":
+                    if (args.Positional.Count > 1) Game.Net.Replication.AimAnchor.Enabled = args.Positional[1] != "off";
+                    return DevCommandResult.Ok("aim anchors " + (Game.Net.Replication.AimAnchor.Enabled ? "on" : "off") + " on this machine");
+                case "costreset":
+                    if (coop.Net == null) return DevCommandResult.Fail("not in a session");
+                    coop.Net.Transport.Stats.ResetCosts(); return DevCommandResult.Ok("cost worst cases cleared");
                 case "sim":
                 {
                     if (coop.Net == null) return DevCommandResult.Fail("no session");
@@ -92,6 +99,10 @@ namespace Game.App.DevRuntime.Commands
             text.Append("\n  in  ").Append(s.InKbps(NetChannel.Reliable).ToString("0")).Append(" kbps reliable, ").Append(s.InKbps(NetChannel.Unreliable).ToString("0")).Append(" kbps unreliable");
             text.Append("\n  totals out ").Append((s.TotalOut(NetChannel.Reliable) + s.TotalOut(NetChannel.Unreliable)) / 1024).Append(" KB, in ")
                 .Append((s.TotalIn(NetChannel.Reliable) + s.TotalIn(NetChannel.Unreliable)) / 1024).Append(" KB; peak reliable backlog ").Append(s.PeakReliableBacklog / 1024).Append(" KB");
+            text.Append("\n  cost ms/frame (peak, session worst):");
+            foreach (NetCost c in Enum.GetValues(typeof(NetCost)))
+                if (s.CostWorstMs(c) > 0)
+                    text.Append(' ').Append(c.ToString().ToLowerInvariant()).Append(' ').Append(s.CostAvgMs(c).ToString("0.00")).Append(" (").Append(s.CostPeakMs(c).ToString("0.0")).Append(", ").Append(s.CostWorstMs(c).ToString("0.0")).Append(')');
             if (net.Host != null) text.Append("\n  host: ").Append(net.Host.TrackedGrids).Append(" grids, ").Append(net.Host.LiveChunks).Append(" chunks tracked").Append(net.DescribeCommands());
             if (net.Guest != null)
                 text.Append("\n  guest: ").Append(net.Guest.GridCount).Append(" grids, ").Append(net.Guest.ChunkCount).Append(" chunks, ").Append(net.Guest.PendingMessages)

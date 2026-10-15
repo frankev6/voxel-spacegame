@@ -3,6 +3,7 @@ using Game.Core.Systems;
 using Game.Galaxy.Components;
 using Game.Net.Protocol;
 using Game.Net.Replication;
+using Game.Net.Transport;
 using Game.Simulation.Commands;
 using Game.Simulation.Power;
 using Game.Voxel.Grid;
@@ -35,6 +36,7 @@ namespace Game.Net.Systems
         {
             base.OnCreate();
             pilots = GetEntityQuery(ComponentType.ReadOnly<RemotePilot>(), ComponentType.ReadWrite<RemotePilotInput>());
+            RequireForUpdate<SimClock>();
         }
         protected override void OnUpdate()
         {
@@ -42,11 +44,33 @@ namespace Game.Net.Systems
             var em = EntityManager;
             using var entities = pilots.ToEntityArray(Allocator.Temp);
             em.CompleteDependencyBeforeRW<RemotePilotInput>();
+            em.CompleteDependencyBeforeRW<Game.Simulation.Weapons.ShipTarget>(); em.CompleteDependencyBeforeRW<Game.Simulation.Weapons.WeaponControl>();
+            uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             foreach (var entity in entities)
             {
                 byte slot = em.GetComponentData<RemotePilot>(entity).Slot;
-                if (!Net.TryPopCommand(slot, out uint sequence, out var command)) continue;
+                if (!Net.TryPopCommand(slot, out uint sequence, out var pilot)) continue;
+                var command = pilot.Command;
+                // Lag compensation: aim at the same point of the same grid the guest aimed at, where that grid is now.
+                if (pilot.AimAnchor != 0 && Net.Host.TryGetGrid(pilot.AimAnchor, out var anchor) && AimAnchor.Resolve(em, anchor, pilot.AimLocal, out var aim))
+                {
+                    Net.NoteAimShift(math.distance(command.AimWorld, aim));
+                    command.AimWorld = aim;
+                }
                 em.SetComponentData(entity, new RemotePilotInput { Command = command, Sequence = sequence });
+                // The guest's own target lock and weapon mode: its HUD state, which the host's targeting system never sets for it.
+                if (em.HasComponent<Game.Simulation.Weapons.ShipTarget>(entity))
+                {
+                    var target = em.GetComponentData<Game.Simulation.Weapons.ShipTarget>(entity);
+                    Entity resolved = pilot.Target != 0 && Net.Host.TryGetGrid(pilot.Target, out var t) && em.Exists(t) ? t : Entity.Null;
+                    if (target.Value != resolved) { target.Value = resolved; target.SinceTick = tick; em.SetComponentData(entity, target); }
+                }
+                if (em.HasComponent<Game.Simulation.Weapons.WeaponControl>(entity))
+                {
+                    var control = em.GetComponentData<Game.Simulation.Weapons.WeaponControl>(entity);
+                    control.Autofire = pilot.Autofire; control.AimMode = (Game.Simulation.Weapons.WeaponAimMode)pilot.AimMode;
+                    em.SetComponentData(entity, control);
+                }
             }
         }
     }
@@ -60,7 +84,9 @@ namespace Game.Net.Systems
         protected override void OnUpdate()
         {
             if (Net?.Guest == null) return;
+            long start = NetStats.Stamp();
             Net.Guest.Apply(EntityManager, Net.Registry, Net.Transport.LocalSlot);
+            Net.Transport.Stats.AddCost(NetCost.Apply, start);
         }
     }
 
@@ -71,22 +97,56 @@ namespace Game.Net.Systems
     [UpdateBefore(typeof(Game.Simulation.Weapons.WeaponAimSystem)), UpdateBefore(typeof(Game.Simulation.Flight.PropulsionSystem)), UpdateBefore(typeof(Game.Simulation.Power.PowerDemandGroup))]
     public partial class ReplicaBodySyncSystem : NetSystemBase
     {
-        EntityQuery replicas;
+        EntityQuery replicas, aimGrids;
         protected override void OnCreate()
         {
             base.OnCreate();
             RequireForUpdate<GameplayActive>();
             replicas = GetEntityQuery(ComponentType.ReadWrite<Replicated>(), ComponentType.ReadWrite<LocalTransform>());
+            aimGrids = GetEntityQuery(ComponentType.ReadOnly<Game.Voxel.Model.VoxelGrid>(), ComponentType.ReadOnly<Game.Core.Components.PersistentId>(),
+                ComponentType.ReadOnly<LocalTransform>());
         }
         protected override void OnUpdate()
         {
             var guest = Net?.Guest;
             if (guest == null) return;
-            // NET-011: this tick's command gets its own sequence; the host applies it for exactly one tick too.
-            uint sequence = Net.RecordTickCommand(SystemAPI.TryGetSingleton<PlayerCommand>(out var input) ? input : default, guest.HostOrigin);
+            // NET-011: this tick's command gets its own sequence; the host applies it for exactly one tick too. It carries the guest's
+            // target lock and weapon mode as well.
+            ulong lockId = 0, aimAnchor = 0; byte autofire = 0, aimMode = 0; float3 aimLocal = default;
+            var input = SystemAPI.TryGetSingleton<PlayerCommand>(out var sampled) ? sampled : default;
+            if (SystemAPI.TryGetSingletonEntity<PlayerShip>(out var own))
+            {
+                var em0 = EntityManager;
+                em0.CompleteDependencyBeforeRO<Game.Simulation.Weapons.ShipTarget>(); em0.CompleteDependencyBeforeRO<Game.Simulation.Weapons.WeaponControl>();
+                em0.CompleteDependencyBeforeRO<LocalTransform>();
+                Entity locked = Entity.Null;
+                if (em0.HasComponent<Game.Simulation.Weapons.ShipTarget>(own))
+                {
+                    locked = em0.GetComponentData<Game.Simulation.Weapons.ShipTarget>(own).Value;
+                    if (locked != Entity.Null && em0.Exists(locked) && em0.HasComponent<Replicated>(locked)) lockId = em0.GetComponentData<Replicated>(locked).NetId;
+                }
+                if (input.AimValid != 0 && math.all(math.isfinite(input.AimWorld)))
+                    aimAnchor = AimAnchor.Find(em0, aimGrids, input.AimWorld, locked, own, out aimLocal);
+                if (em0.HasComponent<Game.Simulation.Weapons.WeaponControl>(own))
+                {
+                    var control = em0.GetComponentData<Game.Simulation.Weapons.WeaponControl>(own); autofire = control.Autofire; aimMode = (byte)control.AimMode;
+                }
+            }
+            uint sequence = Net.RecordTickCommand(input, guest.HostOrigin, lockId, autofire, aimMode, aimAnchor, aimLocal);
             if (!guest.HasOrigin) return;
+            long start = NetStats.Stamp();
+            Sync(guest, sequence);
+            Net.Transport.Stats.AddCost(NetCost.BodySync, start);
+        }
+
+        void Sync(GuestReplicator guest, uint sequence)
+        {
             var em = EntityManager;
-            em.CompleteAllTrackedJobs();
+            // Only what this system touches: a full completion here was a sync point in every guest fixed tick.
+            em.CompleteDependencyBeforeRW<LocalTransform>(); em.CompleteDependencyBeforeRW<PhysicsVelocity>(); em.CompleteDependencyBeforeRO<PhysicsMass>();
+            em.CompleteDependencyBeforeRW<ShipCommand>(); em.CompleteDependencyBeforeRW<ShieldState>(); em.CompleteDependencyBeforeRW<Replicated>();
+            em.CompleteDependencyBeforeRW<Game.Simulation.Weapons.WeaponControl>(); em.CompleteDependencyBeforeRW<Game.Simulation.Weapons.ShipTarget>();
+            em.CompleteDependencyBeforeRW<Game.Simulation.Flight.ThrusterState>(); em.CompleteDependencyBeforeRO<Game.Voxel.Model.BlockInstance>();
             double3 origin = guest.HostOrigin, previousOrigin = origin;
             if (SystemAPI.TryGetSingletonRW<FrameOrigin>(out var frame))
             {
@@ -113,6 +173,8 @@ namespace Game.Net.Systems
                 if (s.HasCommand != 0 && replica.OwnedLocally == 0 && em.HasComponent<ShipCommand>(entity))
                 {
                     var command = s.Command; command.AimWorld -= (float3)origin; command.Edges = ShipCommandEdges.None;
+                    // A player's aim as the shooter saw it: on the grid it was over, wherever this machine shows that grid now.
+                    if (s.AimAnchor != 0 && guest.TryGetEntity(s.AimAnchor, out var anchor) && AimAnchor.Resolve(em, anchor, s.AimLocal, out var aim)) command.AimWorld = aim;
                     em.SetComponentData(entity, command);
                 }
                 if (s.HasWeapons != 0 && replica.OwnedLocally == 0)
@@ -216,12 +278,20 @@ namespace Game.Net.Systems
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             double3 origin = SystemAPI.TryGetSingleton<FrameOrigin>(out var frame) ? frame.OriginInStarSystem : double3.zero;
             Net.HostOriginForCommands = origin;
+            var stats = Net.Transport.Stats;
+            long start = NetStats.Stamp();
             host.Capture(em, tick);
-            if (tick - lastSnapshotTick >= NetProtocol.SnapshotEveryTicks) { host.Snapshot(em, tick, origin, 3); lastSnapshotTick = tick; }
+            stats.AddCost(NetCost.Capture, start);
+            if (tick - lastSnapshotTick >= NetProtocol.SnapshotEveryTicks)
+            {
+                start = NetStats.Stamp(); host.Snapshot(em, tick, origin, 3); lastSnapshotTick = tick; stats.AddCost(NetCost.Snapshot, start);
+            }
             if (Net.HashRequested || tick - lastHashTick >= 300)
             {
+                start = NetStats.Stamp();
                 host.SendHashReport(em, tick, Net.HashRequested);
                 Net.HashRequested = false; lastHashTick = tick;
+                stats.AddCost(NetCost.Hash, start);
             }
         }
     }

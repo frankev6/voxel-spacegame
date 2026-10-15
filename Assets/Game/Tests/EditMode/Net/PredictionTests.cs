@@ -9,7 +9,7 @@ namespace Game.Tests.EditMode.Net
     [Category("Net")]
     public class PredictionTests
     {
-        static PlayerCommand Thrust(float x) => new PlayerCommand { Thrust = new float2(0, x) };
+        static PilotCommand Thrust(float x) => new PilotCommand { Command = new PlayerCommand { Thrust = new float2(0, x) } };
 
         [Test]
         public void Queue_PlaysOneCommandPerTick_AndRepeatsWhenStarved()
@@ -17,7 +17,7 @@ namespace Game.Tests.EditMode.Net
             var q = new PilotCommandQueue();
             for (uint s = 1; s <= 3; s++) q.Push(s, Thrust(s));
             q.Push(2, Thrust(99));   // redundant copy from a later packet: ignored
-            for (uint s = 1; s <= 3; s++) { q.Pop(); Assert.AreEqual(s, q.Applied); Assert.AreEqual((float)s, q.Current.Thrust.y); }
+            for (uint s = 1; s <= 3; s++) { q.Pop(); Assert.AreEqual(s, q.Applied); Assert.AreEqual((float)s, q.Current.Command.Thrust.y); }
             q.Pop();
             Assert.AreEqual(3u, q.Applied, "an empty queue repeats the last command without advancing the ack");
             Assert.AreEqual(1, q.Starved);

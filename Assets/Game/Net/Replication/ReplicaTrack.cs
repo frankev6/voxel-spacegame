@@ -15,7 +15,8 @@ namespace Game.Net.Replication
         public ShipCommand Command;
         public float ShieldHp, ShieldMax; public byte ShieldActive;
         public byte HasWeapons, Autofire, AimMode; public ulong Target;
-        public byte HasAck; public uint Ack;   // newest pilot command the host had applied (remote-piloted ships)
+        public byte HasAck; public uint Ack;
+        public ulong AimAnchor; public float3 AimLocal;   // player ships' aim as a point on a grid (AimAnchor.cs)   // newest pilot command the host had applied (remote-piloted ships)
     }
 
     /// <summary>Interpolation buffer for one replicated body (SPEC-90 NET-005): newest samples by host tick, sampled 100 ms behind.</summary>

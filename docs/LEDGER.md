@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
-| M4 | 8 | 2 | 0 | 0 | 15 | 0 | 25 | 5 |
+| M4 | 9 | 2 | 0 | 0 | 15 | 0 | 26 | 6 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -514,6 +514,7 @@
 | NET-009 | Combat presentation on guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-006 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | cosmetic weapons on guests via replicated target and mode; spike worktree only |
 | NET-010 | Co-op playtest scenario and stats overlay | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-008, NET-009 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | fcb0b16b | coop-soak.sh table at 0/50/100/150 ms in SPEC-90 §10a; spike worktree only |
 | NET-011 | Own-ship prediction (stretch) | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-010 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | fcb0b16b | per-tick commands, adaptive host buffer, reconcile without replay; spike worktree only |
+| NET-012 | Co-op hardening: cost, big hits, target lock, aim compensation | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-011 | yes | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1228,6 +1229,23 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-15 — NET-012: co-op hardening (lead, claude-opus-5-5)
+- Owner: "fix the open items" (the SPEC-90 §10a gaps), after "Do this task here: Co-op host capture performance pass". Still only in the co-op worktree; `main` untouched.
+- **Built:**
+  - per-frame cost timing in `net status`, and `coop-cost.sh`;
+  - Burst jobs for hashing, the host diff, guest brick writes, the orphan scan and chunk colliders, warmed at join;
+  - targeted job completion on the host;
+  - guest knockback from its own hits, and gliding corrections;
+  - guest target lock and weapon mode sent to the host;
+  - lag-compensated aim anchors, with `coop-aim.sh`.
+- **Verified live:**
+  - a guest's worst cut frame fell from 23.6 to 5–7 ms;
+  - snaps fell from 53 to 0 in the cut scenario;
+  - aim compensation moved a guest's aim by up to 4.9 m onto a circling target;
+  - `coop-soak.sh` shows 0 hash mismatches, 0 crashes and 0 exceptions;
+  - Net EditMode tests (18) pass.
+- **Found:** a guest window covered by another is throttled by macOS to about 23 ticks a second, which starves the host's command buffer. Listed in SPEC-90 §10a.
 
 ### 2026-10-15 — NET-010/011: prediction, plumes, names, goodbye, soak table (lead, claude-opus-5-5)
 - Owner: "keep working on the multiplayer until its ready". Still only on `task/NET-001-coop-prototype` in the co-op worktree; `main` untouched.

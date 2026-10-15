@@ -29,11 +29,12 @@ namespace Game.Net.Replication
             public int Palette;
             public GridKind Kind;
             public readonly HashSet<int3> Live = new();
-            public readonly Dictionary<int3, Cell[]> Shadow = new();
+            public readonly Dictionary<int3, NativeArray<Cell>> Shadow = new();   // persistent; freed by DisposeShadows
             public float[] InstanceHp = Array.Empty<float>();
             public ushort[] InstanceCells = Array.Empty<ushort>();
             public byte[] InstanceFlags = Array.Empty<byte>();
             public bool Moving;
+            public void DisposeShadows() { foreach (var cells in Shadow.Values) cells.Dispose(); Shadow.Clear(); }
         }
         struct ChunkSlot { public ulong NetId; public Entity Entity; }
 
@@ -48,6 +49,8 @@ namespace Game.Net.Replication
         readonly Dictionary<NetPeer, Dictionary<ulong, float>> priorities = new();
         readonly List<(ulong Id, float Priority)> ranked = new();
         NativeArray<Cell> scratch;
+        NativeList<Cell> sparse;   // expanded sparse bricks for the diff job
+        readonly List<(Entity Entity, int3 Coord)> candidates = new();
         EntityQuery gridQuery, chunkQuery;
         bool queriesCreated, tracking;
         public int TrackedGrids => grids.Count;
@@ -57,6 +60,8 @@ namespace Game.Net.Replication
         {
             this.transport = transport;
             scratch = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Persistent);
+            sparse = new NativeList<Cell>(0, Allocator.Persistent);
+            Game.Voxel.Replica.ReplicaJobs.WarmUp();
         }
 
         void EnsureQueries(EntityManager em)
@@ -85,7 +90,7 @@ namespace Game.Net.Replication
             if (!AnyPeer(NetPeerPhase.Ready)) { if (tracking) Reset(); return; }
             tracking = true;
             EnsureQueries(em);
-            em.CompleteAllTrackedJobs();
+            CompleteReads(em);
             seen.Clear();
 
             using (var roots = gridQuery.ToEntityArray(Allocator.Temp))
@@ -124,6 +129,21 @@ namespace Game.Net.Replication
             quietBricks.Clear();   // gathered tick by tick since the last capture (TapRemovals)
         }
 
+        /// <summary>Completes only the jobs writing what capture, snapshots and hashes read. Completing every tracked job here also
+        /// waited for in-flight mesh and collider builds, which never touch these.</summary>
+        public static void CompleteReads(EntityManager em)
+        {
+            em.CompleteDependencyBeforeRO<VoxelGrid>(); em.CompleteDependencyBeforeRO<PersistentId>(); em.CompleteDependencyBeforeRO<LocalTransform>();
+            em.CompleteDependencyBeforeRO<BrickSlot>(); em.CompleteDependencyBeforeRO<Brick>(); em.CompleteDependencyBeforeRO<BrickCells>();
+            em.CompleteDependencyBeforeRO<BrickSparseCells>(); em.CompleteDependencyBeforeRO<PaletteEntry>(); em.CompleteDependencyBeforeRO<BlockInstance>();
+            em.CompleteDependencyBeforeRO<GridSpawning>(); em.CompleteDependencyBeforeRO<GridSource>(); em.CompleteDependencyBeforeRO<PhysicsVelocity>();
+            em.CompleteDependencyBeforeRO<PhysicsMass>(); em.CompleteDependencyBeforeRO<Allegiance>(); em.CompleteDependencyBeforeRO<ShipCommand>();
+            em.CompleteDependencyBeforeRO<ChunkBody>(); em.CompleteDependencyBeforeRO<ChunkCell>(); em.CompleteDependencyBeforeRO<ShieldState>();
+            em.CompleteDependencyBeforeRO<Game.Simulation.Weapons.WeaponControl>(); em.CompleteDependencyBeforeRO<Game.Simulation.Weapons.ShipTarget>();
+            em.CompleteDependencyBeforeRO<RemotePilotInput>(); em.CompleteDependencyBeforeRO<Game.Simulation.Flight.FlightThruster>();
+            em.CompleteDependencyBeforeRO<Game.Simulation.Flight.ThrusterState>();
+        }
+
         /// <summary>HostRemovalTapSystem, every fixed tick after the resolver: removal reasons only live for their own tick, and a frame
         /// can run several ticks before the next capture.</summary>
         public void TapRemovals(EntityManager em)
@@ -134,7 +154,8 @@ namespace Game.Net.Replication
 
         void SendDespawn(ulong id)
         {
-            grids.Remove(id); order.Remove(id);
+            if (grids.Remove(id, out var g)) g.DisposeShadows();
+            order.Remove(id);
             message.Clear(); message.U64(id); Broadcast(NetMessage.GridDespawn, message);
         }
 
@@ -200,34 +221,57 @@ namespace Game.Net.Replication
                 body.U16((ushort)i); body.F32(b.FunctionHp); body.U16(b.CellsAlive); body.U8((byte)b.Flags); changed++;
             }
             body.Data[countAt] = (byte)changed; body.Data[countAt + 1] = (byte)(changed >> 8);
-            // Bricks: changed since the last capture, new, or gone.
+            // Bricks: changed since the last capture, new, or gone. Changed bricks are diffed against their shadows in one Burst job.
             int opsAt = body.ReserveU32(); uint ops = 0;
             var slots = em.GetBuffer<BrickSlot>(root, true);
+            candidates.Clear(); int sparseCount = 0;
             for (int s = 0; s < slots.Length; s++)
             {
                 Entity entity = slots[s].Brick;
                 if (entity == Entity.Null || !em.Exists(entity)) continue;
                 var brick = em.GetComponentData<Brick>(entity);
-                bool known = g.Live.Contains(brick.Coord);
-                if (known && brick.ChangedRevision <= g.Revision) continue;
-                Game.Voxel.Replica.ReplicaVoxelApi.ReadBrick(em, entity, scratch);
-                if (known && g.Shadow.TryGetValue(brick.Coord, out var shadow))
+                if (g.Live.Contains(brick.Coord) && brick.ChangedRevision <= g.Revision) continue;
+                candidates.Add((entity, brick.Coord));
+                if (Game.Voxel.Replica.ReplicaJobs.IsSparse(em, entity)) sparseCount++;
+            }
+            if (candidates.Count > 0)
+            {
+                int count = candidates.Count;
+                var current = new NativeArray<Game.Voxel.Replica.BrickView>(count, Allocator.TempJob);
+                var shadows = new NativeArray<Game.Voxel.Replica.BrickView>(count, Allocator.TempJob);
+                var counts = new NativeArray<int>(count, Allocator.TempJob);
+                var changedCells = new NativeArray<ushort>(count * BrickMath.CellsPerBrick, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+                sparse.Clear(); sparse.Resize(sparseCount * BrickMath.CellsPerBrick, NativeArrayOptions.UninitializedMemory);
+                int next = 0;
+                for (int k = 0; k < count; k++)
                 {
-                    int diffs = 0;
-                    for (int i = 0; i < scratch.Length; i++) if (!scratch[i].Equals(shadow[i])) diffs++;
+                    var (entity, coord) = candidates[k];
+                    current[k] = Game.Voxel.Replica.ReplicaJobs.View(em, entity, sparse, ref next);
+                    shadows[k] = g.Live.Contains(coord) && g.Shadow.TryGetValue(coord, out var shadow) ? Game.Voxel.Replica.ReplicaJobs.ViewOf(shadow, coord) : default;
+                }
+                Game.Voxel.Replica.ReplicaJobs.Diff(current, shadows, counts, changedCells);
+                for (int k = 0; k < count; k++)
+                {
+                    var coord = candidates[k].Coord; int diffs = counts[k];
                     if (diffs == 0) continue;
-                    if (diffs <= BrickMath.CellsPerBrick / 4)
+                    if (diffs > 0 && diffs <= BrickMath.CellsPerBrick / 4)
                     {
-                        body.U8((byte)(2 | Quiet(root, brick.Coord))); body.I3(brick.Coord); body.U16((ushort)diffs);
-                        for (int i = 0; i < scratch.Length; i++)
-                            if (!scratch[i].Equals(shadow[i])) { body.U16((ushort)i); GridCodec.WriteCell(body, scratch[i]); shadow[i] = scratch[i]; }
+                        var shadow = g.Shadow[coord];
+                        body.U8((byte)(2 | Quiet(root, coord))); body.I3(coord); body.U16((ushort)diffs);
+                        for (int d = 0, at = k * BrickMath.CellsPerBrick; d < diffs; d++)
+                        {
+                            int i = changedCells[at + d]; var cell = Game.Voxel.Replica.ReplicaJobs.Get(current[k], i);
+                            body.U16((ushort)i); GridCodec.WriteCell(body, cell); shadow[i] = cell;
+                        }
                         ops++; continue;
                     }
+                    Game.Voxel.Replica.ReplicaJobs.CopyTo(current[k], scratch);
+                    body.U8((byte)(1 | Quiet(root, coord))); GridCodec.WriteBrickCells(body, coord, scratch); ops++;
+                    if (!g.Shadow.TryGetValue(coord, out var copy)) { copy = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Persistent); g.Shadow[coord] = copy; }
+                    scratch.CopyTo(copy);
+                    g.Live.Add(coord);
                 }
-                body.U8((byte)(1 | Quiet(root, brick.Coord))); GridCodec.WriteBrickCells(body, brick.Coord, scratch); ops++;
-                if (!g.Shadow.TryGetValue(brick.Coord, out var copy)) { copy = new Cell[BrickMath.CellsPerBrick]; g.Shadow[brick.Coord] = copy; }
-                scratch.CopyTo(copy);
-                g.Live.Add(brick.Coord);
+                current.Dispose(); shadows.Dispose(); counts.Dispose(); changedCells.Dispose();
             }
             if (g.Live.Count > 0)
             {
@@ -239,7 +283,11 @@ namespace Game.Net.Replication
                     if (entity == Entity.Null || !em.Exists(entity)) (gone ??= new List<int3>()).Add(coord);
                 }
                 if (gone != null)
-                    foreach (var coord in gone) { body.U8((byte)(0 | Quiet(root, coord))); body.I3(coord); ops++; g.Live.Remove(coord); g.Shadow.Remove(coord); }
+                    foreach (var coord in gone)
+                    {
+                        body.U8((byte)(0 | Quiet(root, coord))); body.I3(coord); ops++; g.Live.Remove(coord);
+                        if (g.Shadow.Remove(coord, out var dead)) dead.Dispose();
+                    }
             }
             body.PatchU32(opsAt, ops);
             g.Revision = grid.Revision;
@@ -370,16 +418,24 @@ namespace Game.Net.Replication
             return Entity.Null;
         }
 
-        // Entry: id, flags (1 command, 2 shield, 4 scale, 8 weapons, 16 acknowledged pilot command, 32 thruster plumes), pose,
-        // velocities, optional blocks.
-        static void WriteEntry(EntityManager em, Entity e, ulong id, NetWriter w)
+        // Entry: id, flags (1 command, 2 shield, 4 scale, 8 weapons, 16 acknowledged pilot command, 32 thruster plumes, 64 aim anchor),
+        // pose, velocities, optional blocks.
+        void WriteEntry(EntityManager em, Entity e, ulong id, NetWriter w)
         {
             var pose = em.GetComponentData<LocalTransform>(e);
             bool command = em.HasComponent<ShipCommand>(e), shield = em.HasComponent<ShieldState>(e), chunk = NetIds.IsChunk(id);
             bool weapons = em.HasComponent<Game.Simulation.Weapons.WeaponControl>(e) || em.HasComponent<Game.Simulation.Weapons.ShipTarget>(e);
             bool ack = em.HasComponent<RemotePilotInput>(e);
             bool plumes = em.HasBuffer<Game.Simulation.Flight.FlightThruster>(e) && !em.HasComponent<Game.Voxel.Damage.Hulk>(e);
-            byte flags = (byte)((command ? 1 : 0) | (shield ? 2 : 0) | (chunk ? 4 : 0) | (weapons ? 8 : 0) | (ack ? 16 : 0) | (plumes ? 32 : 0));
+            // Player ships aim at a point the player picked by eye: guests rebuild it on the grid under it (AimAnchor.cs).
+            ulong aimAnchor = 0; float3 aimLocal = default;
+            if (command && (em.HasComponent<PlayerShip>(e) || em.HasComponent<RemotePilot>(e)))
+            {
+                var c = em.GetComponentData<ShipCommand>(e);
+                Entity locked = em.HasComponent<Game.Simulation.Weapons.ShipTarget>(e) ? em.GetComponentData<Game.Simulation.Weapons.ShipTarget>(e).Value : Entity.Null;
+                if (c.AimValid != 0 && math.all(math.isfinite(c.AimWorld))) aimAnchor = AimAnchor.Find(em, gridQuery, c.AimWorld, locked, e, out aimLocal);
+            }
+            byte flags = (byte)((command ? 1 : 0) | (shield ? 2 : 0) | (chunk ? 4 : 0) | (weapons ? 8 : 0) | (ack ? 16 : 0) | (plumes ? 32 : 0) | (aimAnchor != 0 ? 64 : 0));
             w.U64(id); w.U8(flags); w.F3(pose.Position); w.Quat(pose.Rotation);
             w.F3(em.HasComponent<PhysicsVelocity>(e) ? em.GetComponentData<PhysicsVelocity>(e).Linear : float3.zero);
             w.F3(GridCodec.AngularWorld(em, e, pose.Rotation));
@@ -399,6 +455,7 @@ namespace Game.Net.Replication
                 w.U64(targetId); w.U8(control.Autofire); w.U8((byte)control.AimMode);
             }
             if (ack) w.U32(em.GetComponentData<RemotePilotInput>(e).Sequence);
+            if (aimAnchor != 0) { w.U64(aimAnchor); w.F3(aimLocal); }
             if (plumes)
             {
                 // Lit thrusters only, by block instance: guests have no flight solve for kinematic replicas, so plumes and engine
@@ -424,7 +481,7 @@ namespace Game.Net.Replication
         public int SendHashReport(EntityManager em, uint tick, bool all)
         {
             if (!tracking || !AnyPeer(NetPeerPhase.InWorld)) return 0;
-            em.CompleteAllTrackedJobs();
+            CompleteReads(em);
             message.Clear(); message.U32(tick); int countAt = message.Length; message.U16(0); ushort n = 0;
             foreach (var id in order)
             {
@@ -441,8 +498,17 @@ namespace Game.Net.Replication
 
         public void ForgetPeer(NetPeer peer) => priorities.Remove(peer);
 
+        /// <summary>The live grid root for a network id (guests name their target lock by it).</summary>
+        public bool TryGetGrid(ulong id, out Entity entity)
+        {
+            entity = Entity.Null;
+            if (!grids.TryGetValue(id, out var g)) return false;
+            entity = g.Entity; return true;
+        }
+
         void Reset()
         {
+            foreach (var g in grids.Values) g.DisposeShadows();
             grids.Clear(); order.Clear(); priorities.Clear(); hashedRevision.Clear();
             for (int i = 0; i < chunks.Length; i++) chunks[i] = default;
             tracking = false;
@@ -450,8 +516,9 @@ namespace Game.Net.Replication
 
         public void Dispose()
         {
-            if (scratch.IsCreated) scratch.Dispose();
             Reset();
+            if (scratch.IsCreated) scratch.Dispose();
+            if (sparse.IsCreated) sparse.Dispose();
         }
     }
 }

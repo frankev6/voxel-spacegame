@@ -17,8 +17,9 @@ namespace Game.Net.Replication
             public float3 Linear, Angular; // angular in world space
         }
 
-        public const float PositionBlend = .3f, VelocityBlend = .5f;   // per acknowledged snapshot (30 Hz)
-        public const float SnapDistance = 6f, SnapAngle = .5f;          // metres, radians: beyond these the body jumps to the host
+        public const float PositionBlend = .3f, VelocityBlend = .5f;   // per acknowledged snapshot (30 Hz), for ordinary errors
+        public const float FastError = 1f, FullError = 10f;             // metres: the blend rises from PositionBlend to 1 between these
+        public const float SnapDistance = 25f, SnapAngle = 1.2f;        // metres, radians: only beyond these does the body jump
         const int Capacity = 256;                                       // 4 s at 60 Hz
         readonly BodyState[] history = new BodyState[Capacity];
         int start, count;
@@ -70,7 +71,10 @@ namespace Game.Net.Replication
             LastErrorM = error; PeakErrorM = math.max(PeakErrorM, error); Corrections++;
             bool snap = error > SnapDistance || angle > SnapAngle;
             if (snap) Snaps++;
-            float a = snap ? 1 : PositionBlend, b = snap ? 1 : VelocityBlend;
+            // A big hit the guest did not predict: take the host's velocity at once and glide to its position over a few snapshots,
+            // rather than jumping.
+            float urgency = math.saturate(math.max((error - FastError) / (FullError - FastError), angle / SnapAngle));
+            float a = snap ? 1 : math.lerp(PositionBlend, 1, urgency), b = snap || error > FastError ? 1 : VelocityBlend;
             quaternion turn = math.slerp(quaternion.identity, dq, a);
             Shift(ref current, dp * a, dv * b, dw * b, turn);
             for (int i = index; i < count; i++)

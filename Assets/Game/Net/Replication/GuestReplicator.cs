@@ -54,6 +54,9 @@ namespace Game.Net.Replication
         public int HashMismatches { get; private set; }
         public OwnShipPredictor Predictor { get; } = new();
         uint localTick;
+        readonly double[] kindMs = new double[256];
+        readonly int[] kindCount = new int[256];
+        static double Ms(long start) => (NetStats.Stamp() - start) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
 
         public GuestReplicator(NetTransport transport)
         {
@@ -105,6 +108,7 @@ namespace Game.Net.Replication
                 if ((flags & 4) != 0) s.Scale = r.F32();
                 if ((flags & 8) != 0) { s.HasWeapons = 1; s.Target = r.U64(); s.Autofire = r.U8(); s.AimMode = r.U8(); }
                 if ((flags & 16) != 0) { s.HasAck = 1; s.Ack = r.U32(); }
+                if ((flags & 64) != 0) { s.AimAnchor = r.U64(); s.AimLocal = r.F3(); }
                 int plumes = (flags & 32) != 0 ? r.U8() : 0;
                 if (!tracks.TryGetValue(id, out var track)) tracks[id] = track = new ReplicaTrack();
                 bool fresh = track.Add(s);
@@ -137,18 +141,32 @@ namespace Game.Net.Replication
             RetireDespawned(em, registry);
             removedCells.Clear();
             int budget = 2000;   // messages per frame; the join snapshot spreads over a few frames
+            long frameStart = NetStats.Stamp();
+            Array.Clear(kindMs, 0, kindMs.Length); Array.Clear(kindCount, 0, kindCount.Length);
             while (queue.Count > 0 && budget-- > 0)
             {
                 var (kind, data) = queue.Peek();
                 reader.Reset(data, 0, data.Length);
+                long start = NetStats.Stamp();
                 try
                 {
                     if (!ApplyOne(em, registry, localSlot, kind, reader)) break;
                 }
                 catch (Exception e) { GameLog.Exception(NetTransport.Category, e, "apply " + kind); transport.Stats.Desyncs++; }
+                kindMs[(byte)kind] += Ms(start); kindCount[(byte)kind]++;
                 queue.Dequeue();
             }
+            long debrisStart = NetStats.Stamp();
             if (removedCells.Length > 0) ReplicaVoxelApi.EmitDebris(em, removedCells);
+            double debris = Ms(debrisStart), total = Ms(frameStart);
+            if (total > 8)
+            {
+                var text = new System.Text.StringBuilder("slow apply ").Append(total.ToString("0.0")).Append(" ms:");
+                for (int k = 0; k < kindMs.Length; k++)
+                    if (kindCount[k] > 0) text.Append(' ').Append((NetMessage)k).Append(' ').Append(kindMs[k].ToString("0.0")).Append(" ms x").Append(kindCount[k]);
+                text.Append(", debris ").Append(debris.ToString("0.0")).Append(" ms (").Append(removedCells.Length).Append(" cells)");
+                GameLog.Info(NetTransport.Category, text.ToString());
+            }
             transport.Stats.ReplicatedGrids = grids.Count; transport.Stats.ReplicatedChunks = chunks.Count;
             transport.Stats.SnapshotAgeMs = SnapshotAgeMs;
         }
@@ -161,6 +179,7 @@ namespace Game.Net.Replication
             switch (kind)
             {
                 case NetMessage.JoinBegin:
+                    ReplicaJobs.WarmUp();
                     JoinComplete = false; GameLog.Info(NetTransport.Category, "join snapshot: " + (r.Remaining >= 6 ? "tick " + r.U32() + ", " + r.U16() + " grids" : "")); return true;
                 case NetMessage.JoinEnd:
                     JoinComplete = true; GameLog.Info(NetTransport.Category, "join snapshot complete"); return true;
