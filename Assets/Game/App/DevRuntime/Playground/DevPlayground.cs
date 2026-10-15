@@ -54,7 +54,8 @@ namespace Game.App.DevRuntime.Playground
             new Pad("power", "12  POWER / ABILITIES", -320, -360, "F opens live power and shield instruments. Toggle shield or trigger Speed Boost using the buttons or equipped ability keys. Console: playground run=shield or run=boost."),
             new Pad("campaign", "13  PRACTICE CAMPAIGN", -160, -540, "F starts the real opening campaign in the isolated playground profile: dialogue, combat, station docking, trade and travel. Console: playground reset returns here."),
             new Pad("salvage", "14  SALVAGE / RECOVER CARGO", 0, -540, DevPlaygroundSalvage.PadDetail),
-            new Pad("xeno", "15  XENO / ALIENS", 160, -540, "F wakes two HUSK skimmers and a BROODMOTHER, grown ships of smooth obsidian tissue (ADR-0115).\nThey hunt you with acid. Shoot them to see wounds open into glowing flesh; kill the heart for a hulk. One wave per reset.")
+            new Pad("xeno", "15  XENO / ALIENS", 160, -540, "F wakes two HUSK skimmers and a BROODMOTHER, grown ships of smooth obsidian tissue (ADR-0115).\nThey hunt you with acid. Shoot them to see wounds open into glowing flesh; kill the heart for a hulk. One wave per reset."),
+            new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the new NOCTURNE line from the look book: a WRAITH frigate (28 m) beside you and a REQUIEM heavy cruiser (123 m, 129k cells) broadside ahead.\nNo AI: fly around them, compare scale, and shoot the cruiser to test destruction on a big hull. One pair per reset.")
         };
         DevPlaygroundPower power;
         DevPlaygroundSalvage salvage;
@@ -72,7 +73,7 @@ namespace Game.App.DevRuntime.Playground
         readonly float3[] courseOffsets = { new float3(-160, 0, 90), new float3(-240, 0, 150), new float3(-320, 0, 70), new float3(-160, 0, 0) };
         int courseGate = -1;
         double3 origin;
-        bool active, entering, enemyRequested, tradeGranted, xenoRequested;
+        bool active, entering, enemyRequested, tradeGranted, xenoRequested, nocturneRequested;
         bool autoEnter;
         int nearest = -1, pending;
         string report = "";
@@ -181,7 +182,7 @@ namespace Game.App.DevRuntime.Playground
             var ctx = host.Context;
             var player = ctx.PlayerShipRoot;
             if (!DevEcs.TryGetUniversePosition(ctx, player, out origin)) throw new InvalidOperationException("player position unavailable");
-            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; pending = 0; nearest = -1;
+            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; nocturneRequested = false; pending = 0; nearest = -1;
             courseGate = -1;
             report = "Quiet sandbox ready. No hostile ships spawn until you activate COMBAT.";
             salvage?.Reset();
@@ -302,6 +303,16 @@ namespace Game.App.DevRuntime.Playground
                         if (result.Kind != DevResultKind.Failed)
                             result = host.Commands.Execute("spawn blueprint=ship_xeno_broodmother dx=0 dz=420 face=player faction=faction_xeno team=2 ai=true", host.Context);
                         if (result.Kind != DevResultKind.Failed) xenoRequested = true;
+                    }
+                    break;
+                case "nocturne":
+                    if (nocturneRequested) result = DevCommandResult.Ok("The NOCTURNE pair is already parked. playground reset clears them.");
+                    else
+                    {
+                        result = host.Commands.Execute("spawn blueprint=ship_nocturne_wraith dx=-45 dz=40 face=player ai=false", host.Context);
+                        if (result.Kind != DevResultKind.Failed)
+                            result = host.Commands.Execute("spawn blueprint=ship_nocturne_requiem dx=0 dz=190 yaw=90 ai=false", host.Context);
+                        if (result.Kind != DevResultKind.Failed) nocturneRequested = true;
                     }
                     break;
                 case "salvage":

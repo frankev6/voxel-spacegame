@@ -44,7 +44,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 An independent reviewer still starts at [scope and access only](QA-REVIEWER-PROMPT.md).
 
-1. Frank reviews QA-001 in the playground: pads 01–15, with 15 for the aliens; the main menu; a new campaign.
+1. Frank reviews QA-001 in the playground: pads 01–16, with 15 for the aliens and 16 for the new NOCTURNE WRAITH frigate and REQUIEM cruiser; the main menu; a new campaign.
 2. Waiting on Frank:
    - download approval for the OFL fonts (AST-004);
    - art approval of the procedural organ meshes, the magnet block, the UI sounds and the baked plating textures (`docs/design/asset-manifest.csv` status `review`);
