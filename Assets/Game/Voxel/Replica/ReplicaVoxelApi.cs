@@ -116,6 +116,9 @@ namespace Game.Voxel.Replica
             grid.Revision++; em.SetComponentData(root, grid);
             if (brick.SolidCount == 0)
             {
+                // The host destroys emptied bricks after its dirty drain has queued their collider rebuild; destroying one here at once
+                // would leave its collision part in the grid's compound (ships hit blocks that are gone), so queue the removal first.
+                QueueColliderRemoval(em, root, grid, entity, coord);
                 slots = em.GetBuffer<BrickSlot>(root); slots[slotIndex] = default;
                 RemoveFromGroup(em, root, entity);
                 em.DestroyEntity(entity);
@@ -181,6 +184,15 @@ namespace Game.Voxel.Replica
             bool found = ReplicaJobs.ContainsRef(views.AsArray(), reference);
             views.Dispose(); sparse.Dispose(); bricks.Dispose();
             return found;
+        }
+
+        static void QueueColliderRemoval(EntityManager em, Entity root, VoxelGrid grid, Entity brick, int3 coord)
+        {
+            using var query = em.CreateEntityQuery(ComponentType.ReadOnly<ColliderDirtyQueue>());
+            if (query.IsEmptyIgnoreFilter) return;
+            var queue = query.GetSingleton<ColliderDirtyQueue>();
+            queue.CompleteAccess();
+            queue.Enqueue(grid.Serial, root, brick, coord, ColliderPriority.Damage);   // a missing brick snapshots as empty: the child is removed
         }
 
         static void TouchNeighbours(EntityManager em, Entity root, VoxelGrid grid, int3 coord, BlockFaceMask faces)
