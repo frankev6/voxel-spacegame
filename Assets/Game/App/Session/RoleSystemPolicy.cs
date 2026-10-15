@@ -29,6 +29,7 @@ namespace Game.App.Session
             ["PlayerInputSampleSystem"] = SystemAuthority.Both,
             ["PlayerCommandReplaySystem"] = SystemAuthority.Both,
             ["PlayerCommandRecordSystem"] = SystemAuthority.Both,
+            ["PilotSetupSystem"] = SystemAuthority.Both,
             ["GridSpawnSystem"] = SystemAuthority.Both,
             ["GridSpawnBodyInitSystem"] = SystemAuthority.Both,
             ["PowerInitSystem"] = SystemAuthority.Both,
@@ -40,6 +41,7 @@ namespace Game.App.Session
             ["ReplicaApplySystem"] = SystemAuthority.GuestOnly,
             // GameplayPrePhysicsGroup and its subgroups
             ["FactionStandingSystem"] = SystemAuthority.AuthorityOnly,
+            ["PilotInteractCountSystem"] = SystemAuthority.Both,          // ADR-0117: each pilot's Interact presses
             ["PlayerCommandApplySystem"] = SystemAuthority.Both,          // guests: their own ship's cosmetic weapons fire at once
             ["RemotePilotReceiveSystem"] = SystemAuthority.HostOnly,
             ["RemotePilotApplySystem"] = SystemAuthority.HostOnly,
@@ -101,8 +103,9 @@ namespace Game.App.Session
             // WorldGroup
             ["GalaxyServicesBridgeSystem"] = SystemAuthority.AuthorityOnly,
             ["InteractionQuerySystem"] = SystemAuthority.Both,
-            ["SalvageMarkSystem"] = SystemAuthority.AuthorityOnly,
-            ["SalvageReachSystem"] = SystemAuthority.AuthorityOnly,
+            ["InteractionTriggerSystem"] = SystemAuthority.AuthorityOnly,   // ADR-0117 decider: every pilot's presses act on the host
+            ["SalvageMarkSystem"] = SystemAuthority.Both,                // ADR-0117 derivation: salvage tint and prompt on guests
+            ["SalvageReachSystem"] = SystemAuthority.Both,               // ADR-0117 derivation, per pilot
             ["BodyGridWatchSystem"] = SystemAuthority.AuthorityOnly,
             ["GridLodSystem"] = SystemAuthority.Both,
             ["WeaponVisualSyncSystem"] = SystemAuthority.Both,

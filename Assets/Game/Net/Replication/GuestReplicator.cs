@@ -283,6 +283,8 @@ namespace Game.Net.Replication
             if (header.HasAllegiance != 0) em.AddComponentData(entity, header.Allegiance);
             if (!string.IsNullOrEmpty(header.Pilot)) em.AddComponentData(entity, Game.Core.Net.PilotName.From(header.Pilot));
             em.AddComponentData(entity, new Replicated { NetId = header.NetId, OwnedLocally = (byte)(mine ? 1 : 0) });
+            // ADR-0117: every player's ship is a pilot here too (the own one is also PlayerShip), so per-pilot systems serve it alike.
+            if (header.OwnerSlot != 255 && header.Kind == GridKind.Ship) em.AddComponentData(entity, new Pilot { Slot = header.OwnerSlot });
             if (mine) Predictor.Reset();
             grids[header.NetId] = new GuestGrid { Entity = entity, Handle = handle, Structure = structure, Header = header };
         }

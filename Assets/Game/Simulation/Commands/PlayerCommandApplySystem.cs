@@ -40,24 +40,7 @@ namespace Game.Simulation.Commands
                 consumed = player.Edges; consumed.Cruise = cruise;
                 return;
             }
-            var edges = Consume(player.Edges.Interact, ref consumed.Interact, ShipCommandEdges.Interact);
-            edges |= Consume(player.Edges.Ability1, ref consumed.Ability1, ShipCommandEdges.Ability1);
-            edges |= Consume(player.Edges.Ability2, ref consumed.Ability2, ShipCommandEdges.Ability2);
-            edges |= Consume(player.Edges.Ability3, ref consumed.Ability3, ShipCommandEdges.Ability3);
-            edges |= Consume(player.Edges.Ability4, ref consumed.Ability4, ShipCommandEdges.Ability4);
-            edges |= Consume(player.Edges.TargetNext, ref consumed.TargetNext, ShipCommandEdges.TargetNext);
-            edges |= Consume(player.Edges.TargetUnderCursor, ref consumed.TargetUnderCursor, ShipCommandEdges.TargetUnderCursor);
-            edges |= Consume(player.Edges.TargetClear, ref consumed.TargetClear, ShipCommandEdges.TargetClear);
-            edges |= Consume(player.Edges.AutofireToggle, ref consumed.AutofireToggle, ShipCommandEdges.AutofireToggle);
-            bool3 finiteAim = math.isfinite(player.AimWorld);
-            var command = new ShipCommand
-            {
-                Thrust = math.clamp(math.select(float2.zero, player.Thrust, math.isfinite(player.Thrust)), -1, 1),
-                Turn = math.isfinite(player.Turn) ? math.clamp(player.Turn, -1, 1) : 0,
-                AimWorld = math.select(float3.zero, player.AimWorld, finiteAim),
-                AimValid = math.all(finiteAim) ? player.AimValid : (byte)0,
-                Flags = player.Flags, Edges = edges, FireGroups = player.FireGroups
-            };
+            var command = PilotCommandConversion.Convert(player, ref consumed);   // shared with co-op guests' ships (ADR-0117)
             if (SystemAPI.TryGetSingleton(out PlayerControlLock controlLock))
             {
                 if ((controlLock.Flags & PlayerControlLockFlags.Movement) != 0)
@@ -78,13 +61,6 @@ namespace Game.Simulation.Commands
                 }
             }
             state.Dependency = new PlayerCommandWriteJob { Command = command }.Schedule(playerQuery, state.Dependency);
-        }
-
-        static ShipCommandEdges Consume(byte incoming, ref byte consumed, ShipCommandEdges edge)
-        {
-            if (incoming == consumed) return ShipCommandEdges.None;
-            consumed = unchecked((byte)(consumed + 1));
-            return edge;
         }
     }
 }

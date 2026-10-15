@@ -229,6 +229,7 @@ namespace Game.App.Session
                 if (id.IsNone || !spawner.TryGetRoot(id, out var root)) throw new InvalidOperationException("the guest ship spawn was rejected");
                 var em = world.EntityManager;
                 em.AddComponentData(root, new RemotePilot { Slot = peer.Slot });
+                em.AddComponentData(root, new Pilot { Slot = peer.Slot });   // ADR-0117: served by the same per-pilot systems as the host's ship
                 em.AddComponentData(root, new RemotePilotInput());
                 em.AddComponentData(root, new RemotePilotEdgeConsumed());
                 em.AddComponentData(root, PilotName.From(string.IsNullOrEmpty(peer.Name) ? "Guest " + peer.Slot : peer.Name));

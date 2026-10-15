@@ -29,7 +29,7 @@ namespace Game.Galaxy.Salvage
         readonly EconomyConfigDefinition config;
         readonly IAudioService audio;
         readonly SalvageLedger ledger = new();
-        EntityQuery targets, hulks, players;
+        EntityQuery targets, hulks, players, pilots;
         bool disposed, transferring, leavingWorld;
         public SalvageService(World world, ContentCatalog catalog, EconomyConfigDefinition config, IAudioService audio)
         {
@@ -40,6 +40,7 @@ namespace Game.Galaxy.Salvage
             targets = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<InteractionTarget>());
             hulks = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Hulk>(), ComponentType.ReadOnly<PersistentId>());
             players = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PlayerShip>());
+            pilots = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<PersistentId>());
             EventBus<BodyInteracted>.Subscribe(Interacted); EventBus<SceneTransitionStarted>.Subscribe(Transition);
             EventBus<SceneTransitionFinished>.Subscribe(TransitionFinished); EventBus<SessionReset>.Subscribe(Reset);
         }
@@ -55,16 +56,30 @@ namespace Game.Galaxy.Salvage
         {
             if (disposed || !world.IsCreated || value.Kind != (byte)InteractionKind.Salvage) return;
             var em = world.EntityManager; em.CompleteDependencyBeforeRO<InteractionTarget>(); em.CompleteDependencyBeforeRO<PersistentId>();
+            var collector = PilotShip(em, value.PilotPersistentId);
             if (targets.TryGetSingleton<InteractionTarget>(out var target) && em.Exists(target.Target) &&
                 em.HasComponent<PersistentId>(target.Target) && em.GetComponentData<PersistentId>(target.Target).Value == value.GridPersistentId)
-            { TrySalvage(target.Target, out _); return; }
+            { TrySalvage(target.Target, out _, collector); return; }
             using var roots = hulks.ToEntityArray(Allocator.Temp);
             foreach (var root in roots)
-                if (em.GetComponentData<PersistentId>(root).Value == value.GridPersistentId) { TrySalvage(root, out _); return; }
+                if (em.GetComponentData<PersistentId>(root).Value == value.GridPersistentId) { TrySalvage(root, out _, collector); return; }
+        }
+        /// <summary>ADR-0117: the ship that interacted (a co-op guest's on the host), else the local player's.</summary>
+        Entity PilotShip(EntityManager em, ulong id)
+        {
+            if (id != 0)
+            {
+                using var ships = pilots.ToEntityArray(Allocator.Temp);
+                foreach (var ship in ships) if (em.GetComponentData<PersistentId>(ship).Value == id) return ship;
+            }
+            return players.CalculateEntityCount() == 1 ? players.GetSingletonEntity() : Entity.Null;
         }
         static bool Refuse(string text, out string message)
         { message = text; EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvageRefused, text)); return false; }
-        public bool TrySalvage(Entity root, out string message)
+        public bool TrySalvage(Entity root, out string message) => TrySalvage(root, out message, Entity.Null);
+        /// <summary>Salvages <paramref name="root"/> into the cargo hold; the wreck streams into <paramref name="collector"/> (the pilot
+        /// that interacted; the local player's ship when null). Co-op shares one hold, the host's (SPEC-90 §10 Q5).</summary>
+        public bool TrySalvage(Entity root, out string message, Entity collector)
         {
             if (disposed || !world.IsCreated || transferring) return Refuse("Nothing to salvage.", out message);
             var em = world.EntityManager;
@@ -96,9 +111,10 @@ namespace Game.Galaxy.Salvage
                 {
                     // QA-001: the wreck streams into the player's ship (SalvagePullSystem, which despawns it after the last wave)
                     // instead of vanishing; without a collector it despawns at once.
-                    if (players.CalculateEntityCount() == 1)
+                    if (collector == Entity.Null && players.CalculateEntityCount() == 1) collector = players.GetSingletonEntity();
+                    if (collector != Entity.Null && em.Exists(collector))
                     {
-                        em.AddComponentData(root, new SalvageCollected { Collector = players.GetSingletonEntity() });
+                        em.AddComponentData(root, new SalvageCollected { Collector = collector });
                         if (em.HasComponent<Interactable>(root)) em.RemoveComponent<Interactable>(root);
                     }
                     else GridSpawnApi.RequestDespawn(em, root);
