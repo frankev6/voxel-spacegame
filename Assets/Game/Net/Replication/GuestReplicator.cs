@@ -41,6 +41,7 @@ namespace Game.Net.Replication
         NativeArray<Cell> cells;
         NativeList<ReplicaCellWrite> writes;
         NativeList<CellRemoved> removedCells;
+        NativeList<int> touchedInstances;
         double clockOffset; bool clockValid;
         public uint NewestHostTick { get; private set; }
         public double3 HostOrigin { get; private set; }
@@ -59,6 +60,7 @@ namespace Game.Net.Replication
             cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Persistent);
             writes = new NativeList<ReplicaCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
             removedCells = new NativeList<CellRemoved>(256, Allocator.Persistent);
+            touchedInstances = new NativeList<int>(32, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
                          NetMessage.GridState, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
             {
@@ -282,6 +284,7 @@ namespace Game.Net.Replication
                 int index = r.U16(); float hp = r.F32(); ushort alive = r.U16(); var flags = (BlockInstanceFlags)r.U8();
                 ReplicaVoxelApi.SetInstance(em, root, index, hp, alive, flags);
             }
+            touchedInstances.Clear();
             uint ops = r.U32();
             for (uint o = 0; o < ops; o++)
             {
@@ -302,8 +305,9 @@ namespace Game.Net.Replication
                     coord = r.I3(); int n = r.U16();
                     for (int i = 0; i < n; i++) writes.Add(new ReplicaCellWrite { Local = r.U16(), Value = GridCodec.ReadCell(r) });
                 }
-                if (!ReplicaVoxelApi.WriteBrick(em, root, coord, writes.AsArray(), removedCells, quiet) && op != 0) transport.Stats.Desyncs++;
+                if (!ReplicaVoxelApi.WriteBrick(em, root, coord, writes.AsArray(), removedCells, quiet, touchedInstances) && op != 0) transport.Stats.Desyncs++;
             }
+            ReplicaVoxelApi.ReleaseOrphanedInstances(em, root, touchedInstances);
         }
 
         void SpawnChunk(EntityManager em, NetReader r)
@@ -365,6 +369,7 @@ namespace Game.Net.Replication
             if (cells.IsCreated) cells.Dispose();
             if (writes.IsCreated) writes.Dispose();
             if (removedCells.IsCreated) removedCells.Dispose();
+            if (touchedInstances.IsCreated) touchedInstances.Dispose();
         }
     }
 }

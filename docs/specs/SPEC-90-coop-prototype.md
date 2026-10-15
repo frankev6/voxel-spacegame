@@ -260,7 +260,7 @@ Verified live with the Editor as host and one or two dev-build guests on one Mac
 - **Bandwidth.** About 170 kbps of snapshots per guest in a three-player fight. Reliable bursts are a few kbps, peaking at about 36 KB of backlog on big cuts.
 - **Single-player.** EditMode passes except the two ordering tests this branch first broke, which are now fixed and green. No Game.Net system runs without a session.
 
-Bugs found and fixed while testing: a double free of replica chunk colliders (crashed a guest after chunks expired), debris sprayed for cells that left as detached bodies (pods showed a cloud of cubes), and AI weapons idle on guests until the target and weapon mode were replicated.
+Bugs found and fixed while testing: a double free of replica chunk colliders (crashed a guest after chunks expired), debris sprayed for cells that left as detached bodies (pods showed a cloud of cubes), AI weapons idle on guests until the target and weapon mode were replicated, and a duplicate thruster left hanging where a pod split off (guests now drop functional entities whose block has no cells left in that grid).
 
 Known gaps:
 1. Guest ships show as "Contact" on other machines: they spawn from a structure copy, which has no blueprint name.

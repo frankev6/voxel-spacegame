@@ -61,7 +61,8 @@ namespace Game.Voxel.Replica
 
         /// <summary>Applies one brick's replicated writes. Returns false when the brick does not exist here (a desync). Removed cells are
         /// appended to <paramref name="removed"/> for debris, VFX and audio; emptied bricks are destroyed like the host's resolver does.</summary>
-        public static bool WriteBrick(EntityManager em, Entity root, int3 coord, NativeArray<ReplicaCellWrite> writes, NativeList<CellRemoved> removed, bool quiet = false)
+        public static bool WriteBrick(EntityManager em, Entity root, int3 coord, NativeArray<ReplicaCellWrite> writes, NativeList<CellRemoved> removed,
+            bool quiet = false, NativeList<int> touchedInstances = default)
         {
             var grid = em.GetComponentData<VoxelGrid>(root);
             int slotIndex = BrickMath.SlotIndex(coord, grid.BrickMin, grid.BrickDims);
@@ -83,6 +84,7 @@ namespace Game.Voxel.Replica
                 var old = BrickWrite.Get(dense, sparse, local);
                 if (!BrickWrite.Set(ref brick, dense, sparse, mask, ref dirty, local, writes[i].Value, grid.Revision + 1)) continue;
                 changed = true;
+                if (old.IsInstance && touchedInstances.IsCreated && (writes[i].Value.IsAir || writes[i].Value.Ref != old.Ref)) touchedInstances.Add(old.InstanceIndex);
                 if (!old.IsAir && writes[i].Value.IsAir && removed.IsCreated && !quiet)
                 {
                     var paint = old.IsInstance && old.InstanceIndex < instances.Length
@@ -109,6 +111,46 @@ namespace Game.Voxel.Replica
             }
             TouchNeighbours(em, root, grid, coord, neighbours);
             return true;
+        }
+
+        /// <summary>Guest: after a delta, an instance that lost cells and has none left in this grid has left it (destroyed, or moved
+        /// to a hulk where the host transfers its functional entity). Its functional entity here is removed, so no thruster or turret
+        /// stays hanging where the piece used to be.</summary>
+        public static void ReleaseOrphanedInstances(EntityManager em, Entity root, NativeList<int> touchedInstances)
+        {
+            if (!touchedInstances.IsCreated || touchedInstances.Length == 0) return;
+            var grid = em.GetComponentData<VoxelGrid>(root);
+            var cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
+            var checkedSet = new NativeHashSet<int>(touchedInstances.Length, Allocator.Temp);
+            foreach (int index in touchedInstances)
+            {
+                if (!checkedSet.Add(index)) continue;
+                var instances = em.GetBuffer<BlockInstance>(root, true);
+                if ((uint)index >= (uint)instances.Length || instances[index].Functional == Entity.Null) continue;
+                if (InstanceHasCells(em, root, grid, instances[index].Origin, (ushort)(Cell.InstanceBit | index), cells)) continue;
+                var copy = instances[index]; Entity functional = copy.Functional;
+                copy.Functional = Entity.Null; copy.CellsAlive = 0;
+                var writable = em.GetBuffer<BlockInstance>(root); writable[index] = copy;
+                if (em.Exists(functional)) { RemoveFromGroup(em, root, functional); em.DestroyEntity(functional); }
+            }
+            cells.Dispose(); checkedSet.Dispose();
+        }
+
+        // Multi-cell blocks span at most a few cells; search the bricks around the instance origin for any cell that still refers to it.
+        static bool InstanceHasCells(EntityManager em, Entity root, VoxelGrid grid, int3 origin, ushort reference, NativeArray<Cell> cells)
+        {
+            var slots = em.GetBuffer<BrickSlot>(root, true);
+            int3 lo = BrickMath.BrickOf(origin - 8), hi = BrickMath.BrickOf(origin + 8);
+            for (int z = lo.z; z <= hi.z; z++) for (int y = lo.y; y <= hi.y; y++) for (int x = lo.x; x <= hi.x; x++)
+            {
+                int slot = BrickMath.SlotIndex(new int3(x, y, z), grid.BrickMin, grid.BrickDims);
+                if (slot < 0 || slot >= slots.Length) continue;
+                Entity brick = slots[slot].Brick;
+                if (brick == Entity.Null || !em.Exists(brick)) continue;
+                ReadBrick(em, brick, cells);
+                for (int i = 0; i < cells.Length; i++) if (cells[i].Ref == reference) return true;
+            }
+            return false;
         }
 
         static void TouchNeighbours(EntityManager em, Entity root, VoxelGrid grid, int3 coord, BlockFaceMask faces)
