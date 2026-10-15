@@ -32,7 +32,7 @@ MonoBehaviour:
     Bits: 16777215
   attachFaces: 63
   mirrorPartner: {fileID: 0}
-  cellHp: 80
+  cellHp: 30
   functionHp: 0
   cellMass: 20
   armorClass: 0

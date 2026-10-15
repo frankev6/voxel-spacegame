@@ -5,12 +5,14 @@ namespace Game.App.DevRuntime.Commands
     public sealed class PlaygroundDevCommand : IDevCommand
     {
         public string Name => "playground";
-        public string Usage => "playground [reset|status|activate] | playground goto=<pad> | playground run=<pad|shield|boost|station>";
+        public string Usage => "playground [reset|status|activate] | playground goto=<pad> | playground run=<pad|shield|boost|station> | playground ship=<blueprint|starter>";
         public string Summary => "Enter/reset the isolated interactive playground; fly to a pad and press F";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
-            string error = DevCommandRegistry.UnknownArgument(args, Name, "goto", "run");
+            string error = DevCommandRegistry.UnknownArgument(args, Name, "goto", "run", "ship");
             if (error != null) return DevCommandResult.Fail(error);
+            if (args.Has("ship")) return args.Positional.Count == 0 && !args.Has("goto") && !args.Has("run")
+                ? ctx.Host.Playground.SwitchShip(args.GetString("ship", "")) : DevCommandResult.Fail(Usage);
             if (args.Has("run")) return args.Positional.Count == 0 && !args.Has("goto")
                 ? ctx.Host.Playground.Run(args.GetString("run", "")) : DevCommandResult.Fail(Usage);
             if (args.Has("goto")) return args.Positional.Count == 0

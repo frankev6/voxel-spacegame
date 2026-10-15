@@ -58,6 +58,7 @@ namespace Game.App.DevRuntime.Playground
             new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the new NOCTURNE line from the look book: a WRAITH frigate (28 m) beside you and a REQUIEM heavy cruiser (123 m, 129k cells) broadside ahead.\nNo AI: fly around them, compare scale, and shoot the cruiser to test destruction on a big hull. One pair per reset.")
         };
         DevPlaygroundPower power;
+        DevPlaygroundShip ship;
         DevPlaygroundSalvage salvage;
         readonly DevPlaygroundCampaign campaign = new();
         InputService input;
@@ -83,6 +84,7 @@ namespace Game.App.DevRuntime.Playground
         {
             input = service; ui = root;
             power = new DevPlaygroundPower(host.Context, ui);
+            ship = new DevPlaygroundShip(host.Context);
             salvage = new DevPlaygroundSalvage(host, SetReport);
             input.Controls.Flight.Interact.performed += OnInteract;
             launcher = new VisualElement { name = "dev-launcher", pickingMode = PickingMode.Ignore };
@@ -228,7 +230,15 @@ namespace Game.App.DevRuntime.Playground
                 return host.Commands.Execute("interact", host.Context);
             return activation;
         }
-        internal DevCommandResult Status() => DevCommandResult.Ok((active ? "Playground active. " : "Playground inactive. F1: playground to enter. ") + Directory() + "\n" + report);
+        internal DevCommandResult Status() => DevCommandResult.Ok((active ? "Playground active. " : "Playground inactive. F1: playground to enter. ")
+            + (ship == null || ship.Override.IsNone ? "" : "Flying " + ship.Override + " (playground ship=starter restores the start ship). ") + Directory() + "\n" + report);
+        /// <summary>QA-001: choose the playground flagship, then reset so it spawns.</summary>
+        internal DevCommandResult SwitchShip(string id)
+        {
+            if (ship == null) return DevCommandResult.Fail("playground is not bound yet");
+            string error = ship.Select(id);
+            return error != null ? DevCommandResult.Fail(error) : Enter();
+        }
         string Directory()
         {
             var text = new System.Text.StringBuilder("Console: playground reset | playground run=<id> | playground goto=<id>\n");
@@ -489,7 +499,7 @@ namespace Game.App.DevRuntime.Playground
         public void Dispose()
         {
             if (input != null) input.Controls.Flight.Interact.performed -= OnInteract;
-            power?.Dispose(); campaign.Dispose(); salvage?.Dispose();
+            power?.Dispose(); ship?.Dispose(); campaign.Dispose(); salvage?.Dispose();
             active = false; ClearPresentation();
             launcher?.RemoveFromHierarchy(); launcher = null;
         }

@@ -91,7 +91,7 @@ Shader "Game/Voxel/PropInstanced"
         {
             float4 positionCS:SV_POSITION; float3 positionWS:TEXCOORD0;
             float3 normalWS:TEXCOORD1; float3 tangentWS:TEXCOORD2; float3 bitangentWS:TEXCOORD3;
-            float2 uv:TEXCOORD4; float4 paint:TEXCOORD5; float blink:TEXCOORD6;
+            float2 uv:TEXCOORD4; float4 paint:TEXCOORD5; float2 blink:TEXCOORD6;
             nointerpolation uint colour:TEXCOORD7;
             float3 objectPos:TEXCOORD8; float3 objectNormal:TEXCOORD9;
             UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -113,13 +113,15 @@ Shader "Game/Voxel/PropInstanced"
             o.tangentWS=normalize(mul((float3x3)grid,mul(rotation,tangent)));
             o.bitangentWS=normalize(mul((float3x3)grid,mul(rotation,bitangent)));
             o.colour=(instance.Packed>>5u)&255u;
+            // QA-001: broken-off chunk cubes (uv1.y = 8) shade in chunk cell space so the hull plating carries across cells.
+            if(a.blink.y>4) { o.objectPos=instance.LocalCellCenter+mul(rotation,a.position); o.objectNormal=mul(rotation,a.normal); }
 #else
             o.positionWS=TransformObjectToWorld(a.position); o.normalWS=TransformObjectToWorldNormal(a.normal);
             o.tangentWS=TransformObjectToWorldDir(tangent); o.bitangentWS=TransformObjectToWorldDir(bitangent);
             o.colour=(uint)UNITY_ACCESS_INSTANCED_PROP(DraftProps, _DraftPaintIndex);
 #endif
-            o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=a.uv; o.paint=a.paint; o.blink=a.blink.x;
-            o.objectPos=a.position; o.objectNormal=a.normal;
+            o.positionCS=TransformWorldToHClip(o.positionWS); o.uv=a.uv; o.paint=a.paint; o.blink=a.blink;
+            if(a.blink.y<=4) { o.objectPos=a.position; o.objectNormal=a.normal; }
             return o;
         }
         void DraftSliceClip(PropVaryings v)
@@ -175,9 +177,21 @@ Shader "Game/Voxel/PropInstanced"
                 s.normalTS=normalize(half3(s.normalTS.xy*.3h+pl.normalTS.xy,s.normalTS.z*pl.normalTS.z));
                 glowSlot=pl.glow;
             }
-            half blink=v.blink<=0 ? 1 : step(frac(_Time.y-v.blink),.1);
+            half chunk=v.blink.y>4 ? 1 : 0;
+            if(chunk>0)
+            {
+                // QA-001 (owner: "they are literally black, no texture, no uv map"): debris chunks wear the hull's NOCTURNE
+                // plating (layer 0, ark plate) in chunk cell units, tinted by each cell's paint; no lit windows.
+                float3 on=normalize(v.objectNormal), an=abs(on), p=v.objectPos;
+                float2 puv=an.x>an.y&&an.x>an.z?p.zy:an.y>an.z?p.xz:p.xy;
+                half4 h2=LOAD_TEXTURE2D(_BrickLayerParams,int2(0,2)), h3=LOAD_TEXTURE2D(_BrickLayerParams,int2(0,3));
+                PlatingResult pl=NocturnePlating(puv,p,on,1,0,h2.b,h3.a,BrickPaint(v.colour),Brick_TeamAccent().rgb);
+                s.albedo=pl.albedo; s.metallic=pl.metallic; s.smoothness=pl.smoothness; s.normalTS=pl.normalTS;
+                glowSlot=0; xenoGlow=0; crack=0;
+            }
+            half blink=v.blink.x<=0 ? 1 : step(frac(_Time.y-v.blink.x),.1);
             half powered=Brick_Powered();
-            s.emission=Brick_TeamAccent().rgb*mask.a*_EmissiveIntensity*powered*blink*(1+Brick_Throttle());
+            s.emission=Brick_TeamAccent().rgb*mask.a*(1-chunk)*_EmissiveIntensity*powered*blink*(1+Brick_Throttle());
             s.emission+=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,0)).rgb*glowSlot*_EmissiveIntensity*powered*(.6+Brick_Throttle());
             s.emission+=xenoGlow*_EmissiveIntensity*(1+Brick_Throttle());
             half fade=_EmberFadeSeconds>0 ? saturate(1-(_Time.y-Brick_LastHitTime())/_EmberFadeSeconds) : 0;

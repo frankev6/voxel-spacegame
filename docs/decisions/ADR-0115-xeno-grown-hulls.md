@@ -39,6 +39,11 @@ The renders came from `ArtSource/LookDev/ld_aliens.py` (signed-distance primitiv
    - encounters: the xeno-faction encounters (probe tutorial, glass worms, jungle beasts, solar parasite) now spawn them;
    - playground: pad 15 spawns a wave.
 
+## Amendment (QA-001, 2026-10-15)
+Owner, verbatim: "art approval, yes aliens look good, i couldn't break their bodies though its like theyre invincible".
+- **Wounds open.** Depth is fixed at spawn, so tissue exposed by damage kept its old depth and the shell regrew over craters: a crater dug to y = 12 meshed its floor at 12.375. The mesher now treats a tissue cell deeper than 1.2 cells that touches air as a wound. A pristine cell touching air is at most about one cell deep, because the field is a distance. Its geometry samples a shallow depth (0.2), so the floor follows the removed cells (11.875); its shading keeps the true depth, so the wound still glows as flesh. Interior depth is capped one code below the maximum (3.75 cells), so only sacs carry the maximum and keep their bulge.
+- **Flesh is soft.** Grown hulls are solid: a HUSK (2,843 cells) against a fighter (1,005 mostly thin cells). Tissue drops from 80 to 30 HP and sacs from 40 to 15. A HUSK then holds about 85k HP, close to a fighter's 100k, and the BROODMOTHER (about 490k) stays a boss.
+
 ## Consequences
 - The opening chapter's first alien contact is three HUSKs instead of human frigates.
 - A Xeno brick costs one extra sampling pass, and only when the brick holds tissue. Human bricks exit after one scan of the snapshot.

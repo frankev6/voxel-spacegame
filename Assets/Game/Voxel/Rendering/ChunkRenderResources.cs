@@ -26,7 +26,7 @@ namespace Game.Voxel.Rendering
         void OnDestroy() => Dispose();
         internal static Mesh CreateCube()
         {
-            var vertices = new Vector3[24]; var normals = new Vector3[24]; var uv = new Vector2[24];
+            var vertices = new Vector3[24]; var normals = new Vector3[24]; var uv = new Vector2[24]; var chunkFlag = new Vector2[24];
             var colors = new Color[24]; var triangles = new int[36];
             var directions = new[] { Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back };
             for (int face = 0; face < 6; face++)
@@ -37,14 +37,14 @@ namespace Game.Voxel.Rendering
                     float x = corner == 0 || corner == 3 ? -.5f : .5f;
                     float y = corner < 2 ? -.5f : .5f;
                     int i = face * 4 + corner; vertices[i] = n * .5f + u * x + v * y; normals[i] = n;
-                    uv[i] = new Vector2(x + .5f, y + .5f); colors[i] = new Color(1, 0, 0, 0);
+                    uv[i] = new Vector2(x + .5f, y + .5f); chunkFlag[i] = new Vector2(0, 8); colors[i] = new Color(1, 0, 0, 0);
                 }
                 int t = face * 6, b = face * 4;
                 triangles[t] = b; triangles[t+1] = b+1; triangles[t+2] = b+2;
                 triangles[t+3] = b; triangles[t+4] = b+2; triangles[t+5] = b+3;
             }
             var mesh = new Mesh { name = "Chunk unit cube", hideFlags = HideFlags.DontSave };
-            mesh.vertices = vertices; mesh.normals = normals; mesh.uv = uv; mesh.colors = colors; mesh.triangles = triangles;
+            mesh.vertices = vertices; mesh.normals = normals; mesh.uv = uv; mesh.uv2 = chunkFlag; mesh.colors = colors; mesh.triangles = triangles;   // uv1.y = 8 (outside any lightmap range): chunk plating (QA-001)
             mesh.RecalculateBounds(); mesh.UploadMeshData(true); return mesh;
         }
     }

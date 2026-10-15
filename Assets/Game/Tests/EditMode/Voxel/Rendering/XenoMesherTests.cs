@@ -108,6 +108,22 @@ namespace Game.Tests.EditMode.Voxel.Rendering
             }
             Assert.Greater(wound, 10, "The crater floor sits in deep tissue and glows."); Assert.Greater(shell, 100);
         }
+        [Test] public void Crater_FloorFollowsTheRemovedCells()
+        {
+            // QA-001: exposed tissue keeps its spawn depth (~2 cells), so the shell regrew 0.4 cells over a crater (floor 12.375
+            // for cells removed down to y = 12). Wound cells mesh at a shallow depth: the floor sits on the removed volume.
+            Ball(new float3(8, 8, 8), 6.5f);
+            for (int z = 7; z <= 9; z++) for (int x = 7; x <= 9; x++) for (int y = 12; y <= 14; y++) snapshot[MeshCell.SnapIndex(x, y, z)] = 0;
+            Mesh(); float floor = float.MaxValue; bool glows = false;
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                var p = vertices[i].Position;
+                if (math.abs(p.x - 8.5f) > .75f || math.abs(p.z - 8.5f) > .75f || p.y < 9) continue;
+                if (p.y < floor) { floor = p.y; uint flags = vertices[i].Hi >> 24; glows = ((flags & 3) | (((flags >> 6) & 3) << 2)) >= 4; }
+            }
+            Assert.Less(floor, 12.1f, "The crater floor sits on the removed cells instead of regrowing over them.");
+            Assert.IsTrue(glows, "The crater floor keeps its true depth, so it glows as a wound.");
+        }
         [Test] public void Lod1_StillShellsTissueAndNeverAddsCubes()
         {
             Ball(new float3(8, 8, 8), 6f); Mesh(1);

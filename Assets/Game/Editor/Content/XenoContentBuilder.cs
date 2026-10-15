@@ -28,11 +28,14 @@ namespace Game.Editor.Content
             var sac = SaveMesh(Ellipsoid("xeno_sac", new float3(.5f, .5f, .5f), 18, 12));
             var eye = SaveMesh(Ellipsoid("xeno_eye", new float3(.46f, .4f, .5f), 18, 12));
             var vent = SaveMesh(Ellipsoid("xeno_vent", new float3(.5f, .32f, .5f), 18, 10));
+            // QA-001 (owner: "i couldn't break their bodies though its like theyre invincible"): grown hulls are solid, so a HUSK
+            // (2,843 cells) outweighed a fighter (1,005 mostly thin cells) nearly threefold at 80 HP. Flesh is soft: at 30 HP a HUSK
+            // holds ~85k, about a fighter; the BROODMOTHER (16,291 cells, ~490k) stays a boss.
             Block("block_hull", "block_xeno_tissue", "Xeno tissue", "Grown carapace. Damage exposes the living flesh beneath.", TissueLayer, null,
-                so => { Set(so, "shape", 5); Set(so, "cellHp", 80f); Set(so, "cellMass", 20f); });
+                so => { Set(so, "shape", 5); Set(so, "cellHp", 30f); Set(so, "cellMass", 20f); });
             // Sacs share the tissue layer; their maximum depth makes them bulge from the shell and glow through the smooth depth channel.
             Block("block_hull", "block_xeno_sac", "Xeno sac", "A glowing fluid sac in the carapace.", TissueLayer, null,
-                so => { Set(so, "shape", 5); Set(so, "cellHp", 40f); Set(so, "cellMass", 15f); });
+                so => { Set(so, "shape", 5); Set(so, "cellHp", 15f); Set(so, "cellMass", 15f); });
             Block("block_core_small", "block_xeno_heart", "Xeno heart", "The organ that keeps a grown ship alive.", OrganLayer, sac, null);
             Block("block_thruster_small", "block_xeno_fin", "Xeno fin", "A pulsing propulsion vent.", OrganLayer, vent, so =>
             {
@@ -177,7 +180,8 @@ namespace Game.Editor.Content
                 if (value >= 0) continue;
                 bool isSac = false;
                 foreach (var s in design.Sacs) if (s(p) < 0) { isSac = true; break; }
-                byte flags = XenoDepth.With(0, isSac ? 4 : -value);
+                // Interior depth stops one code short of the maximum, which marks sacs (the mesher keeps their bulge, QA-001).
+                byte flags = XenoDepth.With(0, isSac ? 4 : math.min(-value, 3.75f));
                 structure.SetCell(new int3(x, y, z), Cell.Palette(isSac ? sac : tissue, 255, flags));
             }
             void Place(string block, float3 at, byte orient)

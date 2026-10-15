@@ -178,19 +178,37 @@ namespace Game.Voxel.Rendering
         // (functional cells inside a Xeno brick count as tissue so organs never leave holes). A vertex sits in every dual
         // cube with a sign change, at the mean of its edge crossings; a quad is emitted for each sign-changing edge whose
         // inside end is tissue, owned by the brick holding the edge's lower sample. Stride 2 meshes LOD1 from 2x2x2 means.
-        static float XenoSample(NativeArray<uint> snapshot, int3 s, int stride, bool organs, out uint value, out bool tissue)
+        // QA-001 (owner: "i couldn't break their bodies though its like theyre invincible"): the depth is set at spawn, so a cell
+        // exposed by damage still carried its old depth and the shell regrew over the hole (a crater's floor rose 0.4 cells).
+        // A tissue cell touching air sits at most ~1 cell below the grown surface (the field is a distance); one deeper than 1.2
+        // cells that touches air was exposed by damage, a fresh wound: its geometry uses a shallow depth so the hole opens, and
+        // `shade` keeps the true depth so the wound still glows as flesh. Sacs (the maximum depth code) keep their bulge.
+        const float WoundDepth = .2f;
+        static bool Wound(NativeArray<uint> snapshot, int3 c, uint v)
         {
-            float sum = 0; int solid = 0, count = 0; value = 0; tissue = false;
+            if (((v >> 5) & 31) >= 31 || MeshCell.XenoDepthCells(v) <= 1.2f) return false;
+            for (int f = 0; f < 6; f++)
+            {
+                int3 n = c; n[f >> 1] += (f & 1) == 0 ? 1 : -1; n = math.clamp(n, -1, 16);
+                if (MeshCell.Class(snapshot[MeshCell.SnapIndex(n.x, n.y, n.z)]) == 0) return true;
+            }
+            return false;
+        }
+        static float XenoSample(NativeArray<uint> snapshot, int3 s, int stride, bool organs, out uint value, out bool tissue, out float shade)
+        {
+            float sum = 0, raw = 0; int solid = 0, count = 0; value = 0; tissue = false;
             for (int i = 0; i < stride * stride * stride; i++)
             {
                 int3 c = s * stride + new int3(i % stride, (i / stride) % stride, i / (stride * stride));
                 c = math.clamp(c, -1, 16); count++;
                 uint v = snapshot[MeshCell.SnapIndex(c.x, c.y, c.z)]; int cls = MeshCell.Class(v);
-                if (cls == 0) { sum += .5f; continue; }
+                if (cls == 0) { sum += .5f; raw += .5f; continue; }
                 bool xeno = MeshCell.IsXeno(v) || organs && cls == 2;
-                sum -= xeno ? (MeshCell.IsXeno(v) ? MeshCell.XenoDepthCells(v) : .5f) + 1f / 16 : .5f; solid++;
+                float depth = xeno ? (MeshCell.IsXeno(v) ? MeshCell.XenoDepthCells(v) : .5f) + 1f / 16 : .5f;
+                raw -= depth; sum -= MeshCell.IsXeno(v) && Wound(snapshot, c, v) ? WoundDepth + 1f / 16 : depth; solid++;
                 if (xeno && (!tissue || MeshCell.IsXeno(v) && !MeshCell.IsXeno(value))) { value = v; tissue = true; }
             }
+            shade = stride == 1 ? -raw : -raw / count;
             return stride == 1 ? sum : solid * 2 >= count ? math.min(sum / count, -1f / 16) : math.max(sum / count, 1f / 16);
         }
         static void MeshXeno(NativeArray<uint> snapshot, int stride, ref Output output)
@@ -204,6 +222,7 @@ namespace Game.Voxel.Rendering
             var field = new NativeArray<float>(side * side * side, Allocator.Temp);
             var values = new NativeArray<uint>(side * side * side, Allocator.Temp);
             var tissue = new NativeArray<bool>(side * side * side, Allocator.Temp);
+            var shade = new NativeArray<float>(side * side * side, Allocator.Temp);
             var vertexOf = new NativeArray<int>(cubes * cubes * cubes, Allocator.Temp);
             var pending = new NativeArray<PackedBrickVertex>(cubes * cubes * cubes, Allocator.Temp, NativeArrayOptions.UninitializedMemory);
             try
@@ -211,14 +230,14 @@ namespace Game.Voxel.Rendering
                 for (int z = -1; z <= n; z++) for (int y = -1; y <= n; y++) for (int x = -1; x <= n; x++)
                 {
                     int k = (x + 1) + side * (y + 1) + side * side * (z + 1);
-                    field[k] = XenoSample(snapshot, new int3(x, y, z), stride, true, out uint v, out bool t);
-                    values[k] = v; tissue[k] = t;
+                    field[k] = XenoSample(snapshot, new int3(x, y, z), stride, true, out uint v, out bool t, out float d);
+                    values[k] = v; tissue[k] = t; shade[k] = d;
                 }
-                MeshXenoQuads(field, values, tissue, vertexOf, pending, side, cubes, n, stride, ref output);
+                MeshXenoQuads(field, shade, values, tissue, vertexOf, pending, side, cubes, n, stride, ref output);
             }
-            finally { field.Dispose(); values.Dispose(); tissue.Dispose(); vertexOf.Dispose(); pending.Dispose(); }
+            finally { field.Dispose(); shade.Dispose(); values.Dispose(); tissue.Dispose(); vertexOf.Dispose(); pending.Dispose(); }
         }
-        static void MeshXenoQuads(NativeArray<float> field, NativeArray<uint> values, NativeArray<bool> tissue, NativeArray<int> vertexOf,
+        static void MeshXenoQuads(NativeArray<float> field, NativeArray<float> shade, NativeArray<uint> values, NativeArray<bool> tissue, NativeArray<int> vertexOf,
             NativeArray<PackedBrickVertex> pending, int side, int cubes, int n, int stride, ref Output output)
         {
             for (int i = 0; i < vertexOf.Length; i++) vertexOf[i] = -1;
@@ -236,7 +255,7 @@ namespace Game.Voxel.Rendering
                     {
                         if (!haveAttribute) { attribute = values[k]; haveAttribute = true; }
                         // The shallowest tissue corner says how deep this surface cuts: ~0 on the grown shell, > 1 in a wound.
-                        shallowest = math.min(shallowest, -field[k]);
+                        shallowest = math.min(shallowest, shade[k]);
                     }
                 }
                 if (!haveAttribute) continue;
