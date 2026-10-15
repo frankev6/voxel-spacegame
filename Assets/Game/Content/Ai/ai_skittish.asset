@@ -19,6 +19,7 @@ MonoBehaviour:
   sensorRange: 1500
   preferredRangeFraction: 0.7
   minEngageRange: 80
+  maxEngageRange: 160
   facing: 0
   throttle: 1
   fleeHullFraction: 0.5

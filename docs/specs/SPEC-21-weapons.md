@@ -457,8 +457,11 @@ This spec relies on SPEC-23 §4.1 (`SpatialHash`, `SpatialProxy`, queries) and i
 | `wpn_ark_lance_medium` | Beam | Energy | 900 | 2 | 0 / 0 | no | 0.1 | 1 / 0 | 1 | 0 | — | — | 0 | 900 / 1.0 | 35 / 60 | 20 | 10 | 2 | LaserBeam | 90 |
 | `wpn_flak_cannon_medium` | Projectile | Explosive | 0 | 1 | 2.5 / 60 | yes | 1 | 1 / 0 | 8 | 6.0 | 300 | 0.5–1.5 | 0 | — | 0 / 0 | 20 | 5 | 4 | FlakShell | 240 |
 | `wpn_missile_launcher_small` | Missile | Explosive | 0 | 1 | 3.0 / 200 | yes | 0.3 | 6 / 0.05 | 1 | 2.0 | 180 | 5.0 | 90 | — | 0 / 0 | 20 | 2 | 4 | Missile | 180 |
+| `wpn_siege_cannon_heavy` (QA-001) | Projectile | Explosive | 500 | 3 | 4.0 / 1600 | yes | 0.3 | 1 / 0 | 1 | 0.4 | 420 | 2.0 | 0 | — | 150 / 45 | 20 | 25 | 2 | StandardBullet | 390 |
 
-Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3); `fireConeDeg` 3; `impulsePerHit` = `Dmg × 2` N·s; beam width 0.3 m (ark lance 0.6); `fireCue` from SPEC-72's legacy sound map; `muzzleFx`/`hitFx` null. Legacy-to-field rules (for traceability; the table above wins): accuracy `a` → `spreadDeg = (1 − a) × 10`; legacy speed/size × 0.5; `IsRotating == false` or `MaxRotationAngle == 0` → fixed.
+The siege cannon is not legacy content: `HeavyWeaponBuilder` (QA-001, owner: "make a new large gun for a cruiser level ship, i feel like im fighting with pebbles") writes it with the 4×2×4 block `weapon_siege_cannon_heavy`. Its 4 m burst at 1600 clears about 3 m of 100 HP hull and 3.5 m of xeno flesh behind the occlusion rule, so four shells sever a HUSK.
+
+Common to all: `projectileRadius` 0.1 m (flak 0.2, missile 0.3, siege cannon 0.35); `fireConeDeg` 3 (siege cannon 4); `impulsePerHit` = `Dmg × 2` N·s; beam width 0.3 m (ark lance 0.6); `fireCue` from SPEC-72's legacy sound map; `muzzleFx`/`hitFx` null. Legacy-to-field rules (for traceability; the table above wins): accuracy `a` → `spreadDeg = (1 − a) × 10`; legacy speed/size × 0.5; `IsRotating == false` or `MaxRotationAngle == 0` → fixed.
 
 ## 5. Systems, services and flow
 

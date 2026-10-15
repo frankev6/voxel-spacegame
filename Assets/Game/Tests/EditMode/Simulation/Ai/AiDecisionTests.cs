@@ -230,5 +230,19 @@ namespace Game.Tests.EditMode.Simulation.Ai
             }
             public void Dispose() { Em.CompleteAllTrackedJobs(); world.Dispose(); profiles.Dispose(); factions.Dispose(); }
         }
+            // QA-001: fights happen on screen and enemies stop backing away from a player who closes in.
+        [Test]
+        public void EngageDistance_CappedAndHoldsWhenCloser()
+        {
+            // 600 m guns at 0.7 wanted 420 m; the 130 m cap brings it on screen.
+            Assert.AreEqual(130f, AiThinkJob.EngageDistance(60, 130, .7f, 600, 500), 1e-4f);
+            // Closer than preferred: hold the current distance instead of retreating to 130 m.
+            Assert.AreEqual(95f, AiThinkJob.EngageDistance(60, 130, .7f, 600, 95), 1e-4f);
+            // Inside the minimum: still pushed out to it.
+            Assert.AreEqual(60f, AiThinkJob.EngageDistance(60, 130, .7f, 600, 20), 1e-4f);
+            // No cap (0) keeps the fraction of weapon range; short guns still respect the minimum.
+            Assert.AreEqual(420f, AiThinkJob.EngageDistance(60, 0, .7f, 600, 900), 1e-4f);
+            Assert.AreEqual(60f, AiThinkJob.EngageDistance(60, 130, .7f, 50, 900), 1e-4f);
+        }
     }
 }

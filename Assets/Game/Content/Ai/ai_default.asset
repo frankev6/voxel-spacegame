@@ -18,7 +18,8 @@ MonoBehaviour:
   thinkIntervalTicks: 10
   sensorRange: 1500
   preferredRangeFraction: 0.7
-  minEngageRange: 80
+  minEngageRange: 45
+  maxEngageRange: 85
   facing: 0
   throttle: 0.85
   fleeHullFraction: 0.25

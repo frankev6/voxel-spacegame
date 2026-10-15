@@ -1029,3 +1029,4 @@ TEX_Plating_B,texture,Assets/Game/Art/Nocturne/Plating/Plating_B.png,,tex:1024x1
 TEX_Plating_N,texture,Assets/Game/Art/Nocturne/Plating/Plating_N.png,,tex:1024x1024x6,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review
 TEX_DebrisPlate_Albedo,texture,Assets/Game/Art/Nocturne/Plating/DebrisPlate_Albedo.png,fx_debris_default,tex:256x256,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_debris_plate.py),review
 TEX_DebrisPlate_Normal,texture,Assets/Game/Art/Nocturne/Plating/DebrisPlate_Normal.png,fx_debris_default,tex:256x256,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_debris_plate.py),review
+MSH_siege_cannon,mesh,Assets/Game/Art/Nocturne/Meshes/siege_cannon.asset,weapon_siege_cannon_heavy,,QA-001,own,Own work (procedural: Editor/Content/HeavyWeaponBuilder),review

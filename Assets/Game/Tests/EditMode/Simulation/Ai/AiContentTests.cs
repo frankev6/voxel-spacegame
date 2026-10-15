@@ -33,7 +33,8 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 Assert.AreEqual(id == "ai_turret" ? AiRole.Turret : id == "ai_civilian" ? AiRole.Civilian : AiRole.Combat, asset.Role);
                 Assert.AreEqual(id == "ai_turret" ? 6 : 10, asset.ThinkIntervalTicks);
                 Assert.AreEqual(id == "ai_turret" ? 1200f : 1500f, asset.SensorRange);
-                Assert.AreEqual(.7f, asset.PreferredRangeFraction); Assert.AreEqual(80f, asset.MinEngageRange);
+                Assert.AreEqual(.7f, asset.PreferredRangeFraction); Assert.AreEqual(id == "ai_default" ? 45f : 80f, asset.MinEngageRange);
+                Assert.AreEqual(id == "ai_default" ? 85f : id == "ai_skittish" ? 160f : 0f, asset.MaxEngageRange);   // QA-001: fights on screen
                 Assert.AreEqual(AiFacing.FaceTarget, asset.Facing); Assert.AreEqual(id == "ai_skittish" ? 1f : .85f, asset.Throttle);
                 Assert.AreEqual(id == "ai_skittish" ? .5f : id == "ai_civilian" ? 1f : .25f, asset.FleeHullFraction);
                 Assert.AreEqual(3000f, asset.LeashRadius); Assert.AreEqual(600f, asset.PatrolRadius);
@@ -153,7 +154,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
             Assert.AreEqual(expected.AvoidFriendlyFire ? 1 : 0, actual.AvoidFriendlyFire);
             Assert.AreEqual(expected.ThinkIntervalTicks, actual.ThinkIntervalTicks);
             Assert.AreEqual(expected.SensorRange, actual.SensorRange); Assert.AreEqual(expected.PreferredRangeFraction, actual.PreferredRangeFraction);
-            Assert.AreEqual(expected.MinEngageRange, actual.MinEngageRange); Assert.AreEqual(expected.Throttle, actual.Throttle);
+            Assert.AreEqual(expected.MinEngageRange, actual.MinEngageRange); Assert.AreEqual(expected.MaxEngageRange, actual.MaxEngageRange); Assert.AreEqual(expected.Throttle, actual.Throttle);
             Assert.AreEqual(expected.FleeHullFraction, actual.FleeHullFraction); Assert.AreEqual(expected.LeashRadius, actual.LeashRadius);
             Assert.AreEqual(expected.PatrolRadius, actual.PatrolRadius); Assert.AreEqual(expected.PlayerBias, actual.PlayerBias);
             Assert.AreEqual(expected.Stickiness, actual.Stickiness); Assert.AreEqual(expected.OrbitFlipThinks, actual.OrbitFlipThinks);

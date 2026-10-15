@@ -93,7 +93,7 @@ def cruiser_nave():
     """A NAVE, line cruiser. A cathedral cross in plan: ram, long nave, a broad transept whose arms carry the wing
     batteries, a crossing tower, and a chamfered dark apse at the stern with the lance between organ pipes.
     Niche: holds a line and covers both flanks from the transept; counter: frigates under the apse, where only flak bears."""
-    s = Ship("REQUIEM", 31, "company")
+    s = Ship("VESPER", 31, "company")
     cbox(s, -10, 10, 0, 18, 0, 14, "trim", ct=3, cb=2, cr=4)            # apse
     cbox(s, -6, 6, 18, 84, 0, 10, "hull", ct=2, cb=2)                          # nave hull
     cbox(s, -4, 4, 18, 76, 10, 13, "hull2", ct=2, tf=3)                        # ochre roof
@@ -111,7 +111,7 @@ def cruiser_nave():
     s.paint(lambda x, y, z: 0 <= y < 18 and 7 <= z < 8.5, "hull")             # bone band round the apse
     s.paint(lambda x, y, z: 80 <= y < 81.5 and z > 1, "accent")
     s.mod("storm", -2, 4, 14, size=(4, 4, 3))
-    s.mod("heavy_cannon", 10, 50, 9, size=(4, 4, 2), mirror=True)
+    s.mod("siege", 10, 50, 9, size=(4, 4, 2), mirror=True)        # siege cannons on the transept arms
     s.mod("heavy_cannon", -2, 30, 13, size=(4, 4, 2))
     s.mod("heavy_cannon", -2, 66, 13, size=(4, 4, 2))
     s.mod("railgun", 16, 50, 3, size=(1, 4, 2), mirror=True)
@@ -126,7 +126,7 @@ def cruiser_broadside():
     """B BROADSIDE: asymmetric with a reason. A long starboard gallery carries four turrets that all bear to starboard;
     the command island and its spires sit offset to port. Niche: lays its gallery against the enemy line; counter: come in
     from port, where one railgun and a flak mount bear."""
-    s = Ship("REQUIEM-B", 32, "company")
+    s = Ship("DIRGE", 32, "company")
     cbox(s, -9, 9, 0, 16, 0, 13, "trim", ct=3, cb=2, cr=3)
     cbox(s, -7, 7, 16, 84, 0, 10, "hull", ct=2, cb=2)
     cbox(s, -6, 6, 84, 88, 0, 10, "hull", ct=2, cb=2, cf=3)
@@ -145,8 +145,8 @@ def cruiser_broadside():
     s.paint(lambda x, y, z: 0 <= y < 16 and 7 <= z < 8.5, "hull")             # bone band round the castle
     s.paint(lambda x, y, z: 80 <= y < 81.5 and z > 1, "accent")
     s.mod("storm", -2, 4, 13, size=(4, 4, 3))
-    for y in (24, 36, 48, 60):
-        s.mod("heavy_cannon", 8, y, 9, size=(4, 4, 2))
+    for y, kind in ((24, "siege"), (36, "heavy_cannon"), (48, "siege"), (60, "heavy_cannon")):
+        s.mod(kind, 8, y, 9, size=(4, 4, 2))
     s.mod("railgun", 17, 30, 3, size=(1, 4, 2))
     s.mod("railgun", 17, 54, 3, size=(1, 4, 2))
     s.mod("railgun", -8, 48, 3, size=(1, 4, 2))
@@ -161,7 +161,7 @@ def cruiser_lance():
     """C LANCE: spinal lance cruiser. The bow forks into two armoured tines with the lightning lance mounted between them;
     a narrow waist; a broad dark stern with outboard engine pods and an organ of four spires. Niche: one devastating
     forward shot down the fork; counter: anything on its flanks, which must wait for the whole hull to turn."""
-    s = Ship("REQUIEM-C", 33, "company")
+    s = Ship("REQUIEM", 33, "company")
     cbox(s, -12, 12, 0, 20, 0, 15, "trim", ct=3, cb=2, cr=3)            # stern
     cbox(s, 12, 18, -2, 14, 3, 10, "armor", mirror=True, ct=2, cb=2, cf=3)     # engine pods
     cbox(s, -7, 7, 20, 52, 1, 11, "hull", ct=2, cb=2)                          # waist
@@ -177,8 +177,8 @@ def cruiser_lance():
     s.paint(lambda x, y, z: 0 <= y < 20 and 7 <= z < 8.5, "hull")             # bone band round the stern
     s.paint(lambda x, y, z: 56 <= y < 57.5 and z > 1, "accent")
     s.mod("storm", -2, 58, 2, size=(4, 6, 5))
-    s.mod("heavy_cannon", -2, 34, 14, size=(4, 4, 2))
-    s.mod("heavy_cannon", 6, 74, 9, size=(4, 4, 2), mirror=True)
+    s.mod("siege", -2, 34, 14, size=(4, 4, 2))                    # siege cannons: nave roof and both tines
+    s.mod("siege", 5, 64, 9, size=(4, 4, 2), mirror=True)
     s.mod("railgun", 11, 64, 2, size=(1, 4, 2), mirror=True)
     s.mod("flak", -2, 14, 15, size=(4, 3, 2))
     engines(s, 0, 6, 3, 3)
@@ -189,5 +189,7 @@ def cruiser_lance():
     return finish(s)
 
 
-OPTIONS = [("ship_nocturne_cruiser_a", cruiser_nave), ("ship_nocturne_cruiser_b", cruiser_broadside),
-           ("ship_nocturne_cruiser_c", cruiser_lance)]
+# Owner: "the C lance is good as the new requiem, but i also liked your other options so just add them all as ships."
+# Siege cannons (HeavyWeaponBuilder, owner: "make a new large gun for a cruiser level ship"): REQUIEM 3, VESPER 2, DIRGE 2.
+OPTIONS = [("ship_nocturne_requiem", cruiser_lance), ("ship_nocturne_vesper", cruiser_nave),
+           ("ship_nocturne_dirge", cruiser_broadside)]

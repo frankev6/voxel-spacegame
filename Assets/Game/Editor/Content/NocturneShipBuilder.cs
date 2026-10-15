@@ -36,9 +36,11 @@ namespace Game.Editor.Content
             BuildShip(service, "ship_nocturne_wraith", "WRAITH", 0);
             // Owner: "lets design a ship that looks really good, and "borrows" slightly from the requiem instead of copying
             // outright, and feels good". Three cruiser options drawn on the kit (ArtSource/LookDev/ld_cruisers.py).
-            BuildShip(service, "ship_nocturne_cruiser_a", "REQUIEM A · NAVE", 2);
-            BuildShip(service, "ship_nocturne_cruiser_b", "REQUIEM B · BROADSIDE", 2);
-            BuildShip(service, "ship_nocturne_cruiser_c", "REQUIEM C · LANCE", 2);
+            // Owner, picking: "the C lance is good as the new requiem, but i also liked your other options so just add them all
+            // as ships." REQUIEM is the spinal lance cruiser, VESPER the nave line cruiser, DIRGE the broadside cruiser.
+            BuildShip(service, "ship_nocturne_requiem", "REQUIEM", 2);
+            BuildShip(service, "ship_nocturne_vesper", "VESPER", 2);
+            BuildShip(service, "ship_nocturne_dirge", "DIRGE", 2);
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built NOCTURNE ships (WRAITH, REQUIEM).");
         }
@@ -291,7 +293,7 @@ namespace Game.Editor.Content
             { "thruster_s", "block_thruster_small" }, { "thruster_l", "block_thruster_medium" }, { "thruster_xl", "block_thruster_large" }, { "rcs", "block_thruster_large" },
             { "gatling", "weapon_plasma_turret_small" }, { "autocannon", "weapon_plasma_turret_small" }, { "heavy_cannon", "weapon_plasma_turret_medium" },
             { "flak", "weapon_flak_cannon_medium" }, { "railgun", "weapon_railgun_medium" }, { "nova", "weapon_missile_launcher_small" },
-            { "storm", "weapon_ark_lance_medium" }, { "core_1", "block_core_small" }
+            { "storm", "weapon_ark_lance_medium" }, { "siege", "weapon_siege_cannon_heavy" }, { "core_1", "block_core_small" }
         };
         static readonly int3[] Directions = { new(0, 1, 0), new(0, -1, 0), new(1, 0, 0), new(-1, 0, 0), new(0, 0, 1), new(0, 0, -1) };
 

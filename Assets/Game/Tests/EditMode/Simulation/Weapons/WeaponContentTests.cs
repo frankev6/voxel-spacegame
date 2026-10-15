@@ -38,10 +38,10 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         {
             var catalog = Catalog();
             var definitions = catalog.All<WeaponDefinition>();
-            Assert.That(definitions.Count, Is.EqualTo(10));
+            Assert.That(definitions.Count, Is.EqualTo(11));
             using (var blob = WeaponContent.BuildBlob(catalog))
             {
-                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(11));
+                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(12));
                 for (int i = 0; i < definitions.Count; i++)
                 {
                     var d = definitions[i];
@@ -284,6 +284,12 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     w.Damage = 0; w.ExplosionRadius = 2.5f; w.ExplosionDamage = 60; w.TriggerIntervalTicks = 60; w.PelletsPerRound = 8;
                     w.SpreadRad = math.radians(6f); w.ProjectileSpeed = 300; w.ProjectileRadius = .2f; w.LifetimeMinTicks = 30;
                     w.TraverseHalfArcRad = w.TraverseRateRad = 0; w.PowerDraw = 5; w.Range = 450; w.SustainedDps = 240; break;
+                case "wpn_siege_cannon_heavy":   // QA-001 cruiser heavy turret (HeavyWeaponBuilder)
+                    w.Type = DamageType.Explosive; w.DefaultFireGroups = 2; w.ExplodeOnExpire = 1;
+                    w.Damage = 500; w.PenetrationCells = 3; w.ExplosionRadius = 4; w.ExplosionDamage = 1600; w.TriggerIntervalTicks = 200;
+                    w.SpreadRad = math.radians(.4f); w.ProjectileSpeed = 420; w.ProjectileRadius = .35f; w.LifetimeMinTicks = w.LifetimeMaxTicks = 120;
+                    w.TraverseHalfArcRad = math.radians(150f); w.TraverseRateRad = math.radians(45f); w.FireConeRad = math.radians(4f);
+                    w.PowerDraw = 25; w.Range = 840; w.SustainedDps = 390; break;
                 case "wpn_missile_launcher_small":
                     w.Delivery = WeaponDelivery.Missile; w.Type = DamageType.Explosive; w.Visual = ProjectileVisual.Missile; w.DefaultFireGroups = 4; w.ExplodeOnExpire = w.IsFixed = 1;
                     w.Damage = 0; w.ExplosionRadius = 3; w.ExplosionDamage = 200; w.TriggerIntervalTicks = 200; w.BurstCount = 6; w.BurstIntervalTicks = 3;

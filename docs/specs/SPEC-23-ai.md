@@ -145,6 +145,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Min(100)] private float sensorRange = 1500;          // m: target search radius
         [UnityEngine.SerializeField, UnityEngine.Range(0.2f, 1.2f)] private float preferredRangeFraction = 0.7f; // of WeaponStats.MaxWeaponRange (SPEC-21)
         [UnityEngine.SerializeField, UnityEngine.Min(10)] private float minEngageRange = 80;           // m
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float maxEngageRange;                 // m; 0 = no cap (QA-001)
         [UnityEngine.SerializeField] private AiFacing facing = AiFacing.FaceTarget;
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float throttle = 0.85f;         // max fraction of the speed caps
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float fleeHullFraction = 0.25f; // ShipStats.MassFraction below which it flees; 0 = never
@@ -192,7 +193,7 @@ namespace Game.Simulation.Ai
         public byte AvoidFriendlyFire;
         public byte Reserved;
         public int ThinkIntervalTicks;
-        public float SensorRange, PreferredRangeFraction, MinEngageRange, Throttle, FleeHullFraction;
+        public float SensorRange, PreferredRangeFraction, MinEngageRange, MaxEngageRange, Throttle, FleeHullFraction;
         public float LeashRadius, PatrolRadius, PlayerBias, Stickiness, OrbitStepRad;
         public int OrbitFlipThinks;
         public Game.Core.ContentHash IdHash;
@@ -359,7 +360,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
    - Target set → `Engage`, unless `LeashRadius > 0 && toAnchor > 1.5 × LeashRadius` → `Return` (and clear the target).
    - No target: `LeashRadius > 0 && toAnchor > LeashRadius` → `Return`; else `Patrol` if `PatrolRadius > 0`, else `Idle`.
    - `Return` ends when `toAnchor < ArrivalRadius × 2`.
-5. **Goal** (`range = max(MinEngageRange, WeaponStats.MaxWeaponRange × PreferredRangeFraction)`; positions on the plane, `y = 0`):
+5. **Goal** (`range = max(MinEngageRange, WeaponStats.MaxWeaponRange × PreferredRangeFraction)`, capped at `max(MinEngageRange, MaxEngageRange)` when that is non-zero, then `min(range, max(MinEngageRange, current distance))` so a ship already closer holds its distance instead of backing off (QA-001, owner: "enemies fight so far away i literally can't see them in the map and im always chasing them, like they are shy"; `ai_default` 45–85 m keeps fights inside the default flight camera's view, ~90 m ahead and ~97 m to either side); positions on the plane, `y = 0`):
    - `Engage`: `toSelf = normalize(xz(pos − targetCentre))` (zero → +X); every `OrbitFlipThinks` thinks flip `OrbitSign` with probability 0.5; `dir = rotateY(toSelf, OrbitSign × OrbitStepRad)`; `GoalPosition = targetCentre + dir × range`; `GoalHeadingYaw = FaceTarget ? yaw toward the target : yaw of (target direction rotated by OrbitSign × 90°)`; `GoalSpeedFraction = Throttle`.
    - `Flee`: away from the nearest hostile: `GoalPosition = pos + normalize(xz(pos − threat)) × 1500`; heading along it; speed 1.
    - `Return`: `GoalPosition = Anchor`; heading toward it; speed `Throttle`.

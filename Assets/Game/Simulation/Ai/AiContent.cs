@@ -63,7 +63,7 @@ namespace Game.Simulation.Ai
                     p.Reserved = 0;
                     p.ThinkIntervalTicks = d.ThinkIntervalTicks;
                     p.SensorRange = d.SensorRange; p.PreferredRangeFraction = d.PreferredRangeFraction;
-                    p.MinEngageRange = d.MinEngageRange; p.Throttle = d.Throttle; p.FleeHullFraction = d.FleeHullFraction;
+                    p.MinEngageRange = d.MinEngageRange; p.MaxEngageRange = d.MaxEngageRange; p.Throttle = d.Throttle; p.FleeHullFraction = d.FleeHullFraction;
                     p.LeashRadius = d.LeashRadius; p.PatrolRadius = d.PatrolRadius;
                     p.PlayerBias = d.PlayerBias; p.Stickiness = d.Stickiness;
                     p.OrbitStepRad = d.OrbitStepRad; p.OrbitFlipThinks = d.OrbitFlipThinks;

@@ -12,6 +12,10 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Min(100)] private float sensorRange = 1500;          // m: target search radius
         [UnityEngine.SerializeField, UnityEngine.Range(0.2f, 1.2f)] private float preferredRangeFraction = 0.7f; // of WeaponStats.MaxWeaponRange (SPEC-21)
         [UnityEngine.SerializeField, UnityEngine.Min(10)] private float minEngageRange = 80;           // m
+        // QA-001 (owner: "enemies fight so far away i literally can't see them ... like they are shy"): caps the engage
+        // distance so fights happen on screen (the default flight camera, 150 m back at 55°, shows ~90 m ahead, ~97 m to
+        // either side and ~53 m behind the ship); 0 = no cap.
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float maxEngageRange;                 // m
         [UnityEngine.SerializeField] private AiFacing facing = AiFacing.FaceTarget;
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float throttle = 0.85f;         // max fraction of the speed caps
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float fleeHullFraction = 0.25f; // ShipStats.MassFraction below which it flees; 0 = never
@@ -28,6 +32,7 @@ namespace Game.Data.Definitions
         public float SensorRange => sensorRange;
         public float PreferredRangeFraction => preferredRangeFraction;
         public float MinEngageRange => minEngageRange;
+        public float MaxEngageRange => maxEngageRange;
         public AiFacing Facing => facing;
         public float Throttle => throttle;
         public float FleeHullFraction => fleeHullFraction;
@@ -50,6 +55,8 @@ namespace Game.Data.Definitions
             Minimum(scope, nameof(sensorRange), sensorRange, 100f);
             Range(scope, nameof(preferredRangeFraction), preferredRangeFraction, .2f, 1.2f);
             Minimum(scope, nameof(minEngageRange), minEngageRange, 10f);
+            if (maxEngageRange != 0 && maxEngageRange < minEngageRange)
+                scope.Error("AI-E001", nameof(maxEngageRange), "Max engage range must be 0 (no cap) or at least the min engage range.");
             Range(scope, nameof(throttle), throttle, 0f, 1f);
             Range(scope, nameof(fleeHullFraction), fleeHullFraction, 0f, 1f);
             Minimum(scope, nameof(leashRadius), leashRadius, 0f);

@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: weapon_siege_cannon_heavy
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: weapon_siege_cannon_heavy
+  formerIds: []
+  displayName: Siege Cannon
+  description: A cruiser's heavy turret (4x2x4). Twin barrels fire slow armour-piercing shells that burst through a hull section.
+  category: 0
+  rarity: 3
+  basePrice: 900
+  maxStack: 999
+  icon: {fileID: -676522578, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  tradeable: 1
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  - {x: 1, y: 0, z: 0}
+  - {x: 2, y: 0, z: 0}
+  - {x: 3, y: 0, z: 0}
+  - {x: 0, y: 1, z: 0}
+  - {x: 1, y: 1, z: 0}
+  - {x: 2, y: 1, z: 0}
+  - {x: 3, y: 1, z: 0}
+  - {x: 0, y: 0, z: 1}
+  - {x: 1, y: 0, z: 1}
+  - {x: 2, y: 0, z: 1}
+  - {x: 3, y: 0, z: 1}
+  - {x: 0, y: 1, z: 1}
+  - {x: 1, y: 1, z: 1}
+  - {x: 2, y: 1, z: 1}
+  - {x: 3, y: 1, z: 1}
+  - {x: 0, y: 0, z: 2}
+  - {x: 1, y: 0, z: 2}
+  - {x: 2, y: 0, z: 2}
+  - {x: 3, y: 0, z: 2}
+  - {x: 0, y: 1, z: 2}
+  - {x: 1, y: 1, z: 2}
+  - {x: 2, y: 1, z: 2}
+  - {x: 3, y: 1, z: 2}
+  - {x: 0, y: 0, z: 3}
+  - {x: 1, y: 0, z: 3}
+  - {x: 2, y: 0, z: 3}
+  - {x: 3, y: 0, z: 3}
+  - {x: 0, y: 1, z: 3}
+  - {x: 1, y: 1, z: 3}
+  - {x: 2, y: 1, z: 3}
+  - {x: 3, y: 1, z: 3}
+  shapes: 
+  clearance:
+  - {x: 0, y: 1, z: 4}
+  - {x: 1, y: 1, z: 4}
+  - {x: 2, y: 1, z: 4}
+  - {x: 3, y: 1, z: 4}
+  - {x: 0, y: 1, z: 5}
+  - {x: 1, y: 1, z: 5}
+  - {x: 2, y: 1, z: 5}
+  - {x: 3, y: 1, z: 5}
+  - {x: 0, y: 1, z: 6}
+  - {x: 1, y: 1, z: 6}
+  - {x: 2, y: 1, z: 6}
+  - {x: 3, y: 1, z: 6}
+  - {x: 0, y: 1, z: 7}
+  - {x: 1, y: 1, z: 7}
+  - {x: 2, y: 1, z: 7}
+  - {x: 3, y: 1, z: 7}
+  - {x: 0, y: 1, z: 8}
+  - {x: 1, y: 1, z: 8}
+  - {x: 2, y: 1, z: 8}
+  - {x: 3, y: 1, z: 8}
+  allowedOrientations:
+    Bits: 65535
+  attachFaces: 47
+  mirrorPartner: {fileID: 0}
+  cellHp: 200
+  functionHp: 1500
+  cellMass: 40
+  armorClass: 0
+  materialLayer: 3
+  propMesh: {fileID: 4300000, guid: ebdd084b98ea849ba968c1ce2eb78d21, type: 2}
+  blockCategory: 5
+  modules:
+  - rid: 5
+  grantedAbilities: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 5
+      type: {class: WeaponMountModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        MuzzleOffsetCells:
+          x: 1.5
+          y: 0.8225
+          z: 8.966667
+        weapon: {fileID: 11400000, guid: a5cecb0048a7f4c728ab7ab35176ed31, type: 2}

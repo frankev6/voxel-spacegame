@@ -134,6 +134,17 @@ namespace Game.Simulation.Ai
             && (proxy.Kind == ProxyKind.Ship || proxy.Kind == ProxyKind.Station)
             && Relations.IsHostile(allegiance, proxy.Allegiance);
 
+        /// QA-001 (owner: "enemies fight so far away i literally can't see them in the map and im always chasing them, like
+        /// they are shy"): the preferred distance (a fraction of the longest gun's range, at least MinEngageRange) is capped
+        /// by MaxEngageRange, and a ship already closer holds its distance instead of backing off to it; only MinEngageRange
+        /// still pushes it out.
+        internal static float EngageDistance(float minRange, float maxRange, float fraction, float weaponRange, float current)
+        {
+            float preferred = math.max(minRange, weaponRange * fraction);
+            if (maxRange > 0) preferred = math.min(preferred, math.max(minRange, maxRange));
+            return math.min(preferred, math.max(minRange, current));
+        }
+
         void SetGoal(ref AiBrain brain, ref AiProfile profile, in LocalTransform pose, int target, int threat,
             float weaponRange, ref Random rng)
         {
@@ -147,7 +158,8 @@ namespace Game.Simulation.Ai
                     if (profile.OrbitFlipThinks > 0 && brain.ThinkCount % profile.OrbitFlipThinks == 0 && rng.NextFloat() < .5f)
                         brain.OrbitSign = (sbyte)-brain.OrbitSign;
                     brain.GoalPosition = targetCenter + math.rotate(quaternion.RotateY(brain.OrbitSign * profile.OrbitStepRad), toSelf)
-                        * math.max(profile.MinEngageRange, weaponRange * profile.PreferredRangeFraction);
+                        * EngageDistance(profile.MinEngageRange, profile.MaxEngageRange, profile.PreferredRangeFraction, weaponRange,
+                            math.distance(position, targetCenter));
                     heading = -toSelf;
                     if (profile.Facing == AiFacing.Broadside)
                         heading = math.rotate(quaternion.RotateY(brain.OrbitSign * math.PI * .5f), heading);

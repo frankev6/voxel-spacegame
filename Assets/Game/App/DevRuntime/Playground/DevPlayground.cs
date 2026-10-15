@@ -55,7 +55,7 @@ namespace Game.App.DevRuntime.Playground
             new Pad("campaign", "13  PRACTICE CAMPAIGN", -160, -540, "F starts the real opening campaign in the isolated playground profile: dialogue, combat, station docking, trade and travel. Console: playground reset returns here."),
             new Pad("salvage", "14  SALVAGE / RECOVER CARGO", 0, -540, DevPlaygroundSalvage.PadDetail),
             new Pad("xeno", "15  XENO / ALIENS", 160, -540, "F wakes two HUSK skimmers and a BROODMOTHER, grown ships of smooth obsidian tissue (ADR-0115).\nThey hunt you with acid. Shoot them to see wounds open into glowing flesh; kill the heart for a hulk. One wave per reset."),
-            new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the NOCTURNE line: a WRAITH frigate (26 m) beside you and the three REQUIEM cruiser options (~52 m) broadside ahead: A nave, B broadside, C lance.\nNo AI: fly around them, compare, shoot them. Fly one with playground ship=ship_nocturne_cruiser_a (b, c). One set per reset.")
+            new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the NOCTURNE line: a WRAITH frigate (26 m) beside you and the three NOCTURNE cruisers (~52 m) broadside ahead: REQUIEM (lance), VESPER (nave), DIRGE (broadside).\nNo AI: fly around them, compare, shoot them. Fly one with playground ship=ship_nocturne_requiem (vesper, dirge). One set per reset.")
         };
         DevPlaygroundPower power;
         DevPlaygroundShip ship;
@@ -321,9 +321,9 @@ namespace Game.App.DevRuntime.Playground
                     {
                         result = host.Commands.Execute("spawn blueprint=ship_nocturne_wraith dx=-45 dz=40 face=player ai=false", host.Context);
                         if (result.Kind != DevResultKind.Failed)
-                            foreach (var (option, dz) in new[] { ("a", 150), ("b", 230), ("c", 310) })
+                            foreach (var (option, dz) in new[] { ("requiem", 150), ("vesper", 230), ("dirge", 310) })
                                 if (result.Kind != DevResultKind.Failed)
-                                    result = host.Commands.Execute("spawn blueprint=ship_nocturne_cruiser_" + option + " dx=0 dz=" + dz + " yaw=90 ai=false", host.Context);
+                                    result = host.Commands.Execute("spawn blueprint=ship_nocturne_" + option + " dx=0 dz=" + dz + " yaw=90 ai=false", host.Context);
                         if (result.Kind != DevResultKind.Failed) nocturneRequested = true;
                     }
                     break;

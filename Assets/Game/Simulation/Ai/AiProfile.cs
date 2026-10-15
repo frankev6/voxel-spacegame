@@ -10,7 +10,7 @@ namespace Game.Simulation.Ai
         public byte AvoidFriendlyFire;
         public byte Reserved;
         public int ThinkIntervalTicks;
-        public float SensorRange, PreferredRangeFraction, MinEngageRange, Throttle, FleeHullFraction;
+        public float SensorRange, PreferredRangeFraction, MinEngageRange, MaxEngageRange, Throttle, FleeHullFraction;   // MaxEngageRange 0 = no cap
         public float LeashRadius, PatrolRadius, PlayerBias, Stickiness, OrbitStepRad;
         public int OrbitFlipThinks;
         public Game.Core.ContentHash IdHash;

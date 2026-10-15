@@ -4,7 +4,7 @@ Owner: "make a new frigate that aligns with the new versions we've been working 
 the designs we planed for nocture, i want to see how we can handle bigger ships".
   WRAITH   the NOCTURNE frigate as rebuilt on the slope kit (ld_slopes.wraith_rebuilt, kit k3 = the game's ADR-0018 kit:
            cube, 45-degree wedge, hip corner, long slope 1x2), ~28 m;
-  cruisers --cruisers: the three REQUIEM options drawn on kit k3 (ld_cruisers), ~52 m.
+  cruisers --cruisers: REQUIEM, VESPER and DIRGE drawn on kit k3 (ld_cruisers), ~52 m.
 Big blocks are split back into cells and every cut cell is snapped to one k3 piece, so each cell maps to one game block.
 Own work: the designs and generator are ours (ArtSource/LookDev); nothing is imported.
 
