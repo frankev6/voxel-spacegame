@@ -173,11 +173,11 @@ namespace Game.Voxel.Replica
             }
         }
 
-        /// <summary>Host: bricks whose cells left this tick only as detached bodies (hulks and chunks), which guests receive as their own
+        /// <summary>Host: bricks whose cells left only as detached bodies (accumulate = true adds this tick to earlier ticks) (hulks and chunks), which guests receive as their own
         /// grids or chunk bodies and so must not also spray as debris. Call after the tick's structural sync, before the next tick.</summary>
-        public static unsafe void CollectQuietBricks(EntityManager em, Dictionary<(Entity Grid, int3 Brick), bool> quiet)
+        public static unsafe void CollectQuietBricks(EntityManager em, Dictionary<(Entity Grid, int3 Brick), bool> quiet, bool accumulate = false)
         {
-            quiet.Clear();
+            if (!accumulate) quiet.Clear();
             using var query = em.CreateEntityQuery(ComponentType.ReadOnly<DamageStreams>());
             if (query.IsEmptyIgnoreFilter) return;
             em.CompleteAllTrackedJobs();
@@ -191,6 +191,24 @@ namespace Game.Voxel.Replica
                 bool body = cell.Reason == CellRemovedReason.DetachedBody;
                 quiet[key] = quiet.TryGetValue(key, out bool all) ? all && body : body;
             }
+        }
+
+        /// <summary>Guest: the core-breach blast and sound a ship makes when the host turns it into a hulk (ShipDeathSystem's presentation).</summary>
+        public static void EmitHulkBlast(EntityManager em, Entity root)
+        {
+            if (!em.Exists(root) || !em.HasComponent<VoxelGrid>(root)) return;
+            using var fxQuery = em.CreateEntityQuery(ComponentType.ReadWrite<FxEventQueue>());
+            if (fxQuery.IsEmptyIgnoreFilter) return;
+            em.CompleteAllTrackedJobs();
+            var grid = em.GetComponentData<VoxelGrid>(root); var pose = em.GetComponentData<LocalTransform>(root);
+            float3 centre = pose.TransformPoint(((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
+            float3 velocity = em.HasComponent<PhysicsVelocity>(root) ? em.GetComponentData<PhysicsVelocity>(root).Linear : float3.zero;
+            fxQuery.GetSingleton<FxEventQueue>().Queue.Enqueue(FxEvents.Explosion(centre, 6, velocity));
+            using var configs = em.CreateEntityQuery(ComponentType.ReadOnly<DamageConfig>());
+            using var sfxQuery = em.CreateEntityQuery(ComponentType.ReadWrite<SfxEventQueue>());
+            if (configs.IsEmptyIgnoreFilter || sfxQuery.IsEmptyIgnoreFilter) return;
+            var config = configs.GetSingleton<DamageConfig>();
+            if (config.CueCoreLost.Value != 0) sfxQuery.GetSingleton<SfxEventQueue>().Queue.Enqueue(new SfxEvent { Cue = config.CueCoreLost, Pos = centre, Volume = 1 });
         }
 
         /// <summary>Reads one brick's 4096 cells (air for a missing brick). Host capture and hash checks use it.</summary>
@@ -228,22 +246,12 @@ namespace Game.Voxel.Replica
             return entity;
         }
 
-        /// <summary>Removes a replica chunk and frees its collider after the physics world stops referencing it.</summary>
+        /// <summary>Removes a replica chunk. ChunkColliderBlob is a cleanup component: ChunkColliderCleanupSystem retires the collider
+        /// once the entity is gone, exactly as for host chunks, so this must not free it too (a double free corrupts the heap).</summary>
         public static void DestroyChunk(EntityManager em, Entity entity)
         {
             if (!em.Exists(entity) || !em.HasComponent<ChunkBody>(entity)) return;
-            var owner = em.GetComponentData<ChunkColliderBlob>(entity);
-            if (owner.Value.IsCreated) DeferredRetire(em, owner.Value);
             em.DestroyEntity(entity);
-        }
-
-        static void DeferredRetire(EntityManager em, BlobAssetReference<Collider> blob)
-        {
-            using var query = em.CreateEntityQuery(ComponentType.ReadWrite<DeferredDisposalQueue>());
-            if (query.IsEmptyIgnoreFilter) return;   // leaks one small blob at shutdown at worst
-            em.CompleteAllTrackedJobs();
-            var queue = query.GetSingletonRW<DeferredDisposalQueue>();
-            DeferredDisposal.RetireBlob(ref queue.ValueRW, blob);
         }
 
         /// <summary>Order-independent hash of a grid's solid cells by brick coordinate, for host/guest comparison (SPEC-90 NET-007).</summary>

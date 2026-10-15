@@ -90,6 +90,8 @@ namespace Game.App.Session
             ["ColliderSnapshotSystem"] = SystemAuthority.Both,
             ["GameplayEndCommandBufferSystem"] = SystemAuthority.Both,
             ["SimClockAdvanceSystem"] = SystemAuthority.Both,
+            ["HostRemovalTapSystem"] = SystemAuthority.HostOnly,
+            // WorldGroup (HostCaptureSystem lives here: once per frame, outside the fixed step)
             ["HostCaptureSystem"] = SystemAuthority.HostOnly,
             // WorldGroup
             ["GalaxyServicesBridgeSystem"] = SystemAuthority.AuthorityOnly,

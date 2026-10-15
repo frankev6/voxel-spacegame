@@ -169,7 +169,7 @@ namespace Game.Net.Replication
                     if (Ready(id, out var g) && em.Exists(g.Entity))
                     {
                         var grid = em.GetComponentData<VoxelGrid>(g.Entity); grid.Kind = gridKind; em.SetComponentData(g.Entity, grid);
-                        if (hulk && !em.HasComponent<Hulk>(g.Entity)) em.AddComponent<Hulk>(g.Entity);
+                        if (hulk && !em.HasComponent<Hulk>(g.Entity)) { em.AddComponent<Hulk>(g.Entity); ReplicaVoxelApi.EmitHulkBlast(em, g.Entity); }
                     }
                     return true;
                 }

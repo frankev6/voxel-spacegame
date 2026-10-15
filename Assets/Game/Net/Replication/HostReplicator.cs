@@ -87,7 +87,7 @@ namespace Game.Net.Replication
             EnsureQueries(em);
             em.CompleteAllTrackedJobs();
             seen.Clear();
-            Game.Voxel.Replica.ReplicaVoxelApi.CollectQuietBricks(em, quietBricks);
+
             using (var roots = gridQuery.ToEntityArray(Allocator.Temp))
             {
                 foreach (var root in roots)
@@ -121,6 +121,15 @@ namespace Game.Net.Replication
             foreach (var id in removed) SendDespawn(id);
             CaptureChunks(em, tick);
             foreach (var peer in transport.Peers) if (peer.Phase == NetPeerPhase.Ready) SendJoin(em, peer, tick);
+            quietBricks.Clear();   // gathered tick by tick since the last capture (TapRemovals)
+        }
+
+        /// <summary>HostRemovalTapSystem, every fixed tick after the resolver: removal reasons only live for their own tick, and a frame
+        /// can run several ticks before the next capture.</summary>
+        public void TapRemovals(EntityManager em)
+        {
+            if (!tracking) return;
+            Game.Voxel.Replica.ReplicaVoxelApi.CollectQuietBricks(em, quietBricks, accumulate: true);
         }
 
         void SendDespawn(ulong id)

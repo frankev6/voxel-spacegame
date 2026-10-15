@@ -123,6 +123,7 @@ namespace Game.App.Session
             var old = net; net = null;
             joinRequested = false; readySent = false;
             pause.KeepRunning = false;
+            HideOverlay();
             SetRole(SimRoleKind.Solo);
             old?.Dispose();
             State = CoopState.Offline;
@@ -142,6 +143,7 @@ namespace Game.App.Session
             }
             else UpdateDrifting();
             net.Transport.Flush();
+            UpdateOverlay();
         }
 
         void Notify(string text, NotificationKind kind = NotificationKind.Info)
@@ -196,7 +198,11 @@ namespace Game.App.Session
             bool inReplica = net?.Role == SimRoleKind.Guest && session.CurrentScene == GameScene.World;
             Shutdown();
             State = CoopState.Failed; status = reason;
-            if (inReplica && !session.IsTransitioning) _ = session.QuitToMainMenuAsync(false);
+            if (inReplica && !session.IsTransitioning)
+            {
+                GameLog.Info(NetTransport.Category, "returning to the main menu");
+                _ = session.QuitToMainMenuAsync(false);
+            }
         }
 
         // ---------------- host ----------------
@@ -269,6 +275,37 @@ namespace Game.App.Session
             foreach (var entry in drifting) spawner.Despawn(new PersistentId(entry.Id));
             guestShips.Clear(); drifting.Clear();
         }
+
+        // SPEC-90 NET-010: one line of session health over the HUD while a session is live.
+        UnityEngine.UIElements.Label overlay;
+        double overlayAt;
+        void UpdateOverlay()
+        {
+            double now = UnityEngine.Time.realtimeSinceStartupAsDouble;
+            if (now < overlayAt) return;
+            overlayAt = now + .5;
+            var root = ui?.Invoke();
+            if (root == null) return;
+            if (overlay == null)
+            {
+                overlay = new UnityEngine.UIElements.Label { name = "coop-overlay", pickingMode = UnityEngine.UIElements.PickingMode.Ignore };
+                overlay.AddToClassList("text-xs"); overlay.AddToClassList("text-muted");
+                overlay.style.position = UnityEngine.UIElements.Position.Absolute; overlay.style.top = 8; overlay.style.left = new UnityEngine.UIElements.Length(50, UnityEngine.UIElements.LengthUnit.Percent);
+                overlay.style.translate = new UnityEngine.UIElements.Translate(new UnityEngine.UIElements.Length(-50, UnityEngine.UIElements.LengthUnit.Percent), 0);
+                root.GetLayer(UILayer.Hud).Add(overlay);
+            }
+            var s = net.Transport.Stats;
+            var text = new System.Text.StringBuilder("CO-OP  ");
+            if (net.Role == SimRoleKind.Host) text.Append("host · ").Append(net.Transport.Peers.Count).Append(" guest(s)");
+            else text.Append("slot ").Append(net.Transport.LocalSlot).Append(" · ").Append(State == CoopState.Joined ? "joined" : State.ToString().ToLowerInvariant());
+            float rtt = 0; foreach (var peer in net.Transport.Peers) rtt = UnityEngine.Mathf.Max(rtt, peer.RttMs);
+            text.Append(" · ").Append(rtt.ToString("0")).Append(" ms · ↑").Append((s.OutKbps(NetChannel.Reliable) + s.OutKbps(NetChannel.Unreliable)).ToString("0"))
+                .Append(" ↓").Append((s.InKbps(NetChannel.Reliable) + s.InKbps(NetChannel.Unreliable)).ToString("0")).Append(" kbps");
+            if (s.Desyncs > 0) text.Append(" · desyncs ").Append(s.Desyncs);
+            overlay.text = text.ToString();
+        }
+
+        void HideOverlay() { overlay?.RemoveFromHierarchy(); overlay = null; }
 
         partial void BindDev();
         partial void TickDev();

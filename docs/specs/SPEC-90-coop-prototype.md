@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft (spike) |
+| **Status** | In progress (spike): NET-002…009 working end to end, NET-010 partly, NET-011 not started |
 | **Area code** | NET (task IDs are `NET-001`, `NET-002`, …) |
 | **Module(s)** | `Game.Net` (folder `Assets/Game/Net/`), with session wiring in `Game.App` |
 | **Depends on specs** | SPEC-10, SPEC-12, SPEC-13 (grids, bodies, damage and splits), SPEC-20, SPEC-21 (commands, weapons), SPEC-05 (VOXS), SPEC-70 (dev commands) |
@@ -251,6 +251,24 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 | 2 | Second instance: Editor host plus a standalone dev build, or Multiplayer Play Mode virtual players? | Editor plus a dev build (also works Mac to Windows) | Owner | |
 | 3 | Pause in co-op: never pause, or pause only when every player has a menu open? | Never pause | Owner | |
 | 4 | A guest's ship blueprint: the host's playground flagship, or the guest's own blueprint sent at join? | The host's playground flagship for the spike | Owner | |
+
+## 10a. Spike status (2026-10-15)
+Verified live with the Editor as host and one or two dev-build guests on one Mac (`tools/playtest/coop.sh`):
+- **Join and leave.** A guest joins by IP into a replica World scene, gets the join snapshot and its own ship (a copy of the host's flagship, so it has the same fitted shield), and can join while a fight is in progress. Killing a guest frees its slot, its ship drifts and is removed after 30 s, and a relaunched guest rejoins. When the host leaves, guests notice within the 10 s timeout and return to the main menu.
+- **Flight and combat.** Guests fly their own ships through their commands. AI engages host and guests alike. Guests see AI and player tracers, acid hits, shield ripples, impact wounds and debris. AI weapons aim on guests through the replicated target and weapon mode.
+- **Destruction.** Damage, hulks (core kill), a pod cut off as a hulk, and a bridge segment freed as a chunk body all appear on every machine. Cell hashes matched for every grid in every check: three players, about a minute of combat, at +100 ms, ±10 ms jitter and 2% loss.
+- **Bandwidth.** About 170 kbps of snapshots per guest in a three-player fight. Reliable bursts are a few kbps, peaking at about 36 KB of backlog on big cuts.
+- **Single-player.** EditMode passes except the two ordering tests this branch first broke, which are now fixed and green. No Game.Net system runs without a session.
+
+Bugs found and fixed while testing: a double free of replica chunk colliders (crashed a guest after chunks expired), debris sprayed for cells that left as detached bodies (pods showed a cloud of cubes), and AI weapons idle on guests until the target and weapon mode were replicated.
+
+Known gaps:
+1. Guest ships show as "Contact" on other machines: they spawn from a structure copy, which has no blueprint name.
+2. With the network simulator on, the host's goodbye packet is dropped when it closes, so guests wait out the 10 s timeout.
+3. There is no own-ship prediction yet (NET-011): a guest's ship responds after one round trip plus the 100 ms interpolation delay.
+4. Capture, apply and snapshots are managed main-thread code. The host completes all jobs once per frame while guests are connected. Burst jobs and per-system timing are the optimisation pass.
+5. The NET-010 bandwidth table at 0, 50, 100 and 150 ms has only the 0 and 100 ms points.
+6. A guest's own ship is host-authoritative, so its HUD target lock is local only.
 
 ## 11. References
 - [ADR-0116](../decisions/ADR-0116-coop-prototype-host-authority.md).

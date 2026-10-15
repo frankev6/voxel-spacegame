@@ -61,7 +61,8 @@ namespace Game.Net.Systems
     /// <summary>Guest: drives every replicated body 100 ms behind the host from the interpolation tracks, first in the fixed step,
     /// and adopts the host's frame origin (SPEC-90 ReplicaBodySyncSystem). Writer of replicated LocalTransform, PhysicsVelocity,
     /// ShipCommand (except the guest's own ship) and ShieldState on guests.</summary>
-    [UpdateInGroup(typeof(GameplayPrePhysicsGroup), OrderFirst = true)]
+    [UpdateInGroup(typeof(GameplayPrePhysicsGroup)), UpdateAfter(typeof(ShipCommandGroup))]
+    [UpdateBefore(typeof(Game.Simulation.Weapons.WeaponAimSystem)), UpdateBefore(typeof(Game.Simulation.Flight.PropulsionSystem)), UpdateBefore(typeof(Game.Simulation.Power.PowerDemandGroup))]
     public partial class ReplicaBodySyncSystem : NetSystemBase
     {
         EntityQuery replicas;
@@ -118,12 +119,13 @@ namespace Game.Net.Systems
         }
     }
 
-    /// <summary>Host: after the tick's single structural sync, streams grid and chunk changes (every tick), transforms (30 Hz) and
-    /// cell hashes (every five seconds, or on request) to guests (SPEC-90 HostCaptureSystem, HostSnapshotSystem, CellHashCheckSystem).</summary>
-    [UpdateInGroup(typeof(GameplayPostPhysicsGroup), OrderLast = true), UpdateAfter(typeof(GameplayEndCommandBufferSystem))]
+    /// <summary>Host: once per frame after the fixed step (WorldGroup, last), streams grid and chunk changes, transforms every second
+    /// tick (30 Hz) and cell hashes every five seconds or on request (SPEC-90 HostCaptureSystem, HostSnapshotSystem,
+    /// CellHashCheckSystem). Outside the fixed step, so the GameplayEnd command buffer stays the tick's last structural point.</summary>
+    [UpdateInGroup(typeof(WorldGroup), OrderLast = true)]
     public partial class HostCaptureSystem : NetSystemBase
     {
-        uint lastHashTick;
+        uint lastHashTick, lastSnapshotTick;
         protected override void OnCreate() { base.OnCreate(); RequireForUpdate<GameplayActive>(); RequireForUpdate<SimClock>(); }
         protected override void OnUpdate()
         {
@@ -134,13 +136,23 @@ namespace Game.Net.Systems
             double3 origin = SystemAPI.TryGetSingleton<FrameOrigin>(out var frame) ? frame.OriginInStarSystem : double3.zero;
             Net.HostOriginForCommands = origin;
             host.Capture(em, tick);
-            if (tick % NetProtocol.SnapshotEveryTicks == 0) host.Snapshot(em, tick, origin, 3);
+            if (tick - lastSnapshotTick >= NetProtocol.SnapshotEveryTicks) { host.Snapshot(em, tick, origin, 3); lastSnapshotTick = tick; }
             if (Net.HashRequested || tick - lastHashTick >= 300)
             {
                 host.SendHashReport(em, tick, Net.HashRequested);
                 Net.HashRequested = false; lastHashTick = tick;
             }
         }
+    }
+
+    /// <summary>Host: each fixed tick, after DamageResolveSystem and before the structural sync, records which bricks lost cells only as
+    /// detached bodies this tick, so guests skip debris for cells that arrive as hulks and chunk bodies instead.</summary>
+    [UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(Game.Voxel.Damage.DamageResolveSystem))]
+    [UpdateBefore(typeof(GameplayEndCommandBufferSystem))]
+    public partial class HostRemovalTapSystem : NetSystemBase
+    {
+        protected override void OnCreate() { base.OnCreate(); RequireForUpdate<GameplayActive>(); }
+        protected override void OnUpdate() { Net?.Host?.TapRemovals(EntityManager); }
     }
 
     /// <summary>Guest: sends the local PlayerCommand sampled this frame, at most 60 times a second (SPEC-90 GuestCommandSendSystem).</summary>

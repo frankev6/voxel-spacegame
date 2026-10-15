@@ -14,7 +14,9 @@ action=${1:-start}
 launch_guest() {
   local n=$1 log="$OUT_DIR/guest$1.log"
   rm -f "$log"
-  open -n "$APP" --args -coop-join 127.0.0.1 -coop-name "Guest$n" -coop-bg-input -screen-fullscreen 0 -screen-width 1280 -screen-height 720 -logFile "$log"
+  # macOS App Nap freezes covered windows long enough to time out (10 s); this key affects only the game's own bundle.
+  defaults write com.koalastudios.spaceshipgame.v2 NSAppSleepDisabled -bool YES
+  open -n "$APP" --args -coop-join 127.0.0.1 -coop-name "Guest$n" -coop-bg-input -screen-fullscreen 0 -screen-width 960 -screen-height 540 -logFile "$log"
   for i in {1..60}; do
     grep -q "join snapshot complete" "$log" 2>/dev/null && { echo "guest $n joined"; return 0; }
     grep -qE "Lost the host|Could not|Version mismatch" "$log" 2>/dev/null && { grep "\[Net\]" "$log" | tail -3; return 1; }

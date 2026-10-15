@@ -51,7 +51,9 @@ Choices made while building, which refine the decisions above:
 7. **The role singleton is a boot entity**, created by `GameComposition` with `Solo`. `RoleSystemPolicy` (Game.App) switches systems by name, restores each system's own solo state on leave, and keeps every Game.Net system disabled outside a session.
 8. **Managed systems for the spike.** Capture, apply and snapshots are main-thread managed code that completes all jobs on host ticks with guests connected. Burst jobs are the optimisation pass, not the spike (owner: "optimize later"). Solo play runs none of it.
 9. **Pausing.** `PauseService.KeepRunning` keeps counting pause tokens, for menus and input contexts, while time keeps running during a live session.
-10. **Dev tooling.** `net guest <slot> "<command>"` runs any dev command on a guest and returns its reply (`net reply`), and players accept `-coop-host` and `-coop-join <ip>` on the command line. One terminal can drive every instance.
+10. **Capture placement.** `HostCaptureSystem` runs once per frame, last in WorldGroup, because the GameplayEnd command buffer must stay the tick's last structural point (SystemGroupOrderTests). `HostRemovalTapSystem` records each tick's removal reasons right after `DamageResolveSystem`, since a frame can run several ticks. Cells that left as detached bodies are flagged so guests skip debris for them.
+11. **Chunk replicas.** Guests destroy replica chunk entities and let `ChunkColliderCleanupSystem` retire their colliders, as on the host. Retiring them as well double-freed the blob and crashed a guest on 2026-10-15.
+12. **Dev tooling.** `net guest <slot> "<command>"` runs any dev command on a guest and returns its reply (`net reply`), and players accept `-coop-host` and `-coop-join <ip>` on the command line. One terminal can drive every instance.
 
 ## Consequences
 - Single-player keeps its fixed step, ordering, determinism tests and performance. Every change is gated by `SimRole`.
