@@ -52,6 +52,11 @@ namespace Game.App.DevRuntime.Commands
                     return coop.SendGuestCommand(slot, line, out uint id) ? DevCommandResult.Ok("sent #" + id + " to slot " + slot + "; read it with net reply")
                         : DevCommandResult.Fail("no guest in slot " + slot);
                 }
+                case "bring":
+                {
+                    if (args.Positional.Count < 2 || !byte.TryParse(args.Positional[1], out byte who)) return DevCommandResult.Fail("net bring <slot>");
+                    return coop.BringGuest(who) ? DevCommandResult.Ok("slot " + who + " moved beside you") : DevCommandResult.Fail("no ship for slot " + who);
+                }
                 case "reply":
                     return DevCommandResult.Ok(coop.GuestReplies.Count == 0 ? "no replies yet" : string.Join("\n", coop.GuestReplies));
                 case "shot":
@@ -87,7 +92,7 @@ namespace Game.App.DevRuntime.Commands
             text.Append("\n  in  ").Append(s.InKbps(NetChannel.Reliable).ToString("0")).Append(" kbps reliable, ").Append(s.InKbps(NetChannel.Unreliable).ToString("0")).Append(" kbps unreliable");
             text.Append("\n  totals out ").Append((s.TotalOut(NetChannel.Reliable) + s.TotalOut(NetChannel.Unreliable)) / 1024).Append(" KB, in ")
                 .Append((s.TotalIn(NetChannel.Reliable) + s.TotalIn(NetChannel.Unreliable)) / 1024).Append(" KB; peak reliable backlog ").Append(s.PeakReliableBacklog / 1024).Append(" KB");
-            if (net.Host != null) text.Append("\n  host: ").Append(net.Host.TrackedGrids).Append(" grids, ").Append(net.Host.LiveChunks).Append(" chunks tracked");
+            if (net.Host != null) text.Append("\n  host: ").Append(net.Host.TrackedGrids).Append(" grids, ").Append(net.Host.LiveChunks).Append(" chunks tracked").Append(net.DescribeCommands());
             if (net.Guest != null)
                 text.Append("\n  guest: ").Append(net.Guest.GridCount).Append(" grids, ").Append(net.Guest.ChunkCount).Append(" chunks, ").Append(net.Guest.PendingMessages)
                     .Append(" queued, snapshot age ").Append(net.Guest.SnapshotAgeMs.ToString("0")).Append(" ms, desyncs ").Append(s.Desyncs)

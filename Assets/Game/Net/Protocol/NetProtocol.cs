@@ -3,7 +3,7 @@ namespace Game.Net.Protocol
     /// <summary>Wire constants (SPEC-90 §3.5). Bump <see cref="Version"/> whenever any message layout changes.</summary>
     public static class NetProtocol
     {
-        public const uint Version = 1;
+        public const uint Version = 3;
         public const ushort DefaultPort = 7777;
         public const int MaxPlayers = 4;                 // host + 3 guests
         public const int UnreliablePacketBytes = 1200;   // below every common path MTU, no fragmentation

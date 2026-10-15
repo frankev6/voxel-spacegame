@@ -14,6 +14,7 @@ namespace Game.Net.Replication
         public byte HasCommand, HasShield;
         public ShipCommand Command;
         public float ShieldHp, ShieldMax; public byte ShieldActive;
+        public byte HasWeapons, Autofire, AimMode; public ulong Target;
     }
 
     /// <summary>Interpolation buffer for one replicated body (SPEC-90 NET-005): newest samples by host tick, sampled 100 ms behind.</summary>

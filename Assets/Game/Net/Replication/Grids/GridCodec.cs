@@ -22,6 +22,7 @@ namespace Game.Net.Replication.Grids
         public byte HasAllegiance;
         public GridSpawnFlags Flags;
         public float CellSize;
+        public ulong Blueprint;            // host GridSource.Blueprint, for names on the HUD; 0 = none
         public float3 Position, Linear, AngularWorld;
         public quaternion Rotation;
     }
@@ -36,14 +37,14 @@ namespace Game.Net.Replication.Grids
         {
             w.U64(h.NetId); w.U8(h.OwnerSlot); w.U8((byte)h.Kind); w.U8((byte)h.Motion); w.U8((byte)h.Role);
             w.U8(h.HasAllegiance); w.U8(h.Allegiance.Faction); w.U8(h.Allegiance.Team); w.U16((ushort)h.Flags);
-            w.F32(h.CellSize); w.F3(h.Position); w.Quat(h.Rotation); w.F3(h.Linear); w.F3(h.AngularWorld);
+            w.F32(h.CellSize); w.U64(h.Blueprint); w.F3(h.Position); w.Quat(h.Rotation); w.F3(h.Linear); w.F3(h.AngularWorld);
         }
 
         public static GridSpawnHeader ReadHeader(NetReader r) => new GridSpawnHeader
         {
             NetId = r.U64(), OwnerSlot = r.U8(), Kind = (GridKind)r.U8(), Motion = (GridMotion)r.U8(), Role = (GridRoleHint)r.U8(),
             HasAllegiance = r.U8(), Allegiance = new Allegiance { Faction = r.U8(), Team = r.U8() }, Flags = (GridSpawnFlags)r.U16(),
-            CellSize = r.F32(), Position = r.F3(), Rotation = r.Quat(), Linear = r.F3(), AngularWorld = r.F3()
+            CellSize = r.F32(), Blueprint = r.U64(), Position = r.F3(), Rotation = r.Quat(), Linear = r.F3(), AngularWorld = r.F3()
         };
 
         public static void WritePaletteEntry(NetWriter w, PaletteEntry e) { w.U16(e.Block); w.U8(e.Orient); w.U8(e.Color); }

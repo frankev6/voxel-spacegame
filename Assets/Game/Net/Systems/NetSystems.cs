@@ -96,6 +96,17 @@ namespace Game.Net.Systems
                     var command = s.Command; command.AimWorld -= (float3)origin; command.Edges = ShipCommandEdges.None;
                     em.SetComponentData(entity, command);
                 }
+                if (s.HasWeapons != 0 && replica.OwnedLocally == 0)
+                {
+                    if (em.HasComponent<Game.Simulation.Weapons.WeaponControl>(entity))
+                        em.SetComponentData(entity, new Game.Simulation.Weapons.WeaponControl { Autofire = s.Autofire, AimMode = (Game.Simulation.Weapons.WeaponAimMode)s.AimMode });
+                    if (em.HasComponent<Game.Simulation.Weapons.ShipTarget>(entity))
+                    {
+                        var target = em.GetComponentData<Game.Simulation.Weapons.ShipTarget>(entity);
+                        Entity resolved = s.Target != 0 && guest.TryGetEntity(s.Target, out var t) ? t : Entity.Null;
+                        if (target.Value != resolved) { target.Value = resolved; em.SetComponentData(entity, target); }
+                    }
+                }
                 if (s.HasShield != 0 && em.HasComponent<ShieldState>(entity))
                 {
                     var shield = em.GetComponentData<ShieldState>(entity);

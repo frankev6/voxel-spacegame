@@ -100,6 +100,7 @@ namespace Game.Net.Replication
                 }
                 if ((flags & 2) != 0) { s.HasShield = 1; s.ShieldHp = r.F32(); s.ShieldMax = r.F32(); s.ShieldActive = r.U8(); }
                 if ((flags & 4) != 0) s.Scale = r.F32();
+                if ((flags & 8) != 0) { s.HasWeapons = 1; s.Target = r.U64(); s.Autofire = r.U8(); s.AimMode = r.U8(); }
                 if (!tracks.TryGetValue(id, out var track)) tracks[id] = track = new ReplicaTrack();
                 if (!track.Add(s)) transport.Stats.DroppedSnapshots++;
             }
@@ -237,6 +238,11 @@ namespace Game.Net.Replication
                 }
                 if (!em.HasComponent<GridSpawning>(g.Entity) || em.IsComponentEnabled<GridSpawning>(g.Entity)) continue;
                 g.Spawned = true;
+                if (g.Header.Blueprint != 0 && em.HasComponent<GridSource>(g.Entity))
+                {
+                    // Names only: the replica's cells come from its own structure, never from the blueprint.
+                    var source = em.GetComponentData<GridSource>(g.Entity); source.Blueprint = new ContentHash(g.Header.Blueprint); em.SetComponentData(g.Entity, source);
+                }
                 if (g.Header.Kind == GridKind.Hulk && !em.HasComponent<Hulk>(g.Entity)) em.AddComponent<Hulk>(g.Entity);
             }
         }
@@ -279,7 +285,7 @@ namespace Game.Net.Replication
             uint ops = r.U32();
             for (uint o = 0; o < ops; o++)
             {
-                byte op = r.U8(); int3 coord;
+                byte flags = r.U8(); bool quiet = (flags & 0x80) != 0; byte op = (byte)(flags & 0x7F); int3 coord;
                 writes.Clear();
                 if (op == 0)
                 {
@@ -296,7 +302,7 @@ namespace Game.Net.Replication
                     coord = r.I3(); int n = r.U16();
                     for (int i = 0; i < n; i++) writes.Add(new ReplicaCellWrite { Local = r.U16(), Value = GridCodec.ReadCell(r) });
                 }
-                if (!ReplicaVoxelApi.WriteBrick(em, root, coord, writes.AsArray(), removedCells) && op != 0) transport.Stats.Desyncs++;
+                if (!ReplicaVoxelApi.WriteBrick(em, root, coord, writes.AsArray(), removedCells, quiet) && op != 0) transport.Stats.Desyncs++;
             }
         }
 
@@ -311,7 +317,9 @@ namespace Game.Net.Replication
             for (int i = 0; i < n; i++) l[i] = new ChunkCell { X = r.U8(), Y = r.U8(), Z = r.U8(), Orient = r.U8(), Block = r.U16(), Color = r.U8() };
             if (chunks.Remove(id, out var old)) ReplicaVoxelApi.DestroyChunk(em, old);
             if (n == 0) return;
-            uint tick = localTick;
+            // Presentation fades chunks against the local SimClock, so lifetimes are re-based onto it.
+            using var clocks = em.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
+            uint tick = clocks.IsEmptyIgnoreFilter ? localTick : clocks.GetSingleton<SimClock>().Tick;
             var entity = ReplicaVoxelApi.CreateChunk(em, cellSize, localOrigin, list, pose, tick + end, tick + dissolve, tick);
             em.AddComponentData(entity, new Replicated { NetId = id });
             if (em.HasComponent<Unity.Physics.PhysicsVelocity>(entity)) em.SetComponentData(entity, new Unity.Physics.PhysicsVelocity { Linear = linear });

@@ -103,6 +103,11 @@ namespace Game.App.Session
                     case "-coop-host": autoHostStage = "playground"; break;
                     case "-coop-port": if (next != null && ushort.TryParse(next, out var port)) { autoPort = port; i++; } break;
                     case "-coop-name": if (next != null) { PlayerName = next; i++; } break;
+                    // Lets dev-command key injection drive an unfocused second window on the same machine.
+                    case "-coop-bg-input":
+                        UnityEngine.Application.runInBackground = true;
+                        UnityEngine.InputSystem.InputSystem.settings.backgroundBehavior = UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
+                        break;
                 }
             }
             autoAt = UnityEngine.Time.realtimeSinceStartupAsDouble + 1;

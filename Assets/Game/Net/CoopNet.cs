@@ -51,6 +51,18 @@ namespace Game.Net
             sequence = 0; value = default; return false;
         }
 
+        public string DescribeCommands()
+        {
+            var text = new System.Text.StringBuilder();
+            foreach (var pair in remoteCommands)
+            {
+                var c = pair.Value.Command;
+                text.Append("\n  pilot ").Append(pair.Key).Append(" #").Append(pair.Value.Sequence).Append(": thrust ").Append(c.Thrust).Append(" turn ").Append(c.Turn)
+                    .Append(" fire ").Append(c.FireGroups).Append(" aim ").Append(c.AimValid).Append(' ').Append(c.AimWorld);
+            }
+            return text.ToString();
+        }
+
         void OnCommand(NetPeer peer, NetReader r)
         {
             uint sequence = r.U32();

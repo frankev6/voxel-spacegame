@@ -40,6 +40,19 @@
 ## Assemblies
 A new `Game.Net` module (`Assets/Game/Net/`) may reference Core, Data, Voxel and Simulation, plus Entities, Collections, Burst, Mathematics, Unity Physics and Unity Transport. `Game.App` references `Game.Net`, and `Game.Presentation` does not. `AssemblyRulesTests` gains that row. Unity Transport is allowed only in `Game.Net`, `Game.App` and tests.
 
+## Implementation notes (2026-10-15, NET-002 onwards)
+Choices made while building, which refine the decisions above:
+1. **Guests apply replicated voxel state at frame start.** `ReplicaApplySystem` (GameInitGroup, before `GridSpawnSystem`) applies the reliable stream on the main thread with direct structural changes, as a spawn would: grid spawns through `GridSpawnRequest`, despawns, cell deltas, instance health, chunk bodies and hash checks. The cell writes go through the new public `Game.Voxel.Replica.ReplicaVoxelApi`, so `Game.Voxel` stays the only code that writes cells. Bricks emptied by a delta are destroyed and unlinked from the root's `LinkedEntityGroup`, as the host's resolver does.
+2. **Exact grid wire format instead of VOXS.** Grids travel as their exact palette, instance order and brick cells (deflated). VOXS re-indexes, and later raw cell values must mean the same on both ends. Both ends run the same build, so block indices agree, and the handshake's protocol version guards the layout.
+3. **Shared delta stream.** The host keeps one shadow, not one per guest. A joining guest gets the current state of every grid at the end of tick T, then the same deltas from T + 1 as everyone else. A brick's first change is sent whole; later changes are diffs against the shadow (whole again when more than a quarter changed).
+4. **Weapons run cosmetically on guests.** Snapshots carry each ship's `ShipCommand`. Guests keep `WeaponAimSystem`, `WeaponFireSystem`, `ProjectileStepSystem`, `BeamStepSystem`, `ExplosionSystem` and `ShieldSystem`, so tracers, impacts and shield flashes come from the existing presentation paths. `ReplicaDamageDrainSystem` (Game.Voxel, guests only) consumes and discards the damage, impulse and restore channels in place of `DamageResolveSystem` and `ImpactEventSystem`. Shield HP is overwritten from snapshots every tick.
+5. **Guest bodies are kinematic.** Replicas spawn with `GridMotion.Kinematic`. `ReplicaBodySyncSystem` sets their pose 100 ms behind the host and gives them the replicated linear velocity, so graphical smoothing stays smooth. `GridMassUpdateSystem` is authority-only.
+6. **`Game.Net` also references `Game.Galaxy`** for `FrameOrigin`. Guests write the host's origin into it, since `OriginRebaseSystem` is authority-only.
+7. **The role singleton is a boot entity**, created by `GameComposition` with `Solo`. `RoleSystemPolicy` (Game.App) switches systems by name, restores each system's own solo state on leave, and keeps every Game.Net system disabled outside a session.
+8. **Managed systems for the spike.** Capture, apply and snapshots are main-thread managed code that completes all jobs on host ticks with guests connected. Burst jobs are the optimisation pass, not the spike (owner: "optimize later"). Solo play runs none of it.
+9. **Pausing.** `PauseService.KeepRunning` keeps counting pause tokens, for menus and input contexts, while time keeps running during a live session.
+10. **Dev tooling.** `net guest <slot> "<command>"` runs any dev command on a guest and returns its reply (`net reply`), and players accept `-coop-host` and `-coop-join <ip>` on the command line. One terminal can drive every instance.
+
 ## Consequences
 - Single-player keeps its fixed step, ordering, determinism tests and performance. Every change is gated by `SimRole`.
 - Guests see the world about 100 ms behind (the interpolation buffer) plus half the round trip. Their own ship responds after a full round trip until own-ship prediction lands (NET-011).

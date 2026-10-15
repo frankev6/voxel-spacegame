@@ -61,7 +61,7 @@ namespace Game.Voxel.Replica
 
         /// <summary>Applies one brick's replicated writes. Returns false when the brick does not exist here (a desync). Removed cells are
         /// appended to <paramref name="removed"/> for debris, VFX and audio; emptied bricks are destroyed like the host's resolver does.</summary>
-        public static bool WriteBrick(EntityManager em, Entity root, int3 coord, NativeArray<ReplicaCellWrite> writes, NativeList<CellRemoved> removed)
+        public static bool WriteBrick(EntityManager em, Entity root, int3 coord, NativeArray<ReplicaCellWrite> writes, NativeList<CellRemoved> removed, bool quiet = false)
         {
             var grid = em.GetComponentData<VoxelGrid>(root);
             int slotIndex = BrickMath.SlotIndex(coord, grid.BrickMin, grid.BrickDims);
@@ -83,7 +83,7 @@ namespace Game.Voxel.Replica
                 var old = BrickWrite.Get(dense, sparse, local);
                 if (!BrickWrite.Set(ref brick, dense, sparse, mask, ref dirty, local, writes[i].Value, grid.Revision + 1)) continue;
                 changed = true;
-                if (!old.IsAir && writes[i].Value.IsAir && removed.IsCreated)
+                if (!old.IsAir && writes[i].Value.IsAir && removed.IsCreated && !quiet)
                 {
                     var paint = old.IsInstance && old.InstanceIndex < instances.Length
                         ? new PaletteEntry { Block = instances[old.InstanceIndex].Block, Orient = instances[old.InstanceIndex].Orient, Color = instances[old.InstanceIndex].Color }
@@ -170,6 +170,26 @@ namespace Game.Voxel.Replica
             {
                 var sfx = sfxQuery.GetSingleton<SfxEventQueue>();
                 sfx.Queue.Enqueue(new SfxEvent { Cue = config.CueCellBreak, Pos = removed[0].WorldPos, Volume = math.clamp(.2f + .1f * math.log2(removed.Length), .2f, 1) });
+            }
+        }
+
+        /// <summary>Host: bricks whose cells left this tick only as detached bodies (hulks and chunks), which guests receive as their own
+        /// grids or chunk bodies and so must not also spray as debris. Call after the tick's structural sync, before the next tick.</summary>
+        public static unsafe void CollectQuietBricks(EntityManager em, Dictionary<(Entity Grid, int3 Brick), bool> quiet)
+        {
+            quiet.Clear();
+            using var query = em.CreateEntityQuery(ComponentType.ReadOnly<DamageStreams>());
+            if (query.IsEmptyIgnoreFilter) return;
+            em.CompleteAllTrackedJobs();
+            var data = query.GetSingleton<DamageStreams>().Data;
+            if (data == null) return;
+            var removed = data->Removed;
+            for (int i = 0; i < removed.Length; i++)
+            {
+                var cell = removed[i];
+                var key = (cell.Grid, BrickMath.BrickOf(cell.Cell));
+                bool body = cell.Reason == CellRemovedReason.DetachedBody;
+                quiet[key] = quiet.TryGetValue(key, out bool all) ? all && body : body;
             }
         }
 

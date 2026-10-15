@@ -371,7 +371,8 @@ namespace Game.App.DevRuntime.Playground
         internal void Tick()
         {
             if (launcher != null) launcher.style.display = host.Console.Screen.IsOpen ? DisplayStyle.None : DisplayStyle.Flex;
-            if (enterButton != null) enterButton.style.display = active ? DisplayStyle.None : DisplayStyle.Flex;
+            bool coop = host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coopSession) && coopSession.Role != Game.Core.Net.SimRoleKind.Solo;
+            if (enterButton != null) enterButton.style.display = active || coop ? DisplayStyle.None : DisplayStyle.Flex;
             var ctx = host.Context;
             power?.Tick(ctx); salvage?.Tick();
             if (autoEnter && !entering && input != null && PlayerScenarioProbes.IsReady(ctx)

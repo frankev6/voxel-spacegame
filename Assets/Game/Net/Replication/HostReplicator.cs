@@ -41,6 +41,7 @@ namespace Game.Net.Replication
         readonly Dictionary<ulong, HostGrid> grids = new();
         readonly List<ulong> order = new();
         readonly HashSet<ulong> seen = new();
+        readonly Dictionary<(Entity Grid, int3 Brick), bool> quietBricks = new();
         readonly List<ulong> removed = new();
         readonly ChunkSlot[] chunks = new ChunkSlot[256];
         readonly NetWriter body = new(64 * 1024), message = new(64 * 1024), packet = new(NetProtocol.UnreliablePacketBytes);
@@ -86,6 +87,7 @@ namespace Game.Net.Replication
             EnsureQueries(em);
             em.CompleteAllTrackedJobs();
             seen.Clear();
+            Game.Voxel.Replica.ReplicaVoxelApi.CollectQuietBricks(em, quietBricks);
             using (var roots = gridQuery.ToEntityArray(Allocator.Temp))
             {
                 foreach (var root in roots)
@@ -156,7 +158,8 @@ namespace Game.Net.Replication
                 NetId = id, OwnerSlot = owner, Kind = grid.Kind, Motion = moving ? GridMotion.Kinematic : GridMotion.Static, Role = role,
                 HasAllegiance = (byte)(em.HasComponent<Allegiance>(root) ? 1 : 0),
                 Allegiance = em.HasComponent<Allegiance>(root) ? em.GetComponentData<Allegiance>(root) : Allegiance.None,
-                Flags = flags, CellSize = grid.CellSize, Position = transform.Position, Rotation = transform.Rotation,
+                Flags = flags, CellSize = grid.CellSize, Blueprint = em.HasComponent<GridSource>(root) ? em.GetComponentData<GridSource>(root).Blueprint.Value : 0,
+                Position = transform.Position, Rotation = transform.Rotation,
                 Linear = moving ? em.GetComponentData<PhysicsVelocity>(root).Linear : float3.zero,
                 AngularWorld = GridCodec.AngularWorld(em, root, transform.Rotation)
             };
@@ -204,13 +207,13 @@ namespace Game.Net.Replication
                     if (diffs == 0) continue;
                     if (diffs <= BrickMath.CellsPerBrick / 4)
                     {
-                        body.U8(2); body.I3(brick.Coord); body.U16((ushort)diffs);
+                        body.U8((byte)(2 | Quiet(root, brick.Coord))); body.I3(brick.Coord); body.U16((ushort)diffs);
                         for (int i = 0; i < scratch.Length; i++)
                             if (!scratch[i].Equals(shadow[i])) { body.U16((ushort)i); GridCodec.WriteCell(body, scratch[i]); shadow[i] = scratch[i]; }
                         ops++; continue;
                     }
                 }
-                body.U8(1); GridCodec.WriteBrickCells(body, brick.Coord, scratch); ops++;
+                body.U8((byte)(1 | Quiet(root, brick.Coord))); GridCodec.WriteBrickCells(body, brick.Coord, scratch); ops++;
                 if (!g.Shadow.TryGetValue(brick.Coord, out var copy)) { copy = new Cell[BrickMath.CellsPerBrick]; g.Shadow[brick.Coord] = copy; }
                 scratch.CopyTo(copy);
                 g.Live.Add(brick.Coord);
@@ -225,7 +228,7 @@ namespace Game.Net.Replication
                     if (entity == Entity.Null || !em.Exists(entity)) (gone ??= new List<int3>()).Add(coord);
                 }
                 if (gone != null)
-                    foreach (var coord in gone) { body.U8(0); body.I3(coord); ops++; g.Live.Remove(coord); g.Shadow.Remove(coord); }
+                    foreach (var coord in gone) { body.U8((byte)(0 | Quiet(root, coord))); body.I3(coord); ops++; g.Live.Remove(coord); g.Shadow.Remove(coord); }
             }
             body.PatchU32(opsAt, ops);
             g.Revision = grid.Revision;
@@ -235,6 +238,9 @@ namespace Game.Net.Replication
             else { message.U8(0); message.Bytes(body.Data, 0, body.Length); }
             Broadcast(NetMessage.GridDelta, message);
         }
+
+        /// <summary>Op flag 0x80: this brick's cells left as detached bodies only; guests skip debris for them.</summary>
+        byte Quiet(Entity root, int3 coord) => quietBricks.TryGetValue((root, coord), out bool quiet) && quiet ? (byte)0x80 : (byte)0;
 
         void CaptureChunks(EntityManager em, uint tick)
         {
@@ -356,7 +362,8 @@ namespace Game.Net.Replication
         {
             var pose = em.GetComponentData<LocalTransform>(e);
             bool command = em.HasComponent<ShipCommand>(e), shield = em.HasComponent<ShieldState>(e), chunk = NetIds.IsChunk(id);
-            byte flags = (byte)((command ? 1 : 0) | (shield ? 2 : 0) | (chunk ? 4 : 0));
+            bool weapons = em.HasComponent<Game.Simulation.Weapons.WeaponControl>(e) || em.HasComponent<Game.Simulation.Weapons.ShipTarget>(e);
+            byte flags = (byte)((command ? 1 : 0) | (shield ? 2 : 0) | (chunk ? 4 : 0) | (weapons ? 8 : 0));
             w.U64(id); w.U8(flags); w.F3(pose.Position); w.Quat(pose.Rotation);
             w.F3(em.HasComponent<PhysicsVelocity>(e) ? em.GetComponentData<PhysicsVelocity>(e).Linear : float3.zero);
             w.F3(GridCodec.AngularWorld(em, e, pose.Rotation));
@@ -367,6 +374,14 @@ namespace Game.Net.Replication
             }
             if (shield) { var s = em.GetComponentData<ShieldState>(e); w.F32(s.Hp); w.F32(s.MaxHp); w.U8(s.Active); }
             if (chunk) w.F32(pose.Scale);
+            if (weapons)
+            {
+                // AI weapons lead a target rather than an aim point: guests resolve the target by NetId and aim the same way.
+                var control = em.HasComponent<Game.Simulation.Weapons.WeaponControl>(e) ? em.GetComponentData<Game.Simulation.Weapons.WeaponControl>(e) : default;
+                Entity target = em.HasComponent<Game.Simulation.Weapons.ShipTarget>(e) ? em.GetComponentData<Game.Simulation.Weapons.ShipTarget>(e).Value : Entity.Null;
+                ulong targetId = target != Entity.Null && em.Exists(target) && em.HasComponent<PersistentId>(target) ? em.GetComponentData<PersistentId>(target).Value : 0;
+                w.U64(targetId); w.U8(control.Autofire); w.U8((byte)control.AimMode);
+            }
         }
 
         readonly Dictionary<ulong, uint> hashedRevision = new();

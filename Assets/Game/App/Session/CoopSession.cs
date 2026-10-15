@@ -34,6 +34,7 @@ namespace Game.App.Session
         readonly Func<Game.UI.Services.UIRoot> ui;
         readonly Dictionary<byte, ulong> guestShips = new();
         readonly List<(ulong Id, double At)> drifting = new();
+        readonly List<Game.Voxel.Model.VoxelStructure> guestStructures = new();   // flagship copies; freed with the session object
         CoopNet net;
         bool joinRequested, readySent;
         string status = "Offline";
@@ -205,7 +206,10 @@ namespace Game.App.Session
             try
             {
                 if (!Game.Core.Services.TryGet<ShipSpawnService>(out var spawner)) throw new InvalidOperationException("no ship spawner");
+                // SPEC-90 open question 4 default: guests fly a copy of the host's flagship (the playground ship, with its fitted shield).
                 var blueprint = GuestBlueprint.IsNone ? config.StartBlueprint.Id : GuestBlueprint;
+                Game.Voxel.Model.VoxelStructure copy = null;
+                if (GuestBlueprint.IsNone && session.Fleet.Flagship?.Structure != null) { copy = session.Fleet.Flagship.Structure.Clone(); guestStructures.Add(copy); }
                 float3 position = new float3(40 * peer.Slot, 0, -30);
                 quaternion rotation = quaternion.identity;
                 if (session.PlayerSpawner != null && session.PlayerSpawner.TryGetRoot(out var player))
@@ -214,7 +218,7 @@ namespace Game.App.Session
                     position = pose.Position + math.rotate(pose.Rotation, new float3(45 * (peer.Slot % 2 == 1 ? 1 : -1) * ((peer.Slot + 1) / 2), 0, -20));
                     rotation = pose.Rotation;
                 }
-                var id = spawner.Spawn(new ShipSpawnArgs { Blueprint = blueprint, Position = position, Rotation = rotation, Allegiance = Allegiance.Player, WithAi = false });
+                var id = spawner.Spawn(new ShipSpawnArgs { Blueprint = blueprint, Structure = copy, Position = position, Rotation = rotation, Allegiance = Allegiance.Player, WithAi = false });
                 if (id.IsNone || !spawner.TryGetRoot(id, out var root)) throw new InvalidOperationException("the guest ship spawn was rejected");
                 var em = world.EntityManager;
                 em.AddComponentData(root, new RemotePilot { Slot = peer.Slot });
@@ -269,6 +273,25 @@ namespace Game.App.Session
         partial void BindDev();
         partial void TickDev();
 
-        public void Dispose() { if (net != null) Shutdown(); }
+        /// <summary>Host, dev: puts a guest's ship beside the host's, facing the same way.</summary>
+        public bool BringGuest(byte slot)
+        {
+            if (!guestShips.TryGetValue(slot, out var id) || !Game.Core.Services.TryGet<ShipSpawnService>(out var spawner)
+                || !spawner.TryGetRoot(new PersistentId(id), out var root) || session.PlayerSpawner == null || !session.PlayerSpawner.TryGetRoot(out var player)) return false;
+            var em = world.EntityManager; em.CompleteAllTrackedJobs();
+            var pose = em.GetComponentData<LocalTransform>(player);
+            var target = em.GetComponentData<LocalTransform>(root);
+            target.Position = pose.Position + math.rotate(pose.Rotation, new float3(35 * (slot % 2 == 1 ? 1 : -1), 0, -10)); target.Rotation = pose.Rotation;
+            em.SetComponentData(root, target);
+            if (em.HasComponent<Unity.Physics.PhysicsVelocity>(root)) em.SetComponentData(root, default(Unity.Physics.PhysicsVelocity));
+            return true;
+        }
+
+        public void Dispose()
+        {
+            if (net != null) Shutdown();
+            foreach (var s in guestStructures) if (!s.IsPinned) s.Dispose();
+            guestStructures.Clear();
+        }
     }
 }
