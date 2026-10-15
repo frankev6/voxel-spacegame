@@ -34,7 +34,11 @@ namespace Game.Editor.Content
         {
             using var service = new ContentService(ContentDatabaseBuilder.Rebuild());
             BuildShip(service, "ship_nocturne_wraith", "WRAITH", 0);
-            BuildShip(service, "ship_nocturne_requiem", "REQUIEM", 2);
+            // Owner: "lets design a ship that looks really good, and "borrows" slightly from the requiem instead of copying
+            // outright, and feels good". Three cruiser options drawn on the kit (ArtSource/LookDev/ld_cruisers.py).
+            BuildShip(service, "ship_nocturne_cruiser_a", "REQUIEM A · NAVE", 2);
+            BuildShip(service, "ship_nocturne_cruiser_b", "REQUIEM B · BROADSIDE", 2);
+            BuildShip(service, "ship_nocturne_cruiser_c", "REQUIEM C · LANCE", 2);
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built NOCTURNE ships (WRAITH, REQUIEM).");
         }
@@ -175,7 +179,8 @@ namespace Game.Editor.Content
                 int3 boxMin = math.min(a, b), boxMax = math.max(a, b);
                 modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed);
             }
-            if (id == "ship_nocturne_requiem") failed += SeatCoreAndReactors(structure, content, Index("block_core_small"), Index("block_reactor_small"), reactors);
+            if (reactors > 0) failed += SeatCoreAndReactors(structure, content, Index("block_core_small"), Index("block_reactor_small"), reactors);
+            int hollowed = reactors > 0 ? Hollow(structure, content, cube, 10) : 0;
             var (bridges, loose) = Connect(structure, content, cube, Index("block_core_small"));
 
             string path = Ships + id + ".asset";
@@ -190,7 +195,7 @@ namespace Game.Editor.Content
             EditorUtility.SetDirty(blueprint);
             Debug.Log($"{id}: {structure.SolidCellCount} cells, bounds {min}..{max}; {full.Count} cubes, {longSlopes} long slopes, {singles} wedges/hips, " +
                 $"{cubes} cut cells kept as cubes, {dropped} slivers dropped, {modules} module blocks, {failed} placements refused, " +
-                $"{bridges} bridge cubes, {loose} loose cells removed");
+                $"{bridges} bridge cubes, {loose} loose cells removed, {hollowed} interior cells hollowed; mass {structure.GetMass(content).Mass:0} kg");
         }
 
         // ---------------------------------------------------------------------------------------------------- connectivity
@@ -283,7 +288,7 @@ namespace Game.Editor.Content
         // -------------------------------------------------------------------------------------------------------- modules
         static readonly Dictionary<string, string> ModuleBlock = new()
         {
-            { "thruster_s", "block_thruster_small" }, { "thruster_l", "block_thruster_medium" }, { "thruster_xl", "block_thruster_medium" },
+            { "thruster_s", "block_thruster_small" }, { "thruster_l", "block_thruster_medium" }, { "thruster_xl", "block_thruster_large" }, { "rcs", "block_thruster_large" },
             { "gatling", "weapon_plasma_turret_small" }, { "autocannon", "weapon_plasma_turret_small" }, { "heavy_cannon", "weapon_plasma_turret_medium" },
             { "flak", "weapon_flak_cannon_medium" }, { "railgun", "weapon_railgun_medium" }, { "nova", "weapon_missile_launcher_small" },
             { "storm", "weapon_ark_lance_medium" }, { "core_1", "block_core_small" }
@@ -293,7 +298,7 @@ namespace Game.Editor.Content
         static int PlaceModule(VoxelStructure structure, VoxelContent content, ContentCatalog catalog, string kind, int3 boxMin, int3 boxMax, ref int failed)
         {
             ref var tables = ref content.Orientations.Value;
-            bool engine = kind.StartsWith("thruster", StringComparison.Ordinal);
+            bool engine = kind.StartsWith("thruster", StringComparison.Ordinal), rcs = kind == "rcs";
             // The open face: most empty cells just outside it (engines always fire aft, -z).
             int3 face = new int3(0, 0, -1);
             if (!engine)
@@ -321,15 +326,17 @@ namespace Game.Editor.Content
                 for (int o = 0; o < 24; o++)
                 {
                     int3 up = tables.Rotate(new int3(0, 1, 0), (byte)o), fwd = tables.Rotate(new int3(0, 0, 1), (byte)o);
+                    // A manoeuvring thruster's nozzle (its +z) points out of the open face; its thrust pushes the hull the other way.
                     int score = engine ? (math.all(fwd == new int3(0, 0, -1)) ? 2 : 0) + (math.all(up == new int3(0, 1, 0)) ? 1 : 0)
+                        : rcs ? (math.all(fwd == face) ? 4 : 0) + (math.all(up == new int3(0, 1, 0)) ? 1 : 0)
                         : (math.all(up == face) ? 4 : 0) + (math.all(fwd == new int3(0, 0, 1)) ? 2 : math.all(fwd == new int3(0, 1, 0)) ? 1 : 0);
                     if (score > bestScore) { bestScore = score; orient = (byte)o; }
                 }
                 int3 fpMin = int.MaxValue, fpMax = int.MinValue;
                 for (int i = 0; i < def.Cells.Length; i++) { var r = tables.Rotate(def.Cells[i], orient); fpMin = math.min(fpMin, r); fpMax = math.max(fpMax, r); }
                 int3 size = fpMax - fpMin + 1, box = boxMax - boxMin + 1;
-                // Tile engines across the aft face; one block for everything else, centred on the face.
-                int3 count = engine ? math.max(1, box / size) : 1;
+                // Tile engines and manoeuvring pods across their face; one block for everything else, centred on the face.
+                int3 count = engine || rcs ? math.max(1, box / size) : 1;
                 int3 axis = math.abs(face);
                 count = math.select(count, 1, axis == 1);
                 int3 used = count * size, start = boxMin + (box - used) / 2;
@@ -339,8 +346,9 @@ namespace Game.Editor.Content
                     int3 slot = new int3(k % count.x, k / count.x % count.y, k / (count.x * count.y));
                     int3 origin = start + slot * size - fpMin;
                     for (int i = 0; i < def.Cells.Length; i++) structure.SetCell(origin + tables.Rotate(def.Cells[i], orient), default);
-                    if (structure.TryPlaceBlock(new BlockPlacement { Block = block, Origin = origin, Orient = orient, Color = 27 }, content) == PlaceResult.Ok) placed++;
-                    else failed++;
+                    var result = structure.TryPlaceBlock(new BlockPlacement { Block = block, Origin = origin, Orient = orient, Color = 27 }, content);
+                    if (result == PlaceResult.Ok) placed++;
+                    else { failed++; Debug.LogWarning($"ship_ module {kind} at {origin} refused: {result}"); }
                 }
             }
             // Close the rest of the box (bridge housings, gun plinths, engine blocks, silo towers) in dark trim.
@@ -351,6 +359,44 @@ namespace Game.Editor.Content
                 if (structure.GetCell(c).IsAir) structure.TryPlaceBlock(new BlockPlacement { Block = trim, Origin = c, Orient = 0, Color = 27 }, content);
             }
             return placed;
+        }
+
+        // Cruisers are framed, not solid: a one-cell skin, transverse bulkheads every `bulkheadEvery` cells, and full slabs
+        // through every function block so reactors and the core stay seated and connected. A solid 48 m hull weighed ~390 t.
+        static int Hollow(VoxelStructure structure, VoxelContent content, ushort cube, int bulkheadEvery)
+        {
+            if (!structure.TryGetCellBounds(out var min, out var max)) return 0;
+            var slabs = new HashSet<int>();
+            using (var blocks = new Unity.Collections.NativeList<StructureBlock>(Unity.Collections.Allocator.Temp))
+            {
+                structure.GetBlocks(blocks);
+                foreach (var b in blocks)
+                {
+                    if (b.InstanceIndex < 0) continue;
+                    ref var def = ref content.Blocks.Value.Blocks[b.Placement.Block];
+                    for (int i = 0; i < def.Cells.Length; i++)
+                    {
+                        int z = b.Placement.Origin.z + content.Orientations.Value.Rotate(def.Cells[i], b.Placement.Orient).z;
+                        for (int dz = -1; dz <= 1; dz++) slabs.Add(z + dz);
+                    }
+                }
+            }
+            var interior = new List<int3>();
+            for (int z = min.z; z <= max.z; z++)
+            {
+                if (z % bulkheadEvery == 0 || slabs.Contains(z)) continue;
+                for (int y = min.y; y <= max.y; y++) for (int x = min.x; x <= max.x; x++)
+                {
+                    var c = new int3(x, y, z);
+                    if (!structure.TryGetBlockAt(c, out var b, out int instance) || instance >= 0 || b.Block != cube) continue;
+                    bool inside = true;
+                    for (int dz = -1; dz <= 1 && inside; dz++) for (int dy = -1; dy <= 1 && inside; dy++) for (int dx = -1; dx <= 1 && inside; dx++)
+                        inside = !structure.GetCell(c + new int3(dx, dy, dz)).IsAir;
+                    if (inside) interior.Add(c);
+                }
+            }
+            foreach (var c in interior) structure.SetCell(c, default);
+            return interior.Count;
         }
 
         // A core and reactors where the hull is thickest, near its middle (REQUIEM's look-book design carries no core module).

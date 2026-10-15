@@ -8,7 +8,7 @@ Start with `Assets/Game/Scenes/World.unity` and Play, or run `tools/playtest/pla
 - `playground status` lists the available areas and last result.
 - `playground run=<id>` closes the console, moves to the area and activates it. Close any other screen first.
 - `playground goto=<id>` moves without activation; close Console and press F within the ring.
-- `playground ship=<blueprint>` resets the playground flying that ship, for example `ship_nocturne_wraith`, `ship_nocturne_requiem`, `ship_xeno_husk` or `ship_fighter`. `playground ship=starter` restores the start ship; a wrong id lists every ship. The choice lasts across resets until the Editor restarts and never touches a campaign fleet (QA-001).
+- `playground ship=<blueprint>` resets the playground flying that ship, for example `ship_nocturne_wraith`, `ship_nocturne_cruiser_a` (`_b`, `_c`), `ship_xeno_husk` or `ship_fighter`. `playground ship=starter` restores the start ship; a wrong id lists every ship. The choice lasts across resets until the Editor restarts and never touches a campaign fleet (QA-001).
 - `playground reset` discards the current practice session and recreates the quiet sandbox, including from its Blueprint Lab or practice campaign. Saved blueprints/settings and already-written profile saves are not deleted. It never resets another profile's saved campaign.
 
 ## Playable systems

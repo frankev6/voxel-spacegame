@@ -50,11 +50,28 @@ namespace Game.App.Session
             try
             {
                 Target = GridSpawnApi.RequestSpawn(em, registry, handle, new GridSpawnParams { PersistentId = ids.Allocate(),
-                    Pose = new RigidTransform(math.mul(playerPose.Rotation, quaternion.RotateY(math.radians(config.TargetYaw))), playerPose.TransformPoint(config.TargetOffset)),
+                    Pose = new RigidTransform(math.mul(playerPose.Rotation, quaternion.RotateY(math.radians(config.TargetYaw))),
+                        playerPose.TransformPoint((float3)config.TargetOffset + new float3(0, 0, BowClearance(em, player)))),
                     Kind = GridKind.Station, Motion = GridMotion.Static, Profile = GridProfile.None });
                 return Target;
             }
             catch { Release(); throw; }
+        }
+        // QA-001 (owner: "its literally overlapping the station wtf??"): the offset was tuned for a fighter's ~8 m bow; a longer
+        // ship pushes the station out by the rest of its bow so a cruiser never spawns inside it.
+        const float TunedBowMeters = 10;
+        float BowClearance(EntityManager em, Entity player)
+        {
+            float bow = 0;
+            if (em.HasComponent<VoxelGrid>(player)) { var grid = em.GetComponentData<VoxelGrid>(player); bow = (grid.CellMax.z + 1) * grid.CellSize; }
+            else if (em.HasComponent<GridSpawnRequest>(player))
+            {
+                var request = em.GetComponentData<GridSpawnRequest>(player);
+                var structure = request.StructureHandle >= 0 ? registry.Get(request.StructureHandle) : null;
+                if (structure == null && !request.Blueprint.IsNone) registry.TryGetBlueprint(request.Blueprint, out structure);
+                if (structure != null && structure.TryGetCellBounds(out _, out var max)) bow = (max.z + 1) * structure.CellSize;
+            }
+            return math.max(0, bow - TunedBowMeters);
         }
         /// <summary>Owner-requested test structure, built from real content through normal placement.</summary>
         public static VoxelStructure BuildStation(FiringRangeConfigDefinition config, ContentCatalog catalog, VoxelContent content)

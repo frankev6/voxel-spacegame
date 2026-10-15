@@ -4,7 +4,7 @@ Owner: "make a new frigate that aligns with the new versions we've been working 
 the designs we planed for nocture, i want to see how we can handle bigger ships".
   WRAITH   the NOCTURNE frigate as rebuilt on the slope kit (ld_slopes.wraith_rebuilt, kit k3 = the game's ADR-0018 kit:
            cube, 45-degree wedge, hip corner, long slope 1x2), ~28 m;
-  REQUIEM  the NOCTURNE heavy cruiser (ld_capships.nocturne_cruiser), ~115 m, built on kit k3 the same way.
+  cruisers --cruisers: the three REQUIEM options drawn on kit k3 (ld_cruisers), ~52 m.
 Big blocks are split back into cells and every cut cell is snapped to one k3 piece, so each cell maps to one game block.
 Own work: the designs and generator are ours (ArtSource/LookDev); nothing is imported.
 
@@ -23,7 +23,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "ArtSource", "LookDev"))
-import ld_capships  # noqa: E402
+import ld_cruisers  # noqa: E402
 import ld_slopes  # noqa: E402
 
 KIT = ["w11", "hip", "s12"]
@@ -51,10 +51,15 @@ def export(ship_id, s):
 
 
 def main():
+    if "--cruisers" in sys.argv:
+        for ship_id, fn in ld_cruisers.OPTIONS:
+            s = fn()
+            print("%s: %d cut cells off the kit" % (ship_id, s.kit_off))
+            export(ship_id, s)
+        return
     export("ship_nocturne_wraith", ld_slopes.wraith_rebuilt("k3"))
-    requiem, exact, total = ld_slopes.option_ship(ld_capships.nocturne_cruiser, KIT)
-    print("REQUIEM on kit k3: %d of %d cut blocks exact" % (exact, total))
-    export("ship_nocturne_requiem", requiem)
+    # The first REQUIEM (ld_capships.nocturne_cruiser snapped onto the kit) was retired by the owner as "an ugly mess";
+    # the cruiser options are drawn on the kit in ld_cruisers (--cruisers).
 
 
 main()
