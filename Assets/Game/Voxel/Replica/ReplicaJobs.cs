@@ -70,7 +70,7 @@ namespace Game.Voxel.Replica
             var c = cells; c[0] = new Cell { Ref = 1, Hp = 255 };
             using var views = new NativeArray<BrickView>(1, Allocator.TempJob);
             var v = views; v[0] = ViewOf(cells, int3.zero);
-            Hash(views); ContainsRef(views, 1);
+            Hash(views);
             using var counts = new NativeArray<int>(1, Allocator.TempJob);
             using var changed = new NativeArray<ushort>(BrickMath.CellsPerBrick, Allocator.TempJob);
             Diff(views, views, counts, changed);
@@ -113,31 +113,6 @@ namespace Game.Voxel.Replica
             }
         }
 
-        /// <summary>True when any cell of <paramref name="bricks"/> holds <paramref name="reference"/>.</summary>
-        public static bool ContainsRef(NativeArray<BrickView> bricks, ushort reference)
-        {
-            if (bricks.Length == 0) return false;
-            using var found = new NativeReference<bool>(Allocator.TempJob);
-            new ContainsRefJob { Bricks = bricks, Reference = reference, Found = found }.Run();
-            return found.Value;
-        }
-
-        [BurstCompile]
-        struct ContainsRefJob : IJob
-        {
-            [ReadOnly] public NativeArray<BrickView> Bricks;
-            public ushort Reference;
-            public NativeReference<bool> Found;
-            public void Execute()
-            {
-                for (int b = 0; b < Bricks.Length; b++)
-                {
-                    Cell* cells = Bricks[b].Cells;
-                    for (int i = 0; i < BrickMath.CellsPerBrick; i++) if (cells[i].Ref == Reference) { Found.Value = true; return; }
-                }
-            }
-        }
-
         /// <summary>Host capture: compares each brick with its shadow copy. For brick k, <paramref name="counts"/>[k] is the number of
         /// changed cells and <paramref name="changed"/>[k * 4096 ..] their local indices. Bricks with a null shadow get count -1.</summary>
         public static void Diff(NativeArray<BrickView> current, NativeArray<BrickView> shadows, NativeArray<int> counts, NativeArray<ushort> changed)
@@ -160,89 +135,6 @@ namespace Game.Voxel.Replica
                 uint* wa = (uint*)a, wb = (uint*)b;   // a cell is four bytes
                 for (int i = 0; i < BrickMath.CellsPerBrick; i++) if (wa[i] != wb[i]) Changed[at + n++] = (ushort)i;
                 Counts[index] = n;
-            }
-        }
-
-        public struct DenseWrite
-        {
-            public Brick Brick; public BrickDirty Dirty;
-            public int Changed; public BlockFaceMask Neighbours;
-        }
-
-        /// <summary>Applies replicated writes to a dense brick in Burst with BrickWrite.Set's rules (mask, solid count, revision, dirty
-        /// flags), collecting removed cells and touched instances like the managed path in ReplicaVoxelApi.WriteBrick.</summary>
-        public static DenseWrite WriteDense(DynamicBuffer<BrickCells> dense, DynamicBuffer<BrickSolidMask> mask, NativeArray<ReplicaCellWrite> writes,
-            DynamicBuffer<PaletteEntry> palette, DynamicBuffer<BlockInstance> instances, Brick brick, BrickDirty dirty, uint revision,
-            Entity root, int3 coord, float cellSize, Unity.Transforms.LocalTransform transform, float3 velocity, bool quiet,
-            NativeList<CellRemoved> removed, NativeList<int> touched)
-        {
-            using var result = new NativeReference<DenseWrite>(new DenseWrite { Brick = brick, Dirty = dirty }, Allocator.TempJob);
-            var noRemoved = removed.IsCreated ? default : new NativeList<CellRemoved>(0, Allocator.TempJob);
-            var noTouched = touched.IsCreated ? default : new NativeList<int>(0, Allocator.TempJob);
-            new WriteDenseJob
-            {
-                Cells = (Cell*)dense.GetUnsafePtr(), Mask = (ulong*)mask.GetUnsafePtr(), Writes = writes,
-                Palette = (PaletteEntry*)palette.GetUnsafeReadOnlyPtr(), PaletteLength = palette.Length,
-                Instances = (BlockInstance*)instances.GetUnsafeReadOnlyPtr(), InstanceLength = instances.Length,
-                Revision = revision, Root = root, Coord = coord, CellSize = cellSize, Transform = transform, Velocity = velocity,
-                CollectRemoved = removed.IsCreated && !quiet, CollectTouched = touched.IsCreated,
-                Removed = removed.IsCreated ? removed : noRemoved, Touched = touched.IsCreated ? touched : noTouched, Result = result
-            }.Run();
-            if (noRemoved.IsCreated) noRemoved.Dispose();
-            if (noTouched.IsCreated) noTouched.Dispose();
-            return result.Value;
-        }
-
-        [BurstCompile]
-        struct WriteDenseJob : IJob
-        {
-            [NativeDisableUnsafePtrRestriction] public Cell* Cells;
-            [NativeDisableUnsafePtrRestriction] public ulong* Mask;
-            [NativeDisableUnsafePtrRestriction] public PaletteEntry* Palette;
-            [NativeDisableUnsafePtrRestriction] public BlockInstance* Instances;
-            [ReadOnly] public NativeArray<ReplicaCellWrite> Writes;
-            public int PaletteLength, InstanceLength;
-            public uint Revision; public Entity Root; public int3 Coord; public float CellSize;
-            public Unity.Transforms.LocalTransform Transform; public float3 Velocity;
-            public bool CollectRemoved, CollectTouched;
-            public NativeList<CellRemoved> Removed; public NativeList<int> Touched;
-            public NativeReference<DenseWrite> Result;
-
-            public void Execute()
-            {
-                var r = Result.Value;
-                for (int w = 0; w < Writes.Length; w++)
-                {
-                    int local = Writes[w].Local; if (local >= BrickMath.CellsPerBrick) continue;
-                    Cell written = Writes[w].Value, value = written.IsAir ? default : written;
-                    Cell old = Cells[local];
-                    if (old.Equals(value)) continue;
-                    Cells[local] = value;
-                    bool solidityChanged = old.IsAir != value.IsAir;
-                    if (solidityChanged)
-                    {
-                        int word = local >> 6; ulong bit = 1UL << (local & 63);
-                        Mask[word] = value.IsAir ? Mask[word] & ~bit : Mask[word] | bit;
-                        r.Brick.SolidCount = (ushort)(r.Brick.SolidCount + (value.IsAir ? -1 : 1));
-                        r.Dirty.Flags |= BrickDirtyFlags.Collider;
-                    }
-                    r.Brick.ChangedRevision = Revision; r.Dirty.Flags |= BrickDirtyFlags.Mesh;
-                    if (solidityChanged || (old.Hp >> 6) != (value.Hp >> 6)) r.Dirty.BorderMask |= BrickMath.BorderFaces(local);
-                    r.Changed = 1;
-                    if (old.IsInstance && CollectTouched && (written.IsAir || written.Ref != old.Ref)) Touched.Add(old.InstanceIndex);
-                    if (!old.IsAir && written.IsAir && CollectRemoved)
-                    {
-                        var paint = old.IsInstance && old.InstanceIndex < InstanceLength
-                            ? new PaletteEntry { Block = Instances[old.InstanceIndex].Block, Orient = Instances[old.InstanceIndex].Orient, Color = Instances[old.InstanceIndex].Color }
-                            : old.PaletteIndex < PaletteLength ? Palette[old.PaletteIndex] : default;
-                        int3 cell = BrickMath.CellOf(Coord, local);
-                        Removed.Add(new CellRemoved { Grid = Root, Cell = cell, Block = paint.Block, Color = paint.Color, Orient = paint.Orient,
-                            InstanceIndex = old.IsInstance ? old.InstanceIndex : -1, Reason = CellRemovedReason.Destroyed,
-                            WorldPos = Transform.TransformPoint(((float3)cell + .5f) * CellSize), WorldVel = Velocity });
-                    }
-                    r.Neighbours |= BrickMath.BorderFaces(local);
-                }
-                Result.Value = r;
             }
         }
 

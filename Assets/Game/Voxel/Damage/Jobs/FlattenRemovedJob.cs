@@ -26,7 +26,7 @@ namespace Game.Voxel.Damage.Jobs
         [NativeDisableUnsafePtrRestriction] public DamageStreamsData* Data;
         public void Execute()
         {
-            Cells.Clear(); Ranges.Clear(); Bricks.Clear(); Destroy.Clear(); Grids.Clear(); Restored.Clear(); RestoredRanges.Clear();
+            // The lists start empty at the tick reset (DamageStreamsSystem); appliers append.
             PublishedExplosions.BeginForEachIndex(0);
             for (int i = 0; i < Results.Length; i++)
             {

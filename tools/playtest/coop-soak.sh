@@ -52,5 +52,5 @@ done
 host "net sim 0 0 0" >/dev/null
 echo
 for log in "$OUT_DIR"/guest1.log "$OUT_DIR"/guest2.log; do
-  echo "$(basename $log): $(grep -c 'Native Crash' "$log") crashes, $(grep -ciE 'exception' "$log") exceptions, $(grep -c 'mismatch:' "$log") hash warnings"
+  echo "$(basename $log): $(grep -c 'Native Crash' "$log") crashes, $(grep -iE 'exception' "$log" | grep -vc 'GetOrCreateSystemsAndLogException') exceptions, $(grep -c 'mismatch:' "$log") hash warnings"
 done

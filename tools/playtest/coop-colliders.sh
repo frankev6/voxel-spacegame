@@ -10,4 +10,4 @@ while (( $# >= 2 )); do "$G" gh_dmg_hit --x $1 --y 4 --z $2 --amount 5000000 --r
 sleep 3
 echo "host:  $("$G" dev --cmd "grid id=$id" | grep -E 'bricks=|collider=' | tr '\n' ' ')"
 "$G" dev --cmd "net guest 1 \"grid id=$id\"" >/dev/null; sleep 1.5
-echo "guest: $("$G" dev --cmd "net reply" | grep -E 'bricks=|collider=' | tail -2 | tr '\n' ' ')"
+echo "guest: $("$G" dev --cmd "net reply" | grep -E '^bricks=|^collider=' | tail -2 | tr '\n' ' ')"

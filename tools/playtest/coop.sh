@@ -5,6 +5,8 @@
 #   guest   launch another guest (slot 2, 3)
 #   stop    quit the guests and leave Play mode
 #   status  host and guest `net status`
+# COOP_HEADLESS=1 launches guests with -batchmode -nographics: no window, so they keep a full tick rate while covered or while the
+# screen is locked (a locked screen stalls a windowed player on presentation). Everything but rendering runs.
 . "$(dirname "$0")/_env.sh"
 export UNITY_PROJECT_PATH="$PROJECT_ROOT"
 G="$PT_DIR/g.sh"
@@ -16,7 +18,11 @@ launch_guest() {
   rm -f "$log"
   # macOS App Nap freezes covered windows long enough to time out (10 s); this key affects only the game's own bundle.
   defaults write com.koalastudios.spaceshipgame.v2 NSAppSleepDisabled -bool YES
-  open -n "$APP" --args -coop-join 127.0.0.1 -coop-name "Guest$n" -coop-bg-input -screen-fullscreen 0 -screen-width 960 -screen-height 540 -logFile "$log"
+  if [[ -n "$COOP_HEADLESS" ]]; then
+    open -n "$APP" --args -batchmode -nographics -coop-join 127.0.0.1 -coop-name "Guest$n" -coop-bg-input -logFile "$log"
+  else
+    open -n "$APP" --args -coop-join 127.0.0.1 -coop-name "Guest$n" -coop-bg-input -screen-fullscreen 0 -screen-width 960 -screen-height 540 -logFile "$log"
+  fi
   for i in {1..60}; do
     grep -q "join snapshot complete" "$log" 2>/dev/null && { echo "guest $n joined"; return 0; }
     grep -qE "Lost the host|Could not|Version mismatch" "$log" 2>/dev/null && { grep "\[Net\]" "$log" | tail -3; return 1; }

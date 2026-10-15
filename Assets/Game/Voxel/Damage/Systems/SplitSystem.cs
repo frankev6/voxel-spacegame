@@ -74,11 +74,8 @@ namespace Game.Voxel.Damage
             var chunkBodies = new NativeArray<ChunkBody>(slots.Length, Allocator.TempJob);
             var dependency = JobHandle.CombineDependencies(state.Dependency, data->IntegrityHandle, data->DetachNextWritable);
             var fx = SystemAPI.GetSingleton<FxEventQueue>();
-            var sfx = SystemAPI.GetSingleton<SfxEventQueue>();
-            dependency = new EmitDebrisJob { Removed = data->Removed, Ranges = data->RemovedGrids, Grids = job.Reader.Grids, Blocks = job.Blocks,
-                Config = job.Config, Fx = fx.Queue.AsParallelWriter(), Sfx = sfx.Queue.AsParallelWriter(), Data = data
-            }.Schedule(sfx.Access.BeginRead(fx.Access.BeginRead(dependency)));
-            sfx.Access.EndRead(dependency);
+            // Debris for the tick's removals is DebrisEmitSystem's (ADR-0117), which runs on every machine just before this.
+            dependency = fx.Access.BeginRead(JobHandle.CombineDependencies(dependency, data->DebrisHandle));
             dependency = new ChunkLifetimeJob { Tick = job.Tick, Ecb = job.Ecb, Retired = data->RetiredChunkBlobs,
                 Fx = fx.Queue.AsParallelWriter() }.Schedule(dependency);
             dependency = new CollectChunkSlotsJob { Entities = slots, Bodies = chunkBodies }.Schedule(dependency);

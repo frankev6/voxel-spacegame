@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
-| M4 | 8 | 2 | 0 | 0 | 16 | 0 | 26 | 5 |
+| M4 | 14 | 2 | 0 | 0 | 16 | 0 | 32 | 6 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -515,6 +515,12 @@
 | NET-010 | Co-op playtest scenario and stats overlay | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-008, NET-009 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | fcb0b16b | coop-soak.sh table at 0/50/100/150 ms in SPEC-90 §10a; spike worktree only |
 | NET-011 | Own-ship prediction (stretch) | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-010 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | fcb0b16b | per-tick commands, adaptive host buffer, reconcile without replay; spike worktree only |
 | NET-012 | Co-op hardening: cost, big hits, target lock, aim compensation | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-011 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 359ef7b6 | Burst replica jobs, knockback, guest target lock, aim anchors; spike worktree only |
+| NET-013 | One code path: shared cell apply | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-012 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | (this commit) | ADR-0117 phase 1: guests apply host cell writes through CellWriter; debris and destroy pass run everywhere; spike worktree only |
+| NET-014 | One code path: structural transitions and spawn setup | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
+| NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | no | todo |  |  |  |  |
+| NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | no | todo |  |  |  |  |
+| NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | no | todo |  |  |  |  |
+| NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1229,6 +1235,20 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-15 — NET-013: one code path, phase 1 (lead, claude-opus-5-5)
+- Owner, after ghost collisions and missing guest features: "i think we have to decouple the systems and make sure that host, guest, or single player, they go through the same functions so we are not running redundant or duplicate code", and "this doesn't go just for the destruction system, for every system".
+- Decision: [ADR-0117](decisions/ADR-0117-coop-one-code-path.md). Every system is a decider (authority only) or an applier (every machine), and `Game.Net` only translates. It has six phases, NET-013 to NET-018. The inventory of guest copies and the bugs each caused is in its Context table.
+- **Built:**
+  - `CellWriter.ApplyExactCell` and `ApplyExactInstance`, run by `ExactCellApplySystem`;
+  - `DebrisEmitSystem` and `StructuralDestroySystem`, split out of `SplitSystem` and `ShipDeathSystem`;
+  - guests translate deltas into exact writes;
+  - the guest copies are deleted;
+  - headless guests (`COOP_HEADLESS=1`).
+- **Verified:**
+  - single-player damage suites and the determinism test pass;
+  - live with headless guests: colliders and cells identical after station cuts, 0 hash mismatches and 0 desyncs in `coop-cost.sh` and `coop-soak.sh`, and guest debris now comes from the shared system.
+- Next: NET-014 (structural transitions and spawn setup).
 
 ### 2026-10-15 — NET-012: co-op hardening (lead, claude-opus-5-5)
 - Owner: "fix the open items" (the SPEC-90 §10a gaps), after "Do this task here: Co-op host capture performance pass". Still only in the co-op worktree; `main` untouched.

@@ -81,10 +81,13 @@ namespace Game.App.Session
             ["ExplosionSystem"] = SystemAuthority.Both,
             ["ShieldSystem"] = SystemAuthority.Both,                     // guests: hit flashes; HP is overwritten from snapshots
             ["DamageResolveSystem"] = SystemAuthority.AuthorityOnly,
+            ["ExactCellApplySystem"] = SystemAuthority.Both,             // ADR-0117 applier: guests feed it the host's cell writes
+            ["DebrisEmitSystem"] = SystemAuthority.Both,                 // ADR-0117 applier
             ["ReplicaDamageDrainSystem"] = SystemAuthority.GuestOnly,
             ["IntegritySystem"] = SystemAuthority.AuthorityOnly,
             ["SplitSystem"] = SystemAuthority.AuthorityOnly,
             ["ShipDeathSystem"] = SystemAuthority.AuthorityOnly,
+            ["StructuralDestroySystem"] = SystemAuthority.Both,          // ADR-0117 applier: bricks, functional entities, dissolved grids
             ["GridMassUpdateSystem"] = SystemAuthority.Both,              // guests: replica deltas request a recompute (hull bars, own-ship mass)
             ["BrickDirtyScheduleSystem"] = SystemAuthority.Both,
             ["ColliderSnapshotSystem"] = SystemAuthority.Both,

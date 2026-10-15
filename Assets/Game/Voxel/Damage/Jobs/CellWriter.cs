@@ -49,6 +49,20 @@ namespace Game.Voxel.Damage.Jobs
             if (touchedSet.Add(brick)) Touched.Add(new TouchedBrick { Grid = Access.Grid, SlotIndex = slot, Brick = brick });
             // Enable bits are applied serially by the resolver's Flatten phase, never by parallel ranges.
         }
+        /// <summary>A cell on a brick face changed: the touching brick's mesh shows that face now.</summary>
+        void TouchNeighbours(int3 c)
+        {
+            int3 localCell = BrickMath.LocalOf(c);
+            for (int axis = 0; axis < 3; axis++)
+            {
+                if (localCell[axis] != 0 && localCell[axis] != 15) continue;
+                int3 neighbour = BrickMath.BrickOf(c); neighbour[axis] += localCell[axis] == 0 ? -1 : 1;
+                int neighbourSlot = BrickMath.SlotIndex(neighbour, Access.Definition.BrickMin, Access.Definition.BrickDims);
+                if (neighbourSlot < 0) continue;
+                var other = Access.Slots[neighbourSlot].Brick;
+                if (other != Entity.Null) Touch(other, neighbourSlot, BrickDirtyFlags.Mesh);
+            }
+        }
         public void ApplyCellDamage(int3 c, float effective)
         {
             if (effective <= 0f || !Access.TryGetCell(c, out var cell, out var brick, out int local)) return;
@@ -75,16 +89,7 @@ namespace Game.Voxel.Damage.Jobs
             BrickDirtyFlags flags = BrickDirtyFlags.Mesh | BrickDirtyFlags.Collider;
             // BrickDirtyScheduleSystem routes runtime collider changes to urgent ColliderPriority.Damage.
             int slot = Access.Slot(c); Touch(brick, slot, flags);
-            int3 localCell = BrickMath.LocalOf(c);
-            for (int axis = 0; axis < 3; axis++)
-            {
-                if (localCell[axis] != 0 && localCell[axis] != 15) continue;
-                int3 neighbour = BrickMath.BrickOf(c); neighbour[axis] += localCell[axis] == 0 ? -1 : 1;
-                int neighbourSlot = BrickMath.SlotIndex(neighbour, Access.Definition.BrickMin, Access.Definition.BrickDims);
-                if (neighbourSlot < 0) continue;
-                var other = Access.Slots[neighbourSlot].Brick;
-                if (other != Entity.Null) Touch(other, neighbourSlot, BrickDirtyFlags.Mesh);
-            }
+            TouchNeighbours(c);
             if (Access.Bricks[brick].SolidCount == 0)
             {
                 DestroyList.Add(brick); Access.Slots[slot] = default;

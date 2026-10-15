@@ -59,15 +59,7 @@ namespace Game.Voxel.Damage.Jobs
             }
             if (!Access.Write(brick, BrickMath.LocalIndex(BrickMath.LocalOf(position)), Cell.Palette(palette))) return false;
             Changed = true; Touch(brick, slot, BrickDirtyFlags.Mesh | BrickDirtyFlags.Collider);
-            int3 localPosition = BrickMath.LocalOf(position);
-            for (int axis = 0; axis < 3; axis++)
-            {
-                if (localPosition[axis] != 0 && localPosition[axis] != 15) continue;
-                int3 coordinate = BrickMath.BrickOf(position); coordinate[axis] += localPosition[axis] == 0 ? -1 : 1;
-                int neighbour = BrickMath.SlotIndex(coordinate, Access.Definition.BrickMin, Access.Definition.BrickDims);
-                if (neighbour >= 0 && Access.Slots[neighbour].Brick != Entity.Null)
-                    Touch(Access.Slots[neighbour].Brick, neighbour, BrickDirtyFlags.Mesh);
-            }
+            TouchNeighbours(position);
             restored = new CellRestored { Grid = Access.Grid, Cell = position, Block = request.Block, Color = request.Color };
             return true;
         }

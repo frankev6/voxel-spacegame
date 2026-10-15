@@ -19,7 +19,9 @@ using Unity.Transforms;
 namespace Game.Net.Replication
 {
     /// <summary>Guest side of ADR-0116. Reliable messages are queued in stream order and applied at the start of the frame
-    /// (GameInitGroup, before GridSpawnSystem); snapshots go straight into interpolation tracks. Main thread.</summary>
+    /// (GameInitGroup, before GridSpawnSystem); snapshots go straight into interpolation tracks. Cell and instance changes are only
+    /// translated here: they are queued as exact writes and applied in the next tick by the same code as the host's damage
+    /// (ADR-0117). Main thread.</summary>
     public sealed class GuestReplicator : IDisposable
     {
         sealed class GuestGrid
@@ -39,9 +41,8 @@ namespace Game.Net.Replication
         readonly List<GuestGrid> retiring = new();
         readonly NetReader reader = new();
         NativeArray<Cell> cells;
-        NativeList<ReplicaCellWrite> writes;
-        NativeList<CellRemoved> removedCells;
-        NativeList<int> touchedInstances;
+        NativeList<ExactCellWrite> exact, instanceWrites;   // this frame's decoded writes, queued to DamageStreams after the apply loop
+        EntityQuery streamsQuery;
         double clockOffset; bool clockValid;
         public uint NewestHostTick { get; private set; }
         public double3 HostOrigin { get; private set; }
@@ -51,6 +52,8 @@ namespace Game.Net.Replication
         public int GridCount => grids.Count;
         public int ChunkCount => chunks.Count;
         public string LastHashReport { get; private set; } = "no hash check yet";
+        public string AppliedSummary { get; private set; } = "";
+        int lastMissing;
         public int HashMismatches { get; private set; }
         public OwnShipPredictor Predictor { get; } = new();
         uint localTick;
@@ -62,9 +65,8 @@ namespace Game.Net.Replication
         {
             this.transport = transport;
             cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Persistent);
-            writes = new NativeList<ReplicaCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
-            removedCells = new NativeList<CellRemoved>(256, Allocator.Persistent);
-            touchedInstances = new NativeList<int>(32, Allocator.Persistent);
+            exact = new NativeList<ExactCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
+            instanceWrites = new NativeList<ExactCellWrite>(64, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
                          NetMessage.GridState, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
             {
@@ -139,7 +141,7 @@ namespace Game.Net.Replication
             em.CompleteAllTrackedJobs();
             FinishSpawns(em);
             RetireDespawned(em, registry);
-            removedCells.Clear();
+            exact.Clear();
             int budget = 2000;   // messages per frame; the join snapshot spreads over a few frames
             long frameStart = NetStats.Stamp();
             Array.Clear(kindMs, 0, kindMs.Length); Array.Clear(kindCount, 0, kindCount.Length);
@@ -156,20 +158,33 @@ namespace Game.Net.Replication
                 kindMs[(byte)kind] += Ms(start); kindCount[(byte)kind]++;
                 queue.Dequeue();
             }
-            long debrisStart = NetStats.Stamp();
-            if (removedCells.Length > 0) ReplicaVoxelApi.EmitDebris(em, removedCells);
-            double debris = Ms(debrisStart), total = Ms(frameStart);
+            var streams = Streams(em);
+            if (exact.Length > 0) streams.QueueExact(exact.AsArray());
+            // Writes the shared applier could not place (no grid or brick here) are desyncs too.
+            int missing = streams.ExactMissing; transport.Stats.Desyncs += missing - lastMissing; lastMissing = missing;
+            var totals = streams.Totals;
+            AppliedSummary = "applied by the shared cell writer: " + totals.CellsDestroyed + " cells destroyed, " + totals.CellsDetached + " detached, "
+                + totals.CellsPlaced + " placed, " + totals.DebrisParticles + " debris, " + missing + " writes missing";
+            double total = Ms(frameStart);
             if (total > 8)
             {
                 var text = new System.Text.StringBuilder("slow apply ").Append(total.ToString("0.0")).Append(" ms:");
                 for (int k = 0; k < kindMs.Length; k++)
                     if (kindCount[k] > 0) text.Append(' ').Append((NetMessage)k).Append(' ').Append(kindMs[k].ToString("0.0")).Append(" ms x").Append(kindCount[k]);
-                text.Append(", debris ").Append(debris.ToString("0.0")).Append(" ms (").Append(removedCells.Length).Append(" cells)");
+                text.Append(", ").Append(exact.Length).Append(" exact writes queued");
                 GameLog.Info(NetTransport.Category, text.ToString());
             }
             transport.Stats.ReplicatedGrids = grids.Count; transport.Stats.ReplicatedChunks = chunks.Count;
             transport.Stats.SnapshotAgeMs = SnapshotAgeMs;
         }
+
+        DamageStreams Streams(EntityManager em)
+        {
+            if (streamsQuery == default) streamsQuery = em.CreateEntityQuery(ComponentType.ReadOnly<DamageStreams>());
+            return streamsQuery.GetSingleton<DamageStreams>();
+        }
+        // Writes decoded this frame or queued and not yet applied by a tick: reads of cells, and despawns of the grids they target, wait.
+        bool WritesPending(EntityManager em) => exact.Length > 0 || Streams(em).ExactPending;
 
         bool Ready(ulong id, out GuestGrid g) => grids.TryGetValue(id, out g) && g.Spawned;
         bool Waiting(ulong id) => grids.TryGetValue(id, out var g) && !g.Spawned;
@@ -187,7 +202,7 @@ namespace Game.Net.Replication
                 case NetMessage.GridDespawn:
                 {
                     ulong id = r.U64();
-                    if (Waiting(id)) return false;
+                    if (Waiting(id) || grids.ContainsKey(id) && WritesPending(em)) return false;
                     if (grids.Remove(id, out var g))
                     {
                         if (em.Exists(g.Entity) && em.HasComponent<GridDespawnRequest>(g.Entity)) GridSpawnApi.RequestDespawn(em, g.Entity);
@@ -224,7 +239,9 @@ namespace Game.Net.Replication
                     tracks.Remove(id);
                     return true;
                 }
-                case NetMessage.HashReport: CompareHashes(em, r); return true;
+                case NetMessage.HashReport:
+                    if (WritesPending(em)) return false;   // compare after the cells before it are applied
+                    CompareHashes(em, r); return true;
             }
             return true;
         }
@@ -303,6 +320,9 @@ namespace Game.Net.Replication
             }
         }
 
+        /// <summary>Translates one GridDelta into exact writes for <see cref="ExactCellApplySystem"/>: the cells first, then the instance
+        /// health that follows from them. A brick's removals are DetachedBody when the host flagged it quiet (its cells left as a hulk or
+        /// chunk body, which arrive as their own spawns), so no debris is sprayed for them.</summary>
         void ApplyDelta(EntityManager em, Entity root, NetReader r)
         {
             int paletteStart = r.U16(), paletteCount = r.U16();
@@ -311,40 +331,41 @@ namespace Game.Net.Replication
                 using var entries = new NativeArray<PaletteEntry>(paletteCount, Allocator.Temp);
                 var e = entries;
                 for (int i = 0; i < paletteCount; i++) e[i] = GridCodec.ReadPaletteEntry(r);
-                ReplicaVoxelApi.SetPalette(em, root, paletteStart, entries);
+                ReplicaVoxelApi.SetPalette(em, root, paletteStart, entries);   // replicated state with no consequences; cells refer to it later
             }
+            instanceWrites.Clear();
             int instanceCount = r.U16();
             for (int i = 0; i < instanceCount; i++)
             {
                 int index = r.U16(); float hp = r.F32(); ushort alive = r.U16(); var flags = (BlockInstanceFlags)r.U8();
-                ReplicaVoxelApi.SetInstance(em, root, index, hp, alive, flags);
+                instanceWrites.Add(new ExactCellWrite { Grid = root, Kind = ExactWriteKind.Instance, Instance = index, FunctionHp = hp, CellsAlive = alive, Flags = flags });
             }
-            touchedInstances.Clear();
             uint ops = r.U32();
             for (uint o = 0; o < ops; o++)
             {
                 byte flags = r.U8(); bool quiet = (flags & 0x80) != 0; byte op = (byte)(flags & 0x7F); int3 coord;
-                writes.Clear();
+                var reason = quiet ? CellRemovedReason.DetachedBody : CellRemovedReason.Destroyed;
                 if (op == 0)
                 {
                     coord = r.I3();
-                    for (int i = 0; i < BrickMath.CellsPerBrick; i++) writes.Add(new ReplicaCellWrite { Local = (ushort)i });
+                    for (int i = 0; i < BrickMath.CellsPerBrick; i++) Add(root, BrickMath.CellOf(coord, i), default, reason);
                 }
                 else if (op == 1)
                 {
                     coord = GridCodec.ReadBrickCells(r, cells);
-                    for (int i = 0; i < BrickMath.CellsPerBrick; i++) writes.Add(new ReplicaCellWrite { Local = (ushort)i, Value = cells[i] });
+                    for (int i = 0; i < BrickMath.CellsPerBrick; i++) Add(root, BrickMath.CellOf(coord, i), cells[i], reason);
                 }
                 else
                 {
                     coord = r.I3(); int n = r.U16();
-                    for (int i = 0; i < n; i++) writes.Add(new ReplicaCellWrite { Local = r.U16(), Value = GridCodec.ReadCell(r) });
+                    for (int i = 0; i < n; i++) { int local = r.U16(); Add(root, BrickMath.CellOf(coord, local), GridCodec.ReadCell(r), reason); }
                 }
-                if (!ReplicaVoxelApi.WriteBrick(em, root, coord, writes.AsArray(), removedCells, quiet, touchedInstances) && op != 0) transport.Stats.Desyncs++;
             }
-            ReplicaVoxelApi.ReleaseOrphanedInstances(em, root, touchedInstances);
-            if (ops > 0) ReplicaVoxelApi.RequestMassRecompute(em, root);
+            exact.AddRange(instanceWrites.AsArray());
         }
+
+        void Add(Entity root, int3 cell, Cell value, CellRemovedReason reason)
+            => exact.Add(new ExactCellWrite { Grid = root, Kind = ExactWriteKind.Cell, Cell = cell, Value = value, Reason = reason });
 
         void SpawnChunk(EntityManager em, NetReader r)
         {
@@ -404,9 +425,8 @@ namespace Game.Net.Replication
         public void Dispose()
         {
             if (cells.IsCreated) cells.Dispose();
-            if (writes.IsCreated) writes.Dispose();
-            if (removedCells.IsCreated) removedCells.Dispose();
-            if (touchedInstances.IsCreated) touchedInstances.Dispose();
+            if (exact.IsCreated) exact.Dispose();
+            if (instanceWrites.IsCreated) instanceWrites.Dispose();
         }
     }
 }

@@ -50,6 +50,7 @@ namespace Game.Voxel.Damage
             data->PendingDetachCurrent.Clear(); data->PendingDetachNext.Clear(); data->CoreLost.Clear();
             data->Removed.Clear(); data->RemovedGrids.Clear(); data->Restored.Clear(); data->RestoredGrids.Clear();
             data->Islands.Clear(); data->IslandMasks.Clear(); data->DestroyList.Clear(); data->GridResults.Clear();
+            data->TouchedBricks.Clear(); data->DissolveDespawns.Clear(); data->ExactWrites.Clear();
             data->RamPairs.Clear(); data->Current = default; data->Last = default;
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
@@ -58,7 +59,9 @@ namespace Game.Voxel.Damage
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             owned.Damage.BeginTick(tick); owned.Explosions.BeginTick(tick); owned.Impulses.BeginTick(tick); owned.Restores.BeginTick(tick);
             var data = owned.Data;
-            var reset = new ResetTickJob { Data = data, Tick = tick, ChunkPool = data->ChunkPool, MaxLiveChunks = SystemAPI.GetSingleton<DamageConfig>().MaxLiveChunks }.Schedule(data->AllJobs(state.Dependency));
+            var reset = new ResetTickJob { Data = data, Tick = tick, ChunkPool = data->ChunkPool, MaxLiveChunks = SystemAPI.GetSingleton<DamageConfig>().MaxLiveChunks,
+                Removed = data->Removed, RemovedGrids = data->RemovedGrids, Restored = data->Restored, RestoredGrids = data->RestoredGrids,
+                Touched = data->TouchedBricks, Destroy = data->DestroyList, Dissolved = data->DissolveDespawns, Grids = data->GridResults }.Schedule(data->AllJobs(state.Dependency));
             data->RemovedReaderHandles.Clear();
             data->TickResetHandle = reset;
             var previous = data->PendingDetachCurrent; data->PendingDetachCurrent = data->PendingDetachNext; data->PendingDetachNext = previous;
@@ -83,8 +86,17 @@ namespace Game.Voxel.Damage
             public uint Tick;
             public NativeList<ChunkPoolSlot> ChunkPool;
             public int MaxLiveChunks;
+            // ADR-0117: the tick's published lists start empty here, not in the resolver, so every applier (the resolver on the
+            // authority, ExactCellApplySystem on co-op guests) appends to the same lists.
+            public NativeList<CellRemoved> Removed; public NativeList<CellRestored> Restored;
+            public NativeList<GridRemovedRange> RemovedGrids, RestoredGrids;
+            public NativeList<TouchedBrick> Touched; public NativeList<Entity> Destroy, Dissolved; public NativeList<DamageGridResult> Grids;
             public void Execute()
             {
+                Removed.Clear(); RemovedGrids.Clear(); Restored.Clear(); RestoredGrids.Clear(); Touched.Clear(); Destroy.Clear(); Dissolved.Clear(); Grids.Clear();
+                ref var totals = ref Data->Totals; var current = Data->Current;
+                totals.CellsDestroyed += current.CellsDestroyed; totals.CellsDetached += current.CellsDetached; totals.InstancesDestroyed += current.InstancesDestroyed;
+                totals.DebrisParticles += current.DebrisParticles; totals.CellsPlaced += current.CellsPlaced; totals.GridsResolved += current.GridsResolved;
                 Data->Last = Data->Current; Data->Current = new DamageTickStats { Tick = Tick };
                 // Config is authored after automatic OnCreate; first gameplay tick sees the boot-configured cap.
                 if (ChunkPool.Length == 0) ChunkPool.Resize(Unity.Mathematics.math.max(0, MaxLiveChunks), NativeArrayOptions.ClearMemory);

@@ -156,7 +156,7 @@ namespace Game.Tests.PlayMode.Combat
         static FlightFixture Create(bool firing)
         {
             var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
-                typeof(IntegritySystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(ChunkColliderCleanupSystem),
+                typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(StructuralDestroySystem), typeof(ChunkColliderCleanupSystem),
                 typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SpatialHashBuildSystem), typeof(ShieldSystem), typeof(ExplosionSystem), typeof(SplitGraceContactSystem) };
             if (firing) systems.AddRange(new[] { typeof(WeaponInitSystem), typeof(WeaponAimSystem), typeof(WeaponFireSystem),
                 typeof(PowerRegistrationSystem), typeof(PowerInitSystem), typeof(PowerAllocationSystem), typeof(ShipStatsAggregateSystem), typeof(RegressionCoreKillSystem) });

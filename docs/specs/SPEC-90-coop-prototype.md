@@ -261,6 +261,100 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - [x] A guest's autofire and target-lead weapons work on the host.
 - **Tests:** `PredictionTests` (EditMode), `coop-soak.sh`, `coop-cost.sh`, `coop-aim.sh`.
 
+### NET-013 — One code path: shared cell apply
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-012`
+- **Do:** ([ADR-0117](../decisions/ADR-0117-coop-one-code-path.md) phase 1)
+  - Extract `CellApply` from `CellWriter`: the one writer of a cell together with all its consequences:
+    - brick dirty flags and neighbour marks;
+    - the brick's deferred destroy;
+    - the `CellRemoved` record;
+    - instance cell counts.
+    The resolver, split and dissolve paths call it, and single-player behaviour is unchanged.
+  - Guests queue exact cell and instance writes (with each brick's removal reason) and apply them in the fixed step through `CellApply`, at the resolver's place. Debris, sound, mass, collider and mesh rebuilds and brick deletion then run in the host's own systems.
+  - Move debris emission out of `SplitSystem` and the final destroy pass out of `ShipDeathSystem` into appliers that run on every machine.
+  - Delete the guest copies:
+    - `ReplicaVoxelApi.WriteBrick`, `TouchNeighbours`, `QueueColliderRemoval`, `SetInstance`, `EmitDebris` and `RequestMassRecompute`;
+    - the dense write job.
+- **Files:** `Assets/Game/Voxel/Damage/Jobs/CellApply.cs`, `Assets/Game/Voxel/Damage/Systems/ExactCellApplySystem.cs`, `DebrisEmitSystem.cs`, `StructuralDestroySystem.cs`, `Assets/Game/Net/Replication/GuestReplicator.cs`
+- **Acceptance criteria:**
+  - [x] Damage, integrity, split and ship-death tests pass. EditMode Voxel.Damage: 84. PlayMode: `ShipDeathRegressionTests`, `DamageDeterminismTests`, `DamagePersistenceScenarioTests`, `CombatScenarioTests`. Hand-built test pipelines list the new appliers.
+  - [x] Guests get debris, break sounds, collider removal and mass changes from the shared systems.
+    - `coop-colliders.sh 4098 -24 21 24 117 24 101 -40 53`: host 30 bricks / 30 collider parts / 15,443 cells, guest identical.
+    - `coop-cost.sh`: 0 hash mismatches, 0 desyncs, 0 missing writes, 620 debris particles from `DebrisEmitSystem` on a guest.
+    - `coop-soak.sh 6`: 0 bad hashes and 0 snaps at 0 to 150 ms.
+  - [x] `Game.Net` no longer writes cells or instance health.
+- **Tests:** existing Voxel damage suites, `coop-colliders.sh`, `coop-soak.sh`.
+
+### NET-014 — One code path: structural transitions and spawn setup
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-013`
+- **Do:** (ADR-0117 phase 2)
+  - Split core loss, hulk splits (with the instance remap that moves functional blocks), chunk creation and lifetime, and impulses into a decider and an applier.
+  - Guests receive the deciders' records and run the same appliers. This deletes `EmitHulkBlast`, `CreateChunk`, `DestroyChunk`, `ReleaseOrphanedInstances` and the impulse copy in `ReplicaDamageDrainSystem`.
+  - One shared root setup for every spawn path, by kind and profile.
+  - `SalvageMarkSystem` runs everywhere (a derivation).
+- **Files:** `Assets/Game/Voxel/Damage/Systems/ShipDeathSystem.cs`, `SplitSystem.cs`, `ImpactEventSystem.cs`, `Assets/Game/Voxel/Grid/GridRootSetup.cs`
+- **Acceptance criteria:**
+  - [ ] Hulks, pods and chunk bodies look and behave the same on host and guests, including the core blast, salvage tint and moved functional blocks.
+- **Tests:** existing Voxel suites, `coop-soak.sh`, `coop-parity.sh`.
+
+### NET-015 — One code path: pilots
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-014`
+- **Do:** (ADR-0117 phase 3)
+  - Every player's ship has `Pilot { Slot }` on every machine, and `LocalPilot` marks the one this machine flies.
+  - One command-apply path per pilot. `RemotePilotApplySystem` and the target copy in `RemotePilotReceiveSystem` are deleted.
+  - Targeting, interaction queries, salvage reach, salvage, combat status and faction standing work per pilot.
+  - Presentation reads `LocalPilot`.
+- **Files:** `Assets/Game/Core/Components/Pilot.cs`, `Assets/Game/Simulation/Commands/PlayerCommandApplySystem.cs`, `Assets/Game/Galaxy/Interaction/InteractionQuerySystem.cs`
+- **Acceptance criteria:**
+  - [ ] A guest sees the Salvage prompt and can salvage. Every pilot's target lock and autofire run through the same system.
+- **Tests:** command and interaction EditMode suites, `coop-parity.sh`.
+
+### NET-016 — One code path: abilities and status
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-015`
+- **Do:** (ADR-0117 phase 4)
+  - Ability activation stays the host's decision.
+  - Slot state is replicated per ship.
+  - Shield-toggle and stat-boost effects run as appliers everywhere, so the guest's hotbar fills and its prediction includes boosts.
+- **Files:** `Assets/Game/Simulation/Abilities/AbilitySystem.cs`, `ShieldToggleEffectSystem.cs`, `StatBoostEffectSystem.cs`
+- **Acceptance criteria:**
+  - [ ] The guest's hotbar matches the host's view of its ship. A boost no longer arrives as a correction.
+- **Tests:** ability suites, `coop-parity.sh`, `coop-soak.sh`.
+
+### NET-017 — One code path: galaxy state for guests
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-016`
+- **Do:** (ADR-0117 phase 5)
+  - Guests receive faction relations, economy notices, combat status and the interactables of stations and encounters.
+  - Salvage goes to the cargo model chosen in §10 Q5.
+- **Files:** `Assets/Game/Net/Replication/HostReplicator.cs`, `Assets/Game/Net/Replication/GuestReplicator.cs`, `Assets/Game/Galaxy/Salvage/SalvageService.cs`
+- **Acceptance criteria:**
+  - [ ] Guests see dock, hail and inspect prompts.
+  - [ ] Guests see salvage and trade notices.
+  - [ ] Radar colours follow standing changes.
+- **Tests:** `coop-parity.sh`.
+
+### NET-018 — One code path: enforcement
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-013`
+- **Do:** (ADR-0117 §7)
+  - Annotate each authority-only entry in `RoleSystemPolicy` with the decision it owns.
+  - Add a test that `Game.Net` calls no structural voxel or gameplay writer.
+  - Add `tools/playtest/coop-parity.sh`, which diffs the host's and a guest's view of the same ship: HUD snapshot, interaction target, collider parts, hulk and interactable counts, ability slots.
+- **Files:** `Assets/Game/App/Session/RoleSystemPolicy.cs`, `Assets/Game/Tests/EditMode/Net/NetWriterRulesTests.cs`, `tools/playtest/coop-parity.sh`
+- **Acceptance criteria:**
+  - [ ] The test and the parity script exist and pass after each later phase.
+- **Tests:** `NetWriterRulesTests` (EditMode), `coop-parity.sh`.
+
 ## 10. Open questions
 | # | Question | Default | Decider | Answer |
 |---|---|---|---|---|
@@ -268,6 +362,7 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 | 2 | Second instance: Editor host plus a standalone dev build, or Multiplayer Play Mode virtual players? | Editor plus a dev build (also works Mac to Windows) | Owner | |
 | 3 | Pause in co-op: never pause, or pause only when every player has a menu open? | Never pause | Owner | |
 | 4 | A guest's ship blueprint: the host's playground flagship, or the guest's own blueprint sent at join? | The host's playground flagship for the spike | Owner | |
+| 5 | Cargo in co-op: one shared party hold, or a hold per player? | One shared hold (the host's inventory) for the spike; whoever salvages fills it | Owner | |
 
 ## 10a. Spike status (2026-10-15)
 Verified live with the Editor as host and one or two dev-build guests on one Mac (`tools/playtest/coop.sh`, `tools/playtest/coop-soak.sh`):

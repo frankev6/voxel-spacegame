@@ -89,7 +89,7 @@ namespace Game.Tests.PlayMode.Combat
             {
                 this.chunkSpur = chunkSpur;
                 var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
-                    typeof(IntegritySystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(ChunkColliderCleanupSystem),
+                    typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(StructuralDestroySystem), typeof(ChunkColliderCleanupSystem),
                     typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SpatialHashBuildSystem), typeof(ShieldSystem), typeof(ExplosionSystem), typeof(SkirmishShotsSystem) };
                 if (chunkSpur) systems.Add(typeof(SplitGraceContactSystem));
                 Flight = new FlightFixture(systems.ToArray());

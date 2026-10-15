@@ -50,6 +50,17 @@ namespace Game.Voxel.Damage
         }
         public void EndRestoredRead(JobHandle readerJob) => Data->RemovedReaderHandles.Add(readerJob);
 
+        // ADR-0117 exact writes (co-op guests): main thread outside the fixed step. Applied in order by ExactCellApplySystem next tick.
+        public void QueueExact(NativeArray<ExactCellWrite> writes)
+        {
+            if (writes.Length == 0) return;
+            Data->ExactHandle.Complete(); Data->ExactWrites.AddRange(writes);
+        }
+        // True while queued exact writes wait for a tick: cell reads (hash checks) must wait too.
+        public bool ExactPending { get { Data->ExactHandle.Complete(); return Data->ExactWrites.Length > 0; } }
+        // Exact writes dropped because their grid or brick does not exist here (desyncs), since boot.
+        public int ExactMissing { get { Data->ExactHandle.Complete(); return Data->ExactMissing; } }
+
         // SPEC-21 ShipDestroyedBridgeSystem, once per frame (presentation, main thread); completes ShipDeathSystem's last write first.
         public void DrainCoreLost(NativeList<GridCoreLost> output)
         {
@@ -65,6 +76,7 @@ namespace Game.Voxel.Damage
         }
 
         // Main thread outside fixed simulation only: the completed prior tick is published by a dependent job (Q21).
+        public DamageTickStats Totals { get { Data->TickResetHandle.Complete(); return Data->Totals; } }   // running sums since boot
         public DamageTickStats LastTickStats { get { Data->TickResetHandle.Complete(); return Data->Last; } }                  // copied at the start of the next tick
 
         [BurstCompile] struct ClearExplosionsJob : IJob
