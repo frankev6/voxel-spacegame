@@ -190,6 +190,8 @@ namespace Game.Net.Transport
                         scratch.Clear(); scratch.F64(reader.F64()); SendUnreliable(peer, NetMessage.Pong, scratch); return;
                     case NetMessage.Pong:
                         peer.RttMs = (float)((Now - reader.F64()) * 1000); return;
+                    case NetMessage.Goodbye:
+                        Drop(peer, (IsHost ? "said goodbye: " : "the host ended the session: ") + (reader.Remaining > 2 ? reader.Str() : "left")); return;
                     case NetMessage.Hello when IsHost: OnHello(peer, reader); return;
                     case NetMessage.Ready when IsHost:
                         if (peer.Phase == NetPeerPhase.Welcomed) { peer.Phase = NetPeerPhase.Ready; PeerReady?.Invoke(peer); }
@@ -310,6 +312,11 @@ namespace Game.Net.Transport
         public void Shutdown(string reason)
         {
             if (!driver.IsCreated) { peers.Clear(); return; }
+            // The goodbye skips the network simulator (its delayed packets die with the driver) and goes out three times against loss.
+            driver.ModifyNetworkSimulatorParameters(default);
+            scratch.Clear(); scratch.Str(reason);
+            for (int copy = 0; copy < 3; copy++)
+                foreach (var peer in peers) if (peer.Phase >= NetPeerPhase.Welcomed) SendUnreliable(peer, NetMessage.Goodbye, scratch);
             foreach (var peer in peers) if (driver.GetConnectionState(peer.Connection) != NetworkConnection.State.Disconnected) driver.Disconnect(peer.Connection);
             driver.ScheduleFlushSend().Complete();
             driver.Dispose();

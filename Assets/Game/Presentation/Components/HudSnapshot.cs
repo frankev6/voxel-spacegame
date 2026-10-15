@@ -16,6 +16,7 @@ namespace Game.Presentation.Components
         public FixedList64Bytes<HudWeaponGroupState> WeaponGroups;
         public FixedList128Bytes<HudAbilityState> Abilities;
         public ContentHash TargetNameHash;
+        public FixedString32Bytes TargetPilot;   // co-op: the target's pilot name, shown in place of the blueprint name
         public byte TargetFaction;
         public byte TargetRelation;
         public float TargetHull01, TargetShield01, TargetDistanceM;

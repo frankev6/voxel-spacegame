@@ -96,7 +96,10 @@ namespace Game.App.DevRuntime.Commands
             if (net.Guest != null)
                 text.Append("\n  guest: ").Append(net.Guest.GridCount).Append(" grids, ").Append(net.Guest.ChunkCount).Append(" chunks, ").Append(net.Guest.PendingMessages)
                     .Append(" queued, snapshot age ").Append(net.Guest.SnapshotAgeMs.ToString("0")).Append(" ms, desyncs ").Append(s.Desyncs)
-                    .Append(", dropped snapshots ").Append(s.DroppedSnapshots).Append("\n  ").Append(net.Guest.LastHashReport);
+                    .Append(", dropped snapshots ").Append(s.DroppedSnapshots).Append("\n  ").Append(net.Guest.LastHashReport)
+                    .Append("\n  prediction: ").Append(net.Guest.Predictor.Corrections).Append(" corrections, error ").Append(net.Guest.Predictor.LastErrorM.ToString("0.00"))
+                    .Append(" m (peak ").Append(net.Guest.Predictor.PeakErrorM.ToString("0.00")).Append("), snaps ").Append(net.Guest.Predictor.Snaps)
+                    .Append(", ack ").Append(net.Guest.Predictor.LastAck).Append(" of ").Append(net.TickSequence);
             return text.ToString();
         }
     }

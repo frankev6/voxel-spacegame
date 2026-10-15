@@ -60,12 +60,13 @@ namespace Game.Tests.EditMode.Net
         {
             var h = new GridSpawnHeader { NetId = 99, OwnerSlot = 2, Kind = GridKind.Hulk, Motion = GridMotion.Kinematic, Role = GridRoleHint.Ship,
                 HasAllegiance = 1, Allegiance = new Allegiance { Faction = 3, Team = 2 }, Flags = GridSpawnFlags.PlanarInertia, CellSize = .5f,
-                Position = new float3(10, 0, -4), Rotation = quaternion.RotateY(.3f), Linear = new float3(1, 0, 2), AngularWorld = new float3(0, .2f, 0) };
+                Position = new float3(10, 0, -4), Rotation = quaternion.RotateY(.3f), Linear = new float3(1, 0, 2), AngularWorld = new float3(0, .2f, 0), Pilot = "Frank" };
             var w = new NetWriter(); GridCodec.WriteHeader(w, h);
             var back = GridCodec.ReadHeader(new NetReader(w.Data, 0, w.Length));
             Assert.AreEqual(h.NetId, back.NetId); Assert.AreEqual(h.OwnerSlot, back.OwnerSlot); Assert.AreEqual(h.Kind, back.Kind);
             Assert.AreEqual(h.Motion, back.Motion); Assert.AreEqual(h.Role, back.Role); Assert.IsTrue(h.Allegiance.Equals(back.Allegiance));
             Assert.AreEqual(h.Flags, back.Flags); Assert.AreEqual(h.Position, back.Position); Assert.AreEqual(h.Rotation, back.Rotation);
+            Assert.AreEqual("Frank", back.Pilot);
         }
 
         [Test]

@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
-| M4 | 19 | 2 | 0 | 0 | 4 | 0 | 25 | 6 |
+| M4 | 8 | 2 | 0 | 0 | 15 | 0 | 25 | 5 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -504,16 +504,16 @@
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
-| NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
-| NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
-| NET-004 | Grid replication and join snapshot | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-003 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | exact grid wire format, join snapshot; spike worktree only |
-| NET-005 | Transform snapshots and interpolation | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-004 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | 30 Hz snapshots, 100 ms interpolation, kinematic replicas; spike worktree only |
-| NET-006 | Remote pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-005 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | guest ship = host flagship copy; AI engages guests; spike worktree only |
-| NET-007 | Cell replication | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-006 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | shared shadow diffs; hash checks 0 mismatches; spike worktree only |
-| NET-008 | Splits, chunks and hulks | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-007 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | hulks, pod split, chunk bodies replicated; spike worktree only |
-| NET-009 | Combat presentation on guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-006 | no | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | cosmetic weapons on guests via replicated target and mode; spike worktree only |
-| NET-010 | Co-op playtest scenario and stats overlay | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-008, NET-009 | no | in-progress | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | coop.sh loop and overlay done; bandwidth table partial; spike worktree only |
-| NET-011 | Own-ship prediction (stretch) | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-010 | no | todo |  |  |  |  |
+| NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
+| NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
+| NET-004 | Grid replication and join snapshot | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-003 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | exact grid wire format, join snapshot; spike worktree only |
+| NET-005 | Transform snapshots and interpolation | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-004 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | 30 Hz snapshots, 100 ms interpolation, kinematic replicas; spike worktree only |
+| NET-006 | Remote pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-005 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | guest ship = host flagship copy; AI engages guests; spike worktree only |
+| NET-007 | Cell replication | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-006 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | shared shadow diffs; hash checks 0 mismatches; spike worktree only |
+| NET-008 | Splits, chunks and hulks | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-007 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | hulks, pod split, chunk bodies replicated; spike worktree only |
+| NET-009 | Combat presentation on guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-006 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | cosmetic weapons on guests via replicated target and mode; spike worktree only |
+| NET-010 | Co-op playtest scenario and stats overlay | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | standard | NET-008, NET-009 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | COMMIT | coop-soak.sh table at 0/50/100/150 ms in SPEC-90 §10a; spike worktree only |
+| NET-011 | Own-ship prediction (stretch) | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-010 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | COMMIT | per-tick commands, adaptive host buffer, reconcile without replay; spike worktree only |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1228,6 +1228,18 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-15 — NET-010/011: prediction, plumes, names, goodbye, soak table (lead, claude-opus-5-5)
+- Owner: "keep working on the multiplayer until its ready". Still only on `task/NET-001-coop-prototype` in the co-op worktree; `main` untouched.
+- **Built:**
+  - own-ship prediction with per-tick commands, an adaptive host command buffer and snapshot acks;
+  - thruster plumes and engine sound on replicas;
+  - pilot names on players' ships;
+  - a host goodbye that survives the simulator and loss;
+  - guests' hull bars follow damage;
+  - `tools/playtest/coop-soak.sh`, the automated NET-010 scenario and table.
+- **Verified live** (Editor host plus two dev-build guests): prediction error 0.00 m and 0 snaps in normal combat up to 208 ms RTT with ±10 ms jitter and 2% loss; 0 hash mismatches; no crashes or exceptions; guests leave within seconds when the host quits under the simulator. Table in SPEC-90 §10a.
+- **Tests:** EditMode Net (18, including the new `PredictionTests`), HUD (18), system order (9) and project (8) pass.
 
 ### 2026-10-15 — NET-002…010: co-op spike working end to end (lead, claude-opus-5-5)
 - Owner: "ok begin your work, dont touch main". All work is on `task/NET-001-coop-prototype` in the co-op worktree; `main` is untouched.

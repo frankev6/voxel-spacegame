@@ -146,6 +146,7 @@ namespace Game.Presentation.Systems
                     }
                     if (SystemAPI.HasComponent<LocalToWorld>(target)) value.TargetDistanceM = math.distance(position, SystemAPI.GetComponent<LocalToWorld>(target).Position);
                     if (SystemAPI.HasComponent<GridSource>(target)) value.TargetNameHash = SystemAPI.GetComponent<GridSource>(target).Blueprint;
+                    if (SystemAPI.HasComponent<Game.Core.Net.PilotName>(target)) value.TargetPilot = SystemAPI.GetComponent<Game.Core.Net.PilotName>(target).Value;
                 }
                 if (SystemAPI.TryGetSingleton<InteractionTarget>(out var interaction) && interaction.Target != Entity.Null)
                 {

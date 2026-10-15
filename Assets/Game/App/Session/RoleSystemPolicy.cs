@@ -11,7 +11,7 @@ namespace Game.App.Session
     public enum SystemAuthority : byte
     {
         Both = 0,           // runs everywhere, unchanged (presentation-facing, derived stats, cosmetic weapons on guests)
-        AuthorityOnly = 1,  // solo and host only: AI, damage, splits, flight forces, encounters, origin rebasing
+        AuthorityOnly = 1,  // solo and host only: AI, damage, splits, encounters, origin rebasing
         GuestOnly = 2,      // co-op guests only (replica apply, body sync, damage drain)
         HostOnly = 3,       // co-op host only (capture, remote pilots)
         Session = 4,        // host and guest while a session is live, never in solo (transport send)
@@ -37,11 +37,11 @@ namespace Game.App.Session
             ["WeaponInitSystem"] = SystemAuthority.Both,
             ["SalvagePullSystem"] = SystemAuthority.AuthorityOnly,
             ["SceneNavigationBridgeSystem"] = SystemAuthority.Both,
-            ["RemotePilotReceiveSystem"] = SystemAuthority.HostOnly,
             ["ReplicaApplySystem"] = SystemAuthority.GuestOnly,
             // GameplayPrePhysicsGroup and its subgroups
             ["FactionStandingSystem"] = SystemAuthority.AuthorityOnly,
             ["PlayerCommandApplySystem"] = SystemAuthority.Both,          // guests: their own ship's cosmetic weapons fire at once
+            ["RemotePilotReceiveSystem"] = SystemAuthority.HostOnly,
             ["RemotePilotApplySystem"] = SystemAuthority.HostOnly,
             ["AiAnchorShiftSystem"] = SystemAuthority.AuthorityOnly,
             ["AiDecisionSystem"] = SystemAuthority.AuthorityOnly,
@@ -58,8 +58,8 @@ namespace Game.App.Session
             ["ShipStatsAggregateSystem"] = SystemAuthority.Both,
             ["PropulsionStatsSystem"] = SystemAuthority.Both,
             ["WeaponStatsSystem"] = SystemAuthority.Both,
-            ["PropulsionSystem"] = SystemAuthority.AuthorityOnly,
-            ["PlanarConstraintSystem"] = SystemAuthority.AuthorityOnly,
+            ["PropulsionSystem"] = SystemAuthority.Both,                  // guests: flies their own predicted ship; kinematic replicas have no inverse mass
+            ["PlanarConstraintSystem"] = SystemAuthority.Both,            // same: dynamic bodies only
             ["WeaponAimSystem"] = SystemAuthority.Both,
             ["WeaponFireSystem"] = SystemAuthority.Both,
             ["ProjectileShotHandlerSystem"] = SystemAuthority.Both,
@@ -85,7 +85,7 @@ namespace Game.App.Session
             ["IntegritySystem"] = SystemAuthority.AuthorityOnly,
             ["SplitSystem"] = SystemAuthority.AuthorityOnly,
             ["ShipDeathSystem"] = SystemAuthority.AuthorityOnly,
-            ["GridMassUpdateSystem"] = SystemAuthority.AuthorityOnly,     // guests' bodies are kinematic
+            ["GridMassUpdateSystem"] = SystemAuthority.Both,              // guests: replica deltas request a recompute (hull bars, own-ship mass)
             ["BrickDirtyScheduleSystem"] = SystemAuthority.Both,
             ["ColliderSnapshotSystem"] = SystemAuthority.Both,
             ["GameplayEndCommandBufferSystem"] = SystemAuthority.Both,

@@ -133,6 +133,7 @@ namespace Game.Presentation.Systems
                 bool active = interaction.Target == entity && interaction.InRange != 0;
                 var blueprint = em.HasComponent<GridSource>(entity) ? em.GetComponentData<GridSource>(entity).Blueprint : default;
                 string name = hulk ? (salvage ? "Wreck  ·  Salvage" : "Wreck")
+                    : em.HasComponent<Game.Core.Net.PilotName>(entity) ? PilotText(em.GetComponentData<Game.Core.Net.PilotName>(entity).Value)
                     : blueprint.Value == 0 ? (grid.Kind == GridKind.Station ? "Station" : "Contact")
                     : names.TargetName(blueprint, em.HasComponent<Allegiance>(entity) ? em.GetComponentData<Allegiance>(entity).Faction : (byte)255);
                 Show(tags[used++], rect, name, (int)math.round(candidate.Distance / 10) * 10, relation, salvage, active);
@@ -156,6 +157,13 @@ namespace Game.Presentation.Systems
             if (centre.x + size.x * .5f < 0 || centre.y + size.y * .5f < 0 || centre.x - size.x * .5f > bounds.width || centre.y - size.y * .5f > bounds.height) return false;
             rect = new Rect(centre.x - size.x * .5f, centre.y - size.y * .5f, size.x, size.y);
             return true;
+        }
+        // Co-op pilot names: cached so the HUD does not allocate a string every frame.
+        readonly Dictionary<FixedString32Bytes, string> pilotTexts = new();
+        string PilotText(in FixedString32Bytes name)
+        {
+            if (!pilotTexts.TryGetValue(name, out var text)) pilotTexts[name] = text = name.ToString();
+            return text;
         }
         void Show(Tag tag, Rect rect, string name, int distance, int relation, bool salvage, bool active)
         {

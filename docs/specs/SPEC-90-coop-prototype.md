@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress (spike): NET-002…009 working end to end, NET-010 partly, NET-011 not started |
+| **Status** | Spike complete: NET-002…011 working end to end in the co-op worktree |
 | **Area code** | NET (task IDs are `NET-001`, `NET-002`, …) |
 | **Module(s)** | `Game.Net` (folder `Assets/Game/Net/`), with session wiring in `Game.App` |
 | **Depends on specs** | SPEC-10, SPEC-12, SPEC-13 (grids, bodies, damage and splits), SPEC-20, SPEC-21 (commands, weapons), SPEC-05 (VOXS), SPEC-70 (dev commands) |
@@ -229,8 +229,8 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - Record bandwidth at 0, 50, 100 and 150 ms of latency in the ledger.
 - **Files:** `Assets/Game/Presentation/Net/NetOverlay*.cs`, `tools/playtest/coop.sh`
 - **Acceptance criteria:**
-  - [ ] The scenario runs end to end with zero desyncs and zero exceptions on both sides.
-- **Tests:** `tools/playtest/coop.sh`.
+  - [x] The scenario runs end to end with zero desyncs and zero exceptions on both sides (`tools/playtest/coop-soak.sh`, §10a table). The overlay lives in Game.App (`CoopSession`), not Presentation.
+- **Tests:** `tools/playtest/coop.sh`, `tools/playtest/coop-soak.sh`, `tools/playtest/coop-chunks.sh`.
 
 ### NET-011 — Own-ship prediction (stretch)
 - **Milestone:** M4 (spike)
@@ -239,10 +239,11 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 - **Do:**
   - Have the guest simulate its own ship locally from its commands.
   - Keep a 32-tick history, compare it with host snapshots, and correct smoothly. Snap past 2 m or 20°.
-- **Files:** `Assets/Game/Net/Prediction/**`
+  - As built: one command per fixed tick, played back one per host tick from an adaptive buffer, and acknowledged in snapshots; a 256-tick history; 30% of the position error and 50% of the velocity error applied per acknowledged snapshot; snaps past 6 m or 0.5 rad, since normal corrections never come near them.
+- **Files:** `Assets/Game/Net/Replication/OwnShipPredictor.cs`, `Assets/Game/Net/Replication/PilotCommandQueue.cs`
 - **Acceptance criteria:**
-  - [ ] At 100 ms latency, the guest's ship responds on the same frame as its input, with no visible rubber-banding in normal flight.
-- **Tests:** `ReconcileTests` (EditMode).
+  - [x] At 100 ms latency, the guest's ship responds on the same frame as its input, with no visible rubber-banding in normal flight (0.00 m error, 0 snaps at 167 ms RTT with jitter and loss).
+- **Tests:** `PredictionTests` (EditMode).
 
 ## 10. Open questions
 | # | Question | Default | Decider | Answer |
@@ -253,22 +254,30 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 | 4 | A guest's ship blueprint: the host's playground flagship, or the guest's own blueprint sent at join? | The host's playground flagship for the spike | Owner | |
 
 ## 10a. Spike status (2026-10-15)
-Verified live with the Editor as host and one or two dev-build guests on one Mac (`tools/playtest/coop.sh`):
-- **Join and leave.** A guest joins by IP into a replica World scene, gets the join snapshot and its own ship (a copy of the host's flagship, so it has the same fitted shield), and can join while a fight is in progress. Killing a guest frees its slot, its ship drifts and is removed after 30 s, and a relaunched guest rejoins. When the host leaves, guests notice within the 10 s timeout and return to the main menu.
-- **Flight and combat.** Guests fly their own ships through their commands. AI engages host and guests alike. Guests see AI and player tracers, acid hits, shield ripples, impact wounds and debris. AI weapons aim on guests through the replicated target and weapon mode.
-- **Destruction.** Damage, hulks (core kill), a pod cut off as a hulk, and a bridge segment freed as a chunk body all appear on every machine. Cell hashes matched for every grid in every check: three players, about a minute of combat, at +100 ms, ±10 ms jitter and 2% loss.
-- **Bandwidth.** About 170 kbps of snapshots per guest in a three-player fight. Reliable bursts are a few kbps, peaking at about 36 KB of backlog on big cuts.
-- **Single-player.** EditMode passes except the two ordering tests this branch first broke, which are now fixed and green. No Game.Net system runs without a session.
+Verified live with the Editor as host and one or two dev-build guests on one Mac (`tools/playtest/coop.sh`, `tools/playtest/coop-soak.sh`):
+- **Join and leave.** A guest joins by IP into a replica World scene, gets the join snapshot and its own ship (a copy of the host's flagship, so it has the same fitted shield), and can join while a fight is in progress. Killing a guest frees its slot, its ship drifts and is removed after 30 s, and a relaunched guest rejoins. When the host leaves, its goodbye (sent three times, past the network simulator) returns guests to the main menu within a second or two, also at 150 ms and 2% loss.
+- **Flight and combat.** Guests fly their own ships with prediction (NET-011): the ship answers input on the same frame, and the host's state corrects it. AI engages host and guests alike. Guests see AI and player tracers, acid hits, shield ripples, impact wounds, debris, thruster plumes and engine sound on every ship, and players' names on their ships.
+- **Destruction.** Damage, hulks (core kill), a pod cut off as a hulk, and bridge segments freed as chunk bodies appear on every machine. Cell hashes matched for every grid in every check. Guests' hull bars follow damage (replica deltas request a mass recompute).
+- **Single-player.** No Game.Net system runs without a session. EditMode Net, HUD, system-order and project tests pass.
 
-Bugs found and fixed while testing: a double free of replica chunk colliders (crashed a guest after chunks expired), debris sprayed for cells that left as detached bodies (pods showed a cloud of cubes), AI weapons idle on guests until the target and weapon mode were replicated, and a duplicate thruster left hanging where a pod split off (guests now drop functional entities whose block has no cells left in that grid).
+NET-010 scenario (`coop-soak.sh 12`: two guests weaving and firing at an AI ship, 12 s per point, the latency split across both ends, ±10 ms jitter and 2% loss above 0):
+
+| Added latency | Host out, 2 guests | Guest in | RTT | Prediction error | Snaps | Host command buffer | Hash |
+|---|---|---|---|---|---|---|---|
+| 0 ms | 288 kbps | 56 kbps* | 16 ms | 0.00 m | 0 | depth 1 | 0 mismatched |
+| 50 ms | 374 kbps | 120 kbps | 116 ms | 0.00 m | 0 | 1 starve, depth 1 | 0 mismatched |
+| 100 ms | 436 kbps | 152 kbps | 167 ms | 0.00 m | 0 | 6 starves, depth 3 | 0 mismatched |
+| 150 ms | 438 kbps | 204 kbps | 208 ms | 0.00 m | 0 | 4 starves, depth 2 | 0 mismatched |
+
+\*The receive rate is a one-second sample and swings with how many ships are in the guest's packets; the host's send rate, about 150–220 kbps per guest, is the steadier figure. No crashes, exceptions or hash warnings on either guest.
+
+Bugs found and fixed while testing: a double free of replica chunk colliders (crashed a guest after chunks expired), debris sprayed for cells that left as detached bodies (pods showed a cloud of cubes), AI weapons idle on guests until the target and weapon mode were replicated, a duplicate thruster left hanging where a pod split off, per-frame command matching that made prediction error grow with frame-rate differences (now one command per tick), and a command buffer that trimmed itself into constant starvation under jitter (now adaptive).
 
 Known gaps:
-1. Guest ships show as "Contact" on other machines: they spawn from a structure copy, which has no blueprint name.
-2. With the network simulator on, the host's goodbye packet is dropped when it closes, so guests wait out the 10 s timeout.
-3. There is no own-ship prediction yet (NET-011): a guest's ship responds after one round trip plus the 100 ms interpolation delay.
-4. Capture, apply and snapshots are managed main-thread code. The host completes all jobs once per frame while guests are connected. Burst jobs and per-system timing are the optimisation pass.
-5. The NET-010 bandwidth table at 0, 50, 100 and 150 ms has only the 0 and 100 ms points.
-6. A guest's own ship is host-authoritative, so its HUD target lock is local only.
+1. Capture, apply and snapshots are managed main-thread code. The host completes all jobs once per frame while guests are connected. Burst jobs and per-system timing are the optimisation pass.
+2. Prediction does not replay: forces only the host applies (impact impulses, ability stat boosts) show as corrections, and very large hits (a 500k test charge) snap the guest's ship. Normal combat showed no snaps.
+3. A guest's own ship is host-authoritative, so its HUD target lock is local only.
+4. Remote players' projectiles are cosmetic copies fired from the interpolated (100 ms old) pose, so they can look slightly offset from what the host simulates.
 
 ## 11. References
 - [ADR-0116](../decisions/ADR-0116-coop-prototype-host-authority.md).

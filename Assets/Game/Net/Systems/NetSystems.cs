@@ -25,21 +25,27 @@ namespace Game.Net.Systems
         protected override void OnCreate() { Enabled = false; }
     }
 
-    /// <summary>Host: copies each guest's newest command onto its ship (SPEC-90 NET-006). The fixed step turns it into ShipCommand.</summary>
-    [UpdateInGroup(typeof(GameInitGroup)), UpdateBefore(typeof(GridSpawnSystem))]
+    /// <summary>Host, each fixed tick: gives each guest's ship the next command from that guest's queue, one per tick, as the guest's
+    /// prediction applied them (SPEC-90 NET-006, NET-011). RemotePilotApplySystem turns it into ShipCommand.</summary>
+    [UpdateInGroup(typeof(ShipCommandGroup)), UpdateBefore(typeof(RemotePilotApplySystem))]
     public partial class RemotePilotReceiveSystem : NetSystemBase
     {
+        EntityQuery pilots;
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            pilots = GetEntityQuery(ComponentType.ReadOnly<RemotePilot>(), ComponentType.ReadWrite<RemotePilotInput>());
+        }
         protected override void OnUpdate()
         {
             if (Net?.Host == null) return;
             var em = EntityManager;
-            using var query = em.CreateEntityQuery(ComponentType.ReadOnly<RemotePilot>(), ComponentType.ReadWrite<RemotePilotInput>());
-            using var entities = query.ToEntityArray(Allocator.Temp);
+            using var entities = pilots.ToEntityArray(Allocator.Temp);
             em.CompleteDependencyBeforeRW<RemotePilotInput>();
             foreach (var entity in entities)
             {
                 byte slot = em.GetComponentData<RemotePilot>(entity).Slot;
-                if (!Net.TryGetCommand(slot, out uint sequence, out var command)) continue;
+                if (!Net.TryPopCommand(slot, out uint sequence, out var command)) continue;
                 em.SetComponentData(entity, new RemotePilotInput { Command = command, Sequence = sequence });
             }
         }
@@ -75,23 +81,35 @@ namespace Game.Net.Systems
         protected override void OnUpdate()
         {
             var guest = Net?.Guest;
-            if (guest == null || !guest.HasOrigin) return;
+            if (guest == null) return;
+            // NET-011: this tick's command gets its own sequence; the host applies it for exactly one tick too.
+            uint sequence = Net.RecordTickCommand(SystemAPI.TryGetSingleton<PlayerCommand>(out var input) ? input : default, guest.HostOrigin);
+            if (!guest.HasOrigin) return;
             var em = EntityManager;
             em.CompleteAllTrackedJobs();
-            double3 origin = guest.HostOrigin;
-            if (SystemAPI.TryGetSingletonRW<FrameOrigin>(out var frame) && math.any(frame.ValueRO.OriginInStarSystem != origin))
-                frame.ValueRW.OriginInStarSystem = origin;
+            double3 origin = guest.HostOrigin, previousOrigin = origin;
+            if (SystemAPI.TryGetSingletonRW<FrameOrigin>(out var frame))
+            {
+                previousOrigin = frame.ValueRO.OriginInStarSystem;
+                if (math.any(previousOrigin != origin)) frame.ValueRW.OriginInStarSystem = origin;
+            }
             double tick = guest.RenderTick;
             using var entities = replicas.ToEntityArray(Allocator.Temp);
             foreach (var entity in entities)
             {
                 var replica = em.GetComponentData<Replicated>(entity);
                 if (!guest.TryGetTrack(replica.NetId, out var track) || !track.Sample(tick, NetProtocol.MaxExtrapolationTicks, out var s)) continue;
-                var pose = em.GetComponentData<LocalTransform>(entity);
-                pose.Position = (float3)(s.Position - origin); pose.Rotation = math.normalizesafe(s.Rotation, quaternion.identity);
-                if (NetIds.IsChunk(replica.NetId)) pose.Scale = s.Scale;
-                em.SetComponentData(entity, pose);
-                if (em.HasComponent<PhysicsVelocity>(entity)) em.SetComponentData(entity, new PhysicsVelocity { Linear = s.Linear });
+                if (replica.OwnedLocally != 0 && em.HasComponent<PhysicsMass>(entity) && em.GetComponentData<PhysicsMass>(entity).InverseMass > 0)
+                    Predict(em, entity, guest, track, previousOrigin, origin, sequence);
+                else
+                {
+                    var pose = em.GetComponentData<LocalTransform>(entity);
+                    pose.Position = (float3)(s.Position - origin); pose.Rotation = math.normalizesafe(s.Rotation, quaternion.identity);
+                    if (NetIds.IsChunk(replica.NetId)) pose.Scale = s.Scale;
+                    em.SetComponentData(entity, pose);
+                    if (em.HasComponent<PhysicsVelocity>(entity)) em.SetComponentData(entity, new PhysicsVelocity { Linear = s.Linear });
+                    if (track.PlumeVersion != track.ShownVersion) ShowPlumes(em, entity, track);
+                }
                 if (s.HasCommand != 0 && replica.OwnedLocally == 0 && em.HasComponent<ShipCommand>(entity))
                 {
                     var command = s.Command; command.AimWorld -= (float3)origin; command.Edges = ShipCommandEdges.None;
@@ -116,6 +134,69 @@ namespace Game.Net.Systems
                 }
                 replica.LastSnapshotTick = track.NewestTick; em.SetComponentData(entity, replica);
             }
+        }
+
+        /// <summary>Thruster plumes of a kinematic replica from the newest snapshot: lights the listed thrusters and puts out the rest of
+        /// those shown last time. ThrusterState feeds plumes and engine sound; on guests nothing else writes it for replicas.</summary>
+        static void ShowPlumes(EntityManager em, Entity root, ReplicaTrack track)
+        {
+            track.ShownVersion = track.PlumeVersion;
+            if (!em.HasBuffer<Game.Voxel.Model.BlockInstance>(root)) return;
+            var instances = em.GetBuffer<Game.Voxel.Model.BlockInstance>(root, true);
+            for (int i = 0; i < track.ShownCount; i++) SetPlume(em, instances, track.ShownPlumes[i], 0);
+            for (int i = 0; i < track.PlumeCount; i++)
+            {
+                SetPlume(em, instances, track.PlumeInstances[i], ReplicaTrack.DecodePlume(track.PlumeLevels[i]));
+                track.ShownPlumes[i] = track.PlumeInstances[i];
+            }
+            track.ShownCount = track.PlumeCount;
+        }
+
+        static void SetPlume(EntityManager em, DynamicBuffer<Game.Voxel.Model.BlockInstance> instances, int index, float intensity)
+        {
+            if (index >= instances.Length) return;
+            var functional = instances[index].Functional;
+            if (functional == Entity.Null || !em.Exists(functional) || !em.HasComponent<Game.Simulation.Flight.ThrusterState>(functional)) return;
+            em.SetComponentData(functional, new Game.Simulation.Flight.ThrusterState { Intensity = intensity });
+        }
+
+        /// <summary>NET-011: the guest's own ship is simulated here from local input. Records the state the last tick produced under that
+        /// tick's command sequence, corrects it toward the newest acknowledged host state, and labels this tick with the next command.</summary>
+        void Predict(EntityManager em, Entity entity, GuestReplicator guest, ReplicaTrack track, double3 previousOrigin, double3 origin, uint sequence)
+        {
+            var predictor = guest.Predictor;
+            var pose = em.GetComponentData<LocalTransform>(entity);
+            var velocity = em.GetComponentData<PhysicsVelocity>(entity);
+            var mass = em.GetComponentData<PhysicsMass>(entity);
+            quaternion inertia = math.mul(pose.Rotation, mass.InertiaOrientation);
+            var current = new OwnShipPredictor.BodyState
+            {
+                Sequence = predictor.AppliedSequence, Position = (double3)pose.Position + previousOrigin, Rotation = pose.Rotation,
+                Linear = velocity.Linear, Angular = math.rotate(inertia, velocity.Angular)
+            };
+            var latest = track.Latest;
+            var host = new OwnShipPredictor.BodyState { Position = latest.Position, Rotation = math.normalizesafe(latest.Rotation, quaternion.identity), Linear = latest.Linear, Angular = latest.Angular };
+            bool corrected;
+            if (!predictor.HasApplied)
+            {
+                // Just spawned: wait for an acknowledged snapshot, start exactly where the host has the ship, then predict from there.
+                if (latest.HasAck == 0) return;
+                current = host; corrected = true;
+            }
+            else
+            {
+                predictor.Record(current);
+                corrected = latest.HasAck != 0 && predictor.Reconcile(latest.Ack, host, ref current);
+            }
+            if (corrected || math.any(previousOrigin != origin))
+            {
+                pose.Position = (float3)(current.Position - origin); pose.Rotation = current.Rotation;
+                em.SetComponentData(entity, pose);
+                velocity.Linear = current.Linear;
+                velocity.Angular = math.rotate(math.inverse(math.mul(current.Rotation, mass.InertiaOrientation)), current.Angular);
+                em.SetComponentData(entity, velocity);
+            }
+            predictor.AppliedSequence = sequence; predictor.HasApplied = true;
         }
     }
 
@@ -155,19 +236,11 @@ namespace Game.Net.Systems
         protected override void OnUpdate() { Net?.Host?.TapRemovals(EntityManager); }
     }
 
-    /// <summary>Guest: sends the local PlayerCommand sampled this frame, at most 60 times a second (SPEC-90 GuestCommandSendSystem).</summary>
+    /// <summary>Guest: sends the commands of the fixed ticks that ran, with a few older ones against loss (SPEC-90 GuestCommandSendSystem).</summary>
     [UpdateInGroup(typeof(PresentationBridgeGroup), OrderLast = true)]
     public partial class GuestCommandSendSystem : NetSystemBase
     {
-        double next;
-        protected override void OnUpdate()
-        {
-            if (Net?.Guest == null || !SystemAPI.TryGetSingleton<PlayerCommand>(out var command)) return;
-            double now = UnityEngine.Time.realtimeSinceStartupAsDouble;
-            if (now < next) return;
-            next = now + 1.0 / 60;
-            Net.SendCommand(command, Net.Guest.HostOrigin);
-        }
+        protected override void OnUpdate() { if (Net?.Guest != null) Net.SendCommands(); }
     }
 
     /// <summary>Host and guest: moves this frame's queued messages into the driver, last in presentation (SPEC-90 NetSendSystem).</summary>

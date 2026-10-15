@@ -15,6 +15,7 @@ namespace Game.Net.Replication
         public ShipCommand Command;
         public float ShieldHp, ShieldMax; public byte ShieldActive;
         public byte HasWeapons, Autofire, AimMode; public ulong Target;
+        public byte HasAck; public uint Ack;   // newest pilot command the host had applied (remote-piloted ships)
     }
 
     /// <summary>Interpolation buffer for one replicated body (SPEC-90 NET-005): newest samples by host tick, sampled 100 ms behind.</summary>
@@ -74,5 +75,17 @@ namespace Game.Net.Replication
         }
 
         public void Clear() => count = 0;
+
+        // Thruster plumes (not interpolated): the newest snapshot's lit thrusters, by block instance, and what the guest last showed.
+        public const int MaxPlumes = 64;
+        public static byte EncodePlume(float intensity) => (byte)math.clamp((int)math.round(intensity * 100), 0, 255);
+        public static float DecodePlume(byte level) => level / 100f;
+        public readonly ushort[] PlumeInstances = new ushort[MaxPlumes];
+        public readonly byte[] PlumeLevels = new byte[MaxPlumes];
+        public int PlumeCount;
+        public uint PlumeVersion;
+        public readonly ushort[] ShownPlumes = new ushort[MaxPlumes];
+        public int ShownCount;
+        public uint ShownVersion;
     }
 }

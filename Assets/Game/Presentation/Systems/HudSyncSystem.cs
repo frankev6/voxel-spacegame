@@ -109,7 +109,7 @@ namespace Game.Presentation.Systems
             model.ShieldStatus = value.ShieldStatus; model.SpeedMps = Rounded(value.SpeedMps);
             model.Boosting = (value.Flags & HudFlags.Boosting) != 0;
             model.HasTarget = ship && (value.Flags & HudFlags.HasTarget) != 0;
-            model.TargetName = model.HasTarget ? names.TargetName(value.TargetNameHash, value.TargetFaction) : "";
+            model.TargetName = !model.HasTarget ? "" : value.TargetPilot.Length > 0 ? PilotText(value.TargetPilot) : names.TargetName(value.TargetNameHash, value.TargetFaction);
             model.TargetRelation = value.TargetRelation;
             model.TargetHullFraction = Fraction(value.TargetHull01, 500); model.TargetShieldFraction = Fraction(value.TargetShield01, 500);
             model.TargetDistanceM = Rounded(value.TargetDistanceM);
@@ -175,6 +175,13 @@ namespace Game.Presentation.Systems
             changed |= radarCount != count; radarCount = count; lastSourceRadar = value.RadarVersion; radarInitialized = true;
             if (changed) model.RadarVersion = ++radarVersion;
             if (math.isfinite(yaw) && math.abs(UnityEngine.Mathf.DeltaAngle(model.RadarYawDeg, yaw)) >= .5f) model.RadarYawDeg = yaw;
+        }
+        // Co-op pilot names: cached so the HUD does not allocate a string every frame.
+        FixedString32Bytes pilotKey; string pilotText = "";
+        string PilotText(in FixedString32Bytes name)
+        {
+            if (name != pilotKey) { pilotKey = name; pilotText = name.ToString(); }
+            return pilotText;
         }
         static bool Same(HudRadarBlipView a, HudRadarBlipView b) => a.OffsetXZ == b.OffsetXZ && a.Kind == b.Kind && a.Relation == b.Relation && a.Flags == b.Flags;
         static int Rounded(float value) => math.isfinite(value) ? (int)math.clamp(math.round(value), int.MinValue, int.MaxValue) : 0;

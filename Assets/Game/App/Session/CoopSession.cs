@@ -93,6 +93,7 @@ namespace Game.App.Session
             var role = net.Role;
             GameLog.Info(NetTransport.Category, "leaving the session: " + reason);
             if (role == SimRoleKind.Host) ReleaseGuestShips(true);
+            net.Transport.Shutdown(reason);   // the goodbye carries the reason
             Shutdown();
             status = "Offline (" + reason + ")";
             if (role == SimRoleKind.Guest && session.CurrentScene == GameScene.World && !session.IsTransitioning)
@@ -230,6 +231,7 @@ namespace Game.App.Session
                 em.AddComponentData(root, new RemotePilot { Slot = peer.Slot });
                 em.AddComponentData(root, new RemotePilotInput());
                 em.AddComponentData(root, new RemotePilotEdgeConsumed());
+                em.AddComponentData(root, PilotName.From(string.IsNullOrEmpty(peer.Name) ? "Guest " + peer.Slot : peer.Name));
                 guestShips[peer.Slot] = id.Value;
                 Notify(peer.Name + " joined");
                 status = "Hosting: " + net.Transport.Peers.Count + " guest(s)";

@@ -116,6 +116,13 @@ namespace Game.Voxel.Replica
         /// <summary>Guest: after a delta, an instance that lost cells and has none left in this grid has left it (destroyed, or moved
         /// to a hulk where the host transfers its functional entity). Its functional entity here is removed, so no thruster or turret
         /// stays hanging where the piece used to be.</summary>
+        /// <summary>Asks GridMassUpdateSystem for a full mass recompute of a replica whose cells changed (hull bars; the guest's own
+        /// dynamic ship needs its real mass to fly).</summary>
+        public static void RequestMassRecompute(EntityManager em, Entity root)
+        {
+            if (em.HasComponent<GridMassRecompute>(root)) em.SetComponentEnabled<GridMassRecompute>(root, true);
+        }
+
         public static void ReleaseOrphanedInstances(EntityManager em, Entity root, NativeList<int> touchedInstances)
         {
             if (!touchedInstances.IsCreated || touchedInstances.Length == 0) return;

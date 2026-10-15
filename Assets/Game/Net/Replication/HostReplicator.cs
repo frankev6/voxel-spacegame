@@ -161,6 +161,8 @@ namespace Game.Net.Replication
             else if (em.HasComponent<RemotePilot>(root)) owner = em.GetComponentData<RemotePilot>(root).Slot;
             var role = grid.Kind == GridKind.Ship ? GridRoleHint.Ship : grid.Kind == GridKind.Station && em.HasComponent<ShipCommand>(root) ? GridRoleHint.Station : GridRoleHint.None;
             bool moving = em.HasComponent<PhysicsVelocity>(root);
+            string pilot = em.HasComponent<Game.Core.Net.PilotName>(root) ? em.GetComponentData<Game.Core.Net.PilotName>(root).Value.ToString()
+                : owner == 0 ? transport.LocalName : "";
             var flags = em.HasComponent<GridSource>(root) ? em.GetComponentData<GridSource>(root).Flags & (GridSpawnFlags.NoRender | GridSpawnFlags.PlanarInertia) : 0;
             return new GridSpawnHeader
             {
@@ -170,7 +172,7 @@ namespace Game.Net.Replication
                 Flags = flags, CellSize = grid.CellSize, Blueprint = em.HasComponent<GridSource>(root) ? em.GetComponentData<GridSource>(root).Blueprint.Value : 0,
                 Position = transform.Position, Rotation = transform.Rotation,
                 Linear = moving ? em.GetComponentData<PhysicsVelocity>(root).Linear : float3.zero,
-                AngularWorld = GridCodec.AngularWorld(em, root, transform.Rotation)
+                AngularWorld = GridCodec.AngularWorld(em, root, transform.Rotation), Pilot = pilot
             };
         }
 
@@ -326,6 +328,8 @@ namespace Game.Net.Replication
                     table.TryGetValue(id, out float p);
                     float speed = math.length(em.GetComponentData<PhysicsVelocity>(g.Entity).Linear);
                     p += 1 + math.min(speed, 40) / 10f;
+                    // A guest's own ship goes first in every snapshot: its prediction is corrected from it (NET-011).
+                    if (em.HasComponent<RemotePilot>(g.Entity) && em.GetComponentData<RemotePilot>(g.Entity).Slot == peer.Slot) p += 1000;
                     table[id] = p; ranked.Add((id, p));
                 }
                 foreach (var slot in chunks)
@@ -366,13 +370,16 @@ namespace Game.Net.Replication
             return Entity.Null;
         }
 
-        // Entry: id, flags (1 command, 2 shield, 4 scale), pose, velocities, optional blocks.
+        // Entry: id, flags (1 command, 2 shield, 4 scale, 8 weapons, 16 acknowledged pilot command, 32 thruster plumes), pose,
+        // velocities, optional blocks.
         static void WriteEntry(EntityManager em, Entity e, ulong id, NetWriter w)
         {
             var pose = em.GetComponentData<LocalTransform>(e);
             bool command = em.HasComponent<ShipCommand>(e), shield = em.HasComponent<ShieldState>(e), chunk = NetIds.IsChunk(id);
             bool weapons = em.HasComponent<Game.Simulation.Weapons.WeaponControl>(e) || em.HasComponent<Game.Simulation.Weapons.ShipTarget>(e);
-            byte flags = (byte)((command ? 1 : 0) | (shield ? 2 : 0) | (chunk ? 4 : 0) | (weapons ? 8 : 0));
+            bool ack = em.HasComponent<RemotePilotInput>(e);
+            bool plumes = em.HasBuffer<Game.Simulation.Flight.FlightThruster>(e) && !em.HasComponent<Game.Voxel.Damage.Hulk>(e);
+            byte flags = (byte)((command ? 1 : 0) | (shield ? 2 : 0) | (chunk ? 4 : 0) | (weapons ? 8 : 0) | (ack ? 16 : 0) | (plumes ? 32 : 0));
             w.U64(id); w.U8(flags); w.F3(pose.Position); w.Quat(pose.Rotation);
             w.F3(em.HasComponent<PhysicsVelocity>(e) ? em.GetComponentData<PhysicsVelocity>(e).Linear : float3.zero);
             w.F3(GridCodec.AngularWorld(em, e, pose.Rotation));
@@ -390,6 +397,23 @@ namespace Game.Net.Replication
                 Entity target = em.HasComponent<Game.Simulation.Weapons.ShipTarget>(e) ? em.GetComponentData<Game.Simulation.Weapons.ShipTarget>(e).Value : Entity.Null;
                 ulong targetId = target != Entity.Null && em.Exists(target) && em.HasComponent<PersistentId>(target) ? em.GetComponentData<PersistentId>(target).Value : 0;
                 w.U64(targetId); w.U8(control.Autofire); w.U8((byte)control.AimMode);
+            }
+            if (ack) w.U32(em.GetComponentData<RemotePilotInput>(e).Sequence);
+            if (plumes)
+            {
+                // Lit thrusters only, by block instance: guests have no flight solve for kinematic replicas, so plumes and engine
+                // sound come from here.
+                var thrusters = em.GetBuffer<Game.Simulation.Flight.FlightThruster>(e, true);
+                int countAt = w.Length; w.U8(0); byte n = 0;
+                for (int k = 0; k < thrusters.Length && n < ReplicaTrack.MaxPlumes; k++)
+                {
+                    var t = thrusters[k];
+                    if (!em.Exists(t.Thruster) || !em.HasComponent<Game.Simulation.Flight.ThrusterState>(t.Thruster)) continue;
+                    byte level = ReplicaTrack.EncodePlume(em.GetComponentData<Game.Simulation.Flight.ThrusterState>(t.Thruster).Intensity);
+                    if (level == 0) continue;
+                    w.U16((ushort)t.InstanceIndex); w.U8(level); n++;
+                }
+                w.Data[countAt] = n;
             }
         }
 

@@ -15,6 +15,9 @@ check takes seconds. Outputs go to `Logs/playtest/` (never `Temp/`, which Unity 
 | `newgame.sh [seed=1] [ship]` | Enter Play from Boot if needed, launch into the imported starter, poll readiness and print a snapshot; uses the isolated harness profile |
 | `waitscene.sh <Scene>` | Block until a scene is active |
 | `to.sh <secs> <cmd>` | Hard timeout wrapper (macOS has no `timeout`) |
+| `coop.sh [start\|guest n\|stop\|status]` | Co-op spike (SPEC-90): the Editor hosts the playground, dev-build guests join (`tools/build-dev.sh` first) |
+| `coop-chunks.sh [secs]` | Co-op: cut the range bridges into chunk bodies, wait for them to expire, hash-check and scan guest logs |
+| `coop-soak.sh [secs]` | Co-op NET-010 table: two guests fight at 0/50/100/150 ms; bandwidth, prediction error, command buffer, hashes, crash scan |
 
 `newgame.sh` and `scenario.sh` are available. `toworld.sh` follows the travel integration. The optional ship argument is a start-scenario ID; leave it empty until start scenarios exist.
 

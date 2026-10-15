@@ -52,6 +52,7 @@ namespace Game.Net.Replication
         public int ChunkCount => chunks.Count;
         public string LastHashReport { get; private set; } = "no hash check yet";
         public int HashMismatches { get; private set; }
+        public OwnShipPredictor Predictor { get; } = new();
         uint localTick;
 
         public GuestReplicator(NetTransport transport)
@@ -103,8 +104,20 @@ namespace Game.Net.Replication
                 if ((flags & 2) != 0) { s.HasShield = 1; s.ShieldHp = r.F32(); s.ShieldMax = r.F32(); s.ShieldActive = r.U8(); }
                 if ((flags & 4) != 0) s.Scale = r.F32();
                 if ((flags & 8) != 0) { s.HasWeapons = 1; s.Target = r.U64(); s.Autofire = r.U8(); s.AimMode = r.U8(); }
+                if ((flags & 16) != 0) { s.HasAck = 1; s.Ack = r.U32(); }
+                int plumes = (flags & 32) != 0 ? r.U8() : 0;
                 if (!tracks.TryGetValue(id, out var track)) tracks[id] = track = new ReplicaTrack();
-                if (!track.Add(s)) transport.Stats.DroppedSnapshots++;
+                bool fresh = track.Add(s);
+                if (!fresh) transport.Stats.DroppedSnapshots++;
+                if ((flags & 32) != 0)
+                {
+                    if (fresh) { track.PlumeCount = Math.Min(plumes, ReplicaTrack.MaxPlumes); track.PlumeVersion++; }
+                    for (int k = 0; k < plumes; k++)
+                    {
+                        ushort instance = r.U16(); byte level = r.U8();
+                        if (fresh && k < ReplicaTrack.MaxPlumes) { track.PlumeInstances[k] = instance; track.PlumeLevels[k] = level; }
+                    }
+                }
             }
         }
 
@@ -216,14 +229,17 @@ namespace Game.Net.Replication
             var p = new GridSpawnParams
             {
                 Pose = new RigidTransform(header.Rotation, header.Position), LinearVelocity = header.Linear,
-                Kind = header.Kind, Motion = header.Motion == GridMotion.Static ? GridMotion.Static : GridMotion.Kinematic,
+                // NET-011: the guest's own ship is a local dynamic body flown by its own input; everything else is kinematic.
+                Kind = header.Kind, Motion = header.Motion == GridMotion.Static ? GridMotion.Static : mine && header.Kind == GridKind.Ship ? GridMotion.Dynamic : GridMotion.Kinematic,
                 Flags = header.Flags & ~GridSpawnFlags.WriteBack, Profile = profile, PersistentId = header.NetId
             };
             Entity entity;
             try { entity = GridSpawnApi.RequestSpawn(em, registry, handle, p); }
             catch { registry.Release(handle); structure.Dispose(); throw; }
             if (header.HasAllegiance != 0) em.AddComponentData(entity, header.Allegiance);
+            if (!string.IsNullOrEmpty(header.Pilot)) em.AddComponentData(entity, Game.Core.Net.PilotName.From(header.Pilot));
             em.AddComponentData(entity, new Replicated { NetId = header.NetId, OwnedLocally = (byte)(mine ? 1 : 0) });
+            if (mine) Predictor.Reset();
             grids[header.NetId] = new GuestGrid { Entity = entity, Handle = handle, Structure = structure, Header = header };
         }
 
@@ -308,6 +324,7 @@ namespace Game.Net.Replication
                 if (!ReplicaVoxelApi.WriteBrick(em, root, coord, writes.AsArray(), removedCells, quiet, touchedInstances) && op != 0) transport.Stats.Desyncs++;
             }
             ReplicaVoxelApi.ReleaseOrphanedInstances(em, root, touchedInstances);
+            if (ops > 0) ReplicaVoxelApi.RequestMassRecompute(em, root);
         }
 
         void SpawnChunk(EntityManager em, NetReader r)
@@ -362,6 +379,7 @@ namespace Game.Net.Replication
             foreach (var g in retiring) { if (g.Handle >= 0) registry?.Release(g.Handle); g.Structure?.Dispose(); }
             grids.Clear(); retiring.Clear(); chunks.Clear(); tracks.Clear(); queue.Clear();
             clockValid = false; NewestHostTick = 0; HasOrigin = false; JoinComplete = false; HashMismatches = 0;
+            Predictor.Reset();
         }
 
         public void Dispose()
