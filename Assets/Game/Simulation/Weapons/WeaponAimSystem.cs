@@ -23,14 +23,14 @@ namespace Game.Simulation.Weapons
             job.Grids = state.GetComponentLookup<VoxelGrid>(true);
             job.Transforms = state.GetComponentLookup<LocalTransform>(true); job.Commands = state.GetComponentLookup<ShipCommand>(true);
             job.Hulks = state.GetComponentLookup<Hulk>(true); job.Spawning = state.GetComponentLookup<GridSpawning>(true); job.Dormant = state.GetComponentLookup<Dormant>(true);
-            job.Velocities = state.GetComponentLookup<Unity.Physics.PhysicsVelocity>(true);
+            job.Velocities = state.GetComponentLookup<Unity.Physics.PhysicsVelocity>(true); job.Masses = state.GetComponentLookup<Unity.Physics.PhysicsMass>(true);
             job.Controls = state.GetComponentLookup<WeaponControl>(true); job.Targets = state.GetComponentLookup<ShipTarget>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>(); state.RequireForUpdate<WeaponTuning>();
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             job.Grids.Update(ref state); job.Transforms.Update(ref state); job.Commands.Update(ref state); job.Hulks.Update(ref state); job.Spawning.Update(ref state); job.Dormant.Update(ref state);
-            job.Velocities.Update(ref state); job.Controls.Update(ref state); job.Targets.Update(ref state);
+            job.Velocities.Update(ref state); job.Masses.Update(ref state); job.Controls.Update(ref state); job.Targets.Update(ref state);
             job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value; job.Convergence = SystemAPI.GetSingleton<WeaponTuning>().FixedConvergenceRad;
             state.Dependency = job.ScheduleParallel(state.Dependency);
         }

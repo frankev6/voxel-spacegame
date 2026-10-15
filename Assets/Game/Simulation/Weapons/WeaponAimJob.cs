@@ -23,6 +23,7 @@ namespace Game.Simulation.Weapons
             [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
             [ReadOnly] public ComponentLookup<Dormant> Dormant;
             [ReadOnly] public ComponentLookup<Unity.Physics.PhysicsVelocity> Velocities;
+            [ReadOnly] public ComponentLookup<Unity.Physics.PhysicsMass> Masses;
             [ReadOnly] public ComponentLookup<WeaponControl> Controls;
             [ReadOnly] public ComponentLookup<ShipTarget> Targets;
             public BlobAssetReference<WeaponDefsBlob> Weapons; public float Convergence;
@@ -40,10 +41,13 @@ namespace Game.Simulation.Weapons
                 {
                     var targetPose = Transforms[target];
                     point = targetPose.Position;
-                    if (Grids.HasComponent(target))
+                    // QA-001: aim at the live centre of mass. Spawn bounds never shrink, so once the top of a hull was
+                    // shot away their centre floated above what was left and every later shot skimmed over the ship.
+                    if (Masses.HasComponent(target))
+                        point = targetPose.TransformPoint(Masses[target].CenterOfMass);
+                    else if (Grids.HasComponent(target))
                     {
                         var grid = Grids[target];
-                        // Match SpatialProxy's occupied-bounds center, not the blueprint's arbitrary origin.
                         float3 center = ((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize);
                         point = targetPose.TransformPoint(center);
                     }
