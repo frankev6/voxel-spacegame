@@ -1,0 +1,52 @@
+# ADR-0116 — Co-op prototype: host authority, replica guests, voxel delta stream
+
+**Status:** Proposed (2026-10-15). Spike only: lives on `task/NET-001-coop-prototype` in the `spaceship-game-v2-coop` worktree and never merges to `main` without the owner's approval. Owner request, verbatim: "make a prototype in a separate worktree i don't want to touch main for this testing at all ... the goal is to have a working coop with combat and multiple ships, large chunk breaks all working on both sides without really obvious error, we can add a million tests and optimize later but the focus is building out implementation with proper architecture".
+
+## Context
+- [00-vision](../00-vision.md) and architecture §2 put multiplayer out of scope for v1. This ADR does not change that on `main`. It records how the spike is built so it can be judged, and kept or thrown away, as a whole.
+- Determinism holds on one machine only (architecture §2). Damage randomness seeds from `Entity.Index` (`DamageMath`, `RecordChunkJob`, `DissolveJob`), and `ColliderSwapSystem` installs colliders when a job reports `IsCompleted`, so two machines diverge within ticks. Lockstep is ruled out.
+- Teardown (Voxagon, March 2026) shipped co-op voxel destruction as a hybrid: deterministic destruction commands over a reliable stream, with transforms state-synced over an unreliable one at about 1 Mbit per client.
+- The built-in packages in Unity 6000.6.5f1 include `com.unity.transport` 6.6.0, `com.unity.netcode` 6.6.0 and `com.unity.multiplayer.playmode` 3.0.0.
+
+## Decision
+1. **Topology: one player hosts, 2–4 players total.** The host runs the full single-player simulation unchanged. Guests run the same build in **replica** mode: they render, predict nothing yet, and send only their ship commands. There are no dedicated servers.
+2. **Library: Unity Transport directly; not Netcode for Entities.** NfE needs separate client and server worlds, doubling voxel memory on the host, and its ghosts do not fit 16 KB bricks. The spike keeps the single default `World` (architecture §4.3) and writes a thin replication layer. Transport's simulator pipeline provides latency, jitter and loss for testing.
+3. **Role.** The `SimRole` singleton (`Solo`, `Host`, `Guest`) is created by `Game.App`. `Solo` and `Host` behave exactly like today's game. Single-player pays nothing: with no session, no network system runs.
+4. **Role policy, in one place.** `Game.App` owns `RoleSystemPolicy`, a table classifying every system in the fixed step and in `WorldGroup` as `Both`, `AuthorityOnly` or `GuestOnly`. On a guest it disables the `AuthorityOnly` systems. These include AI, weapon fire and hits, damage resolution, integrity, split, ship death, impact events, the encounter director, streaming spawns and origin rebasing. A test fails when a system is unclassified, so new systems cannot slip through. No module outside `Game.Net` and `Game.App` changes behaviour by role.
+5. **Identity.** `PersistentId` is the network identity of every grid root, hulks included. Chunk bodies use `(pool slot, spawn tick)`. Projectiles have no network identity.
+6. **Channels.** Each guest connection has three pipelines:
+   - **reliable ordered** with fragmentation, for spawns, despawns, cell deltas, splits and events;
+   - **unreliable**, for transform snapshots at 30 Hz, prioritised by distance and recency;
+   - **reliable ordered** for guest-to-host ship commands, carrying the latest and the previous command against loss.
+
+   Large blobs (join snapshots) are split into chunks with acknowledgement flow control.
+7. **Voxel replication: brick diffs against a shadow copy.** After the tick's structural sync, the host diffs every brick changed this tick against its last-sent copy and sends the changed `Cell` values. The diff catches every cell writer (damage, restores, dissolve, edits), so no writer needs a network hook. A brick with more than a quarter of its cells changed is sent whole. Guests never resolve damage.
+8. **Splits.** A new hulk is a spawn message carrying the hulk's VOXS structure, sent after the grid exists on the host. The parent's detached cells arrive as ordinary air in the brick diff of the same tick. A chunk body is a spawn message with its `ChunkCell` list, pose and velocities, and the guest builds its collider through the existing chunk builder.
+9. **Join.** Joining sends one snapshot: every replicated grid as either a `Blueprint` hash, when its cells are unchanged since spawn, or a VOXS structure, plus pose, velocity, kind, profile and allegiance, plus live chunk bodies and the host tick. The delta stream starts at the snapshot tick + 1 on the same reliable channel, so ordering is free.
+10. **Guest presentation without authority.** Guests synthesise `CellRemoved`-equivalent records from diffs where a cell became air, so debris, VFX and audio run through the existing presentation paths. Shots, beams, explosions and shield hits arrive as cosmetic events: tracers and impacts only, never damage.
+11. **Space.** Guests adopt the host's `FrameOrigin`, sent with each snapshot, and never rebase on their own. The spike runs in the playground, so the party is always within a few kilometres of the origin.
+
+## New single writers (architecture §8, spike only)
+| State | Writer on a guest | Notes |
+|---|---|---|
+| Cell contents, `Cell.Hp`, `VoxelGrid.Revision`, `BrickDirty` | `ReplicaCellApplySystem` | `DamageResolveSystem`, `IntegritySystem` and `SplitSystem` are disabled on guests |
+| `LocalTransform`, `PhysicsVelocity` of replicated bodies | `ReplicaBodySyncSystem` | Remote bodies are kinematic on guests |
+| Grid and chunk spawn and despawn | `ReplicaSpawnSystem`, through `GridSpawnRequest` and the existing pipeline | Streaming and encounter spawns are disabled on guests |
+
+| State | Writer on the host | Notes |
+|---|---|---|
+| `ShipCommand` of a guest-piloted ship | `RemotePilotApplySystem` | Same clamping and edge rules as `PlayerCommandApplySystem` |
+
+## Assemblies
+A new `Game.Net` module (`Assets/Game/Net/`) may reference Core, Data, Voxel and Simulation, plus Entities, Collections, Burst, Mathematics, Unity Physics and Unity Transport. `Game.App` references `Game.Net`, and `Game.Presentation` does not. `AssemblyRulesTests` gains that row. Unity Transport is allowed only in `Game.Net`, `Game.App` and tests.
+
+## Consequences
+- Single-player keeps its fixed step, ordering, determinism tests and performance. Every change is gated by `SimRole`.
+- Guests see the world about 100 ms behind (the interpolation buffer) plus half the round trip. Their own ship responds after a full round trip until own-ship prediction lands (NET-011).
+- Bandwidth target per guest: about 250–500 kbps in heavy combat, plus bursts on big cuts. The spike measures it; it is not a gate.
+- Throwaway risk is accepted: if the owner rejects co-op, the worktree and branch are deleted and `main` never saw them.
+
+## Alternatives rejected
+- **Netcode for Entities:** two worlds on the host, ghosts unsuited to bricks, and every system re-tagged.
+- **Deterministic lockstep with rollback:** needs cross-machine bit-identical simulation, and rollback cannot snapshot or re-simulate million-cell grids within a frame.
+- **Damage-event replication (guests resolve damage):** cheaper bandwidth, but needs damage resolution in fixed-point for x64/ARM identity. This is a possible later optimisation (Teardown's model), not the starting point.
