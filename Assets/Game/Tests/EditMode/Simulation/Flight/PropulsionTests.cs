@@ -90,7 +90,9 @@ namespace Game.Tests.EditMode.Simulation.Flight
             Tick();
             buffer = EM.GetBuffer<FlightThruster>(root);
             Assert.AreEqual(3, buffer.Length);
-            for (int k = 0; k < buffer.Length; k++) Assert.AreEqual(.1f * (buffer[k].InstanceIndex + 1), buffer[k].Throttle);
+            // Two ticks with zero sweeps: each carries the warm start shrunk once (QA-001 null-space bleed).
+            float carried = PropulsionJob.WarmStartDecay * PropulsionJob.WarmStartDecay;
+            for (int k = 0; k < buffer.Length; k++) Assert.AreEqual(.1f * (buffer[k].InstanceIndex + 1) * carried, buffer[k].Throttle, 1e-6f);
             Assert.AreEqual(grid.Revision, EM.GetComponentData<FlightState>(root).SourceRevision);
             // Missing entities cannot fire even before the next geometry revision.
             var missing = buffer[0].Thruster; EM.DestroyEntity(missing); Tick();

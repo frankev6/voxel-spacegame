@@ -22,6 +22,7 @@ namespace Game.Simulation.Flight
     [WithNone(typeof(Hulk))]
     public partial struct PropulsionJob : IJobEntity
     {
+        internal const float WarmStartDecay = .9f;
         public FlightConfig Config;
         [ReadOnly] public BlobAssetReference<BlockDefsBlob> Blocks;
         [ReadOnly] public BlobAssetReference<BlockModulesBlob> Modules;
@@ -98,6 +99,12 @@ namespace Game.Simulation.Flight
                 maximum += math.max(actuator.Column * actuator.Min, actuator.Column * actuator.Max);
             }
             problem.Target = math.clamp(problem.Target, minimum, maximum);
+            // QA-001 (owner: "when the ship is stationary, why are the thrusters on?"): least squares has a null space once
+            // actuators overlap (side thrusters against the core assist, engines against assist braking, balanced by the
+            // gyro). Gauss–Seidel never leaves it and the warm start carried it forever, so a resting cruiser kept 12
+            // thrusters at full burn. Shrinking the warm start each tick bleeds that out (0.9^60 ≈ 0.2% after a second);
+            // the solve itself is unchanged and restores any throttle the target still needs within its sweeps.
+            for (int k = 0; k < throttles.Length; k++) throttles[k] *= WarmStartDecay;
             ThrustAllocator.Solve(problem, actuators, throttles);
             bool firing = false;
             for (int k = 0; k < thrusters.Length; k++)
