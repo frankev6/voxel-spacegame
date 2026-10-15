@@ -176,6 +176,7 @@ namespace Game.Editor.Content
                 modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed);
             }
             if (id == "ship_nocturne_requiem") failed += SeatCoreAndReactors(structure, content, Index("block_core_small"), Index("block_reactor_small"), reactors);
+            var (bridges, loose) = Connect(structure, content, cube, Index("block_core_small"));
 
             string path = Ships + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(path);
@@ -188,7 +189,95 @@ namespace Game.Editor.Content
                 structure.SolidCellCount, new Vector3Int(min.x, min.y, min.z), new Vector3Int(max.x, max.y, max.z));
             EditorUtility.SetDirty(blueprint);
             Debug.Log($"{id}: {structure.SolidCellCount} cells, bounds {min}..{max}; {full.Count} cubes, {longSlopes} long slopes, {singles} wedges/hips, " +
-                $"{cubes} cut cells kept as cubes, {dropped} slivers dropped, {modules} module blocks, {failed} placements refused");
+                $"{cubes} cut cells kept as cubes, {dropped} slivers dropped, {modules} module blocks, {failed} placements refused, " +
+                $"{bridges} bridge cubes, {loose} loose cells removed");
+        }
+
+        // ---------------------------------------------------------------------------------------------------- connectivity
+        // QA-001 (owner: "when i ran "playground ship=ship_nocturne_requiem", it doesn't work, only worked with the wraith"):
+        // a ship is one piece only through shared faces (SPEC-51 §5.5), and the look book's slope snapping left parts of REQUIEM
+        // touching the hull at an edge or corner, so the editor refused its loadout commit. A part meeting the core's piece
+        // at an edge or corner gets one hull cube in its colour on a shared face; anything still apart is removed.
+        static int3[] Faces => Directions;   // declared below; a field initialiser here would run first and read null
+        static (int bridges, int loose) Connect(VoxelStructure structure, VoxelContent content, ushort cube, ushort core)
+        {
+            int bridges = 0;
+            for (int pass = 0; pass < 16; pass++)
+            {
+                var main = MainPiece(structure, core, out var all);
+                if (main.Count == all.Count) return (bridges, 0);
+                var handled = new HashSet<int3>(main); var solid = new HashSet<int3>(all);
+                int joined = 0;
+                foreach (var cell in all)
+                {
+                    if (handled.Contains(cell)) continue;
+                    // One bridge per separate part and pass: an edge (two axes) or corner (three axes) neighbour in the core's
+                    // piece, joined through an empty cell one axis step away. A corner contact becomes an edge one next pass.
+                    bool done = false;
+                    for (int dz = -1; dz <= 1 && !done; dz++) for (int dy = -1; dy <= 1 && !done; dy++) for (int dx = -1; dx <= 1 && !done; dx++)
+                    {
+                        var d = new int3(dx, dy, dz);
+                        if (math.csum(math.abs(d)) < 2 || !main.Contains(cell + d)) continue;
+                        structure.TryGetBlockAt(cell, out var owner, out _);
+                        foreach (var step in Faces)
+                        {
+                            if (math.any(step != 0 & step != d) || !structure.GetCell(cell + step).IsAir) continue;
+                            if (structure.TryPlaceBlock(new BlockPlacement { Block = cube, Origin = cell + step, Orient = 0, Color = owner.Color }, content) != PlaceResult.Ok) continue;
+                            bridges++; joined++; done = true; break;
+                        }
+                    }
+                    if (done) Flood(cell, solid, handled);
+                }
+                if (joined == 0) break;
+            }
+            // Parts with no edge or corner contact are removed.
+            return (bridges, RemoveLoose(structure, content, core));
+        }
+        /// <summary>Removes every block with a cell outside the piece face-connected to a `core` block (or, without one, the
+        /// largest piece); returns the cells removed. Also used by XenoContentBuilder.</summary>
+        internal static int RemoveLoose(VoxelStructure structure, VoxelContent content, ushort core)
+        {
+            var keep = MainPiece(structure, core, out var cells);
+            int before = structure.SolidCellCount;
+            foreach (var cell in cells)
+                if (!keep.Contains(cell) && !structure.GetCell(cell).IsAir) structure.TryRemoveBlockAt(cell, content, out _);
+            return before - structure.SolidCellCount;
+        }
+        static void Flood(int3 from, HashSet<int3> set, HashSet<int3> handled)
+        {
+            var stack = new Stack<int3>(); stack.Push(from); handled.Add(from);
+            while (stack.Count > 0)
+            {
+                var c = stack.Pop();
+                foreach (var f in Faces) if (set.Contains(c + f) && handled.Add(c + f)) stack.Push(c + f);
+            }
+        }
+        // Face-connected cells reachable from the core (or, without one, the largest piece); `all` holds every solid cell.
+        static HashSet<int3> MainPiece(VoxelStructure structure, ushort core, out List<int3> all)
+        {
+            all = new List<int3>(); var solid = new HashSet<int3>();
+            if (!structure.TryGetCellBounds(out var min, out var max)) return solid;
+            int3 seed = int.MinValue;
+            for (int z = min.z; z <= max.z; z++) for (int y = min.y; y <= max.y; y++) for (int x = min.x; x <= max.x; x++)
+            {
+                var c = new int3(x, y, z); if (structure.GetCell(c).IsAir) continue;
+                all.Add(c); solid.Add(c);
+                if (seed.x == int.MinValue && structure.TryGetBlockAt(c, out var b, out _) && b.Block == core) seed = c;
+            }
+            HashSet<int3> Fill(int3 from, HashSet<int3> unvisited)
+            {
+                var piece = new HashSet<int3> { from }; var stack = new Stack<int3>(); stack.Push(from); unvisited.Remove(from);
+                while (stack.Count > 0)
+                {
+                    var c = stack.Pop();
+                    foreach (var f in Faces) if (unvisited.Remove(c + f)) { piece.Add(c + f); stack.Push(c + f); }
+                }
+                return piece;
+            }
+            if (seed.x != int.MinValue) return Fill(seed, solid);
+            HashSet<int3> best = new();
+            while (solid.Count > 0) { var e = solid.GetEnumerator(); e.MoveNext(); var piece = Fill(e.Current, solid); if (piece.Count > best.Count) best = piece; }
+            return best;
         }
 
         // -------------------------------------------------------------------------------------------------------- modules

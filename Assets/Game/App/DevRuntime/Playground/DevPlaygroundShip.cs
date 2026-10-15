@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
+using System.Collections.Generic;
 using Game.App.Flow;
 using Game.App.Session;
 using Game.Core;
@@ -7,6 +8,8 @@ using Game.Core.Flow;
 using Game.Data.Definitions;
 using Game.Persistence.Services;
 using Game.Voxel.Grid;
+using Game.Voxel.Model;
+using Unity.Mathematics;
 
 namespace Game.App.DevRuntime.Playground
 {
@@ -56,10 +59,45 @@ namespace Game.App.DevRuntime.Playground
             if (!context.TryGetService<BlueprintLibrary>(out var library) || !context.TryGetService<Game.Data.Services.ContentService>(out var content)
                 || !content.Catalog.TryGet<ShipBlueprintDefinition>(Override, out var definition) || !library.TryGet(Override.Hash, out var source))
             { GameLog.Warn(LogCategories.Dev, "Playground ship " + Override + " could not be decoded; flying the starter."); return; }
-            session.Fleet.ReplaceStructure(ship.PersistentId, source.Clone());
+            var clone = source.Clone();
+            // Owner: "when i ran "playground ship=ship_nocturne_requiem", it doesn't work, only worked with the wraith". The
+            // shield fit commits through the ship editor, which refuses a ship in several pieces; older content (ship_red_elite)
+            // still carries loose cells, so only the largest face-connected piece flies here.
+            int loose = KeepLargestPiece(clone, new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations });
+            if (loose > 0) GameLog.Warn(LogCategories.Dev, "Playground ship " + Override + ": removed " + loose + " cells not connected to the hull.");
+            session.Fleet.ReplaceStructure(ship.PersistentId, clone);
             ship.SourceBlueprint = definition.Id;
             string name = string.IsNullOrWhiteSpace(definition.DisplayName) ? definition.IdString : definition.DisplayName;
             ship.Name = name.Length > 32 ? name.Substring(0, 32) : name;
+        }
+        static int KeepLargestPiece(VoxelStructure structure, VoxelContent content)
+        {
+            if (!structure.TryGetCellBounds(out var min, out var max)) return 0;
+            var solid = new HashSet<int3>();
+            for (int z = min.z; z <= max.z; z++) for (int y = min.y; y <= max.y; y++) for (int x = min.x; x <= max.x; x++)
+                if (!structure.GetCell(new int3(x, y, z)).IsAir) solid.Add(new int3(x, y, z));
+            var pieces = new List<List<int3>>(); var stack = new Stack<int3>(); var unvisited = new HashSet<int3>(solid);
+            foreach (var start in solid)
+            {
+                if (!unvisited.Remove(start)) continue;
+                var piece = new List<int3>(); stack.Push(start);
+                while (stack.Count > 0)
+                {
+                    var c = stack.Pop(); piece.Add(c);
+                    for (int d = 0; d < 6; d++)
+                    {
+                        var n = c; n[d >> 1] += (d & 1) == 0 ? 1 : -1;
+                        if (unvisited.Remove(n)) stack.Push(n);
+                    }
+                }
+                pieces.Add(piece);
+            }
+            if (pieces.Count < 2) return 0;
+            pieces.Sort((a, b) => b.Count.CompareTo(a.Count));
+            int before = structure.SolidCellCount;
+            for (int i = 1; i < pieces.Count; i++)
+                foreach (var cell in pieces[i]) if (!structure.GetCell(cell).IsAir) structure.TryRemoveBlockAt(cell, content, out _);
+            return before - structure.SolidCellCount;
         }
         bool IsPlaygroundProfile()
         {

@@ -198,6 +198,9 @@ namespace Game.Editor.Content
             Place("block_xeno_heart", design.Heart, 0);
             foreach (var p in design.Spitters) Place("weapon_xeno_spitter", p, 0);
             foreach (var p in design.Fins) Place("block_xeno_fin", p, 8);
+            // QA-001: the smooth-min field leaves specks a cell or two wide off the body (BROODMOTHER had 29); a ship is one
+            // face-connected piece (SPEC-51 §5.5), so they are removed rather than flown as floating cells.
+            int loose = NocturneShipBuilder.RemoveLoose(structure, content, Index("block_xeno_heart"));
             string path = Ships + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(path);
             if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, path); }
@@ -208,7 +211,7 @@ namespace Game.Editor.Content
             blueprint.EditorSetPayload(VoxelStructureCodec.Encode(structure, VoxsBlockNames.FromCatalog(catalog), VoxsEncodeOptions.ForAsset),
                 structure.SolidCellCount, new Vector3Int(min.x, min.y, min.z), new Vector3Int(max.x, max.y, max.z));
             EditorUtility.SetDirty(blueprint);
-            Debug.Log($"{id}: {structure.SolidCellCount} cells, bounds {min}..{max}");
+            Debug.Log($"{id}: {structure.SolidCellCount} cells, bounds {min}..{max}, {loose} loose cells removed");
         }
 
         // ---------------------------------------------------------------------------------------------------- assets
