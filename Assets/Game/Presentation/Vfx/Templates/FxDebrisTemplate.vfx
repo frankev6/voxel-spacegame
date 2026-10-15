@@ -3492,7 +3492,7 @@ MonoBehaviour:
   m_Disabled: 0
   m_ActivationSlot: {fileID: 114350483966675100}
   m_BlockName: Custom HLSL
-  m_HLSLCode: void Fade(inout VFXAttributes attributes) { attributes.size *= saturate((1.0 - attributes.age / attributes.lifetime) * 4.0); }
+  m_HLSLCode: void Fade(inout VFXAttributes attributes) { attributes.size *= saturate((1.0 - attributes.age / attributes.lifetime) * 4.0); if (attributes.size < 0.02) attributes.alive = false; }
   m_ShaderFile: {fileID: 0}
   m_AvailableFunction:
     selection: Fade

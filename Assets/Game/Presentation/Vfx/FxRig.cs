@@ -142,6 +142,9 @@ namespace Game.Presentation.Vfx
                         var child = new GameObject("Fx_" + def.Id.Value + (count > 1 ? "_" + n : "")); child.transform.SetParent(transform, false);
                         var effect = child.AddComponent<VisualEffect>(); r.Effects[n] = effect; effect.visualEffectAsset = def.Graph;
                         effect.playRate = 1;
+                        // QA-001: lit debris needs the scene ambient; renderers default to no probes (black shadowed sides).
+                        var fxRenderer = child.GetComponent<Renderer>();
+                        if (fxRenderer != null) { fxRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.BlendProbes; fxRenderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbes; }
                         string missing = MissingProperty(effect, def.Mode);
                         if (missing != null) { Reject(def, missing); valid = false; break; }
                         effect.SetFloat(QualityId, config.Budget(quality).ParticleFactor);

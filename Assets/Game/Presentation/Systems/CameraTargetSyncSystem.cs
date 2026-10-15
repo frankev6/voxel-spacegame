@@ -140,12 +140,17 @@ namespace Game.Presentation.Systems
                 if (rig.Mode == Data.CameraMode.Flight && rig.HasTarget && !physics.IsEmptyIgnoreFilter)
                 {
                     CompleteDependency(); EntityManager.CompleteDependencyBeforeRO<PhysicsWorldSingleton>();
-                    float3 start = rig.Focus, end = rig.DesiredFlightPosition();
+                    float3 focus = rig.Focus, end = rig.DesiredFlightPosition();
+                    // QA-001 (owner: "when colliding hard, the camera zooms in like crazy"): the probe starts at the edge of the
+                    // ship's own bounds. A ram presses the hull into the other grid, so a probe from the centre hit it at once
+                    // and clamped the camera to the minimum distance. Geometry touching the hull is not between hull and camera.
+                    float length = math.distance(focus, end), skip = math.min(math.max(0, rig.TargetRadius), length * .5f);
+                    float3 start = focus + (end - focus) * (skip / math.max(length, 1e-3f));
                     var ray = new RaycastInput { Start = start, End = end, Filter = PhysicsLayers.CameraOcclusionQuery };
                     var collector = new IgnoreEntityClosestHitCollector(lastTarget);
                     var collision = physics.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
                     if (collision.CastRay(ray, ref collector))
-                        limit = math.max(rig.Config.OcclusionMinDistance, collector.ClosestHit.Fraction * math.distance(start, end) - rig.Config.OcclusionMargin);
+                        limit = math.max(rig.Config.OcclusionMinDistance, skip + collector.ClosestHit.Fraction * (length - skip) - rig.Config.OcclusionMargin);
                 }
                 rig.SetOcclusionDistance(limit);
             }
