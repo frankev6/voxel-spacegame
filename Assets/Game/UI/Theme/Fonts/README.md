@@ -1,7 +1,14 @@
-# Fonts after ART-014
+# Fonts
 
-ART-014 moved the existing Office Code Pro files from `Assets/Game/Art/_Placeholder/Fonts/` into `OfficeCodePro/`, retaining every asset GUID and every file's bytes. The original `OfficeCodePro-LICENSE.txt` is now `OfficeCodePro/OFL.txt`, with its original GUID and unmodified SIL OFL 1.1 text. The eight static TTFs and two existing SDF assets were moved; no font was downloaded, renamed as another family, regenerated or newly licensed.
+**NOCTURNE typography (AST-004, QA-001, 2026-10-15).** With the owner's approval of the OFL downloads, the theme tokens use the DESIGN-SYSTEM §10 families. Each comes from its official release and keeps its unmodified OFL text beside it (proof copies in `docs/design/licenses/`, rows in `docs/design/LICENSES.md`):
 
-These remain **compatibility placeholders**, not approved final NOCTURNE typography. The look-test fonts were never produced. Display/body/mono/body-strong temporarily use the existing Bold/Regular/Regular/Bold SDFs. TODO(AST-004): provide Michroma Regular, Inter Regular, JetBrains Mono Regular and Inter SemiBold with their own OFL texts and generated SDF assets, then replace the corresponding tokens. Preserve the existing GUID references until that producer explicitly replaces them.
+| Token | Asset | Source |
+|---|---|---|
+| `--font-display` | `Michroma/FNT_Michroma-Regular_SDF.asset` (falls back to Inter SemiBold, then Regular) | Google Fonts `ofl/michroma` |
+| `--font-body` | `Inter/FNT_Inter-Regular_SDF.asset` | rsms/inter v4.1 static TTF |
+| `--font-body-strong` | `Inter/FNT_Inter-SemiBold_SDF.asset` | rsms/inter v4.1 static TTF |
+| `--font-mono` | `JetBrainsMono/FNT_JetBrainsMono-Regular_SDF.asset` (falls back to Inter Regular) | JetBrains/JetBrainsMono v2.304 |
 
-The notice glyphs and existing layouts have not been regenerated. Lead validation must run the existing token-font PlayMode check after importing the moved assets. ART-014 does not certify any other carried-over font; Kontrapunkt remains outside this migration for AST-003/AST-034's provenance/removal audit.
+The SDF assets use the §10.9 settings of the earlier placeholders: SDF AA, 90 pt sampling, padding 9, 1024² dynamic multi-atlas, dynamic data cleared on build. Michroma is uppercase-only display type.
+
+**Office Code Pro** (`OfficeCodePro/`) is the former compatibility placeholder from ART-014, kept with its OFL text and GUIDs; no token references it any more. Remove it with its register rows when nothing else does.

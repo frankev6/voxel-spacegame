@@ -57,16 +57,17 @@
     --icon-l: 32px;
     --hud-margin: 32px;
     /* type */
-    --font-display: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Bold_SDF.asset");
-    --font-body: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
-    --font-mono: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
+    /* AST-004 (QA-001, owner approved the OFL downloads): NOCTURNE typography, DESIGN-SYSTEM §10 */
+    --font-display: url("project://database/Assets/Game/UI/Theme/Fonts/Michroma/FNT_Michroma-Regular_SDF.asset");
+    --font-body: url("project://database/Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-Regular_SDF.asset");
+    --font-mono: url("project://database/Assets/Game/UI/Theme/Fonts/JetBrainsMono/FNT_JetBrainsMono-Regular_SDF.asset");
     --text-xs: 12px;
     --text-s: 14px;
     --text-m: 16px;
     --text-l: 20px;
     --text-xl: 26px;
     --text-xxl: 34px;
-    --font-body-strong: url("project://database/Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Bold_SDF.asset");
+    --font-body-strong: url("project://database/Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-SemiBold_SDF.asset");
     /* motion and opacity */
     --duration-fast: 120ms;
     --duration-normal: 250ms;

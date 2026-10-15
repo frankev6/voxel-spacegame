@@ -21,15 +21,15 @@ namespace Game.Tests.PlayMode.Art
         }
 
         [UnityTest]
-        public IEnumerator FontBodyToken_ResolvesToPlaceholderFontAsset()
+        public IEnumerator FontBodyToken_ResolvesToInterFontAsset()
         {
 #if UNITY_EDITOR
             var tokens = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Game/UI/Theme/tokens.uss");
             var rule = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Game/Tests/PlayMode/Art/TokenFontTest.uss");
-            var expected = UnityEditor.AssetDatabase.LoadAssetAtPath<FontAsset>("Assets/Game/UI/Theme/Fonts/OfficeCodePro/OfficeCodePro-Regular_SDF.asset");
+            var expected = UnityEditor.AssetDatabase.LoadAssetAtPath<FontAsset>("Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-Regular_SDF.asset");
             Assert.IsNotNull(tokens, "tokens.uss");
             Assert.IsNotNull(rule, "TokenFontTest.uss");
-            Assert.IsNotNull(expected, "OfficeCodePro-Regular_SDF.asset");
+            Assert.IsNotNull(expected, "FNT_Inter-Regular_SDF.asset");
 
             panel = ScriptableObject.CreateInstance<PanelSettings>();
             host = new GameObject("TokenFontTest");

@@ -1,14 +1,14 @@
 asset_id,kind,path,content_ids,budget,task,source,licence,status
-FNT_Inter-Regular,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-Regular.ttf,,,AST-004,ofl,SIL OFL 1.1,planned
-FNT_Inter-Regular_SDF,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-Regular_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,planned
-FNT_Inter-SemiBold,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-SemiBold.ttf,,,AST-004,ofl,SIL OFL 1.1,planned
-FNT_Inter-SemiBold_SDF,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-SemiBold_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,planned
+FNT_Inter-Regular,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-Regular.ttf,,,AST-004,ofl,SIL OFL 1.1,done
+FNT_Inter-Regular_SDF,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-Regular_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,done
+FNT_Inter-SemiBold,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-SemiBold.ttf,,,AST-004,ofl,SIL OFL 1.1,done
+FNT_Inter-SemiBold_SDF,font,Assets/Game/UI/Theme/Fonts/Inter/FNT_Inter-SemiBold_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,done
 OFL,definition,Assets/Game/UI/Theme/Fonts/Inter/OFL.txt,,,AST-004,ofl,SIL OFL 1.1,planned
-FNT_JetBrainsMono-Regular,font,Assets/Game/UI/Theme/Fonts/JetBrainsMono/FNT_JetBrainsMono-Regular.ttf,,,AST-004,ofl,SIL OFL 1.1,planned
-FNT_JetBrainsMono-Regular_SDF,font,Assets/Game/UI/Theme/Fonts/JetBrainsMono/FNT_JetBrainsMono-Regular_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,planned
+FNT_JetBrainsMono-Regular,font,Assets/Game/UI/Theme/Fonts/JetBrainsMono/FNT_JetBrainsMono-Regular.ttf,,,AST-004,ofl,SIL OFL 1.1,done
+FNT_JetBrainsMono-Regular_SDF,font,Assets/Game/UI/Theme/Fonts/JetBrainsMono/FNT_JetBrainsMono-Regular_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,done
 OFL,definition,Assets/Game/UI/Theme/Fonts/JetBrainsMono/OFL.txt,,,AST-004,ofl,SIL OFL 1.1,planned
-FNT_Michroma-Regular,font,Assets/Game/UI/Theme/Fonts/Michroma/FNT_Michroma-Regular.ttf,,,AST-004,ofl,SIL OFL 1.1,planned
-FNT_Michroma-Regular_SDF,font,Assets/Game/UI/Theme/Fonts/Michroma/FNT_Michroma-Regular_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,planned
+FNT_Michroma-Regular,font,Assets/Game/UI/Theme/Fonts/Michroma/FNT_Michroma-Regular.ttf,,,AST-004,ofl,SIL OFL 1.1,done
+FNT_Michroma-Regular_SDF,font,Assets/Game/UI/Theme/Fonts/Michroma/FNT_Michroma-Regular_SDF.asset,,bytes:4194304,AST-004,ofl,SIL OFL 1.1,done
 OFL,definition,Assets/Game/UI/Theme/Fonts/Michroma/OFL.txt,,,AST-004,ofl,SIL OFL 1.1,planned
 TypeSpecimen,definition,Assets/Game/UI/Theme/Gallery/TypeSpecimen.uxml,,,AST-004,own,-,planned
 utilities,definition,Assets/Game/UI/Theme/utilities.uss,,,AST-004,own,-,planned
@@ -1021,9 +1021,11 @@ cue_stinger_message_from_yourself,definition,Assets/Game/Content/Audio/cue_sting
 cue_stinger_silence_presence,definition,Assets/Game/Content/Audio/cue_stinger_silence_presence.asset,cue_stinger_silence_presence,,AST-032,own,-,planned
 cue_stinger_vanguard,definition,Assets/Game/Content/Audio/cue_stinger_vanguard.asset,cue_stinger_vanguard,,AST-032,own,-,planned
 cue_stinger_whisper,definition,Assets/Game/Content/Audio/cue_stinger_whisper.asset,cue_stinger_whisper,,AST-032,own,-,planned
-MSH_xeno_sac,mesh,Assets/Game/Art/Xeno/Meshes/xeno_sac.asset,block_xeno_heart,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
-MSH_xeno_eye,mesh,Assets/Game/Art/Xeno/Meshes/xeno_eye.asset,weapon_xeno_spitter,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
-MSH_xeno_vent,mesh,Assets/Game/Art/Xeno/Meshes/xeno_vent.asset,block_xeno_fin,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),review
+MSH_xeno_sac,mesh,Assets/Game/Art/Xeno/Meshes/xeno_sac.asset,block_xeno_heart,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),done
+MSH_xeno_eye,mesh,Assets/Game/Art/Xeno/Meshes/xeno_eye.asset,weapon_xeno_spitter,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),done
+MSH_xeno_vent,mesh,Assets/Game/Art/Xeno/Meshes/xeno_vent.asset,block_xeno_fin,,QA-001,own,Own work (procedural: Editor/Content/XenoContentBuilder),done
 TEX_Plating_A,texture,Assets/Game/Art/Nocturne/Plating/Plating_A.png,,tex:1024x1024x6,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review
 TEX_Plating_B,texture,Assets/Game/Art/Nocturne/Plating/Plating_B.png,,tex:1024x1024x6,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review
 TEX_Plating_N,texture,Assets/Game/Art/Nocturne/Plating/Plating_N.png,,tex:1024x1024x6,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_plating.py),review
+TEX_DebrisPlate_Albedo,texture,Assets/Game/Art/Nocturne/Plating/DebrisPlate_Albedo.png,fx_debris_default,tex:256x256,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_debris_plate.py),review
+TEX_DebrisPlate_Normal,texture,Assets/Game/Art/Nocturne/Plating/DebrisPlate_Normal.png,fx_debris_default,tex:256x256,QA-001,own,Own work (baked from ArtSource/LookDev/ld_plating.py by ArtSource/Bricks/bake_debris_plate.py),review

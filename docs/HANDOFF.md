@@ -46,9 +46,9 @@ An independent reviewer still starts at [scope and access only](QA-REVIEWER-PROM
 
 1. Frank reviews QA-001 in the playground: pads 01–16, with 15 for the aliens and 16 for the new NOCTURNE WRAITH frigate and REQUIEM cruiser; the main menu; a new campaign.
 2. Waiting on Frank:
-   - download approval for the OFL fonts (AST-004);
-   - art approval of the procedural organ meshes, the magnet block, the UI sounds and the baked plating textures (`docs/design/asset-manifest.csv` status `review`);
-   - Q125 flight balance by play.
+   - art approval of the magnet block, the UI sounds and the baked plating and debris textures (`docs/design/asset-manifest.csv` status `review`);
+   - whether small debris chunks should drop scrap.
+   Switch the playground ship with `playground ship=<blueprint>` (`ship=starter` restores it).
 3. Not done yet:
    - navigation strobes, which need per-grid hull anchors;
    - GRAVID, LAMPREY and CRINOID (the builder supports them);
