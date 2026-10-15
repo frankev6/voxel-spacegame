@@ -40,8 +40,8 @@ namespace Game.Tests.PlayMode.Simulation.Weapons
                     typeof(WeaponAimSystem), typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem),
                     typeof(BeamShotHandlerSystem), typeof(ProjectileStepSystem), typeof(BeamStepSystem),
                     typeof(ExplosionSystem), typeof(ShieldSystem), typeof(SpatialHashBuildSystem),
-                    typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
-                    typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(StructuralDestroySystem),
+                    typeof(DamageStreamsSystem), typeof(ImpulseApplySystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
+                    typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(HulkTransitionSystem), typeof(StructuralDestroySystem),
                     typeof(ChunkColliderCleanupSystem), typeof(SplitGraceContactSystem),
                     typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem));
                 using (var authored = WeaponContent.BuildBlob(Flight.Catalog))

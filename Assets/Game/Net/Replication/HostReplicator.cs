@@ -115,7 +115,9 @@ namespace Game.Net.Replication
                     if (grid.Kind != g.Kind)
                     {
                         g.Kind = grid.Kind;
-                        message.Clear(); message.U64(id); message.U8((byte)grid.Kind); message.Bool(em.HasComponent<Hulk>(root));
+                        bool hulk = em.HasComponent<Hulk>(root) && em.HasComponent<HulkInfo>(root);
+                        message.Clear(); message.U64(id); message.U8((byte)grid.Kind);
+                        GridCodec.WriteHulk(message, hulk, hulk ? em.GetComponentData<HulkInfo>(root) : default);
                         Broadcast(NetMessage.GridState, message);
                     }
                     if (grid.Revision != g.Revision) Delta(em, root, id, g, grid);
@@ -193,7 +195,9 @@ namespace Game.Net.Replication
                 Flags = flags, CellSize = grid.CellSize, Blueprint = em.HasComponent<GridSource>(root) ? em.GetComponentData<GridSource>(root).Blueprint.Value : 0,
                 Position = transform.Position, Rotation = transform.Rotation,
                 Linear = moving ? em.GetComponentData<PhysicsVelocity>(root).Linear : float3.zero,
-                AngularWorld = GridCodec.AngularWorld(em, root, transform.Rotation), Pilot = pilot
+                AngularWorld = GridCodec.AngularWorld(em, root, transform.Rotation), Pilot = pilot,
+                IsHulk = (byte)(em.HasComponent<Hulk>(root) && em.HasComponent<HulkInfo>(root) ? 1 : 0),
+                Hulk = em.HasComponent<HulkInfo>(root) ? em.GetComponentData<HulkInfo>(root) : default
             };
         }
 

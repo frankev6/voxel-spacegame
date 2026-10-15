@@ -178,6 +178,13 @@ namespace Game.Net.Replication
             transport.Stats.SnapshotAgeMs = SnapshotAgeMs;
         }
 
+        void QueueHulk(EntityManager em, Entity root, HulkInfo info, bool blast)
+        {
+            using var clocks = em.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
+            info.Tick = clocks.IsEmptyIgnoreFilter ? localTick : clocks.GetSingleton<SimClock>().Tick;   // this machine's tick, as HulkInfo.Tick means
+            Streams(em).QueueHulk(new HulkTransition { Grid = root, Info = info, Blast = (byte)(blast ? 1 : 0) });
+        }
+
         DamageStreams Streams(EntityManager em)
         {
             if (streamsQuery == default) streamsQuery = em.CreateEntityQuery(ComponentType.ReadOnly<DamageStreams>());
@@ -213,12 +220,13 @@ namespace Game.Net.Replication
                 }
                 case NetMessage.GridState:
                 {
-                    ulong id = r.U64(); var gridKind = (GridKind)r.U8(); bool hulk = r.Bool();
+                    ulong id = r.U64(); var gridKind = (GridKind)r.U8(); bool hulk = GridCodec.ReadHulk(r, out var info);
                     if (Waiting(id)) return false;
                     if (Ready(id, out var g) && em.Exists(g.Entity))
                     {
-                        var grid = em.GetComponentData<VoxelGrid>(g.Entity); grid.Kind = gridKind; em.SetComponentData(g.Entity, grid);
-                        if (hulk && !em.HasComponent<Hulk>(g.Entity)) { em.AddComponent<Hulk>(g.Entity); ReplicaVoxelApi.EmitHulkBlast(em, g.Entity); }
+                        // A hulk transition is applied by HulkTransitionSystem as on the host: components, kind, breach blast and sound.
+                        if (hulk) { if (!em.HasComponent<Hulk>(g.Entity)) QueueHulk(em, g.Entity, info, info.Cause == HulkCause.CoreLost); }
+                        else { var grid = em.GetComponentData<VoxelGrid>(g.Entity); grid.Kind = gridKind; em.SetComponentData(g.Entity, grid); }
                     }
                     return true;
                 }
@@ -297,7 +305,8 @@ namespace Game.Net.Replication
                     // Names only: the replica's cells come from its own structure, never from the blueprint.
                     var source = em.GetComponentData<GridSource>(g.Entity); source.Blueprint = new ContentHash(g.Header.Blueprint); em.SetComponentData(g.Entity, source);
                 }
-                if (g.Header.Kind == GridKind.Hulk && !em.HasComponent<Hulk>(g.Entity)) em.AddComponent<Hulk>(g.Entity);
+                // Already a hulk on the host (a split piece, or one that died before this guest joined): the same transition, no blast.
+                if (g.Header.IsHulk != 0 && !em.HasComponent<Hulk>(g.Entity)) QueueHulk(em, g.Entity, g.Header.Hulk, false);
             }
         }
 

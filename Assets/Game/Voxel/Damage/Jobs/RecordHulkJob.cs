@@ -101,7 +101,7 @@ namespace Game.Voxel.Damage.Jobs
             Ecb.AddComponent(hulk, new SplitOrigin { Parent = parent });
             if (grid.Kind == GridKind.Hulk)
             {
-                Ecb.AddComponent<Hulk>(hulk); Ecb.AddComponent(hulk, new HulkInfo { Cause = HulkCause.Split, Tick = Tick,
+                HulkSetup.Add(ref Ecb, hulk, new HulkInfo { Cause = HulkCause.Split, Tick = Tick,
                     OriginPersistentId = Ids[parent].Value, FormerKind = source.Kind });
             }
             var group = Ecb.SetBuffer<LinkedEntityGroup>(hulk); group.Add(new LinkedEntityGroup { Value = hulk });

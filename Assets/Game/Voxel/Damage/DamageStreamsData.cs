@@ -29,7 +29,7 @@ namespace Game.Voxel.Damage
         public UnsafeList<JobHandle> RemovedReaderHandles;
         public JobHandle RemovedWriteHandle, CoreLostWriteHandle, RetiredChunkBlobsWriteHandle;
         public JobHandle ResolverHandle, IntegrityHandle, SplitHandle, DeathHandle, ImpactHandle, TickResetHandle, DetachNextWritable;
-        public JobHandle ExactHandle, DebrisHandle, DestroyHandle;   // ADR-0117 appliers
+        public JobHandle ExactHandle, DebrisHandle, DestroyHandle, ImpulseHandle, HulkHandle;   // ADR-0117 appliers
         public NativeList<GridCoreLost> CoreLost;
         public NativeList<BlobAssetReference<Collider>> RetiredChunkBlobs;
         public DamageTickStats Current, Last;
@@ -43,6 +43,7 @@ namespace Game.Voxel.Damage
         public NativeList<Entity> DestroyList;
         public NativeList<Entity> DissolveDespawns;      // ShipDeathSystem's dissolved grids, destroyed by StructuralDestroySystem
         public NativeList<ExactCellWrite> ExactWrites;   // ADR-0117: queued on the main thread, applied by ExactCellApplySystem
+        public NativeList<HulkTransition> HulkTransitions;   // ADR-0117: ShipDeathSystem's or a guest's, applied by HulkTransitionSystem
         public NativeList<IslandRecord> Islands;
         public NativeList<IslandMask> IslandMasks;
         public NativeList<PendingDetach> PendingDetachCurrent, PendingDetachNext;
@@ -67,6 +68,7 @@ namespace Game.Voxel.Damage
             data->DestroyList = new NativeList<Entity>(256, Allocator.Persistent);
             data->DissolveDespawns = new NativeList<Entity>(16, Allocator.Persistent);
             data->ExactWrites = new NativeList<ExactCellWrite>(1024, Allocator.Persistent);
+            data->HulkTransitions = new NativeList<HulkTransition>(16, Allocator.Persistent);
             data->Islands = new NativeList<IslandRecord>(64, Allocator.Persistent);
             data->IslandMasks = new NativeList<IslandMask>(64, Allocator.Persistent);
             data->PendingDetachCurrent = new NativeList<PendingDetach>(64, Allocator.Persistent);
@@ -82,7 +84,8 @@ namespace Game.Voxel.Damage
             dependency = JobHandle.CombineDependencies(dependency, ImpactHandle, TickResetHandle);
             dependency = JobHandle.CombineDependencies(dependency, DetachNextWritable, RemovedWriteHandle);
             dependency = JobHandle.CombineDependencies(dependency, CoreLostWriteHandle, RetiredChunkBlobsWriteHandle);
-            dependency = JobHandle.CombineDependencies(dependency, ExactHandle, JobHandle.CombineDependencies(DebrisHandle, DestroyHandle));
+            dependency = JobHandle.CombineDependencies(dependency, ExactHandle, JobHandle.CombineDependencies(DebrisHandle, DestroyHandle, ImpulseHandle));
+            dependency = JobHandle.CombineDependencies(dependency, HulkHandle);
             for (int i = 0; i < RemovedReaderHandles.Length; i++) dependency = JobHandle.CombineDependencies(dependency, RemovedReaderHandles[i]);
             return dependency;
         }
@@ -93,7 +96,7 @@ namespace Game.Voxel.Damage
             CoreLost.Dispose();
             foreach (var item in RetiredChunkBlobs) { var blob = item; if (blob.IsCreated) blob.Dispose(); }
             RetiredChunkBlobs.Dispose(); GridRanges.Dispose(); SortedEvents.Dispose(); GridResults.Dispose();
-            TouchedBricks.Dispose(); DestroyList.Dispose(); DissolveDespawns.Dispose(); ExactWrites.Dispose(); Islands.Dispose(); IslandMasks.Dispose();
+            TouchedBricks.Dispose(); DestroyList.Dispose(); DissolveDespawns.Dispose(); ExactWrites.Dispose(); HulkTransitions.Dispose(); Islands.Dispose(); IslandMasks.Dispose();
             PendingDetachCurrent.Dispose(); PendingDetachNext.Dispose(); ChunkPool.Dispose(); RamPairs.Dispose();
         }
     }

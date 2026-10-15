@@ -58,6 +58,8 @@ namespace Game.Voxel.Damage
         }
         // True while queued exact writes wait for a tick: cell reads (hash checks) must wait too.
         public bool ExactPending { get { Data->ExactHandle.Complete(); return Data->ExactWrites.Length > 0; } }
+        // ADR-0117: a co-op guest's copy of the host's hulk transitions. Main thread outside the fixed step; applied next tick.
+        public void QueueHulk(HulkTransition transition) { Data->HulkHandle.Complete(); Data->HulkTransitions.Add(transition); }
         // Exact writes dropped because their grid or brick does not exist here (desyncs), since boot.
         public int ExactMissing { get { Data->ExactHandle.Complete(); return Data->ExactMissing; } }
 

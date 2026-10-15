@@ -88,8 +88,8 @@ namespace Game.Tests.PlayMode.Combat
             public Fixture(bool chunkSpur = false)
             {
                 this.chunkSpur = chunkSpur;
-                var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
-                    typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(StructuralDestroySystem), typeof(ChunkColliderCleanupSystem),
+                var systems = new List<Type> { typeof(DamageStreamsSystem), typeof(ImpulseApplySystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
+                    typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(HulkTransitionSystem), typeof(StructuralDestroySystem), typeof(ChunkColliderCleanupSystem),
                     typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SpatialHashBuildSystem), typeof(ShieldSystem), typeof(ExplosionSystem), typeof(SkirmishShotsSystem) };
                 if (chunkSpur) systems.Add(typeof(SplitGraceContactSystem));
                 Flight = new FlightFixture(systems.ToArray());

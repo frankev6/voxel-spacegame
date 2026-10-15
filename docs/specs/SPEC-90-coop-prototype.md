@@ -298,7 +298,11 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - `SalvageMarkSystem` runs everywhere (a derivation).
 - **Files:** `Assets/Game/Voxel/Damage/Systems/ShipDeathSystem.cs`, `SplitSystem.cs`, `ImpactEventSystem.cs`, `Assets/Game/Voxel/Grid/GridRootSetup.cs`
 - **Acceptance criteria:**
-  - [ ] Hulks, pods and chunk bodies look and behave the same on host and guests, including the core blast, salvage tint and moved functional blocks.
+  - [x] A core loss runs through `HulkTransitionSystem` on host and guests alike (hulk components, kind, breach blast and sound). In a live check (`gh_dmg_kill_core`), the guest's hulk matched the host's: 966 cells, 0 hash mismatches.
+  - [x] Chunk bodies are set up by `ChunkBodySetup` on host and guests. `coop-chunks.sh`: 8 chunks spawned and expired, 0 mismatches, no crashes.
+  - [x] Impulses come from one applier everywhere.
+  - [ ] Salvage tint on guests moved to NET-015: it needs the guest's F press to go to the host first.
+  - [ ] Split-off hulks moving their functional blocks, and one root-setup function. Recorded in ADR-0117 note 2.
 - **Tests:** existing Voxel suites, `coop-soak.sh`, `coop-parity.sh`.
 
 ### NET-015 — One code path: pilots

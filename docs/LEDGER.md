@@ -516,7 +516,7 @@
 | NET-011 | Own-ship prediction (stretch) | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-010 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | fcb0b16b | per-tick commands, adaptive host buffer, reconcile without replay; spike worktree only |
 | NET-012 | Co-op hardening: cost, big hits, target lock, aim compensation | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-011 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 359ef7b6 | Burst replica jobs, knockback, guest target lock, aim anchors; spike worktree only |
 | NET-013 | One code path: shared cell apply | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-012 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | e7ed57f3 | ADR-0117 phase 1: guests apply host cell writes through CellWriter; debris and destroy pass run everywhere; spike worktree only |
-| NET-014 | One code path: structural transitions and spawn setup | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
+| NET-014 | One code path: structural transitions and spawn setup | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | (this commit) | impulses, core loss and chunk body setup shared; split-hulk functional moves and one root setup recorded as remaining; spike worktree only |
 | NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | no | todo |  |  |  |  |
 | NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | no | todo |  |  |  |  |
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | no | todo |  |  |  |  |
@@ -1235,6 +1235,19 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-15 — NET-014: one code path, phase 2 (lead, claude-opus-5-5)
+- **Built:**
+  - `ImpulseApplySystem`, split from `ImpactEventSystem`;
+  - `HulkTransition`, `HulkTransitionSystem` and `HulkSetup` (`ShipDeathJob` now only decides);
+  - `HulkInfo.CoreLocal`;
+  - `ChunkBodySetup`, shared by `RecordChunkJob` and guest replicas;
+  - protocol 6, with `HulkInfo` on the wire;
+  - deleted `EmitHulkBlast` and the guest's own chunk archetype and impulse apply.
+- **Verified:**
+  - damage EditMode (84) and PlayMode regressions, including determinism;
+  - live with a headless guest: a core kill made the same hulk on both (966 cells), `coop-chunks.sh` chunks spawned and expired, 0 hash mismatches, 0 desyncs.
+- **Not done:** split hulks still recreate functional blocks on guests, and spawn root setup is not yet one function (ADR-0117 note 2). The salvage tint moved to NET-015, because a guest's F press would salvage locally until interaction runs per pilot on the host.
 
 ### 2026-10-15 — NET-013: one code path, phase 1 (lead, claude-opus-5-5)
 - Owner, after ghost collisions and missing guest features: "i think we have to decouple the systems and make sure that host, guest, or single player, they go through the same functions so we are not running redundant or duplicate code", and "this doesn't go just for the destruction system, for every system".

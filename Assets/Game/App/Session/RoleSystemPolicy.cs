@@ -75,6 +75,7 @@ namespace Game.App.Session
             // GameplayPostPhysicsGroup
             ["SpatialHashBuildSystem"] = SystemAuthority.Both,
             ["DamageStreamsSystem"] = SystemAuthority.Both,
+            ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
             ["BeamStepSystem"] = SystemAuthority.Both,
@@ -87,6 +88,7 @@ namespace Game.App.Session
             ["IntegritySystem"] = SystemAuthority.AuthorityOnly,
             ["SplitSystem"] = SystemAuthority.AuthorityOnly,
             ["ShipDeathSystem"] = SystemAuthority.AuthorityOnly,
+            ["HulkTransitionSystem"] = SystemAuthority.Both,             // ADR-0117 applier: hulk components, breach blast and sound
             ["StructuralDestroySystem"] = SystemAuthority.Both,          // ADR-0117 applier: bricks, functional entities, dissolved grids
             ["GridMassUpdateSystem"] = SystemAuthority.Both,              // guests: replica deltas request a recompute (hull bars, own-ship mass)
             ["BrickDirtyScheduleSystem"] = SystemAuthority.Both,

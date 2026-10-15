@@ -46,7 +46,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
             public EntityManager EM => Test.EntityManager;
             public Fixture()
             {
-                var systems = new List<Type> { typeof(GridSpawnSystem), typeof(SimClockAdvanceSystem), typeof(DamageStreamsSystem), typeof(ImpactEventSystem),
+                var systems = new List<Type> { typeof(GridSpawnSystem), typeof(SimClockAdvanceSystem), typeof(DamageStreamsSystem), typeof(ImpulseApplySystem), typeof(ImpactEventSystem),
                     typeof(ImpactCaptureSystem), typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem) };
                 foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                     if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics") || type.Namespace == "Unity.Transforms")) systems.Add(type);

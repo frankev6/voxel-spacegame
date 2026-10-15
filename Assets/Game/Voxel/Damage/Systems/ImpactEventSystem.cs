@@ -17,27 +17,19 @@ using Unity.Transforms;
 
 namespace Game.Voxel.Damage
 {
-    /// <summary>SPEC-13 §5.2: Unity Physics contacts become ram damage; prior-tick damage becomes impulses.</summary>
+    /// <summary>SPEC-13 §5.2: Unity Physics contacts become ram damage (an authority decision). Impulses are ImpulseApplySystem's, which
+    /// runs on every machine just before this (ADR-0117).</summary>
     [BurstCompile, UpdateInGroup(typeof(GameplayPostPhysicsGroup))]
-    [UpdateAfter(typeof(DamageStreamsSystem)), UpdateBefore(typeof(DamageResolveSystem))]
+    [UpdateAfter(typeof(DamageStreamsSystem)), UpdateAfter(typeof(ImpulseApplySystem)), UpdateBefore(typeof(DamageResolveSystem))]
     public unsafe partial struct ImpactEventSystem : ISystem
     {
         NativeList<RamContact> contacts;
-        NativeList<ImpulseRequest> requests;
-        ApplyRequestedImpulseJob applyRequested;
-        ComponentLookup<PlanarConstraint> planar;
         EmitRamDamageJob emit;
-        static readonly ProfilerMarker Apply = new ProfilerMarker(ProfilerCategory.Scripts, "ImpactEventSystem.ApplyImpulses");
         static readonly ProfilerMarker Collect = new ProfilerMarker(ProfilerCategory.Scripts, "ImpactEventSystem.Collect");
         static readonly ProfilerMarker Emit = new ProfilerMarker(ProfilerCategory.Scripts, "ImpactEventSystem.Emit");
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
             contacts = new NativeList<RamContact>(64, Allocator.Persistent);
-            requests = new NativeList<ImpulseRequest>(64, Allocator.Persistent);
-            applyRequested.Velocities = state.GetComponentLookup<PhysicsVelocity>();
-            applyRequested.Masses = state.GetComponentLookup<PhysicsMass>(true);
-            applyRequested.Transforms = state.GetComponentLookup<LocalTransform>(true);
-            planar = state.GetComponentLookup<PlanarConstraint>(true);
             emit.Cells = GridCellReader.Create(ref state); emit.Palettes = state.GetBufferLookup<PaletteEntry>(true); emit.Instances = state.GetBufferLookup<BlockInstance>(true);
             emit.Transforms = state.GetComponentLookup<LocalTransform>(true); emit.Masses = state.GetComponentLookup<PhysicsMass>(true);
             emit.Velocities = state.GetComponentLookup<PhysicsVelocity>(true); emit.Owners = state.GetComponentLookup<OwnedBy>(true);
@@ -45,19 +37,11 @@ namespace Game.Voxel.Damage
             state.RequireForUpdate<PhysicsWorldSingleton>(); state.RequireForUpdate<SimulationSingleton>(); state.RequireForUpdate<BlockDefsRef>();
             state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>();
         }
-        [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); contacts.Dispose(); requests.Dispose(); }
+        [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); contacts.Dispose(); }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             var streams = SystemAPI.GetSingleton<DamageStreams>(); var data = streams.Data; uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            state.Dependency = data->AllJobs(state.Dependency); planar.Update(ref state);
-            using (Apply.Auto()) state.Dependency = new ApplyPendingImpulseJob { Tick = tick, Planar = planar }.ScheduleParallel(state.Dependency);
-            applyRequested.Velocities.Update(ref state); applyRequested.Masses.Update(ref state); applyRequested.Transforms.Update(ref state);
-            state.Dependency = new ClearRequestsJob { Requests = requests }.Schedule(state.Dependency);
-            var requested = streams.Impulses.BeginRead(ref state);
-            state.Dependency = SimEventGather.Schedule(requested, requests, state.Dependency);
-            applyRequested.Requests = requests; applyRequested.Planar = planar; applyRequested.Data = data;
-            using (Apply.Auto()) state.Dependency = applyRequested.Schedule(state.Dependency);
-            streams.Impulses.EndRead(state.Dependency);
+            state.Dependency = data->AllJobs(state.Dependency);
             emit.Cells.Update(ref state); emit.Palettes.Update(ref state); emit.Instances.Update(ref state); emit.Transforms.Update(ref state);
             emit.Masses.Update(ref state); emit.Velocities.Update(ref state); emit.Owners.Update(ref state);
             state.Dependency = new ClearContactsJob { Contacts = contacts }.Schedule(state.Dependency);
@@ -73,8 +57,6 @@ namespace Game.Voxel.Damage
             using (Emit.Auto()) state.Dependency = emit.Schedule(sfx.Access.BeginRead(fx.Access.BeginRead(state.Dependency)));
             sfx.Access.EndRead(state.Dependency); fx.Access.EndRead(state.Dependency); streams.Damage.EndWrite(state.Dependency); data->ImpactHandle = state.Dependency;
         }
-        [BurstCompile] struct ClearRequestsJob : IJob
-        { public NativeList<ImpulseRequest> Requests; public void Execute() => Requests.Clear(); }
         [BurstCompile] struct ClearContactsJob : IJob
         { public NativeList<RamContact> Contacts; public void Execute() => Contacts.Clear(); }
     }

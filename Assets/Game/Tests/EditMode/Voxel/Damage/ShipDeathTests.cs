@@ -21,7 +21,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
             public EntityManager Em => F.EM;
             public DamageStreams Streams;
             public readonly Entity Clock;
-            readonly SystemHandle death, destroy;
+            readonly SystemHandle death, hulks, destroy;
             readonly GameplayEndCommandBufferSystem end;
             public Fixture()
             {
@@ -31,6 +31,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
                 Clock = Em.CreateSingleton(new SimClock { Tick = 10 });
                 end = F.World.GetOrCreateSystemManaged<GameplayEndCommandBufferSystem>();
                 death = F.World.GetOrCreateSystem<ShipDeathSystem>();
+                hulks = F.World.GetOrCreateSystem<HulkTransitionSystem>();   // ADR-0117: core-loss consequences
                 destroy = F.World.GetOrCreateSystem<StructuralDestroySystem>();   // ADR-0117: the final destroy pass runs after it
                 using var q = Em.CreateEntityQuery(typeof(DamageStreams)); Streams = q.GetSingleton<DamageStreams>();
             }
@@ -38,7 +39,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
             { var e = Em.CreateEntity(); Em.AddComponentData(e, new GridDissolveRequest { Grid = root, Mode = mode }); return e; }
             public void Step()
             {
-                death.Update(F.World.Unmanaged); destroy.Update(F.World.Unmanaged); Em.CompleteAllTrackedJobs(); Streams.Data->AllJobs(default).Complete(); end.Update();
+                death.Update(F.World.Unmanaged); hulks.Update(F.World.Unmanaged); destroy.Update(F.World.Unmanaged); Em.CompleteAllTrackedJobs(); Streams.Data->AllJobs(default).Complete(); end.Update();
                 var clock = Em.GetComponentData<SimClock>(Clock); clock.Tick++; Em.SetComponentData(Clock, clock);
             }
             public int DrainFx()

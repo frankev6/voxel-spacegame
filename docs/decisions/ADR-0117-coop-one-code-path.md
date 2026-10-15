@@ -74,7 +74,21 @@ There is a second form of the same problem: host simulation assumes one player (
      - `ReplicaVoxelApi.WriteBrick`, `SetInstance`, `ReleaseOrphanedInstances`, `EmitDebris`, `RequestMassRecompute`, `QueueColliderRemoval` and `TouchNeighbours`;
      - `ReplicaJobs.WriteDense` and `ContainsRef`.
    - Mass now updates on guests from `CellRemoved` like the host's, not from full recomputes.
-2. **Headless guests.** A player started with `-nographics` no longer waits for a voxel renderer before spawning grids (`VoxelConfigFactory`). `COOP_HEADLESS=1 coop.sh start` runs guests that way, so checks keep a full tick rate while windows are covered or the screen is locked. A locked screen stalls a windowed player on presentation.
+2. **NET-014 (2026-10-15).**
+   - **Impulses.** `ImpulseApplySystem` (every role) applies damage impulses and requested impulses, which was the first half of `ImpactEventSystem`. Ram damage stays authority-only. `ReplicaDamageDrainSystem` now only drains the damage and restore channels.
+   - **Core loss.**
+     - `ShipDeathJob` only decides: it queues a `HulkTransition`, with `HulkInfo.CoreLocal` (new) holding the core's position in the grid frame.
+     - `HulkTransitionSystem` (every role) applies it: hulk components through `HulkSetup.Add`, the kind, and the breach explosion request and sound. `RecordHulkJob` uses `HulkSetup.Add` too.
+     - Guests queue the host's transitions, from `GridState` (with blast) and from spawn headers (no blast), through `DamageStreams.QueueHulk`.
+     - On a guest the breach explosion's damage is drained like any cosmetic shot's, so only its effects show. `ReplicaVoxelApi.EmitHulkBlast` is deleted.
+   - **Chunk bodies.** `ChunkBodySetup` holds the archetype and the component writes, for `RecordChunkJob` and the guest's replicas alike. Only the mass (kinematic on guests) and graphical smoothing differ. The collider comes from the host's chunk box builder.
+   - **Protocol 6.** Spawn headers and `GridState` carry `HulkInfo`.
+   - **Still separate, recorded for later phases:**
+     - split-off hulks are built by `RecordHulkJob` on the authority but spawned from their structure on guests, so guests recreate the functional blocks instead of moving them;
+     - ram contact sparks and sounds come only from the authority's ram damage job;
+     - the debris shown when a full chunk pool evicts a live chunk is the authority's only;
+     - spawn-time root setup is not yet one function.
+3. **Headless guests.** A player started with `-nographics` no longer waits for a voxel renderer before spawning grids (`VoxelConfigFactory`). `COOP_HEADLESS=1 coop.sh start` runs guests that way, so checks keep a full tick rate while windows are covered or the screen is locked. A locked screen stalls a windowed player on presentation.
 
 ## Consequences
 - Single-player behaviour must stay identical. Each split is a refactor of existing systems, checked by the existing damage, integrity, split, ability and interaction tests before co-op is touched.

@@ -117,15 +117,8 @@ namespace Game.Voxel.Damage.Jobs
                     CellSize = grid.CellSize, LocalOrigin = origin, CellCount = (ushort)cells.Length, Slot = (byte)slot, Live = 1 };
                 Entity entity = Slots[slot];
                 if (entity == Entity.Null) { entity = Ecb.CreateEntity(Archetype); Ecb.SetSharedComponent(entity, GridBodyFactory.WorldIndex()); }
-                Ecb.RemoveComponent<Disabled>(entity);
-                Ecb.SetComponent(entity, pose); Ecb.SetComponent(entity, motion.Mass); Ecb.SetComponent(entity, motion.Velocity);
-                Ecb.SetComponent(entity, new PhysicsCollider { Value = blob }); Ecb.SetComponent(entity, new ChunkColliderBlob { Value = blob });
-                Ecb.SetComponent(entity, new PhysicsDamping { Linear = .02f, Angular = .05f });
-                Ecb.SetComponent(entity, new PhysicsGraphicalInterpolationBuffer { PreviousTransform = new RigidTransform(pose.Rotation, pose.Position), PreviousVelocity = motion.Velocity });
-                Ecb.SetComponent(entity, new ChunkContactState());
-                Ecb.SetComponent(entity, body); Ecb.SetComponent(entity, new SplitGrace { Other = island.Grid, UntilTick = Tick + (uint)Config.SplitGraceTicks });
-                Ecb.SetComponent(entity, new SplitOrigin { Parent = island.Grid });
-                Ecb.SetBuffer<ChunkCell>(entity).CopyFrom(cells.AsArray());
+                ChunkBodySetup.Write(ref Ecb, entity, pose, motion.Mass, motion.Velocity, blob, body, cells.AsArray(), island.Grid,
+                    Tick + (uint)Config.SplitGraceTicks, 0);
                 Slots[slot] = entity; Bodies[slot] = body; blobs[slot] = blob; poses[slot] = pose; velocities[slot] = motion.Velocity;
                 offsets[slot] = cached.Length; cached.AddRange(cells.AsArray());
                 Data->Current.ChunksCreated++;

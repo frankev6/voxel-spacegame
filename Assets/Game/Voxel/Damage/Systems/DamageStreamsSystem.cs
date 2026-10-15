@@ -50,7 +50,7 @@ namespace Game.Voxel.Damage
             data->PendingDetachCurrent.Clear(); data->PendingDetachNext.Clear(); data->CoreLost.Clear();
             data->Removed.Clear(); data->RemovedGrids.Clear(); data->Restored.Clear(); data->RestoredGrids.Clear();
             data->Islands.Clear(); data->IslandMasks.Clear(); data->DestroyList.Clear(); data->GridResults.Clear();
-            data->TouchedBricks.Clear(); data->DissolveDespawns.Clear(); data->ExactWrites.Clear();
+            data->TouchedBricks.Clear(); data->DissolveDespawns.Clear(); data->ExactWrites.Clear(); data->HulkTransitions.Clear();
             data->RamPairs.Clear(); data->Current = default; data->Last = default;
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
