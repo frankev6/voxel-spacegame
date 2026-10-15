@@ -103,6 +103,9 @@ namespace Game.App.DevRuntime.Playground
         {
             autoEnter = false;
             var ctx = host.Context;
+            // Co-op spike: a reset would tear down the world other players share; a guest never runs the playground.
+            if (ctx.TryGetService<Game.Core.Net.ICoopSession>(out var coop) && coop.Role != Game.Core.Net.SimRoleKind.Solo)
+                return DevCommandResult.Fail("net leave first: the playground cannot reset during a co-op session");
             if (entering || !ctx.TryGetService<IGameFlow>(out var flow) || flow.IsTransitioning
                 || !ctx.TryGetService<SaveService>(out var save) || save.IsBusy
                 || !ctx.TryGetService<SceneFlow>(out var scenes)) return DevCommandResult.Fail("flow/save busy or unavailable");

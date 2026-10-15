@@ -1,0 +1,28 @@
+{
+    "name": "Game.Net",
+    "rootNamespace": "Game.Net",
+    "references": [
+        "Game.Core",
+        "Game.Data",
+        "Game.Voxel",
+        "Game.Simulation",
+        "Game.Galaxy",
+        "Unity.Entities",
+        "Unity.Entities.Hybrid",
+        "Unity.Transforms",
+        "Unity.Collections",
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Physics",
+        "Unity.Networking.Transport"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

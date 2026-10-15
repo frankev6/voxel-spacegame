@@ -14,6 +14,8 @@
         "Game.ShipEditor",
         "Game.UI",
         "Game.Presentation",
+        "Game.Net",
+        "Unity.Networking.Transport",
         "Unity.Entities",
         "Unity.Entities.Hybrid",
         "Unity.Transforms",

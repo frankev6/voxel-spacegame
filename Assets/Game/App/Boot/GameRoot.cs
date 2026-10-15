@@ -46,6 +46,7 @@ namespace Game.App.Boot
         void Update()
         {
             float dt = Time.unscaledDeltaTime;
+            Composition?.Coop?.Tick();
             Composition?.Session?.Tick(dt);
             Composition?.Save?.Autosave.Update(dt);
             Composition?.Screens?.Tick();

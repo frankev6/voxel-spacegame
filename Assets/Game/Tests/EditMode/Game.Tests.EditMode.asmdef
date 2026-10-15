@@ -15,6 +15,7 @@
         "Game.UI",
         "Game.Presentation",
         "Game.App",
+        "Game.Net",
         "Game.Tests.Common",
         "Unity.Entities",
         "Unity.Entities.Hybrid",

@@ -28,7 +28,9 @@ namespace Game.Tests.EditMode.Project
             ["Game.ShipEditor"] = new[] { "Game.Core", "Game.Data", "Game.Voxel", "Game.Economy" },
             ["Game.UI"] = new[] { "Game.Core", "Game.Data", "Game.Input" },
             ["Game.Presentation"] = new[] { "Game.Core", "Game.Data", "Game.Input", "Game.Voxel", "Game.Simulation", "Game.Galaxy", "Game.Narrative", "Game.Economy", "Game.UI" },
-            ["Game.App"] = new[] { "Game.Core", "Game.Data", "Game.Input", "Game.Persistence", "Game.Economy", "Game.Voxel", "Game.Simulation", "Game.Galaxy", "Game.Narrative", "Game.ShipEditor", "Game.UI", "Game.Presentation" },
+            // ADR-0116 (co-op spike branch only): the replication module sits beside Presentation, under App.
+            ["Game.Net"] = new[] { "Game.Core", "Game.Data", "Game.Voxel", "Game.Simulation", "Game.Galaxy" },
+            ["Game.App"] = new[] { "Game.Core", "Game.Data", "Game.Input", "Game.Persistence", "Game.Economy", "Game.Voxel", "Game.Simulation", "Game.Galaxy", "Game.Narrative", "Game.ShipEditor", "Game.UI", "Game.Presentation", "Game.Net" },
         };
 
         [Serializable] class AsmDef { public string name; public string[] references; public bool autoReferenced; }

@@ -12,6 +12,15 @@ namespace Game.App.Services
         readonly List<(uint id, string reason)> tokens = new List<(uint, string)>();
         uint nextId = 1;
 
+        bool keepRunning;
+        /// <summary>Co-op spike (SPEC-90 §3.2): while a session is live, tokens are still counted (menus, input contexts) but the world
+        /// keeps running, because other players share it. Only Game.App's CoopSession sets it.</summary>
+        public bool KeepRunning
+        {
+            get => keepRunning;
+            set { keepRunning = value; UnityEngine.Time.timeScale = tokens.Count > 0 && !value ? 0f : 1f; }
+        }
+
         public PauseToken Acquire(string reason)
         {
             if (string.IsNullOrEmpty(reason)) throw new ArgumentException("A pause reason is required.", nameof(reason));
@@ -19,7 +28,7 @@ namespace Game.App.Services
             tokens.Add((id, reason));
             if (tokens.Count == 1)
             {
-                UnityEngine.Time.timeScale = 0f;
+                if (!keepRunning) UnityEngine.Time.timeScale = 0f;
                 EventBus<PauseStateChanged>.Publish(new PauseStateChanged(true, tokens.Count));
             }
             return new PauseToken(this, id);

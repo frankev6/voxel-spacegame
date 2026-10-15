@@ -62,6 +62,7 @@ namespace Game.App.Boot
         internal SceneFlow Flow { get; private set; }
         internal GameSession Session { get; private set; }
         internal ShipSpawnService Spawner { get; private set; }
+        internal CoopSession Coop { get; private set; }
 
         GameComposition() { }
 
@@ -180,6 +181,11 @@ namespace Game.App.Boot
                 Spawner = Push(new ShipSpawnService(world, Registry, Content.Catalog, Session, galaxy));
                 Register(Spawner); Register<IShipSpawner>(Spawner);
             }
+            // Co-op spike (ADR-0116): the role singleton is a boot entity, so it survives scene changes; absent or Solo = single-player.
+            var roleEntity = em.CreateSingleton(new Game.Core.Net.SimRole { Value = Game.Core.Net.SimRoleKind.Solo });
+            em.AddComponent<BootSingleton>(roleEntity);
+            Coop = Push(new CoopSession(world, Flow, Session, Registry, Pause, GameConfig, () => UI));
+            Register(Coop); Register<Game.Core.Net.ICoopSession>(Coop);
             var encounters = Push(new EncounterDirectorService(campaignGalaxy, systemLoader, travel, docking, Spawner, factions, territory, world, Content.Catalog));
             Register(encounters); galaxyTicker.Register(encounters); Flow.RegisterExiting(encounters);
             Save.Register(new EncounterSaveParticipant(encounters, Content.Catalog));
@@ -408,7 +414,7 @@ namespace Game.App.Boot
                 catch (Exception e) { GameLog.Exception(LogCategories.Boot, e, "GameComposition.Dispose " + DisposeStack[i].GetType().Name); }
             }
             DisposeStack.Clear();
-            Screens = null; UI = null; Session = null;
+            Screens = null; UI = null; Session = null; Coop = null;
             Settings = null; Content = null; Blueprints = null; Registry = null; Input = null; Audio = null; Camera = null; Fx = null; Pause = null; Save = null; GameConfig = null; Flow = null;
             Game.Core.Services.Reset();
         }
