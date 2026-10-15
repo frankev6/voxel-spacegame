@@ -1,6 +1,7 @@
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Simulation.Weapons;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -28,7 +29,14 @@ namespace Game.Presentation.Vfx
                 alpha = (float)math.clamp(SystemAPI.Time.ElapsedTime - times[0].ElapsedTime, 0, 1.0 / 60);
 
             var config = Rig.Config; var colors = config.TracerColorByDamageType; int count = math.min(store.Rows.Length, Rig.Budget.MaxTracers);
-            using (Gather.Auto()) new TracerGatherJob { Rows = store.Rows.AsArray(), Output = batch.Data, Correction = correction, Alpha = alpha,
+            var scales = new NativeArray<float>(0, Allocator.TempJob);
+            if (SystemAPI.TryGetSingleton<WeaponDefsRef>(out var defs) && defs.Value.IsCreated)
+            {
+                ref var weapons = ref defs.Value.Value.Weapons; scales.Dispose(); scales = new NativeArray<float>(weapons.Length, Allocator.TempJob);
+                for (int w = 0; w < weapons.Length; w++) scales[w] = TracerGatherJob.Scale(weapons[w].ProjectileRadius);
+            }
+            using (scales)
+            using (Gather.Auto()) new TracerGatherJob { Rows = store.Rows.AsArray(), WeaponScale = scales, Output = batch.Data, Correction = correction, Alpha = alpha,
                 LengthSeconds = config.TracerLengthSeconds, MinLength = config.TracerMinLength, MaxLength = config.TracerMaxLength, Width = config.TracerWidth,
                 Color0 = (UnityEngine.Vector4)colors[0].linear, Color1 = (UnityEngine.Vector4)colors[1].linear,
                 Color2 = (UnityEngine.Vector4)colors[2].linear, Color3 = (UnityEngine.Vector4)colors[3].linear }.Schedule(count, 256).Complete();

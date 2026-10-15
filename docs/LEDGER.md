@@ -1289,6 +1289,10 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - Cause 1, fixed: turrets and lead aim used the centre of the target's spawn bounds, which never shrink. The enemy had sheared the starter ship down to 1.5 m, and that centre (2.0 m up) sat above what was left, so later beams and shells skimmed over. `WeaponAimJob` now aims at the live centre of mass (`PhysicsMass`); bounds remain the fallback for grids without mass. SPEC-21 §5.4 updated.
   - Cause 2, open for the owner: beams and shells hit-test as an infinitely thin line. Against a stationary ship all four beams converge on one line and bore a one-cell tunnel through the hull, then shine through it (live: centre-of-mass cell gone, raw ray through the hull misses). The top-down camera cannot show the tunnel.
   - Tests, live targeted: EditMode Weapons 62/0, AI 30/0.
+- Owner, verbatim: "the big guns on the requiem aint shootin".
+  - Measured live: they do fire. All three siege cannons reload every 3.3 s and put three shells in flight per right-mouse volley. The shells drew as the same 0.15 m × 8 m hairline as a plasma bolt (one global tracer size). At 420 m/s they leave the screen in about half a second and, with nothing hit, burst at the end of their life 840 m away, out of view.
+  - Fix: `TracerGatherJob` scales each tracer by its projectile's radius against the standard 0.1 m bolt, 1–4×. The siege shell (0.35 m) now draws 3.5× wider and longer (about 0.5 m × 29 m), flak 2× and missiles 3×; every 0.1 m weapon is unchanged. Slow-motion capture `Logs/playtest/fixslow_sheet.png`.
+  - Tests, live targeted: EditMode Vfx 35/0 (new `TracerGatherJobTests.HeavyShell_DrawsWiderAndLonger`).
 - Open for the owner: art review of the magnet block, the UI sounds and the baked plating and debris textures; whether small debris chunks should drop scrap; art review of the siege cannon turret. Beam/shot hit test across the hull's height (cause 2 above).
 
 ### 2026-10-14 — Owner correction: unbiased reviewer access brief — astra (gpt-6)
