@@ -55,7 +55,7 @@ namespace Game.Presentation.Presenters
         }
         void Economy(EconomyNotice value)
         {
-            if (!bound) return;
+            if (!bound || value.Pilot != 0) return;   // ADR-0117: a co-op guest's notice is shown on that guest's machine
             switch (value.Kind)
             {
                 case EconomyNoticeKind.CargoFull: case EconomyNoticeKind.Jettisoned: case EconomyNoticeKind.SalvageRefused: case EconomyNoticeKind.TradeRefused: Post(NotificationKind.Warning, value.Text); break;

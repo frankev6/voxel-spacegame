@@ -64,7 +64,7 @@ namespace Game.App.Session
             net = new CoopNet(registry) { };
             net.Transport.LocalName = PlayerName;
             if (!net.StartHost(port)) { status = net.Transport.LastError; Shutdown(); return false; }
-            BindDev();
+            BindDev(); BindNotices();
             net.Transport.PeerReady += OnGuestReady;
             net.Transport.PeerLeft += OnGuestLeft;
             SetRole(SimRoleKind.Host);
@@ -80,7 +80,7 @@ namespace Game.App.Session
             net = new CoopNet(registry);
             net.Transport.LocalName = PlayerName;
             if (!net.StartGuest(address, port)) { status = net.Transport.LastError; Shutdown(); return false; }
-            BindDev();
+            BindDev(); BindNotices();
             net.Transport.Welcomed += OnWelcomed;
             net.Transport.Failed += OnFailed;
             State = CoopState.Connecting; status = "Connecting to " + address + ":" + port;
@@ -124,7 +124,7 @@ namespace Game.App.Session
             var old = net; net = null;
             joinRequested = false; readySent = false;
             pause.KeepRunning = false;
-            HideOverlay();
+            HideOverlay(); UnbindNotices();
             SetRole(SimRoleKind.Solo);
             old?.Dispose();
             State = CoopState.Offline;

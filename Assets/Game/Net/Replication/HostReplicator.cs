@@ -35,6 +35,7 @@ namespace Game.Net.Replication
             public byte[] InstanceFlags = Array.Empty<byte>();
             public bool Moving;
             public ulong AbilitySignature;   // decided slot state last broadcast (NET-016)
+            public bool SalvageSent;         // SalvageCollected broadcast (NET-017)
             public void DisposeShadows() { foreach (var cells in Shadow.Values) cells.Dispose(); Shadow.Clear(); }
         }
         struct ChunkSlot { public ulong NetId; public Entity Entity; }
@@ -124,6 +125,7 @@ namespace Game.Net.Replication
                     }
                     if (grid.Revision != g.Revision) Delta(em, root, id, g, grid);
                     SendAbilities(em, root, id, g, tick);
+                    SendSalvage(em, root, id, g);
                 }
             }
             removed.Clear();
@@ -143,6 +145,23 @@ namespace Game.Net.Replication
             Broadcast(NetMessage.AbilityState, message);
         }
 
+        /// <summary>NET-017: the authority's salvage decision, so every machine pulls the wreck into the same ship.</summary>
+        void SendSalvage(EntityManager em, Entity root, ulong id, HostGrid g)
+        {
+            if (g.SalvageSent || !WriteSalvage(em, root, id, message)) return;
+            g.SalvageSent = true;
+            Broadcast(NetMessage.GridSalvage, message);
+        }
+
+        static bool WriteSalvage(EntityManager em, Entity root, ulong id, NetWriter w)
+        {
+            w.Clear();
+            if (!em.HasComponent<Game.Galaxy.Salvage.SalvageCollected>(root)) return false;
+            var collector = em.GetComponentData<Game.Galaxy.Salvage.SalvageCollected>(root).Collector;
+            w.U64(id); w.U64(em.Exists(collector) && em.HasComponent<PersistentId>(collector) ? em.GetComponentData<PersistentId>(collector).Value : 0);
+            return true;
+        }
+
         /// <summary>Completes only the jobs writing what capture, snapshots and hashes read. Completing every tracked job here also
         /// waited for in-flight mesh and collider builds, which never touch these.</summary>
         public static void CompleteReads(EntityManager em)
@@ -157,6 +176,7 @@ namespace Game.Net.Replication
             em.CompleteDependencyBeforeRO<RemotePilotInput>(); em.CompleteDependencyBeforeRO<Game.Simulation.Flight.FlightThruster>();
             em.CompleteDependencyBeforeRO<Game.Simulation.Flight.ThrusterState>();
             em.CompleteDependencyBeforeRO<Game.Simulation.Abilities.AbilitySlot>(); em.CompleteDependencyBeforeRO<ShieldControl>();
+            em.CompleteDependencyBeforeRO<Game.Galaxy.Salvage.SalvageCollected>();
         }
 
         /// <summary>HostRemovalTapSystem, every fixed tick after the resolver: removal reasons only live for their own tick, and a frame
@@ -367,6 +387,7 @@ namespace Game.Net.Replication
                 message.Clear(); message.Deflated(body); transport.SendReliable(peer, NetMessage.GridSpawn, message);
                 message.Clear();
                 if (AbilityCodec.Write(em, g.Entity, id, tick, message, out _)) transport.SendReliable(peer, NetMessage.AbilityState, message);
+                if (WriteSalvage(em, g.Entity, id, message)) transport.SendReliable(peer, NetMessage.GridSalvage, message);
             }
             foreach (var slot in chunks)
             {

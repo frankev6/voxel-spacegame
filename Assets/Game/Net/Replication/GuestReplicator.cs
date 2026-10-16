@@ -68,7 +68,7 @@ namespace Game.Net.Replication
             exact = new NativeList<ExactCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
             instanceWrites = new NativeList<ExactCellWrite>(64, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
-                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
+                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.GridSalvage, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
             {
                 var k = kind;
                 transport.Register(k, (peer, r) => Enqueue(k, r));
@@ -236,6 +236,16 @@ namespace Game.Net.Replication
                     ulong id = AbilityCodec.ReadId(r);
                     if (Waiting(id)) return false;
                     if (Ready(id, out var g) && em.Exists(g.Entity) && em.HasBuffer<Game.Simulation.Abilities.AbilitySlot>(g.Entity)) AbilityCodec.Read(em, g.Entity, r);
+                    return true;
+                }
+                case NetMessage.GridSalvage:
+                {
+                    // NET-017: the host's salvage decision as state; SalvageMarkSystem, SalvagePullSystem apply it as on the host.
+                    ulong id = r.U64(), collectorId = r.U64();
+                    if (Waiting(id) || Waiting(collectorId)) return false;
+                    if (Ready(id, out var g) && em.Exists(g.Entity) && !em.HasComponent<Game.Galaxy.Salvage.SalvageCollected>(g.Entity)
+                        && Ready(collectorId, out var c) && em.Exists(c.Entity))
+                        em.AddComponentData(g.Entity, new Game.Galaxy.Salvage.SalvageCollected { Collector = c.Entity });
                     return true;
                 }
                 case NetMessage.GridDelta:

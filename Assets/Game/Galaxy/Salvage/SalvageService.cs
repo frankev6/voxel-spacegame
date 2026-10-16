@@ -43,6 +43,13 @@ namespace Game.Galaxy.Salvage
             pilots = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<PersistentId>());
             EventBus<BodyInteracted>.Subscribe(Interacted); EventBus<SceneTransitionStarted>.Subscribe(Transition);
             EventBus<SceneTransitionFinished>.Subscribe(TransitionFinished); EventBus<SessionReset>.Subscribe(Reset);
+            EventBus<EconomyNotice>.Subscribe(Noticed);
+        }
+        /// <summary>The salvage cue belongs to the pilot whose salvage finished, on that pilot's machine: here for this machine's notices,
+        /// on a co-op guest when the host's notice for it arrives (ADR-0117).</summary>
+        void Noticed(EconomyNotice value)
+        {
+            if (!disposed && value.Pilot == 0 && value.Kind == EconomyNoticeKind.SalvageDone && config.SalvageCue != null) audio.PlayCue(config.SalvageCue.Id);
         }
         public int PendingWrecks
         {
@@ -74,23 +81,27 @@ namespace Game.Galaxy.Salvage
             }
             return players.CalculateEntityCount() == 1 ? players.GetSingletonEntity() : Entity.Null;
         }
-        static bool Refuse(string text, out string message)
-        { message = text; EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvageRefused, text)); return false; }
+        static bool Refuse(string text, out string message, ulong pilot = 0)
+        { message = text; EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvageRefused, text, pilot)); return false; }
+        /// <summary>Whose machine a notice about <paramref name="collector"/>'s salvage goes to: 0 for this machine's player.</summary>
+        ulong NoticePilot(EntityManager em, Entity collector) =>
+            collector != Entity.Null && em.Exists(collector) && !em.HasComponent<PlayerShip>(collector) && em.HasComponent<PersistentId>(collector)
+                ? em.GetComponentData<PersistentId>(collector).Value : 0;
         public bool TrySalvage(Entity root, out string message) => TrySalvage(root, out message, Entity.Null);
         /// <summary>Salvages <paramref name="root"/> into the cargo hold; the wreck streams into <paramref name="collector"/> (the pilot
         /// that interacted; the local player's ship when null). Co-op shares one hold, the host's (SPEC-90 §10 Q5).</summary>
         public bool TrySalvage(Entity root, out string message, Entity collector)
         {
             if (disposed || !world.IsCreated || transferring) return Refuse("Nothing to salvage.", out message);
-            var em = world.EntityManager;
+            var em = world.EntityManager; ulong pilot = NoticePilot(em, collector);
             em.CompleteDependencyBeforeRO<GridMass>(); em.CompleteDependencyBeforeRO<HulkInfo>(); em.CompleteDependencyBeforeRO<PersistentId>();
             if (!em.Exists(root) || !em.HasComponent<Hulk>(root) || em.HasComponent<PlayerShip>(root) || em.HasComponent<BodyGridOwner>(root) ||
                 !em.HasComponent<GridMass>(root) || !em.HasComponent<HulkInfo>(root) || !em.HasComponent<PersistentId>(root) ||
                 !em.HasBuffer<BlockInstance>(root) || !em.HasComponent<GridDespawnRequest>(root) || em.IsComponentEnabled<GridDespawnRequest>(root) || em.HasComponent<SalvageCollected>(root))
-                return Refuse("Nothing to salvage.", out message);
+                return Refuse("Nothing to salvage.", out message, pilot);
             uint cells = em.GetComponentData<GridMass>(root).Data.CellCount;
-            if (cells > config.MaxSalvageCells) return Refuse("Too large to salvage.", out message);
-            if (!Game.Core.Services.TryGet<ICargo>(out var cargo)) return Refuse("No cargo hold.", out message);
+            if (cells > config.MaxSalvageCells) return Refuse("Too large to salvage.", out message, pilot);
+            if (!Game.Core.Services.TryGet<ICargo>(out var cargo)) return Refuse("No cargo hold.", out message, pilot);
             ledger.Prune(em); ulong id = em.GetComponentData<PersistentId>(root).Value;
             if (!ledger.Entries.TryGetValue(id, out var entry) || entry.Root != root)
             {
@@ -112,19 +123,16 @@ namespace Game.Galaxy.Salvage
                     // QA-001: the wreck streams into the player's ship (SalvagePullSystem, which despawns it after the last wave)
                     // instead of vanishing; without a collector it despawns at once.
                     if (collector == Entity.Null && players.CalculateEntityCount() == 1) collector = players.GetSingletonEntity();
-                    if (collector != Entity.Null && em.Exists(collector))
-                    {
-                        em.AddComponentData(root, new SalvageCollected { Collector = collector });
-                        if (em.HasComponent<Interactable>(root)) em.RemoveComponent<Interactable>(root);
-                    }
+                    // ADR-0117: the decision is SalvageCollected (replicated to co-op guests). Every machine applies it the same way:
+                    // SalvageMarkSystem drops the prompt, SalvagePullSystem streams the cubes, SalvageDespawnSystem (authority) ends it.
+                    if (collector != Entity.Null && em.Exists(collector)) em.AddComponentData(root, new SalvageCollected { Collector = collector });
                     else GridSpawnApi.RequestDespawn(em, root);
                     ledger.Entries.Remove(id);
-                    if (config.SalvageCue != null) audio.PlayCue(config.SalvageCue.Id);
                     message = "Salvaged " + total + " items.";
-                    EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvageDone, message)); return true;
+                    EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvageDone, message, pilot)); return true;
                 }
                 message = "Cargo full: salvage left on the wreck.";
-                EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvagePartial, message)); return true;
+                EventBus<EconomyNotice>.Publish(new EconomyNotice(EconomyNoticeKind.SalvagePartial, message, pilot)); return true;
             }
             finally { transferring = false; }
         }
@@ -156,7 +164,7 @@ namespace Game.Galaxy.Salvage
         public void Dispose()
         {
             if (disposed) return; disposed = true;
-            EventBus<BodyInteracted>.Unsubscribe(Interacted); EventBus<SceneTransitionStarted>.Unsubscribe(Transition); EventBus<SceneTransitionFinished>.Unsubscribe(TransitionFinished); EventBus<SessionReset>.Unsubscribe(Reset);
+            EventBus<BodyInteracted>.Unsubscribe(Interacted); EventBus<SceneTransitionStarted>.Unsubscribe(Transition); EventBus<EconomyNotice>.Unsubscribe(Noticed); EventBus<SceneTransitionFinished>.Unsubscribe(TransitionFinished); EventBus<SessionReset>.Unsubscribe(Reset);
             ledger.Clear(); if (world.IsCreated) { targets.Dispose(); hulks.Dispose(); players.Dispose(); }
         }
     }

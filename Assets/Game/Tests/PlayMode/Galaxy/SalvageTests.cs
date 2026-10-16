@@ -118,14 +118,15 @@ namespace Game.Tests.PlayMode.Galaxy
             f.Cargo.SetCapacity(20); Assert.IsTrue(f.Salvage.TrySalvage(root, out message)); Assert.AreEqual(0, f.Salvage.PendingWrecks);
             Assert.AreEqual(collector, f.Em.GetComponentData<SalvageCollected>(root).Collector, "QA-001: the wreck is pulled into the player's ship");
             foreach (var item in expected) Assert.AreEqual(item.Count, f.Cargo.CountOf(item.ItemIndex));
-            Assert.IsFalse(f.Em.IsComponentEnabled<GridDespawnRequest>(root), "SalvagePullSystem despawns after the last wave");
+            Assert.IsFalse(f.Em.IsComponentEnabled<GridDespawnRequest>(root), "SalvageDespawnSystem despawns after the last wave");
+            EventBus<EconomyNotice>.Drain();   // ADR-0117: the cue follows the pilot's SalvageDone notice
             Assert.AreEqual(1, f.Sound.Calls);
             Assert.IsFalse(f.Salvage.TrySalvage(root, out _), "Pending despawn cannot be harvested again.");
         }
         [Test] public void Pull_DespawnsAfterStagger()
         {
             using var content = new ContentService(Resources.Load<GameRoot>("GameRoot").Config.ContentDatabase);
-            using var w = EcsTestWorld.Create(typeof(Game.Voxel.PresentationStreams.FxEventQueueCreateSystem), typeof(SalvagePullSystem));
+            using var w = EcsTestWorld.Create(typeof(Game.Voxel.PresentationStreams.FxEventQueueCreateSystem), typeof(SalvagePullSystem), typeof(SalvageDespawnSystem));
             content.CreateSingletons(w.EntityManager);
             var collector = w.EntityManager.CreateEntity(typeof(PlayerShip), typeof(LocalTransform));
             w.EntityManager.SetComponentData(collector, LocalTransform.Identity);
@@ -177,6 +178,7 @@ namespace Game.Tests.PlayMode.Galaxy
                 f.Test.StepTicks(1); Assert.IsFalse(f.Em.IsComponentEnabled<GridSpawning>(root));
                 f.Em.AddComponent<Hulk>(root); f.Em.AddComponentData(root, new HulkInfo { Tick = 31 });
                 Assert.IsTrue(f.Salvage.TrySalvage(root, out _)); f.Test.StepTicks(1); Assert.IsFalse(f.Em.Exists(root));
+                EventBus<EconomyNotice>.Drain();   // the cue follows the SalvageDone notice
                 Assert.AreEqual(1, f.Sound.Calls); Assert.AreEqual(0, f.Salvage.PendingWrecks);
             }
             finally { registry.Dispose(); }

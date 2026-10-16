@@ -18,7 +18,8 @@ namespace Game.Galaxy.Salvage
 {
     /// <summary>QA-001 salvage pull (fire-and-forget debris). A collected wreck's surface cubes leave in staggered waves over
     /// FxCollect.StaggerSeconds, nearest to the collector first with per-cell jitter, each aimed at its own point on the
-    /// collector's hull and living FxCollect.Seconds, the flight time. After the last wave the normal despawn is requested.</summary>
+    /// collector's hull and living FxCollect.Seconds, the flight time. ADR-0117 applier, every machine; the despawn after the last
+    /// wave is SalvageDespawnSystem's (authority).</summary>
     [BurstCompile, UpdateInGroup(typeof(GameInitGroup)), UpdateBefore(typeof(GridSpawnSystem))]
     public partial struct SalvagePullSystem : ISystem
     {
@@ -34,14 +35,14 @@ namespace Game.Galaxy.Salvage
             {
                 Reader = GridCellReader.Create(ref state), Bricks = state.GetComponentLookup<Brick>(true),
                 Transforms = state.GetComponentLookup<LocalTransform>(true), Velocities = state.GetComponentLookup<PhysicsVelocity>(true),
-                Collected = state.GetComponentLookup<SalvageCollected>(), Despawns = state.GetComponentLookup<GridDespawnRequest>(),
+                Collected = state.GetComponentLookup<SalvageCollected>(),
                 Palettes = state.GetBufferLookup<PaletteEntry>(true), Instances = state.GetBufferLookup<BlockInstance>(true)
             };
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             job.Reader.Update(ref state); job.Bricks.Update(ref state); job.Transforms.Update(ref state); job.Velocities.Update(ref state);
-            job.Collected.Update(ref state); job.Despawns.Update(ref state); job.Palettes.Update(ref state); job.Instances.Update(ref state);
+            job.Collected.Update(ref state); job.Palettes.Update(ref state); job.Instances.Update(ref state);
             var fx = SystemAPI.GetSingleton<FxEventQueue>();
             job.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; job.Fx = fx.Queue.AsParallelWriter();
             job.DeltaTime = SystemAPI.Time.DeltaTime;
@@ -57,7 +58,6 @@ namespace Game.Galaxy.Salvage
             [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
             [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
             public ComponentLookup<SalvageCollected> Collected;
-            public ComponentLookup<GridDespawnRequest> Despawns;
             [ReadOnly] public BufferLookup<PaletteEntry> Palettes;
             [ReadOnly] public BufferLookup<BlockInstance> Instances;
             [ReadOnly] public NativeList<Entity> Roots;
@@ -75,7 +75,6 @@ namespace Game.Galaxy.Salvage
                     bool last = after >= 1;
                     if (Transforms.HasComponent(state.Collector) && Reader.Grids.HasComponent(root) && Reader.Slots.HasBuffer(root))
                         Emit(root, state.Collector, before, last ? float.MaxValue : after);
-                    if (last && Despawns.HasComponent(root)) Despawns.SetComponentEnabled(root, true);   // GridSpawnApi.RequestDespawn
                 }
             }
             /// Emits the surface cells whose wave order lies in [from, to).

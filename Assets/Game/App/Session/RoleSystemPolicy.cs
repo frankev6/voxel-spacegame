@@ -36,7 +36,8 @@ namespace Game.App.Session
             ["PowerRegistrationSystem"] = SystemAuthority.Both,
             ["ThrusterInitSystem"] = SystemAuthority.Both,
             ["WeaponInitSystem"] = SystemAuthority.Both,
-            ["SalvagePullSystem"] = SystemAuthority.AuthorityOnly,
+            ["SalvagePullSystem"] = SystemAuthority.Both,                // ADR-0117 applier: the pull animation
+            ["SalvageDespawnSystem"] = SystemAuthority.AuthorityOnly,    // ADR-0117 decider: despawn after the last wave
             ["SceneNavigationBridgeSystem"] = SystemAuthority.Both,
             ["ReplicaApplySystem"] = SystemAuthority.GuestOnly,
             // GameplayPrePhysicsGroup and its subgroups
