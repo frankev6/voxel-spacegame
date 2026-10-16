@@ -518,7 +518,7 @@
 | NET-013 | One code path: shared cell apply | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-012 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | e7ed57f3 | ADR-0117 phase 1: guests apply host cell writes through CellWriter; debris and destroy pass run everywhere; spike worktree only |
 | NET-014 | One code path: structural transitions and spawn setup | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 4f7cd407 | impulses, core loss and chunk body setup shared; split-hulk functional moves and one root setup recorded as remaining; spike worktree only |
 | NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 7b267105 | pilots on every machine; per-pilot interaction, host-side trigger; guest salvage live; combat status moved to NET-017; spike worktree only |
-| NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | no | todo |  |  |  |  |
+| NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | COMMIT | ability timers and effects on every machine, activation on the host, slots replicated; guest hotbar and boost prediction live; spike worktree only |
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | no | todo |  |  |  |  |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
@@ -1235,6 +1235,23 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-16 — NET-016: one code path, phase 4 (lead, claude-opus-5-5)
+- Owner, at the start of the night: "go ahead with everything, even past the net 016, im going to bed, use your best judgement instead of stopping for reports or decision".
+- **Built:**
+  - `AbilityTimerSystem` and `AbilityLifecycle` (shared timers);
+  - `AbilityFeedbackSystem` (activation cue and effect);
+  - `AbilitySystem` now only decides;
+  - `AbilitySlot.ActivationCount`;
+  - the `AbilityState` message (protocol 7), `AbilityCodec`, and `AbilitySlotApplySystem` with `AbilityHostSlot`/`AbilityHostState`;
+  - the shield-toggle and stat-boost effects run everywhere;
+  - `net costreset` also clears the guest's peak prediction error.
+- **Verified:**
+  - EditMode abilities (15), Net (18), system order (9), power (49), AI (30) and HUD suites pass;
+  - PlayMode ability scenarios 3 of 4, plus combat scenario and playground;
+  - live with a headless guest: the guest's hotbar matches the host's; its boost reached 245 m/s with a 0.20 m peak prediction error (1.65 m at 100 ms), no snaps; key 2 toggled its shield through the host; 0 hash mismatches, 0 desyncs, no errors.
+- **Found, not from this work:** `AbilityScenarioTests.Boost_RaisesTopSpeed` fails since QA-001's flight changes. The pulse no longer reaches the boosted cap (fixed in the test) and braking sheds only 41 of 79 m/s inside its bound (left failing, see ADR-0117 note 5). The content's 4x playtest boost broke the scenario's numbers too, so the scenario now pins the shipped tuning.
+- **Not done:** a guest's boost starts one round trip after its press, and the guest's energy meter does not include the host's ability costs.
 
 ### 2026-10-16 — NET-015: one code path, phase 3 (lead, claude-opus-5-5)
 - **Built:**

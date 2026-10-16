@@ -327,12 +327,14 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 - **Tier:** frontier
 - **Depends on:** `NET-015`
 - **Do:** (ADR-0117 phase 4)
-  - Ability activation stays the host's decision.
-  - Slot state is replicated per ship.
-  - Shield-toggle and stat-boost effects run as appliers everywhere, so the guest's hotbar fills and its prediction includes boosts.
-- **Files:** `Assets/Game/Simulation/Abilities/AbilitySystem.cs`, `ShieldToggleEffectSystem.cs`, `StatBoostEffectSystem.cs`
+  - Ability activation stays the host's decision (`AbilitySystem`: slot resync, power grants, presses).
+  - Timers (cooldowns, charges, boost expiry) are one shared step on every machine (`AbilityTimerSystem`, `AbilityLifecycle`).
+  - Slot state is replicated per ship whenever a decision changes it, with an activation counter, so each activation reaches a guest exactly once.
+  - Shield-toggle, stat-boost and activation feedback run as appliers everywhere, so the guest's hotbar fills and its prediction includes boosts.
+- **Files:** `Assets/Game/Simulation/Abilities/AbilitySystem.cs`, `AbilityTimerSystem.cs`, `AbilitySlotApplySystem.cs`, `AbilityFeedbackSystem.cs`, `Assets/Game/Net/Replication/AbilityCodec.cs`
 - **Acceptance criteria:**
-  - [ ] The guest's hotbar matches the host's view of its ship. A boost no longer arrives as a correction.
+  - [x] The guest's hotbar matches the host's view of its ship. Live with a headless guest: the same ability entries as the host (boost with 2 charges, shield); key 2 turned the guest's shield off and on through the host.
+  - [x] A boost no longer arrives as a correction. The guest's own ship reached the boosted speed (245 m/s against a 62 m/s cap) with a peak prediction error of 0.20 m and no snaps; at 100 ms simulated latency, 1.65 m, smoothed, no snaps. Both use the 4x playtest tuning. Without a boost the error is 0.00 m.
 - **Tests:** ability suites, `coop-parity.sh`, `coop-soak.sh`.
 
 ### NET-017 — One code path: galaxy state for guests

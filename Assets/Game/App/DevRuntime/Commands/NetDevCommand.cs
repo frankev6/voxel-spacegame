@@ -42,7 +42,8 @@ namespace Game.App.DevRuntime.Commands
                     return DevCommandResult.Ok("aim anchors " + (Game.Net.Replication.AimAnchor.Enabled ? "on" : "off") + " on this machine");
                 case "costreset":
                     if (coop.Net == null) return DevCommandResult.Fail("not in a session");
-                    coop.Net.Transport.Stats.ResetCosts(); return DevCommandResult.Ok("cost worst cases cleared");
+                    coop.Net.Transport.Stats.ResetCosts(); coop.Net.Guest?.Predictor.ResetPeak();
+                    return DevCommandResult.Ok("cost worst cases and peak prediction error cleared");
                 case "sim":
                 {
                     if (coop.Net == null) return DevCommandResult.Fail("no session");

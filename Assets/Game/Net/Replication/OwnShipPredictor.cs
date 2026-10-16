@@ -38,6 +38,9 @@ namespace Game.Net.Replication
             LastErrorM = PeakErrorM = 0; Snaps = Corrections = 0;
         }
 
+        /// <summary>Clears the peak error and snap count (dev measurements), keeping the history.</summary>
+        public void ResetPeak() { PeakErrorM = 0; Snaps = 0; }
+
         public void Record(in BodyState state)
         {
             int at = (start + count) % Capacity;

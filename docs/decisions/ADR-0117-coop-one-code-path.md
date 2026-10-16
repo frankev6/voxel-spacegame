@@ -22,7 +22,7 @@ Turning a system off on a guest removed both jobs. The spike then rebuilt the co
 | `PlayerTargetingSystem` (only `PlayerShip`) | `RemotePilotReceiveSystem` writes `ShipTarget` | guest autofire did nothing on the host |
 | `SalvageMarkSystem`, `SalvageReachSystem` (host only) | none | no salvage tint, prompt or reach on guests |
 | `BodyGridSpawner`, `EncounterDirectorService` add `Interactable` | none | no dock, hail or inspect prompts on guests |
-| `AbilitySystem` fills `AbilitySlot` (host only) | none | empty ability hotbar on guests |
+| `AbilitySystem` fills `AbilitySlot` (host only) | none | empty ability hotbar on guests (fixed in NET-016) |
 | `InteractionQuerySystem`, `SalvageService` use the one `PlayerShip` | none | a guest's F press does nothing on the host |
 
 There is a second form of the same problem: host simulation assumes one player (`PlayerShip` and `PlayerCommand` singletons). Guest ships on the host get parallel code (`RemotePilot*`) or nothing. The code paths are `InteractionQuerySystem`, `SalvageReachSystem`, `SalvageService`, `PlayerCombatStatusSystem`, `FactionStandingSystem`, `PlayerTargetingSystem`, `EncounterDirectorService`, `StarSystemLoader`, `TravelService`, `OriginRebaseSystem` and `NarrativePlayerDamage`.
@@ -54,7 +54,7 @@ There is a second form of the same problem: host simulation assumes one player (
    - Spawn-time root setup is one shared function.
    - Salvage marking runs everywhere.
 3. **NET-015, pilots.** Add `Pilot`, one command conversion, and per-pilot interaction, salvage reach and salvage marking. A guest can salvage. (Combat status moved to NET-017; `PlayerShip` stays the local ship, so no `LocalPilot`.)
-4. **NET-016, abilities and status.** Activation decides on the host. Slot state is replicated. Effects (shield toggle, stat boosts) are appliers everywhere, so guest prediction includes boosts and the hotbar works.
+4. **NET-016, abilities and status.** Activation decides on the host. Slot state is replicated. Timers and effects (shield toggle, stat boosts, activation cue) run everywhere, so guest prediction includes boosts and the hotbar works.
 5. **NET-017, galaxy state for guests.** Faction relations, economy notices, encounter and body interactables, cargo for whoever salvages (the owner picks the cargo model, SPEC-90 §10 Q5).
 6. **NET-018, enforcement.** Add the role-policy annotations, the `Game.Net` writer test and `coop-parity.sh`.
 
@@ -111,6 +111,28 @@ There is a second form of the same problem: host simulation assumes one player (
      - `PlayerCombatStatus` is one host-side value (NET-017);
      - the dev playground's radar zoom and beacon markers are set up on the host only.
    - **Flaky test, not from this work.** `OpeningChapterTests.Playthrough` sometimes stops at the last probe (`shots=3092; line=72`). It fails the same way on 18769d21, before ADR-0117.
+
+5. **NET-016 (2026-10-16).**
+   - **Split.** `AbilityJob` kept only the decisions: slot resync from blocks, power grants and presses.
+     - `AbilityTimerSystem` (every machine) clears last tick's flags, makes a hulk's slots unavailable and advances timers through `AbilityLifecycle.Advance`, the code `AbilityJob` used to run inline.
+     - `AbilityFeedbackSystem` (every machine) plays the activation cue and effect of every slot flagged `ActivatedThisTick`; that used to be inside `Activate`.
+     - `ShieldToggleEffectSystem` and `StatBoostEffectSystem` now run on every machine.
+   - **Activation counter.** `AbilitySlot.Reserved` became `ActivationCount`, incremented on each activation. Replication carries it, so a guest flags `ActivatedThisTick` exactly once per host activation, even when one frame covers several ticks or several activations.
+   - **Wire (protocol 7).** `AbilityState` (reliable) carries one ship's slots and its `ShieldControl.RequestedOn`.
+     - The host sends it after the ship's cells, whenever a signature of the decided fields changes (slot list, state, charges, active, activation count, shield request). Timers are not part of the signature, since both machines run them.
+     - A boost's end travels as ticks remaining, because the two clocks differ.
+     - The join snapshot sends every ship's slots after its spawn.
+   - **Guest apply.**
+     - `AbilityCodec` writes the message into `AbilityHostSlot` and `AbilityHostState`. `AbilitySlotApplySystem` registers both with ship root setup, so the network layer adds no components.
+     - In the next fixed tick, `AbilitySlotApplySystem` (after the timers, before the effects) copies the host's slots, rebases the boost end, flags activations and list changes, and sets `RequestedOn` so that the toggle effect ends on the host's value.
+     - A host power request becomes Ready on the guest, so the guest's power allocator does not draw energy for it again.
+   - **Still separate, recorded for later phases:**
+     - a guest's own boost starts when the host's decision arrives, one round trip after the press (1.65 m peak error at 100 ms with the playtest tuning);
+     - the guest's energy meter is its own power allocation, without the host's ability costs.
+   - **Tests.** The ability fixtures run the timer and feedback systems.
+     - `AbilityScenarioTests` now pins the shipped boost (1.8x speed, 2x thrust), since the content carries the 4x playtest tuning from NET-012.
+     - Its peak-speed check now asks for a clear pass over the normal cap, not reaching the boosted one. The pulse reaches 199 of 216 m/s on 68c80533, before any co-op code, so this comes from QA-001's flight handling.
+     - `Boost_RaisesTopSpeed` still fails its braking bound on 3c5b2faa, before this phase: 41 of 79 m/s shed in 323 ticks. That is a QA-001 flight question, recorded rather than loosened.
 
 ## Consequences
 - Single-player behaviour must stay identical. Each split is a refactor of existing systems, checked by the existing damage, integrity, split, ability and interaction tests before co-op is touched.
