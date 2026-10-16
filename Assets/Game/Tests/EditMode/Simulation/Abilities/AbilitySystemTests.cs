@@ -29,7 +29,7 @@ namespace Game.Tests.EditMode.Simulation.Abilities
             public EntityManager Em => World.EntityManager;
             public readonly Entity Root;
             readonly Entity clock;
-            readonly SystemHandle ability, power;
+            readonly SystemHandle timers, ability, feedback, power;
             readonly BlobAssetReference<BlockDefsBlob> blocks;
             readonly BlobAssetReference<AbilityDefsBlob> definitions;
             public uint Tick;
@@ -60,6 +60,7 @@ namespace Game.Tests.EditMode.Simulation.Abilities
                 Em.AddBuffer<RootComponentRegistration>(Em.CreateEntity());
                 World.GetOrCreateSystem<FxEventQueueCreateSystem>(); World.GetOrCreateSystem<SfxEventQueueCreateSystem>();
                 power = World.GetOrCreateSystem<PowerAllocationSystem>(); ability = World.GetOrCreateSystem<AbilitySystem>();
+                timers = World.GetOrCreateSystem<AbilityTimerSystem>(); feedback = World.GetOrCreateSystem<AbilityFeedbackSystem>();
                 Root = Em.CreateEntity(typeof(AbilityState), typeof(ShipCommand), typeof(LocalTransform));
                 Em.SetComponentData(Root, LocalTransform.Identity); Em.AddBuffer<AbilitySlot>(Root); Em.AddBuffer<BlockInstance>(Root);
                 if (player) Em.AddComponent<PlayerShip>(Root);
@@ -79,7 +80,8 @@ namespace Game.Tests.EditMode.Simulation.Abilities
             public void Step(ShipCommandEdges edges = ShipCommandEdges.None)
             {
                 Em.SetComponentData(clock, new SimClock { Tick = ++Tick }); Em.SetComponentData(Root, new ShipCommand { Edges = edges });
-                power.Update(World.Unmanaged); ability.Update(World.Unmanaged); Em.CompleteAllTrackedJobs();
+                power.Update(World.Unmanaged); timers.Update(World.Unmanaged); ability.Update(World.Unmanaged); feedback.Update(World.Unmanaged);
+                Em.CompleteAllTrackedJobs();
                 using var fq = Em.CreateEntityQuery(typeof(FxEventQueue)); var fx = fq.GetSingleton<FxEventQueue>(); fx.Access.CompleteAccess();
                 using var sq = Em.CreateEntityQuery(typeof(SfxEventQueue)); var sfx = sq.GetSingleton<SfxEventQueue>(); sfx.Access.CompleteAccess();
                 FxCount = SfxCount = 0;

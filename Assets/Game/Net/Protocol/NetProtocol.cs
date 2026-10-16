@@ -3,7 +3,7 @@ namespace Game.Net.Protocol
     /// <summary>Wire constants (SPEC-90 §3.5). Bump <see cref="Version"/> whenever any message layout changes.</summary>
     public static class NetProtocol
     {
-        public const uint Version = 6;
+        public const uint Version = 7;
         public const ushort DefaultPort = 7777;
         public const int MaxPlayers = 4;                 // host + 3 guests
         public const int UnreliablePacketBytes = 1200;   // below every common path MTU, no fragmentation
@@ -21,7 +21,7 @@ namespace Game.Net.Protocol
         Hello = 1, Ready = 2,
         // host → guest, reliable
         Welcome = 10, Reject = 11, JoinBegin = 12, JoinEnd = 13,
-        GridSpawn = 20, GridDespawn = 21, GridDelta = 22, GridState = 23,
+        GridSpawn = 20, GridDespawn = 21, GridDelta = 22, GridState = 23, AbilityState = 24,
         ChunkSpawn = 30, ChunkDespawn = 31,
         CombatFx = 40, HashReport = 41,
         // dev builds: host → guest command, guest → host reply (reliable)

@@ -66,9 +66,12 @@ namespace Game.App.Session
             ["WeaponFireSystem"] = SystemAuthority.Both,
             ["ProjectileShotHandlerSystem"] = SystemAuthority.Both,
             ["BeamShotHandlerSystem"] = SystemAuthority.Both,
-            ["AbilitySystem"] = SystemAuthority.AuthorityOnly,
-            ["ShieldToggleEffectSystem"] = SystemAuthority.AuthorityOnly,
-            ["StatBoostEffectSystem"] = SystemAuthority.AuthorityOnly,
+            ["AbilityTimerSystem"] = SystemAuthority.Both,               // ADR-0117 derivation: cooldowns, charges, boost expiry
+            ["AbilitySlotApplySystem"] = SystemAuthority.Both,           // ADR-0117 applier: guests feed it the host's slot decisions
+            ["AbilitySystem"] = SystemAuthority.AuthorityOnly,           // ADR-0117 decider: slot resync, power grants, presses
+            ["ShieldToggleEffectSystem"] = SystemAuthority.Both,         // ADR-0117 applier
+            ["StatBoostEffectSystem"] = SystemAuthority.Both,            // ADR-0117 applier: a guest's own prediction includes its boosts
+            ["AbilityFeedbackSystem"] = SystemAuthority.Both,            // ADR-0117 applier: activation cue and effect
             ["ColliderSwapSystem"] = SystemAuthority.Both,
             ["GridBodyInitSystem"] = SystemAuthority.Both,
             ["ReplicaBodySyncSystem"] = SystemAuthority.GuestOnly,

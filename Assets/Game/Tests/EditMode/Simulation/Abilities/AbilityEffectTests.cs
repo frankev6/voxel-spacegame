@@ -28,7 +28,7 @@ namespace Game.Tests.EditMode.Simulation.Abilities
             public readonly Entity Root;
             public EntityManager Em => World.EntityManager;
             readonly Entity clock;
-            readonly SystemHandle status, ability, toggle, boost;
+            readonly SystemHandle status, timers, ability, toggle, boost;
             readonly BlobAssetReference<AbilityDefsBlob> definitions;
             readonly BlobAssetReference<BlockDefsBlob> blocks;
             public uint Tick;
@@ -58,7 +58,7 @@ namespace Game.Tests.EditMode.Simulation.Abilities
                 clock = Em.CreateSingleton(new SimClock()); Em.CreateEntity(typeof(GameplayActive));
                 Em.AddBuffer<RootComponentRegistration>(Em.CreateEntity());
                 World.GetOrCreateSystem<FxEventQueueCreateSystem>(); World.GetOrCreateSystem<SfxEventQueueCreateSystem>();
-                status = World.GetOrCreateSystem<StatusSystem>(); ability = World.GetOrCreateSystem<AbilitySystem>();
+                status = World.GetOrCreateSystem<StatusSystem>(); ability = World.GetOrCreateSystem<AbilitySystem>(); timers = World.GetOrCreateSystem<AbilityTimerSystem>();
                 toggle = World.GetOrCreateSystem<ShieldToggleEffectSystem>(); boost = World.GetOrCreateSystem<StatBoostEffectSystem>();
                 Root = Em.CreateEntity(typeof(AbilityState), typeof(ShipCommand), typeof(ShipStats), typeof(ShieldControl), typeof(ShieldState));
                 Em.AddBuffer<AbilitySlot>(Root); Em.AddBuffer<BlockInstance>(Root); Em.AddBuffer<ShipStatModifier>(Root);
@@ -72,7 +72,7 @@ namespace Game.Tests.EditMode.Simulation.Abilities
             {
                 Em.SetComponentData(clock, new SimClock { Tick = ++Tick }); Em.SetComponentData(Root, new ShipCommand { Edges = edges });
                 // Production ordering: status precedes ability activation, so newly posted effects apply next tick.
-                status.Update(World.Unmanaged); ability.Update(World.Unmanaged); toggle.Update(World.Unmanaged); boost.Update(World.Unmanaged);
+                status.Update(World.Unmanaged); timers.Update(World.Unmanaged); ability.Update(World.Unmanaged); toggle.Update(World.Unmanaged); boost.Update(World.Unmanaged);
                 Em.CompleteAllTrackedJobs();
             }
             public void Until(uint tick) { while (Tick < tick) Step(); }

@@ -68,7 +68,7 @@ namespace Game.Net.Replication
             exact = new NativeList<ExactCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
             instanceWrites = new NativeList<ExactCellWrite>(64, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
-                         NetMessage.GridState, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
+                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
             {
                 var k = kind;
                 transport.Register(k, (peer, r) => Enqueue(k, r));
@@ -228,6 +228,14 @@ namespace Game.Net.Replication
                         if (hulk) { if (!em.HasComponent<Hulk>(g.Entity)) QueueHulk(em, g.Entity, info, info.Cause == HulkCause.CoreLost); }
                         else { var grid = em.GetComponentData<VoxelGrid>(g.Entity); grid.Kind = gridKind; em.SetComponentData(g.Entity, grid); }
                     }
+                    return true;
+                }
+                case NetMessage.AbilityState:
+                {
+                    // NET-016: the host's slot decisions, applied in the next tick by AbilitySlotApplySystem (ADR-0117).
+                    ulong id = AbilityCodec.ReadId(r);
+                    if (Waiting(id)) return false;
+                    if (Ready(id, out var g) && em.Exists(g.Entity) && em.HasBuffer<Game.Simulation.Abilities.AbilitySlot>(g.Entity)) AbilityCodec.Read(em, g.Entity, r);
                     return true;
                 }
                 case NetMessage.GridDelta:

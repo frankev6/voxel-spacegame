@@ -34,6 +34,7 @@ namespace Game.Net.Replication
             public ushort[] InstanceCells = Array.Empty<ushort>();
             public byte[] InstanceFlags = Array.Empty<byte>();
             public bool Moving;
+            public ulong AbilitySignature;   // decided slot state last broadcast (NET-016)
             public void DisposeShadows() { foreach (var cells in Shadow.Values) cells.Dispose(); Shadow.Clear(); }
         }
         struct ChunkSlot { public ulong NetId; public Entity Entity; }
@@ -109,6 +110,7 @@ namespace Game.Net.Replication
                         grids[id] = g; order.Add(id);
                         body.Clear(); GridCodec.WriteGrid(em, root, Header(em, root, id), body, scratch);
                         message.Clear(); message.Deflated(body); Broadcast(NetMessage.GridSpawn, message);
+                        SendAbilities(em, root, id, g, tick);
                         continue;
                     }
                     var grid = em.GetComponentData<VoxelGrid>(root);
@@ -121,6 +123,7 @@ namespace Game.Net.Replication
                         Broadcast(NetMessage.GridState, message);
                     }
                     if (grid.Revision != g.Revision) Delta(em, root, id, g, grid);
+                    SendAbilities(em, root, id, g, tick);
                 }
             }
             removed.Clear();
@@ -129,6 +132,15 @@ namespace Game.Net.Replication
             CaptureChunks(em, tick);
             foreach (var peer in transport.Peers) if (peer.Phase == NetPeerPhase.Ready) SendJoin(em, peer, tick);
             quietBricks.Clear();   // gathered tick by tick since the last capture (TapRemovals)
+        }
+
+        /// <summary>NET-016: a ship's ability slots whenever a decision changed them, after its cells, in the same reliable stream.</summary>
+        void SendAbilities(EntityManager em, Entity root, ulong id, HostGrid g, uint tick)
+        {
+            message.Clear();
+            if (!AbilityCodec.Write(em, root, id, tick, message, out ulong signature) || signature == g.AbilitySignature) return;
+            g.AbilitySignature = signature;
+            Broadcast(NetMessage.AbilityState, message);
         }
 
         /// <summary>Completes only the jobs writing what capture, snapshots and hashes read. Completing every tracked job here also
@@ -144,6 +156,7 @@ namespace Game.Net.Replication
             em.CompleteDependencyBeforeRO<Game.Simulation.Weapons.WeaponControl>(); em.CompleteDependencyBeforeRO<Game.Simulation.Weapons.ShipTarget>();
             em.CompleteDependencyBeforeRO<RemotePilotInput>(); em.CompleteDependencyBeforeRO<Game.Simulation.Flight.FlightThruster>();
             em.CompleteDependencyBeforeRO<Game.Simulation.Flight.ThrusterState>();
+            em.CompleteDependencyBeforeRO<Game.Simulation.Abilities.AbilitySlot>(); em.CompleteDependencyBeforeRO<ShieldControl>();
         }
 
         /// <summary>HostRemovalTapSystem, every fixed tick after the resolver: removal reasons only live for their own tick, and a frame
@@ -352,6 +365,8 @@ namespace Game.Net.Replication
                 if (!em.Exists(g.Entity)) continue;
                 body.Clear(); GridCodec.WriteGrid(em, g.Entity, Header(em, g.Entity, id), body, scratch);
                 message.Clear(); message.Deflated(body); transport.SendReliable(peer, NetMessage.GridSpawn, message);
+                message.Clear();
+                if (AbilityCodec.Write(em, g.Entity, id, tick, message, out _)) transport.SendReliable(peer, NetMessage.AbilityState, message);
             }
             foreach (var slot in chunks)
             {
