@@ -2,6 +2,8 @@ using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Data.Definitions;
 using Game.Simulation.Power;
+using Game.Voxel.Grid;
+using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -24,12 +26,14 @@ namespace Game.Simulation.Abilities
     /// shared appliers after it (shield toggle, stat boost, activation feedback) act on them exactly as they act on the host's own.
     /// A slot whose activation count moved is flagged ActivatedThisTick once; a changed slot list is flagged Resynced. Runs on every
     /// machine; only a guest's network layer writes the input.</summary>
-    [BurstCompile, UpdateInGroup(typeof(AbilityActivationGroup)), UpdateAfter(typeof(AbilityTimerSystem)), UpdateBefore(typeof(AbilitySystem))]
+    [BurstCompile, CreateAfter(typeof(GridSpawnSystem)), UpdateInGroup(typeof(AbilityActivationGroup)), UpdateAfter(typeof(AbilityTimerSystem)),
+     UpdateBefore(typeof(AbilitySystem))]
     public partial struct AbilitySlotApplySystem : ISystem
     {
         ApplyJob job;
-        [BurstCompile] public void OnCreate(ref SystemState state)
+        public void OnCreate(ref SystemState state)
         {
+            if (SystemAPI.TryGetSingletonBuffer<RootComponentRegistration>(out var registrations)) AbilityGridSetup.RegisterHost(registrations);
             job.Shields = state.GetComponentLookup<ShieldControl>();
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<AbilityDefsRef>(); state.RequireForUpdate<SimClock>();
             state.RequireForUpdate<AbilityHostState>();

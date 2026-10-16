@@ -41,8 +41,7 @@ namespace Game.Net.Replication
         public static void Read(EntityManager em, Entity root, NetReader r)
         {
             byte shield = r.U8(); int count = r.U8();
-            if (!em.HasBuffer<AbilityHostSlot>(root)) em.AddBuffer<AbilityHostSlot>(root);
-            if (!em.HasComponent<AbilityHostState>(root)) em.AddComponent<AbilityHostState>(root);
+            if (!em.HasBuffer<AbilityHostSlot>(root) || !em.HasComponent<AbilityHostState>(root)) return;   // AbilityGridSetup adds both
             var slots = em.GetBuffer<AbilityHostSlot>(root); slots.Clear();
             for (int i = 0; i < count; i++)
             {
