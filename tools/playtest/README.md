@@ -16,6 +16,7 @@ check takes seconds. Outputs go to `Logs/playtest/` (never `Temp/`, which Unity 
 | `waitscene.sh <Scene>` | Block until a scene is active |
 | `to.sh <secs> <cmd>` | Hard timeout wrapper (macOS has no `timeout`) |
 | `coop.sh [start\|guest n\|stop\|status]` | Co-op spike (SPEC-90): the Editor hosts the playground, dev-build guests join (`tools/build-dev.sh` first). `COOP_HEADLESS=1` runs guests with `-nographics`: no window, full tick rate even when covered or with the screen locked |
+| `coop-parity.sh [slot]` | Co-op (ADR-0117 §7): diff the host's and a guest's `net parity` line for that guest's ship and the world (cells, blocks, colliders, ability slots, shield, combat status, interaction target, hulk and salvage counts, factions); exit 1 on any difference |
 | `coop-colliders.sh <grid id> [x z ...]` | Co-op: optionally blow holes at world x/z, then compare one grid's bricks, cells and collider parts on host and guest 1 |
 | `coop-chunks.sh [secs]` | Co-op: cut the range bridges into chunk bodies, wait for them to expire, hash-check and scan guest logs |
 | `coop-soak.sh [secs]` | Co-op NET-010 table: two guests fight at 0/50/100/150 ms; bandwidth, prediction error, command buffer, hashes, crash scan |

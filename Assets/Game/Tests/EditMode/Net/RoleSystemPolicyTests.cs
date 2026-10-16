@@ -47,6 +47,16 @@ namespace Game.Tests.EditMode.Net
         }
 
         [Test]
+        public void EveryDecider_NamesItsDecision()
+        {
+            var unnamed = RoleSystemPolicy.Table.Where(p => p.Value == SystemAuthority.AuthorityOnly && !RoleSystemPolicy.Decisions.ContainsKey(p.Key)).Select(p => p.Key).ToList();
+            Assert.IsEmpty(unnamed, "ADR-0117 §7: name the decision each authority-only system owns in RoleSystemPolicy.Decisions, or split it into a decider and an applier:\n" + string.Join("\n", unnamed));
+            var stale = RoleSystemPolicy.Decisions.Keys.Where(k => !RoleSystemPolicy.Table.TryGetValue(k, out var a) || a != SystemAuthority.AuthorityOnly).ToList();
+            Assert.IsEmpty(stale, "Decisions lists systems that are not authority-only:\n" + string.Join("\n", stale));
+            foreach (var pair in RoleSystemPolicy.Decisions) StringAssert.Contains(";", pair.Value, pair.Key + ": say how a guest receives the decision");
+        }
+
+        [Test]
         public void Roles_RunTheRightSets()
         {
             Assert.IsTrue(RoleSystemPolicy.Runs(SystemAuthority.AuthorityOnly, SimRoleKind.Solo));

@@ -362,9 +362,13 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - Annotate each authority-only entry in `RoleSystemPolicy` with the decision it owns.
   - Add a test that `Game.Net` calls no structural voxel or gameplay writer.
   - Add `tools/playtest/coop-parity.sh`, which diffs the host's and a guest's view of the same ship: HUD snapshot, interaction target, collider parts, hulk and interactable counts, ability slots.
-- **Files:** `Assets/Game/App/Session/RoleSystemPolicy.cs`, `Assets/Game/Tests/EditMode/Net/NetWriterRulesTests.cs`, `tools/playtest/coop-parity.sh`
+- **Files:** `Assets/Game/App/Session/RoleSystemPolicy.cs`, `Assets/Game/Tests/EditMode/Net/NetWriterRulesTests.cs`, `Assets/Game/App/DevRuntime/DevParity.cs`, `tools/playtest/coop-parity.sh`
 - **Acceptance criteria:**
-  - [ ] The test and the parity script exist and pass after each later phase.
+  - [x] `RoleSystemPolicy.Decisions` names the decision of every authority-only system and how a guest receives it. `EveryDecider_NamesItsDecision` fails on a missing or stale entry.
+  - [x] `NetWriterRulesTests` decodes the IL of every Game.Net method. It fails on calls to CellWriter, audio, effect or sound queues, `EventBus.Publish`, entity destruction, replica helpers outside an allow-list, and typed writes of components that are not replicated state or records. A self-check proves that each rule fires.
+  - [x] `coop-parity.sh` compares the host's and a guest's `net parity` line: cell hash, working blocks, collider parts, ability slots, shield, combat status, interaction target, grid, hulk, salvageable and collected counts, and the faction table.
+    - Live: no differences at rest, with a wreck in range after a boost, and after damage to the guest's ship.
+    - The HUD snapshot is not compared directly, because the host draws no HUD for a guest's ship. The line holds the state the HUD is built from.
 - **Tests:** `NetWriterRulesTests` (EditMode), `coop-parity.sh`.
 
 ## 10. Open questions

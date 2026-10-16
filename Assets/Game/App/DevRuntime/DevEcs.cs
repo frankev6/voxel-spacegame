@@ -120,7 +120,7 @@ namespace Game.App.DevRuntime
             if (bricks) { sb.Append(lines); if (brickCount > 200) sb.AppendLine("brick detail truncated at 200"); }
             return sb.ToString().TrimEnd();
         }
-        static unsafe string Collider(EntityManager em, Entity root)
+        internal static unsafe string Collider(EntityManager em, Entity root)
         {
             if (!em.HasComponent<PhysicsCollider>(root)) return "none";
             var blob = em.GetComponentData<PhysicsCollider>(root).Value;

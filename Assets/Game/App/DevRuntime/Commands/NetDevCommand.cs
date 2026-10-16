@@ -14,7 +14,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class NetDevCommand : IDevCommand
     {
         public string Name => "net";
-        public string Usage => "net host [port] [ship=<blueprint>] | net join <ip> [port] | net leave | net status | net sim <latencyMs> <jitterMs> <lossPct> | net hash | net guest <slot> \"<command>\" | net reply | net shot [file.png] | net bring <slot> | net costreset | net anchor [on|off] | net factions";
+        public string Usage => "net host [port] [ship=<blueprint>] | net join <ip> [port] | net leave | net status | net sim <latencyMs> <jitterMs> <lossPct> | net hash | net guest <slot> \"<command>\" | net reply | net shot [file.png] | net bring <slot> | net costreset | net anchor [on|off] | net factions | net parity [slot]";
         public string Summary => "Co-op spike: host or join a session, show traffic, simulate a bad network";
         readonly List<CoopPeer> peers = new();
 
@@ -78,6 +78,14 @@ namespace Game.App.DevRuntime.Commands
                     if (coop.Net == null) return DevCommandResult.Fail("no session");
                     if (coop.Role == SimRoleKind.Host) { coop.Net.HashRequested = true; return DevCommandResult.Ok("hash report requested; guests log the result"); }
                     return DevCommandResult.Ok(coop.Net.Guest?.LastHashReport ?? "no guest replicator");
+                }
+                case "parity":
+                {
+                    // NET-018: this machine's view of one pilot's ship (default: the guest's own, or slot 1 on the host).
+                    if (coop.Net == null) return DevCommandResult.Fail("no session");
+                    byte slot = args.Positional.Count > 1 && byte.TryParse(args.Positional[1], out byte s) ? s : (byte)1;
+                    var ship = coop.Role == SimRoleKind.Host ? (coop.TryGetPilotShip(slot, out var root) ? root : Unity.Entities.Entity.Null) : ctx.PlayerShipRoot;
+                    return DevCommandResult.Ok(DevParity.Describe(ctx, ship));
                 }
                 case "factions":
                 {

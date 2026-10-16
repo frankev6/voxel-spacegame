@@ -156,6 +156,13 @@ There is a second form of the same problem: host simulation assumes one player (
      - show non-salvage prompts on guests as host-only until those flows have a co-op design.
      - Trade is in the same position, because only the host can open the merchant screen.
 
+7. **NET-018 (2026-10-16).** The enforcement in §7 exists.
+   - `RoleSystemPolicy.Decisions` names, for each authority-only system, the decision it owns and how a guest receives it.
+   - `NetWriterRulesTests` reads Game.Net's compiled IL with reflection (no Cecil), so lambdas and state machines are covered.
+     - What Game.Net may write is an allow-list with a reason per component: its own bookkeeping, replicated state (pilot, allegiance, poses, snapshot shield, plumes and commands, the pilot-machine target lock) and records for appliers (`AbilityHostState`; `SalvageCollected` and `PilotCombatStatus` as replicated decisions).
+     - Everything else fails the test, with the call site named.
+   - `net parity` and `tools/playtest/coop-parity.sh` compare one guest ship as host and guest derive it. Poses, timers and distances are left out, because they lag by design.
+
 ## Consequences
 - Single-player behaviour must stay identical. Each split is a refactor of existing systems, checked by the existing damage, integrity, split, ability and interaction tests before co-op is touched.
 - System order changes: new applier systems sit where the code they came from ran, so `SystemGroupOrderTests` and the role-policy table both change.

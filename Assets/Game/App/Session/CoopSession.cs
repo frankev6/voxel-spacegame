@@ -107,6 +107,14 @@ namespace Game.App.Session
             foreach (var peer in net.Transport.Peers) results.Add(new CoopPeer(peer.Slot, peer.Name, peer.RttMs, peer.Phase == NetPeerPhase.InWorld));
         }
 
+        /// <summary>Host: the ship the pilot in <paramref name="slot"/> flies (0 = the host's own).</summary>
+        public bool TryGetPilotShip(byte slot, out Entity root)
+        {
+            root = Entity.Null;
+            if (slot == 0) return session.PlayerSpawner != null && session.PlayerSpawner.TryGetRoot(out root);
+            return guestShips.TryGetValue(slot, out var id) && Game.Core.Services.TryGet<ShipSpawnService>(out var spawner) && spawner.TryGetRoot(new PersistentId(id), out root);
+        }
+
         // ---------------- lifecycle ----------------
 
         void SetRole(SimRoleKind role)

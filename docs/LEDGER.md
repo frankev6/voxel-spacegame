@@ -520,7 +520,7 @@
 | NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 7b267105 | pilots on every machine; per-pilot interaction, host-side trigger; guest salvage live; combat status moved to NET-017; spike worktree only |
 | NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 69cb8412 | ability timers and effects on every machine, activation on the host, slots replicated; guest hotbar and boost prediction live; spike worktree only |
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | d60fca59 | salvage collect and pull on every machine, notices to the pilot's machine, combat status per pilot, stance table to guests; body interactables deferred (sandbox-only co-op); spike worktree only |
-| NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
+| NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | COMMIT | decisions table and test, Game.Net IL writer rules, net parity and coop-parity.sh; spike worktree only |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1235,6 +1235,14 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-16 — NET-018: one code path, enforcement (lead, claude-opus-5-5)
+- **Built:**
+  - `RoleSystemPolicy.Decisions` and `EveryDecider_NamesItsDecision`;
+  - `NetWriterRulesTests`: Game.Net's IL decoded with reflection, deny rules plus a reasoned allow-list, and a self-check;
+  - `net parity` (`DevParity`) and `tools/playtest/coop-parity.sh`.
+- **Found by the new test:** ten writes in Game.Net, all translations of replicated state. Each was reviewed and allow-listed with its reason. The test's CellWriter rule first named the wrong namespace; the self-check now pins it.
+- **Verified:** EditMode Net 21 pass; live `coop-parity.sh` showed no differences at rest, with a wreck targeted after a boost, and after damage to the guest's ship.
 
 ### 2026-10-16 — NET-017: one code path, phase 5 (lead, claude-opus-5-5)
 - **Built:**

@@ -119,6 +119,31 @@ namespace Game.App.Session
             ["NetSendSystem"] = SystemAuthority.Session,
         };
 
+        /// <summary>ADR-0117 §7: the decision each authority-only system owns, and how a co-op guest receives it. Every AuthorityOnly
+        /// entry of <see cref="Table"/> has one (RoleSystemPolicyTests). A system that also applies consequences is split instead.</summary>
+        [StaticStateOk("immutable table built once")]
+        public static readonly IReadOnlyDictionary<string, string> Decisions = new Dictionary<string, string>
+        {
+            ["OriginRebaseSystem"] = "when the floating origin shifts; guests follow the host's origin in every snapshot",
+            ["SalvageDespawnSystem"] = "that a collected wreck has finished its pull; GridDespawn",
+            ["FactionStandingSystem"] = "standing and stance changes (provocation, requests); the Factions stance table",
+            ["AiAnchorShiftSystem"] = "AI anchors and goals through rebases; AI state stays on the authority",
+            ["AiDecisionSystem"] = "what each AI ship does; its target and command in snapshots",
+            ["AiSteeringSystem"] = "how each AI ship steers; its command and pose in snapshots",
+            ["FleetSystem"] = "fleet orders for escorts; through AI decisions",
+            ["PlayerCombatStatusSystem"] = "how many hostiles engage each pilot, and its last hit; PilotStatus",
+            ["AbilitySystem"] = "slot resync, power grants and ability presses; AbilityState with activation counts",
+            ["SplitGraceContactSystem"] = "which split pieces may still touch their parent; poses in snapshots",
+            ["ImpactEventSystem"] = "ram damage from contacts; its cells in GridDelta",
+            ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
+            ["IntegritySystem"] = "which islands lost their connection; SplitSystem's plans",
+            ["SplitSystem"] = "how a grid splits into ships, hulks and chunks; GridSpawn and ChunkSpawn",
+            ["ShipDeathSystem"] = "core loss; the HulkTransition in GridState",
+            ["GalaxyServicesBridgeSystem"] = "galaxy streaming, encounters and economy services; the grids they spawn",
+            ["InteractionTriggerSystem"] = "what each pilot's Interact press does; its results (salvage, notices)",
+            ["BodyGridWatchSystem"] = "body core loss and depletion for the galaxy state; host-only galaxy state",
+        };
+
         public static bool Runs(SystemAuthority authority, SimRoleKind role) => authority switch
         {
             SystemAuthority.Both => true,
