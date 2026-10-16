@@ -301,7 +301,7 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - [x] A core loss runs through `HulkTransitionSystem` on host and guests alike (hulk components, kind, breach blast and sound). In a live check (`gh_dmg_kill_core`), the guest's hulk matched the host's: 966 cells, 0 hash mismatches.
   - [x] Chunk bodies are set up by `ChunkBodySetup` on host and guests. `coop-chunks.sh`: 8 chunks spawned and expired, 0 mismatches, no crashes.
   - [x] Impulses come from one applier everywhere.
-  - [ ] Salvage tint on guests moved to NET-015: it needs the guest's F press to go to the host first.
+  - [x] Salvage tint on guests: done in NET-015, once the guest's F press went to the host. `SalvageMarkSystem` runs on every machine.
   - [ ] Split-off hulks moving their functional blocks, and one root-setup function. Recorded in ADR-0117 note 2.
 - **Tests:** existing Voxel suites, `coop-soak.sh`, `coop-parity.sh`.
 
@@ -310,13 +310,16 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 - **Tier:** frontier
 - **Depends on:** `NET-014`
 - **Do:** (ADR-0117 phase 3)
-  - Every player's ship has `Pilot { Slot }` on every machine, and `LocalPilot` marks the one this machine flies.
-  - One command-apply path per pilot. `RemotePilotApplySystem` and the target copy in `RemotePilotReceiveSystem` are deleted.
-  - Targeting, interaction queries, salvage reach, salvage, combat status and faction standing work per pilot.
-  - Presentation reads `LocalPilot`.
-- **Files:** `Assets/Game/Core/Components/Pilot.cs`, `Assets/Game/Simulation/Commands/PlayerCommandApplySystem.cs`, `Assets/Game/Galaxy/Interaction/InteractionQuerySystem.cs`
+  - Every player's ship has `Pilot { Slot }` on every machine. `PlayerShip` keeps meaning the ship this machine flies, so presentation is unchanged (no separate `LocalPilot`).
+  - One command conversion for every pilot (`PilotCommandConversion`).
+  - Interaction queries, salvage reach and salvage marking work per pilot on every machine. Acting on an Interact press is the host's decision.
+- **Files:** `Assets/Game/Simulation/Commands/Pilot.cs`, `PilotCommandConversion.cs`, `Assets/Game/Galaxy/Interaction/InteractionQuerySystem.cs`, `InteractionTriggerSystem.cs`
 - **Acceptance criteria:**
-  - [ ] A guest sees the Salvage prompt and can salvage. Every pilot's target lock and autofire run through the same system.
+  - [x] A guest sees the Salvage prompt and can salvage. Live with a headless guest: the guest's HUD showed "F Salvage" on the playground wreck, its F press salvaged the wreck on the host into the shared hold (thrusters, turrets, 20 scrap), and the wreck despawned on both. 0 hash mismatches, no errors.
+  - [x] One command conversion: the local player's commands and remote pilots' commands go through `PilotCommandConversion.Convert`.
+  - [x] Target lock and autofire run through `PlayerTargetingSystem` for every pilot, on that pilot's own machine (it reads that machine's cursor). The host takes the result from the pilot's commands. Recorded in ADR-0117 note 4.
+  - [ ] Combat status per pilot: moved to NET-017. `PlayerCombatStatus` is still one host-side value.
+  - [ ] Remote pilots can only salvage. Docking, hailing, jumping and inspecting change scenes or open dialogue on one machine, so they wait for a co-op design.
 - **Tests:** command and interaction EditMode suites, `coop-parity.sh`.
 
 ### NET-016 — One code path: abilities and status
@@ -338,6 +341,7 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
 - **Depends on:** `NET-016`
 - **Do:** (ADR-0117 phase 5)
   - Guests receive faction relations, economy notices, combat status and the interactables of stations and encounters.
+  - Combat status per pilot (moved from NET-015), and `SalvageCollected` replicated so a guest's prompt clears when the pull starts.
   - Salvage goes to the cargo model chosen in §10 Q5.
 - **Files:** `Assets/Game/Net/Replication/HostReplicator.cs`, `Assets/Game/Net/Replication/GuestReplicator.cs`, `Assets/Game/Galaxy/Salvage/SalvageService.cs`
 - **Acceptance criteria:**

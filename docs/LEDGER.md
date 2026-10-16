@@ -517,7 +517,7 @@
 | NET-012 | Co-op hardening: cost, big hits, target lock, aim compensation | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-011 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 359ef7b6 | Burst replica jobs, knockback, guest target lock, aim anchors; spike worktree only |
 | NET-013 | One code path: shared cell apply | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-012 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | e7ed57f3 | ADR-0117 phase 1: guests apply host cell writes through CellWriter; debris and destroy pass run everywhere; spike worktree only |
 | NET-014 | One code path: structural transitions and spawn setup | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 4f7cd407 | impulses, core loss and chunk body setup shared; split-hulk functional moves and one root setup recorded as remaining; spike worktree only |
-| NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | no | todo |  |  |  |  |
+| NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | COMMIT | pilots on every machine; per-pilot interaction, host-side trigger; guest salvage live; combat status moved to NET-017; spike worktree only |
 | NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | no | todo |  |  |  |  |
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | no | todo |  |  |  |  |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
@@ -1235,6 +1235,22 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-16 — NET-015: one code path, phase 3 (lead, claude-opus-5-5)
+- **Built:**
+  - `Pilot` on every player's ship on every machine, set up by `PilotSetupSystem`, the co-op session and `GuestReplicator`;
+  - `PilotCommandConversion`, shared by the local and remote command paths;
+  - per-pilot interaction targets (`InteractionQuerySystem`, every machine) and `InteractionTriggerSystem` (authority);
+  - `BodyInteracted` carries the pilot; salvage goes into that pilot's ship and the shared hold;
+  - salvage marking and reach run on every machine;
+  - deleted `InteractionInputState`.
+- **Fixed on the way:** with no pilot in the world, the query allocated its empty list the way Unity rejects for frame allocators (`PlaygroundTests` caught it).
+- **Verified:**
+  - EditMode Net, Commands, role policy, system order, streaming contract, gate interaction and HUD suites pass;
+  - PlayMode interaction, salvage, interact command, playground, HUD view and combat scenario suites pass;
+  - live with a headless guest: the guest saw "F Salvage", its press salvaged the wreck on the host, the wreck despawned on both, 0 hash mismatches, no errors.
+- **Not done:** combat status per pilot (NET-017). Remote pilots only salvage. Smaller gaps are listed in ADR-0117 note 4.
+- **Flaky, not from this work:** `OpeningChapterTests.Playthrough` fails intermittently at the last probe. It fails the same way on 18769d21, before ADR-0117.
 
 ### 2026-10-15 — NET-014: one code path, phase 2 (lead, claude-opus-5-5)
 - **Built:**

@@ -44,7 +44,7 @@ namespace Game.Galaxy.Interaction
             job.Ids.Update(ref state); job.Reaches.Update(ref state); job.Targets.Update(ref state); job.PilotTargets.Update(ref state);
             bool inWorld = !active.IsEmptyIgnoreFilter;
             job.Local = inWorld && local.CalculateEntityCount() == 1 ? local.GetSingletonEntity() : Entity.Null;
-            job.Pilots = inWorld ? pilots.ToEntityArray(state.WorldUpdateAllocator) : new NativeArray<Entity>(0, state.WorldUpdateAllocator);
+            job.Pilots = inWorld ? pilots.ToEntityArray(state.WorldUpdateAllocator) : CollectionHelper.CreateNativeArray<Entity>(0, state.WorldUpdateAllocator);
             job.QueryRadius = SystemAPI.GetSingleton<StreamingConfig>().InteractionQueryRadiusM;
             job.Physics = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
             var spatial = SystemAPI.GetSingleton<SpatialHash>(); job.Spatial = spatial.AsReadOnly();

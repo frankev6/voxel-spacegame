@@ -53,7 +53,7 @@ There is a second form of the same problem: host simulation assumes one player (
    - Guests receive the records and run the appliers.
    - Spawn-time root setup is one shared function.
    - Salvage marking runs everywhere.
-3. **NET-015, pilots.** Add `Pilot` and `LocalPilot`, one command-apply path, and per-pilot targeting, interaction, salvage reach and combat status. A guest can salvage.
+3. **NET-015, pilots.** Add `Pilot`, one command conversion, and per-pilot interaction, salvage reach and salvage marking. A guest can salvage. (Combat status moved to NET-017; `PlayerShip` stays the local ship, so no `LocalPilot`.)
 4. **NET-016, abilities and status.** Activation decides on the host. Slot state is replicated. Effects (shield toggle, stat boosts) are appliers everywhere, so guest prediction includes boosts and the hotbar works.
 5. **NET-017, galaxy state for guests.** Faction relations, economy notices, encounter and body interactables, cargo for whoever salvages (the owner picks the cargo model, SPEC-90 §10 Q5).
 6. **NET-018, enforcement.** Add the role-policy annotations, the `Game.Net` writer test and `coop-parity.sh`.
@@ -89,6 +89,28 @@ There is a second form of the same problem: host simulation assumes one player (
      - the debris shown when a full chunk pool evicts a live chunk is the authority's only;
      - spawn-time root setup is not yet one function.
 3. **Headless guests.** A player started with `-nographics` no longer waits for a voxel renderer before spawning grids (`VoxelConfigFactory`). `COOP_HEADLESS=1 coop.sh start` runs guests that way, so checks keep a full tick rate while windows are covered or the screen is locked. A locked screen stalls a windowed player on presentation.
+
+4. **NET-015 (2026-10-16).**
+   - **Pilots.** `Pilot { Slot }` marks every player's ship on every machine:
+     - `PilotSetupSystem` tags the local `PlayerShip` as slot 0;
+     - the co-op session adds it to guests' ships on the host;
+     - `GuestReplicator` adds it to replica ships from their owner slot.
+   - `PlayerShip` still means the ship this machine flies (input, camera, HUD), so presentation did not change.
+   - **Commands.** `PilotCommandConversion.Convert` turns a sampled command into a `ShipCommand` for the local player and for remote pilots alike.
+   - **Interaction.**
+     - `PilotInteractCountSystem` counts each pilot's Interact edges from its `ShipCommand`.
+     - `InteractionQuerySystem` (every machine) derives each pilot's `PilotInteraction`, and the local pilot's is also the `InteractionTarget` singleton the HUD reads.
+     - `InteractionTriggerSystem` (authority only) turns presses into `BodyInteracted`, which now carries the pilot's `PersistentId`.
+     - Remote pilots may only salvage.
+     - `InteractionInputState` is deleted.
+   - **Salvage.** `SalvageService` streams the wreck into the pilot that interacted. Every pilot fills one hold, the host's (SPEC-90 §10 Q5 default). `SalvageMarkSystem` and `SalvageReachSystem` run on every machine.
+   - **Targeting stays on the pilot's machine.** Target cycling and cursor picks read that machine's cursor and camera. Each machine runs `PlayerTargetingSystem` for its own pilot, and the host applies the target and autofire carried in the guest's commands. It is one system, with its input on the guest and its result on the host, so it is not a copy.
+   - **Still separate, recorded for later phases:**
+     - `SalvageCollected` is not replicated, so the guest's prompt stays up during the pull;
+     - the pull animation and the economy notices show only on the host;
+     - `PlayerCombatStatus` is one host-side value (NET-017);
+     - the dev playground's radar zoom and beacon markers are set up on the host only.
+   - **Flaky test, not from this work.** `OpeningChapterTests.Playthrough` sometimes stops at the last probe (`shots=3092; line=72`). It fails the same way on 18769d21, before ADR-0117.
 
 ## Consequences
 - Single-player behaviour must stay identical. Each split is a refactor of existing systems, checked by the existing damage, integrity, split, ability and interaction tests before co-op is touched.
