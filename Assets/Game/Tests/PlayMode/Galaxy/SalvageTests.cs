@@ -142,7 +142,7 @@ namespace Game.Tests.PlayMode.Galaxy
         {
             using var f = new Fixture(); f.Content.CreateSingletons(f.Em);
             var magnet = f.Content.Catalog.Get<BlockDefinition>(new ContentId("block_salvage_magnet_small"));
-            var ship = f.Em.CreateEntity(typeof(PlayerShip), typeof(VoxelGrid), typeof(BlockInstance));
+            var ship = f.Em.CreateEntity(typeof(PlayerShip), typeof(Pilot), typeof(VoxelGrid), typeof(BlockInstance));
             var buffer = f.Em.GetBuffer<BlockInstance>(ship);
             for (int i = 0; i < 4; i++) buffer.Add(new BlockInstance { Block = f.Content.Catalog.GetBlockIndex(magnet), CellsAlive = 1 });
             var system = f.Test.World.CreateSystem<SalvageReachSystem>();

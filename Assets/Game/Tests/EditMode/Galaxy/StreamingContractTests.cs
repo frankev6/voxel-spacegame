@@ -18,7 +18,7 @@ namespace Game.Tests.EditMode.Galaxy
         [Test] public void Components_AreUnmanaged()
         {
             var components = new[] { typeof(StarSystemBody), typeof(BodyOrbit), typeof(BodyGridOwner), typeof(BodyGridInitialCells),
-                typeof(CurrentStarSystemInfo), typeof(StreamingConfig), typeof(Interactable), typeof(InteractionTarget), typeof(InteractionInputState) };
+                typeof(CurrentStarSystemInfo), typeof(StreamingConfig), typeof(Interactable), typeof(InteractionTarget), typeof(PilotInteraction), typeof(PilotInteractSeen) };
             foreach (var type in components)
             {
                 Assert.IsTrue(typeof(IComponentData).IsAssignableFrom(type), type.FullName);

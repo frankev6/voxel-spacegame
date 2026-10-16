@@ -20,28 +20,29 @@ using Unity.Transforms;
 
 namespace Game.Tests.PlayMode.Galaxy
 {
-    /// <summary>SYS-008: real distance queries and direct variable-rate updates, no wall-clock waits.</summary>
+    /// <summary>SYS-008: real distance queries and direct variable-rate updates, no wall-clock waits. ADR-0117: the player is a pilot;
+    /// its Interact presses arrive as PilotInteractCount (counted from ShipCommand edges) and InteractionTriggerSystem acts on them.</summary>
     public sealed class InteractionTests
     {
         sealed class Fixture : IDisposable
         {
             internal readonly World World = new("SYS-008 interaction");
             internal EntityManager Em => World.EntityManager;
-            internal readonly Entity Player, Station, Command;
+            internal readonly Entity Player, Station;
             internal readonly NativeQueue<ManagedEventEnvelope<BodyInteracted>> Events = new(Allocator.Persistent);
             readonly SpatialHash spatial;
             readonly PhysicsWorld physics;
             readonly BlobAssetReference<Collider> collider;
-            readonly SystemHandle system;
+            readonly SystemHandle query, trigger;
             readonly float radius;
             internal Fixture(float stationRadius = 150, BodyId body = default)
             {
                 radius = stationRadius;
                 Em.CreateEntity(typeof(GameplayActive), typeof(WorldSceneActive));
-                Command = Em.CreateSingleton<PlayerCommand>();
                 Em.CreateSingleton(new StreamingConfig { InteractionQueryRadiusM = 1000 });
                 Em.CreateSingleton(new ManagedEventQueue<BodyInteracted> { Queue = Events });
-                Player = Em.CreateEntity(typeof(PlayerShip), typeof(LocalTransform));
+                Player = Em.CreateEntity(typeof(PlayerShip), typeof(Pilot), typeof(PilotInteractCount), typeof(LocalTransform));
+                Em.AddComponentData(Player, new PilotInteractSeen { Initialized = 1 });
                 Station = Em.CreateEntity(typeof(Interactable), typeof(PersistentId));
                 Em.SetComponentData(Station, new PersistentId(77));
                 Em.SetComponentData(Station, new Interactable { Body = body, Kind = InteractionKind.Dock, DistanceM = 150 });
@@ -54,7 +55,7 @@ namespace Game.Tests.PlayMode.Galaxy
                 bodies[0] = new RigidBody { Entity = Station, Collider = collider, WorldFromBody = RigidTransform.identity, Scale = 1 };
                 var build = physics; build.CollisionWorld.BuildBroadphase(ref build, 1f / 60, float3.zero);
                 Em.CreateSingleton(new PhysicsWorldSingleton { PhysicsWorld = physics });
-                system = World.CreateSystem<InteractionQuerySystem>(); Gap(100);
+                query = World.CreateSystem<InteractionQuerySystem>(); trigger = World.CreateSystem<InteractionTriggerSystem>(); Gap(100);
             }
             internal void Gap(float gap)
             {
@@ -67,8 +68,8 @@ namespace Game.Tests.PlayMode.Galaxy
             }
             internal InteractionTarget Frame(byte counter)
             {
-                Em.SetComponentData(Command, new PlayerCommand { Edges = new PlayerEdgeCounters { Interact = counter } });
-                system.Update(World.Unmanaged); Em.CompleteAllTrackedJobs();
+                Em.SetComponentData(Player, new PilotInteractCount { Value = counter });
+                query.Update(World.Unmanaged); trigger.Update(World.Unmanaged); Em.CompleteAllTrackedJobs();
                 using var target = Em.CreateEntityQuery(typeof(InteractionTarget)); return target.GetSingleton<InteractionTarget>();
             }
             public void Dispose()
@@ -92,8 +93,7 @@ namespace Game.Tests.PlayMode.Galaxy
             foreach (int fps in new[] { 30, 60, 144 })
             {
                 using var f = new Fixture();
-                using var input = f.Em.CreateEntityQuery(typeof(InteractionInputState));
-                input.SetSingleton(new InteractionInputState { LastInteractCounter = 253, Initialized = 1 });
+                f.Em.SetComponentData(f.Player, new PilotInteractSeen { Value = 253, Initialized = 1 });
                 for (int frame = 0; frame < fps; frame++)
                     f.Frame(frame < fps / 3 ? (byte)254 : frame < 2 * fps / 3 ? (byte)255 : (byte)0);
                 Assert.AreEqual(3, f.Events.Count, "One event per edge, including byte wrap, at " + fps + " FPS.");

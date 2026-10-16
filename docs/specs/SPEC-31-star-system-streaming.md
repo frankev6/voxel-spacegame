@@ -172,8 +172,10 @@ namespace Game.Galaxy.Interaction
         public ulong GridPersistentId;   // PersistentId of Target if it is a grid, else 0
     }
 
-    /// <summary>Singleton state of InteractionQuerySystem (its consumed interact counter).</summary>
-    public struct InteractionInputState : IComponentData { public byte LastInteractCounter; public byte Initialized; }
+    /// <summary>ADR-0117 (co-op, NET-015): replaces the InteractionInputState singleton. Each pilot's target, and the presses
+    /// InteractionTriggerSystem (authority) has already handled; presses come from Game.Simulation.Commands.PilotInteractCount.</summary>
+    public struct PilotInteraction : IComponentData { public InteractionTarget Value; }
+    public struct PilotInteractSeen : IComponentData { public byte Value; public byte Initialized; }
 }
 ```
 
@@ -460,7 +462,7 @@ sequenceDiagram
 - **Tier:** standard — transcribes the exact code of §4 (bodies throw `NotImplementedException`)
 - **Depends on:** `CORE-001`, `DATA-001`, `GAL-001`, `WPN-001`
 - **Do:** Create every type of §4 (including the internal §4.5 carriers, `BodyGridInitialCells`/`BodyGridEvent` from §5.6 and `StreamingConfigDefinition`) in the folders of decision 13.
-- **Files:** `Assets/Game/Core/Events/{StarSystemEntryReason,StarSystemEntered,BodyInteracted,BodyDestroyed,DockStateChanged}.cs`; `Assets/Game/Galaxy/Bodies/{BodyTier,BodyFlags,StarSystemBody,BodyOrbit,BodyGridOwner,BodyGridInitialCells,CurrentStarSystemInfo,StreamingConfig}.cs`; `Assets/Game/Galaxy/Interaction/{Interactable,InteractionTarget,InteractionInputState}.cs`; `Assets/Game/Galaxy/Services/{IShipSpawner,PersistentIdValue,GalaxyShipSpawnArgs,LoaderState,StarSystemLoader,DockingService,PlayerLocationSaveParticipant}.cs`; `Assets/Game/Data/Definitions/World/StreamingConfigDefinition.cs`; §4.5 streaming carriers, `BodyGridEvent`, the two required tests and the explicit §4.1 event bridge registration (Q7–8)
+- **Files:** `Assets/Game/Core/Events/{StarSystemEntryReason,StarSystemEntered,BodyInteracted,BodyDestroyed,DockStateChanged}.cs`; `Assets/Game/Galaxy/Bodies/{BodyTier,BodyFlags,StarSystemBody,BodyOrbit,BodyGridOwner,BodyGridInitialCells,CurrentStarSystemInfo,StreamingConfig}.cs`; `Assets/Game/Galaxy/Interaction/{Interactable,InteractionTarget,PilotInteraction}.cs (InteractionInputState until ADR-0117)`; `Assets/Game/Galaxy/Services/{IShipSpawner,PersistentIdValue,GalaxyShipSpawnArgs,LoaderState,StarSystemLoader,DockingService,PlayerLocationSaveParticipant}.cs`; `Assets/Game/Data/Definitions/World/StreamingConfigDefinition.cs`; §4.5 streaming carriers, `BodyGridEvent`, the two required tests and the explicit §4.1 event bridge registration (Q7–8)
 - **Acceptance criteria:**
   - [ ] Compiles; components unmanaged; event payloads use only Core-visible types.
 - **Tests:** `StreamingContractTests.Components_AreUnmanaged`, `.Events_CoreOnly`.
