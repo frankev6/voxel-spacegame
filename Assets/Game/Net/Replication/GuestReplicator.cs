@@ -68,7 +68,7 @@ namespace Game.Net.Replication
             exact = new NativeList<ExactCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
             instanceWrites = new NativeList<ExactCellWrite>(64, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
-                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.GridSalvage, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
+                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.GridSalvage, NetMessage.PilotStatus, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
             {
                 var k = kind;
                 transport.Register(k, (peer, r) => Enqueue(k, r));
@@ -246,6 +246,20 @@ namespace Game.Net.Replication
                     if (Ready(id, out var g) && em.Exists(g.Entity) && !em.HasComponent<Game.Galaxy.Salvage.SalvageCollected>(g.Entity)
                         && Ready(collectorId, out var c) && em.Exists(c.Entity))
                         em.AddComponentData(g.Entity, new Game.Galaxy.Salvage.SalvageCollected { Collector = c.Entity });
+                    return true;
+                }
+                case NetMessage.PilotStatus:
+                {
+                    // NET-017: the host's combat status for a pilot, rebased onto this clock; PlayerCombatStatusSyncSystem reads it.
+                    ulong id = r.U64(); ushort hostiles = r.U16(); uint ago = r.U32();
+                    if (Waiting(id)) return false;
+                    if (Ready(id, out var g) && em.Exists(g.Entity) && em.HasComponent<Game.Simulation.Ai.PilotCombatStatus>(g.Entity))
+                    {
+                        using var clocks = em.CreateEntityQuery(ComponentType.ReadOnly<SimClock>());
+                        uint now = clocks.IsEmptyIgnoreFilter ? localTick : clocks.GetSingleton<SimClock>().Tick;
+                        uint damaged = ago == uint.MaxValue || ago >= now ? 0 : now - ago;   // before this world began counts as never
+                        em.SetComponentData(g.Entity, new Game.Simulation.Ai.PilotCombatStatus { HostilesEngaging = hostiles, LastDamagedTick = damaged });
+                    }
                     return true;
                 }
                 case NetMessage.GridDelta:

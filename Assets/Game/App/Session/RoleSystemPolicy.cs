@@ -50,7 +50,8 @@ namespace Game.App.Session
             ["AiDecisionSystem"] = SystemAuthority.AuthorityOnly,
             ["AiSteeringSystem"] = SystemAuthority.AuthorityOnly,
             ["FleetSystem"] = SystemAuthority.AuthorityOnly,
-            ["PlayerCombatStatusSystem"] = SystemAuthority.AuthorityOnly,
+            ["PlayerCombatStatusSystem"] = SystemAuthority.AuthorityOnly,     // ADR-0117 decider: every pilot's combat status
+            ["PlayerCombatStatusSyncSystem"] = SystemAuthority.Both,          // ADR-0117 derivation: this machine's pilot into the singleton
             ["PlayerTargetingSystem"] = SystemAuthority.Both,             // guests: their own target lock for the HUD
             ["BodyOnRailsSystem"] = SystemAuthority.Both,
             ["ShieldPowerDemandSystem"] = SystemAuthority.Both,

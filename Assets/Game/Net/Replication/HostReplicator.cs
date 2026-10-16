@@ -36,6 +36,9 @@ namespace Game.Net.Replication
             public bool Moving;
             public ulong AbilitySignature;   // decided slot state last broadcast (NET-016)
             public bool SalvageSent;         // SalvageCollected broadcast (NET-017)
+            public bool StatusSent;          // PilotCombatStatus last broadcast (NET-017)
+            public ushort StatusHostiles;
+            public uint StatusDamaged, StatusSentTick;
             public void DisposeShadows() { foreach (var cells in Shadow.Values) cells.Dispose(); Shadow.Clear(); }
         }
         struct ChunkSlot { public ulong NetId; public Entity Entity; }
@@ -126,6 +129,7 @@ namespace Game.Net.Replication
                     if (grid.Revision != g.Revision) Delta(em, root, id, g, grid);
                     SendAbilities(em, root, id, g, tick);
                     SendSalvage(em, root, id, g);
+                    SendPilotStatus(em, root, id, g, tick);
                 }
             }
             removed.Clear();
@@ -153,6 +157,21 @@ namespace Game.Net.Replication
             Broadcast(NetMessage.GridSalvage, message);
         }
 
+        /// <summary>NET-017: a pilot's combat status when it changes (the last hit at most twice a second); the damage tick travels as
+        /// ticks ago, since the clocks differ.</summary>
+        void SendPilotStatus(EntityManager em, Entity root, ulong id, HostGrid g, uint tick)
+        {
+            if (!em.HasComponent<Game.Simulation.Ai.PilotCombatStatus>(root)) return;
+            var s = em.GetComponentData<Game.Simulation.Ai.PilotCombatStatus>(root);
+            bool hostiles = !g.StatusSent || s.HostilesEngaging != g.StatusHostiles;
+            bool damaged = s.LastDamagedTick != g.StatusDamaged && unchecked(tick - g.StatusSentTick) >= 30;
+            if (!hostiles && !damaged) return;
+            g.StatusSent = true; g.StatusHostiles = s.HostilesEngaging; g.StatusDamaged = s.LastDamagedTick; g.StatusSentTick = tick;
+            message.Clear(); message.U64(id); message.U16(s.HostilesEngaging);
+            message.U32(s.LastDamagedTick == 0 ? uint.MaxValue : unchecked(tick - s.LastDamagedTick));
+            Broadcast(NetMessage.PilotStatus, message);
+        }
+
         static bool WriteSalvage(EntityManager em, Entity root, ulong id, NetWriter w)
         {
             w.Clear();
@@ -176,7 +195,7 @@ namespace Game.Net.Replication
             em.CompleteDependencyBeforeRO<RemotePilotInput>(); em.CompleteDependencyBeforeRO<Game.Simulation.Flight.FlightThruster>();
             em.CompleteDependencyBeforeRO<Game.Simulation.Flight.ThrusterState>();
             em.CompleteDependencyBeforeRO<Game.Simulation.Abilities.AbilitySlot>(); em.CompleteDependencyBeforeRO<ShieldControl>();
-            em.CompleteDependencyBeforeRO<Game.Galaxy.Salvage.SalvageCollected>();
+            em.CompleteDependencyBeforeRO<Game.Galaxy.Salvage.SalvageCollected>(); em.CompleteDependencyBeforeRO<Game.Simulation.Ai.PilotCombatStatus>();
         }
 
         /// <summary>HostRemovalTapSystem, every fixed tick after the resolver: removal reasons only live for their own tick, and a frame

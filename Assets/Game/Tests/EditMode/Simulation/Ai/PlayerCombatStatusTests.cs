@@ -106,7 +106,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
             }
             public Fixture()
             {
-                world = EcsTestWorld.Create(typeof(PlayerCombatStatusSystem));
+                world = EcsTestWorld.Create(typeof(PlayerCombatStatusSystem), typeof(PlayerCombatStatusSyncSystem));
                 using (var query = Em.CreateEntityQuery(typeof(PlayerCombatStatus)))
                 {
                     Assert.AreEqual(1, query.CalculateEntityCount(), "Status exists at system creation, before gameplay/config/player.");
@@ -117,7 +117,8 @@ namespace Game.Tests.EditMode.Simulation.Ai
             }
             public Entity Player(uint damageTick)
             {
-                var entity = Em.CreateEntity(typeof(PlayerShip), typeof(Allegiance), typeof(GridDamageStats));
+                // ADR-0117: the player is a pilot, counted into its PilotCombatStatus and synced into the singleton.
+                var entity = Em.CreateEntity(typeof(PlayerShip), typeof(Pilot), typeof(PilotCombatStatus), typeof(Allegiance), typeof(GridDamageStats));
                 Em.SetComponentData(entity, Allegiance.Player); Em.SetComponentData(entity, new GridDamageStats { LastDamageTick = damageTick }); return entity;
             }
             public Entity Ai(Entity target, byte faction = 1, AiState state = AiState.Engage)
@@ -133,7 +134,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 var published = new PublishProxies { Source = source, Proxies = hash.Proxies }.Schedule(hash.Access.Acquire(default));
                 published = source.Dispose(published); hash.Access.Release(published); // Deliberately not an ECS component writer dependency.
             }
-            public void Update() => world.UpdateSystem<PlayerCombatStatusSystem>();
+            public void Update() { world.UpdateSystem<PlayerCombatStatusSystem>(); world.UpdateSystem<PlayerCombatStatusSyncSystem>(); }
             public void StopStatus()
             {
                 if (!statusAlive) return;
