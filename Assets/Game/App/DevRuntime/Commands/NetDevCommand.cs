@@ -14,7 +14,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class NetDevCommand : IDevCommand
     {
         public string Name => "net";
-        public string Usage => "net host [port] [ship=<blueprint>] | net join <ip> [port] | net leave | net status | net sim <latencyMs> <jitterMs> <lossPct> | net hash | net guest <slot> \"<command>\" | net reply | net shot [file.png] | net bring <slot> | net costreset | net anchor [on|off]";
+        public string Usage => "net host [port] [ship=<blueprint>] | net join <ip> [port] | net leave | net status | net sim <latencyMs> <jitterMs> <lossPct> | net hash | net guest <slot> \"<command>\" | net reply | net shot [file.png] | net bring <slot> | net costreset | net anchor [on|off] | net factions";
         public string Summary => "Co-op spike: host or join a session, show traffic, simulate a bad network";
         readonly List<CoopPeer> peers = new();
 
@@ -78,6 +78,22 @@ namespace Game.App.DevRuntime.Commands
                     if (coop.Net == null) return DevCommandResult.Fail("no session");
                     if (coop.Role == SimRoleKind.Host) { coop.Net.HashRequested = true; return DevCommandResult.Ok("hash report requested; guests log the result"); }
                     return DevCommandResult.Ok(coop.Net.Guest?.LastHashReport ?? "no guest replicator");
+                }
+                case "factions":
+                {
+                    // NET-017 parity: this machine's stance table, as targeting and radar colours read it.
+                    var em = ctx.EntityManager;
+                    using var query = em.CreateEntityQuery(Unity.Entities.ComponentType.ReadOnly<Game.Simulation.FactionRelations>());
+                    if (query.CalculateEntityCount() != 1) return DevCommandResult.Fail("no faction table");
+                    em.CompleteDependencyBeforeRO<Game.Simulation.FactionRelations>();
+                    var relations = query.GetSingleton<Game.Simulation.FactionRelations>();
+                    var text = new StringBuilder("factions ").Append(relations.Count).Append(':');
+                    for (int a = 0; a < relations.Count; a++)
+                    {
+                        text.Append(' ');
+                        for (int b = 0; b < relations.Count; b++) text.Append((int)relations.Get((byte)a, (byte)b));
+                    }
+                    return DevCommandResult.Ok(text.ToString());
                 }
             }
             return DevCommandResult.Fail(Usage);

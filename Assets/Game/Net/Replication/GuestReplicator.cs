@@ -68,7 +68,7 @@ namespace Game.Net.Replication
             exact = new NativeList<ExactCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
             instanceWrites = new NativeList<ExactCellWrite>(64, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
-                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.GridSalvage, NetMessage.PilotStatus, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
+                         NetMessage.GridState, NetMessage.AbilityState, NetMessage.GridSalvage, NetMessage.PilotStatus, NetMessage.Factions, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
             {
                 var k = kind;
                 transport.Register(k, (peer, r) => Enqueue(k, r));
@@ -260,6 +260,19 @@ namespace Game.Net.Replication
                         uint damaged = ago == uint.MaxValue || ago >= now ? 0 : now - ago;   // before this world began counts as never
                         em.SetComponentData(g.Entity, new Game.Simulation.Ai.PilotCombatStatus { HostilesEngaging = hostiles, LastDamagedTick = damaged });
                     }
+                    return true;
+                }
+                case NetMessage.Factions:
+                {
+                    // NET-017: the host's stances, written into this machine's table (same content, same faction count).
+                    int count = r.U8();
+                    using var query = em.CreateEntityQuery(ComponentType.ReadWrite<FactionRelations>());
+                    if (query.CalculateEntityCount() != 1) return true;
+                    em.CompleteDependencyBeforeRW<FactionRelations>();
+                    var relations = query.GetSingleton<FactionRelations>();
+                    if (!relations.Stance.IsCreated || relations.Count != count) { transport.Stats.Desyncs++; return true; }
+                    var stance = relations.Stance;
+                    for (int i = 0; i < count * count; i++) stance[i] = r.U8();
                     return true;
                 }
                 case NetMessage.GridDelta:

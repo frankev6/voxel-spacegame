@@ -345,11 +345,13 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
   - Guests receive faction relations, economy notices, combat status and the interactables of stations and encounters.
   - Combat status per pilot (moved from NET-015), and `SalvageCollected` replicated so a guest's prompt clears when the pull starts.
   - Salvage goes to the cargo model chosen in §10 Q5.
-- **Files:** `Assets/Game/Net/Replication/HostReplicator.cs`, `Assets/Game/Net/Replication/GuestReplicator.cs`, `Assets/Game/Galaxy/Salvage/SalvageService.cs`
+- **Files:** `Assets/Game/Net/Replication/HostReplicator.cs`, `Assets/Game/Net/Replication/GuestReplicator.cs`, `Assets/Game/Galaxy/Salvage/SalvageService.cs`, `SalvageDespawnSystem.cs`, `Assets/Game/Simulation/Ai/PlayerCombatStatusSyncSystem.cs`, `Assets/Game/App/Session/CoopSession.Notices.cs`
 - **Acceptance criteria:**
-  - [ ] Guests see dock, hail and inspect prompts.
-  - [ ] Guests see salvage and trade notices.
-  - [ ] Radar colours follow standing changes.
+  - [ ] Guests see dock, hail and inspect prompts. Deferred: co-op hosts only from the sandbox playground, which has no loaded bodies or encounters, so there are none to show. Its pads are dev actions that run on the host. Recorded in ADR-0117 note 6.
+  - [x] Guests see salvage notices. Live: after the guest's F press its prompt cleared and its own HUD showed "Salvaged 32 items."; the host's HUD did not. Trade notices come from the merchant screen, which only the host can open (same deferral).
+  - [x] Radar colours follow standing changes. The stance table that targeting and radar read replicates. Live: `net factions` matched on host and guest before, after setting Vestari hostile, and after setting it back.
+  - [x] Combat status per pilot. The host computes it for every pilot, and each guest receives its own.
+  - [x] Salvage goes to the shared host hold (§10 Q5 default), and the pull animation runs on every machine.
 - **Tests:** `coop-parity.sh`.
 
 ### NET-018 — One code path: enforcement

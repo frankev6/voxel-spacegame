@@ -136,6 +136,7 @@ namespace Game.Net.Replication
             foreach (var id in order) if (!seen.Contains(id)) removed.Add(id);
             foreach (var id in removed) SendDespawn(id);
             CaptureChunks(em, tick);
+            if (WriteFactions(em, message, out ulong factions) && factions != factionSignature) { factionSignature = factions; Broadcast(NetMessage.Factions, message); }
             foreach (var peer in transport.Peers) if (peer.Phase == NetPeerPhase.Ready) SendJoin(em, peer, tick);
             quietBricks.Clear();   // gathered tick by tick since the last capture (TapRemovals)
         }
@@ -147,6 +148,25 @@ namespace Game.Net.Replication
             if (!AbilityCodec.Write(em, root, id, tick, message, out ulong signature) || signature == g.AbilitySignature) return;
             g.AbilitySignature = signature;
             Broadcast(NetMessage.AbilityState, message);
+        }
+
+        ulong factionSignature;
+
+        /// <summary>NET-017: faction stances, which the authority's FactionStandingSystem changes (provocation, relation requests). Guests
+        /// target, colour and judge hostility with the same table.</summary>
+        static bool WriteFactions(EntityManager em, NetWriter w, out ulong signature)
+        {
+            signature = 0; w.Clear();
+            using var query = em.CreateEntityQuery(ComponentType.ReadOnly<FactionRelations>());
+            if (query.CalculateEntityCount() != 1) return false;
+            em.CompleteDependencyBeforeRO<FactionRelations>();
+            var relations = query.GetSingleton<FactionRelations>();
+            if (!relations.Stance.IsCreated || relations.Count <= 0 || relations.Count > 64) return false;
+            ulong h = 1469598103934665603UL;
+            w.U8((byte)relations.Count);
+            for (int i = 0; i < relations.Count * relations.Count; i++) { byte v = relations.Stance[i]; w.U8(v); h = (h ^ v) * 1099511628211UL; }
+            signature = h | 1;
+            return true;
         }
 
         /// <summary>NET-017: the authority's salvage decision, so every machine pulls the wreck into the same ship.</summary>
@@ -414,6 +434,7 @@ namespace Game.Net.Replication
                 message.Clear(); WriteChunk(em, slot.Entity, slot.NetId, em.GetComponentData<ChunkBody>(slot.Entity), tick, message);
                 transport.SendReliable(peer, NetMessage.ChunkSpawn, message);
             }
+            if (WriteFactions(em, message, out _)) transport.SendReliable(peer, NetMessage.Factions, message);
             message.Clear(); message.U32(tick); transport.SendReliable(peer, NetMessage.JoinEnd, message);
             peer.Phase = NetPeerPhase.InWorld;
             Game.Core.GameLog.Info(NetTransport.Category, "join snapshot for slot " + peer.Slot + ": " + grids.Count + " grids, " + peer.PendingReliableBytes / 1024 + " KB queued");
@@ -568,7 +589,7 @@ namespace Game.Net.Replication
         void Reset()
         {
             foreach (var g in grids.Values) g.DisposeShadows();
-            grids.Clear(); order.Clear(); priorities.Clear(); hashedRevision.Clear();
+            grids.Clear(); order.Clear(); priorities.Clear(); hashedRevision.Clear(); factionSignature = 0;
             for (int i = 0; i < chunks.Length; i++) chunks[i] = default;
             tracking = false;
         }

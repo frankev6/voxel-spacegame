@@ -21,7 +21,7 @@ namespace Game.Net.Protocol
         Hello = 1, Ready = 2,
         // host → guest, reliable
         Welcome = 10, Reject = 11, JoinBegin = 12, JoinEnd = 13,
-        GridSpawn = 20, GridDespawn = 21, GridDelta = 22, GridState = 23, AbilityState = 24, GridSalvage = 25, PilotStatus = 26,
+        GridSpawn = 20, GridDespawn = 21, GridDelta = 22, GridState = 23, AbilityState = 24, GridSalvage = 25, PilotStatus = 26, Factions = 27,
         ChunkSpawn = 30, ChunkDespawn = 31,
         CombatFx = 40, HashReport = 41, Notice = 42,
         // dev builds: host → guest command, guest → host reply (reliable)

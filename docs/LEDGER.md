@@ -519,7 +519,7 @@
 | NET-014 | One code path: structural transitions and spawn setup | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 4f7cd407 | impulses, core loss and chunk body setup shared; split-hulk functional moves and one root setup recorded as remaining; spike worktree only |
 | NET-015 | One code path: pilots | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-014 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 7b267105 | pilots on every machine; per-pilot interaction, host-side trigger; guest salvage live; combat status moved to NET-017; spike worktree only |
 | NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 69cb8412 | ability timers and effects on every machine, activation on the host, slots replicated; guest hotbar and boost prediction live; spike worktree only |
-| NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | no | todo |  |  |  |  |
+| NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | COMMIT | salvage collect and pull on every machine, notices to the pilot's machine, combat status per pilot, stance table to guests; body interactables deferred (sandbox-only co-op); spike worktree only |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
@@ -1235,6 +1235,20 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-16 — NET-017: one code path, phase 5 (lead, claude-opus-5-5)
+- **Built:**
+  - `SalvageDespawnSystem`, split out of the pull job; `SalvagePullSystem` runs on every role; `SalvageMarkSystem` removes collected wrecks' prompts;
+  - `EconomyNotice.Pilot` and the `Notice` message (`CoopSession.Notices.cs`); the salvage cue follows the pilot's notice;
+  - `PilotCombatStatus` and `PlayerCombatStatusSyncSystem`;
+  - stance table replication;
+  - protocol 8;
+  - `net factions`.
+- **Verified:**
+  - PlayMode salvage (7), interaction (4), interact command (2), playground, AI scenarios (4) pass;
+  - EditMode AI (30), Net (18), system order (9), role policy (3), notice presenter (3) and inventory (11) pass;
+  - live with a headless guest: the guest's F press cleared its prompt and showed "Salvaged 32 items." on the guest only, the items went to the host's hold and the wreck despawned on both; standing changes matched on both; 0 hash mismatches, 0 desyncs, no errors.
+- **Deferred:** dock, hail, inspect and trade for guests. Co-op is hosted only from the sandbox playground, which has none of them (ADR-0117 note 6).
 
 ### 2026-10-16 — NET-016: one code path, phase 4 (lead, claude-opus-5-5)
 - Owner, at the start of the night: "go ahead with everything, even past the net 016, im going to bed, use your best judgement instead of stopping for reports or decision".

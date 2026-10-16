@@ -21,7 +21,7 @@ Turning a system off on a guest removed both jobs. The spike then rebuilt the co
 | `PlayerCommandApplySystem` | `RemotePilotApplySystem` | (copy of the clamping and edge rules) |
 | `PlayerTargetingSystem` (only `PlayerShip`) | `RemotePilotReceiveSystem` writes `ShipTarget` | guest autofire did nothing on the host |
 | `SalvageMarkSystem`, `SalvageReachSystem` (host only) | none | no salvage tint, prompt or reach on guests |
-| `BodyGridSpawner`, `EncounterDirectorService` add `Interactable` | none | no dock, hail or inspect prompts on guests |
+| `BodyGridSpawner`, `EncounterDirectorService` add `Interactable` | none | no dock, hail or inspect prompts on guests (deferred: co-op is sandbox-only, NET-017) |
 | `AbilitySystem` fills `AbilitySlot` (host only) | none | empty ability hotbar on guests (fixed in NET-016) |
 | `InteractionQuerySystem`, `SalvageService` use the one `PlayerShip` | none | a guest's F press does nothing on the host |
 
@@ -133,6 +133,28 @@ There is a second form of the same problem: host simulation assumes one player (
      - `AbilityScenarioTests` now pins the shipped boost (1.8x speed, 2x thrust), since the content carries the 4x playtest tuning from NET-012.
      - Its peak-speed check now asks for a clear pass over the normal cap, not reaching the boosted one. The pulse reaches 199 of 216 m/s on 68c80533, before any co-op code, so this comes from QA-001's flight handling.
      - `Boost_RaisesTopSpeed` still fails its braking bound on 3c5b2faa, before this phase: 41 of 79 m/s shed in 323 ticks. That is a QA-001 flight question, recorded rather than loosened.
+
+6. **NET-017 (2026-10-16).**
+   - **Salvage.** `SalvageService.TrySalvage` stays the decision: yields, the hold, and `SalvageCollected { Collector }` written as state.
+     - Its consequences run on every machine. `SalvageMarkSystem` removes the prompt from collected wrecks. `SalvagePullSystem` (now on every role) streams the cubes into the collector.
+     - The despawn after the last wave moved out of the pull job into `SalvageDespawnSystem` (authority).
+     - The host sends `GridSalvage` (wreck, collector), and a guest adds the same component.
+   - **Notices.**
+     - `EconomyNotice.Pilot` names the co-op pilot a notice is for (0 = this machine's player).
+     - `SalvageService` sets it to the collector, unless the collector is the local player.
+     - The co-op session sends it to that guest as `Notice`, where it is published for the guest's own player.
+     - `HudNotificationPresenter` shows only this machine's notices.
+     - The salvage cue now follows the `SalvageDone` notice for this machine's pilot, so it plays wherever the salvaging pilot is.
+   - **Combat status.**
+     - `PlayerCombatStatusSystem` (authority) counts every pilot into `PilotCombatStatus`, which `PilotSetupSystem` adds.
+     - `PlayerCombatStatusSyncSystem` (every machine, right after it) writes the singleton from the ship this machine flies. Without exactly one `PlayerShip`, it zeroes the hostile count and keeps the last damage tick, as before.
+     - The host sends `PilotStatus` on change. The last-hit tick goes at most twice a second, as ticks ago.
+   - **Faction relations.** The host sends the stance table (`Factions`) when it changes and in the join snapshot. The guest writes it into its own table, which has the same content and faction count. `net factions` prints it.
+   - **Protocol 8.** New messages: `GridSalvage`, `PilotStatus`, `Factions` and `Notice`.
+   - **Deferred: interactables of bodies and encounters.** Co-op can only be hosted from the sandbox playground, which loads no bodies and runs no encounters, so no dock, hail, inspect or jump target exists to replicate or to check. When co-op leaves the sandbox:
+     - send the root's or body anchor's `Interactable` with the grid;
+     - show non-salvage prompts on guests as host-only until those flows have a co-op design.
+     - Trade is in the same position, because only the host can open the merchant screen.
 
 ## Consequences
 - Single-player behaviour must stay identical. Each split is a refactor of existing systems, checked by the existing damage, integrity, split, ability and interaction tests before co-op is touched.
