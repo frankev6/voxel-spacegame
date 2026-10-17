@@ -515,3 +515,145 @@ def callout(v, p, n, fnt):
     x, y = v.P(p); r = v.px(15)
     v.d.ellipse((x - r, y - r, x + r, y + r), fill=(13, 14, 12, 235), outline=TEXT + (255,), width=v.px(2))
     v.d.text((x, y + v.px(1)), str(n), font=fnt, fill=TEXT + (255,), anchor="mm")
+
+
+def reactor_pulse(v, c, r, shadows=()):
+    """A dying reactor that pulses radiation outward; shadow polygons (behind wreckage) are safe."""
+    for i in range(7, 0, -1):
+        v.circle(c, r * i / 7, fill=FLARE + (int(10 + (7 - i) * 3),))
+    for i in (0.45, 0.7, 0.95):
+        v.circle(c, r * i, outline=FLARE + (150,), width=v.px(2))
+    for sh in shadows:
+        v.poly(sh, fill=(0, 0, 0, 150))
+        v.line(sh, (60, 60, 60, 220), v.px(1), closed=True, dash=(v.px(5), v.px(5)))
+    x, y = v.P(c); rr = v.px(11)
+    v.d.ellipse((x - rr, y - rr, x + rr, y + rr), fill=(255, 220, 160, 255), outline=FLARE + (255,), width=v.px(3))
+
+
+def wreck(a, b, s0, s1, width_fn, jag0=0.0, jag1=0.0, seed=1, step=0.02):
+    """Hull outline along axis a→b from fraction s0 to s1, half-width width_fn(s); jagged (broken) ends where jag > 0 metres."""
+    import random as _r
+    rng = _r.Random(seed)
+    L = math.dist(a, b); u = ((b[0] - a[0]) / L, (b[1] - a[1]) / L); n = (-u[1], u[0])
+    def P(s, w): return (a[0] + u[0] * s * L + n[0] * w, a[1] + u[1] * s * L + n[1] * w)
+    k = max(2, int((s1 - s0) / step))
+    ss = [s0 + (s1 - s0) * i / k for i in range(k + 1)]
+    left = [P(s, width_fn(s)) for s in ss]
+    right = [P(s, -width_fn(s)) for s in reversed(ss)]
+    def end(s, jag, w0, w1):
+        if jag <= 0:
+            return []
+        pts, m = [], 7
+        for i in range(1, m):
+            w = w0 + (w1 - w0) * i / m
+            pts.append(P(s + (rng.uniform(-1, 1) * jag) / L, w))
+        return pts
+    return left + end(s1, jag1, width_fn(s1), -width_fn(s1)) + right + end(s0, jag0, -width_fn(s0), width_fn(s0))
+
+
+# ---------------------------------------------------------------- dead warships (battle graveyard)
+WRECK = dict(base=(78, 76, 70), plate=(112, 108, 98), deck=(52, 52, 48), frame=(34, 34, 31), rust=(116, 72, 44),
+             scorch=(24, 22, 20), ember=(255, 106, 42), dead=(60, 64, 66))
+
+
+def ship_wreck(v, a, b, kind, seed=1, cut=None, width=None):
+    """Draw a dead capital ship from axis a (stern) to b (bow) seen from above, in layered parts.
+    kind: dreadnought, carrier, battleship, cruiser or frigate. cut = (s0, s1) keeps only that part of the hull,
+    with torn edges. Returns the hull outline (world points) so tracks and interiors can be tested against it."""
+    import random as _r
+    rng = _r.Random(seed)
+    L = math.dist(a, b); u = ((b[0] - a[0]) / L, (b[1] - a[1]) / L); n = (-u[1], u[0])
+    W = width or {"dreadnought": 185, "carrier": 125, "battleship": 110, "cruiser": 70, "frigate": 34}[kind]
+
+    def P(s, w):
+        return (a[0] + u[0] * s * L + n[0] * w, a[1] + u[1] * s * L + n[1] * w)
+
+    def half_width(s):
+        if kind == "carrier":
+            return W * (0.78 if s < 0.04 or s > 0.96 else 1.0)
+        prow = {"dreadnought": 0.84, "battleship": 0.86, "cruiser": 0.8, "frigate": 0.72}[kind]
+        w = W
+        if s > prow:
+            w = W * max(0.12, 1 - (s - prow) / (1 - prow) * 0.9)
+        if s < 0.06:
+            w = W * 0.82
+        if kind == "dreadnought" and 0.30 < s < 0.42:
+            w = W * 1.25           # sponsons under the bridge
+        return w
+
+    s0, s1 = cut or (0.0, 1.0)
+    k = max(8, int((s1 - s0) * 90))
+    ss = [s0 + (s1 - s0) * i / k for i in range(k + 1)]
+    left = [P(s, half_width(s)) for s in ss]
+    right = [P(s, -half_width(s)) for s in reversed(ss)]
+
+    def torn(s, w0, w1):
+        return [P(s + rng.uniform(-1, 1) * 40 / L, w0 + (w1 - w0) * i / 8) for i in range(1, 8)]
+    outline = left + (torn(s1, half_width(s1), -half_width(s1)) if s1 < 1 else []) + right + \
+              (torn(s0, -half_width(s0), half_width(s0)) if s0 > 0 else [])
+    inside = lambda s: s0 <= s <= s1
+    v.poly(outline, fill=WRECK["base"] + (255,), outline=WRECK["frame"] + (255,), width=v.px(2))
+
+    # plates in rows along the hull, some missing (scorched) and some rusted
+    rows = 3 if kind in ("frigate",) else 5
+    for r in range(rows):
+        w0 = -1 + 2 * r / rows; w1 = -1 + 2 * (r + 1) / rows
+        s = s0
+        while s < s1:
+            ds = rng.uniform(0.025, 0.06) * (2 if kind == "frigate" else 1)
+            e = min(s1, s + ds)
+            hw = half_width((s + e) / 2) * 0.9
+            col = WRECK["plate"] if rng.random() < 0.7 else (WRECK["rust"] if rng.random() < 0.5 else WRECK["scorch"])
+            v.poly([P(s + 0.003, hw * (w0 + 0.04)), P(e - 0.003, hw * (w0 + 0.04)), P(e - 0.003, hw * (w1 - 0.04)), P(s + 0.003, hw * (w1 - 0.04))],
+                   fill=col + (255,))
+            s = e
+    # centre spine and frames
+    v.line([P(max(s0, 0.04), 0), P(min(s1, 0.95), 0)], WRECK["frame"] + (255,), v.m(W * 0.10))
+    for s in [x / 20 for x in range(1, 20)]:
+        if inside(s):
+            v.line([P(s, half_width(s) * 0.95), P(s, -half_width(s) * 0.95)], WRECK["frame"] + (200,), v.px(1))
+
+    if kind == "carrier":   # flight deck down the middle, island to one side
+        v.poly([P(max(s0, 0.02), W * 0.42), P(min(s1, 0.98), W * 0.42), P(min(s1, 0.98), -W * 0.42), P(max(s0, 0.02), -W * 0.42)], fill=WRECK["deck"] + (255,))
+        for s in [x / 40 for x in range(1, 40)]:
+            if inside(s):
+                v.line([P(s, 0), P(s + 0.012, 0)], (210, 190, 120, 200), v.px(2))
+        for s in (0.15, 0.85):
+            if inside(s):
+                v.line([P(s, W * 0.38), P(s, -W * 0.38)], (210, 190, 120, 160), v.px(2))
+        if inside(0.62):
+            v.poly([P(0.55, -W * 1.0), P(0.70, -W * 1.0), P(0.70, -W * 1.45), P(0.55, -W * 1.45)], fill=WRECK["plate"] + (255,), outline=WRECK["frame"] + (255,))
+    # turrets: barbettes on the centreline (capital ships) or in pairs (cruiser, frigate)
+    turrets = {"dreadnought": [0.22, 0.48, 0.58, 0.70, 0.78], "battleship": [0.28, 0.5, 0.72], "cruiser": [0.6, 0.75], "frigate": [0.65],
+               "carrier": []}[kind]
+    for s in turrets:
+        if not inside(s):
+            continue
+        c = P(s, 0); r = W * (0.32 if kind != "frigate" else 0.4)
+        v.circle(c, r, fill=WRECK["dead"] + (255,), outline=WRECK["frame"] + (255,), width=v.px(2))
+        ang = math.atan2(u[1], u[0]) + rng.uniform(-1.2, 1.2)     # guns frozen where they last pointed
+        for off in (-0.25, 0, 0.25):
+            p0 = (c[0] - math.sin(ang) * r * off, c[1] + math.cos(ang) * r * off)
+            v.line([p0, (p0[0] + math.cos(ang) * r * 2.1, p0[1] + math.sin(ang) * r * 2.1)], WRECK["frame"] + (255,), v.m(W * 0.05))
+    # bridge tower
+    bs = {"dreadnought": 0.36, "battleship": 0.40, "cruiser": 0.45, "frigate": 0.4, "carrier": None}[kind]
+    if bs and inside(bs):
+        v.poly([P(bs - 0.04, W * 0.45), P(bs + 0.03, W * 0.4), P(bs + 0.03, -W * 0.4), P(bs - 0.04, -W * 0.45)], fill=WRECK["plate"] + (255,),
+               outline=WRECK["frame"] + (255,), width=v.px(2))
+        v.line([P(bs - 0.01, W * 0.3), P(bs - 0.01, -W * 0.3)], (255, 174, 74, 90), v.px(2))
+    # dead engines at the stern
+    if s0 <= 0.02:
+        nb = {"dreadnought": 4, "battleship": 3, "carrier": 4, "cruiser": 2, "frigate": 2}[kind]
+        for i in range(nb):
+            w = W * 0.75 * (-1 + 2 * (i + 0.5) / nb)
+            br = W * 0.75 / nb
+            v.poly([P(0.0, w - br * 0.6), P(0.0, w + br * 0.6), P(-0.025 * 600 / L * 6, w + br), P(-0.025 * 600 / L * 6, w - br)],
+                   fill=WRECK["frame"] + (255,))
+    # hull breaches with embers
+    for _ in range({"dreadnought": 5, "battleship": 4, "carrier": 3, "cruiser": 2, "frigate": 1}[kind]):
+        s = rng.uniform(max(s0, 0.08), min(s1, 0.9)); w = rng.uniform(-0.7, 0.7) * half_width(s); r = W * rng.uniform(0.12, 0.25)
+        c = P(s, w)
+        v.circle(c, r * 1.5, fill=WRECK["scorch"] + (200,))
+        v.circle(c, r, fill=(12, 10, 9, 255), outline=WRECK["ember"] + (200,), width=v.px(2))
+        v.dot(c, 2.5, WRECK["ember"] + (230,))
+    return outline

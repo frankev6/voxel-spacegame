@@ -51,6 +51,20 @@ def build(opt):
     for item in opt.get("barricades", []) + opt.get("doors", []):
         if "at_p" in item:
             item["f"] = nearest_f(paths[item["path"]], item["at_p"])
+    for z in opt.get("boost", []) + opt.get("slow", []):
+        if "p" in z:
+            z["f"] = tuple(sorted((nearest_f(paths[z["path"]], z["p"][0]), nearest_f(paths[z["path"]], z["p"][1]))))
+    for g in opt["gates"]:
+        if "at_p" in g:
+            g["f"] = nearest_f(paths[g["path"]], g["at_p"])
+    if "start_p" in opt:
+        opt["start_f"] = nearest_f(paths["main"], opt["start_p"])
+    for pt in opt.get("portals", []):
+        if "at_p" in pt:
+            pt["f"] = nearest_f(paths[pt["path"]], pt["at_p"])
+    for r in opt["routes"]:
+        if isinstance(r.get("portal"), str):  # "portals": skip from the first portal to the second
+            r["portal"] = (opt["portals"][0]["f"], opt["portals"][1]["f"])
     skipped = [p["join"] for n, p in paths.items() if n != "main"] + [r["portal"] for r in opt["routes"] if r.get("portal")]
     for g in opt["gates"]:
         g["required"] = g["path"] == "main" and not any(a < g["f"] < b for a, b in skipped)
@@ -147,69 +161,6 @@ DER_PROFILE = [(0.0, -140), (0.06, -195), (0.27, -195), (0.31, -240), (0.44, -24
 
 # ---------------------------------------------------------------- the options
 OPTIONS = {
-    "A": dict(
-        name="Derelict Run", seed=11, start_f=0.004,
-        tagline="A lap around, along or straight through a 1 km dead dreadnought. Its guns wake on lap 2.",
-        concept="A dead capital ship lies across the north-east corner. The outer line goes around it past salvage cranes "
-                "that sweep the track. The gun deck skims its flank under turrets. The hangar run flies through its "
-                "dark interior, past bulkheads someone has to shoot open, to a blast door anyone on the gun deck can "
-                "slam shut. The south half is about engines: three dead drives vent across the straight in turn, and "
-                "a switchback full of seeker mines leads back to the start.",
-        paths={
-            "main": dict(closed=True, width=140, left="field", right="voxel", points=[
-                (-1250, -100), (-1200, 450), (-900, 780), (-350, 840), (300, 900), (850, 1020), (1300, 860),
-                (1450, 420), (1380, -150), (1150, -650), (700, -850), (0, -780), (-500, -820), (-740, -640),
-                (-620, -420), (-950, -280)]),
-            "hangar": dict(width=60, interior=True, left="voxel", right="voxel", label="HANGAR RUN", label_f=0.55, label_off=2.2,
-                           from_p=(-640, 828), to_p=(820, -810), lead=120,
-                           inner=[along(DER_A, DER_B, -120, 0), along(DER_A, DER_B, 500, 0), along(DER_A, DER_B, 1110, 0),
-                                  (1190, -260), (1140, -560)]),
-            "gundeck": dict(width=100, left="field", right="none", label="GUN DECK", label_f=0.30, label_off=-1.5,
-                            from_p=(-760, 815), to_p=(860, -800), lead=150,
-                            inner=[along(DER_A, DER_B, 40, -380), along(DER_A, DER_B, 560, -370), along(DER_A, DER_B, 960, -400),
-                                   (990, -560)]),
-        },
-        structures=[dict(pts=hull_from_axis(DER_A, DER_B, DER_PROFILE), seed=5)],
-        boost=[dict(path="main", f=(0.09, 0.15)), dict(path="main", f=(0.46, 0.50))],
-        slow=[],
-        canisters=[(-640, 840), (-560, 842), (-480, 845), (1452, 260), (1448, 180), (1440, 100), (300, -790), (380, -795)],
-        mines=[dict(c=(-1010, 690), r=70, n=6, kind="emp"), dict(c=(-760, -500), r=150, n=10, kind="seeker"),
-               dict(c=(-520, -660), r=40, n=3, kind="prox")],
-        rocks=[((-860, -430), 120, 10), ((1180, -880), 90, 6)],
-        barricades=[dict(path="hangar", at_p=along(DER_A, DER_B, 330, 0)), dict(path="hangar", at_p=along(DER_A, DER_B, 620, 0))],
-        doors=[dict(path="hangar", at_p=along(DER_A, DER_B, 930, 0), switch=along(DER_A, DER_B, 880, -215))],
-        turrets=[dict(c=along(DER_A, DER_B, s, -205), facing=-124, reach=330, arc=120) for s in (230, 520, 760)],
-        sweepers=[dict(hub=(760, 1330), length=480, arms=2, phase=-70), dict(hub=(1700, 520), length=420, arms=3, phase=200)],
-        washes=[dict(o=(520, -1100), dir=90, length=430, width=170), dict(o=(20, -1050), dir=90, length=380, width=160),
-                dict(o=(-330, -1090), dir=90, length=380, width=160)],
-        pylons=[dict(c=(930, -640), reach=230)],
-        gates=[dict(id=0, path="main", f=0.0), dict(id=1, path="main", f=0.10), dict(id=2, path="main", f=0.20),
-               dict(id=3, path="main", f=0.30), dict(id=4, path="main", f=0.40), dict(id=5, path="main", f=0.47),
-               dict(id=6, path="main", f=0.60), dict(id=7, path="main", f=0.72), dict(id=8, path="main", f=0.84),
-               dict(id=9, path="hangar", f=0.5), dict(id=10, path="gundeck", f=0.5)],
-        routes=[dict(name="Outer line", branches=[], note="Cranes and canisters; slowest, but nothing shoots at you"),
-                dict(name="Gun deck", branches=["gundeck"], note="Fastest on lap 1; from lap 2 three turrets shove the leader off it"),
-                dict(name="Hangar run", branches=["hangar"], note="Shut on lap 1 until someone shoots the bulkheads; then the steady fast line, unless the door slams")],
-        sectors=[
-            ((-1300, 120), "Start straight on the west side; the pack funnels into the north-west apex."),
-            ((-1010, 790), "EMP mines on the apex: one cuts your thrusters for 1.5 s and you drift on carry."),
-            ((-560, 960), "Boost strip and energy canisters; then the split: outer line, gun deck or hangar."),
-            (along(DER_A, DER_B, 0, 120), "Hangar mouth: fly into the wreck. Dark, 60 m wide, voxel walls."),
-            (along(DER_A, DER_B, 520, 150), "Two bulkheads. The first ship through must shoot them; they stay open for everyone after."),
-            (along(DER_A, DER_B, 930, 150), "Blast door. Its switch is on the gun deck: one shot slams it for 6 s on whoever is inside."),
-            (along(DER_A, DER_B, 380, -480), "Gun deck: wide and fast, but on lap 2 the wreck's turrets wake and target the leader."),
-            ((760, 1180), "Salvage cranes sweep the outer corner. Time the gap or get batted into the wall."),
-            ((1560, 120), "East run: canisters, then a three-arm crane over the track."),
-            ((780, -560), "Grapple hairpin, where the gun deck rejoins: hook the pylon and swing round it without braking."),
-            ((100, -1170), "Engine graveyard: three dead drives vent across the straight in turn, every 12 s."),
-            ((-900, -640), "Seeker switchback: mines drift toward the nearest ship; hide behind rocks or lead them into a rival."),
-        ],
-        events=["Lap 1: bulkheads are closed; the wreck is quiet.",
-                "Lap 2: the gun-deck turrets wake and fire at the race leader.",
-                "Lap 3: the wreck's reactor vents; a slow field fills the hangar's last third."],
-        mechanics=["EMP mines", "Seeker mines", "Bulkheads", "Blast door + switch", "Gauntlet turrets", "Sweeper cranes",
-                   "Grapple pylon", "Engine wash", "Canisters", "Lap events"],
-    ),
     "B": dict(
         name="Moon Slingshot", seed=23, start_f=0.62,
         tagline="A figure eight: one lobe whips round a moon's gravity well, the other threads a spinning station.",
@@ -270,7 +221,7 @@ OPTIONS = {
         tagline="An ore foundry: conveyor rocks, smelter vents, a test-firing freighter and a three-lane fork under guns.",
         concept="The track winds through a working foundry. A docked freighter test-fires its engines across the start "
                 "straight. Smelter vents blast heat across the north sweeper, and an ore conveyor carries rocks across "
-                "the S-bend on a rail. After a grapple hairpin the track forks into three lanes. The boost lane is "
+                "the S-bend on a rail. After the east hairpin the track forks into three lanes. The boost lane is "
                 "fastest, but it runs under a turret platform and ends at a blast door whose switch sits on that "
                 "platform. The barricade lane is shortest, narrow and walled. The safe lane is longest, with energy "
                 "canisters. All three merge at an EMP minefield.",
@@ -290,7 +241,6 @@ OPTIONS = {
         washes=[dict(o=(-1420, -50), dir=0, length=420, width=180), dict(o=(-560, 390), dir=95, length=230, width=120, heat=True),
                 dict(o=(-340, 390), dir=80, length=220, width=110, heat=True)],
         rails=[dict(pts=[(230, 1080), (225, 700), (220, 360), (215, 20)], rocks=[0.12, 0.36, 0.62, 0.86])],
-        pylons=[dict(c=(1010, -60), reach=210)],
         turrets=[dict(c=(-90, -320), facing=90, reach=240, arc=110), dict(c=(90, -320), facing=90, reach=240, arc=110),
                  dict(c=(-90, -400), facing=270, reach=200, arc=100), dict(c=(90, -400), facing=270, reach=200, arc=100)],
         doors=[dict(path="boostlane", f=0.84, switch=(-185, -360))],
@@ -312,7 +262,7 @@ OPTIONS = {
             ((-870, 700), "North sweeper through magnetic dust (slow field)."),
             ((-450, 470), "Smelter vents: heat bursts shove you toward the outer wall."),
             ((380, 260), "Ore conveyor: rocks ride a rail across the S-bend. Shoot one off the rail into a rival."),
-            ((1080, -260), "Grapple hairpin: hook the pylon and swing into the fork at speed."),
+            ((1080, -260), "East hairpin: the tightest corner on the lap, straight into the fork."),
             ((860, -560), "The fork: boost lane, barricade lane or safe lane."),
             ((0, -120), "Boost lane: 192 m/s under four turrets; the exit door can slam shut."),
             ((280, -360), "Gauntlet platform: turrets cover both upper lanes, and the door switch is here."),
@@ -322,7 +272,7 @@ OPTIONS = {
         ],
         events=["Lap 1: conveyor every 6 s; barricades closed.", "Lap 2: the turrets fire at anyone in the boost lane, not just the leader.",
                 "Lap 3: slag pours from the smelter: a slow field floods the north sweeper twice as long."],
-        mechanics=["Engine wash (freighter)", "Heat vents", "Ore conveyor", "Grapple pylon", "Gauntlet turrets",
+        mechanics=["Engine wash (freighter)", "Heat vents", "Ore conveyor", "Gauntlet turrets",
                    "Blast door + switch", "Barricades", "EMP mines", "Canisters", "Lap events"],
     ),
 }
@@ -344,6 +294,10 @@ def draw_track(opt, key):
         xs.append(w["o"][0]); ys.append(w["o"][1])
     for st in opt.get("structures", []):
         xs += [q[0] for q in st["pts"]]; ys += [q[1] for q in st["pts"]]
+    for w in opt.get("wrecks", []):
+        c0, c1 = w.get("cut") or (0.0, 1.0)
+        for f in (c0, c1):
+            xs.append(w["a"][0] + (w["b"][0] - w["a"][0]) * f); ys.append(w["a"][1] + (w["b"][1] - w["a"][1]) * f)
     for r in opt.get("rails", []):
         xs += [q[0] for q in r["pts"]]; ys += [q[1] for q in r["pts"]]
     pad = 120
@@ -361,6 +315,10 @@ def draw_track(opt, key):
         orbit(v, o["c"], o["r"], o["n"], opt["seed"], o["dir"])
     for i, s in enumerate(opt.get("structures", [])):
         structure(v, s["pts"], seed=s.get("seed", i))
+    for i, w in enumerate(opt.get("wrecks", [])):
+        w["_outline"] = ship_wreck(v, w["a"], w["b"], w["kind"], w.get("seed", i), w.get("cut"))
+    for rc in opt.get("reactors", []):
+        reactor_pulse(v, rc["c"], rc["r"], rc.get("shadows", []))
 
     # corridors
     for path in paths.values():
@@ -368,7 +326,7 @@ def draw_track(opt, key):
     for path in paths.values():
         v.line(path["poly"], TRACK, v.m(path["width"]), path["closed"])
         if path.get("interior"):
-            hulls = [st["pts"] for st in opt.get("structures", [])]
+            hulls = [st["pts"] for st in opt.get("structures", [])] + [w["_outline"] for w in opt.get("wrecks", [])]
             run = []
             for q in path["poly"] + [None]:
                 if q is not None and any(point_in_poly(q, h) for h in hulls):
@@ -493,6 +451,12 @@ def draw_track(opt, key):
         x, y = v.P((0, 0)); r = v.m(100)
         v.d.ellipse((x - r, y - r, x + r, y + r), outline=MINE + (200,), width=v.px(3))
 
+    for dr in opt.get("drifts", []):
+        c, r, a0, a1 = dr["c"], dr["r"], dr["a0"], dr["a1"]
+        arc = [(c[0] + math.cos(math.radians(a)) * r, c[1] + math.sin(math.radians(a)) * r) for a in range(a0, a1, 2 if a1 > a0 else -2)]
+        v.line(arc, TEXT + (220,), v.px(3), dash=(v.px(10), v.px(6))); v.arrow(arc[-2], arc[-1], TEXT + (220,), v.px(3))
+    for pos, txt in opt.get("texts", []):
+        v.text(pos, txt, font(F_BOLD, 15), DIM + (255,))
     for name, path in paths.items():
         if name == "main" or "label" not in path:
             continue
@@ -506,7 +470,7 @@ def draw_track(opt, key):
 
     # header and scale
     d = v.d
-    d.text((60 * SS, 48 * SS), f"OPTION {key}  ·  {opt['name'].upper()}", font=font(F_TITLE, 36), fill=TEXT)
+    d.text((60 * SS, 48 * SS), opt.get("title", f"OPTION {key}  ·  {opt['name'].upper()}"), font=font(F_TITLE, 36), fill=TEXT)
     d.text((60 * SS, 104 * SS), opt["tagline"], font=font(F_BODY, 21), fill=DIM)
     bx, by = 60 * SS, (H - STRIP_H - 30) * SS
     d.line([(bx, by), (bx + v.m(500), by)], fill=TEXT, width=3 * SS)
@@ -605,7 +569,7 @@ def mech_well(v):
 
 def mech_sweeper(v):
     card_track(v, [(-420, -40), (0, -40), (420, -40)], 120)
-    sweeper(v, (0, 150), 240, 2, -95, hub_r=45)
+    sweeper(v, (0, 95), 200, 2, -95, hub_r=40)
     ship(v, (-250, -40), 0, 1.4); ship(v, (230, -60), -20, 1.4, MINE)
 
 
@@ -698,18 +662,15 @@ MECHANICS = [
     ("GRAVITY WELLS", mech_well, "small add to SPEC-91: a sixth zone kind, Attract",
      "Dive close to a moon and its pull whips you round faster; misjudge it and you hit the surface.",
      "Every planet, moon and anomaly pulls ships, debris and shots. Slingshot round a gas giant, or get dragged toward a black hole."),
-    ("SWEEPER ARMS", mech_sweeper, "new: moving structures (voxel grids on scripted rails)",
-     "Station arms and salvage cranes sweep across the track. Time the gap or get batted by real voxels.",
-     "Rotating stations, shipyard cranes, mining rigs and defence rings really move. Dock with a spinning ring or slip through a closing yard."),
+    ("MOVING STRUCTURES", mech_sweeper, "new: voxel grids on scripted paths (rotation, rails, drift)",
+     "Station arms, salvage cranes, ore conveyors and drifting wreck halves move on a beat. Time the gap or get batted by real voxels.",
+     "Rotating stations, shipyard cranes, mining rigs, asteroid streams and drifting wrecks really move. Dock with a spinning ring or slip through a closing yard."),
     ("BLAST DOORS + SWITCHES", mech_door, "new: mechanisms (trigger -> action)",
      "Shoot a switch to slam a door on a rival, or open the shortcut for yourself. Doors are voxels.",
      "Derelicts and stations have doors, airlocks and power switches. Shoot them to get in, lock pursuers out, or reach a hidden hold."),
     ("ENGINE WASH", mech_wash, "small add: a push zone behind every firing thruster",
      "Real plumes shove and heat what is behind them. Tailgate and get blasted; brake-check with reverse thrust.",
      "Every ship's thrusters push and burn what is behind them. Capital ships are dangerous to tail, and docking under one is a skill."),
-    ("GRAPPLE PYLONS", mech_grapple, "new: tether constraint plus a racer ability",
-     "Hook a pylon and swing round a hairpin without braking. Release early and you overshoot.",
-     "A tractor tether: tow hulks home for salvage, drag cargo pods out of wrecks, anchor to a rock in a storm."),
     ("THE MINE FAMILY", mech_mines, "small add to SPEC-91: fuse variants on one module",
      "Proximity blasts. Repulsors only shove. EMPs cut thrusters for 1.5 s. Seekers drift at you. Gravity mines pull.",
      "Old minefields guard derelicts and choke points; pirates seed lanes; later you can lay your own behind you."),
@@ -725,23 +686,17 @@ MECHANICS = [
     ("ENERGY CANISTERS", mech_canister, "small add: a device grid that grants energy on contact",
      "Fly through to refill boost and abilities. Shoot one ahead of a rival: it explodes in their face.",
      "Fuel, power and loot floating in wreck fields; volatile cargo that blows when shot."),
-    ("MOVING RAILS", mech_rails, "new: same system as sweeper arms",
-     "Ore conveyors and orbiting debris move across the line on a beat. Shoot a rock off its rail.",
-     "Asteroid streams, ore conveyors at mining stations and debris belts round planets, all moving on a beat."),
-    ("PLACES THAT CHANGE", mech_events, "small add: race lap events drive mechanism actions",
-     "Lap 2 wakes the turrets, lap 3 floods a lane. Wrecks and debris from earlier laps stay on the track.",
-     "Places that change while you are there: a derelict wakes, a station locks down, a storm rolls in."),
 ]
 
 
 def draw_mechanics():
-    CW, CH, cols, rows, top = 790, 590, 4, 3, 170
-    Wm, Hm = 60 * 2 + CW * cols + 30 * (cols - 1), top + rows * CH + (rows - 1) * 30 + 60
+    CW, CH, cols, rows, top = 790, 590, 3, 3, 170
+    Wm, Hm = 60 * 2 + CW * cols + 30 * (cols - 1), top + rows * CH + (rows - 1) * 30 + 60 + 190
     img = Image.new("RGB", (Wm * SS, Hm * SS), BG)
     starfield(img, (0, 0, Wm * SS, Hm * SS), 99, density=1.6)
     d = ImageDraw.Draw(img, "RGBA")
     d.text((60 * SS, 48 * SS), "NEW MECHANICS  ·  GENERAL WORLD SYSTEMS", font=font(F_TITLE, 38), fill=TEXT)
-    d.text((60 * SS, 108 * SS), "Twelve systems for exploring the galaxy. The race tracks are simply the first place they are put together.",
+    d.text((60 * SS, 108 * SS), "Nine systems for exploring the galaxy. The race tracks are simply the first place they are put together.",
            font=font(F_BODY, 22), fill=DIM)
     for i, (title, fn, status, race, game) in enumerate(MECHANICS):
         cx, cy = 60 + (i % cols) * (CW + 30), top + (i // cols) * (CH + 30)
@@ -758,6 +713,14 @@ def draw_mechanics():
             for chunk in wrap(txt, 78):
                 d.text((x0 + 22 * SS, yy), chunk, font=font(F_BODY, 16), fill=col); yy += 23 * SS
             yy += 8 * SS
+    by0 = (Hm - 220) * SS
+    d.rectangle((60 * SS, by0, (Wm - 60) * SS, by0 + 170 * SS), fill=(20, 17, 12, 240), outline=BOOST, width=2 * SS)
+    d.text((90 * SS, by0 + 24 * SS), "DESIGN RULE  ·  PLACES THAT CHANGE", font=font(F_TITLE, 19), fill=BOOST)
+    yy = by0 + 66 * SS
+    for chunk in wrap("Not a mechanic of its own: every track and every explored place uses the systems above to change while you "
+                      "are there. A wreck's bow drifts and closes a gap, guns wake on lap 2, a reactor pulses faster, bulkheads you "
+                      "shot stay open, and the hulks of fallen ships stay where they died. Each place should say what changes, and when.", 170):
+        d.text((90 * SS, yy), chunk, font=font(F_BODY, 18), fill=TEXT); yy += 27 * SS
     out = os.path.join(OUT_IMG, "mechanics.png")
     img.resize((Wm, Hm), Image.LANCZOS).save(out, optimize=True)
     return out
