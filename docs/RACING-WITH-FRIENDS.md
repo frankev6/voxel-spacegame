@@ -61,7 +61,7 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
    - the outer line through the lane-gate (the portal itself comes later; today you fly the outer line).
 5. **Boost strips.** The green chevrons push you to 200 m/s, and the speed carries off the strip.
 6. **Field walls** (blue) bounce you. Hitting one fast costs hull. Each wall is projected by voxel emitter posts about every 50 m; shoot a post's head off and the fence on both sides of it goes dark and stops holding anyone in. The gate pylons carry the fence beside them too. On the carrier's flight deck there is no field: the hull's trench walls are the barrier.
-7. **Mines** (red rings) arm, then blow when a ship comes close or when shot. Shoot a field to clear a path, or shoot the mine beside a rival.
+7. **Mines** (red rings) arm, then blow when a ship comes within about 14 m: 2500 damage and a shove that throws a racer. Shooting one knocks it loose and sends it drifting (into a rival, or out of your line); it bounces off the fences. About ten hits crack the casing and set it off.
 8. **Guns push.** Every hit shoves the ship it hits, and every shot kicks yours back. Darts are light and get thrown about. Rams barely move, and their impact driver shoves rivals off the line.
 9. **Respawn.** A destroyed racer flies again after 3 s at its last gate, in a fresh ship. Its wreck stays on the track.
 10. **Finish.** The race ends when everyone finishes, or 60 s after the winner. The results board shows places and best laps. **F** races again; `race end` clears the track.
@@ -88,11 +88,13 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
 | `race respawn` | Put yourself back at your last gate |
 | `race gate=<id> [back=<m>]` | Practice: jump `back` metres behind gate `id` |
 | `race blast` | Test: blow the emitter post nearest your ship (its fence spans drop) |
+| `race mine [ahead=<m>]` | Test: drop a mine in front of you |
 | `net status` | Peers, round-trip time, bandwidth |
 | `net guest <slot> "<command>"` | Run a console command on a guest |
 
 ## Known limits (first playable)
 - The race state reaches guests through the dev console channel, so co-op racing needs development builds.
 - Mines show their state (arming, armed, triggered) on the host only. Guests see a steady red ring.
+- Fence spans dropping on a guest when a post is shot follows the same rule as the host, but has not been checked on two machines yet.
 - A respawned ship has no shield. The playground fits shields only when a session starts.
 - The drifting bow, blast door, bulkheads, reactor pulses, engine wash, turrets, portal and canisters are RACE-015 and the HAZ-013 to HAZ-021 set pieces. They are not in the track yet.
