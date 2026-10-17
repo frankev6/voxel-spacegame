@@ -474,6 +474,9 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | MIG | [SPEC-72 Legacy content migration](specs/SPEC-72-legacy-migration.md) | Editor |
 | ART | [SPEC-80 Art direction and design system](specs/SPEC-80-art-direction.md) | Art (docs, definitions) |
 | AST | [SPEC-81 Asset production](specs/SPEC-81-asset-production.md) | Art (assets) |
+| NET | [SPEC-90 Co-op prototype](specs/SPEC-90-coop-prototype.md) | Net, App |
+| HAZ | [SPEC-91 Hit force and world hazards](specs/SPEC-91-hazards-hit-force.md) | Simulation, Voxel, Data, Net, Presentation |
+| RACE | [SPEC-92 Racing: tracks, race mode and racer ships](specs/SPEC-92-racing.md) | Galaxy, Data, Net, UI, Presentation, App |
 
 ---
 

@@ -101,6 +101,8 @@ flowchart LR
 
 In-world editing when docked, supercruise, faction territory, more content, LOD2/dormancy polish, gamepad. Specs mark these tasks with milestone `M4`.
 
+**Owner-directed track (2026-10-16): racing, hazards and hit force** ([SPEC-91](specs/SPEC-91-hazards-hit-force.md), [SPEC-92](specs/SPEC-92-racing.md), [ADR-0118](decisions/ADR-0118-hit-force-hazards-tracks.md)). A co-op race to play with a second developer, built on reusable foundations: shot knockback and recoil, boost sections, field walls, gates, mines. It runs beside the open M1–M3 work.
+
 ## Art track (first: A0 gates every milestone, owner decision 2026-10-10)
 
 | Step | Spec | Gate |

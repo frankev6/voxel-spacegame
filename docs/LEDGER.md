@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
-| M4 | 9 | 2 | 0 | 0 | 22 | 0 | 33 | 6 |
+| M4 | 30 | 2 | 0 | 0 | 23 | 0 | 55 | 9 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -29,6 +29,9 @@
 |---|---|---|---|---|
 | Design system / art direction approved | SPEC-80 | approved | 2026-10-11 | NOCTURNE, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md). Owner: "yes I approve". M0–M4 and SPEC-81 (A1) are unblocked |
 | Yarn Spinner 3 adoption | SPEC-41 | waiting for spike | — | Fallback format defined in SPEC-41 |
+| Racing and hazards specs (SPEC-91, SPEC-92, ADR-0118) | SPEC-91, SPEC-92 | waiting for owner review | — | Owner asked to "spec everything first" (2026-10-16); no code until reviewed |
+| First race track layout (top-down map) | SPEC-92 | waiting (RACE-002) | — | Before RACE-004 builds it |
+| Racer ship silhouettes (Dart, Ram) | SPEC-92 | waiting (RACE-003) | — | Silhouettes before voxels (ship-design direction) |
 
 ## Tasks
 
@@ -522,6 +525,28 @@
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | d60fca59 | salvage collect and pull on every machine, notices to the pilot's machine, combat status per pilot, stance table to guests; body interactables deferred (sandbox-only co-op); spike worktree only |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | a59b2b2b | decisions table and test, Game.Net IL writer rules, net parity and coop-parity.sh; spike worktree only |
 | NET-019 | Pre-merge fixes | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-018 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 04518d70 | braking bound, guest energy, guest playground beacons, shipped boost, RequireRenderer in the Editor, merchant header; merged to main |
+| HAZ-001 | Public contract types | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| HAZ-002 | Carried velocity in flight assist | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-001 | no | todo |  |  |  |  |
+| HAZ-003 | Momentum hit model | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | no | todo |  |  |  |  |
+| HAZ-004 | Recoil | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-003 | no | todo |  |  |  |  |
+| HAZ-005 | Hit-force tuning and impact feedback | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002, HAZ-004 | no | todo |  |  |  |  |
+| HAZ-006 | Zones: shapes, query and push effects | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-002 | no | todo |  |  |  |  |
+| HAZ-007 | Field walls | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006 | no | todo |  |  |  |  |
+| HAZ-008 | Mines | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-003 | no | todo |  |  |  |  |
+| HAZ-009 | Hazard playground pad and dev commands | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-005, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
+| HAZ-010 | Hazards and hit force in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-009, NET-018 | no | todo |  |  |  |  |
+| HAZ-011 | Hazard scenarios and determinism gate | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-009 | no | todo |  |  |  |  |
+| RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | no | todo |  |  |  |  |
+| RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| RACE-003 | Racer ship silhouettes for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| RACE-004 | Track builder, barrier blueprints and spawner | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-001, RACE-002, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
+| RACE-005 | Race decider | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, HAZ-006 | no | todo |  |  |  |  |
+| RACE-006 | Respawn | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-005 | no | todo |  |  |  |  |
+| RACE-007 | Race HUD, gate visuals and results | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-005 | no | todo |  |  |  |  |
+| RACE-008 | Racer ships and the shove weapon | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-003, HAZ-005 | no | todo |  |  |  |  |
+| RACE-009 | Race replication and co-op start | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-006, HAZ-010 | no | todo |  |  |  |  |
+| RACE-010 | Windows dev build and remote playtest guide | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| RACE-011 | Two-player race playtest with Daniel | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-007, RACE-008, RACE-009, RACE-010 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1124,6 +1149,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 498 | SPEC-40 Q36/Q37: real load safety and effect trace | Load entry refreshes location without incrementing narrative visits or emitting territory crossings; real successful dispatches produce existing EffectApplied trace. Three specified live scenarios use actual owners; acceptance pending focused checks. | Tech lead |
 | 499 | SPEC-70 Q35: real story playground | Three explicit sandbox beacons use canonical quest/clue/cargo/log/map owners, preserve quiet startup and physical world, and reset through the session. Existing entry/reset case extended; acceptance pending scope repair. | Tech lead |
 | 500 | SPEC-70 Q36: usable power, salvage and campaign trials | Resolved: prepare approved shield through editor/fleet owners before player spawn; normal ability input and real salvage transfer; same-profile campaign with no progress grants; console run shortcuts and isolated Lab reset. Details SPEC-70 Q36 and implementation 9805787b. | Tech lead |
+| 501 | 2026-10-16 | SPEC-91 §10 | Eight hit-force and hazard questions (feel targets, drift, who triggers mines, visibility, chain reactions, guest fire prediction, AI avoidance, debris pushes) | The defaults in SPEC-91 §10 | Owner (1–5), tech lead (6–8) | |
+| 502 | 2026-10-16 | SPEC-92 §10 | Eight racing questions (planar crossings, respawn and hulks, weapons, laps and players, AI racers, names, track location, ramming) | The defaults in SPEC-92 §10 | Owner | |
 
 ## Measurements
 
@@ -1236,6 +1263,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-16 — SPEC-91, SPEC-92 and ADR-0118: racing, hazards and hit force (lead, claude-opus-5-5)
+- Owner, verbatim: "make a racing minigame where we can also shoot eachother, crash into boundaries, have boost sections, interesting looping track with multiple paths and shortcuts, traps like mines in space (all of these things will get repurposed for other parts of the game ...)" and "shooting not only should havve a small recoil on the ship that shot it, but also a clear force against the ship that got shot". Asked for the full specs before any code; connection over Tailscale; a Windows build for Daniel.
+- Found: knockback already flows through `DamageEvent.WorldImpulse` and `PendingImpulse`, but content's ~2 N·s per damage moves a tens-of-tonnes ship by millimetres per second, and flight assist (core assist ~18 m/s², ADR-0114) cancels any push within a few ticks. No recoil, zones or mines exist. This Unity install has no Windows Build Support module.
+- Wrote ADR-0118 (proposed): shot momentum and recoil through the existing impulse channel; carried velocity in flight assist; analytic planar zones; mines as `GridKind.Device` voxel grids with a `ProximityFuse` module; tracks as content; the race as an authority decider.
+- SPEC-91 (HAZ-001…011) and SPEC-92 (RACE-001…011); 22 ledger rows. Ready now: HAZ-001, RACE-002 (track layout options), RACE-003 (racer silhouettes), RACE-010 (Windows build, after the owner installs the module).
 
 ### 2026-10-16 — NET-019: pre-merge fixes and merge to main (lead, claude-opus-5-5)
 - Owner, verbatim: "fix the issues you found, im happy with the multiplayer so far, my biggest question originally with this was if its feasable at all with so many voxels and you proved it was. lets merge these changes back into main so we can continue".
