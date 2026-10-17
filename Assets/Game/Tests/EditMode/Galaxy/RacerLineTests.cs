@@ -132,6 +132,25 @@ namespace Game.Tests.EditMode.Galaxy
         }
 
         [Test]
+        public void Choose_AHullTooBigForTheBreach_NeverTakesIt()
+        {
+            var legs = EM.GetBuffer<RaceLeg>(race); var points = EM.GetBuffer<RaceLegPoint>(race);
+            var toFinish = RacerPlan.ToFinish(legs, track.Gates.Length);
+            var big = Racer(60); big.Reach = 40; var small = Racer(60); small.Reach = 20;
+            bool smallTakesANarrowOne = false;
+            for (uint seed = 0; seed < 32; seed++)
+            {
+                var leg = legs[RacerPlan.Choose(legs, points, toFinish, 0, seed, 0, 0, big)];
+                float narrowest = float.MaxValue;
+                for (int k = 0; k < leg.Count; k++) narrowest = math.min(narrowest, points[leg.Start + k].HalfWidth);
+                Assert.GreaterOrEqual(narrowest, big.Reach, $"seed {seed}: from gate 0 a hull that needs 40 m from the fence takes {leg.From}->{leg.To}, {narrowest} m half wide");
+                var mine = legs[RacerPlan.Choose(legs, points, toFinish, 0, seed, 1, 0, small)];
+                for (int k = 0; k < mine.Count; k++) smallTakesANarrowOne |= points[mine.Start + k].HalfWidth < big.Reach;
+            }
+            Assert.IsTrue(smallTakesANarrowOne, "a small racer still uses the breach, the shorter way round");
+        }
+
+        [Test]
         public void Strips_CoverHalfTheRoute_AndOnlyRacersThatCanMakeTheBendTakeThem()
         {
             var points = EM.GetBuffer<RaceLegPoint>(race); int onStrip = 0;

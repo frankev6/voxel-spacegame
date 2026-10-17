@@ -32,7 +32,11 @@ namespace Game.Galaxy.Racing
 
         /// <summary>What a racer's ship can do, for planning: its speed now, and the side and braking accelerations it can count on.</summary>
         /// <summary>Env set: corners from the hull's grip at each speed (PilotEnvelope.CornerSpeed) with Share of it; else a fixed Lateral.</summary>
-        public struct Ability { public float Speed, Lateral, Brake, YawCap, Share; public PilotEnvelope Env; }
+        public struct Ability { public float Speed, Lateral, Brake, YawCap, Share, Reach; public PilotEnvelope Env; }   // Reach: m its hull keeps off a fence (0 = unsized)
+
+        /// <summary>How near a route's edge a hull may run: a field wall pushes a body from WallRadiusFraction of its bounding sphere off
+        /// the wall line, plus CorridorMargin. The steering job uses the same rule with the spatial hash's sphere.</summary>
+        public static float EdgeReach(float radius, float hull) => math.max(radius, ZoneSystem.WallRadiusFraction * hull + 3) + RacerSteerJob.CorridorMargin;
 
         /// <summary>From the hull's envelope: its grip is the drift grip (main engine and strafe together) it has at each speed, a little
         /// held back for response lag; a better pilot uses more of it.</summary>
@@ -64,6 +68,8 @@ namespace Game.Galaxy.Racing
                 v = math.sqrt(math.max(0, v * v - 2 * a.Brake * ds));
                 float r = Radius(points[leg.Start + math.max(0, i - 3)].Position, p.Position, points[leg.Start + math.min(leg.Count - 1, i + 3)].Position);
                 worst = math.max(worst, v / (CornerSpeed(a, r) * 1.15f + 5));
+                // and a route too narrow for the hull (a heavy racer down the 70 m breach banged both fences every lap)
+                if (a.Reach > 0) worst = math.max(worst, a.Reach / math.max(1, p.HalfWidth));
             }
             return worst;
         }
@@ -287,6 +293,12 @@ namespace Game.Galaxy.Racing
                         var flightNow = em.HasComponent<FlightState>(ship) ? em.GetComponentData<FlightState>(ship) : new FlightState { ForwardCap = 120, StrafeCap = 72, ReverseCap = 60, YawRateCap = 2 };
                         var envelope = PilotEnvelope.From(em.HasComponent<PropulsionStats>(ship) ? em.GetComponentData<PropulsionStats>(ship) : default, flightNow, config, false, 0);
                         var ability = RacerPlan.AbilityOf(envelope, config, pilot.Skill, speed);
+                        if (em.HasComponent<VoxelGrid>(ship))
+                        {
+                            var g = em.GetComponentData<VoxelGrid>(ship);
+                            float hw = math.max(2, (g.CellMax.x - g.CellMin.x + 1) * g.CellSize * .5f), hl = math.max(2, (g.CellMax.z - g.CellMin.z + 1) * g.CellSize * .5f);
+                            ability.Reach = RacerPlan.EdgeReach(math.max(hw, hl * .6f), math.sqrt(hw * hw + hl * hl));
+                        }
                         pilot.LineTo = (short)RacerPlan.Build(built, em.GetBuffer<RaceGate>(race), em.GetBuffer<RaceLeg>(race), em.GetBuffer<RaceLegPoint>(race),
                             carryOn ? pilot.LineTo : from, pilot.Seed, pilot.Skill, carryOn ? lap + 1 + (int)(tick & 7) : lap, ability, switchTo);
                         var line = em.GetBuffer<RacerLinePoint>(ship);
@@ -419,7 +431,7 @@ namespace Game.Galaxy.Racing
             int own = Hash.FindIndex(entity);
             float hull = own >= 0 ? Hash.Get(own).HullRadius : radius;   // its bounding sphere: mines and field walls measure to it
             // How near the line's edge it may run: a field wall pushes a body from WallRadiusFraction of its sphere off the wall line.
-            float edgeReach = math.max(radius, ZoneSystem.WallRadiusFraction * hull + 3) + CorridorMargin;
+            float edgeReach = RacerPlan.EdgeReach(radius, hull);
 
             // Where on the line: the nearest segment a little behind to well ahead; anywhere if it is far off.
             int index = math.clamp(pilot.Index, 0, line.Length - 2);
@@ -478,7 +490,7 @@ namespace Game.Galaxy.Racing
             {
                 if (i > pilot.Index) stripWalk += math.distance(line[i - 1].Position, line[i].Position);
                 if (line[i].PushSpeed <= 0) continue;
-                avoidStrip = line[i].Avoid != 0;
+                avoidStrip = line[i].Avoid != 0 || Racing == 0 || Finished.Contains(slot.Slot);   // cruising after the flag: no strip flinging it into the field
                 lane = avoidStrip ? -math.sign(line[i].PushSide) * .8f : math.sign(line[i].PushSide) * .55f;
                 break;
             }
