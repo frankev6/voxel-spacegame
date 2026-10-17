@@ -364,7 +364,8 @@ namespace Game.Data.Blocks
     [System.Serializable] public struct CoreParams { public int MaxCells; public int MaxExtentCells; }   // ≥ 1 each: build budget and max AABB edge (SPEC-51 enforces)
     [System.Serializable] public struct PowerSourceParams { public float Generation; }                  // E/s, > 0
     [System.Serializable] public struct PowerStorageParams { public float Storage; }                    // E, > 0
-    [System.Serializable] public struct ThrusterParams { public float ThrustNewtons; public float PowerDraw; }   // > 0 along block-local −Z; E/s at full throttle, ≥ 0
+    [System.Serializable] public struct ThrusterParams { public float ThrustNewtons; public float PowerDraw;   // > 0 along block-local −Z; E/s at full throttle, ≥ 0
+        public float SpoolUpSeconds; public float SpoolDownSeconds; public float BoostThrottle; }             // ADR-0120: ≥ 0; 0 = instant / FlightConfig.BoostThrottle
     [System.Serializable] public struct ShieldEmitterParams
     { public float Capacity; public float RegenPerSecond; public float RechargeDelaySeconds; public float PowerDraw; }   // > 0, ≥ 0, ≥ 0, ≥ 0
     [System.Serializable] public struct CargoParams { public float Capacity; }                          // capacity units (SPEC-50: 10 units = 1 slot), > 0

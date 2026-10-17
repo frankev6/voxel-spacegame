@@ -13,12 +13,13 @@ namespace Game.Editor.Content
         static readonly (string id, string name)[] Racers =
         {
             ("ship_racer_needle", "NEEDLE"), ("ship_racer_kite", "KITE"), ("ship_racer_gimbal", "GIMBAL"),
-            ("ship_racer_battering_ram", "BATTERING RAM"), ("ship_racer_salvage_tug", "SALVAGE TUG"), ("ship_racer_hammerhead", "HAMMERHEAD"),
+            ("ship_racer_battering_ram", "BATTERING RAM"), ("ship_racer_hammerhead", "HAMMERHEAD"),
         };
 
         [MenuItem("Game/Content/Build Racer Ships")]
         public static void Build()
         {
+            EngineContentBuilder.Build();   // the racers fit the ADR-0120 engine line
             using (var service = new ContentService(ContentDatabaseBuilder.Rebuild()))
                 foreach (var (id, name) in Racers) NocturneShipBuilder.BuildShip(service, id, name, 1, Source);
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();

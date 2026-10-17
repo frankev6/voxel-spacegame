@@ -12,6 +12,10 @@ namespace Game.Data.Blocks
             stats.PowerDraw += Params.PowerDraw;
         }
         public override void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report)
-        { ModuleChecks.Positive(report, "Params.ThrustNewtons", Params.ThrustNewtons); ModuleChecks.NonNegative(report, "Params.PowerDraw", Params.PowerDraw); }
+        {
+            ModuleChecks.Positive(report, "Params.ThrustNewtons", Params.ThrustNewtons); ModuleChecks.NonNegative(report, "Params.PowerDraw", Params.PowerDraw);
+            ModuleChecks.NonNegative(report, "Params.SpoolUpSeconds", Params.SpoolUpSeconds); ModuleChecks.NonNegative(report, "Params.SpoolDownSeconds", Params.SpoolDownSeconds);
+            ModuleChecks.NonNegative(report, "Params.BoostThrottle", Params.BoostThrottle);
+        }
     }
 }

@@ -53,7 +53,7 @@ ADR-0118 and SPEC-91 already cover zones (accelerate, drag, repel, gate, bounds)
 8. **Gauntlet turrets use a target override.** `TargetOverride { Entity Target; byte Policy }` on a turret group's root is written only by its decider: `RaceSystem` (the leader), a mechanism action, or later faction logic. AI turret targeting (SPEC-23 AI-009) prefers the override when it is valid.
 9. **Places change through these mechanisms, never through bespoke code.** This is the owner's design rule: each place lists what changes and when (a timer, a lap, a trigger) as mechanism rules.
 10. **Capital wrecks are hollow shells at 2 m cells.** Per-grid `CellSize` already exists. Wreck blueprints use 2 m cells and hull plating two cells thick, about 600k cells at most each, to keep a 1.5 km dreadnought within SPEC-11/12 budgets. Racers and small devices stay at 0.5 m.
-11. **The grapple tether is cut** (owner). The Salvage Tug racer keeps its crane as an armoured side arm.
+11. **The grapple tether is cut** (owner). The Salvage Tug racer that carried it was removed too (owner, 2026-10-17).
 
 ## Consequences
 - **Architecture §8:**

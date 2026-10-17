@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: block_thruster_vernier
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: block_thruster_vernier
+  formerIds: []
+  displayName: Vernier Thruster
+  description: A one-cell manoeuvring jet. Answers instantly; mount it far from the centre to turn and strafe.
+  category: 0
+  rarity: 0
+  basePrice: 10
+  maxStack: 999
+  icon: {fileID: -1696013874, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  tradeable: 1
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  shapes: 
+  clearance:
+  - {x: 0, y: 0, z: 1}
+  allowedOrientations:
+    Bits: 16777215
+  attachFaces: 47
+  mirrorPartner: {fileID: 0}
+  cellHp: 60
+  functionHp: 60
+  cellMass: 20
+  armorClass: 0
+  materialLayer: 2
+  propMesh: {fileID: 4300000, guid: bdf6276b0c93548dc8c43e1484d128dc, type: 2}
+  blockCategory: 3
+  modules:
+  - rid: 4
+  grantedAbilities:
+  - {fileID: 11400000, guid: 35ab7995a9ebc44388dc90283da496f5, type: 2}
+  references:
+    version: 2
+    RefIds:
+    - rid: 4
+      type: {class: ThrusterModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          ThrustNewtons: 10000
+          PowerDraw: 0
+          SpoolUpSeconds: 0.04
+          SpoolDownSeconds: 0.04
+          BoostThrottle: 1

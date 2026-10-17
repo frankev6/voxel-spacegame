@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready (2026-10-16). Amended 2026-10-17: Track 01 is the Battle Graveyard, all six racers are built, and the grapple is cut. The amendment is waiting for owner review. Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
+| **Status** | Ready (2026-10-16). Amended 2026-10-17: Track 01 is the Battle Graveyard, five racers are built (the Salvage Tug was removed), the racers fly the ADR-0120 engine line, and the grapple is cut. The amendment is waiting for owner review. Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
 | **Area code** | RACE (task IDs are `RACE-001`, `RACE-002`, …) |
 | **Module(s)** | `Game.Galaxy` (`Galaxy/Racing/`), `Game.Data` (definitions), `Game.Simulation` (`RaceHold` in command conversion), `Game.Net` (replication), `Game.UI` and `Game.Presentation` (race HUD), `Game.App` (playground pad, session), `Game.Editor` (track builder, Windows build) |
 | **Depends on specs** | SPEC-91 (zones, walls, mines, hit force), SPEC-90 and ADR-0117 (co-op), SPEC-10 (grid spawning), SPEC-20 (commands), SPEC-21 (weapons), SPEC-61 (HUD), SPEC-62 (camera) |
@@ -28,7 +28,7 @@ Weapons stay live, so players shoot each other off the racing line with SPEC-91'
 - the race decider: phases, countdown, gates, laps, branches, finish order, wrong way, out of bounds, respawn;
 - race replication and per-pilot PvP;
 - the race HUD, gate visuals and a results board;
-- six racer ships in two lines, all approved by the owner (2026-10-17): Dart (Vestari: Needle, Kite, Gimbal) and Ram (Khuchad Clan: Battering Ram, Salvage Tug, Hammerhead). Plus one shove weapon and the two racer abilities, Slip and Shove;
+- five racer ships in two lines, approved by the owner (2026-10-17): Dart (Vestari: Needle, Kite, Gimbal) and Ram (Khuchad Clan: Battering Ram, Hammerhead). The Salvage Tug was removed the same day. Plus one shove weapon and the two racer abilities, Slip and Shove;
 - a Windows dev build;
 - a Tailscale playtest guide;
 - the playtest with Daniel.
@@ -58,8 +58,12 @@ Weapons stay live, so players shoot each other off the racing line with SPEC-91'
 11. **Track 01 is a battle graveyard** (owner, 2026-10-17): "instead of just having one ship, its a group of derelict ships, like an ancient battle took place with large ships and we go through and around them."
     - The layout and its routes are in `docs/design/racing/track-01-options.md` and `track_01_battle_graveyard.json`.
     - The wrecks are hollow shells at 2 m cells (ADR-0119 decision 10).
-    - The grapple is cut. The Salvage Tug's crane is an armoured side arm.
-12. **All six racers are built** (owner: "for ships i actually like all options you made, lets create all 6"). The three Darts share the Slip ability and the three Rams share Shove. Each hull keeps its own handling.
+    - The grapple is cut.
+12. **Five racers are built** (owner: "for ships i actually like all options you made, lets create all 6"; then, 2026-10-17: "remove the salvage tug ship, it has no place in this"). The three Darts share the Slip ability and the two Rams share Shove. Each hull keeps its own handling.
+13. **Racers fly the ADR-0120 engine line, and their hulls are shaped** (owner, 2026-10-17: "you need to also make new thruster engines … also in your building of the ships you missed to use a lot of the hull block options").
+    - Darts fly sprint engines (fast spool, hardest boost) and verniers. Rams fly torches (slow spool, most thrust), with sprint engines for correction.
+    - `export_racers.py` shapes each hull as a height field. Domes rise from the outline and are chamfered underneath. Plates, cabins and barrels stand proud with chamfered edges.
+    - Outline edges within 8.5° of a kit line (grid, 45° or 1:2) are snapped onto that line through cell corners, so the builder seats wedges and long slopes along the silhouette. Slopes run along the grid only; diagonal tops step. The Gimbal's ring is an octagon.
 
 ## 4. Data model
 
@@ -336,20 +340,18 @@ Advisory (ADR-0042):
   - [ ] The flight deck is flyable end to end.
 - **Tests:** `WreckContentTests.Validate_CellBudget`, `.FlightDeck_Clear`.
 
-### RACE-013 — The Ram line: Battering Ram, Salvage Tug and Hammerhead
+### RACE-013 — The Ram line: Battering Ram and Hammerhead
 - **Milestone:** M4
 - **Tier:** standard — content builds to approved silhouettes, plus one weapon
 - **Depends on:** `RACE-008`
 - **Do:**
-  - Build the three Khuchad racers in `RacerShipBuilder`, with the Khuchad livery and the race numbers 13, 04 and 66.
+  - Build the two Khuchad racers in `RacerShipBuilder`, with the Khuchad livery and the race numbers 13 and 66. They fly torch engines (ADR-0120).
   - Add `wpn_impact_driver`: kinetic and fixed, with low damage, high `projectileMass` and slow fire. Mounts:
     - **Battering Ram:** spinal;
-    - **Salvage Tug:** on the starboard side;
     - **Hammerhead:** one at each tip of the hammer plate.
-  - The Tug's crane is an armoured side arm, with no tether.
-- **Files:** `Assets/Game/Content/Ships/ship_racer_battering_ram.asset`, `ship_racer_salvage_tug.asset`, `ship_racer_hammerhead.asset`, `Assets/Game/Content/Weapons/wpn_impact_driver.asset`, `Assets/Game/Content/Blocks/weapon_impact_driver.asset`.
+- **Files:** `Assets/Game/Content/Ships/ship_racer_battering_ram.asset`, `ship_racer_hammerhead.asset`, `Assets/Game/Content/Weapons/wpn_impact_driver.asset`, `Assets/Game/Content/Blocks/weapon_impact_driver.asset`.
 - **Acceptance criteria:**
-  - [ ] All three validate, spawn and fly.
+  - [x] Both validate, spawn and fly. Torch launch measured: the Battering Ram reaches 3.7 m/s at 0.5 s and 61 m/s at 4 s; the Hammerhead 7.0 and 83.
   - [ ] Top-down screenshots match the approved silhouettes.
   - [ ] The impact driver fires.
   - [ ] Its knockback is measured once HAZ-005 lands.

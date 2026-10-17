@@ -107,6 +107,38 @@ namespace Game.Tests.EditMode.Simulation.Flight
         }
 
         [Test]
+        public void Spool_BoundsThrottleChangePerTick()
+        {
+            // ADR-0120: a spooling engine moves its throttle at most SpoolUp (rising) or SpoolDown (falling) per second.
+            var root = Ship(); Tick();
+            var buffer = EM.GetBuffer<FlightThruster>(root);
+            for (int i = 0; i < buffer.Length; i++) { var e = buffer[i]; e.Throttle = 0; e.SpoolUp = 1; e.SpoolDown = 2; buffer[i] = e; }
+            const float dt = SimTime.FixedTimestep;
+            Command(root, new float2(0, 1)); Tick();
+            float Forward() { foreach (var e in EM.GetBuffer<FlightThruster>(root)) if (e.ForceDirLocal.z > .5f) return e.Throttle; return -1; }
+            Assert.AreEqual(dt, Forward(), 1e-5f, "One tick of a 1 s spool reaches 1/60 throttle.");
+            Tick(59);
+            Assert.Greater(Forward(), .95f);
+            float before = Forward();
+            Command(root, default, 0, ShipCommandFlags.Brake); Tick();
+            Assert.GreaterOrEqual(Forward(), before - 2 * dt - 1e-4f, "A 0.5 s spool-down keeps the engine pushing after release.");
+            Tick(40);
+            Assert.AreEqual(0, Forward(), "Spooled down to idle.");
+        }
+
+        [Test]
+        public void BoostThrottle_PerEngineCeiling()
+        {
+            var root = Ship(); Tick();
+            var buffer = EM.GetBuffer<FlightThruster>(root);
+            for (int i = 0; i < buffer.Length; i++) { var e = buffer[i]; e.BoostMax = 1.1f; buffer[i] = e; }
+            Command(root, new float2(0, 1), 0, ShipCommandFlags.Boost); Tick(30);
+            foreach (var e in EM.GetBuffer<FlightThruster>(root)) Assert.LessOrEqual(e.Throttle, 1.1f + 1e-5f);
+            float top = 0; foreach (var e in EM.GetBuffer<FlightThruster>(root)) top = math.max(top, e.Throttle);
+            Assert.AreEqual(1.1f, top, 1e-4f, "The engine's own boost ceiling replaces FlightConfig.BoostThrottle.");
+        }
+
+        [Test]
         public void NullSpace_BleedsAtRest()
         {
             // QA-001: four thrusters that cancel exactly are a null space of the solve; the exact warm start alone kept them lit.

@@ -181,7 +181,9 @@ namespace Game.Editor.Content
                 string kind = (string)m[0]; var mn = (JArray)m[1]; var rsz = (JArray)m[4];
                 int3 a = Map((int)mn[0], (int)mn[1], (int)mn[2]), b = Map((int)mn[0] + (int)rsz[0] - 1, (int)mn[1] + (int)rsz[1] - 1, (int)mn[2] + (int)rsz[2] - 1);
                 int3 boxMin = math.min(a, b), boxMax = math.max(a, b);
-                modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed);
+                // An optional sixth entry names the nozzle's direction in look-book axes (ADR-0120 engines and verniers).
+                int3? nozzle = m.Count > 5 ? new int3(-(int)m[5][0], (int)m[5][2], (int)m[5][1]) : null;
+                modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed, nozzle);
             }
             if (reactors > 0) failed += SeatCoreAndReactors(structure, content, Index("block_core_small"), Index("block_reactor_small"), reactors);
             int hollowed = reactors > 0 ? Hollow(structure, content, cube, 10) : 0;
@@ -295,17 +297,21 @@ namespace Game.Editor.Content
             { "thruster_s", "block_thruster_small" }, { "thruster_l", "block_thruster_medium" }, { "thruster_xl", "block_thruster_large" }, { "rcs", "block_thruster_large" },
             { "gatling", "weapon_plasma_turret_small" }, { "autocannon", "weapon_plasma_turret_small" }, { "heavy_cannon", "weapon_plasma_turret_medium" },
             { "flak", "weapon_flak_cannon_medium" }, { "railgun", "weapon_railgun_medium" }, { "nova", "weapon_missile_launcher_small" },
-            { "storm", "weapon_ark_lance_medium" }, { "siege", "weapon_siege_cannon_heavy" }, { "core_1", "block_core_small" }
+            { "storm", "weapon_ark_lance_medium" }, { "siege", "weapon_siege_cannon_heavy" }, { "core_1", "block_core_small" },
+            // ADR-0120 engine line
+            { "vernier", "block_thruster_vernier" }, { "sprint_s", "block_engine_sprint_small" }, { "sprint_m", "block_engine_sprint_medium" },
+            { "torch_l", "block_engine_torch_large" }, { "torch_xl", "block_engine_torch_capital" }
         };
         static readonly int3[] Directions = { new(0, 1, 0), new(0, -1, 0), new(1, 0, 0), new(-1, 0, 0), new(0, 0, 1), new(0, 0, -1) };
 
-        static int PlaceModule(VoxelStructure structure, VoxelContent content, ContentCatalog catalog, string kind, int3 boxMin, int3 boxMax, ref int failed)
+        static int PlaceModule(VoxelStructure structure, VoxelContent content, ContentCatalog catalog, string kind, int3 boxMin, int3 boxMax, ref int failed, int3? nozzle = null)
         {
             ref var tables = ref content.Orientations.Value;
-            bool engine = kind.StartsWith("thruster", StringComparison.Ordinal), rcs = kind == "rcs";
-            // The open face: most empty cells just outside it (engines always fire aft, -z).
-            int3 face = new int3(0, 0, -1);
-            if (!engine)
+            bool engine = kind.StartsWith("thruster", StringComparison.Ordinal), rcs = kind == "rcs" || nozzle.HasValue;
+            if (nozzle.HasValue) engine = false;
+            // The open face: most empty cells just outside it (engines always fire aft, -z); a named nozzle direction wins.
+            int3 face = nozzle ?? new int3(0, 0, -1);
+            if (!engine && !nozzle.HasValue)
             {
                 int bestOpen = -1;
                 foreach (var d in Directions)
@@ -378,6 +384,8 @@ namespace Game.Editor.Content
                 {
                     if (b.InstanceIndex < 0) continue;
                     ref var def = ref content.Blocks.Value.Blocks[b.Placement.Block];
+                    // Only function blocks keep a solid slab: long slopes are two-cell instances too, and a racer seats hundreds.
+                    if (def.Kind != Game.Data.Blocks.BlockKind.Functional) continue;
                     for (int i = 0; i < def.Cells.Length; i++)
                     {
                         int z = b.Placement.Origin.z + content.Orientations.Value.Rotate(def.Cells[i], b.Placement.Orient).z;

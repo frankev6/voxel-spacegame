@@ -243,6 +243,8 @@
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | dcfbf493 | Four damage commands; two required tests and live queued hit/core-to-hulk/hash/stats verified |
 | FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 8dba629 | Power demand, powered actuator gating, stat multipliers and propulsion caches; 8 required tests; full 1003 EM / 145 PM green |
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
+| FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | no | done | claude (claude-opus-5-5) | 2026-10-17 |  | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
+| FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 |  | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 702c1a6 | Weapon definitions, blob and boot-owned singleton lifetime; full 968 EM /145 PM green |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | acdebc2 | Burst nearest-hit queries for hulls, shields and celestial bodies; repairs f376412/528ae87; full 968 EM /145 PM green |
 | WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | abffb45 | Canonical mount geometry and preserved reparent firing state; three required tests; full 1051 EM /146 PM passed. |
@@ -560,7 +562,7 @@
 | RACE-010 | Windows dev build and remote playtest guide | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
 | RACE-011 | Two-player race playtest with Daniel | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-007, RACE-008, RACE-009, RACE-010, RACE-013, RACE-014, RACE-015 | no | todo |  |  |  |  |
 | RACE-012 | Graveyard wrecks | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-002, HAZ-001 | no | todo |  |  |  |  |
-| RACE-013 | The Ram line: Battering Ram, Salvage Tug and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 11ebc831 | Hulls built: Battering Ram 126 t, Salvage Tug 84 t, Hammerhead 71 t; spawn, validate, fly (25/45/51 m/s after 4 s). Impact driver weapon pending; they carry small plasma turrets meanwhile |
+| RACE-013 | The Ram line: Battering Ram and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 11ebc831 | Salvage Tug removed (owner). Torch-engined: Battering Ram 140 t, 61 m/s after 4 s; Hammerhead 86 t, 83 m/s. Impact driver next |
 | RACE-014 | Racer abilities: Slip and Shove | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-013, HAZ-002 | no | todo |  |  |  |  |
 | RACE-015 | Track 01 set pieces | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-004, HAZ-013, HAZ-014, HAZ-016, HAZ-017, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
@@ -1279,6 +1281,28 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-17 — Engine line (ADR-0120), shaped racer hulls, Salvage Tug removed (lead, claude-opus-5-5)
+- **Owner:** "remove the salvage tug ship, it has no place in this. the real answer is you need to also make new thruster engines, maybe some go from 0-100% faster but have less max thrust so theres a give and take, but also it makes sense for thrusters meant to rotate rather than be the main thrust, and maybe larger engines too, for the bigger ships. also in your building of the ships you missed to use a lot of the hull block options that could honestly make some of these ships look less blocky or more sleek where it matters."
+- **Salvage Tug removed:** its blueprint, plan export, builder entry and test row. Its silhouette stays on the RACE-003 option sheet as a record.
+- **ADR-0120 (accepted on owner direction) and FLT-014.** Engines spool: `ThrusterParams` gains spool up/down seconds and its own boost ceiling. The allocator bounds each engine's throttle per tick around last tick's, so torches run on after release. `FlightThruster` is now 56 bytes.
+- **FLT-015.** `EngineContentBuilder` makes the five new blocks and their lathed nozzle meshes from code, and gives the old thrusters the Standard spool (0.25 s up, 0.2 s down):
+  - vernier: 1 cell, 10 kN, 0.04 s;
+  - sprint S and M: 8 kN per cell, about 0.1 s, boost 2.0;
+  - torch L: 3×3×4, 600 kN, 1.5 s;
+  - torch XL: 5×5×7, 3.2 MN, 2.5 s, for capital hulls.
+- **Hull shaping.** `export_racers.py` now builds a height field with chamfers, real outline cut planes, outline snapping to kit lines (grid, 45°, 1:2) and grid-only slopes. The Gimbal's ring is an octagon. The builder now seats 140–610 long slopes and 190–680 wedges or hips per ship.
+- **Builder fix.** Hollowing kept a slab around every multi-cell block, and long slopes are two-cell instances, so the Battering Ram (608 long slopes) was never hollowed and weighed 213 t. Slabs now come from function blocks only, and the Ram weighs 140 t.
+- **Measured in the playground** (speed at 0.5, 1, 2 and 4 s of full thrust, no boost):
+  - Needle 12.6, 23.8, 48.0, 96.3 m/s;
+  - Kite 9.2, 17.6, 35.4, 71.1;
+  - Gimbal 10.6, 19.9, 39.8, 79.6;
+  - Battering Ram 3.7, 10.0, 26.6, 60.5;
+  - Hammerhead 7.0, 15.0, 37.4, 83.2.
+
+  Both Rams run on for 0.4–0.5 s after release.
+- **Tests:** Flight 49/49, editor content 18/18 (with the new `Racers_FlyTheirLinesEngines`), ship editor 120/120. The full EditMode suite ran headless (see the next line).
+- **Not done:** the impact driver (RACE-013), Slip and Shove (RACE-014), a power draw for torches (ADR-0120 decision 5), and a dedicated close-up of the engine models.
 
 ### 2026-10-17 — RACE-008: the six racers built and flying (lead, claude-opus-5-5)
 - **Pipeline.** `export_racers.py` turns each approved plan view into voxel cells:

@@ -13,11 +13,12 @@ using Unity.Collections;
 namespace Game.Tests.EditMode.Editor.Content
 {
     /// <summary>RACE-008 / RACE-013: the six approved racers are real, flyable blueprints: a core, engines that thrust and a
-    /// gun each, Darts light and Rams heavy (the mass-against-knockback trade, SPEC-92).</summary>
+    /// gun each, Darts light and Rams heavy (the mass-against-knockback trade, SPEC-92). Darts fly sprint engines and Rams
+    /// torches (ADR-0120).</summary>
     public sealed class RacerShipTests
     {
         static readonly string[] Darts = { "ship_racer_needle", "ship_racer_kite", "ship_racer_gimbal" };
-        static readonly string[] Rams = { "ship_racer_battering_ram", "ship_racer_salvage_tug", "ship_racer_hammerhead" };
+        static readonly string[] Rams = { "ship_racer_battering_ram", "ship_racer_hammerhead" };
 
         static (int cores, int thrusters, int weapons, float massKg) Survey(ContentService service, BlueprintLibrary library, string id)
         {
@@ -36,6 +37,34 @@ namespace Game.Tests.EditMode.Editor.Content
                 if (def.HasModule(BlockModuleId.WeaponMount)) weapons++;
             }
             return (cores, thrusters, weapons, (float)ship.GetMass(content).Mass);
+        }
+
+        static int Count(ContentService service, BlueprintLibrary library, string id, params string[] blocks)
+        {
+            var wanted = new System.Collections.Generic.HashSet<ushort>();
+            foreach (var block in blocks) wanted.Add(service.Catalog.GetBlockIndex(service.Catalog.Get<BlockDefinition>(new ContentId(block))));
+            var definition = service.Catalog.Get<ShipBlueprintDefinition>(new ContentId(id));
+            Assert.IsTrue(library.TryGet(definition.Id.Hash, out var ship), id);
+            using var list = new NativeList<StructureBlock>(Allocator.Temp);
+            ship.GetBlocks(list);
+            int n = 0;
+            foreach (var b in list) if (wanted.Contains(b.Placement.Block)) n++;
+            return n;
+        }
+
+        [Test]
+        public void Racers_FlyTheirLinesEngines()
+        {
+            using var service = new ContentService(ContentDatabaseBuilder.Rebuild());
+            using var library = new BlueprintLibrary(service.Catalog, new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations });
+            foreach (var id in Darts)
+            {
+                Assert.GreaterOrEqual(Count(service, library, id, "block_engine_sprint_small", "block_engine_sprint_medium"), 1, id + " sprint engines");
+                Assert.AreEqual(0, Count(service, library, id, "block_engine_torch_large", "block_engine_torch_capital"), id + " carries no torch");
+            }
+            foreach (var id in Rams) Assert.GreaterOrEqual(Count(service, library, id, "block_engine_torch_large"), 2, id + " torches");
+            foreach (var id in new[] { "ship_racer_needle", "ship_racer_kite", "ship_racer_battering_ram", "ship_racer_hammerhead" })
+                Assert.GreaterOrEqual(Count(service, library, id, "block_thruster_vernier"), 4, id + " verniers");
         }
 
         [Test]
