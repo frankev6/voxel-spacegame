@@ -134,7 +134,7 @@ Then open `http://127.0.0.1:8765/docs/design/lookbook/` (the look book) or `http
 
 ## 5. Git
 
-- **Push only when the owner says so** (AGENTS.md §2). `origin` is the public GitHub repo `frankev6/voxel-spacegame`; `main` tracks `origin/main` (first push 2026-10-16, owner-approved). Git LFS is not set up yet (ADR-0008).
+- **Push only when the owner says so** (AGENTS.md §2). `origin` is the public GitHub repo `frankev6/voxel-spacegame`; `main` tracks `origin/main` (first push 2026-10-16, owner-approved). Images, audio, fonts, models and art sources are stored in Git LFS since 2026-10-16 (ADR-0008; the patterns are in `.gitattributes`). On this Mac `git-lfs` 3.8.0 is installed at `~/.local/bin/git-lfs`, which GUI apps (VS Code's git, Unity's version control) may not have on their `PATH`: if a commit or push fails with "git-lfs: command not found", add `~/.local/bin` to that app's `PATH`. Git for Windows ships with Git LFS.
 - **Task work:** one branch per task, `task/<ID>-<slug>`, with commits `<ID>: <summary>` ([04-workflow.md](04-workflow.md)).
 - **Look-dev and design work** uses descriptive branches (`task/lookdev-r4`, `task/design-guide`).
 - **AI workers** end commit messages with their `Co-Authored-By:` trailer.

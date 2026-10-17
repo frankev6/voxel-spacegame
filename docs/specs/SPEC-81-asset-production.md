@@ -42,7 +42,7 @@ Produce every art and audio asset of the game in the approved design system, the
 4. **Art tasks never change gameplay data.** Cosmetic structural blocks copy `block_hull`'s gameplay values exactly; meshes fit the SPEC-04 footprint, never the other way round (conventions §5). Reason: placeholder policy.
 5. **Block, ship and paint icons are rendered by `BlockIconRenderer` (`AST-026`), never drawn.** Reason: consistency and cost.
 6. **No file ships without a row in `docs/design/LICENSES.md`** with status `verified`. Reason: legal safety; at A2 the validator turns a missing row into an error.
-7. **Editable sources go to `ArtSource/`**, never under `Assets/`; binaries are marked `binary` in `.gitattributes` and move to Git LFS before the first push ([ADR-0008](../decisions/ADR-0008-no-lfs-yet.md)). Reason: repository size (the old repo reached 1.9 GB).
+7. **Editable sources go to `ArtSource/`**, never under `Assets/`; binaries are stored in Git LFS through `.gitattributes` ([ADR-0008](../decisions/ADR-0008-no-lfs-yet.md)). Reason: repository size (the old repo reached 1.9 GB).
 8. **Every A1 task is reviewed with DESIGN-SYSTEM §10.20** by someone other than its author; the reviewer and screenshots at 50/150/300 m go in the ledger log. Reason: one look.
 9. **A2 deletes every placeholder and look-test file**; only `docs/design/golden/` and the captures stay. Reason: ROADMAP A2 gate.
 

@@ -46,3 +46,7 @@ __pycache__/
 # Unity Test Framework temporary scenes (QA-001: one was swept into a commit)
 /Assets/InitTestScene*.unity
 /Assets/InitTestScene*.unity.meta
+
+# Mono/Unity crash dumps
+mono_crash.*
+*.mem.*.blob

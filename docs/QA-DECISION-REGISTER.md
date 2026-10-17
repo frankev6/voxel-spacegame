@@ -573,15 +573,15 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 
 ## ADR index — read decision, rationale and consequences
 
-- [ADR-0001 — Fresh project with a clean severance from the prototype](decisions/ADR-0001-fresh-project-clean-severance.md) — **Status:** Accepted (owner, 2026-10-09)
+- [ADR-0001 — Fresh project with a clean severance from the prototype](decisions/ADR-0001-fresh-project-clean-severance.md) — **Status:** Accepted (owner, 2026-10-09); amended 2026-10-16: LFS enabled from that commit on, history not rewritten
 - [ADR-0002 — Voxels are 4-byte cells in 16³ bricks](decisions/ADR-0002-voxel-cells-as-data-in-bricks.md) — **Status:** Accepted
 - [ADR-0003 — Ships fly on a plane](decisions/ADR-0003-planar-flight.md) — **Status:** Accepted (default; owner may revisit)
 - [ADR-0004 — Unity Physics is the only gameplay physics](decisions/ADR-0004-unity-physics-only.md) — **Status:** Accepted
 - [ADR-0005 — UI Toolkit with MVVM; no uGUI or TextMeshPro](decisions/ADR-0005-ui-toolkit-mvvm.md) — **Status:** Accepted
 - [ADR-0006 — Narrative: FactStore truth, Yarn Spinner 3 for dialog (after a spike)](decisions/ADR-0006-narrative-factstore-yarn.md) — **Status:** Accepted with a gate
 - [ADR-0007 — Chunked binary save container](decisions/ADR-0007-save-format.md) — **Status:** Accepted
-- [ADR-0008 — Git without LFS until the first push](decisions/ADR-0008-no-lfs-yet.md) — **Status:** Accepted (owner, 2026-10-09)
-- [ADR-0009 — All current art is placeholder; production art waits for design-system approval](decisions/ADR-0009-placeholder-art-and-design-gate.md) — **Status:** Accepted (owner, 2026-10-09)
+- [ADR-0008 — Git without LFS until the first push](decisions/ADR-0008-no-lfs-yet.md) — **Status:** Accepted (owner, 2026-10-09); amended 2026-10-16: LFS enabled from that commit on, history not rewritten
+- [ADR-0009 — All current art is placeholder; production art waits for design-system approval](decisions/ADR-0009-placeholder-art-and-design-gate.md) — **Status:** Accepted (owner, 2026-10-09); amended 2026-10-16: LFS enabled from that commit on, history not rewritten
 - [ADR-0010 — Game.Voxel owns damage resolution, integrity and splitting](decisions/ADR-0010-voxel-module-owns-cell-writes.md) — **Status:** Accepted
 - [ADR-0011 — Cinemachine, Localization and Yarn are not installed yet](decisions/ADR-0011-deferred-packages.md) — **Status:** Accepted
 - [ADR-0012 — Working title, company and save location](decisions/ADR-0012-working-identity.md) — **Status:** Accepted (working values)
