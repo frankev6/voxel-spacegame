@@ -1,6 +1,6 @@
 # Independent review — scope and access
 
-Review `/Users/frank/DEV/spaceship-game-v2`, a Unity 6.6 Entities/DOTS game.
+Review `/Users/frank/DEV/voxel-spacegame`, a Unity 6.6 Entities/DOTS game.
 
 ## Scope
 
