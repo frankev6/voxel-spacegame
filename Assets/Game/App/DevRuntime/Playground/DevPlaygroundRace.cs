@@ -31,9 +31,8 @@ namespace Game.App.DevRuntime.Playground
         readonly DevRuntimeHost host;
         UIRoot ui;
         Entity race = Entity.Null;
-        GameObject visuals; Material material;
-        readonly List<LineRenderer> gateLines = new();
-        readonly List<LineRenderer> mineRings = new(); GameObject mineVisuals;
+        Game.Presentation.Racing.TrackDressing dressing;
+        readonly List<(Vector3, float, Game.Presentation.Racing.TrackDressing.MineLook)> mineLooks = new();
         double3 trackOrigin;
         VisualElement hud; Label banner, status, warning, results;
         readonly Dictionary<byte, ContentHash> blueprints = new();   // each racer's ship, for respawns
@@ -139,11 +138,7 @@ namespace Game.App.DevRuntime.Playground
                 using (var q = em.CreateEntityQuery(typeof(RaceRespawnRequest))) em.DestroyEntity(q);
             }
             race = Entity.Null;
-            if (visuals != null) UnityEngine.Object.Destroy(visuals);
-            if (mineVisuals != null) UnityEngine.Object.Destroy(mineVisuals);
-            mineVisuals = null; mineRings.Clear();
-            if (material != null) UnityEngine.Object.Destroy(material);
-            visuals = null; material = null; gateLines.Clear();
+            dressing?.Dispose(); dressing = null;
             hud?.RemoveFromHierarchy(); hud = null; banner = status = warning = results = null;
         }
 
@@ -175,11 +170,42 @@ namespace Game.App.DevRuntime.Playground
             return DevCommandResult.Ok($"{back:0} m behind gate {id}");
         }
 
+        /// <summary>Dev (RACE-016): an explosion on the emitter head nearest the player's ship, to test that its fence spans drop.</summary>
+        internal DevCommandResult Blast(float radius, float damage)
+        {
+            if (!IsOpen) return DevCommandResult.Fail("no race open");
+            var em = host.Context.EntityManager; var ship = host.Context.PlayerShipRoot;
+            if (ship == Entity.Null || !em.HasComponent<LocalTransform>(ship)) return DevCommandResult.Fail("no player ship");
+            float2 at = em.GetComponentData<LocalTransform>(ship).Position.xz, best = default; float bestD = float.MaxValue; ushort index = 0;
+            using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>(), ComponentType.ReadOnly<LocalTransform>()))
+            using (var spans = q.ToComponentDataArray<WallSpan>(Allocator.Temp))
+            using (var poses = q.ToComponentDataArray<LocalTransform>(Allocator.Temp))
+                for (int i = 0; i < spans.Length; i++)
+                    foreach (var p in new[] { poses[i].Position.xz + spans[i].A, poses[i].Position.xz + spans[i].B })
+                        if (math.distancesq(p, at) < bestD) { bestD = math.distancesq(p, at); best = p; index = spans[i].Index; }
+            if (bestD == float.MaxValue) return DevCommandResult.Fail("no emitter posts");
+            var streams = em.CreateEntityQuery(typeof(DamageStreams)).GetSingleton<DamageStreams>();
+            em.CompleteAllTrackedJobs();
+            streams.Explosions.PostFromMainThread(new ExplosionRequest { WorldPos = new float3(best.x, 9, best.y), Radius = radius, Amount = damage,
+                Type = Game.Data.Combat.DamageType.Explosive, Producer = Game.Data.Combat.ProducerKind.Hazard, Sequence = 77 });
+            return DevCommandResult.Ok($"blast at ({best.x:0.0}, {best.y:0.0}), {math.sqrt(bestD):0} m away (span {index})");
+        }
+
         internal string Info()
         {
             if (!IsOpen) return "no race open";
             var em = host.Context.EntityManager; var rs = State; var text = new System.Text.StringBuilder();
-            text.Append(rs.Phase).Append(" laps ").Append(rs.Laps).Append(" tick ").Append(host.Context.Tick).Append('\n');
+            text.Append(rs.Phase).Append(" laps ").Append(rs.Laps).Append(" tick ").Append(host.Context.Tick);
+            using (var all = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>()))
+            using (var down = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>(), ComponentType.ReadOnly<ZoneOff>()))
+            using (var spans = all.ToComponentDataArray<WallSpan>(Allocator.Temp))
+            {
+                int seen = 0; foreach (var w in spans) if (w.Seen == 3) seen++;
+                text.Append(" spans ").Append(spans.Length).Append(" (").Append(seen).Append(" with both posts seen, ").Append(down.CalculateEntityCount()).Append(" down)");
+                using var downSpans = down.ToComponentDataArray<WallSpan>(Allocator.Temp);
+                for (int i = 0; i < downSpans.Length && i < 8; i++) text.Append(i == 0 ? " down:" : ",").Append(downSpans[i].Index).Append('/').Append(downSpans[i].Lost);
+            }
+            text.Append('\n');
             foreach (var r in em.GetBuffer<RacerProgress>(race))
                 text.Append($"slot {r.Slot}: place {r.Place} lap {r.Lap} last gate {r.LastGate} gates {r.GatesThisLap} best {r.BestLapTicks / 60f:0.00}s flags {r.Flags}\n");
             return text.ToString();
@@ -311,102 +337,76 @@ namespace Game.App.DevRuntime.Playground
         }
 
         // ------------------------------------------------------------------------------------------------ visuals
+        // RACE-016: TrackDressing builds the look (lanes, fences, gates, pads, boards, grid, wreck lights, dust); this feeds it the
+        // pilot's next gates, the mines and the guide arrow each frame.
         void BuildVisuals(TrackDefinition track)
         {
-            visuals = new GameObject("Race track visuals"); visuals.transform.SetParent(host.transform, false);
-            var shader = Shader.Find("Hidden/Internal-Colored");
-            if (shader == null) return;
-            material = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
-            material.SetInt("_ZWrite", 0); material.SetInt("_Cull", 0);
-            var wall = new Color(.25f, .9f, 1f, .9f); var boost = new Color(.35f, 1f, .5f, .9f);
-            foreach (var z in track.Zones)
-            {
-                if (z.Zone == null) continue;
-                if (z.Zone.Shape == Game.Data.Hazards.ZoneShape.Path)
-                {
-                    var pts = new Vector3[z.Path.Length];
-                    for (int i = 0; i < pts.Length; i++) pts[i] = new Vector3(z.Path[i].x, 0, z.Path[i].y);
-                    Line("wall", pts, (z.PathRadius > 0 ? z.PathRadius : z.Zone.PathRadius) * 2, wall, false);
-                }
-                else
-                {
-                    // boost chevrons along the strip
-                    float2 c = z.Position, f = new float2(math.sin(z.Yaw), math.cos(z.Yaw)), r = new float2(f.y, -f.x);
-                    float half = z.HalfExtents.y > 0 ? z.HalfExtents.y : z.Zone.HalfExtents.y, w = z.HalfExtents.x > 0 ? z.HalfExtents.x : z.Zone.HalfExtents.x;
-                    for (float s = -half + 20; s < half; s += 40)
-                    {
-                        float2 tip = c + f * (s + 14), a = c + f * s + r * w * .5f, b = c + f * s - r * w * .5f;
-                        Line("boost", new[] { new Vector3(a.x, -1, a.y), new Vector3(tip.x, -1, tip.y), new Vector3(b.x, -1, b.y) }, 5, boost, false);
-                    }
-                }
-            }
-            foreach (var g in track.Gates)
-            {
-                float2 r = new float2(math.cos(g.Yaw), -math.sin(g.Yaw)) * g.Width * .5f;
-                var line = Line("gate", new[] { new Vector3(g.Position.x - r.x, 0, g.Position.y - r.y), new Vector3(g.Position.x + r.x, 0, g.Position.y + r.y) }, 3,
-                    g.Required ? new Color(1, .85f, .2f, .9f) : new Color(1, .5f, .25f, .7f), false);
-                gateLines.Add(line);
-            }
+            dressing?.Dispose();
+            dressing = new Game.Presentation.Racing.TrackDressing(track, host.transform);
+            gatePositions = new Vector3[track.Gates.Length];
+            for (int i = 0; i < track.Gates.Length; i++) gatePositions[i] = new Vector3(track.Gates[i].Position.x, 0, track.Gates[i].Position.y);
         }
-        LineRenderer Line(string name, Vector3[] points, float width, Color color, bool loop)
-        {
-            var go = new GameObject(name); go.transform.SetParent(visuals.transform, false);
-            var line = go.AddComponent<LineRenderer>();
-            line.sharedMaterial = material; line.useWorldSpace = false; line.loop = loop; line.widthMultiplier = width;
-            line.positionCount = points.Length; line.SetPositions(points); line.startColor = line.endColor = color;
-            line.alignment = LineAlignment.TransformZ; go.transform.localRotation = Quaternion.Euler(90, 0, 0);
-            // TransformZ alignment lays the ribbon flat: rotate points back into the parent's plane
-            for (int i = 0; i < points.Length; i++) points[i] = new Vector3(points[i].x, points[i].z, -points[i].y);
-            line.SetPositions(points);
-            line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; line.receiveShadows = false;
-            return line;
-        }
+        Vector3[] gatePositions = Array.Empty<Vector3>();
+        readonly List<(int, byte)> spansDown = new();
         void UpdateVisuals()
         {
-            if (visuals == null || !host.Context.TryGetFrame(out var frame)) return;
-            visuals.transform.position = (float3)(trackOrigin - frame.OriginInStarSystem);
+            if (dressing == null || !host.Context.TryGetFrame(out var frame)) return;
+            Vector3 origin = (float3)(trackOrigin - frame.OriginInStarSystem);
+            dressing.Root.transform.position = origin;
             var em = host.Context.EntityManager;
-            ulong next = 1;
+            ulong next = 1; Entity ship = Entity.Null;
             byte me = LocalSlot;
             foreach (var r in em.GetBuffer<RacerProgress>(race))
-                if (r.Slot == me) next = r.LastGate >= 0 ? em.GetBuffer<RaceGate>(race)[r.LastGate].NextMask : 1;
-            for (int i = 0; i < gateLines.Count; i++) gateLines[i].widthMultiplier = (next & (1UL << i)) != 0 ? 9 : 3;
+                if (r.Slot == me)
+                {
+                    next = r.LastGate >= 0 ? em.GetBuffer<RaceGate>(race)[r.LastGate].NextMask : 1;
+                    if ((r.Flags & RacerFlags.Finished) != 0) next = 0;
+                    ship = r.Ship;
+                }
+            dressing.SetNextGates(next);
+            // guide: toward the nearest of the next gates, while racing
+            bool racing = State.Phase == RacePhase.Racing && next != 0;
+            if (ship == Entity.Null || !em.Exists(ship)) ship = host.Context.PlayerShipRoot;
+            Vector3 at = ship != Entity.Null && em.Exists(ship) && em.HasComponent<LocalTransform>(ship) ? (Vector3)em.GetComponentData<LocalTransform>(ship).Position : Vector3.zero;
+            Vector3 target = at; float best = float.MaxValue;
+            for (int i = 0; i < gatePositions.Length && i < 64; i++)
+            {
+                if ((next & (1UL << i)) == 0) continue;
+                Vector3 g = origin + gatePositions[i]; float d = (g - at).sqrMagnitude;
+                if (d < best) { best = d; target = g; }
+            }
+            dressing.SetGuide(racing && ship != Entity.Null, at, target);
+            // RACE-016: spans whose emitter post was shot away go dark
+            spansDown.Clear();
+            using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>(), ComponentType.ReadOnly<ZoneOff>()))
+            using (var spans = q.ToComponentDataArray<WallSpan>(Allocator.Temp))
+                foreach (var w in spans) spansDown.Add((w.Index, w.Lost));
+            dressing.SetSpans(spansDown);
             UpdateMines();
         }
 
-        // HAZ-008: a ring the size of each mine's trigger radius, under it (grey arming, pulsing red armed, flashing triggered).
+        // HAZ-008: each mine's halo (its trigger radius) and light: grey while arming, pulsing red armed, flashing when triggered.
         void UpdateMines()
         {
-            if (material == null) return;
             var em = host.Context.EntityManager;
-            if (mineVisuals == null) { mineVisuals = new GameObject("Race mines"); mineVisuals.transform.SetParent(host.transform, false); }
+            mineLooks.Clear();
             using var q = em.CreateEntityQuery(ComponentType.ReadOnly<Game.Voxel.Model.VoxelGrid>(), ComponentType.ReadOnly<LocalTransform>());
             using var grids = q.ToEntityArray(Allocator.Temp);
-            int used = 0; float t = UnityEngine.Time.time;
             foreach (var e in grids)
             {
                 if (em.GetComponentData<Game.Voxel.Model.VoxelGrid>(e).Kind != Game.Voxel.Model.GridKind.Device) continue;
-                if (used == mineRings.Count)
-                {
-                    var go = new GameObject("mine"); go.transform.SetParent(mineVisuals.transform, false);
-                    var ring = go.AddComponent<LineRenderer>(); ring.sharedMaterial = material; ring.useWorldSpace = false; ring.loop = true;
-                    ring.positionCount = 32; ring.widthMultiplier = 1.2f; ring.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                    for (int i = 0; i < 32; i++) { float a = i * math.PI * 2 / 32; ring.SetPosition(i, new Vector3(math.cos(a) * 16, -1, math.sin(a) * 16)); }
-                    mineRings.Add(ring);
-                }
-                var r = mineRings[used++]; r.gameObject.SetActive(true);
-                r.transform.localPosition = em.GetComponentData<LocalTransform>(e).Position;
-                Color c = new Color(1, .25f, .2f, .5f);
+                var state = Game.Presentation.Racing.TrackDressing.MineLook.Armed;
                 if (em.HasComponent<MineState>(e))
                     switch (em.GetComponentData<MineState>(e).Phase)
                     {
-                        case MinePhase.Arming: c = new Color(.6f, .6f, .6f, .4f); break;
-                        case MinePhase.Armed: c = new Color(1, .25f, .2f, .35f + .3f * math.sin(t * 3)); break;
-                        case MinePhase.Triggered: c = math.sin(t * 30) > 0 ? new Color(1, 1, 1, .95f) : new Color(1, .2f, .1f, .95f); break;
+                        case MinePhase.Arming: state = Game.Presentation.Racing.TrackDressing.MineLook.Arming; break;
+                        case MinePhase.Triggered: state = Game.Presentation.Racing.TrackDressing.MineLook.Triggered; break;
+                        case MinePhase.Spent: continue;
                     }
-                r.startColor = r.endColor = c;
+                float radius = em.HasComponent<MineFuse>(e) ? em.GetComponentData<MineFuse>(e).Params.TriggerRadius : 16;
+                mineLooks.Add((em.GetComponentData<LocalTransform>(e).Position, radius, state));
             }
-            for (int i = used; i < mineRings.Count; i++) mineRings[i].gameObject.SetActive(false);
+            dressing.SetMines(mineLooks, UnityEngine.Time.time);
         }
 
         // ------------------------------------------------------------------------------------------------ HUD

@@ -32,7 +32,7 @@ namespace Game.Editor.Content
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Repel, A = 400, B = 8, C = 2, Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices | ZoneEffectFlags.AffectsDebris });
             var bounds = Zone("zone_track_bounds", ZoneShape.Path, default, 1,
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Bounds, Flags = ZoneEffectFlags.AffectsShips });
-            WreckBuilder.EnsureBlock();
+            WreckBuilder.EnsureBlock(); TrackStructureBuilder.EnsureBlock();
             AssetDatabase.SaveAssets();
             var mine = Mine();
             Track("track_01", boost, gate, wall, bounds, mine);
@@ -119,6 +119,95 @@ namespace Game.Editor.Content
             return field;
         }
 
+        // RACE-016: the dressing's materials. HDR colours: bloom turns anything over 1 into light.
+        static TrackLook Look() => new TrackLook
+        {
+            Curtain = Holo("gate", 0, new Color(1f, .62f, .2f) * 2.2f), Fence = Holo("fence", 1, new Color(.25f, .62f, 1f) * 2.0f),
+            Pad = Holo("boost", 2, new Color(.35f, 1f, .5f) * 2.6f), Halo = Holo("halo", 3, new Color(1f, .22f, .15f) * 2.6f),
+            Glow = Holo("glow", 4, Color.white * 3f), Ribbon = Holo("ribbon", 5, new Color(.3f, .7f, 1f) * 2.2f),
+            Solid = Holo("light", 6, Color.white * 2.6f), Surface = Holo("lane", 7, new Color(.45f, .62f, 1f) * 1.1f),
+            Sign = Holo("board", 8, new Color(1f, .58f, .15f) * 2.6f), Dust = Holo("dust", 9, new Color(.7f, .8f, 1f, .55f) * .8f),
+            Metal = Metal(),
+        };
+        static Material Holo(string name, int mode, Color color)
+        {
+            var shader = Shader.Find("Game/Race/Holo") ?? throw new InvalidOperationException("Game/Race/Holo shader missing");
+            string path = Racing + "mat_race_" + name + ".mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null) { mat = new Material(shader); AssetDatabase.CreateAsset(mat, path); }
+            mat.shader = shader; mat.SetFloat("_Mode", mode); mat.SetColor("_Color", color); mat.renderQueue = 3000 + mode;
+            EditorUtility.SetDirty(mat); return mat;
+        }
+        static Material Metal()
+        {
+            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? throw new InvalidOperationException("URP Lit missing");
+            string path = Racing + "mat_race_metal.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null) { mat = new Material(shader); AssetDatabase.CreateAsset(mat, path); }
+            mat.shader = shader; mat.SetColor("_BaseColor", new Color(.30f, .32f, .36f)); mat.SetFloat("_Metallic", .85f); mat.SetFloat("_Smoothness", .62f);
+            mat.enableInstancing = true; EditorUtility.SetDirty(mat); return mat;
+        }
+
+        static bool Inside(Vector2 p, List<Vector2> poly)
+        {
+            bool c = false;
+            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
+                if ((poly[i].y > p.y) != (poly[j].y > p.y) && p.x < (poly[j].x - poly[i].x) * (p.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) c = !c;
+            return c;
+        }
+        static float RouteDistance(TrackPath path, Vector2 p)
+        {
+            var pts = path.Points; float best = float.MaxValue; int n = pts.Length;
+            for (int i = 0; i < (path.Closed ? n : n - 1); i++)
+            {
+                Vector2 a = pts[i], ab = pts[(i + 1) % n] - a;
+                float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / Mathf.Max(1e-6f, ab.sqrMagnitude));
+                best = Mathf.Min(best, Vector2.Distance(p, a + t * ab));
+            }
+            return best;
+        }
+
+        /// <summary>RACE-016: battle debris outside the fences, every 70–130 m of wall on the side away from every route; plates that sit
+        /// on the flight plane only well clear of it. Seeded: the same track every build.</summary>
+        static int DebrisPieces(List<TrackPiece> pieces, Dictionary<string, ShipBlueprintDefinition> parts, List<List<Vector2>> walls, List<TrackPath> routes,
+            Func<Vector2, bool> inWreck)
+        {
+            var rng = new System.Random(16); int count = 0;
+            float R() => (float)rng.NextDouble();
+            bool Clear(Vector2 q, float margin)
+            {
+                if (inWreck(q)) return false;
+                foreach (var r in routes) if (RouteDistance(r, q) < r.Width * .5f + margin) return false;
+                return true;
+            }
+            foreach (var pts in walls)
+            {
+                float next = R() * 60, along = 0;
+                for (int i = 1; i < pts.Count && count < 180; i++)
+                {
+                    float seg = Vector2.Distance(pts[i - 1], pts[i]);
+                    while (next <= along + seg && count < 180)
+                    {
+                        Vector2 q = Vector2.Lerp(pts[i - 1], pts[i], (next - along) / Mathf.Max(seg, 1e-3f));
+                        next += 70 + R() * 60;
+                        Vector2 d = (pts[i] - pts[i - 1]).normalized, normal = new Vector2(-d.y, d.x);
+                        float side = Clear(q + normal * 30, 4) ? 1 : Clear(q - normal * 30, 4) ? -1 : 0;
+                        if (side == 0) continue;
+                        float out_ = 18 + R() * R() * 200;
+                        Vector2 at = q + normal * side * out_;
+                        if (!Clear(at, 12)) continue;
+                        int kind = rng.Next(TrackStructureBuilder.DebrisKinds);
+                        if (kind >= TrackStructureBuilder.DebrisKinds / 2 && out_ < 45) kind -= TrackStructureBuilder.DebrisKinds / 2;   // on-plane pieces stay well clear
+                        float yaw = R() * Mathf.PI * 2;
+                        pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Debris + kind], Position = TrackStructureBuilder.Place(at, yaw, 2), Yaw = yaw, Kind = TrackPieceKind.Decor });
+                        count++;
+                    }
+                    along += seg;
+                }
+            }
+            return count;
+        }
+
         static Vector2 V(JToken t) => new Vector2((float)t[0], (float)t[1]);
 
         static void Track(string id, ZoneDefinition boost, ZoneDefinition gate, ZoneDefinition wall, ZoneDefinition bounds, MineDefinition mine)
@@ -130,6 +219,20 @@ namespace Game.Editor.Content
             var so = new SerializedObject(track); so.FindProperty("id").stringValue = id; so.ApplyModifiedPropertiesWithoutUndo();
             track.DisplayName = (string)json["name"]; track.DefaultLaps = (int)json["laps"];
             track.GateZone = gate; track.BoundsZone = bounds;
+            track.Look = Look();
+            var routes = new List<TrackPath>();
+            foreach (var kv in (JObject)json["paths"])
+            {
+                var r = (JObject)kv.Value; var pts = new List<Vector2>(); foreach (var q in (JArray)r["points"]) pts.Add(V(q));
+                routes.Add(new TrackPath { Name = kv.Key, Points = pts.ToArray(), Width = (float)r["width"], Closed = (bool)r["closed"], Interior = (bool)r["interior"] });
+            }
+            track.Paths = routes.ToArray();
+
+            // RACE-016: wreck outlines. A route inside a wreck (the carrier's hangar) has its hull as the barrier: no field walls, no
+            // pylons there.
+            var outlines = new List<List<Vector2>>();
+            foreach (JObject w in (JArray)json["wrecks"]) { var o = new List<Vector2>(); foreach (var q in (JArray)w["outline"]) o.Add(V(q)); outlines.Add(o); }
+            bool InWreck(Vector2 q) { foreach (var o in outlines) if (Inside(q, o)) return true; return false; }
 
             var gateArray = (JArray)json["gates"];
             var byId = new TrackGate[gateArray.Count];
@@ -140,16 +243,53 @@ namespace Game.Editor.Content
                 // Respawn 40 m past the gate, on the line, facing along it.
                 var forward = new Vector2(Mathf.Sin(yaw), Mathf.Cos(yaw));
                 byId[(int)g["id"]] = new TrackGate { Position = p, Yaw = yaw, Width = (float)g["width"], Required = (bool)g["required"],
-                    Next = next.ToArray(), RespawnPosition = p + forward * 40, RespawnYaw = yaw };
+                    Next = next.ToArray(), RespawnPosition = p + forward * 40, RespawnYaw = yaw, Interior = InWreck(p) };
             }
             track.Gates = byId;
 
-            var zones = new List<TrackZone>();
+            // Gate pylons stand just outside each end of the gate line.
+            var pylons = new List<(Vector2 centre, float yaw)>();
+            foreach (var g in byId)
+            {
+                if (g.Interior) continue;
+                var right = new Vector2(Mathf.Cos(g.Yaw), -Mathf.Sin(g.Yaw));
+                pylons.Add((g.Position - right * (g.Width * .5f + 4.5f), g.Yaw)); pylons.Add((g.Position + right * (g.Width * .5f + 4.5f), g.Yaw));
+            }
+
+            // Field walls, split into spans between emitter posts about every 50 m. A post that would stand on a gate pylon is the
+            // pylon: its head carries the field there.
+            var zones = new List<TrackZone>(); var posts = new List<Vector2>(); var keptWalls = new List<List<Vector2>>();
             float radius = (float)json["wall_radius"];
             foreach (JArray w in (JArray)json["walls"])
             {
                 var pts = new List<Vector2>(); foreach (var q in w) pts.Add(V(q));
-                zones.Add(new TrackZone { Zone = wall, Path = pts.ToArray(), PathRadius = radius });
+                int inside = 0; foreach (var q in pts) if (InWreck(q)) inside++;
+                if (inside * 2 > pts.Count) continue;
+                keptWalls.Add(pts);
+                var along = new float[pts.Count];
+                for (int i = 1; i < pts.Count; i++) along[i] = along[i - 1] + Vector2.Distance(pts[i - 1], pts[i]);
+                float length = along[pts.Count - 1]; int n = Mathf.Max(1, Mathf.RoundToInt(length / 50)); float step = length / n;
+                Vector2 At(float d)
+                {
+                    for (int i = 1; i < pts.Count; i++) if (along[i] >= d) return Vector2.Lerp(pts[i - 1], pts[i], (d - along[i - 1]) / Mathf.Max(1e-4f, along[i] - along[i - 1]));
+                    return pts[pts.Count - 1];
+                }
+                Vector2 Emitter(Vector2 q)
+                {
+                    foreach (var (c, _) in pylons) if (Vector2.Distance(c, q) < 9) return c;
+                    posts.Add(q); return q;
+                }
+                var emitters = new Vector2[n + 1];
+                for (int k = 0; k <= n; k++) emitters[k] = Emitter(At(k * step));
+                int next = 1;
+                for (int k = 0; k < n; k++)
+                {
+                    float d0 = k * step, d1 = (k + 1) * step;
+                    var span = new List<Vector2> { At(d0) };
+                    while (next < pts.Count - 1 && along[next] < d1) { if (along[next] > d0) span.Add(pts[next]); next++; }
+                    span.Add(At(d1));
+                    zones.Add(new TrackZone { Zone = wall, Path = span.ToArray(), PathRadius = radius, Emitters = true, EmitterA = emitters[k], EmitterB = emitters[k + 1] });
+                }
             }
             foreach (JObject b in (JArray)json["boost"])
                 zones.Add(new TrackZone { Zone = boost, Position = V(b["center"]), Yaw = (float)b["yaw"],
@@ -168,21 +308,28 @@ namespace Game.Editor.Content
             var hangar = new List<Unity.Mathematics.float2>();
             foreach (var q in (JArray)json["paths"]["hangar"]["points"]) hangar.Add(new Unity.Mathematics.float2((float)q[0], (float)q[1]));
             float hangarHalf = (float)json["paths"]["hangar"]["width"] / 2;
-            var pieces = new List<TrackPiece>(); int total = 0;
+            var pieces = new List<TrackPiece>(); var lights = new List<TrackLight>(); int total = 0;
             using (var service = new Game.Data.Services.ContentService(ContentDatabaseBuilder.Rebuild()))
             {
                 var wrecks = (JArray)json["wrecks"];
                 for (int i = 0; i < wrecks.Count && i < names.Length; i++)
                 {
                     var w = (JObject)wrecks[i];
-                    var (blueprint, position, cells) = WreckBuilder.Build(service, names[i], titles[i], w, (string)w["kind"] == "carrier" ? hangar : null, hangarHalf);
+                    var (blueprint, position, cells) = WreckBuilder.Build(service, names[i], titles[i], w, (string)w["kind"] == "carrier" ? hangar : null, hangarHalf, lights);
                     pieces.Add(new TrackPiece { Blueprint = blueprint, Position = position, Yaw = 0, Kind = TrackPieceKind.Wall });
                     total += cells;
                 }
+                // RACE-016: the solid track parts.
+                var parts = TrackStructureBuilder.Build(service, byId[0].Width);
+                foreach (var q in posts) pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Post], Position = TrackStructureBuilder.Place(q, 0), Kind = TrackPieceKind.Pylon });
+                foreach (var (c, yaw) in pylons) pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Pylon], Position = TrackStructureBuilder.Place(c, yaw), Yaw = yaw, Kind = TrackPieceKind.Pylon });
+                pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Gantry], Position = TrackStructureBuilder.Place(byId[0].Position, byId[0].Yaw), Yaw = byId[0].Yaw, Kind = TrackPieceKind.Wall });
+                int debris = DebrisPieces(pieces, parts, keptWalls, routes, InWreck);
+                Debug.Log($"{id}: {posts.Count} emitter posts, {pylons.Count} pylons, {debris} debris");
             }
             AssetDatabase.SaveAssets();
             track = AssetDatabase.LoadAssetAtPath<TrackDefinition>(path);   // reload after the database rebuild
-            track.Pieces = pieces.ToArray();
+            track.Pieces = pieces.ToArray(); track.Lights = lights.ToArray(); track.Look = Look(); track.Paths = routes.ToArray();
 
             // HAZ-008: the battle's old minefields, never cleared (proximity mines; the EMP, seeker and repulsor payloads are HAZ-018).
             var fields = new List<TrackMines>(); int f = 0;
@@ -194,7 +341,7 @@ namespace Game.Editor.Content
                 f++;
             }
             track.MineFields = fields.ToArray();
-            Debug.Log($"{id}: {pieces.Count} wrecks, {total} cells");
+            Debug.Log($"{id}: {pieces.Count} pieces, {total} wreck cells");
             EditorUtility.SetDirty(track);
             var errors = TrackValidator.Check(track);
             if (errors.Count > 0) throw new InvalidOperationException(id + ": " + string.Join("; ", errors));

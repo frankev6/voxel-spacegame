@@ -48,6 +48,13 @@ namespace Game.Presentation.Presenters
             if (ReferenceEquals(generation, galaxy.Galaxy)) return;
             generation = galaxy.Galaxy; systems.Clear(); bodies.Clear(); lastCount = -1; gateCached = false;
         }
+        readonly Dictionary<ulong, bool> trackParts = new();
+        public bool IsTrackPart(ContentHash blueprint)
+        {
+            if (trackParts.TryGetValue(blueprint.Value, out var part)) return part;
+            part = content.TryGet<ShipBlueprintDefinition>(blueprint, out var definition) && definition.IdString.StartsWith("ship_track_", System.StringComparison.Ordinal);
+            trackParts.Add(blueprint.Value, part); return part;
+        }
         public string TargetName(ContentHash blueprint, byte faction)
         {
             var key = (blueprint.Value, faction);

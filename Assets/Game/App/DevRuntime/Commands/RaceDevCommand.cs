@@ -5,7 +5,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class RaceDevCommand : IDevCommand
     {
         public string Name => "race";
-        public string Usage => "race open [laps=<n>] | race start | race end | race info | race respawn | race gate=<id> [back=<m>]";
+        public string Usage => "race open [laps=<n>] | race start | race end | race info | race respawn | race gate=<id> [back=<m>] | race blast [radius=<m>] [damage=<n>]";
         public string Summary => "Open Track 01 in the playground, start the countdown, end it, or show progress";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
@@ -30,6 +30,7 @@ namespace Game.App.DevRuntime.Commands
                 "end" => End(race),
                 "respawn" => race.Respawn(),
                 "info" => DevCommandResult.Ok(race.Info()),
+                "blast" => race.Blast((float)args.GetDouble("radius", 3), (float)args.GetDouble("damage", 6000)),
                 _ => DevCommandResult.Fail(Usage)
             };
         }

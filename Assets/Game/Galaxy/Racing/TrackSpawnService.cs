@@ -32,6 +32,8 @@ namespace Game.Galaxy.Racing
                     var pts = new float2[z.Path.Length];
                     for (int k = 0; k < pts.Length; k++) pts[k] = origin + (float2)z.Path[k];
                     e = HazardSpawn.PathZone(em, z.Zone, pts, group, Id(), z.PathRadius > 0 ? z.PathRadius : z.Zone.PathRadius);
+                    if (z.Emitters)
+                        em.AddComponentData(e, new WallSpan { A = origin + (float2)z.EmitterA - pts[0], B = origin + (float2)z.EmitterB - pts[0], Index = (ushort)i });
                 }
                 else
                 {

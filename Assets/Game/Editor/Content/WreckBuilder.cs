@@ -23,13 +23,14 @@ namespace Game.Editor.Content
         public const float Cell = 2f;
         const int Bottom = -8;   // cells: the walls reach 16 m below the flight plane
 
-        // deck height (cells above the flight plane) and weathered paint per class (palette: 1 graphite, 10 brown, 11 soot, 12 olive drab,
-        // 13 steel blue, 14 bare metal, 6 rust; never 17–19, the team slots). Two fleets: graphite and steel (dreadnought, cruisers),
-        // olive and rust (the rest).
-        static readonly Dictionary<string, (int deck, byte hull, byte hull2, byte plate, byte scorch)> Kinds = new()
+        // deck height (cells above the flight plane) and weathered paint per class (palette: 1 graphite #3a3f48, 13 steel blue, 12 olive
+        // #34432f, 10 brown, 11 soot, 14 bare metal, 16 light grey; never 17–19, which render as the team colour). Two fleets: graphite
+        // and steel (dreadnought, cruisers), olive with graphite bands (the rest). RACE-016: the hull is banded by section, not patched;
+        // bare metal rims the deck so a hull reads against space; burn streaks, no bright rust.
+        static readonly Dictionary<string, (int deck, byte hull, byte band, byte plate, byte scorch, byte rim)> Kinds = new()
         {
-            { "dreadnought", (20, 1, 11, 13, 11) }, { "cruiser", (11, 1, 11, 13, 11) },
-            { "carrier", (14, 12, 10, 6, 11) }, { "battleship", (17, 12, 10, 6, 11) }, { "frigate", (7, 12, 10, 6, 11) },
+            { "dreadnought", (20, 1, 13, 14, 11, 16) }, { "cruiser", (11, 1, 13, 14, 11, 16) },
+            { "carrier", (14, 12, 1, 10, 11, 14) }, { "battleship", (17, 12, 1, 10, 11, 14) }, { "frigate", (7, 12, 1, 10, 11, 14) },
         };
 
         internal static void EnsureBlock()
@@ -67,14 +68,39 @@ namespace Game.Editor.Content
         }
         static uint Hash(int x, int y, uint seed) { uint h = (uint)x * 73856093u ^ (uint)y * 19349663u ^ seed * 83492791u; h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15; return h; }
 
+        /// <summary>RACE-016: the wreck's lights, in track space. Amber and red running lights along the hull edge every ~26 m, a red
+        /// beacon on the bridge tower, and a fire in one hole in three.</summary>
+        static void Lights(List<TrackLight> lights, List<float2> outline, int deck, HashSet<(int, int)> holes, float2 origin, uint seed, float2 tower, int towerTop)
+        {
+            float edgeY = (deck - 3) * Cell; int n = 0;
+            for (int i = 0; i < outline.Count; i++)
+            {
+                float2 a = outline[i], b = outline[(i + 1) % outline.Count]; float len = math.distance(a, b);
+                for (float d = 0; d < len; d += 26, n++)
+                {
+                    float2 p = math.lerp(a, b, d / len);
+                    var c = n % 3 == 2 ? new Color(1f, .18f, .12f) : new Color(1f, .6f, .2f);
+                    lights.Add(new TrackLight { Position = new Vector3(p.x, edgeY, p.y), Color = c, Size = 3.2f, Kind = TrackLightKind.Blink });
+                }
+            }
+            foreach (var (px, pz) in holes)
+            {
+                if (Hash(px, pz, seed + 23) % 3 != 0) continue;
+                float2 p = origin + new float2(px * 4 + 2, pz * 4 + 2) * Cell;
+                lights.Add(new TrackLight { Position = new Vector3(p.x, (deck - 5) * Cell, p.y), Color = new Color(1f, .38f, .08f), Size = 16, Kind = TrackLightKind.Fire });
+            }
+            if (towerTop >= 0)
+                lights.Add(new TrackLight { Position = new Vector3(tower.x, (towerTop + 2) * Cell, tower.y), Color = new Color(1f, .1f, .08f), Size = 9, Kind = TrackLightKind.Blink });
+        }
+
         /// <summary>Builds one wreck blueprint; returns it and the track-space position of its cell origin (spawn it there at yaw 0).</summary>
         internal static (ShipBlueprintDefinition blueprint, Vector2 position, int cells) Build(ContentService service, string id, string name, JObject wreck,
-            List<float2> trench, float trenchHalfWidth)
+            List<float2> trench, float trenchHalfWidth, List<TrackLight> lights = null)
         {
             var catalog = service.Catalog;
             var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
             ushort plate = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_wreck_plate")));
-            string kind = (string)wreck["kind"]; var (deck, hull, hull2, plateColour, scorch) = Kinds[kind]; byte trim = 14;
+            string kind = (string)wreck["kind"]; var (deck, hull, band, plateColour, scorch, rim) = Kinds[kind]; byte trim = 14;
             var outline = new List<float2>(); foreach (var q in (JArray)wreck["outline"]) outline.Add(V(q));
             float2 lo = outline[0], hi = outline[0];
             foreach (var p in outline) { lo = math.min(lo, p); hi = math.max(hi, p); }
@@ -92,6 +118,7 @@ namespace Game.Editor.Content
             // Pass 1: each column's deck height, paint and role. Pass 2 places it, filling down to its lowest neighbour so every step in
             // the deck stays face-connected (a ship is one piece, SPEC-51 §5.5).
             const int Empty = int.MinValue;
+            var holes = new HashSet<(int, int)>(); int towerTop = 0, towerCount = 0; float2 towerSum = 0;
             var tops = new int[nx, nz]; var colours = new byte[nx, nz]; var walls = new bool[nx, nz]; var towers = new bool[nx, nz];
             for (int x = 0; x < nx; x++)
                 for (int z = 0; z < nz; z++)
@@ -118,11 +145,17 @@ namespace Game.Editor.Content
                     bool hole = panel % 29 == 3 && edge > Cell * 5 && !tower;
                     bool wall = edge < Cell * 1.5f || trenchWall;
                     if (hole && !wall) continue;
-                    // Mostly hull, a second hull tone in large patches, sparse plates, scorch round the holes and in streaks.
-                    byte deckColour = big % 3 == 1 ? hull2 : hull;
-                    if (panel % 9 == 0) deckColour = plateColour;
+                    // Hull plating in sections across the axis (every ~36 m a band), sparse plates, scorch round the holes and in
+                    // streaks, burn runs, bare metal along the deck edge.
+                    int section = (int)math.floor(s * length / 36);
+                    byte deckColour = (section & 3) == 1 ? band : hull;
+                    if (panel % 13 == 0 && edge > Cell * 4) deckColour = plateColour;
                     if (h % 31 == 0 || panel % 29 == 4 || Hash(x / 2, z / 6, seed + 11) % 37 == 0) deckColour = scorch;
+                    if (Hash(x, z / 9, seed + 17) % 89 == 0) deckColour = scorch;   // burn streaks
+                    if (edge < Cell * 1.5f && !trenchWall) deckColour = rim;
                     if (tower) deckColour = panel % 4 == 0 ? trim : hull;
+                    if (hole) holes.Add((x / 4, z / 4));
+                    if (tower) { towerTop = math.max(towerTop, top); towerSum += p; towerCount++; }
                     tops[x, z] = top; colours[x, z] = deckColour; walls[x, z] = wall; towers[x, z] = tower;
                 }
             for (int x = 0; x < nx; x++)
@@ -140,8 +173,9 @@ namespace Game.Editor.Content
                             from = math.min(from, tops[ax, az]);
                         }
                     for (int y = from; y <= top; y++)
-                        Put(x, y, z, y == top ? colours[x, z] : towers[x, z] ? trim : y % 5 == 0 ? scorch : hull);
+                        Put(x, y, z, y == top ? colours[x, z] : towers[x, z] ? trim : y % 5 == 0 ? scorch : y == top - 1 && walls[x, z] ? rim : hull);
                 }
+            if (lights != null) Lights(lights, outline, deck, holes, origin, seed, towerCount > 0 ? towerSum / towerCount : float2.zero, towerCount > 0 ? towerTop : -1);
             // Anything a hole or the trench cut off from the hull is removed: a wreck is one piece.
             int loose = NocturneShipBuilder.RemoveLoose(structure, content, 0);   // no core: keep the largest piece
 

@@ -40,7 +40,7 @@ namespace Game.Simulation.Hazards
             contactsEntity = state.EntityManager.CreateEntity(typeof(ZoneContacts));
             state.EntityManager.SetName(contactsEntity, "ZoneContacts");
             state.EntityManager.SetComponentData(contactsEntity, new ZoneContacts { Current = new NativeList<ZoneContact>(16, Allocator.Persistent) });
-            zones = new EntityQueryBuilder(Allocator.Temp).WithAll<WorldZone, ZoneEffect, LocalTransform>().Build(ref state);
+            zones = new EntityQueryBuilder(Allocator.Temp).WithAll<WorldZone, ZoneEffect, LocalTransform>().WithNone<ZoneOff>().Build(ref state);
             bodies = new EntityQueryBuilder(Allocator.Temp).WithAll<LocalTransform, PhysicsVelocity, PhysicsMass>().WithNone<Parent>().Build(ref state);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>();
             state.RequireForUpdate(zones);

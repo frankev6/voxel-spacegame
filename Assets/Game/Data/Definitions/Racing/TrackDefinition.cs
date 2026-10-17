@@ -22,6 +22,10 @@ namespace Game.Data.Definitions
         public ZoneDefinition GateZone;                               // the gate zone every gate spawns (its effect Id is set per gate)
         public ZoneDefinition BoundsZone;
         public Texture2D LayoutMap;                                   // the approved top-down map (doc and loading screen)
+        // RACE-016: what the track looks like. None of it is simulated; TrackDressing builds it on every machine.
+        public TrackPath[] Paths = Array.Empty<TrackPath>();          // route centrelines: the lane surface and the corner boards
+        public TrackLight[] Lights = Array.Empty<TrackLight>();       // wreck running lights, beacons and fires (track space, y up)
+        public TrackLook Look;
 
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {
@@ -36,6 +40,7 @@ namespace Game.Data.Definitions
         public bool Required;                                            // on every valid lap
         public int[] Next;                                               // ids reachable next (branches); validator: graph from 0 back to 0
         public Vector2 RespawnPosition; public float RespawnYaw;
+        public bool Interior;                                            // inside a wreck: its hull is the barrier, no pylons (RACE-016)
     }
     [Serializable] public struct TrackPiece { public ShipBlueprintDefinition Blueprint; public Vector2 Position; public float Yaw; public TrackPieceKind Kind; }
     public enum TrackPieceKind : byte { Wall = 0, Pylon = 1, Barricade = 2, Obstacle = 3, Decor = 4 }   // Obstacle = dynamic (pushable)
@@ -44,9 +49,21 @@ namespace Game.Data.Definitions
         public ZoneDefinition Zone; public Vector2[] Path; public Vector2 Position; public float Yaw;
         public Vector2 HalfExtents;   // box or circle size for this placement; zero = the definition's
         public float PathRadius;      // path capsule radius for this placement; zero = the definition's
+        // RACE-016: a field-wall span held up by two voxel emitter posts (track space). While either post's emitter head is shot
+        // away the span is down (WallEmitterSystem). No emitters = always up.
+        public bool Emitters; public Vector2 EmitterA, EmitterB;
     }
     [Serializable] public struct TrackMines { public MineFieldDefinition Field; public Vector2 Position; public float Yaw; public uint Seed; }
     [Serializable] public struct TrackSlot { public Vector2 Position; public float Yaw; }
+    [Serializable] public struct TrackPath { public string Name; public Vector2[] Points; public float Width; public bool Closed; public bool Interior; }
+    public enum TrackLightKind : byte { Steady = 0, Blink = 1, Fire = 2 }
+    [Serializable] public struct TrackLight { public Vector3 Position; public Color Color; public float Size; public TrackLightKind Kind; }
+    /// <summary>The materials of the dressing: one Game/Race/Holo material per mode, and a lit metal for pylons and posts.</summary>
+    [Serializable] public struct TrackLook
+    {
+        public Material Curtain, Fence, Pad, Halo, Glow, Ribbon, Solid, Surface, Sign, Dust;
+        public Material Metal;
+    }
 
     /// <summary>SPEC-92 §7: the gate graph must lead from gate 0 back to gate 0, and every required gate must lie on every lap.</summary>
     public static class TrackValidator

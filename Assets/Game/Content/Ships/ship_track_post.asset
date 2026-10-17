@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_track_post
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_track_post
+  formerIds: []
+  displayName: Field Emitter Post
+  cellSize: 1
+  payloadVersion: 1
+  payload: 564f5853010001007d4f310ac240109cd15c0c88a2b5c63c254f9128daa808210fb011fca58d825d1a8b74e7ee16928bc4e55898d9d9d939e0927b29ce37c7f3f6b0aeca42fabe2c4ebb1100624c9070c48c9810532494029a4c060370084857a9b2b755c82621bc532d5558679172b153dac1f6019f7ed958b9a8257ad2347a9aa16b17fb8525ff3ddf812ffe0f9baa8bbe9a61ac375bb9ae4b58fcbee4061fbd63f998dcc107y
+  cellCount: 158
+  boundsMin: {x: -1, y: -7, z: -1}
+  boundsMax: {x: 1, y: 10, z: 1}

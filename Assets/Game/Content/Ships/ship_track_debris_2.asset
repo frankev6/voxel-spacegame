@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_track_debris_2
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_track_debris_2
+  formerIds: []
+  displayName: Battle Debris
+  cellSize: 2
+  payloadVersion: 1
+  payload: 564f5853010001004d8eb10dc2400c45bf9da3e0ee92f4ac42c32648d0207112150d0d1bc1023001b3040640287c3b04e50a9ffdfef79701ac7a3e899b72d8eed7bb6329330082281041234808c20ef82c941c6f5153a0444895d56e98d99f6dd7cc2f9a117eaeecae271749e27f50d7e99e3b52af270fe0dab575ad16cb61c9d340b53f0f11c0432a73dc1bbf9c4a5f8f66e2e497a5e9d5a3649923ccc17be0c23492a5d75b4bf205y
+  cellCount: 73
+  boundsMin: {x: -5, y: -9, z: -3}
+  boundsMax: {x: 5, y: -8, z: 3}

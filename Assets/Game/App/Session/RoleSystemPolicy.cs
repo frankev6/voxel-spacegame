@@ -84,6 +84,7 @@ namespace Game.App.Session
             ["DamageStreamsSystem"] = SystemAuthority.Both,
             ["RecoilSystem"] = SystemAuthority.Both,                     // SPEC-91: shooters feel their own recoil at once
             ["ZoneSystem"] = SystemAuthority.Both,
+            ["WallEmitterSystem"] = SystemAuthority.Both,              // RACE-016: spatial, so every machine drops the same spans
             ["MineSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-91: arm, trigger and detonate; mines replicate as grids
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests                       // SPEC-91: pushes everywhere; wall damage and gate contacts used on the authority
