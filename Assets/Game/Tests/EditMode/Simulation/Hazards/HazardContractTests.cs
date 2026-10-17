@@ -50,9 +50,10 @@ namespace Game.Tests.EditMode.Simulation.Hazards
         }
 
         [Test]
-        public void HazardSpawn_IsAContractOnly()
+        public void HazardSpawn_MineFieldIsAContractOnly()
         {
-            Assert.Throws<NotImplementedException>(() => HazardSpawn.DespawnGroup(default, 1));
+            // Zones are implemented (HAZ-006); mine fields follow in HAZ-008.
+            Assert.Throws<NotImplementedException>(() => HazardSpawn.MineField(default, null, default, 0, 0, 1, null, default));
         }
 
         [Test]

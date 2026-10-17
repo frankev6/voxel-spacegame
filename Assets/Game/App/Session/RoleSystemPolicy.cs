@@ -82,6 +82,7 @@ namespace Game.App.Session
             // GameplayPostPhysicsGroup
             ["SpatialHashBuildSystem"] = SystemAuthority.Both,
             ["DamageStreamsSystem"] = SystemAuthority.Both,
+            ["ZoneSystem"] = SystemAuthority.Both,                       // SPEC-91: pushes everywhere; wall damage and gate contacts used on the authority
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
