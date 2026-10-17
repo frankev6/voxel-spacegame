@@ -31,6 +31,7 @@ namespace Game.Editor.Content
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Repel, A = 400, B = 8, C = 2, Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices | ZoneEffectFlags.AffectsDebris });
             var bounds = Zone("zone_track_bounds", ZoneShape.Path, default, 1,
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Bounds, Flags = ZoneEffectFlags.AffectsShips });
+            WreckBuilder.EnsureBlock();
             AssetDatabase.SaveAssets();
             Track("track_01", boost, gate, wall, bounds);
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
@@ -107,6 +108,31 @@ namespace Game.Editor.Content
             var slots = new List<TrackSlot>();
             foreach (JObject s in (JArray)json["start"]) slots.Add(new TrackSlot { Position = V(s["position"]), Yaw = (float)s["yaw"] });
             track.StartGrid = slots.ToArray();
+
+            // RACE-012: the wrecks, as 2 m-cell hulls placed at their cell origins.
+            var names = new[] { "ship_wreck_dreadnought_stern", "ship_wreck_dreadnought_bow", "ship_wreck_carrier", "ship_wreck_battleship", "ship_wreck_engine_section",
+                "ship_wreck_cruiser", "ship_wreck_cruiser_burned", "ship_wreck_frigate_a", "ship_wreck_frigate_b", "ship_wreck_frigate_c" };
+            var titles = new[] { "DREADNOUGHT (STERN)", "DREADNOUGHT (BOW)", "CARRIER", "BATTLESHIP", "ENGINE SECTION", "CRUISER", "BURNED-OUT CRUISER",
+                "FRIGATE", "FRIGATE", "FRIGATE" };
+            var hangar = new List<Unity.Mathematics.float2>();
+            foreach (var q in (JArray)json["paths"]["hangar"]["points"]) hangar.Add(new Unity.Mathematics.float2((float)q[0], (float)q[1]));
+            float hangarHalf = (float)json["paths"]["hangar"]["width"] / 2;
+            var pieces = new List<TrackPiece>(); int total = 0;
+            using (var service = new Game.Data.Services.ContentService(ContentDatabaseBuilder.Rebuild()))
+            {
+                var wrecks = (JArray)json["wrecks"];
+                for (int i = 0; i < wrecks.Count && i < names.Length; i++)
+                {
+                    var w = (JObject)wrecks[i];
+                    var (blueprint, position, cells) = WreckBuilder.Build(service, names[i], titles[i], w, (string)w["kind"] == "carrier" ? hangar : null, hangarHalf);
+                    pieces.Add(new TrackPiece { Blueprint = blueprint, Position = position, Yaw = 0, Kind = TrackPieceKind.Wall });
+                    total += cells;
+                }
+            }
+            AssetDatabase.SaveAssets();
+            track = AssetDatabase.LoadAssetAtPath<TrackDefinition>(path);   // reload after the database rebuild
+            track.Pieces = pieces.ToArray();
+            Debug.Log($"{id}: {pieces.Count} wrecks, {total} cells");
             EditorUtility.SetDirty(track);
             var errors = TrackValidator.Check(track);
             if (errors.Count > 0) throw new InvalidOperationException(id + ": " + string.Join("; ", errors));

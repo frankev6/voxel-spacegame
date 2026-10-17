@@ -129,7 +129,47 @@ MonoBehaviour:
     Next: 00000000i
     RespawnPosition: {x: -408.8631, y: 1011.1592}
     RespawnYaw: 1.53681
-  Pieces: []
+  Pieces:
+  - Blueprint: {fileID: 11400000, guid: 87074b20b75eb41789141e1c0fa1139b, type: 2}
+    Position: {x: -324, y: -30}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: ef50615d9119f4e88a5f1fe4f231a4c3, type: 2}
+    Position: {x: 532, y: 336}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: 7587519a36ae84cd087fbf3f675ab2f7, type: 2}
+    Position: {x: -1454, y: -564}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: 1d1078fb6632747b5b37d333524bea45, type: 2}
+    Position: {x: -692, y: -708}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: 95d37c1311ed54d2a989d3eebcff2799, type: 2}
+    Position: {x: 254, y: -1748}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: d8d6e7f9389a64dedaf7e590ae7e7a52, type: 2}
+    Position: {x: 1314, y: 292}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: cf80bb561aa454edc856a09ad38b9f0a, type: 2}
+    Position: {x: 2224, y: -778}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: d9fff52cd849d49a69b26823dc3f1d30, type: 2}
+    Position: {x: -920, y: 278}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: ca15dbce825b6478f84a837f90de393d, type: 2}
+    Position: {x: -884, y: 260}
+    Yaw: 0
+    Kind: 0
+  - Blueprint: {fileID: 11400000, guid: 6ffa7500c9d19453682a87c004e2c203, type: 2}
+    Position: {x: -530, y: -254}
+    Yaw: 0
+    Kind: 0
   Zones:
   - Zone: {fileID: 11400000, guid: 0f81ad6acc0ce4b7c8e107fa886f1641, type: 2}
     Path:

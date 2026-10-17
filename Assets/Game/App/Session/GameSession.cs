@@ -27,6 +27,19 @@ namespace Game.App.Session
         public ulong NextPersistentId { get; private set; } = 1;
 
         // Shared allocation initializer; the composition constructor binds flow and persistence below.
+        /// <summary>SPEC-92 decision 8: true while a race counts down or runs; deaths respawn instead of ending the session.</summary>
+        internal bool RaceRunning
+        {
+            get
+            {
+                if (!world.IsCreated) return false;
+                using var q = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<Game.Galaxy.Racing.RaceState>());
+                if (q.IsEmptyIgnoreFilter) return false;
+                using var states = q.ToComponentDataArray<Game.Galaxy.Racing.RaceState>(Unity.Collections.Allocator.Temp);
+                foreach (var r in states) if (r.Phase == Game.Galaxy.Racing.RacePhase.Countdown || r.Phase == Game.Galaxy.Racing.RacePhase.Racing) return true;
+                return false;
+            }
+        }
         internal GameSession(World world, GameConfigDefinition config)
         {
             this.world = world ?? throw new ArgumentNullException(nameof(world));

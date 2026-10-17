@@ -35,6 +35,7 @@ namespace Game.App.DevRuntime.Playground
         readonly List<LineRenderer> gateLines = new();
         double3 trackOrigin;
         VisualElement hud; Label banner, status, warning, results;
+        readonly Dictionary<byte, ContentHash> blueprints = new();   // each racer's ship, for respawns
 
         internal DevPlaygroundRace(DevRuntimeHost host) { this.host = host; }
         internal void Bind(UIRoot root) { ui = root; }
@@ -52,9 +53,22 @@ namespace Game.App.DevRuntime.Playground
             ctx.TryGetService<GameSession>(out var session);
             End();
             em.CompleteAllTrackedJobs();
+            blueprints.Clear();
             trackOrigin = padsOrigin + TrackOffset;
             float2 local = (float2)(trackOrigin - frame.OriginInStarSystem).xz;
-            race = TrackSpawnService.Spawn(em, track, local, Group, session);
+            var frameOrigin = frame.OriginInStarSystem;
+            race = TrackSpawnService.Spawn(em, track, local, Group, session, (blueprint, at, yaw, id) =>
+            {
+                // Wrecks and walls are static station grids; UniversePosition keeps them in place through origin rebases.
+                var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
+                {
+                    PersistentId = id, Pose = new RigidTransform(quaternion.RotateY(yaw), new float3(at.x, 0, at.y)),
+                    Kind = Game.Voxel.Model.GridKind.Station, Motion = Game.Voxel.Model.GridMotion.Static, Profile = Game.Voxel.Model.GridProfile.Station,
+                    Flags = Game.Voxel.Model.GridSpawnFlags.Transient
+                });
+                em.AddComponentData(root, new Game.Galaxy.Components.UniversePosition { Value = frameOrigin + new double3(at.x, 0, at.y) });
+                return root;
+            });
             var rs = em.GetComponentData<RaceState>(race);
             if (laps > 0) { rs.Laps = (byte)math.clamp(laps, 1, 20); em.SetComponentData(race, rs); }
 
@@ -74,6 +88,9 @@ namespace Game.App.DevRuntime.Playground
                 var p = local + slots[i].Position;
                 DevEcs.TeleportRoot(em, ship, new float3(p.x, 0, p.y), quaternion.RotateY(slots[i].Yaw));
                 racers.Add(new RacerProgress { Slot = slot, LastGate = -1, Ship = ship });
+                var source = em.HasComponent<Game.Voxel.Model.GridSource>(ship) ? em.GetComponentData<Game.Voxel.Model.GridSource>(ship).Blueprint : default;
+                if (source.Equals(default(ContentHash)) && slot == 0 && session?.Fleet?.Flagship != null) source = session.Fleet.Flagship.SourceBlueprint.Hash;
+                blueprints[slot] = source;
             }
             slots.Dispose();
             var buffer = em.GetBuffer<RacerProgress>(race);
@@ -163,11 +180,38 @@ namespace Game.App.DevRuntime.Playground
                     var request = em.GetComponentData<RaceRespawnRequest>(e);
                     em.DestroyEntity(e);
                     var racers = em.GetBuffer<RacerProgress>(race);
+                    bool live = false;
                     for (int i = 0; i < racers.Length; i++)
                         if (racers[i].Slot == request.Slot && racers[i].Ship != Entity.Null && em.Exists(racers[i].Ship) && !em.HasComponent<Hulk>(racers[i].Ship))
-                            DevEcs.TeleportRoot(em, racers[i].Ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw));
+                        { DevEcs.TeleportRoot(em, racers[i].Ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw)); live = true; }
+                    if (!live) SpawnFresh(request);
                 }
             UpdateVisuals(); UpdateHud();
+        }
+
+        /// <summary>RACE-006: a destroyed racer flies again in a fresh ship of its blueprint. Its hulk stays on the track as an obstacle
+        /// but gives up the pilot's tags, so the camera, HUD and controls follow the new ship.</summary>
+        void SpawnFresh(in RaceRespawnRequest request)
+        {
+            var ctx = host.Context; var em = ctx.EntityManager;
+            if (!blueprints.TryGetValue(request.Slot, out var blueprint) || blueprint.Equals(default(ContentHash)))
+            { GameLog.Warn(LogCategories.Dev, "Race: no blueprint to respawn pilot " + request.Slot); return; }
+            using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<Hulk>()))
+            using (var hulks = q.ToEntityArray(Allocator.Temp))
+                foreach (var h in hulks)
+                {
+                    if (em.GetComponentData<Pilot>(h).Slot != request.Slot) continue;
+                    em.RemoveComponent<Pilot>(h);
+                    if (em.HasComponent<PlayerShip>(h)) em.RemoveComponent<PlayerShip>(h);
+                }
+            if (request.Slot != 0) { GameLog.Warn(LogCategories.Dev, "Race: guest respawn arrives with RACE-009"); return; }
+            if (!ctx.TryGetService<GameSession>(out var session)) return;
+            var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint, new Game.Voxel.Grid.GridSpawnParams
+            {
+                PersistentId = session.Allocate(), Pose = new RigidTransform(quaternion.RotateY(request.Yaw), new float3(request.Position.x, 0, request.Position.y)),
+                Kind = Game.Voxel.Model.GridKind.Ship, Motion = Game.Voxel.Model.GridMotion.Dynamic, Profile = Game.Voxel.Model.GridProfile.PlayerShip
+            });
+            em.AddComponentData(root, Game.Simulation.Allegiance.Player);
         }
 
         // ------------------------------------------------------------------------------------------------ visuals
