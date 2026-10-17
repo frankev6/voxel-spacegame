@@ -61,3 +61,6 @@ MonoBehaviour:
         Params:
           ThrustNewtons: 90000
           PowerDraw: 0
+          SpoolUpSeconds: 0.25
+          SpoolDownSeconds: 0.2
+          BoostThrottle: 0

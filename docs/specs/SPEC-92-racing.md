@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready: approved by the owner with all §10 defaults (2026-10-16). Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
+| **Status** | Ready (2026-10-16). Amended 2026-10-17: Track 01 is the Battle Graveyard, five racers are built (the Salvage Tug was removed), the racers fly the ADR-0120 engine line, and the grapple is cut. The amendment is waiting for owner review. Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
 | **Area code** | RACE (task IDs are `RACE-001`, `RACE-002`, …) |
 | **Module(s)** | `Game.Galaxy` (`Galaxy/Racing/`), `Game.Data` (definitions), `Game.Simulation` (`RaceHold` in command conversion), `Game.Net` (replication), `Game.UI` and `Game.Presentation` (race HUD), `Game.App` (playground pad, session), `Game.Editor` (track builder, Windows build) |
 | **Depends on specs** | SPEC-91 (zones, walls, mines, hit force), SPEC-90 and ADR-0117 (co-op), SPEC-10 (grid spawning), SPEC-20 (commands), SPEC-21 (weapons), SPEC-61 (HUD), SPEC-62 (camera) |
@@ -23,12 +23,12 @@ Weapons stay live, so players shoot each other off the racing line with SPEC-91'
 ## 2. Scope
 **In scope:**
 - `TrackDefinition` and the track spawner;
-- one track, approved first as a top-down map;
+- one track, approved first as a top-down map: **Track 01, the Battle Graveyard** (RACE-002, owner 2026-10-17), built around a fleet of capital wrecks;
 - the voxel barrier and obstacle blueprints;
 - the race decider: phases, countdown, gates, laps, branches, finish order, wrong way, out of bounds, respawn;
 - race replication and per-pilot PvP;
 - the race HUD, gate visuals and a results board;
-- two racer ships (silhouettes approved before any voxels) and one shove weapon;
+- five racer ships in two lines, approved by the owner (2026-10-17): Dart (Vestari: Needle, Kite, Gimbal) and Ram (Khuchad Clan: Battering Ram, Hammerhead). The Salvage Tug was removed the same day. Plus one shove weapon and the two racer abilities, Slip and Shove;
 - a Windows dev build;
 - a Tailscale playtest guide;
 - the playtest with Daniel.
@@ -55,6 +55,15 @@ Weapons stay live, so players shoot each other off the racing line with SPEC-91'
 8. **No defeat screen during a race.** `DefeatWatcher` ignores pilot deaths while `RaceState.Phase` is `Countdown` or `Racing`. Reason: respawn replaces defeat.
 9. **Default race rules:** 3 laps, 2–4 pilots, a countdown from 3, and a 60 s finish window after the first finisher.
 10. **The track lives in the playground**, spawned 1,500 m south of the pads by pad `18  RACE`. Co-op runs only in the sandbox (SPEC-90). Reason: Daniel's first test.
+11. **Track 01 is a battle graveyard** (owner, 2026-10-17): "instead of just having one ship, its a group of derelict ships, like an ancient battle took place with large ships and we go through and around them."
+    - The layout and its routes are in `docs/design/racing/track-01-options.md` and `track_01_battle_graveyard.json`.
+    - The wrecks are hollow shells at 2 m cells (ADR-0119 decision 10).
+    - The grapple is cut.
+12. **Five racers are built** (owner: "for ships i actually like all options you made, lets create all 6"; then, 2026-10-17: "remove the salvage tug ship, it has no place in this"). The three Darts share the Slip ability and the two Rams share Shove. Each hull keeps its own handling.
+13. **Racers fly the ADR-0120 engine line, and their hulls are shaped** (owner, 2026-10-17: "you need to also make new thruster engines … also in your building of the ships you missed to use a lot of the hull block options").
+    - Darts fly sprint engines (fast spool, hardest boost) and verniers. Rams fly torches (slow spool, most thrust), with sprint engines for correction.
+    - `export_racers.py` shapes each hull as a height field. Domes rise from the outline and are chamfered underneath. Plates, cabins and barrels stand proud with chamfered edges.
+    - Outline edges within 8.5° of a kit line (grid, 45° or 1:2) are snapped onto that line through cell corners, so the builder seats wedges and long slopes along the silhouette. Slopes run along the grid only; diagonal tops step. The Gimbal's ring is an octagon.
 
 ## 4. Data model
 
@@ -217,8 +226,9 @@ Advisory (ADR-0042):
 ### RACE-004 — Track builder, barrier blueprints and spawner
 - **Milestone:** M4
 - **Tier:** frontier — spawns many grids, zones and mines with stable ids, across roles
-- **Depends on:** `RACE-001`, `RACE-002`, `HAZ-007`, `HAZ-008`
+- **Depends on:** `RACE-001`, `RACE-002`, `RACE-012`, `HAZ-007`, `HAZ-008`
 - **Do:**
+  - Build Track 01 from `track_01_battle_graveyard.json`: the wrecks from RACE-012, field walls, zones, mines and gates. Mechanics that land later attach in RACE-015.
   - Make the barrier and obstacle blueprints from human-hull blocks, NOCTURNE paint:
     - `track_wall_straight` and `track_wall_curve`;
     - `track_pylon`;
@@ -289,21 +299,98 @@ Advisory (ADR-0042):
   - [ ] Screenshots of countdown, racing and results are in the ledger log.
 - **Tests:** `RaceHudTests.Binds_Model`, `.Countdown`, `.Results`; `AuditTests` covers the new screen.
 
-### RACE-008 — Racer ships and the shove weapon
+### RACE-008 — The Dart line: Needle, Kite and Gimbal
 - **Milestone:** M4
-- **Tier:** standard — content builds to approved silhouettes and stated stat targets
-- **Depends on:** `RACE-003`, `HAZ-005`
+- **Tier:** standard — content builds to approved silhouettes
+- **Depends on:** `RACE-003`, `HAZ-001`
 - **Do:**
-  - Build both approved racers as blueprints in an editor builder, like `NocturneShipBuilder`.
-  - Add `wpn_impact_driver`: a kinetic fixed gun with low damage, high `projectileMass` and slow fire. On a Dart it gives 8–12 m/s of Δv, which is about 2.5× the railgun's push per damage.
-  - Tune them so the Dart's lap is 8–12% faster on a clean run, and the Ram wins a contact-heavy run.
-  - Ask the owner to fly both. That is not a gate.
-- **Files:** `Assets/Game/Editor/Content/RacerShipBuilder.cs`, `Assets/Game/Content/Ships/ship_racer_*.asset`, `Assets/Game/Content/Weapons/wpn_impact_driver.asset`, `Assets/Game/Content/Blocks/weapon_impact_driver.asset`.
+  - Write `RacerShipBuilder` (an editor builder like `NocturneShipBuilder`).
+  - Build the three Vestari racers from the approved plan views in `racer_silhouettes.py`. Use existing blocks at 0.5 m cells; the top layer follows the silhouette and the hull is 3–5 layers deep.
+  - Use the Vestari livery from the sheet as paint, and the race numbers 07, 22 and 31.
+  - Handling per the sheet:
+    - **Needle:** pods wide of the centre of mass, so it yaws hard;
+    - **Kite:** a radiator sail, so it boosts longer;
+    - **Gimbal:** a thruster ring, so it thrusts equally in every direction.
+- **Files:** `Assets/Game/Editor/Content/RacerShipBuilder.cs`, `Assets/Game/Content/Ships/ship_racer_needle.asset`, `ship_racer_kite.asset`, `ship_racer_gimbal.asset`.
 - **Acceptance criteria:**
-  - [ ] Both ships validate and fly.
-  - [ ] Their silhouettes match the approved ones from above.
-  - [ ] Stat targets are measured and recorded.
-- **Tests:** `RacerShipTests.Validate`, `.Dart_FasterCleanLap`, `.ImpactDriver_KnockbackTarget`.
+  - [ ] All three validate, spawn and fly in the playground.
+  - [ ] Top-down screenshots match the approved silhouettes.
+  - [ ] Mass, thrust and top speed are recorded.
+- **Tests:** `RacerShipTests.Darts_Validate`, `.Darts_Fly`.
+
+### RACE-012 — Graveyard wrecks
+- **Milestone:** M4
+- **Tier:** standard — large content builds from the approved map, at 2 m cells
+- **Depends on:** `RACE-002`, `HAZ-001`
+- **Do:** Build the wreck blueprints of Track 01 as hollow shells at 2 m cells, with torn edges where the map shows breaks:
+  - the dreadnought's stern and bow halves;
+  - the carrier, with its flight deck open end to end (the hangar run) and slots for the bulkheads and door;
+  - the battleship, with turret barbettes on its south flank and a reactor breach on its north;
+  - the engine section;
+  - two cruisers (one burned out);
+  - two frigates rammed together;
+  - the salvage rig.
+
+  Damage cell HP is set so racers' guns can open bulkheads in a few seconds but cannot cut capital hulls in a race. Record cell counts.
+- **Files:** `Assets/Game/Editor/Content/WreckBuilder.cs`, `Assets/Game/Content/Ships/wreck_*.asset`.
+- **Acceptance criteria:**
+  - [ ] Each wreck validates and spawns.
+  - [ ] No wreck is over 600k cells.
+  - [ ] Top-down screenshots match the map.
+  - [ ] The flight deck is flyable end to end.
+- **Tests:** `WreckContentTests.Validate_CellBudget`, `.FlightDeck_Clear`.
+
+### RACE-013 — The Ram line: Battering Ram and Hammerhead
+- **Milestone:** M4
+- **Tier:** standard — content builds to approved silhouettes, plus one weapon
+- **Depends on:** `RACE-008`
+- **Do:**
+  - Build the two Khuchad racers in `RacerShipBuilder`, with the Khuchad livery and the race numbers 13 and 66. They fly torch engines (ADR-0120).
+  - Add `wpn_impact_driver`: kinetic and fixed, with low damage, high `projectileMass` and slow fire. Mounts:
+    - **Battering Ram:** spinal;
+    - **Hammerhead:** one at each tip of the hammer plate.
+- **Files:** `Assets/Game/Content/Ships/ship_racer_battering_ram.asset`, `ship_racer_hammerhead.asset`, `Assets/Game/Content/Weapons/wpn_impact_driver.asset`, `Assets/Game/Content/Blocks/weapon_impact_driver.asset`.
+- **Acceptance criteria:**
+  - [x] Both validate, spawn and fly. Torch launch measured: the Battering Ram reaches 3.7 m/s at 0.5 s and 61 m/s at 4 s; the Hammerhead 7.0 and 83.
+  - [ ] Top-down screenshots match the approved silhouettes.
+  - [ ] The impact driver fires.
+  - [ ] Its knockback is measured once HAZ-005 lands.
+- **Tests:** `RacerShipTests.Rams_Validate`, `.Rams_Fly`, `.ImpactDriver_Fires`.
+
+### RACE-014 — Racer abilities: Slip and Shove
+- **Milestone:** M4
+- **Tier:** standard — two abilities on the SPEC-24 framework
+- **Depends on:** `RACE-013`, `HAZ-002`
+- **Do:**
+  - **Slip** (the Darts): a sideways impulse of about 25 m/s through `ImpulseRequest`, with a 6 s cooldown.
+  - **Shove** (the Rams): a 60 m radial impulse on ships, mines and rocks, with no damage and a 10 s cooldown.
+  - Both are general abilities usable by any ship.
+- **Files:** `Assets/Game/Content/Abilities/ability_slip.asset`, `ability_shove.asset`; `Assets/Game/Simulation/Abilities/*`.
+- **Acceptance criteria:**
+  - [ ] Slip moves a Dart sideways by its Δv and the move carries.
+  - [ ] Shove pushes everything in range away and damages nothing.
+  - [ ] Cooldowns hold.
+- **Tests:** `RacerAbilityTests.Slip_Sideways`, `.Shove_PushesNoDamage`.
+
+### RACE-015 — Track 01 set pieces
+- **Milestone:** M4
+- **Tier:** standard — configures finished systems on the track
+- **Depends on:** `RACE-004`, `HAZ-013`, `HAZ-014`, `HAZ-016`, `HAZ-017`, `HAZ-018`, `HAZ-019`, `HAZ-020`, `HAZ-021`
+- **Do:** Wire the graveyard's mechanisms and lap events (SPEC-92 decision 11):
+  - the bow half drifts, narrowing the Break to 130, 90 and 50 m;
+  - the rig's arms sweep;
+  - the flight-deck door and its switch;
+  - the battleship's turrets wake on lap 2 with a leader override;
+  - the reactor pulse with its shadows (every 8 s, then 4 s on lap 3);
+  - the engine section fires in turn;
+  - the minefield payloads;
+  - the canisters;
+  - the lane-gate portal pair.
+- **Files:** `Assets/Game/Content/Racing/track_01*.asset`, `Assets/Game/Content/Hazards/mech_track01_*.asset`.
+- **Acceptance criteria:**
+  - [ ] A scripted three-lap run sees every set piece act at its lap.
+  - [ ] Top-down screenshots per lap are in the ledger log.
+- **Tests:** `Track01Tests.LapEvents_Fire`, `.Break_Narrows`.
 
 ### RACE-009 — Race replication and co-op start
 - **Milestone:** M4
@@ -345,7 +432,7 @@ Advisory (ADR-0042):
 ### RACE-011 — Two-player race playtest with Daniel
 - **Milestone:** M4
 - **Tier:** standard — scripted session plus notes
-- **Depends on:** `RACE-007`, `RACE-008`, `RACE-009`, `RACE-010`
+- **Depends on:** `RACE-007`, `RACE-008`, `RACE-009`, `RACE-010`, `RACE-013`, `RACE-014`, `RACE-015`
 - **Do:** Run a full race with Daniel over Tailscale:
   - 3 laps, both racers, mines, barricades and shortcuts;
   - `net status` RTT and loss, and frame times on both machines;

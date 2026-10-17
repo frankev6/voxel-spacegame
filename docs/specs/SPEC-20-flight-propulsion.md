@@ -149,14 +149,17 @@ namespace Game.Simulation.Flight
 
     /// <summary>One usable thruster of the ship, grid-local. Rebuilt when VoxelGrid.Revision changes. Only writer: PropulsionSystem.</summary>
     [InternalBufferCapacity(0)]
-    public struct FlightThruster : IBufferElementData   // 44 bytes (Q9)
+    public struct FlightThruster : IBufferElementData   // 56 bytes (Q9; spool and boost added by ADR-0120)
     {
         public Entity Thruster;          // functional entity
         public int InstanceIndex;        // BlockInstance index
         public float3 PositionLocal;     // grid-local metres: footprint centre (GridSpaceMath.InstanceCenter)
         public float3 ForceDirLocal;     // grid-local unit vector, Y = 0 (decision 5)
         public float MaxForce;           // N = ThrusterParams.ThrustNewtons
-        public float Throttle;           // last solved throttle 0..BoostThrottle (warm start)
+        public float Throttle;           // last solved throttle 0..BoostMax (warm start, and the spool's starting point)
+        public float SpoolUp;            // throttle gained per second at most; 0 = instant (ADR-0120)
+        public float SpoolDown;          // throttle shed per second at most; 0 = instant
+        public float BoostMax;           // throttle ceiling while boosting; 0 = FlightConfig.BoostThrottle
     }
 
     /// <summary>On every thruster functional entity (registered for BlockModuleId.Thruster). Only writer: PropulsionSystem.
@@ -653,6 +656,30 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
   - [x] Real Fighter demonstrates reverse, both strafe directions and thrust along its rotated forward axis. Removing directional thrusters removes that capability. Report mass/force and measured motion rather than inflating all thrust values.
   - [x] Live flight verified and captured; existing flight/determinism checks and full suites remain functionally passing.
 - **Tests:** update `InputAssetTests`, `PlayerInputSampleSystemTests.Analog_Mapping`, `FlightMathTests.Targets_Coast`, existing propulsion coast expectations and config validation; add `FlightControlCorrectionTests.Fighter_DirectionalThrust`, `.Fighter_TurnAndStrafe`, `.Fighter_CoastAndBrake`.
+
+### FLT-014 — Engine spool and per-engine boost ceiling (ADR-0120)
+- **Milestone:** M4
+- **Tier:** frontier — changes the shared propulsion allocator's bounds
+- **Depends on:** `FLT-007`, `FLT-013`
+- **Do:** Add `SpoolUpSeconds`, `SpoolDownSeconds` and `BoostThrottle` to `ThrusterParams`, with 0 meaning instant and the config ceiling respectively. Carry the rates and the ceiling on `FlightThruster` when the list is rebuilt. Each tick, bound every engine actuator to [last throttle − SpoolDown·dt, last throttle + SpoolUp·dt] ∩ [0, ceiling]. The solve, the core assist and the gyro are unchanged.
+- **Files:** `Assets/Game/Data/Blocks/{ThrusterParams,ThrusterModule}.cs`; `Assets/Game/Simulation/Flight/{FlightThruster,PropulsionJob}.cs`; `Assets/Game/Tests/EditMode/Simulation/Flight/PropulsionTests.cs`.
+- **Acceptance criteria:**
+  - [x] One tick of a 1 s spool reaches 1/60 throttle, and the engine reaches full throttle after a second.
+  - [x] On release, a 0.5 s spool-down sheds at most 2·dt of throttle per tick, and the engine reaches idle.
+  - [x] An engine's own boost ceiling replaces `FlightConfig.BoostThrottle`.
+  - [x] Rows with 0 values behave exactly as before. The existing flight tests pass unchanged.
+- **Tests:** `PropulsionTests.Spool_BoundsThrottleChangePerTick`, `PropulsionTests.BoostThrottle_PerEngineCeiling`.
+
+### FLT-015 — The engine line content (ADR-0120)
+- **Milestone:** M4
+- **Tier:** standard
+- **Depends on:** `FLT-014`
+- **Do:** Build the vernier, two sprint engines and two torches with `EngineContentBuilder`, including their procedural nozzle meshes. Give the existing thrusters the Standard spool. Measure the racers' launch and release on the line in the playground.
+- **Files:** `Assets/Game/Editor/Content/EngineContentBuilder.cs`; `Assets/Game/Content/Blocks/block_thruster_vernier.asset`, `block_engine_{sprint_small,sprint_medium,torch_large,torch_capital}.asset`; `Assets/Game/Art/Engines/Meshes/*.asset`; the existing thruster block assets.
+- **Acceptance criteria:**
+  - [x] Five blocks validate and appear under Propulsion in the ship editor, with nozzle meshes and plumes sized to their footprint.
+  - [ ] A torch-driven Ram is measurably slower to launch than a sprint-driven Dart, and keeps pushing after release (playground measurement in the ledger).
+- **Tests:** `RacerShipTests.Racers_HaveCoreEnginesAndGuns` (engine kinds per line), content validation.
 
 ## 10. Open questions
 

@@ -85,13 +85,14 @@ namespace Game.Editor.Content
         sealed class Target { public int3 Cell; public byte Colour; public Bits Bits; public bool Done; }
 
         // ---------------------------------------------------------------------------------------------------------- build
-        static void BuildShip(ContentService service, string id, string name, int reactors)
+        /// <summary>Builds one blueprint from a look-book-format JSON in <paramref name="source"/> (RacerShipBuilder reuses it).</summary>
+        internal static void BuildShip(ContentService service, string id, string name, int reactors, string source = Source)
         {
             var catalog = service.Catalog;
             var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
             ushort Index(string block) => catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId(block)));
             var kit = new Kit(ref service.Orientations.Value);
-            var json = JObject.Parse(File.ReadAllText(Source + id + ".json"));
+            var json = JObject.Parse(File.ReadAllText(source + id + ".json"));
 
             // Look-book cell (x, y, z) -> game cell (-x - 1, z, y), recentred: centred along the keel, keel bottom at 0.
             int3 lo = int.MaxValue, hi = int.MinValue;
@@ -104,7 +105,8 @@ namespace Game.Editor.Content
             foreach (JArray c in (JArray)json["cells"])
             {
                 var cell = Map((int)c[0], (int)c[1], (int)c[2]);
-                byte colour = TagColour.TryGetValue((string)c[3], out var k) ? k : (byte)0;
+                string tag = (string)c[3];   // a look-book tag, or "#NN" for a paint index (racers, RACE-008)
+                byte colour = TagColour.TryGetValue(tag, out var k) ? k : tag.Length > 1 && tag[0] == '#' && byte.TryParse(tag.Substring(1), out var paint) ? paint : (byte)0;
                 if (c[4].Type == JTokenType.Null) { full.Add((cell, colour)); continue; }
                 // Cell-local look-book half-spaces n . p <= d become game-local ones: n' = (-n.x, n.z, n.y), d' = d - n.x.
                 var planes = new List<(float3 n, float d)>();
@@ -179,7 +181,9 @@ namespace Game.Editor.Content
                 string kind = (string)m[0]; var mn = (JArray)m[1]; var rsz = (JArray)m[4];
                 int3 a = Map((int)mn[0], (int)mn[1], (int)mn[2]), b = Map((int)mn[0] + (int)rsz[0] - 1, (int)mn[1] + (int)rsz[1] - 1, (int)mn[2] + (int)rsz[2] - 1);
                 int3 boxMin = math.min(a, b), boxMax = math.max(a, b);
-                modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed);
+                // An optional sixth entry names the nozzle's direction in look-book axes (ADR-0120 engines and verniers).
+                int3? nozzle = m.Count > 5 ? new int3(-(int)m[5][0], (int)m[5][2], (int)m[5][1]) : null;
+                modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed, nozzle);
             }
             if (reactors > 0) failed += SeatCoreAndReactors(structure, content, Index("block_core_small"), Index("block_reactor_small"), reactors);
             int hollowed = reactors > 0 ? Hollow(structure, content, cube, 10) : 0;
@@ -293,17 +297,21 @@ namespace Game.Editor.Content
             { "thruster_s", "block_thruster_small" }, { "thruster_l", "block_thruster_medium" }, { "thruster_xl", "block_thruster_large" }, { "rcs", "block_thruster_large" },
             { "gatling", "weapon_plasma_turret_small" }, { "autocannon", "weapon_plasma_turret_small" }, { "heavy_cannon", "weapon_plasma_turret_medium" },
             { "flak", "weapon_flak_cannon_medium" }, { "railgun", "weapon_railgun_medium" }, { "nova", "weapon_missile_launcher_small" },
-            { "storm", "weapon_ark_lance_medium" }, { "siege", "weapon_siege_cannon_heavy" }, { "core_1", "block_core_small" }
+            { "storm", "weapon_ark_lance_medium" }, { "siege", "weapon_siege_cannon_heavy" }, { "core_1", "block_core_small" },
+            // ADR-0120 engine line
+            { "vernier", "block_thruster_vernier" }, { "sprint_s", "block_engine_sprint_small" }, { "sprint_m", "block_engine_sprint_medium" },
+            { "torch_l", "block_engine_torch_large" }, { "torch_xl", "block_engine_torch_capital" }
         };
         static readonly int3[] Directions = { new(0, 1, 0), new(0, -1, 0), new(1, 0, 0), new(-1, 0, 0), new(0, 0, 1), new(0, 0, -1) };
 
-        static int PlaceModule(VoxelStructure structure, VoxelContent content, ContentCatalog catalog, string kind, int3 boxMin, int3 boxMax, ref int failed)
+        static int PlaceModule(VoxelStructure structure, VoxelContent content, ContentCatalog catalog, string kind, int3 boxMin, int3 boxMax, ref int failed, int3? nozzle = null)
         {
             ref var tables = ref content.Orientations.Value;
-            bool engine = kind.StartsWith("thruster", StringComparison.Ordinal), rcs = kind == "rcs";
-            // The open face: most empty cells just outside it (engines always fire aft, -z).
-            int3 face = new int3(0, 0, -1);
-            if (!engine)
+            bool engine = kind.StartsWith("thruster", StringComparison.Ordinal), rcs = kind == "rcs" || nozzle.HasValue;
+            if (nozzle.HasValue) engine = false;
+            // The open face: most empty cells just outside it (engines always fire aft, -z); a named nozzle direction wins.
+            int3 face = nozzle ?? new int3(0, 0, -1);
+            if (!engine && !nozzle.HasValue)
             {
                 int bestOpen = -1;
                 foreach (var d in Directions)
@@ -376,6 +384,8 @@ namespace Game.Editor.Content
                 {
                     if (b.InstanceIndex < 0) continue;
                     ref var def = ref content.Blocks.Value.Blocks[b.Placement.Block];
+                    // Only function blocks keep a solid slab: long slopes are two-cell instances too, and a racer seats hundreds.
+                    if (def.Kind != Game.Data.Blocks.BlockKind.Functional) continue;
                     for (int i = 0; i < def.Cells.Length; i++)
                     {
                         int z = b.Placement.Origin.z + content.Orientations.Value.Rotate(def.Cells[i], b.Placement.Orient).z;
@@ -413,8 +423,9 @@ namespace Game.Editor.Content
                     for (int dy = -r; dy <= r; dy++) for (int dz = -r; dz <= r; dz++)
                     {
                         var c = near + new int3(0, dy, dz); bool solid = true;
+                        // Only plain hull cells: seating over an earlier core or reactor would clear its cells and orphan it (RACE-013).
                         for (int ex = -2; ex <= 3 && solid; ex++) for (int ey = -2; ey <= 3 && solid; ey++) for (int ez = -2; ez <= 3 && solid; ez++)
-                            solid = !structure.GetCell(c + new int3(ex, ey, ez)).IsAir;
+                            solid = structure.TryGetBlockAt(c + new int3(ex, ey, ez), out _, out int instance) && instance < 0;
                         if (solid) return c;
                     }
                 return near;

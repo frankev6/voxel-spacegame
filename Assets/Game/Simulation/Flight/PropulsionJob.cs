@@ -72,11 +72,16 @@ namespace Game.Simulation.Flight
                 var thruster = thrusters[k];
                 bool usable = Entities.Exists(thruster.Thruster) &&
                     (!Powered.HasComponent(thruster.Thruster) || Powered.IsComponentEnabled(thruster.Thruster));
-                float max = usable ? (boost ? Config.BoostThrottle : 1) : 0;
+                float max = usable ? (boost ? (thruster.BoostMax > 0 ? thruster.BoostMax : Config.BoostThrottle) : 1) : 0;
+                // ADR-0120: an engine spools. Its throttle can only move so far from last tick's, so a torch engine keeps
+                // pushing after release and a vernier answers at once; the core assist and other engines make up the rest.
+                float min = 0;
+                if (thruster.SpoolUp > 0) max = math.min(max, thruster.Throttle + thruster.SpoolUp * dt);
+                if (thruster.SpoolDown > 0) min = math.min(math.max(0, thruster.Throttle - thruster.SpoolDown * dt), max);
                 actuators[k] = new ThrustActuator
                 {
                     Column = thruster.MaxForce * thrustMultiplier * new float3(thruster.ForceDirLocal.x, thruster.ForceDirLocal.z,
-                        math.cross(thruster.PositionLocal - mass.CenterOfMass, thruster.ForceDirLocal).y), Max = max
+                        math.cross(thruster.PositionLocal - mass.CenterOfMass, thruster.ForceDirLocal).y), Min = min, Max = max
                 };
                 throttles[k] = math.clamp(thruster.Throttle, 0, max);
             }
@@ -129,7 +134,7 @@ namespace Game.Simulation.Flight
                 if (Thrusters.HasComponent(thruster.Thruster))
                 {
                     float intensity = Thrusters[thruster.Thruster].Intensity;
-                    float desired = math.clamp(throttle, 0, Config.BoostThrottle); // boost overdrive shows as a longer plume (QA-001)
+                    float desired = math.clamp(throttle, 0, math.max(Config.BoostThrottle, thruster.BoostMax)); // boost overdrive shows as a longer plume (QA-001)
                     intensity += (desired - intensity) * (desired > intensity ? Config.IntensityRise : Config.IntensityFall);
                     Thrusters[thruster.Thruster] = new ThrusterState { Intensity = intensity < .005f ? 0 : intensity };
                 }
@@ -170,7 +175,9 @@ namespace Game.Simulation.Flight
                 {
                     Thruster = instance.Functional, InstanceIndex = i, ForceDirLocal = math.normalize(direction),
                     PositionLocal = GridSpaceMath.InstanceCenter(ref definition, ref orientations, instance.Orient, instance.Origin, grid.CellSize),
-                    MaxForce = row.ThrustNewtons, Throttle = throttle
+                    MaxForce = row.ThrustNewtons, Throttle = throttle,
+                    SpoolUp = row.SpoolUpSeconds > 0 ? 1 / row.SpoolUpSeconds : 0,
+                    SpoolDown = row.SpoolDownSeconds > 0 ? 1 / row.SpoolDownSeconds : 0, BoostMax = row.BoostThrottle
                 });
             }
             thrusters.CopyFrom(rebuilt.AsArray());

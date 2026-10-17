@@ -15,7 +15,9 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float explosionRadius;     // m; 0 = no explosion
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float explosionDamage;     // raw damage at the blast centre
         [UnityEngine.SerializeField] private bool explodeOnExpire;                          // fuse: explode at end of life (flak, missiles)
-        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float impulsePerHit;       // N·s along the shot direction (knockback)
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float impulsePerHit;       // N·s along the shot direction (knockback); replaced by projectileMass/beamForce in HAZ-003
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float projectileMass;      // kg per pellet; momentum = projectileMass × projectileSpeed (SPEC-91)
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float beamForce;           // N while a beam pulse is on target (beams only, SPEC-91)
         [UnityEngine.SerializeField, UnityEngine.Min(0.01f)] private float fireRate = 1;    // triggers per second
         [UnityEngine.SerializeField, UnityEngine.Min(1)] private int burstCount = 1;        // rounds per trigger
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float burstInterval;       // s between rounds of a burst
@@ -49,6 +51,8 @@ namespace Game.Data.Definitions
         public float ExplosionDamage => explosionDamage;
         public bool ExplodeOnExpire => explodeOnExpire;
         public float ImpulsePerHit => impulsePerHit;
+        public float ProjectileMass => projectileMass;
+        public float BeamForce => beamForce;
         public float FireRate => fireRate;
         public int BurstCount => burstCount;
         public float BurstInterval => burstInterval;
@@ -118,6 +122,8 @@ namespace Game.Data.Definitions
             Check(scope, "WPN-E006", nameof(damage), damage > 0 || explosionDamage > 0, "A weapon must deal hit or blast damage.");
             Check(scope, "WPN-E006", nameof(penetrationCells), penetrationCells >= 1 && float.IsFinite(penetrationCells), "Penetration must be finite and at least one cell.");
             Check(scope, "WPN-E006", nameof(impulsePerHit), Nonnegative(impulsePerHit), "Hit impulse must be finite and nonnegative.");
+            Check(scope, "WPN-E006", nameof(projectileMass), Nonnegative(projectileMass), "Projectile mass must be finite and nonnegative.");
+            Check(scope, "WPN-E006", nameof(beamForce), Nonnegative(beamForce), "Beam force must be finite and nonnegative.");
             Check(scope, "WPN-E008", nameof(damageType), System.Enum.IsDefined(typeof(Game.Data.Combat.DamageType), damageType) && damageType != Game.Data.Combat.DamageType.Ram, "Weapons require a supported non-Ram damage type.");
             ValidateReference(scope, context, nameof(fireCue), fireCue);
             ValidateReference(scope, context, nameof(muzzleFx), muzzleFx);

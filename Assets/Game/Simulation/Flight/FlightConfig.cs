@@ -25,10 +25,16 @@ namespace Game.Simulation.Flight
         public float PlaneCorrection;      // 0.2: fraction of the Y offset removed per tick
         public float IntensityRise;        // 0.35: ThrusterState.Intensity EMA factor when rising
         public float IntensityFall;        // 0.15: EMA factor when falling
+        public float CarryDecel;           // m/s²: carried push bleeds toward zero (SPEC-91, ADR-0118); Default 1e6 = no carry
+        public float CarryBrakeDecel;      // m/s² while Brake is held
+        public float CarryYawDecel;        // rad/s²
+        public float MaxCarry;             // m/s per axis
+        public float MaxCarryYaw;          // rad/s
         public static FlightConfig Default => new FlightConfig {
             MaxForwardSpeed = 120f, ReverseSpeedFraction = 0.5f, StrafeSpeedFraction = 0.6f, BoostSpeedMultiplier = 1.5f,
             BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, CoastDeceleration = 0.08f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
             AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, CoreLinearAccel = 0f, CoreMaxLinearForce = 0f, ThrottleEpsilon = 0.001f,
-            PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f };
+            PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f,
+            CarryDecel = 1e6f, CarryBrakeDecel = 1e6f, CarryYawDecel = 1e6f, MaxCarry = 120f, MaxCarryYaw = 3.5f };
     }
 }

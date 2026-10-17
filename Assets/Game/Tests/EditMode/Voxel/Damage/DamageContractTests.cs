@@ -29,7 +29,7 @@ namespace Game.Tests.EditMode.Voxel.Damage
             Assert.GreaterOrEqual(types.Length, 30);
             foreach (var type in types) Assert.IsTrue(UnsafeUtility.IsUnmanaged(type), type.Name);
             CollectionAssert.AreEquivalent(new[] { ComponentType.ReadWrite<GridDamageStats>(), ComponentType.ReadWrite<PendingImpulse>(),
-                ComponentType.ReadWrite<GridIntegrityState>(), ComponentType.ReadWrite<IntegritySeed>() }, DamageSetup.GridRootComponents());
+                ComponentType.ReadWrite<GridIntegrityState>(), ComponentType.ReadWrite<IntegritySeed>(), ComponentType.ReadWrite<ExternalPush>() }, DamageSetup.GridRootComponents());   // ExternalPush: SPEC-91, ADR-0118
             CollectionAssert.AreEqual(new[] { ComponentType.ReadWrite<BrickIntegrity>() }, DamageSetup.BrickComponents());
         }
         [Test]

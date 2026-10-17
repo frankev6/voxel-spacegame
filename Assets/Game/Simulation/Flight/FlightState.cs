@@ -17,6 +17,8 @@ namespace Game.Simulation.Flight
         public float YawRateCap;         // rad/s this tick
         public float2 TargetLocalVelocity; // the assist target this tick (x strafe, y forward)
         public float TargetYawRate;
+        public float2 Carry;             // ship-local planar m/s added to assist targets from external pushes (SPEC-91, ADR-0118)
+        public float CarryYaw;           // rad/s added to the yaw-rate target
         public FlightFlags Flags;
     }
 }
