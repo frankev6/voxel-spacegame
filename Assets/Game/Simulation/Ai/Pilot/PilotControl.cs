@@ -45,26 +45,46 @@ namespace Game.Simulation.Ai
             float step = math.min(env.YawRate, math.sqrt(env.YawStop)) * Game.Core.SimTime.FixedTimestep * .6f;
             nose = nose + math.clamp(chosen - nose, -step, step);
 
-            float faceYaw = math.atan2(d.x, d.y) + nose;
-            float error = Planar.WrapAngle(faceYaw - yaw);
-            // a correction it can stop in time, on the yaw it can count on mid-drift (the wanted direction already turns with the path;
-            // adding the curve's rate overturned it)
-            float rate = math.sign(error) * math.min(math.min(math.abs(error) * 3, env.YawRate), math.sqrt(2 * env.YawStop * .8f * math.abs(error)));
-
             var cmd = default(ShipCommand);
-            cmd.Turn = math.clamp(rate / env.YawRate, -1, 1);
-            // The thrust is the acceleration it needs, scaled as a whole into what the thrusters have so it keeps its direction, and
-            // commanded as the velocity the assist reaches from here (it closes Response of a gap per second). Commanding the wanted
-            // velocity instead let each axis chase its own share: in a drift the strafe saturated, the main engine stayed at full
-            // along a nose angled short of the drift angle, and the ship sped up and ran wide.
+            cmd.Turn = TurnTo(env, yaw, math.atan2(d.x, d.y) + nose);
+            cmd.Thrust = Thrust(env, flight, rotation, velocity, need, forwardCap);
+            return cmd;
+        }
+
+        /// <summary>Command for wanted world velocity `want` while holding the nose on `faceYaw`, a heading the caller chose (on a target,
+        /// broadside, in formation): no drift, since the nose is not the pilot's to angle.</summary>
+        public static ShipCommand Face(in PilotEnvelope env, in FlightState flight, quaternion rotation, float2 velocity, float2 want, float faceYaw,
+            float forwardCap)
+        {
+            float yaw = Planar.YawFromForward(math.rotate(rotation, new float3(0, 0, 1)));
+            var cmd = default(ShipCommand);
+            cmd.Turn = TurnTo(env, yaw, faceYaw);
+            cmd.Thrust = Thrust(env, flight, rotation, velocity, (want - velocity) / (.8f + env.Spool * .5f), forwardCap);
+            return cmd;
+        }
+
+        /// <summary>Turn command toward faceYaw: a correction it can stop in time, on the yaw it can count on mid-drift (the wanted
+        /// direction already turns with the path; adding the curve's rate overturned it).</summary>
+        public static float TurnTo(in PilotEnvelope env, float yaw, float faceYaw)
+        {
+            float error = Planar.WrapAngle(faceYaw - yaw);
+            float rate = math.sign(error) * math.min(math.min(math.abs(error) * 3, env.YawRate), math.sqrt(2 * env.YawStop * .8f * math.abs(error)));
+            return math.clamp(rate / env.YawRate, -1, 1);
+        }
+
+        /// <summary>Thrust command for world acceleration `need`: scaled as a whole into what the thrusters have so it keeps its
+        /// direction, and commanded as the velocity the assist reaches from here (it closes Response of a gap per second). Commanding
+        /// the wanted velocity instead let each axis chase its own share: in a drift the strafe saturated, the main engine stayed at
+        /// full along a nose angled short of the drift angle, and the ship sped up and ran wide.</summary>
+        public static float2 Thrust(in PilotEnvelope env, in FlightState flight, quaternion rotation, float2 velocity, float2 need, float forwardCap)
+        {
             float2 accel = FlightMath.ToLocalPlanar(new float3(need.x, 0, need.y), rotation);
             float fit = math.min(1, math.min(env.Strafe / math.max(1e-4f, math.abs(accel.x)),
                 (accel.y > 0 ? env.Forward : env.Reverse) / math.max(1e-4f, math.abs(accel.y))));
             // (the assist adds a push's carry to whatever is commanded, ADR-0118: command the difference)
             float2 local = FlightMath.ToLocalPlanar(new float3(velocity.x, 0, velocity.y), rotation) + accel * (fit / env.Response) - flight.Carry;
-            cmd.Thrust.x = math.clamp(local.x / math.max(1, env.StrafeCap), -1, 1);
-            cmd.Thrust.y = local.y >= 0 ? math.clamp(local.y / math.max(1, forwardCap), 0, 1) : math.clamp(local.y / math.max(1, env.ReverseCap), -1, 0);
-            return cmd;
+            return new float2(math.clamp(local.x / math.max(1, env.StrafeCap), -1, 1),
+                local.y >= 0 ? math.clamp(local.y / math.max(1, forwardCap), 0, 1) : math.clamp(local.y / math.max(1, env.ReverseCap), -1, 0));
         }
 
         /// <summary>The nose angle off direction d (rad, + = right) at which the thrusters can best give acceleration `need`: the least

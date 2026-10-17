@@ -101,6 +101,26 @@ namespace Game.Tests.EditMode.Simulation.Ai
             }
         }
 
+        [Test] public void HoldsTheBrainsHeading_WhileItTravels()
+        {
+            // engaged ships keep their guns on a target (or broadside) while they move: the pilot flies the way there under that nose
+            using var f = new Fixture(physics: true);
+            var ship = f.PhysicalShip(); var goal = new float3(0, 0, 400);
+            var brain = f.Brain(ship); brain.GoalPosition = goal; brain.GoalSpeedFraction = .6f; brain.GoalHeadingYaw = math.PI * .5f;
+            f.Em.SetComponentData(ship, brain);
+            bool arrived = false; float worstLate = 0;
+            for (int tick = 0; tick < 2400; tick++)
+            {
+                f.Tick(); var pose = f.Em.GetComponentData<LocalTransform>(ship);
+                float yaw = Planar.YawFromForward(math.rotate(pose.Rotation, new float3(0, 0, 1)));
+                if (tick > 600) worstLate = math.max(worstLate, math.abs(Planar.WrapAngle(yaw - brain.GoalHeadingYaw)));
+                Assert.LessOrEqual(pose.Position.z, 420, "It must not overshoot the goal by more than 20 m flying sideways.");
+                if (math.distance(pose.Position, goal) < Fixture.Arrival && math.length(f.Em.GetComponentData<PhysicsVelocity>(ship).Linear) < 1) { arrived = true; break; }
+            }
+            Assert.IsTrue(arrived, "It reaches and stops on a goal off its nose.");
+            Assert.Less(worstLate, .1f, "and holds the brain's heading once turned to it");
+        }
+
         [Test] public void FacesHeading()
         {
             using var f = new Fixture(); var ship = f.Ship();

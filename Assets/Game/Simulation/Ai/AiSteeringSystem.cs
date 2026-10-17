@@ -1,11 +1,13 @@
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Simulation.Flight;
+using Game.Simulation.Power;
 using Game.Simulation.Weapons;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Entities;
+using Unity.Physics;
 using Unity.Profiling;
 using Unity.Transforms;
 
@@ -30,12 +32,18 @@ namespace Game.Simulation.Ai
             job.Grids = state.GetComponentLookup<VoxelGrid>(true);
             job.Hulks = state.GetComponentLookup<Hulk>(true);
             job.Spawning = state.GetComponentLookup<GridSpawning>(true);
+            job.Velocities = state.GetComponentLookup<PhysicsVelocity>(true);
+            job.Multipliers = state.GetComponentLookup<ShipStatMultipliers>(true);
+            job.Shields = state.GetComponentLookup<ShieldState>(true);
+            job.Thrusters = state.GetBufferLookup<FlightThruster>(true);
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             using var marker = ScheduleMarker.Auto();
             job.Members.Update(ref state); job.Flights.Update(ref state); job.Propulsion.Update(ref state); job.Targets.Update(ref state);
             job.Transforms.Update(ref state); job.Grids.Update(ref state); job.Hulks.Update(ref state); job.Spawning.Update(ref state);
+            job.Velocities.Update(ref state); job.Multipliers.Update(ref state); job.Shields.Update(ref state); job.Thrusters.Update(ref state);
+            job.FlightConfig = SystemAPI.GetSingleton<FlightConfig>();
             job.Config = SystemAPI.GetSingleton<AiConfig>(); job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
             state.Dependency = job.ScheduleParallel(state.Dependency);
         }
