@@ -2,7 +2,15 @@
 
 You are implementing **Spaceship Game V2**, a Unity 6.6 DOTS game: build ships from functional voxel blocks, fly between star systems uncovering a mystery, and watch massive voxel ships and stations break apart realistically.
 
-This file is the entry point. It is short on purpose; the binding details are in `docs/`. **Continuing someone's work? Read [docs/HANDOFF.md](docs/HANDOFF.md) first**: the owner's standing rules, where things stand and what's next.
+This file is the entry point for anyone writing code here. It is short on purpose; the binding details are in `docs/`. [README.md](README.md) is the project's public face for people; keep worker instructions here, not there. **Continuing someone's work? Read [docs/HANDOFF.md](docs/HANDOFF.md) first**: the owner's standing rules, where things stand and what's next.
+
+| If you are… | Read |
+|---|---|
+| Continuing someone's work | [docs/HANDOFF.md](docs/HANDOFF.md), then this file |
+| Implementing anything | This file, then [docs/README.md](docs/README.md) |
+| Looking for a command or tool | [docs/08-tools.md](docs/08-tools.md) |
+| Reviewing direction with the owner | [docs/00-vision.md](docs/00-vision.md), [docs/ROADMAP.md](docs/ROADMAP.md), [docs/design/DESIGN-GUIDE.md](docs/design/DESIGN-GUIDE.md) |
+| Checking progress | [docs/LEDGER.md](docs/LEDGER.md) |
 
 ## 1. Read before touching anything
 
@@ -28,7 +36,7 @@ This file is the entry point. It is short on purpose; the binding details are in
 - **One writer per piece of state** (architecture §8). If you need to change state you don't own, send an event or request.
 - **Simulation is deterministic and fixed-step.** No `UnityEngine.Random`, `System.Random` or `GetHashCode` in simulation or saves. No `Time.deltaTime` in gameplay.
 - **Art follows [DESIGN-GUIDE.md](docs/design/DESIGN-GUIDE.md)** (approved 2026-10-11). Never reference `Assets/Game/Art/_Placeholder/` from code; use definitions and theme tokens. No copyrighted or third-party images (no Starsector art); fonts are SIL OFL 1.1 only; AI-generated assets only with the owner's approval of each asset.
-- **Git stays local.** Commit locally; never push or touch a remote until the owner says so (Git LFS first, ADR-0008).
+- **Push only when the owner says so.** `origin` is the public GitHub repo `frankev6/voxel-spacegame`. Commit locally on task branches; pushing publishes publicly, so every push needs the owner's go-ahead. Git LFS is not set up yet (ADR-0008).
 - **No old code.** The old prototype is a reference for feel and content only. Content arrives through `Import/Legacy/` and the converters in SPEC-72.
 - **Build systems before tuning** ([ADR-0042](docs/decisions/ADR-0042-advisory-performance-targets.md)): performance numbers in specs are suggestions, never blockers for task completion or later phases. At most **two initial optimization passes per system/feature**, carried across workers and handoffs; benchmark troubleshooting counts too. Record misses or unavailable measurements and move on to integration and live gameplay. Revisit tuning only for a demonstrated integrated bottleneck or an explicit owner request.
 - **Done means functional work is done**: functional acceptance criteria checked, correctness/safety tests passing, `tools/compile.sh` clean, ledger updated with the commit hash and a log entry. Report performance-only failures honestly as deferred; they do not keep the task open ([05-testing §4](docs/05-testing.md)).
@@ -44,6 +52,8 @@ tools/check-docs.py                   # spec/ledger consistency
 tools/ledger-sync.py                  # add ledger rows for new spec tasks
 tools/playtest/g.sh snapshot          # live game state from the running Editor (see tools/playtest/README.md)
 ```
+
+First open of the project imports everything (a few minutes); run `Game > Project Setup > Apply Required Settings` once if `ProjectSettingsGuardTests` complain. Play from any scene boots through `Boot`.
 
 The Unity CLI lives at `~/.unity/bin/unity` (the scripts add it to `PATH`). The project uses `com.unity.pipeline` so the CLI can drive an open Editor. The full tool reference, including headless Unity runs, art tools and known traps, is [docs/08-tools.md](docs/08-tools.md).
 

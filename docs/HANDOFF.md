@@ -11,7 +11,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 | Rule | In practice |
 |---|---|
-| Commit locally only; never push | No `git push` and no remote operations. Merging to local `main` is fine |
+| Commit locally; push only on the owner's word | `origin` is the public GitHub repo `frankev6/voxel-spacegame`. Merging to local `main` is fine; any push needs Frank's go-ahead |
 | Use the Unity CLI where possible | `tools/*.sh` and the CLI over manual Editor work ([08-tools.md](08-tools.md)) |
 | Keep the ledger current; record owner decisions verbatim | Quote Frank's words in the ledger log and in the *Answer* column of open questions |
 | Fast validation, owner correction 2026-10-13 | Focused functional acceptance per compatible batch; broad regression at gameplay checkpoints; benchmarks/soaks opt-in. No repeated three-minute test loops or worker queues behind unrelated tests. ADR-0070 supersedes older full-suite requirements below |
