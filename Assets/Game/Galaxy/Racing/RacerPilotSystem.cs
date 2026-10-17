@@ -379,6 +379,7 @@ namespace Game.Galaxy.Racing
 
         // Headings tried around the line target (rad): straight first, then wider either side.
         static readonly float[] Offsets = { 0, .1f, -.1f, .21f, -.21f, .35f, -.35f, .52f, -.52f, .73f, -.73f, .98f, -.98f, 1.3f, -1.3f };
+        public const float LineUpNose = .12f;    // rad: the most it drifts while lining up a shot at a mine in its way
         public const float Horizon = 3;          // s: how far ahead other bodies are predicted
         public const float Margin = 5;           // m kept from anything, on top of both radii
         public const float CorridorMargin = 10;  // m kept inside the route's edge (the field walls)
@@ -577,7 +578,7 @@ namespace Game.Galaxy.Racing
             // Guns (owner: "they should be able to shoot opponents and obstacles if necessary"). First anything it cannot pass clear of
             // on its heading — a mine from beyond its blast (knocked aside or set off safely), a hulk or a rock; then, in bursts as
             // aggressive as the racer is, a rival ahead in the guns' arc. Never through another ship; only while racing.
-            float2 gunAt = default; bool shoot = false;
+            float2 gunAt = default; bool shoot = false, lineUp = false;
             float range = Weapons.HasComponent(entity) ? math.min(Weapons[entity].MaxWeaponRange, MineShootMax) : 0;
             if (range > 0 && Racing != 0 && !Finished.Contains(slot.Slot))
             {
@@ -592,7 +593,9 @@ namespace Game.Galaxy.Racing
                     float2 w = v - o.Velocity;
                     float t = math.clamp(math.dot(rel, w) / math.max(1e-3f, math.lengthsq(w)), 0, Horizon);
                     if (math.length(rel - w * t) >= o.Radius) continue;                        // it passes clear of this one
-                    if (math.dot(math.normalizesafe(rel), forward) < math.cos(MineShootArc) || LineBlocked(near, k, pos, rel, d)) continue;
+                    if (LineBlocked(near, k, pos, rel, d)) continue;
+                    // in a drift the nose (and fixed guns) points off the way it goes: straighten up to take the shot
+                    if (math.dot(math.normalizesafe(rel), forward) < math.cos(MineShootArc)) { lineUp = true; continue; }
                     nearest = d; gunAt = o.Position; shoot = true;
                 }
                 uint burst = math.hash(new uint2(pilot.Seed, Tick / 45));
@@ -648,7 +651,8 @@ namespace Game.Galaxy.Racing
             float curvature = Curvature(line, pilot.Index, math.clamp(speed * .4f, 10, 80));
             bool boost = target > baseCap * 1.02f && speed < target - 5 && math.abs(pilot.Nose) < .1f && bestThreat < .5f && !reverse;
             float nose = pilot.Nose;
-            var cmd = PilotControl.Fly(envelope, flight, pose.Rotation, vel, want, curvature, boost ? boostCap : baseCap, ref nose);
+            var cmd = PilotControl.Fly(envelope, flight, pose.Rotation, vel, want, curvature, boost ? boostCap : baseCap, ref nose,
+                lineUp && !shoot ? LineUpNose : PilotControl.MaxNose);
             pilot.Nose = nose;
             float error = Planar.WrapAngle(steerYaw + nose - yaw);
             if (boost) cmd.Flags |= ShipCommandFlags.Boost;
