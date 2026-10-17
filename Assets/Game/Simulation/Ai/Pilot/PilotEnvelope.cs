@@ -13,6 +13,7 @@ namespace Game.Simulation.Ai
     {
         public float Forward, Reverse, Strafe;    // m/s² along each axis (core assist included)
         public float YawAccel, YawRate;           // rad/s², rad/s cap
+        public float YawStop;                     // rad/s² it can count on to stop a turn mid-drift: the gyro's, and half the thrusters' (they are busy pushing)
         public float Cruise, Boost, StrafeCap, ReverseCap;   // m/s caps (Boost = forward cap while boosting)
         public float Spool;                       // s for the main engines to reach full thrust (0 = instant)
         public float Response;                    // 1/s: the share of a velocity gap the flight assist closes per second
@@ -24,7 +25,7 @@ namespace Game.Simulation.Ai
             return new PilotEnvelope
             {
                 Forward = math.max(.5f, stats.ForwardAccel), Reverse = math.max(.5f, stats.ReverseAccel), Strafe = math.max(.5f, stats.StrafeAccel),
-                YawAccel = math.max(.2f, math.radians(stats.YawAccelDeg)), YawRate = math.max(.1f, flight.YawRateCap),
+                YawAccel = math.max(.2f, math.radians(stats.YawAccelDeg)), YawRate = math.max(.1f, flight.YawRateCap), YawStop = YawStopOf(stats),
                 Cruise = cruise, Boost = cruise * boost, StrafeCap = flight.StrafeCap, ReverseCap = flight.ReverseCap, Spool = spool,
                 Response = math.max(1, config.LinearAssistGain / Game.Core.SimTime.FixedTimestep),
             };
@@ -39,10 +40,19 @@ namespace Game.Simulation.Ai
             return new PilotEnvelope
             {
                 Forward = math.max(.5f, stats.ForwardAccel), Reverse = math.max(.5f, stats.ReverseAccel), Strafe = math.max(.5f, stats.StrafeAccel),
-                YawAccel = math.max(.2f, math.radians(stats.YawAccelDeg)), YawRate = math.max(.1f, yawRateCap),
+                YawAccel = math.max(.2f, math.radians(stats.YawAccelDeg)), YawRate = math.max(.1f, yawRateCap), YawStop = YawStopOf(stats),
                 Cruise = cruise, Boost = cruise * math.max(1, config.BoostSpeedMultiplier), StrafeCap = strafe, ReverseCap = reverse, Spool = spool,
                 Response = math.max(1, config.LinearAssistGain / Game.Core.SimTime.FixedTimestep),
             };
+        }
+
+        /// <summary>The gyro's share of the rated yaw acceleration, plus half the thrusters' share. A hull that turns on its thrusters
+        /// loses that torque to the push in a drift: planning stops on all of it, a slow one swung past its heading again and again.</summary>
+        static float YawStopOf(in PropulsionStats stats)
+        {
+            float full = math.max(.2f, math.radians(stats.YawAccelDeg)), torque = stats.YawTorque + stats.GyroYawTorque;
+            float gyro = torque > 0 ? stats.GyroYawTorque / torque : 1;
+            return math.max(.2f, full * (gyro + (1 - gyro) * .5f));
         }
 
         /// <summary>Main engines' spool: the thrust-weighted seconds to full of the thrusters that push forward.</summary>
