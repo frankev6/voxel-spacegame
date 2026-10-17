@@ -300,7 +300,8 @@ namespace Game.Editor.Content
             { "storm", "weapon_ark_lance_medium" }, { "siege", "weapon_siege_cannon_heavy" }, { "core_1", "block_core_small" },
             // ADR-0120 engine line
             { "vernier", "block_thruster_vernier" }, { "sprint_s", "block_engine_sprint_small" }, { "sprint_m", "block_engine_sprint_medium" },
-            { "torch_l", "block_engine_torch_large" }, { "torch_xl", "block_engine_torch_capital" }
+            { "torch_l", "block_engine_torch_large" }, { "torch_xl", "block_engine_torch_capital" },
+            { "driver", "weapon_impact_driver" }   // RACE-013
         };
         static readonly int3[] Directions = { new(0, 1, 0), new(0, -1, 0), new(1, 0, 0), new(-1, 0, 0), new(0, 0, 1), new(0, 0, -1) };
 

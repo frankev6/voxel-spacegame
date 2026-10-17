@@ -14,7 +14,10 @@ namespace Game.Simulation.Weapons
         public byte DefaultFireGroups;       // WeaponFireGroups bits
         public byte ExplodeOnExpire;
         public byte IsFixed;                 // TraverseHalfArc == 0
-        public float Damage, PenetrationCells, ExplosionRadius, ExplosionDamage, ImpulsePerHit;
+        public float Damage, PenetrationCells, ExplosionRadius, ExplosionDamage;
+        public float ImpulsePerHit;          // N·s applied to the target per hit (per beam pulse) = HitMomentum × KnockbackScale (SPEC-91)
+        public float HitMomentum;            // N·s per pellet (projectiles) or per pulse (beams), before scales (ADR-0118 decision 1)
+        public float RecoilMomentum;         // N·s per pellet pushed back at the muzzle = HitMomentum × RecoilScale; 0 for beams
         public float TriggerIntervalTicks;   // 60 / fireRate
         public int BurstCount;
         public float BurstIntervalTicks;     // burstInterval × 60

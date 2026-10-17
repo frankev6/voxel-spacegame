@@ -16,7 +16,9 @@ MonoBehaviour:
   formerIds: []
   maxProjectiles: 8192
   fixedConvergenceDeg: 3
-  explosionImpulsePerDamage: 2
+  explosionImpulsePerDamage: 60
+  knockbackScale: 1
+  recoilScale: 0.17
   maxTargetRange: 2500
   underCursorRadius: 30
   maxCandidates: 32

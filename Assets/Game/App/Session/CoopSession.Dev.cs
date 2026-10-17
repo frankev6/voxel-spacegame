@@ -65,6 +65,13 @@ namespace Game.App.Session
             return false;
         }
 
+        /// <summary>Host: runs <paramref name="line"/> on every guest in the world (the playground race shares its state this way).</summary>
+        public void SendAllGuests(string line)
+        {
+            if (net == null || net.Role != SimRoleKind.Host) return;
+            foreach (var peer in net.Transport.Peers) if (peer.Phase == NetPeerPhase.InWorld) SendGuestCommand(peer.Slot, line, out _);
+        }
+
         partial void TickDev()
         {
             if (!argsRead) ReadArgs();

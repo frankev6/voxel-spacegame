@@ -24,7 +24,7 @@ MonoBehaviour:
   explodeOnExpire: 0
   impulsePerHit: 300
   projectileMass: 0
-  beamForce: 0
+  beamForce: 10000
   fireRate: 0.6
   burstCount: 1
   burstInterval: 0

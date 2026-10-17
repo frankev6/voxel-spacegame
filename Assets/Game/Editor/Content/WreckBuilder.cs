@@ -89,19 +89,24 @@ namespace Game.Editor.Content
             {
                 if (structure.TryPlaceBlock(new BlockPlacement { Block = plate, Origin = new int3(x, y, z), Orient = 0, Color = colour }, content) == PlaceResult.Ok) placed++;
             }
+            // Pass 1: each column's deck height, paint and role. Pass 2 places it, filling down to its lowest neighbour so every step in
+            // the deck stays face-connected (a ship is one piece, SPEC-51 §5.5).
+            const int Empty = int.MinValue;
+            var tops = new int[nx, nz]; var colours = new byte[nx, nz]; var walls = new bool[nx, nz]; var towers = new bool[nx, nz];
             for (int x = 0; x < nx; x++)
                 for (int z = 0; z < nz; z++)
                 {
+                    tops[x, z] = Empty;
                     float2 p = origin + new float2(x + .5f, z + .5f) * Cell;
                     if (!Inside(p, outline)) continue;
                     float edge = Dist(p, outline, true);
-                    bool trenchHere = trench != null && Dist(p, trench, false) < trenchHalfWidth;
-                    if (trenchHere) continue;
+                    if (trench != null && Dist(p, trench, false) < trenchHalfWidth)
+                    { tops[x, z] = Bottom; colours[x, z] = scorch; walls[x, z] = true; continue; }   // the trench floor: a keel 16 m below the flight plane ties both sides
                     bool trenchWall = trench != null && Dist(p, trench, false) < trenchHalfWidth + Cell * 1.5f;
                     float s = math.dot(p - a, axis) / length;   // 0 at the stern, 1 at the bow
                     uint h = Hash(x, z, seed);
-                    // Deck height: the class's deck, lower toward the hull edge and the bow, raised superstructure mid-ships,
-                    // plates one cell proud in 8-cell panels, and burned-through holes.
+                    // Deck height: the class's deck, lower toward the hull edge and the bow, raised sections and superstructure,
+                    // and burned-through holes.
                     int top = deck;
                     if (edge < Cell * 6) top -= 2; if (edge < Cell * 3) top -= 2;
                     if (s > .85f) top -= (int)((s - .85f) / .15f * deck * .5f);
@@ -112,19 +117,33 @@ namespace Game.Editor.Content
                     if (tower) top += kind == "dreadnought" ? 12 : 7;
                     bool hole = panel % 29 == 3 && edge > Cell * 5 && !tower;
                     bool wall = edge < Cell * 1.5f || trenchWall;
+                    if (hole && !wall) continue;
                     // Mostly hull, a second hull tone in large patches, sparse plates, scorch round the holes and in streaks.
                     byte deckColour = big % 3 == 1 ? hull2 : hull;
                     if (panel % 9 == 0) deckColour = plateColour;
                     if (h % 31 == 0 || panel % 29 == 4 || Hash(x / 2, z / 6, seed + 11) % 37 == 0) deckColour = scorch;
                     if (tower) deckColour = panel % 4 == 0 ? trim : hull;
-                    if (wall)
-                        for (int y = Bottom; y <= top; y++) Put(x, y, z, y == top ? deckColour : y % 5 == 0 ? scorch : hull);
-                    else if (!hole)
-                    {
-                        Put(x, top, z, deckColour);
-                        if (tower) for (int y = deck; y < top; y++) if (edge < Cell * 16 || (x + z) % 9 == 0) Put(x, y, z, trim);
-                    }
+                    tops[x, z] = top; colours[x, z] = deckColour; walls[x, z] = wall; towers[x, z] = tower;
                 }
+            for (int x = 0; x < nx; x++)
+                for (int z = 0; z < nz; z++)
+                {
+                    int top = tops[x, z];
+                    if (top == Empty) continue;
+                    int from = top;
+                    if (walls[x, z]) from = Bottom;
+                    else
+                        for (int d = 0; d < 4; d++)
+                        {
+                            int ax = x + (d == 0 ? 1 : d == 1 ? -1 : 0), az = z + (d == 2 ? 1 : d == 3 ? -1 : 0);
+                            if (ax < 0 || az < 0 || ax >= nx || az >= nz || tops[ax, az] == Empty) continue;
+                            from = math.min(from, tops[ax, az]);
+                        }
+                    for (int y = from; y <= top; y++)
+                        Put(x, y, z, y == top ? colours[x, z] : towers[x, z] ? trim : y % 5 == 0 ? scorch : hull);
+                }
+            // Anything a hole or the trench cut off from the hull is removed: a wreck is one piece.
+            int loose = NocturneShipBuilder.RemoveLoose(structure, content, 0);   // no core: keep the largest piece
 
             string path = Ships + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(path);
@@ -136,7 +155,7 @@ namespace Game.Editor.Content
             blueprint.EditorSetPayload(VoxelStructureCodec.Encode(structure, VoxsBlockNames.FromCatalog(catalog), VoxsEncodeOptions.ForAsset),
                 structure.SolidCellCount, new Vector3Int(min.x, min.y, min.z), new Vector3Int(max.x, max.y, max.z));
             EditorUtility.SetDirty(blueprint);
-            Debug.Log($"{id}: {structure.SolidCellCount} cells at {Cell} m, {nx}×{nz} columns, bounds {min}..{max}");
+            Debug.Log($"{id}: {structure.SolidCellCount} cells at {Cell} m, {nx}×{nz} columns, bounds {min}..{max}, {loose} loose cells removed");
             return (blueprint, new Vector2(origin.x, origin.y), structure.SolidCellCount);
         }
     }

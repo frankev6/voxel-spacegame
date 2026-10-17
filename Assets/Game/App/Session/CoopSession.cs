@@ -220,11 +220,6 @@ namespace Game.App.Session
         {
             try
             {
-                if (!Game.Core.Services.TryGet<ShipSpawnService>(out var spawner)) throw new InvalidOperationException("no ship spawner");
-                // SPEC-90 open question 4 default: guests fly a copy of the host's flagship (the playground ship, with its fitted shield).
-                var blueprint = GuestBlueprint.IsNone ? config.StartBlueprint.Id : GuestBlueprint;
-                Game.Voxel.Model.VoxelStructure copy = null;
-                if (GuestBlueprint.IsNone && session.Fleet.Flagship?.Structure != null) { copy = session.Fleet.Flagship.Structure.Clone(); guestStructures.Add(copy); }
                 float3 position = new float3(40 * peer.Slot, 0, -30);
                 quaternion rotation = quaternion.identity;
                 if (session.PlayerSpawner != null && session.PlayerSpawner.TryGetRoot(out var player))
@@ -233,15 +228,7 @@ namespace Game.App.Session
                     position = pose.Position + math.rotate(pose.Rotation, new float3(45 * (peer.Slot % 2 == 1 ? 1 : -1) * ((peer.Slot + 1) / 2), 0, -20));
                     rotation = pose.Rotation;
                 }
-                var id = spawner.Spawn(new ShipSpawnArgs { Blueprint = blueprint, Structure = copy, Position = position, Rotation = rotation, Allegiance = Allegiance.Player, WithAi = false });
-                if (id.IsNone || !spawner.TryGetRoot(id, out var root)) throw new InvalidOperationException("the guest ship spawn was rejected");
-                var em = world.EntityManager;
-                em.AddComponentData(root, new RemotePilot { Slot = peer.Slot });
-                em.AddComponentData(root, new Pilot { Slot = peer.Slot });   // ADR-0117: served by the same per-pilot systems as the host's ship
-                em.AddComponentData(root, new RemotePilotInput());
-                em.AddComponentData(root, new RemotePilotEdgeConsumed());
-                em.AddComponentData(root, PilotName.From(string.IsNullOrEmpty(peer.Name) ? "Guest " + peer.Slot : peer.Name));
-                guestShips[peer.Slot] = id.Value;
+                var id = SpawnGuestShip(peer.Slot, string.IsNullOrEmpty(peer.Name) ? "Guest " + peer.Slot : peer.Name, position, rotation);
                 Notify(peer.Name + " joined");
                 status = "Hosting: " + net.Transport.Peers.Count + " guest(s)";
             }
@@ -250,6 +237,42 @@ namespace Game.App.Session
                 GameLog.Exception(NetTransport.Category, e, "guest ship");
                 net?.Transport.Disconnect(peer, "no ship for you: " + e.Message);
             }
+        }
+
+        /// <summary>Host: spawns a ship for the guest in <paramref name="slot"/> and makes it theirs (join, and race respawns).
+        /// SPEC-90 open question 4 default: guests fly a copy of the host's flagship (the playground ship, with its fitted shield).</summary>
+        internal PersistentId SpawnGuestShip(byte slot, string pilot, float3 position, quaternion rotation)
+        {
+            if (!Game.Core.Services.TryGet<ShipSpawnService>(out var spawner)) throw new InvalidOperationException("no ship spawner");
+            var blueprint = GuestBlueprint.IsNone ? config.StartBlueprint.Id : GuestBlueprint;
+            Game.Voxel.Model.VoxelStructure copy = null;
+            if (GuestBlueprint.IsNone && session.Fleet.Flagship?.Structure != null) { copy = session.Fleet.Flagship.Structure.Clone(); guestStructures.Add(copy); }
+            var id = spawner.Spawn(new ShipSpawnArgs { Blueprint = blueprint, Structure = copy, Position = position, Rotation = rotation, Allegiance = Allegiance.Player, WithAi = false });
+            if (id.IsNone || !spawner.TryGetRoot(id, out var root)) throw new InvalidOperationException("the guest ship spawn was rejected");
+            var em = world.EntityManager;
+            em.AddComponentData(root, new RemotePilot { Slot = slot });
+            em.AddComponentData(root, new Pilot { Slot = slot });   // ADR-0117: served by the same per-pilot systems as the host's ship
+            em.AddComponentData(root, new RemotePilotInput());
+            em.AddComponentData(root, new RemotePilotEdgeConsumed());
+            em.AddComponentData(root, PilotName.From(pilot));
+            guestShips[slot] = id.Value;
+            return id;
+        }
+
+        /// <summary>Host, SPEC-92 respawn: the guest's dead ship stays as a hulk (no longer theirs) and they fly a fresh one.</summary>
+        internal bool RespawnGuestShip(byte slot, float3 position, quaternion rotation)
+        {
+            if (net == null || net.Role != SimRoleKind.Host) return false;
+            string pilot = "Guest " + slot;
+            if (TryGetPilotShip(slot, out var old))
+            {
+                var em = world.EntityManager;
+                if (em.HasComponent<PilotName>(old)) pilot = em.GetComponentData<PilotName>(old).Value.ToString();
+                if (em.HasComponent<RemotePilot>(old)) em.RemoveComponent<RemotePilot>(old);
+                if (em.HasComponent<Pilot>(old)) em.RemoveComponent<Pilot>(old);
+            }
+            try { SpawnGuestShip(slot, pilot, position, rotation); return true; }
+            catch (Exception e) { GameLog.Exception(NetTransport.Category, e, "guest respawn"); return false; }
         }
 
         void OnGuestLeft(NetPeer peer, string reason)

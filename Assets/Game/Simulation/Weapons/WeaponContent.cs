@@ -56,6 +56,9 @@ namespace Game.Simulation.Weapons
                 factions.Dispose(); if (blob.IsCreated) blob.Dispose(); throw;
             }
         }
+        static float Momentum(WeaponDefinition d)
+            => d.Delivery != WeaponDelivery.Beam && d.ProjectileMass > 0 ? d.ProjectileMass * d.ProjectileSpeed
+             : d.Delivery == WeaponDelivery.Beam && d.BeamForce > 0 ? d.BeamForce * d.BeamPulseSeconds : d.ImpulsePerHit;
         public static BlobAssetReference<WeaponDefsBlob> BuildBlob(ContentCatalog catalog)
         {
             if (catalog == null) throw new ArgumentNullException(nameof(catalog));
@@ -64,6 +67,10 @@ namespace Game.Simulation.Weapons
             ref var root = ref builder.ConstructRoot<WeaponDefsBlob>();
             var weapons = builder.Allocate(ref root.Weapons, definitions.Count + 1);
             weapons[0] = default;
+            // SPEC-91 §4.1 (HAZ-003): a shot's push is its momentum. Projectiles: projectileMass × projectileSpeed; beams: beamForce ×
+            // pulse seconds; a weapon with neither keeps its authored impulsePerHit. The global scales come from config_weapons.
+            float knockback = 1, recoil = 0;
+            if (catalog.TryGet<WeaponTuningDefinition>(new ContentId("config_weapons"), out var tuningDef)) { knockback = tuningDef.KnockbackScale; recoil = tuningDef.RecoilScale; }
             for (int i = 0; i < definitions.Count; i++)
             {
                 var d = definitions[i]; UnityEngine.Color32 color = d.TracerColor;
@@ -83,7 +90,9 @@ namespace Game.Simulation.Weapons
                     PenetrationCells = d.PenetrationCells,
                     ExplosionRadius = d.ExplosionRadius,
                     ExplosionDamage = d.ExplosionDamage,
-                    ImpulsePerHit = d.ImpulsePerHit,
+                    HitMomentum = Momentum(d),
+                    ImpulsePerHit = Momentum(d) * knockback,
+                    RecoilMomentum = d.Delivery == WeaponDelivery.Beam ? 0 : Momentum(d) * recoil,
                     BurstCount = d.BurstCount,
                     PelletsPerRound = d.PelletsPerRound,
                     ProjectileSpeed = d.ProjectileSpeed,

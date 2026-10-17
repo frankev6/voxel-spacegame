@@ -38,6 +38,19 @@ namespace Game.App.DevRuntime.Playground
         readonly Dictionary<byte, ContentHash> blueprints = new();   // each racer's ship, for respawns
 
         internal DevPlaygroundRace(DevRuntimeHost host) { this.host = host; }
+        int syncFrame; RacePhase sentPhase = (RacePhase)255;
+        Game.Core.Net.SimRoleKind Role => host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coop) ? coop.Role : Game.Core.Net.SimRoleKind.Solo;
+        CoopSession Coop => host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coop) ? coop as CoopSession : null;
+        /// <summary>This machine's pilot slot (0 for solo and the host).</summary>
+        byte LocalSlot
+        {
+            get
+            {
+                var em = host.Context.EntityManager; var ship = host.Context.PlayerShipRoot;
+                return ship != Entity.Null && em.HasComponent<Pilot>(ship) ? em.GetComponentData<Pilot>(ship).Slot : (byte)0;
+            }
+        }
+        static string F(double v) => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
         internal void Bind(UIRoot root) { ui = root; }
         internal bool IsOpen => race != Entity.Null && host.Context.World != null && host.Context.World.IsCreated && host.Context.EntityManager.Exists(race);
         internal bool InLobby => IsOpen && State.Phase == RacePhase.Lobby;
@@ -96,6 +109,7 @@ namespace Game.App.DevRuntime.Playground
             var buffer = em.GetBuffer<RacerProgress>(race);
             foreach (var r in racers) buffer.Add(r);
             BuildVisuals(track); BuildHud();
+            if (Role == Game.Core.Net.SimRoleKind.Host) { Coop?.SendAllGuests($"race view x={F(trackOrigin.x)} z={F(trackOrigin.z)} laps={State.Laps}"); sentPhase = (RacePhase)255; }
             return DevCommandResult.Ok($"{track.DisplayName}: {racers.Count} pilot(s) on the grid, {State.Laps} laps. Press F (or race start) for the countdown.");
         }
 
@@ -113,6 +127,7 @@ namespace Game.App.DevRuntime.Playground
         internal void End()
         {
             var ctx = host.Context;
+            if (race != Entity.Null && Role == Game.Core.Net.SimRoleKind.Host) Coop?.SendAllGuests("race end");
             if (ctx.World != null && ctx.World.IsCreated)
             {
                 var em = ctx.EntityManager; em.CompleteAllTrackedJobs();
@@ -186,7 +201,79 @@ namespace Game.App.DevRuntime.Playground
                         { DevEcs.TeleportRoot(em, racers[i].Ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw)); live = true; }
                     if (!live) SpawnFresh(request);
                 }
+            if (Role == Game.Core.Net.SimRoleKind.Host && (++syncFrame % 12 == 0 || State.Phase != sentPhase)) { sentPhase = State.Phase; Coop?.SendAllGuests(SyncText()); }
+            if (Role == Game.Core.Net.SimRoleKind.Guest) ApplyLocalHold();
             UpdateVisuals(); UpdateHud();
+        }
+
+        // ------------------------------------------------------------------------------------------------ co-op (RACE-009)
+        // The host runs the race; guests mirror it. `race view` builds the same zones, gates and visuals on a guest (wrecks arrive as
+        // replicated grids), and `race sync` carries the phase and every racer's progress, with times as ticks before now, so they
+        // need no shared clock. A guest holds its own predicted ship through the countdown like the host holds it.
+        string SyncText()
+        {
+            var em = host.Context.EntityManager; var rs = State; uint now = (uint)host.Context.Tick;
+            var text = new System.Text.StringBuilder("race sync phase=").Append((int)rs.Phase).Append(" ago=").Append(now - rs.PhaseTick)
+                .Append(" start=").Append(rs.StartTick == 0 ? 0 : now - rs.StartTick).Append(" laps=").Append(rs.Laps).Append(" racers=");
+            bool first = true;
+            foreach (var r in em.GetBuffer<RacerProgress>(race))
+            {
+                if (!first) text.Append(';'); first = false;
+                text.Append(r.Slot).Append(':').Append(r.Lap).Append(':').Append(r.LastGate).Append(':').Append(r.GatesThisLap).Append(':').Append(r.Place)
+                    .Append(':').Append((int)r.Flags).Append(':').Append(r.BestLapTicks).Append(':').Append(r.LastLapTicks)
+                    .Append(':').Append(now - r.LapStartTick).Append(':').Append(r.FinishTick == 0 ? 0 : now - r.FinishTick);
+            }
+            return text.ToString();
+        }
+
+        /// <summary>Guest: build the host's track locally around its universe origin.</summary>
+        internal DevCommandResult View(double3 origin, int laps)
+        {
+            var ctx = host.Context; var em = ctx.EntityManager;
+            if (!ctx.TryGetService<Game.Data.Services.ContentService>(out var content) || !content.Catalog.TryGet<TrackDefinition>(new ContentId("track_01"), out var track))
+                return DevCommandResult.Fail("track_01 missing");
+            if (!ctx.TryGetFrame(out var frame)) return DevCommandResult.Fail("frame origin unavailable");
+            End();
+            em.CompleteAllTrackedJobs();
+            trackOrigin = origin;
+            race = TrackSpawnService.Spawn(em, track, (float2)(origin - frame.OriginInStarSystem).xz, Group, new LocalIds());
+            if (laps > 0) { var rs = State; rs.Laps = (byte)laps; em.SetComponentData(race, rs); }
+            BuildVisuals(track); BuildHud();
+            return DevCommandResult.Ok("showing the host's race");
+        }
+        sealed class LocalIds : IPersistentIdAllocator { ulong next = 1UL << 48; public ulong Allocate() => next++; }
+
+        /// <summary>Guest: apply the host's race state.</summary>
+        internal DevCommandResult Sync(DevArgs args)
+        {
+            if (!IsOpen) return DevCommandResult.Fail("no race view");
+            var em = host.Context.EntityManager; uint now = (uint)host.Context.Tick;
+            uint Ago(long ago) => ago <= 0 ? 0 : now - (uint)math.min(ago, now);
+            var rs = State;
+            rs.Phase = (RacePhase)args.GetLong("phase", 0); rs.PhaseTick = now - (uint)math.min(args.GetLong("ago", 0), now);
+            rs.StartTick = Ago(args.GetLong("start", 0)); rs.Laps = (byte)args.GetLong("laps", rs.Laps);
+            em.SetComponentData(race, rs);
+            var racers = em.GetBuffer<RacerProgress>(race); racers.Clear();
+            foreach (var row in args.GetString("racers", "").Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var f = row.Split(':'); if (f.Length < 10) continue;
+                long L(int i) => long.Parse(f[i], System.Globalization.CultureInfo.InvariantCulture);
+                racers.Add(new RacerProgress
+                {
+                    Slot = (byte)L(0), Lap = (byte)L(1), LastGate = (short)L(2), GatesThisLap = (byte)L(3), Place = (byte)L(4), Flags = (RacerFlags)L(5),
+                    BestLapTicks = (uint)L(6), LastLapTicks = (uint)L(7), LapStartTick = now - (uint)math.min(L(8), now), FinishTick = Ago(L(9))
+                });
+            }
+            return DevCommandResult.Ok("synced");
+        }
+
+        void ApplyLocalHold()
+        {
+            var em = host.Context.EntityManager; var ship = host.Context.PlayerShipRoot;
+            if (ship == Entity.Null) return;
+            bool hold = State.Phase == RacePhase.Lobby || State.Phase == RacePhase.Countdown;
+            if (!em.HasComponent<RaceHold>(ship)) { if (!hold) return; em.AddComponent<RaceHold>(ship); }
+            if (em.IsComponentEnabled<RaceHold>(ship) != hold) em.SetComponentEnabled<RaceHold>(ship, hold);
         }
 
         /// <summary>RACE-006: a destroyed racer flies again in a fresh ship of its blueprint. Its hulk stays on the track as an obstacle
@@ -204,7 +291,13 @@ namespace Game.App.DevRuntime.Playground
                     em.RemoveComponent<Pilot>(h);
                     if (em.HasComponent<PlayerShip>(h)) em.RemoveComponent<PlayerShip>(h);
                 }
-            if (request.Slot != 0) { GameLog.Warn(LogCategories.Dev, "Race: guest respawn arrives with RACE-009"); return; }
+            if (request.Slot != 0)
+            {
+                // RACE-009: a guest's fresh ship replicates as theirs (RemotePilot), so their camera and HUD follow it.
+                if (Coop == null || !Coop.RespawnGuestShip(request.Slot, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw)))
+                    GameLog.Warn(LogCategories.Dev, "Race: could not respawn pilot " + request.Slot);
+                return;
+            }
             if (!ctx.TryGetService<GameSession>(out var session)) return;
             var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint, new Game.Voxel.Grid.GridSpawnParams
             {
@@ -271,8 +364,9 @@ namespace Game.App.DevRuntime.Playground
             visuals.transform.position = (float3)(trackOrigin - frame.OriginInStarSystem);
             var em = host.Context.EntityManager;
             ulong next = 1;
+            byte me = LocalSlot;
             foreach (var r in em.GetBuffer<RacerProgress>(race))
-                if (r.Ship == host.Context.PlayerShipRoot) next = r.LastGate >= 0 ? em.GetBuffer<RaceGate>(race)[r.LastGate].NextMask : 1;
+                if (r.Slot == me) next = r.LastGate >= 0 ? em.GetBuffer<RaceGate>(race)[r.LastGate].NextMask : 1;
             for (int i = 0; i < gateLines.Count; i++) gateLines[i].widthMultiplier = (next & (1UL << i)) != 0 ? 9 : 3;
         }
 
@@ -297,7 +391,8 @@ namespace Game.App.DevRuntime.Playground
             var em = host.Context.EntityManager; var rs = State; uint tick = (uint)host.Context.Tick;
             var racers = em.GetBuffer<RacerProgress>(race);
             RacerProgress me = default; bool found = false;
-            foreach (var r in racers) if (r.Ship == host.Context.PlayerShipRoot) { me = r; found = true; }
+            byte slot = LocalSlot;
+            foreach (var r in racers) if (r.Slot == slot) { me = r; found = true; }
             switch (rs.Phase)
             {
                 case RacePhase.Lobby: banner.text = "BATTLE GRAVEYARD"; status.text = $"{racers.Length} on the grid  ·  {rs.Laps} laps  ·  F TO START"; break;
@@ -318,10 +413,19 @@ namespace Game.App.DevRuntime.Playground
                 rows.Sort((a, b) => a.Place.CompareTo(b.Place));
                 var text = new System.Text.StringBuilder();
                 foreach (var r in rows)
-                    text.Append($"P{r.Place}   PILOT {r.Slot + 1}   {((r.Flags & RacerFlags.Finished) != 0 ? Time(r.FinishTick - rs.StartTick) : "DNF")}   BEST {Time(r.BestLapTicks)}\n");
+                    text.Append($"P{r.Place}   {PilotLabel(r.Slot)}   {((r.Flags & RacerFlags.Finished) != 0 ? Time(r.FinishTick - rs.StartTick) : "DNF")}   BEST {Time(r.BestLapTicks)}\n");
                 results.text = text.ToString(); results.style.display = DisplayStyle.Flex;
             }
             else results.style.display = DisplayStyle.None;
+        }
+
+        string PilotLabel(byte slot)
+        {
+            var em = host.Context.EntityManager;
+            using var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<Game.Core.Net.PilotName>());
+            using var ships = q.ToEntityArray(Allocator.Temp);
+            foreach (var s in ships) if (em.GetComponentData<Pilot>(s).Slot == slot) return em.GetComponentData<Game.Core.Net.PilotName>(s).Value.ToString().ToUpperInvariant();
+            return slot == LocalSlot ? "YOU" : "PILOT " + (slot + 1);
         }
 
         public void Dispose() => End();

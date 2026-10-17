@@ -126,15 +126,15 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Ships/ship_shuttle.asset|SkippedHandEdited|
 |Assets/Game/Content/Ships/ship_striker.asset|SkippedHandEdited|
 |Assets/Game/Content/Ships/ship_vestari.asset|Unchanged|
-|Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset|Unchanged|
-|Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset|SkippedHandEdited|
 |Assets/Game/Content/Weapons/wpn_flak_cannon_medium.asset|Unchanged|
 |Assets/Game/Content/Weapons/wpn_missile_launcher_small.asset|Unchanged|
 |Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset|SkippedHandEdited|
 |Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset|SkippedHandEdited|
 |Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset|SkippedHandEdited|
-|Assets/Game/Content/Weapons/wpn_railgun_medium.asset|Unchanged|
-|Assets/Game/Content/Weapons/wpn_small_beam_turret.asset|Unchanged|
+|Assets/Game/Content/Weapons/wpn_railgun_medium.asset|SkippedHandEdited|
+|Assets/Game/Content/Weapons/wpn_small_beam_turret.asset|SkippedHandEdited|
 
 ## Ships
 
@@ -256,9 +256,23 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I011 Assets/Game/Content/Ships/ship_red_elite.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_shuttle.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_striker.asset: Kept hand-edited asset.
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_battleship.asset payload: ship_wreck_battleship: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_carrier.asset payload: ship_wreck_carrier: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_cruiser.asset payload: ship_wreck_cruiser: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_cruiser_burned.asset payload: ship_wreck_cruiser_burned: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_dreadnought_bow.asset payload: ship_wreck_dreadnought_bow: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_dreadnought_stern.asset payload: ship_wreck_dreadnought_stern: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_engine_section.asset payload: ship_wreck_engine_section: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_frigate_a.asset payload: ship_wreck_frigate_a: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_frigate_b.asset payload: ship_wreck_frigate_b: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_frigate_c.asset payload: ship_wreck_frigate_c: recharge infinite s > 10 s (rule R2)
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_medium.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Weapons/wpn_plasma_turret_small_fixed.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_railgun_medium.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Weapons/wpn_small_beam_turret.asset: Kept hand-edited asset.
 [I] MIG-I091 Import/Legacy npc_enemy_1: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
 [I] ENC-I002 Import/Legacy npc_enemy_1.Formations[0]: First-formation groups [ship_shuttle x1] replaced by ENC-010's authored final ships/counts; source retained in the hand-off.
 [I] ENC-I001 Import/Legacy npc_enemy_1.Formations[1]: Dropped additional formation: ship_fighter.
@@ -472,15 +486,15 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 96 warnings, 219 infos
+0 errors, 106 warnings, 223 infos
 ```
 
 ## Summary
 
-0 errors, 96 warnings, 219 infos
+0 errors, 106 warnings, 223 infos
 
 Created: 0
 Updated: 0
-Unchanged: 55
-SkippedHandEdited: 74
+Unchanged: 51
+SkippedHandEdited: 78
 Failed: 0

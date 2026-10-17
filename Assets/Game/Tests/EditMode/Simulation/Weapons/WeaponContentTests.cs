@@ -38,10 +38,10 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         {
             var catalog = Catalog();
             var definitions = catalog.All<WeaponDefinition>();
-            Assert.That(definitions.Count, Is.EqualTo(11));
+            Assert.That(definitions.Count, Is.EqualTo(12));
             using (var blob = WeaponContent.BuildBlob(catalog))
             {
-                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(12));
+                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(13));
                 for (int i = 0; i < definitions.Count; i++)
                 {
                     var d = definitions[i];
@@ -217,7 +217,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 var value = tuning.GetSingleton<WeaponTuning>();
                 Assert.That(value.MaxProjectiles, Is.EqualTo(8192)); Assert.That(value.MaxCandidates, Is.EqualTo(32));
                 Assert.That(value.FixedConvergenceRad, Is.EqualTo(math.radians(3f)).Within(.0001f));
-                Assert.That(value.ExplosionImpulsePerDamage, Is.EqualTo(2)); Assert.That(value.MaxTargetRange, Is.EqualTo(2500));
+                Assert.That(value.ExplosionImpulsePerDamage, Is.EqualTo(60));   // SPEC-91 HAZ-005 tuning (was 2) Assert.That(value.MaxTargetRange, Is.EqualTo(2500));
                 Assert.That(value.UnderCursorRadius, Is.EqualTo(30));
                 var matrix = factions.GetSingleton<FactionRelations>();
                 Assert.That(matrix.Count, Is.EqualTo(3));
@@ -260,6 +260,9 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     w.Damage = 45; w.TriggerIntervalTicks = 40; w.SpreadRad = math.radians(3f); w.ProjectileSpeed = 340; w.Range = 510; w.SustainedDps = 67.5f; break;
                 case "wpn_plasma_turret_small_fixed":
                     w.IsFixed = 1; w.TriggerIntervalTicks = 24; w.SpreadRad = math.radians(.5f); w.TraverseHalfArcRad = w.TraverseRateRad = 0; w.SustainedDps = 150; break;
+                case "wpn_impact_driver":   // RACE-013: the Rams' shove gun
+                    w.IsFixed = 1; w.Damage = 40; w.TriggerIntervalTicks = 120; w.SpreadRad = math.radians(.5f); w.TraverseHalfArcRad = w.TraverseRateRad = 0;
+                    w.ProjectileSpeed = 600; w.LifetimeMinTicks = w.LifetimeMaxTicks = 72; w.Range = 720; w.SustainedDps = 20; break;
                 case "wpn_plasma_turret_medium":
                     w.Damage = 70; w.PenetrationCells = 2; w.TriggerIntervalTicks = 40; w.BurstCount = 3; w.BurstIntervalTicks = 3;
                     w.SpreadRad = math.radians(.5f); w.ProjectileSpeed = 450; w.LifetimeMinTicks = w.LifetimeMaxTicks = 96;
@@ -297,7 +300,14 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     w.TraverseHalfArcRad = w.TraverseRateRad = 0; w.PowerDraw = 2; w.Range = 900; w.SustainedDps = 180; break;
                 default: Assert.Fail("No §4.9 oracle for " + id); break;
             }
-            w.ImpulsePerHit = w.Damage * 2; return w;
+            // SPEC-91 momentum (HAZ-003): projectileMass × speed, beamForce × pulse seconds, else the authored Damage × 2; knockback
+            // scale 1 and recoil scale 0.17 from config_weapons.
+            float mass = id switch { "wpn_plasma_turret_small" or "wpn_plasma_turret_small_fixed" => 22.5f, "wpn_plasma_turret_medium" => 26.7f,
+                "wpn_railgun_medium" => 50, "wpn_siege_cannon_heavy" => 95, "wpn_xeno_acid" => 26.5f, "wpn_impact_driver" => 400, _ => 0 };
+            float force = id switch { "wpn_small_beam_turret" or "wpn_fixed_beam_turret_small" => 10000, "wpn_ark_lance_medium" => 40000, _ => 0 };
+            w.HitMomentum = mass > 0 ? mass * w.ProjectileSpeed : force > 0 ? force * w.BeamPulseTicks / 60f : w.Damage * 2;
+            w.ImpulsePerHit = w.HitMomentum; w.RecoilMomentum = w.Delivery == WeaponDelivery.Beam ? 0 : w.HitMomentum * .17f;
+            return w;
         }
     }
 }
