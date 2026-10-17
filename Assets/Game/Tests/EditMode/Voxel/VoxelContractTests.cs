@@ -37,12 +37,13 @@ namespace Game.Tests.EditMode.Voxel
         public void GridKind_HasBindingValues()
         {
             Assert.AreEqual(typeof(byte), Enum.GetUnderlyingType(typeof(GridKind)));
-            CollectionAssert.AreEqual(new[] { GridKind.Ship, GridKind.Station, GridKind.Asteroid, GridKind.Hulk },
+            CollectionAssert.AreEqual(new[] { GridKind.Ship, GridKind.Station, GridKind.Asteroid, GridKind.Hulk, GridKind.Device },
                                       Enum.GetValues(typeof(GridKind)).Cast<GridKind>().ToArray());
             Assert.AreEqual(0, (byte)GridKind.Ship);
             Assert.AreEqual(1, (byte)GridKind.Station);
             Assert.AreEqual(2, (byte)GridKind.Asteroid);
             Assert.AreEqual(3, (byte)GridKind.Hulk);
+            Assert.AreEqual(4, (byte)GridKind.Device);   // ADR-0118
         }
 
         [Test]

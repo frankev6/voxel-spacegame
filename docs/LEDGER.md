@@ -525,7 +525,7 @@
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | d60fca59 | salvage collect and pull on every machine, notices to the pilot's machine, combat status per pilot, stance table to guests; body interactables deferred (sandbox-only co-op); spike worktree only |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | a59b2b2b | decisions table and test, Game.Net IL writer rules, net parity and coop-parity.sh; spike worktree only |
 | NET-019 | Pre-merge fixes | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-018 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 04518d70 | braking bound, guest energy, guest playground beacons, shipped boost, RequireRenderer in the Editor, merchant header; merged to main |
-| HAZ-001 | Public contract types | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| HAZ-001 | Public contract types | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | (this commit) | Contract types; zone enums in Game.Data.Hazards (definitions need them); FlightConfig carry off until HAZ-002; 6 weapon assets re-serialized with the new fields |
 | HAZ-002 | Carried velocity in flight assist | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-001 | no | todo |  |  |  |  |
 | HAZ-003 | Momentum hit model | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | no | todo |  |  |  |  |
 | HAZ-004 | Recoil | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-003 | no | todo |  |  |  |  |
@@ -537,8 +537,8 @@
 | HAZ-010 | Hazards and hit force in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-009, NET-018 | no | todo |  |  |  |  |
 | HAZ-011 | Hazard scenarios and determinism gate | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-009 | no | todo |  |  |  |  |
 | RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | no | todo |  |  |  |  |
-| RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
-| RACE-003 | Racer ship silhouettes for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | review | claude (claude-opus-5-5) | 2026-10-17 | e4df017c | Three layouts (Derelict Run, Moon Slingshot, Foundry Gauntlet) and the 12-mechanic sheet sent 2026-10-17; recommendation A; waiting for the owner to pick |
+| RACE-003 | Racer ship silhouettes for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | review | claude (claude-opus-5-5) | 2026-10-17 | ec9fa708 | Dart (Needle, Kite, Gimbal) and Ram (Battering Ram, Salvage Tug, Hammerhead) sent 2026-10-17; waiting for the owner to pick |
 | RACE-004 | Track builder, barrier blueprints and spawner | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-001, RACE-002, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
 | RACE-005 | Race decider | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, HAZ-006 | no | todo |  |  |  |  |
 | RACE-006 | Respawn | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-005 | no | todo |  |  |  |  |
@@ -1263,6 +1263,28 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-17 — RACE-002, RACE-003 for owner choice; HAZ-001 contracts (lead, claude-opus-5-5)
+- **RACE-002.** The owner found the first three loops boring: "get more intricate and in depth with your designs and add things i haven't thought about too", then "these mechanics should general and for me to be able to use them in real world exploration too".
+  - Redrawn as three set-piece tracks: Derelict Run (fly through a 1 km dreadnought), Moon Slingshot (gravity well, flares, portals) and Foundry Gauntlet (conveyor, vents, a three-lane fork under turrets).
+  - Each map has sectors, route lap times from the production flight limits, a speed trace and per-lap events.
+  - A 12-card mechanics sheet presents every mechanic exploration-first.
+  - Recommendation: Derelict Run. `docs/design/racing/track-01-options.md`.
+- **RACE-003.** The first pixel silhouettes were too plain, so they were redone as layered vector plans in the batch-2 style: Dart (Vestari: Needle, Kite, Gimbal) and Ram (Khuchad Clan: Battering Ram, Salvage Tug, Hammerhead). `docs/design/racing/racers.md`.
+- **HAZ-001.** SPEC-91 contract types:
+  - `ExternalPush` on every grid root;
+  - zone and mine components;
+  - `HazardSpawn` (stubbed);
+  - hazard definitions with the prefixes `zone_`, `mine_` and `minefield_`;
+  - enum appends: `ProducerKind.Recoil`/`Hazard`, `GridKind.Device`, `BlockModuleId.ProximityFuse`, `RngPurpose.HazardScatter`;
+  - `projectileMass`, `beamForce`, `knockbackScale` and `recoilScale`;
+  - carry fields (off).
+
+  The zone enums live in `Game.Data.Hazards`, because the authoring definitions need them (SPEC-91 §4.3 note). Done in the co-op worktree, so the owner's open Editor was not touched.
+
+  Results:
+  - EditMode: 1807 passed, 3 failed, then fixed. The fixes were two contract pins (grid-root components, the flight factory) and migration idempotence: 6 weapon assets were re-serialized with the new fields and the migration manifest re-hashed.
+  - Focused re-run: 50 passed.
 
 ### 2026-10-16 — SPEC-91, SPEC-92 and ADR-0118: racing, hazards and hit force (lead, claude-opus-5-5)
 - Owner, verbatim: "make a racing minigame where we can also shoot eachother, crash into boundaries, have boost sections, interesting looping track with multiple paths and shortcuts, traps like mines in space (all of these things will get repurposed for other parts of the game ...)" and "shooting not only should havve a small recoil on the ship that shot it, but also a clear force against the ship that got shot". Asked for the full specs before any code; connection over Tailscale; a Windows build for Daniel.

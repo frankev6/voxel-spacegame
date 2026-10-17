@@ -29,6 +29,7 @@ namespace Game.Core
         EncounterPlacement = 23,     // SPEC-33 spawn placement
         Territory = 24,              // SPEC-33 faction territory
         Salvage = 25,                // SPEC-50 salvage yields
+        HazardScatter = 26,          // SPEC-91 mine field scatter
         Test = 1000,
     }
 }

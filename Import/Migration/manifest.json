@@ -127,10 +127,10 @@
   "Assets/Game/Content/Ships/ship_shuttle.asset": "abab0f1a1312a12f",
   "Assets/Game/Content/Ships/ship_striker.asset": "332a60c990ed2008",
   "Assets/Game/Content/Ships/ship_vestari.asset": "3168c86ef2049992",
-  "Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset": "3b524a78852af8cf",
-  "Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset": "e8078f12a01fd9b7",
-  "Assets/Game/Content/Weapons/wpn_flak_cannon_medium.asset": "64d7cc9bdc65da99",
-  "Assets/Game/Content/Weapons/wpn_missile_launcher_small.asset": "3c998a14004c6e33",
-  "Assets/Game/Content/Weapons/wpn_railgun_medium.asset": "bf821a3306fb058c",
-  "Assets/Game/Content/Weapons/wpn_small_beam_turret.asset": "8525e28cb05e648a"
+  "Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset": "2a8aecb26139f65c",
+  "Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset": "79d8356e6e84ed2a",
+  "Assets/Game/Content/Weapons/wpn_flak_cannon_medium.asset": "3228f3dc621d9638",
+  "Assets/Game/Content/Weapons/wpn_missile_launcher_small.asset": "928969b6847c0c06",
+  "Assets/Game/Content/Weapons/wpn_railgun_medium.asset": "b4c9a1f2c18c38f3",
+  "Assets/Game/Content/Weapons/wpn_small_beam_turret.asset": "8f3ed1a8e9acb5cd"
 }

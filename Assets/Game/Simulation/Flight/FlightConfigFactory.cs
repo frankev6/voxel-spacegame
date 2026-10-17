@@ -26,6 +26,9 @@ namespace Game.Simulation.Flight
             PlaneCorrection = def.PlaneCorrection,
             IntensityRise = def.IntensityRise,
             IntensityFall = def.IntensityFall,
+            // Carry (SPEC-91): off until HAZ-002 adds the config_flight values.
+            CarryDecel = FlightConfig.Default.CarryDecel, CarryBrakeDecel = FlightConfig.Default.CarryBrakeDecel,
+            CarryYawDecel = FlightConfig.Default.CarryYawDecel, MaxCarry = FlightConfig.Default.MaxCarry, MaxCarryYaw = FlightConfig.Default.MaxCarryYaw,
         };
     }
 }

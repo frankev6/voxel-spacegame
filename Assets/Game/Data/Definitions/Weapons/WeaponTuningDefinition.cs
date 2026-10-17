@@ -11,6 +11,8 @@ namespace Game.Data.Definitions
         [SerializeField] private int maxProjectiles = 8192;
         [SerializeField] private float fixedConvergenceDeg = 3f;
         [SerializeField] private float explosionImpulsePerDamage = 2f;
+        [SerializeField, Min(0)] private float knockbackScale = 1f;   // × shot momentum → target impulse (SPEC-91)
+        [SerializeField, Min(0)] private float recoilScale = 1f;      // × shot momentum → shooter impulse (SPEC-91)
         [SerializeField] private float maxTargetRange = 2500f;
         [SerializeField] private float underCursorRadius = 30f;
         [SerializeField] private int maxCandidates = 32;
@@ -18,6 +20,8 @@ namespace Game.Data.Definitions
         public int MaxProjectiles => maxProjectiles;
         public float FixedConvergenceDeg => fixedConvergenceDeg;
         public float ExplosionImpulsePerDamage => explosionImpulsePerDamage;
+        public float KnockbackScale => knockbackScale;
+        public float RecoilScale => recoilScale;
         public float MaxTargetRange => maxTargetRange;
         public float UnderCursorRadius => underCursorRadius;
         public int MaxCandidates => maxCandidates;

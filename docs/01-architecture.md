@@ -297,7 +297,8 @@ These types cross module boundaries. **Their names and owning module are binding
 | `PaletteEntry` | `ushort Block` (BlockIndex), `byte Orient`, `byte Color` | Per grid |
 | `VoxelStructure` | Managed class owning `NativeList`s: palette, instances, bricks (coord → 4096 cells) | Same layout as ECS; used by editor, saves, tests |
 | `VoxelGrid` | `IComponentData`: `int3 BrickMin, BrickDims; float CellSize; uint Revision; int AnchorInstance; GridKind Kind` | Root entity of a ship, station, asteroid or hulk |
-| `GridKind` | `enum : byte { Ship, Station, Asteroid, Hulk }` | |
+| `GridKind` | `enum : byte { Ship, Station, Asteroid, Hulk, Device }` | `Device` (ADR-0118): mines and other small autonomous objects; no core, no AI, never a hulk |
+| `ExternalPush` | `IComponentData { float3 LinearDv; float YawDv; uint Tick; }` on every grid root | Velocity change impulses applied this tick (SPEC-91, ADR-0118); flight assist carries it |
 | `Brick` | `IComponentData`: `Entity Grid; int3 Coord; ushort SolidCount` + buffers `BrickCells` (4096 × `Cell` when dense) and `BrickSparseCells` (0..1024 sorted six-byte entries when sparse), plus `BrickSolidMask` (512 B) + enableable `BrickDirty` | 16³ cells. Exactly one cell buffer owns storage; dense is selected on insertion of the 1025th solid cell (ADR-0023). All three buffers are `[InternalBufferCapacity(0)]` |
 | `BlockInstance` | buffer element on the grid: `ushort Block; byte Orient, Color; int3 Origin; float FunctionHp; Entity Functional` | Multi-cell and functional blocks |
 | `FunctionalBlock` | `IComponentData`: `Entity Grid; int InstanceIndex` | On thruster/weapon/reactor/shield/core entities |
@@ -324,6 +325,10 @@ These types cross module boundaries. **Their names and owning module are binding
 | `ShieldState` | analytic ellipsoid in grid space + HP | |
 | `ShieldHit` | event: `Entity Grid; float3 LocalPoint; float Amount; DamageType Type; Entity Source` | Producers test shields first (analytically) and emit this instead of a `DamageEvent` |
 | `SpatialHash` | singleton, rebuilt per tick | Used by AI, homing, explosions, radar |
+| `WorldZone` + buffers `ZoneEffect`, `ZonePathPoint` | analytic planar zone: shape, pose, `PersistentId`, group; effects `Accelerate`, `Drag`, `Repel`, `Gate`, `Bounds` (enums in `Game.Data.Hazards`) | SPEC-91, ADR-0118. Spawned only through `HazardSpawn` |
+| `ZoneContacts` | singleton: this tick's gate and bounds contacts | Read by authority deciders (race progress) |
+| `MineState`, `MineAnchor` | on mine device roots: phase and phase tick; optional capped anchor spring | SPEC-91 |
+| `FlightState.Carry`, `CarryYaw` | ship-local carried velocity added to assist targets | SPEC-20 decision 15 (HAZ-002), ADR-0118 |
 
 ### 6.5 Galaxy (`Game.Galaxy`, specs SPEC-30 … SPEC-33)
 
@@ -402,6 +407,10 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `FactionRelations` (after boot), faction standings | `FactionStandingSystem` (requests from `FactionService`) | Read |
 | `PlayerCombatStatus` | `PlayerCombatStatusSystem` | Read |
 | `ShipStats`, `ShipStatMultipliers`, `PowerStats`, `ShieldStats` | `ShipStatsAggregateSystem` | Read |
+| `ExternalPush` | `ImpulseApplySystem` (SPEC-91, ADR-0118) | Read by `PropulsionSystem` |
+| `FlightState.Carry`, `CarryYaw` | `PropulsionSystem` | Read |
+| `ZoneContacts`, `ZoneTracking` | `ZoneSystem` (SPEC-91) | Read by deciders |
+| `MineState` | `MineSystem` (authority, SPEC-91) | Read; replicated to guests |
 | `ShipStatModifier`, `Inhibited` | `StatusSystem` (SPEC-22) from the `StatModifierRequest` / `InhibitRequest` channels (ADR-0016) | Post requests |
 | `PropulsionStats` / `WeaponStats` | `PropulsionStatsSystem` (SPEC-20) / `WeaponStatsSystem` (SPEC-21) | Read |
 | `PowerRequest` element of module m | The feature that owns m (`Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup`); `ConsumerIndex`: `PowerInitSystem` | Read by `PowerAllocationSystem` |

@@ -23,6 +23,8 @@ MonoBehaviour:
   explosionDamage: 200
   explodeOnExpire: 1
   impulsePerHit: 0
+  projectileMass: 0
+  beamForce: 0
   fireRate: 0.3
   burstCount: 6
   burstInterval: 0.05

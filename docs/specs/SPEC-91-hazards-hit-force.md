@@ -100,6 +100,7 @@ maxCarryYaw = 3.5f;       // rad/s
 ```
 
 ### 4.3 Zones (public contract, `Game.Simulation.Hazards`)
+`ZoneShape`, `ZoneEffectKind` and `ZoneEffectFlags` live in `Game.Data.Hazards` (HAZ-001), because the authoring definitions in `Game.Data` need them and Data may not reference Simulation.
 ```csharp
 public enum ZoneShape : byte { Box = 0, Circle = 1, Path = 2 }          // Path = capsule chain along a polyline
 public enum ZoneEffectKind : byte { Accelerate = 0, Drag = 1, Repel = 2, Gate = 3, Bounds = 4 }   // append only
