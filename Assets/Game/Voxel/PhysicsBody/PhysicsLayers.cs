@@ -36,6 +36,7 @@ namespace Game.Voxel.PhysicsBody
         public static CollisionFilter InteractionQuery     => Make(QueryBit, GridBit | CelestialBit | SensorBit);
         public static CollisionFilter SpawnClearanceQuery  => Make(QueryBit, GridBit | ChunkBodyBit | CelestialBit);
         public static CollisionFilter EditorPickQuery      => Make(QueryBit, GridBit | EditorPreviewBit);
+        public static CollisionFilter NavigationQuery      => Make(QueryBit, GridBit);   // RACE-017: what an AI pilot steers round
         public static CollisionFilter DebugAllQuery        => Make(QueryBit, AllBodyBits);
 
         // ---- Materials ----

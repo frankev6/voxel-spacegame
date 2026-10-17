@@ -315,9 +315,36 @@ namespace Game.Editor.Content
                     zones.Add(new TrackZone { Zone = wall, Path = span.ToArray(), PathRadius = radius, Emitters = true, EmitterA = emitters[k], EmitterB = emitters[k + 1] });
                 }
             }
+            // RACE-017: a boost strip follows its route as a chain of short boxes, each along the route there. One straight box laid
+            // on the chord of a bend pushed 10° off the line at its end: about all the side thrust a heavy racer has, into the wall.
             foreach (JObject b in (JArray)json["boost"])
-                zones.Add(new TrackZone { Zone = boost, Position = V(b["center"]), Yaw = (float)b["yaw"],
-                    HalfExtents = new Vector2((float)b["width"] / 2, (float)b["length"] / 2) });
+            {
+                Vector2 c = V(b["center"]); float yaw = (float)b["yaw"], length = (float)b["length"], width = (float)b["width"];
+                var axis = new Vector2(Mathf.Sin(yaw), Mathf.Cos(yaw));
+                TrackPath route = default; float bestRoute = float.MaxValue;
+                foreach (var r in routes)
+                    foreach (var q in r.Points) { float d = Vector2.Distance(q, c); if (d < bestRoute) { bestRoute = d; route = r; } }
+                var pts = route.Points;
+                var along = new float[pts.Length];
+                for (int i = 1; i < pts.Length; i++) along[i] = along[i - 1] + Vector2.Distance(pts[i - 1], pts[i]);
+                float Along(Vector2 q) { int best = 0; for (int i = 1; i < pts.Length; i++) if ((pts[i] - q).sqrMagnitude < (pts[best] - q).sqrMagnitude) best = i; return along[best]; }
+                Vector2 At(float d)
+                {
+                    for (int i = 1; i < pts.Length; i++) if (along[i] >= d) return Vector2.Lerp(pts[i - 1], pts[i], (d - along[i - 1]) / Mathf.Max(1e-4f, along[i] - along[i - 1]));
+                    return pts[pts.Length - 1];
+                }
+                float a0 = Along(c - axis * length * .5f), a1 = Along(c + axis * length * .5f);
+                if (a1 <= a0 + 1) { zones.Add(new TrackZone { Zone = boost, Position = c, Yaw = yaw, HalfExtents = new Vector2(width / 2, length / 2) }); continue; }   // across a closed route's seam
+                int n = Mathf.Max(1, Mathf.CeilToInt((a1 - a0) / 90));
+                float step = (a1 - a0) / n;
+                for (int k = 0; k < n; k++)
+                {
+                    float mid = a0 + (k + .5f) * step;
+                    Vector2 tangent = At(mid + 6) - At(mid - 6);
+                    zones.Add(new TrackZone { Zone = boost, Position = At(mid), Yaw = Mathf.Atan2(tangent.x, tangent.y),
+                        HalfExtents = new Vector2(width / 2, step / 2 + 1) });   // +1: no gap at the joints
+                }
+            }
             track.Zones = zones.ToArray();
 
             var slots = new List<TrackSlot>();

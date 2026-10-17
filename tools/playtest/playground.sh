@@ -1,5 +1,5 @@
 #!/bin/zsh
-# playground.sh  Enter Play and launch the isolated development playground.
+# playground.sh [seed] [ship]  Enter Play and launch the isolated development playground (flying <ship>, a blueprint id).
 . "$(dirname "$0")/_env.sh"
 python3 - "$PROJECT_ROOT" "$@" <<'PYTHON'
 import pathlib, re, subprocess, sys, time
@@ -21,18 +21,23 @@ def call(command, *args):
     except (subprocess.TimeoutExpired, RuntimeError, OSError) as error:
         if time.monotonic() >= deadline: expired()
         print('Editor unreachable (is a modal dialog open?):', str(error)[:300]); sys.exit(3)
-result = call('playground')
-match = re.match(r'^op (\d+):', result)
-if not match:
-    print(result); sys.exit(1)
-operation = match.group(1)
-while time.monotonic() < deadline:
-    result = call('op', '--id', operation)
-    if result.startswith('succeeded:'):
-        print(f'{result} ({time.monotonic()-started:.3f}s)')
-        print(call('snapshot', '--ui', 'false')); sys.exit(0)
-    if not result.startswith('running:'):
+def run(command, *args):
+    result = call(command, *args)
+    match = re.match(r'^op (\d+):', result)
+    if not match:
         print(result); sys.exit(1)
-    time.sleep(.5)
+    operation = match.group(1)
+    while time.monotonic() < deadline:
+        result = call('op', '--id', operation)
+        if result.startswith('succeeded:'): return result
+        if not result.startswith('running:'):
+            print(result); sys.exit(1)
+        time.sleep(.5)
+    expired()
+result = run('playground')
+# the playground ship (playground ship=<blueprint>): a second reset with the hull swapped
+if ship: result = run('dev', '--cmd', 'playground ship=' + ship)
+print(f'{result} ({time.monotonic()-started:.3f}s)')
+print(call('snapshot', '--ui', 'false')); sys.exit(0)
 expired()
 PYTHON

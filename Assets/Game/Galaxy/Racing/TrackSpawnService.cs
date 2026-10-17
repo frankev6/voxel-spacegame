@@ -66,6 +66,19 @@ namespace Game.Galaxy.Racing
             foreach (var row in rows) gates.Add(row);
             var slots = em.AddBuffer<RaceSlot>(race);
             foreach (var s in track.StartGrid) slots.Add(new RaceSlot { Position = s.Position, Yaw = s.Yaw });
+            // RACE-017: the racing line AI racers follow.
+            var legRows = RaceLines.Build(track);
+            em.AddBuffer<RaceLeg>(race); em.AddBuffer<RaceLegPoint>(race);
+            var legs = em.GetBuffer<RaceLeg>(race); var legPoints = em.GetBuffer<RaceLegPoint>(race);
+            foreach (var leg in legRows)
+            {
+                legs.Add(new RaceLeg { From = (byte)leg.From, To = (byte)leg.To, Start = legPoints.Length, Count = leg.Points.Count, Length = leg.Length });
+                foreach (var (p, half) in leg.Points)
+                {
+                    float2 push = RaceLines.Push(track, p);
+                    legPoints.Add(new RaceLegPoint { Position = p, HalfWidth = half, PushSpeed = push.x, PushAccel = push.y });
+                }
+            }
             // Mines are grids: the authority spawns them and guests receive them by replication (spawnMines only there).
             if (spawnMines && track.MineFields != null)
                 foreach (var m in track.MineFields)

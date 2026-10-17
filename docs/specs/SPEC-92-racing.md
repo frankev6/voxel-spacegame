@@ -410,6 +410,18 @@ Advisory (ADR-0042):
   - [ ] A guest sees the same spans drop (two-machine check).
 - **Tests:** in-game (`race info` span counts); a WallEmitterSystem unit test with a physics world is open.
 
+### RACE-017 — Racer AI
+- **Milestone:** M4
+- **Tier:** frontier — new AI and new track data
+- **Depends on:** `RACE-005`, `RACE-016`
+- **Do:** Owner (2026-10-17): "a racer ai that can go through the course and tries its best to avoid obstacles while getting to the finish line", for AI opponents and hands-off track testing. `RaceLines` turns the route centrelines into a directed graph and stores a racing-line leg per gate edge on the race entity (with each point's boost-strip push). `RacerPilotSystem` (authority) keeps each racer's line for the next four legs, choosing branches by the shortest way round among those it can corner at its current speed. It plans speed from corner radii and braking (none on a strip), and steers by scoring 15 headings against the route edge (with the field wall's reach for its hull), ships, hulks and mines (their trigger reach), and structure (sphere casts). Thrust is commanded net of the assist's carry. A racer with no progress for 3 s backs off, then resets at its last gate. AI racers fill free grid slots; `race autopilot` flies the player's ship; `race trace` records every racer for `tools/playtest/race-plot.py`.
+- **Files:** `Assets/Game/Galaxy/Racing/RaceLine.cs`, `RacerPilot.cs`, `RacerPilotSystem.cs`, `Assets/Game/App/DevRuntime/Playground/DevPlaygroundRace.cs`, `tools/playtest/race-plot.py`.
+- **Acceptance criteria:**
+  - [x] Every gate edge of Track 01 has a leg along the routes (`RacerLineTests`).
+  - [x] A racer at speed never takes a branch it cannot corner (the breach S on the boost strip).
+  - [ ] Three AI racers finish a 3-lap race without a reset, losing under 5% of their mass.
+- **Tests:** `RacerLineTests`; traced races (`race trace`, `race-plot.py`).
+
 ### RACE-009 — Race replication and co-op start
 - **Milestone:** M4
 - **Tier:** frontier — new reliable state and per-pilot holds under prediction
