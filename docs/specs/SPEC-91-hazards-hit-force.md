@@ -60,6 +60,12 @@ SPEC-92 builds race tracks from these pieces. Encounters and star-system locatio
     - Every one is a general world system, used in exploration first and on race tracks second.
     - "Places that change" is a design rule: a place lists its changes as mechanism rules (ADR-0119 decision 9).
 
+12. **Implementation choices (HAZ-002–008, 2026-10-17).** These differ from §4–§5 as written:
+    - **Zone pose.** A zone's live pose is its `LocalTransform`, which `OriginRebaseSystem` already shifts, and path points are relative to it. `WorldZone.Position` is the spawn pose.
+    - **Gate tracking.** `ZoneSystem` keeps each body's last centre of mass itself, not in a `ZoneTracking` component. A jump over 50 m in one tick (rebase, respawn, portal) skips that tick's crossings.
+    - **Momentum.** `impulsePerHit` stays as the fallback for weapons with no projectile mass or beam force. The blob's `ImpulsePerHit` is the applied value (`HitMomentum × KnockbackScale`), so there is no asset migration.
+    - **Mines.** `MineDefinition` carries the `ProximityFuseParams`, and the blueprint is the mine's body. A mine cooks off when it loses any cell. `MineAnchorSystem` follows rebases with the same 50 m jump rule.
+
 ## 4. Data model
 
 ### 4.1 Hit force (changes to existing types)

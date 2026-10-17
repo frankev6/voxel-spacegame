@@ -41,6 +41,7 @@ namespace Game.App.Session
         void Destroyed(ShipDestroyed value)
         {
             if (!bound || value.IsPlayer == 0 || !session.HasActiveSession || session.CurrentScene != GameScene.World || session.IsTransitioning || session.PlayerDefeated) return;
+            if (session.RaceRunning) return;   // SPEC-92 decision 8: a race respawns its pilots instead
             session.PlayerDefeated = true; generation++; elapsed = 0; waiting = true; showing = false;
         }
         void Reset(SessionReset _) { generation++; waiting = showing = false; elapsed = 0; }

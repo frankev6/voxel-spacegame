@@ -56,11 +56,13 @@ namespace Game.App.DevRuntime.Playground
             new Pad("campaign", "13  PRACTICE CAMPAIGN", -160, -540, "F starts the real opening campaign in the isolated playground profile: dialogue, combat, station docking, trade and travel. Console: playground reset returns here."),
             new Pad("salvage", "14  SALVAGE / RECOVER CARGO", 0, -540, DevPlaygroundSalvage.PadDetail),
             new Pad("xeno", "15  XENO / ALIENS", 160, -540, "F wakes two HUSK skimmers and a BROODMOTHER, grown ships of smooth obsidian tissue (ADR-0115).\nThey hunt you with acid. Shoot them to see wounds open into glowing flesh; kill the heart for a hulk. One wave per reset."),
+            new Pad("race", "18  RACE  ·  BATTLE GRAVEYARD", 320, 0, "F opens Track 01 south of the pads and puts every pilot on the start grid. F again starts the countdown.\nThree laps through a fleet graveyard: field walls, boost strips and shortcut branches. Console: race start | race end | race info | race laps=<n> | race respawn."),
             new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the NOCTURNE line: a WRAITH frigate (26 m) beside you and the three NOCTURNE cruisers (~52 m) broadside ahead: REQUIEM (lance), VESPER (nave), DIRGE (broadside).\nNo AI: fly around them, compare, shoot them. Fly one with playground ship=ship_nocturne_requiem (vesper, dirge). One set per reset.")
         };
         DevPlaygroundPower power;
         DevPlaygroundShip ship;
         DevPlaygroundSalvage salvage;
+        internal DevPlaygroundRace Race { get; private set; }
         readonly DevPlaygroundCampaign campaign = new();
         InputService input;
         UIRoot ui;
@@ -92,6 +94,7 @@ namespace Game.App.DevRuntime.Playground
             power = new DevPlaygroundPower(host.Context, ui);
             ship = new DevPlaygroundShip(host.Context);
             salvage = new DevPlaygroundSalvage(host, SetReport);
+            Race = new DevPlaygroundRace(host); Race.Bind(root);
             input.Controls.Flight.Interact.performed += OnInteract;
             launcher = new VisualElement { name = "dev-launcher", pickingMode = PickingMode.Ignore };
             // Bottom-right corner: the HUD radar owns the top-right (QA-001: these buttons covered it).
@@ -196,11 +199,13 @@ namespace Game.App.DevRuntime.Playground
             active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; nocturneRequested = false; pending = 0; nearest = -1;
             courseGate = -1;
             report = "Quiet sandbox ready. No hostile ships spawn until you activate COMBAT.";
-            salvage?.Reset();
+            salvage?.Reset(); Race?.End();
             DevPlaygroundStory.RefreshResetMarkers(ctx);
             BuildPresentation();
             GoTo("flight");
         }
+        internal bool Active => active;
+        internal double3 Origin => origin;
         internal DevCommandResult GoTo(string id)
         {
             if (!active || entering) return DevCommandResult.Fail("enter with playground first");
@@ -278,6 +283,8 @@ namespace Game.App.DevRuntime.Playground
         {
             if (!active || entering || input == null || input.CurrentContext != InputContext.Flight)
                 return DevCommandResult.Fail("Activate a playground pad in Flight context");
+            // On the race grid F starts the countdown (or the next race after the results).
+            if (Race != null && Race.IsOpen && (Race.InLobby || Race.IsFinished)) { var started = Race.Start(); SetReport(started.Text); return started; }
             int index = Nearest();
             if (index < 0) return DevCommandResult.Fail("Fly inside a beacon ring first");
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status == DevOperationStatus.Running)
@@ -357,6 +364,9 @@ namespace Game.App.DevRuntime.Playground
                 case "salvage":
                     result = salvage.Activate(host.Context, ui, origin + pad.Offset);
                     break;
+                case "race":
+                    result = Race.Open(origin);
+                    break;
                 case "campaign":
                     result = campaign.Activate(host.Context, ui);
                     break;
@@ -398,7 +408,7 @@ namespace Game.App.DevRuntime.Playground
             bool coop = host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coopSession) && coopSession.Role != Game.Core.Net.SimRoleKind.Solo;
             if (enterButton != null) enterButton.style.display = active || coop ? DisplayStyle.None : DisplayStyle.Flex;
             var ctx = host.Context;
-            power?.Tick(ctx); salvage?.Tick();
+            power?.Tick(ctx); salvage?.Tick(); Race?.Tick();
             if (autoEnter && !entering && input != null && PlayerScenarioProbes.IsReady(ctx)
                 && ctx.TryGetService<IGameFlow>(out var startup) && !startup.IsTransitioning)
             { autoEnter = false; Enter(); }
@@ -538,7 +548,7 @@ namespace Game.App.DevRuntime.Playground
         public void Dispose()
         {
             if (input != null) input.Controls.Flight.Interact.performed -= OnInteract;
-            power?.Dispose(); ship?.Dispose(); campaign.Dispose(); salvage?.Dispose();
+            power?.Dispose(); ship?.Dispose(); campaign.Dispose(); salvage?.Dispose(); Race?.Dispose();
             active = false; ClearPresentation();
             launcher?.RemoveFromHierarchy(); launcher = null;
         }

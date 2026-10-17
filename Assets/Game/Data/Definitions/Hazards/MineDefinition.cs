@@ -14,6 +14,9 @@ namespace Game.Data.Definitions
         [SerializeField, Min(0)] private float anchorDamping = 0.8f;      // 1/s
         [SerializeField, Min(0)] private float anchorMaxAccel = 6f;       // m/s²
         [SerializeField, Min(0)] private float radarRange = 300f;         // m; 0 = never on radar
+        // The fuse, on the mine definition so spawning needs no block decode (HAZ-008; the blueprint is the mine's body).
+        [SerializeField] private Game.Data.Blocks.ProximityFuseParams fuse = new Game.Data.Blocks.ProximityFuseParams
+        { ArmSeconds = 1.5f, TriggerRadius = 16, FuseSeconds = .6f, BlastRadius = 22, BlastDamage = 900, BlastType = Game.Data.Combat.DamageType.Explosive, MinTriggerMass = 2000 };
 
         public ShipBlueprintDefinition Blueprint => blueprint;
         public bool Anchored => anchored;
@@ -21,6 +24,7 @@ namespace Game.Data.Definitions
         public float AnchorDamping => anchorDamping;
         public float AnchorMaxAccel => anchorMaxAccel;
         public float RadarRange => radarRange;
+        public Game.Data.Blocks.ProximityFuseParams Fuse => fuse;
 
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {

@@ -82,6 +82,13 @@ namespace Game.App.Session
             // GameplayPostPhysicsGroup
             ["SpatialHashBuildSystem"] = SystemAuthority.Both,
             ["DamageStreamsSystem"] = SystemAuthority.Both,
+            ["RecoilSystem"] = SystemAuthority.Both,                     // SPEC-91: shooters feel their own recoil at once
+            ["ZoneSystem"] = SystemAuthority.Both,
+            ["WallEmitterSystem"] = SystemAuthority.Both,
+            ["SpinLimitSystem"] = SystemAuthority.Both,                 // RACE-016: every machine flies its own ships              // RACE-016: spatial, so every machine drops the same spans
+            ["MineSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-91: arm, trigger and detonate; mines replicate as grids
+            ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
+            ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests                       // SPEC-91: pushes everywhere; wall damage and gate contacts used on the authority
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
@@ -135,6 +142,8 @@ namespace Game.App.Session
             ["AbilitySystem"] = "slot resync, power grants and ability presses; AbilityState with activation counts",
             ["SplitGraceContactSystem"] = "which split pieces may still touch their parent; poses in snapshots",
             ["ImpactEventSystem"] = "ram damage from contacts; its cells in GridDelta",
+            ["RaceSystem"] = "race phase, laps, gates, places and respawns; RaceState",
+            ["MineSystem"] = "when a mine arms, triggers and detonates; the explosion and its despawn",
             ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
             ["IntegritySystem"] = "which islands lost their connection; SplitSystem's plans",
             ["SplitSystem"] = "how a grid splits into ships, hulks and chunks; GridSpawn and ChunkSpawn",

@@ -21,6 +21,22 @@ namespace Game.Simulation.Flight
             strafe = baseSpeed * c.StrafeSpeedFraction;
         }
         public static float YawRateCap(in FlightConfig c, float turnRateMultiplier) => math.radians(c.MaxYawRateDeg) * turnRateMultiplier;
+        /// SPEC-91 §5.1 step 4.2: each carry axis keeps the sign of the measured velocity and never exceeds it, then the max clamp.
+        public static float2 ClampCarry(float2 carry, float2 measured, float max)
+            => new float2(ClampCarry(carry.x, measured.x, max), ClampCarry(carry.y, measured.y, max));
+        public static float ClampCarry(float carry, float measured, float max)
+        {
+            if (!math.isfinite(carry) || carry == 0 || math.sign(carry) != math.sign(measured)) return 0;
+            return math.sign(carry) * math.min(math.min(math.abs(carry), math.abs(measured)), max);
+        }
+        /// SPEC-91 §5.1 step 4.4: linear carry shrinks as a vector, yaw carry toward 0.
+        public static void DecayCarry(in FlightConfig c, bool brake, ref float2 carry, ref float carryYaw)
+        {
+            float d = (brake ? c.CarryBrakeDecel : c.CarryDecel) * Game.Core.SimTime.FixedTimestep, length = math.length(carry);
+            carry = length > d ? carry * ((length - d) / length) : float2.zero;
+            float y = c.CarryYawDecel * Game.Core.SimTime.FixedTimestep;
+            carryYaw = math.abs(carryYaw) > y ? carryYaw - math.sign(carryYaw) * y : 0;
+        }
         /// World velocity → (strafe, forward) in the ship's frame.
         public static float2 ToLocalPlanar(float3 worldVelocity, quaternion rotation)
         {

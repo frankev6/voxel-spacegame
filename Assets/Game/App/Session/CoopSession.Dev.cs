@@ -37,6 +37,7 @@ namespace Game.App.Session
                     var result = host.Commands.Execute(line, host.Context);
                     reply = result.Kind + ": " + result.Text;
                 }
+                if (line.StartsWith("race sync", StringComparison.Ordinal)) return;   // the race's state stream needs no answers
                 devWriter.Clear(); devWriter.U32(id); devWriter.Str(reply.Length > 8000 ? reply.Substring(0, 8000) : reply);
                 net.Transport.SendReliable(peer, NetMessage.DevResult, devWriter);
             });
@@ -63,6 +64,13 @@ namespace Game.App.Session
                 return true;
             }
             return false;
+        }
+
+        /// <summary>Host: runs <paramref name="line"/> on every guest in the world (the playground race shares its state this way).</summary>
+        public void SendAllGuests(string line)
+        {
+            if (net == null || net.Role != SimRoleKind.Host) return;
+            foreach (var peer in net.Transport.Peers) if (peer.Phase == NetPeerPhase.InWorld) SendGuestCommand(peer.Slot, line, out _);
         }
 
         partial void TickDev()

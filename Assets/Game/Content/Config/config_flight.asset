@@ -33,3 +33,8 @@ MonoBehaviour:
   planeCorrection: 0.2
   intensityRise: 0.35
   intensityFall: 0.15
+  carryDecel: 8
+  carryBrakeDecel: 30
+  carryYawDecel: 2.1
+  maxCarry: 120
+  maxCarryYaw: 3.5

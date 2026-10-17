@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_track_pylon
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_track_pylon
+  formerIds: []
+  displayName: Gate Pylon
+  cellSize: 1
+  payloadVersion: 1
+  payload: 564f585301000100ad543b4ec340107de3b5030a844f430811ca05b842c4515040d000428a3800a2a0e1482922a584c2520a1a8a4814b4485cc0ccacbdce7eec18505c8c3df366e6edaee72df0709af143fbe7377717d767f7e311dbabf1e8f672030081087b8484b045e81076d8531cc37b8fa020d1d2be5210fa2f00c51498861ccbba186807f6e5cf409b3749b2a194c9a2885985c3fb10be3294afa2c3af580ea813b3c1d4ce28b1810fc4729e03684e20ebd6533adc5c27b4ba3359fd959537616068f2ac90ae307ef147b1e8eb7a8ac4e31f1d29c79d930713b6739b803ba5a4023811bb0bbd35de59cfcb8857b973320d0a1b2c68c6af93c4af9bc97e22e1fb3a4eb8069480df9f64392dc2664b0e454e40e7667d1b76eacadcf2c382df844d499fe55c564cd99a80b68840c86448aa2757574e6a077b2db0fe9dc17c9b310be65b15f3fd3b3928b79b54cb70d56be1f9c0dc4943d3d3197e6a1083235a8bd9d751b328bb52962fb75e0b69858c566196c4167e5b37fbf11085d4aa549147430535696ce59de05f113d6847965a25b78fcae8b71d7d3a82761a54d700d789b9cfcd7f00y
+  cellCount: 2029
+  boundsMin: {x: -4, y: -20, z: -4}
+  boundsMax: {x: 4, y: 28, z: 4}

@@ -73,7 +73,8 @@ namespace Game.Simulation.Weapons
             float3 min = (float3)grid.CellMin * grid.CellSize, max = ((float3)grid.CellMax + 1) * grid.CellSize;
             float3 offset = transform.TransformPoint((min + max) * .5f) - explosion.WorldPos;
             float weight = math.saturate(1 - math.length(offset) / explosion.Radius);
-            float3 impulse = math.normalizesafe(offset) * (explosion.Amount * Impulse * weight * weight);
+            float push = explosion.Knockback > 0 ? explosion.Knockback : explosion.Amount * Impulse;   // a mine's blast throws harder than its damage implies
+            float3 impulse = math.normalizesafe(offset) * (push * weight * weight);
             if (Shields.HasComponent(root))
             {
                 var shield = Shields[root];

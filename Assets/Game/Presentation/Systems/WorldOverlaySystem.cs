@@ -102,6 +102,7 @@ namespace Game.Presentation.Systems
                 {
                     var grid = em.GetComponentData<VoxelGrid>(entity);
                     if (grid.Kind == GridKind.Asteroid) continue;
+                    if (grid.Kind == GridKind.Station && em.HasComponent<GridSource>(entity) && names.IsTrackPart(em.GetComponentData<GridSource>(entity).Blueprint)) continue;
                     var ltw = em.GetComponentData<LocalToWorld>(entity).Value;
                     float3 min = (float3)grid.CellMin * grid.CellSize, max = ((float3)grid.CellMax + 1) * grid.CellSize;
                     float distance = math.distance(origin, math.transform(ltw, (min + max) * .5f));

@@ -23,6 +23,8 @@ namespace Game.Presentation.Presenters
     public interface IHudNames
     {
         string TargetName(ContentHash blueprint, byte faction);
+        /// <summary>RACE-016: race-track parts (emitter posts, pylons, gantries, debris) get no world tag.</summary>
+        bool IsTrackPart(ContentHash blueprint);
         string SystemName(uint system);
         AbilityDefinition Ability(ContentHash ability);
         HudInteractionText Interaction(in HudSnapshot snapshot);

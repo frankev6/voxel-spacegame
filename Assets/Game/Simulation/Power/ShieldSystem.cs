@@ -38,7 +38,7 @@ namespace Game.Simulation.Power
             update.Consumers = state.GetBufferTypeHandle<PowerConsumer>(true); update.Instances = state.GetBufferLookup<BlockInstance>(true);
             update.Controls = state.GetComponentLookup<ShieldControl>(true); update.Multipliers = state.GetComponentLookup<ShipStatMultipliers>(true);
             update.Transforms = state.GetComponentLookup<LocalTransform>(true); update.Velocities = state.GetComponentLookup<PhysicsVelocity>(true);
-            update.Hulks = state.GetComponentLookup<Hulk>(true); update.Spawning = state.GetComponentLookup<GridSpawning>(true);
+            update.Hulks = state.GetComponentLookup<Hulk>(true); update.Spawning = state.GetComponentLookup<GridSpawning>(true); update.Pending = state.GetComponentLookup<Game.Voxel.Damage.PendingImpulse>();
             update.Reader = GridCellReader.Create(ref state);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<PowerTuning>();
             state.RequireForUpdate<BlockModulesRef>(); state.RequireForUpdate<DamageConfig>();
@@ -58,7 +58,7 @@ namespace Game.Simulation.Power
             update.Entities.Update(ref state); update.Shields.Update(ref state); update.Ripples.Update(ref state);
             update.Stats.Update(ref state); update.Consumers.Update(ref state); update.Instances.Update(ref state);
             update.Controls.Update(ref state); update.Multipliers.Update(ref state); update.Transforms.Update(ref state);
-            update.Velocities.Update(ref state); update.Hulks.Update(ref state); update.Spawning.Update(ref state); update.Reader.Update(ref state);
+            update.Velocities.Update(ref state); update.Hulks.Update(ref state); update.Pending.Update(ref state); update.Spawning.Update(ref state); update.Reader.Update(ref state);
             update.Tick = SystemAPI.GetSingleton<SimClock>().Tick; update.Tuning = SystemAPI.GetSingleton<PowerTuning>();
             update.Modules = SystemAPI.GetSingleton<BlockModulesRef>().Value; update.DamageConfig = SystemAPI.GetSingleton<DamageConfig>();
             owned.Hits.BeginTick(update.Tick);

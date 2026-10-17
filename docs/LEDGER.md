@@ -529,13 +529,13 @@
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | a59b2b2b | decisions table and test, Game.Net IL writer rules, net parity and coop-parity.sh; spike worktree only |
 | NET-019 | Pre-merge fixes | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-018 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 04518d70 | braking bound, guest energy, guest playground beacons, shipped boost, RequireRenderer in the Editor, merchant header; merged to main |
 | HAZ-001 | Public contract types | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 1994eed5 | Contract types; zone enums in Game.Data.Hazards (definitions need them); FlightConfig carry off until HAZ-002; 6 weapon assets re-serialized with the new fields |
-| HAZ-002 | Carried velocity in flight assist | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-001 | yes | todo |  |  |  |  |
-| HAZ-003 | Momentum hit model | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | yes | todo |  |  |  |  |
-| HAZ-004 | Recoil | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-003 | no | todo |  |  |  |  |
-| HAZ-005 | Hit-force tuning and impact feedback | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002, HAZ-004 | no | todo |  |  |  |  |
-| HAZ-006 | Zones: shapes, query and push effects | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-002 | no | todo |  |  |  |  |
-| HAZ-007 | Field walls | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006 | no | todo |  |  |  |  |
-| HAZ-008 | Mines | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-003 | no | todo |  |  |  |  |
+| HAZ-002 | Carried velocity in flight assist | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-001 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | cf25c6f2 | ExternalPush summed per root in both impulse jobs; carry folded, clamped, decayed in PropulsionJob; config_flight 8/30/2.1; CarryTests 5 |
+| HAZ-003 | Momentum hit model | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 7bdda6b4 | Momentum = projectileMass × speed (beams: beamForce × pulse); impulsePerHit kept as the fallback, so no asset migration; table test updated |
+| HAZ-004 | Recoil | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-003 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 7bdda6b4 | RecoilSystem: one request per pellet at the muzzle, Producer Recoil; beams none |
+| HAZ-005 | Hit-force tuning and impact feedback | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002, HAZ-004 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 7bdda6b4 | Values set from the §8 targets (plasma 22.5 kg, railgun 50 kg, beams 10–40 kN, recoil 0.17, blast 60/damage); Δv table not yet measured in play |
+| HAZ-006 | Zones: shapes, query and push effects | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-002 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 5fd20ccc | ZoneSystem (Burst, one job): boost, drag, gates, bounds; zone pose is LocalTransform (rebase-safe); jump > 50 m skips crossings; ZoneTests |
+| HAZ-007 | Field walls | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 5fd20ccc | Repel walls: two-sided, side from last tick, pushes at the hull end (glancing hits turn); ram damage on the authority |
+| HAZ-008 | Mines | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-003 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 537c809b | Proximity mines: device grids, MineSystem arm/trigger/cook-off/detonate, anchor spring, seeded fields; fuse on MineDefinition; blueprint options not sketched for the owner |
 | HAZ-009 | Hazard playground pad and dev commands | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-005, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
 | HAZ-010 | Hazards and hit force in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-009, NET-018 | no | todo |  |  |  |  |
 | HAZ-011 | Hazard scenarios and determinism gate | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-009 | no | todo |  |  |  |  |
@@ -550,20 +550,21 @@
 | HAZ-020 | Gauntlet turrets | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012 | no | todo |  |  |  |  |
 | HAZ-021 | Lane-gate portals | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-012 | no | todo |  |  |  |  |
 | HAZ-022 | The mechanism set in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-010, HAZ-014, HAZ-016, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
-| RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | yes | todo |  |  |  |  |
+| RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | a1d152d8 | TrackDefinition, gates, pieces, zones, mines, slots, validator; RaceState, RacerProgress, RaceGate; RaceHold in Simulation.Commands |
 | RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 9767f965 | Owner chose A as a fleet of wrecks: Track 01 Battle Graveyard (track-01-options.md, track_01_battle_graveyard.json); grapple cut |
 | RACE-003 | Racer ship silhouettes for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 9767f965 | Owner: "lets create all 6"; built in RACE-008 (Darts) and RACE-013 (Rams) |
-| RACE-004 | Track builder, barrier blueprints and spawner | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-001, RACE-002, RACE-012, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
-| RACE-005 | Race decider | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, HAZ-006 | no | todo |  |  |  |  |
-| RACE-006 | Respawn | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-005 | no | todo |  |  |  |  |
-| RACE-007 | Race HUD, gate visuals and results | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-005 | no | todo |  |  |  |  |
+| RACE-004 | Track builder, barrier blueprints and spawner | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-001, RACE-002, RACE-012, HAZ-007, HAZ-008 | no | done | claude (claude-opus-5-5) | 2026-10-17 | a1d152d8 | export_track.py → TrackBuilder → track_01; TrackSpawnService (zones, gates, wrecks, mines); field walls along every corridor edge, open at junctions |
+| RACE-005 | Race decider | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, HAZ-006 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 71b1fabb | RaceSystem + RaceRules: gate graph from all routes, laps, places, finish window, respawn requests; race dev commands; RaceRulesTests 6 |
+| RACE-006 | Respawn | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-005 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 793290d8 | Fresh-ship respawn at the last gate; hulk keeps its place and loses the pilot tags; defeat suppressed during races; guests through CoopSession.RespawnGuestShip |
+| RACE-007 | Race HUD, gate visuals and results | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-005 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | a1d152d8 | First playable HUD (countdown, lap, place, times, wrong way, results) and line visuals for walls, gates, boosts, mines; UI Toolkit screen and audit still to do |
 | RACE-008 | The Dart line: Needle, Kite and Gimbal | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-003, HAZ-001 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 11ebc831 | Needle 33 t, Kite 55 t, Gimbal 24 t; spawn, validate in the ship editor, fly (95/59/115 m/s after 4 s of thrust); racers_in_game_first_build.png |
-| RACE-009 | Race replication and co-op start | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-006, HAZ-010 | no | todo |  |  |  |  |
-| RACE-010 | Windows dev build and remote playtest guide | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
+| RACE-009 | Race replication and co-op start | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-006, HAZ-010 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 7bdda6b4 | Host sends race view/sync to guests over the dev channel; guests build zones and mirror state; hold and respawn work; verified with a local guest |
+| RACE-010 | Windows dev build and remote playtest guide | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 |  | Guide docs/RACING-WITH-FRIENDS.md and tools/build-windows.sh written; the Windows build needs the owner to install Windows Build Support (Mono) |
 | RACE-011 | Two-player race playtest with Daniel | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-007, RACE-008, RACE-009, RACE-010, RACE-013, RACE-014, RACE-015 | no | todo |  |  |  |  |
-| RACE-012 | Graveyard wrecks | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-002, HAZ-001 | no | todo |  |  |  |  |
-| RACE-013 | The Ram line: Battering Ram and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 11ebc831 | Salvage Tug removed (owner). Torch-engined: Battering Ram 140 t, 61 m/s after 4 s; Hammerhead 86 t, 83 m/s. Impact driver next |
+| RACE-012 | Graveyard wrecks | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-002, HAZ-001 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 793290d8 | Ten wrecks at 2 m cells (623k cells, one piece each), carrier flight-deck trench over a keel; wreck plate 4000 HP |
+| RACE-013 | The Ram line: Battering Ram and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 7bdda6b4 | Battering Ram and Hammerhead on torches with the impact driver (400 kg slug, 0.5/s); knockback not yet measured in play |
 | RACE-014 | Racer abilities: Slip and Shove | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-013, HAZ-002 | no | todo |  |  |  |  |
+| RACE-016 | Track look and destructible track structures | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, RACE-012, HAZ-007 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | cabc7e8d | Owner: "polished space racetrack"; "the material things that can be collided with should be voxel"; "fences should be destructible"; "pixel perfect pixelated" holograms. TrackDressing + Game/Race/Holo (dot-matrix, 1 m pixels); 649 voxel emitter posts, 30 pylons, gantry, 180 debris; field walls split into spans, WallEmitterSystem drops a span when its post head is shot away; hangar route uses the carrier hull as its barrier. Flight pass (2026-10-17): hull-vs-post contacts spun racers to 22 rad/s → SpinLimitSystem caps yaw at 1.6× the turn cap; field reach 0.7 R keeps hulls off posts; posts 60 HP/cell and a span drops at 5% cell loss; emitter probe follows its own post (wreck hulls ignored). Mines: anchors set where the mine appears (were ~2 km off after a rebase and dragged mines into posts), knocked loose above 5 m/s, 700 HP casing, 2500 blast with a 900 kN·s push through ExplosionRequest.Knockback, trigger 300 kg |
 | RACE-015 | Track 01 set pieces | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-004, HAZ-013, HAZ-014, HAZ-016, HAZ-017, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
@@ -1281,6 +1282,32 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-17 — A playable race with friends: carry, zones, Track 01, race decider, respawn, co-op, hit force, mines (lead, claude-opus-5-5)
+- **Owner:** "ok whats left? where is my racetrack to play?" then "like start building the mechanics, track, and everything necessary in order to have a playbable race with my friends". The order was changed from the dependency order to playable-first: carry, zones and walls, the track, the decider, then co-op, combat and mines.
+- **HAZ-002 carry.** Without it the flight assist cancelled every push within a tick. With it, a 5 m/s shove still carries 2.5 m/s after 0.3 s, and a boost strip's surge bleeds off over seconds.
+- **HAZ-006/007 zones and walls.** Boost strips, slow fields, gates (segment crossings, so 300 m/s is caught), bounds and two-sided field walls that never tunnel at 250 m/s.
+- **Track 01 is playable** from pad 18 RACE:
+  - `export_track.py` writes dense centrelines, walls (open at junctions), gates and the start grid. The gate graph comes from all 8 routes, and gates 0 and 15 are required.
+  - `TrackBuilder` writes `track_01`. `TrackSpawnService` spawns it 3.3 km south of the pads.
+  - **Wrecks:** ten 2 m-cell hulls, 623k cells in total. The carrier's flight deck is an open trench over a keel.
+  - **Mines:** five proximity fields (32 mines).
+  - **Performance:** about 115–125 fps in the editor playground.
+- **Race decider (RACE-005).** Countdown and hold, laps through the graph, cuts and skips rejected, places, the 60 s finish window. Verified in game: two laps (outer, then the Break and keel), a skipped gate not counted, then the results board.
+- **Respawn (RACE-006).** A fresh ship at the last gate 3 s after death, and the hulk stays as an obstacle. Defeat is suppressed during a race.
+- **Co-op (RACE-009).** Verified with a local guest window. The guest sees the walls and its own HUD (LAP 1/3 · P2/2), the host counts the guest's gate 0 crossing, and the countdown holds both.
+  - The race view and sync go over the dev command channel (development builds only).
+  - Resting bodies now refresh about every 20 snapshots. The 32 mines had pushed the host to 827 kbps.
+- **Hit force (HAZ-003/004/005).** Momentum from projectile mass (beams: force × pulse), the knockback scale, recoil at the muzzle (scale 0.17), and blasts at 60 per damage. The Rams carry the impact driver (RACE-013).
+- **Mines (HAZ-008).** Device grids that arm in 1.5 s, trigger within 16 m of a ship, cook off when shot, and blow 450 damage over 18 m. They're anchored by a spring and scattered by seed.
+- **Not done:**
+  - the Windows build (the owner installs Windows Build Support (Mono); then `tools/build-windows.sh`);
+  - the RACE-015 set pieces (drifting bow, doors, reactor, wash, turrets, portal, canisters);
+  - the Slip and Shove abilities (RACE-014);
+  - mine-state blink on guests;
+  - the measured Δv table (HAZ-005);
+  - the full UI Toolkit race screen (RACE-007).
+- **Tests:** zones 9, carry 5, race rules 6, weapons 62, net 21, flight 54; the full suite ran before the merge (see the next entry).
 
 ### 2026-10-17 — Engine line (ADR-0120), shaped racer hulls, Salvage Tug removed (lead, claude-opus-5-5)
 - **Owner:** "remove the salvage tug ship, it has no place in this. the real answer is you need to also make new thruster engines, maybe some go from 0-100% faster but have less max thrust so theres a give and take, but also it makes sense for thrusters meant to rotate rather than be the main thrust, and maybe larger engines too, for the bigger ships. also in your building of the ships you missed to use a lot of the hull block options that could honestly make some of these ships look less blocky or more sleek where it matters."

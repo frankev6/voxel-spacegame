@@ -13,6 +13,7 @@ namespace Game.Simulation.Commands
     [UpdateInGroup(typeof(ShipCommandGroup), OrderFirst = true)]
     public partial struct PlayerCommandApplySystem : ISystem
     {
+        ComponentLookup<RaceHold> holds;
         static readonly ProfilerMarker ApplyMarker = new ProfilerMarker(ProfilerCategory.Scripts, "PlayerCommandApplySystem.Apply");
         EntityQuery playerQuery, anyPlayerQuery;
 
@@ -23,6 +24,7 @@ namespace Game.Simulation.Commands
             state.RequireForUpdate<PlayerCommand>();
             var edgeEntity = state.EntityManager.CreateSingleton(default(PlayerEdgeConsumed));
             state.EntityManager.AddComponentData(edgeEntity, new PlayerControlLock { Flags = PlayerControlLockFlags.None });
+            holds = state.GetComponentLookup<RaceHold>(true);
             playerQuery = SystemAPI.QueryBuilder().WithAll<PlayerShip>().WithAllRW<ShipCommand>().WithNone<Hulk>().Build();
             anyPlayerQuery = SystemAPI.QueryBuilder().WithAll<PlayerShip>().Build();
         }
@@ -60,7 +62,8 @@ namespace Game.Simulation.Commands
                     consumed.Cruise = cruise;
                 }
             }
-            state.Dependency = new PlayerCommandWriteJob { Command = command }.Schedule(playerQuery, state.Dependency);
+            holds.Update(ref state);
+            state.Dependency = new PlayerCommandWriteJob { Command = command, Holds = holds }.Schedule(playerQuery, state.Dependency);
         }
     }
 }

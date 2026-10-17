@@ -457,7 +457,8 @@ def modules(ship, ship_id, field):
         X, Y = lb(rear)
         col = field.column((X, Y))
         z = int(math.ceil(col[4] if col and col[4] is not None else col[1] if col else 1))
-        mods.append(["gatling", [int(math.floor(X)) - 1, int(math.floor(Y)), z], I3, [2, 3, 2], [2, 3, 2]])
+        kind = "driver" if ship_id in ("ship_racer_battering_ram", "ship_racer_hammerhead") else "gatling"   # Rams shove (RACE-013)
+        mods.append([kind, [int(math.floor(X)) - 1, int(math.floor(Y)), z], I3, [2, 3, 2], [2, 3, 2]])
     return mods
 
 
