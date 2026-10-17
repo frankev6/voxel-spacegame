@@ -50,10 +50,10 @@ namespace Game.Tests.EditMode.Simulation.Hazards
         }
 
         [Test]
-        public void HazardSpawn_MineFieldIsAContractOnly()
+        public void HazardSpawn_MineField_RejectsAnIncompleteDefinition()
         {
-            // Zones are implemented (HAZ-006); mine fields follow in HAZ-008.
-            Assert.Throws<NotImplementedException>(() => HazardSpawn.MineField(default, null, default, 0, 0, 1, null, default));
+            // Mine fields are implemented (HAZ-008); a definition without a mine blueprint is refused before anything spawns.
+            Assert.Throws<ArgumentException>(() => HazardSpawn.MineField(default, null, default, 0, 0, 1, null, default));
         }
 
         [Test]

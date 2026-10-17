@@ -249,6 +249,7 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I011 Assets/Game/Content/Ships/ship_bastion.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_butterfly.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_crescent.asset: Kept hand-edited asset.
+[W] PWR-W002 Assets/Game/Content/Ships/ship_device_mine_proximity.asset payload: ship_device_mine_proximity: recharge infinite s > 10 s (rule R2)
 [I] MIG-I011 Assets/Game/Content/Ships/ship_fighter.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_freighter.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_frigate.asset: Kept hand-edited asset.
@@ -486,12 +487,12 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 106 warnings, 223 infos
+0 errors, 107 warnings, 223 infos
 ```
 
 ## Summary
 
-0 errors, 106 warnings, 223 infos
+0 errors, 107 warnings, 223 infos
 
 Created: 0
 Updated: 0

@@ -65,6 +65,12 @@ Weapons stay live, so players shoot each other off the racing line with SPEC-91'
     - `export_racers.py` shapes each hull as a height field. Domes rise from the outline and are chamfered underneath. Plates, cabins and barrels stand proud with chamfered edges.
     - Outline edges within 8.5° of a kit line (grid, 45° or 1:2) are snapped onto that line through cell corners, so the builder seats wedges and long slopes along the silhouette. Slopes run along the grid only; diagonal tops step. The Gimbal's ring is an octagon.
 
+14. **First playable (2026-10-17).** These differ from §4–§5 as written:
+    - **Placement.** The track spawns 3.3 km south of the pads, so its north straight is about 2.2 km away.
+    - **Co-op.** The race reaches guests as `race view` and `race sync` over the dev command channel, which works in development builds only. A replicated `RaceState` message replaces it later.
+    - **Respawn.** A respawned ship has no shield, because the playground fits shields only at session start.
+    - **Guide.** `docs/RACING-WITH-FRIENDS.md` is the playtest guide.
+
 ## 4. Data model
 
 ### 4.1 Track content (`Game.Data.Definitions.Racing`, public contract)
