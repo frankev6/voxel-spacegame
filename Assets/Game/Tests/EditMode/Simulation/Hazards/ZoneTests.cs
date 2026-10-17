@@ -167,6 +167,19 @@ namespace Game.Tests.EditMode.Simulation.Hazards
         }
 
         [Test]
+        public void FieldWall_FastHit_DoesNotSpin()
+        {
+            // A long, light hull (low yaw inertia) at 150 m/s into the wall at 60 degrees: it turns, but by no more than one capped kick.
+            HazardSpawn.PathZone(EM, Def(ZoneShape.Path, default, 3, Fx(ZoneEffectKind.Repel, 400, 8, 2)), new[] { new float2(0, -500), new float2(0, 500) }, 1, 11);
+            var body = Body(new float2(30, 0), new float2(-130, 75));
+            var mass = EM.GetComponentData<PhysicsMass>(body); mass.InverseInertia = new float3(0, 1e-3f, 0); EM.SetComponentData(body, mass);
+            float most = 0;
+            for (int i = 0; i < 90; i++) { Step(); most = math.max(most, math.abs(EM.GetComponentData<PhysicsVelocity>(body).Angular.y)); }
+            Assert.Greater(most, 0f, "the hit turned it");
+            Assert.LessOrEqual(most, ZoneSystem.MaxWallSpin * 1.5f, "scraping the wall does not keep adding spin");
+        }
+
+        [Test]
         public void FieldWall_HeadOn_NoTunnelling()
         {
             HazardSpawn.PathZone(EM, Def(ZoneShape.Path, default, 3, Fx(ZoneEffectKind.Repel, 400, 8, 2)), new[] { new float2(0, -500), new float2(0, 500) }, 1, 11);

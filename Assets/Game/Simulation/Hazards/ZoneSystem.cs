@@ -28,6 +28,8 @@ namespace Game.Simulation.Hazards
         internal const float JumpMetres = 50f;
         /// <summary>A wall pushes a body by this fraction of its bounding radius: a sphere round a long hull would hold it metres off.</summary>
         internal const float WallRadiusFraction = .4f;
+        /// <summary>The most yaw rate one wall hit adds (rad/s): a glancing hit turns the ship along the wall, never into a spin.</summary>
+        internal const float MaxWallSpin = .6f;
         Entity contactsEntity;
         NativeHashMap<Entity, float2> lastCom;
         EntityQuery zones, bodies;
@@ -94,6 +96,8 @@ namespace Game.Simulation.Hazards
                     Entity = e, Com = pose.TransformPoint(mass.CenterOfMass), Velocity = SystemAPI.GetComponent<PhysicsVelocity>(e).Linear,
                     Mass = 1f / mass.InverseMass, Pose = pose, Radius = 1, Flags = ZoneEffectFlags.AffectsDebris
                 };
+                float3 yaw = math.rotate(math.inverse(math.mul(pose.Rotation, mass.InertiaOrientation)), math.up());
+                row.InvYawInertia = math.dot(yaw * yaw, mass.InverseInertia);
                 if (SystemAPI.HasComponent<VoxelGrid>(e))
                 {
                     var grid = SystemAPI.GetComponent<VoxelGrid>(e);
@@ -121,7 +125,7 @@ namespace Game.Simulation.Hazards
         internal struct ZoneRow { public WorldZone Zone; public float2 Position; public int EffectStart, EffectCount, PointStart, PointCount; }
         internal struct BodyRow
         {
-            public Entity Entity; public float3 Com, Velocity; public float Mass, Radius, CellSize; public LocalTransform Pose;
+            public Entity Entity; public float3 Com, Velocity; public float Mass, Radius, CellSize, InvYawInertia; public LocalTransform Pose;
             public ZoneEffectFlags Flags; public bool Grid;
         }
         struct ZoneOrder : System.Collections.Generic.IComparer<ZoneRow>
@@ -198,6 +202,9 @@ namespace Game.Simulation.Hazards
                 });
             }
 
+            /// Yaw torque of an impulse j at lever r in the xz plane: (r × j).y.
+            static float Cross(float2 r, float2 j) => r.y * j.x - r.x * j.y;
+
             bool Inside(in ZoneRow row, float2 com, float2 forward, float2 right, float radius)
             {
                 float2 d = com - row.Position;
@@ -261,10 +268,15 @@ namespace Game.Simulation.Hazards
                 if (p <= 0) return;
                 float u = math.max(0, -math.dot(v, n));
                 float dv = effect.A * p * Dt + effect.B * u * Dt + u;
-                // A hull meets a wall at its nose or tail first: the push lands at the end nearer the wall, so a glancing hit turns it.
+                // A hull meets a wall at its nose or tail first, so a glancing hit turns it. Only the impact (u) turns it, and by at most
+                // MaxWallSpin: pushed at the hull end in full, a long hull spun at tens of rad/s, and the scrape spring kept twisting it.
                 float2 heading = math.normalizesafe(math.rotate(body.Pose.Rotation, new float3(0, 0, 1)).xz, new float2(0, 1));
                 float2 contact = com + heading * (math.dot(heading, -n) >= 0 ? 1 : -1) * body.Radius * .7f - n * body.Radius * WallRadiusFraction;
-                Push(body, n * (dv * body.Mass), false, sequence, contact);
+                float2 impulse = n * (dv * body.Mass), lever = contact - com;
+                float full = Cross(lever, impulse), turn = Cross(lever, n * (u * body.Mass));
+                float most = body.InvYawInertia > 1e-12f ? MaxWallSpin / body.InvYawInertia : 0;
+                turn = math.clamp(turn, -most, most);
+                Push(body, impulse, false, sequence, com + lever * (math.abs(full) > 1e-6f ? turn / full : 0));
                 if (Authority && body.Grid && u >= 3 && effect.C > 0)
                 {
                     float3 world = new float3(contact.x, body.Com.y, contact.y);
