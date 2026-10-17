@@ -243,8 +243,8 @@
 | DMG-017 | Harness commands | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M2 | standard | DMG-014, DEV-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | dcfbf493 | Four damage commands; two required tests and live queued hit/core-to-hulk/hash/stats verified |
 | FLT-012 | Power and stat integration (M2) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | 8dba629 | Power demand, powered actuator gating, stat multipliers and propulsion caches; 8 required tests; full 1003 EM / 145 PM green |
 | FLT-013 | Owner flight-control correction before the firing range | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M2 | frontier | FLT-007, FLT-009, SPEC-03 | yes | done | astra (gpt-6) | 2026-10-12 | 1bc23e8 | Shift strafe, Ctrl boost, gentle coast, bounded assist; live Fighter verified; Q182 |
-| FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | no | done | claude (claude-opus-5-5) | 2026-10-17 |  | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
-| FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 |  | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play |
+| FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | no | done | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
+| FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play |
 | WPN-002 | Weapon content: definitions, blob, boot singletons | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-001, SPEC-04 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 702c1a6 | Weapon definitions, blob and boot-owned singleton lifetime; full 968 EM /145 PM green |
 | WPN-003 | CombatHitTest | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | frontier | WPN-001, SPEC-10, AI-001, PWR-001 | yes | done | astra (gpt-6) | 2026-10-13 | acdebc2 | Burst nearest-hit queries for hulls, shields and celestial bodies; repairs f376412/528ae87; full 968 EM /145 PM green |
 | WPN-004 | WeaponInitSystem and mounts | [SPEC-21](specs/SPEC-21-weapons.md) | M2 | standard | WPN-002, SPEC-10, SPEC-20 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | abffb45 | Canonical mount geometry and preserved reparent firing state; three required tests; full 1051 EM /146 PM passed. |
@@ -1301,7 +1301,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - Hammerhead 7.0, 15.0, 37.4, 83.2.
 
   Both Rams run on for 0.4–0.5 s after release.
-- **Tests:** Flight 49/49, editor content 18/18 (with the new `Racers_FlyTheirLinesEngines`), ship editor 120/120. The full EditMode suite ran headless (see the next line).
+- **Tests:** Flight 49/49, editor content 18/18 (with the new `Racers_FlyTheirLinesEngines`), ship editor 120/120. Full EditMode suite headless: 1,816 passed, 2 skipped. A committed empty `_Test` folder had made each run leave a numbered copy and fail Unity's cleanup check; removed. Commit 61f4df97.
 - **Not done:** the impact driver (RACE-013), Slip and Shove (RACE-014), a power draw for torches (ADR-0120 decision 5), and a dedicated close-up of the engine models.
 
 ### 2026-10-17 — RACE-008: the six racers built and flying (lead, claude-opus-5-5)
