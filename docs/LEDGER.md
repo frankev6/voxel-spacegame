@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
-| M4 | 30 | 2 | 0 | 0 | 23 | 0 | 55 | 9 |
+| M4 | 42 | 2 | 0 | 2 | 24 | 0 | 70 | 10 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -30,8 +30,9 @@
 | Design system / art direction approved | SPEC-80 | approved | 2026-10-11 | NOCTURNE, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md). Owner: "yes I approve". M0–M4 and SPEC-81 (A1) are unblocked |
 | Yarn Spinner 3 adoption | SPEC-41 | waiting for spike | — | Fallback format defined in SPEC-41 |
 | Racing and hazards specs (SPEC-91, SPEC-92, ADR-0118) | SPEC-91, SPEC-92 | approved | 2026-10-16 | Owner: "Approved with the defaults. Merge the specs to main, then start the track layout options and racer silhouettes (RACE-002, RACE-003) and HAZ-001." |
-| First race track layout (top-down map) | SPEC-92 | waiting (RACE-002) | — | Before RACE-004 builds it |
-| Racer ship silhouettes (Dart, Ram) | SPEC-92 | waiting (RACE-003) | — | Silhouettes before voxels (ship-design direction) |
+| First race track layout (top-down map) | SPEC-92 | approved | 2026-10-17 | Option A as a battle graveyard: "a group of derelict ships, like an ancient battle took place with large ships and we go through and around them" |
+| Racer ship silhouettes (Dart, Ram) | SPEC-92 | approved | 2026-10-17 | All six: "for ships i actually like all options you made, lets create all 6" |
+| Mechanism amendment (ADR-0119, SPEC-91 HAZ-012…022, SPEC-92 RACE-012…015) | SPEC-91, SPEC-92 | waiting for owner review | — | Written 2026-10-17 from the owner's mechanics decisions |
 
 ## Tasks
 
@@ -525,9 +526,9 @@
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | d60fca59 | salvage collect and pull on every machine, notices to the pilot's machine, combat status per pilot, stance table to guests; body interactables deferred (sandbox-only co-op); spike worktree only |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | a59b2b2b | decisions table and test, Game.Net IL writer rules, net parity and coop-parity.sh; spike worktree only |
 | NET-019 | Pre-merge fixes | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-018 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 04518d70 | braking bound, guest energy, guest playground beacons, shipped boost, RequireRenderer in the Editor, merchant header; merged to main |
-| HAZ-001 | Public contract types | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 5e9bb2af | Contract types; zone enums in Game.Data.Hazards (definitions need them); FlightConfig carry off until HAZ-002; 6 weapon assets re-serialized with the new fields |
-| HAZ-002 | Carried velocity in flight assist | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-001 | no | todo |  |  |  |  |
-| HAZ-003 | Momentum hit model | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | no | todo |  |  |  |  |
+| HAZ-001 | Public contract types | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 1994eed5 | Contract types; zone enums in Game.Data.Hazards (definitions need them); FlightConfig carry off until HAZ-002; 6 weapon assets re-serialized with the new fields |
+| HAZ-002 | Carried velocity in flight assist | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-001 | yes | todo |  |  |  |  |
+| HAZ-003 | Momentum hit model | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | yes | todo |  |  |  |  |
 | HAZ-004 | Recoil | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-003 | no | todo |  |  |  |  |
 | HAZ-005 | Hit-force tuning and impact feedback | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002, HAZ-004 | no | todo |  |  |  |  |
 | HAZ-006 | Zones: shapes, query and push effects | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-002 | no | todo |  |  |  |  |
@@ -536,17 +537,32 @@
 | HAZ-009 | Hazard playground pad and dev commands | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-005, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
 | HAZ-010 | Hazards and hit force in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-009, NET-018 | no | todo |  |  |  |  |
 | HAZ-011 | Hazard scenarios and determinism gate | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-009 | no | todo |  |  |  |  |
-| RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | no | todo |  |  |  |  |
-| RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | review | claude (claude-opus-5-5) | 2026-10-17 | e4df017c | Three layouts (Derelict Run, Moon Slingshot, Foundry Gauntlet) and the 12-mechanic sheet sent 2026-10-17; recommendation A; waiting for the owner to pick |
-| RACE-003 | Racer ship silhouettes for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | review | claude (claude-opus-5-5) | 2026-10-17 | ec9fa708 | Dart (Needle, Kite, Gimbal) and Ram (Battering Ram, Salvage Tug, Hammerhead) sent 2026-10-17; waiting for the owner to pick |
-| RACE-004 | Track builder, barrier blueprints and spawner | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-001, RACE-002, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
+| HAZ-012 | Contract types for the mechanism set | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | yes | todo |  |  |  |  |
+| HAZ-013 | Moving structures | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-012 | no | todo |  |  |  |  |
+| HAZ-014 | Mechanisms: switches and actions | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-013, HAZ-006 | no | todo |  |  |  |  |
+| HAZ-015 | Gravity wells and zone schedules | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006, HAZ-012 | no | todo |  |  |  |  |
+| HAZ-016 | Pulses with shadows (flares and reactors) | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-015 | no | todo |  |  |  |  |
+| HAZ-017 | Engine wash | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002 | no | todo |  |  |  |  |
+| HAZ-018 | Mine payloads and seekers | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-008, HAZ-015 | no | todo |  |  |  |  |
+| HAZ-019 | Energy canisters | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012, HAZ-008 | no | todo |  |  |  |  |
+| HAZ-020 | Gauntlet turrets | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012 | no | todo |  |  |  |  |
+| HAZ-021 | Lane-gate portals | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-012 | no | todo |  |  |  |  |
+| HAZ-022 | The mechanism set in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-010, HAZ-014, HAZ-016, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
+| RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | yes | todo |  |  |  |  |
+| RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 9767f965 | Owner chose A as a fleet of wrecks: Track 01 Battle Graveyard (track-01-options.md, track_01_battle_graveyard.json); grapple cut |
+| RACE-003 | Racer ship silhouettes for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 9767f965 | Owner: "lets create all 6"; built in RACE-008 (Darts) and RACE-013 (Rams) |
+| RACE-004 | Track builder, barrier blueprints and spawner | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-001, RACE-002, RACE-012, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
 | RACE-005 | Race decider | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, HAZ-006 | no | todo |  |  |  |  |
 | RACE-006 | Respawn | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-005 | no | todo |  |  |  |  |
 | RACE-007 | Race HUD, gate visuals and results | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-005 | no | todo |  |  |  |  |
-| RACE-008 | Racer ships and the shove weapon | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-003, HAZ-005 | no | todo |  |  |  |  |
+| RACE-008 | The Dart line: Needle, Kite and Gimbal | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-003, HAZ-001 | no | todo |  |  |  |  |
 | RACE-009 | Race replication and co-op start | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-006, HAZ-010 | no | todo |  |  |  |  |
 | RACE-010 | Windows dev build and remote playtest guide | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
-| RACE-011 | Two-player race playtest with Daniel | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-007, RACE-008, RACE-009, RACE-010 | no | todo |  |  |  |  |
+| RACE-011 | Two-player race playtest with Daniel | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-007, RACE-008, RACE-009, RACE-010, RACE-013, RACE-014, RACE-015 | no | todo |  |  |  |  |
+| RACE-012 | Graveyard wrecks | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-002, HAZ-001 | no | todo |  |  |  |  |
+| RACE-013 | The Ram line: Battering Ram, Salvage Tug and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | todo |  |  |  |  |
+| RACE-014 | Racer abilities: Slip and Shove | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-013, HAZ-002 | no | todo |  |  |  |  |
+| RACE-015 | Track 01 set pieces | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-004, HAZ-013, HAZ-014, HAZ-016, HAZ-017, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1263,6 +1279,28 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-17 — Owner decisions on mechanics, track and racers; amendment written (lead, claude-opus-5-5)
+- **Owner, verbatim:**
+  - "i love all the mechanics except the grapple pylon (lets scratch that), and the "places that change" is less of a mechanic and more a design consideration using the other mechanics."
+  - "I like option A for race track a derelict dreadnaught, but lets improve the idea and instead of just having one ship, its a group of derelict ships, like an ancient battle took place with large ships and we go through and around them."
+  - "for ships i actually like all options you made, lets create all 6".
+- **Track 01, the Battle Graveyard** (`track_graveyard.py`, new dead-warship renderer). The wrecks:
+  - the dreadnought broken in two, whose drifting bow closes the Break each lap;
+  - the carrier, whose flight deck is the hangar run;
+  - the battleship, with guns over the south straight and a reactor pulse with shadows over the keel line;
+  - the engine section, still firing;
+  - a cruiser, a burned-out cruiser and two frigates rammed together.
+
+  Also on the track: a salvage-rig sweeper, old minefields, and the ancient lane-gate the fleets fought over.
+
+  Clean laps: outer 90 s, Break 87 s, flight deck 91 s, keel 96 s, gate 76 s.
+- **Mechanics sheet:** nine cards plus the places-that-change design rule; the grapple is removed from every design.
+- **Amendment:**
+  - ADR-0119 (proposed): moving structures (a kinematic `PhysicsVelocity` writer), mechanisms (trigger to action), portals (a second root-transform writer, for transits only), `Attract`/`Pulse` zones with schedules, engine wash, mine payloads, canisters (`EnergyGrantRequest`), turret target override, and capital wrecks at 2 m cells;
+  - SPEC-91 HAZ-012…022;
+  - SPEC-92 RACE-012 (wrecks), RACE-013 (Ram line), RACE-014 (Slip/Shove) and RACE-015 (Track 01 set pieces); RACE-008 is now the Dart line;
+  - 15 ledger rows.
 
 ### 2026-10-17 — RACE-002, RACE-003 for owner choice; HAZ-001 contracts (lead, claude-opus-5-5)
 - **RACE-002.** The owner found the first three loops boring: "get more intricate and in depth with your designs and add things i haven't thought about too", then "these mechanics should general and for me to be able to use them in real world exploration too".

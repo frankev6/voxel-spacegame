@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Ready: approved by the owner with all §10 defaults (2026-10-16). Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
+| **Status** | Ready (2026-10-16). Amended 2026-10-17 for the owner's mechanics review ([ADR-0119](../decisions/ADR-0119-world-mechanisms.md)), amendment waiting for owner review. Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
 | **Area code** | HAZ (task IDs are `HAZ-001`, `HAZ-002`, …) |
-| **Module(s)** | `Game.Simulation` (`Simulation/Hazards/`, plus changes in `Flight/` and `Weapons/`), `Game.Voxel` (`ExternalPush`), `Game.Data` (definitions, module rows), `Game.Net` (replication), `Game.Presentation` (feedback), `Game.App` (playground pad) |
+| **Module(s)** | `Game.Simulation` (`Simulation/Hazards/`, `Simulation/Mechanisms/` from the amendment, plus changes in `Flight/` and `Weapons/`), `Game.Voxel` (`ExternalPush`), `Game.Data` (definitions, module rows), `Game.Net` (replication), `Game.Presentation` (feedback), `Game.App` (playground pad) |
 | **Depends on specs** | SPEC-13 (impulse channel, explosions), SPEC-20 (flight assist), SPEC-21 (weapons), SPEC-04 (block modules), SPEC-10 (grids), SPEC-23 (`SpatialHash`), SPEC-90 and ADR-0117 (co-op roles) |
 | **Depended on by** | SPEC-92 (race tracks use zones, walls and mines); encounters and star-system locations later |
 | **Milestone** | M4 (owner-directed track, 2026-10-16; ADR-0118 Consequences) |
@@ -55,6 +55,10 @@ SPEC-92 builds race tracks from these pieces. Encounters and star-system locatio
     - on the authority only: `ZoneSystem`'s damage and gate and bounds outputs, and `MineSystem`'s arm, trigger and detonate decisions.
 
     `RoleSystemPolicy` lists each entry with its decision.
+11. **The wider mechanism set (amendment, owner 2026-10-17; ADR-0119).** The owner kept nine mechanics and cut the grapple: "i love all the mechanics except the grapple pylon (lets scratch that), and the "places that change" is less of a mechanic and more a design consideration using the other mechanics".
+    - The mechanics: gravity wells, moving structures, blast doors and switches, engine wash, the mine family, gauntlet turrets, pulses with shadows (flares and reactors), lane-gate portals and energy canisters.
+    - Every one is a general world system, used in exploration first and on race tracks second.
+    - "Places that change" is a design rule: a place lists its changes as mechanism rules (ADR-0119 decision 9).
 
 ## 4. Data model
 
@@ -180,6 +184,43 @@ public static class HazardSpawn
                                 IPersistentIdAllocator ids, Span<Entity> outRequests);   // returns mines requested
     public static void DespawnGroup(EntityManager em, ushort group);   // zones + devices of a group
 }
+```
+
+### 4.6 The mechanism set (amendment, ADR-0119)
+```csharp
+// Game.Data.Hazards.ZoneEffectKind — appended
+Attract = 5,   // A = GM (m³/s²), B = minimum radius m (softening)
+Pulse = 6      // A = damage per pulse, B = shield drain per pulse, C = source: 0 = point at the zone centre, 1 = direction (the zone yaw)
+// Game.Data.Blocks.BlockModuleId — appended
+Switch = 11, Pickup = 12
+
+// Game.Simulation.Hazards — zones switch on and off (any kind); written by ZoneSystem from the clock and by mechanism actions
+public struct ZoneSchedule : IComponentData { public uint PeriodTicks, OnTicks, PhaseTicks; public byte Enabled; }
+
+// Game.Data.Blocks.ProximityFuseParams — appended fields
+public MinePayload Payload;     // Blast (default), Repulse, Emp, Gravity, None
+public float PayloadStrength;   // Repulse: N·s at the centre; Emp: seconds of thruster inhibit; Gravity: GM for PayloadSeconds
+public float PayloadSeconds;    // Gravity: lifetime of the temporary Attract zone
+public float SeekSpeed;         // m/s; > 0 makes an armed mine drift toward its nearest valid target
+public enum MinePayload : byte { Blast = 0, Repulse = 1, Emp = 2, Gravity = 3, None = 4 }
+
+// Game.Simulation.Mechanisms (new folder and namespace)
+public enum MoverPath : byte { Rotate = 0, Rail = 1, Drift = 2, Toggle = 3 }
+public struct Mover : IComponentData        // on kinematic roots only; writer of its PhysicsVelocity: MoverSystem
+{ public MoverPath Path; public float3 Origin; public float Rate; public float Speed; public uint StartTick; public byte Playing, Reverse; public ushort Group; }
+[InternalBufferCapacity(0)] public struct MoverPoint : IBufferElementData { public float3 Pose; public float Yaw; }   // Rail and Toggle points
+public struct MechanismAction { public MechanismActionKind Kind; public ushort Group; public float Value; }        // record written by MechanismSystem
+public enum MechanismActionKind : byte { MoverPlay, MoverReverse, MoverSpeed, ZoneEnable, ZoneDisable, ZonePeriod, MinesArm, MinesDisarm,
+                                         TargetPolicy, PortalJam, SpawnHazardGroup, NarrativeEffect }   // append only
+public struct SwitchParams { public float TriggerDamage; public ushort Group; }     // BlockModuleId.Switch row
+public struct PickupParams { public float Energy; public float Reach; }             // BlockModuleId.Pickup row
+public struct PortalLink : IComponentData { public ulong Other; public float JamSeconds; public uint JammedUntilTick; }   // on a Gate zone
+public struct PortalTransit { public Entity Body; public ulong From, To; public uint Tick; }   // authority record; applied on every machine
+public struct TargetOverride : IComponentData { public Entity Target; public byte Policy; }   // on a turret group root (0 none, 1 leader, 2 fixed)
+public struct EnergyGrantRequest { public Entity Ship; public float Energy; public ProducerKind Producer; public uint Sequence; }  // SPEC-22 channel
+
+// Content
+// MechanismDefinition: rules { trigger (kind, group or zone or block, value), actions[] }; placed with a group id by HazardSpawn
 ```
 
 ## 5. Systems, services and flow
@@ -487,6 +528,158 @@ With `carryDecel = 8 m/s²`, a 5 m/s shove plays out over about 0.6 s, and a 40 
   - [ ] The scenario passes.
   - [ ] Per-tick hashes match across runs, and across 30 and 144 FPS frame pacing.
 - **Tests:** `HazardScenarioTests.FullRun`, `.Deterministic_AcrossFrameRates`.
+
+### HAZ-012 — Contract types for the mechanism set
+- **Milestone:** M4
+- **Tier:** standard — transcribes §4.6 with no behaviour
+- **Depends on:** `HAZ-001`
+- **Do:**
+  - Add every §4.6 type, including the `Switch` and `Pickup` module classes and rows, `MechanismDefinition`, the `ZoneEffectKind` appends and the `ProximityFuseParams` fields.
+  - Add the ADR-0119 rows to architecture §6 and §8.
+  - Add the `EnergyGrantRequest` channel to SPEC-22's power streams, with no consumer yet.
+- **Files:** `Assets/Game/Simulation/Mechanisms/*.cs`; `Assets/Game/Data/Hazards/*.cs`; `Assets/Game/Data/Blocks/*`; `Assets/Game/Data/Definitions/Hazards/MechanismDefinition.cs`; `Assets/Game/Simulation/Power/*Streams*.cs`; `docs/01-architecture.md`.
+- **Acceptance criteria:**
+  - [ ] Compiles; existing tests pass.
+  - [ ] Enum appends keep every existing value.
+- **Tests:** `MechanismContractTests.EnumValues_Appended`, `.Modules_Registered`.
+
+### HAZ-013 — Moving structures
+- **Milestone:** M4
+- **Tier:** frontier — a new kinematic velocity writer that collides with dynamic ships
+- **Depends on:** `HAZ-012`
+- **Do:**
+  - Implement `MoverSystem` (ADR-0119 decision 1) for `Rotate`, `Rail` (loop and ping-pong), `Drift` and `Toggle`, tick-exact from `StartTick`.
+  - Movers spawn kinematic (SPEC-12 motion), and their poses shift with origin rebase.
+  - Add a playground rotating arm and a door to try them.
+- **Files:** `Assets/Game/Simulation/Mechanisms/MoverSystem.cs`, `MoverMath.cs`; `Assets/Game/Galaxy/Systems/OriginRebaseSystem.cs`; tests.
+- **Acceptance criteria:**
+  - [ ] A rotating arm sweeps at its rate with no drift over 10 minutes.
+  - [ ] A ship in its path is batted aside and takes ram damage.
+  - [ ] A toggle door opens and closes in its duration.
+  - [ ] Two runs are identical.
+- **Tests:** `MoverTests.Rotate_TickExact`, `.Rail_PingPong`, `.Toggle_Duration`, `.BatsShip`, `.Deterministic`.
+
+### HAZ-014 — Mechanisms: switches and actions
+- **Milestone:** M4
+- **Tier:** frontier — a decider that drives five other features through their owners
+- **Depends on:** `HAZ-013`, `HAZ-006`
+- **Do:**
+  - Implement `MechanismSystem` (authority). Triggers: switch damaged, instance destroyed, zone or gate contact, timer, race lap (read through an interface), narrative `ICondition`. Actions are records consumed by their owners.
+  - Add the `Switch` block and a blast door blueprint.
+  - Implement `HazardSpawn` support for mechanism groups.
+- **Files:** `Assets/Game/Simulation/Mechanisms/MechanismSystem.cs`, `MechanismActions.cs`; `Assets/Game/Content/Blocks/block_switch.asset`; `Assets/Game/Content/Hazards/*`.
+- **Acceptance criteria:**
+  - [ ] Shooting a switch slams its door for its time, then the door reopens.
+  - [ ] A timer toggles a zone.
+  - [ ] Each action changes only state its owner writes (the role-policy test passes).
+- **Tests:** `MechanismTests.Switch_SlamsDoor`, `.Timer_TogglesZone`, `.Actions_RouteToOwners`.
+
+### HAZ-015 — Gravity wells and zone schedules
+- **Milestone:** M4
+- **Tier:** standard — two additions to HAZ-006's zone system, rules in ADR-0119 decision 4
+- **Depends on:** `HAZ-006`, `HAZ-012`
+- **Do:** Add the `Attract` effect (every machine) and `ZoneSchedule` gating for every kind. Add `zone_gravity_moon` content.
+- **Files:** `Assets/Game/Simulation/Hazards/ZoneJobs.cs`; `Assets/Game/Content/Hazards/zone_gravity_moon.asset`.
+- **Acceptance criteria:**
+  - [ ] A coasting ship curves into an orbit-like arc around a well.
+  - [ ] A scheduled zone is on exactly its `OnTicks` per period.
+- **Tests:** `GravityZoneTests.Attract_CurvesPath`, `ZoneScheduleTests.OnOff_TickExact`.
+
+### HAZ-016 — Pulses with shadows (flares and reactors)
+- **Milestone:** M4
+- **Tier:** frontier — authority raycasts against voxel colliders, deterministic per pulse
+- **Depends on:** `HAZ-015`
+- **Do:**
+  - Add the `Pulse` effect: point or direction source, damage plus shield drain on its scheduled ticks, skipped when the ray from the source to a root's centre of mass hits another grid first.
+  - Visual: a pulse ring or a flare sweep, with the shadows shown.
+- **Files:** `Assets/Game/Simulation/Hazards/PulseJob.cs`; `Assets/Game/Presentation/Hazards/ZoneVisualSystem.cs`.
+- **Acceptance criteria:**
+  - [ ] A ship in the open takes the pulse; a ship behind a wreck does not.
+  - [ ] Shield drain applies before hull damage.
+  - [ ] It is deterministic.
+- **Tests:** `PulseTests.Open_TakesPulse`, `.Shadowed_Safe`, `.Deterministic`.
+
+### HAZ-017 — Engine wash
+- **Milestone:** M4
+- **Tier:** standard — a derived push from existing thruster state
+- **Depends on:** `HAZ-002`
+- **Do:** Implement `EngineWashSystem` (ADR-0119 decision 5): a cone behind each firing thruster, with strength from `MaxForce × Intensity`, never pushing its own ship. Heat damage is authority only.
+- **Files:** `Assets/Game/Simulation/Hazards/EngineWashSystem.cs`.
+- **Acceptance criteria:**
+  - [ ] A tailgating fighter 30 m behind a boosting ship is pushed back measurably.
+  - [ ] The owner ship feels nothing extra.
+  - [ ] A dead engine section set to fire (by a mechanism) pushes across a straight.
+- **Tests:** `EngineWashTests.Tailgater_Pushed`, `.Owner_Unaffected`.
+
+### HAZ-018 — Mine payloads and seekers
+- **Milestone:** M4
+- **Tier:** standard — payload branches on HAZ-008's decider
+- **Depends on:** `HAZ-008`, `HAZ-015`
+- **Do:**
+  - Implement the payloads: `Repulse` (impulse only), `Emp` (`InhibitRequest` on thrusters), `Gravity` (a temporary `Attract` zone) and `None`, plus seeker drift.
+  - Add three mine contents: `mine_repulsor`, `mine_emp` and `mine_seeker`.
+- **Files:** `Assets/Game/Simulation/Hazards/MineSystem.cs`; `Assets/Game/Content/Hazards/*`.
+- **Acceptance criteria:**
+  - [ ] A repulsor shoves without damage.
+  - [ ] An EMP stops thrust for its seconds while carry keeps the ship drifting.
+  - [ ] A seeker reaches a slow ship and not a fast one.
+- **Tests:** `MinePayloadTests.Repulse_NoDamage`, `.Emp_InhibitsThrusters`, `.Gravity_TemporaryWell`, `.Seeker_ChasesSlowShip`.
+
+### HAZ-019 — Energy canisters
+- **Milestone:** M4
+- **Tier:** standard — one device module and one channel consumer
+- **Depends on:** `HAZ-012`, `HAZ-008`
+- **Do:**
+  - Add the `Pickup` module: a ship within reach is granted energy (`EnergyGrantRequest`, applied by `PowerAllocationSystem`), and the canister despawns.
+  - Add `device_canister`, carrying an `Explosive` block so a shot sets it off.
+- **Files:** `Assets/Game/Simulation/Hazards/PickupSystem.cs`; `Assets/Game/Simulation/Power/PowerAllocationSystem.cs`; content.
+- **Acceptance criteria:**
+  - [ ] Flying through a canister raises stored energy by its amount, once.
+  - [ ] Shooting one explodes it.
+- **Tests:** `CanisterTests.Pickup_GrantsOnce`, `.Shot_Explodes`.
+
+### HAZ-020 — Gauntlet turrets
+- **Milestone:** M4
+- **Tier:** standard — a target override read by existing turret targeting
+- **Depends on:** `HAZ-012`
+- **Do:**
+  - Add `TargetOverride` handling in SPEC-23's station-turret targeting: a valid override wins.
+  - A mechanism action can set or clear a group's override.
+  - `RaceSystem` writes the leader (SPEC-92).
+- **Files:** `Assets/Game/Simulation/Ai/*Turret*`; tests.
+- **Acceptance criteria:**
+  - [ ] Turrets with a leader override fire at the leader and switch within one second when the lead changes.
+  - [ ] With no override they behave as before.
+- **Tests:** `TargetOverrideTests.Leader_Targeted`, `.None_Unchanged`.
+
+### HAZ-021 — Lane-gate portals
+- **Milestone:** M4
+- **Tier:** frontier — a second root-transform writer, with own-ship prediction
+- **Depends on:** `HAZ-006`, `HAZ-012`
+- **Do:**
+  - Implement `PortalDecideSystem` (authority: crossing and jam) and `PortalTransitSystem` (every machine: move and rotate the pose and velocity, reset smoothing), as in ADR-0119 decision 3.
+  - Visual: a jammed portal shows it.
+- **Files:** `Assets/Game/Simulation/Mechanisms/PortalDecideSystem.cs`, `PortalTransitSystem.cs`; visuals.
+- **Acceptance criteria:**
+  - [ ] A ship at 150 m/s exits at the paired gate with its speed kept, rotated to the exit frame.
+  - [ ] A second ship within the jam time passes straight through the gate.
+  - [ ] Debris never transits.
+- **Tests:** `PortalTests.Transit_KeepsSpeed`, `.Jam_Blocks`, `.Debris_Ignored`.
+
+### HAZ-022 — The mechanism set in co-op
+- **Milestone:** M4
+- **Tier:** frontier — replication of schedules, mechanism and portal state under prediction
+- **Depends on:** `HAZ-010`, `HAZ-014`, `HAZ-016`, `HAZ-018`, `HAZ-019`, `HAZ-020`, `HAZ-021`
+- **Do:**
+  - Replicate zone schedules and enables, mechanism action results (mover play state), mine payload effects, portal transits and jams, and target overrides.
+  - A guest applies its own ship's transits.
+  - Extend `coop-parity.sh`.
+- **Files:** `Assets/Game/Net/*`; `Assets/Game/App/Session/RoleSystemPolicy.cs`; `tools/playtest/coop-parity.sh`.
+- **Acceptance criteria:**
+  - [ ] A guest sees doors, arms, pulses and jams match the host.
+  - [ ] A guest's own portal transit is not corrected back.
+  - [ ] The parity diff is empty.
+- **Tests:** `MechanismReplicationTests.RoundTrip`, `PortalTransitTests.GuestOwnShip`; parity run recorded.
 
 ## 10. Open questions
 | # | Question | Default if unanswered | Decider |
