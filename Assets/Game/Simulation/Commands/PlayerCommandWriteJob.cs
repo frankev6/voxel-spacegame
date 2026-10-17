@@ -8,6 +8,8 @@ namespace Game.Simulation.Commands
     public partial struct PlayerCommandWriteJob : IJobEntity
     {
         public ShipCommand Command;
-        public void Execute(ref ShipCommand command) => command = Command;
+        [Unity.Collections.ReadOnly] public ComponentLookup<RaceHold> Holds;
+        public void Execute(Entity entity, ref ShipCommand command)
+            => command = Holds.HasComponent(entity) && Holds.IsComponentEnabled(entity) ? PilotCommandConversion.Hold(Command) : Command;
     }
 }

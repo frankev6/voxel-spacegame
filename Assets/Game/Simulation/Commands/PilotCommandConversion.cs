@@ -30,6 +30,14 @@ namespace Game.Simulation.Commands
             };
         }
 
+        /// <summary>SPEC-92 §4.3: a held pilot brakes in place and cannot fire; Interact still passes (pilots ready up with it).</summary>
+        public static ShipCommand Hold(ShipCommand command)
+        {
+            command.Thrust = float2.zero; command.Turn = 0; command.Flags = ShipCommandFlags.Brake; command.FireGroups = 0;
+            command.Edges &= ShipCommandEdges.Interact;
+            return command;
+        }
+
         static ShipCommandEdges Consume(byte incoming, ref byte consumed, ShipCommandEdges edge)
         {
             if (incoming == consumed) return ShipCommandEdges.None;

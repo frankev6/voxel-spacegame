@@ -23,9 +23,13 @@ namespace Game.Simulation.Commands
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            foreach (var (input, consumed, command) in SystemAPI.Query<RefRO<RemotePilotInput>, RefRW<RemotePilotEdgeConsumed>, RefRW<ShipCommand>>()
-                         .WithAll<RemotePilot>().WithNone<Hulk>())
+            foreach (var (input, consumed, command, entity) in SystemAPI.Query<RefRO<RemotePilotInput>, RefRW<RemotePilotEdgeConsumed>, RefRW<ShipCommand>>()
+                         .WithAll<RemotePilot>().WithNone<Hulk>().WithEntityAccess())
+            {
                 command.ValueRW = Apply(input.ValueRO, ref consumed.ValueRW);
+                if (SystemAPI.HasComponent<RaceHold>(entity) && SystemAPI.IsComponentEnabled<RaceHold>(entity))
+                    command.ValueRW = PilotCommandConversion.Hold(command.ValueRO);   // SPEC-92: the same hold as the local pilot
+            }
         }
 
         /// <summary>Pure command conversion, shared with tests.</summary>

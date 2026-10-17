@@ -82,7 +82,8 @@ namespace Game.App.Session
             // GameplayPostPhysicsGroup
             ["SpatialHashBuildSystem"] = SystemAuthority.Both,
             ["DamageStreamsSystem"] = SystemAuthority.Both,
-            ["ZoneSystem"] = SystemAuthority.Both,                       // SPEC-91: pushes everywhere; wall damage and gate contacts used on the authority
+            ["ZoneSystem"] = SystemAuthority.Both,
+            ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests                       // SPEC-91: pushes everywhere; wall damage and gate contacts used on the authority
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
@@ -136,6 +137,7 @@ namespace Game.App.Session
             ["AbilitySystem"] = "slot resync, power grants and ability presses; AbilityState with activation counts",
             ["SplitGraceContactSystem"] = "which split pieces may still touch their parent; poses in snapshots",
             ["ImpactEventSystem"] = "ram damage from contacts; its cells in GridDelta",
+            ["RaceSystem"] = "race phase, laps, gates, places and respawns; RaceState",
             ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
             ["IntegritySystem"] = "which islands lost their connection; SplitSystem's plans",
             ["SplitSystem"] = "how a grid splits into ships, hulks and chunks; GridSpawn and ChunkSpawn",
