@@ -13,5 +13,7 @@ namespace Game.Data.Blocks
         public DamageType BlastType;    // Explosive by default
         public float MinTriggerMass;    // kg; lighter roots never trigger
         public byte TriggerFilter;      // 0 = any ship, 1 = hostile to the mine's allegiance only
+        public float CasingHp;          // damage taken after arming that cooks it off (0 = the first lost cell); shots below it only shove it
+        public float BlastImpulse;      // N·s of push at the centre (ExplosionRequest.Knockback); 0 = the weapons' per-damage push
     }
 }

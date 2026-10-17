@@ -27,9 +27,12 @@ namespace Game.Simulation.Hazards
     {
         internal const float JumpMetres = 50f;
         /// <summary>A wall pushes a body by this fraction of its bounding radius: a sphere round a long hull would hold it metres off.</summary>
-        internal const float WallRadiusFraction = .4f;
-        /// <summary>The most yaw rate one wall hit adds (rad/s): a glancing hit turns the ship along the wall, never into a spin.</summary>
+        internal const float WallRadiusFraction = .7f;   // RACE-016: holds a hull off the emitter posts on the line
+        /// <summary>The most yaw rate a wall leaves a ship with (rad/s): a glancing hit turns it along the wall, never into a spin, however
+        /// long thrust keeps it pressed there.</summary>
         internal const float MaxWallSpin = .6f;
+        /// <summary>The share of a device's approach speed a field wall sends back (ships: none, the wall only stops them).</summary>
+        internal const float DeviceBounce = .6f;
         Entity contactsEntity;
         NativeHashMap<Entity, float2> lastCom;
         EntityQuery zones, bodies;
@@ -96,8 +99,10 @@ namespace Game.Simulation.Hazards
                     Entity = e, Com = pose.TransformPoint(mass.CenterOfMass), Velocity = SystemAPI.GetComponent<PhysicsVelocity>(e).Linear,
                     Mass = 1f / mass.InverseMass, Pose = pose, Radius = 1, Flags = ZoneEffectFlags.AffectsDebris
                 };
-                float3 yaw = math.rotate(math.inverse(math.mul(pose.Rotation, mass.InertiaOrientation)), math.up());
+                var inertia = math.mul(pose.Rotation, mass.InertiaOrientation);
+                float3 yaw = math.rotate(math.inverse(inertia), math.up());
                 row.InvYawInertia = math.dot(yaw * yaw, mass.InverseInertia);
+                row.YawRate = math.rotate(inertia, SystemAPI.GetComponent<PhysicsVelocity>(e).Angular).y;   // Angular is in inertia space
                 if (SystemAPI.HasComponent<VoxelGrid>(e))
                 {
                     var grid = SystemAPI.GetComponent<VoxelGrid>(e);
@@ -125,7 +130,7 @@ namespace Game.Simulation.Hazards
         internal struct ZoneRow { public WorldZone Zone; public float2 Position; public int EffectStart, EffectCount, PointStart, PointCount; }
         internal struct BodyRow
         {
-            public Entity Entity; public float3 Com, Velocity; public float Mass, Radius, CellSize, InvYawInertia; public LocalTransform Pose;
+            public Entity Entity; public float3 Com, Velocity; public float Mass, Radius, CellSize, InvYawInertia, YawRate; public LocalTransform Pose;
             public ZoneEffectFlags Flags; public bool Grid;
         }
         struct ZoneOrder : System.Collections.Generic.IComparer<ZoneRow>
@@ -268,16 +273,26 @@ namespace Game.Simulation.Hazards
                 if (p <= 0) return;
                 float u = math.max(0, -math.dot(v, n));
                 float dv = effect.A * p * Dt + effect.B * u * Dt + u;
+                // RACE-016: a device (a shoved mine) rebounds off the field instead of stopping dead on it
+                if (body.Flags == ZoneEffectFlags.AffectsDevices) dv += u * DeviceBounce;
                 // A hull meets a wall at its nose or tail first, so a glancing hit turns it. Only the impact (u) turns it, and by at most
                 // MaxWallSpin: pushed at the hull end in full, a long hull spun at tens of rad/s, and the scrape spring kept twisting it.
                 float2 heading = math.normalizesafe(math.rotate(body.Pose.Rotation, new float3(0, 0, 1)).xz, new float2(0, 1));
                 float2 contact = com + heading * (math.dot(heading, -n) >= 0 ? 1 : -1) * body.Radius * .7f - n * body.Radius * WallRadiusFraction;
                 float2 impulse = n * (dv * body.Mass), lever = contact - com;
                 float full = Cross(lever, impulse), turn = Cross(lever, n * (u * body.Mass));
-                float most = body.InvYawInertia > 1e-12f ? MaxWallSpin / body.InvYawInertia : 0;
-                turn = math.clamp(turn, -most, most);
+                // Turn only a hull end still pointing into the wall, and only up to MaxWallSpin of yaw rate in all: a ship held
+                // against the wall by its thrust would otherwise gain a kick every tick.
+                float into = math.abs(math.dot(heading, n));
+                if (into < .08f || body.InvYawInertia <= 1e-12f) turn = 0;
+                else
+                {
+                    float spin = turn * body.InvYawInertia, after = math.clamp(body.YawRate + spin, -MaxWallSpin, MaxWallSpin) - body.YawRate;
+                    turn = after * spin > 0 ? after / body.InvYawInertia : 0;   // never brakes or reverses a spin it did not cause
+                }
                 Push(body, impulse, false, sequence, com + lever * (math.abs(full) > 1e-6f ? turn / full : 0));
-                if (Authority && body.Grid && u >= 3 && effect.C > 0)
+                // ram damage on ships only: a mine nudged into the field by its anchor spring must not cook off and blow the fence (RACE-016)
+                if (Authority && body.Grid && body.Flags == ZoneEffectFlags.AffectsShips && u >= 3 && effect.C > 0)
                 {
                     float3 world = new float3(contact.x, body.Com.y, contact.y);
                     Damage.Write(new DamageEvent

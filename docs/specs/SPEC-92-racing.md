@@ -398,6 +398,18 @@ Advisory (ADR-0042):
   - [ ] Top-down screenshots per lap are in the ledger log.
 - **Tests:** `Track01Tests.LapEvents_Fire`, `.Break_Narrows`.
 
+### RACE-016 — Track look and destructible track structures
+- **Milestone:** M4
+- **Tier:** frontier — new presentation, new voxel content and a new simulation rule
+- **Depends on:** `RACE-004`, `RACE-012`, `HAZ-007`
+- **Do:** Owner (2026-10-17): a polished space racetrack; "the material things that can be collided with should be voxel"; "when we're inside a ship that is part of the track, that acts as the barrier itself"; "fences should be destructible"; holograms "pixel perfect pixelated". Solid parts are voxel blueprints (`TrackStructureBuilder`: emitter posts every ~50 m, gate pylons, the start gantry, debris) in Track Frame (400 HP/cell). Field walls are spans between posts (`TrackZone.Emitters`); `WallEmitterSystem` (every machine) turns a span off once a post's emitter head at 9 m has been missing three checks in a row (spatial, so host and guests agree). Walls inside a wreck are dropped. Light and guidance (`TrackDressing`, `Game/Race/Holo`: lanes, fences, curtains, pads, boards, grid, halos, wreck lights, dust) is a 1 m dot matrix and is not simulated.
+- **Files:** `Assets/Game/Editor/Content/TrackStructureBuilder.cs`, `Assets/Game/Presentation/Racing/`, `Assets/Game/Simulation/Hazards/WallEmitterSystem.cs`, `Assets/Game/Content/Racing/`.
+- **Acceptance criteria:**
+  - [x] Every gate, wall and route reads in top-down screenshots; no world tags on track parts.
+  - [x] `race blast` on a post drops exactly the two spans it holds; teleports and rebases drop none.
+  - [ ] A guest sees the same spans drop (two-machine check).
+- **Tests:** in-game (`race info` span counts); a WallEmitterSystem unit test with a physics world is open.
+
 ### RACE-009 — Race replication and co-op start
 - **Milestone:** M4
 - **Tier:** frontier — new reliable state and per-pilot holds under prediction

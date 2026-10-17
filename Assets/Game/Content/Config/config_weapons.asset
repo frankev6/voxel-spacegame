@@ -15,7 +15,7 @@ MonoBehaviour:
   id: config_weapons
   formerIds: []
   maxProjectiles: 8192
-  fixedConvergenceDeg: 3
+  fixedConvergenceDeg: 6
   explosionImpulsePerDamage: 60
   knockbackScale: 1
   recoilScale: 0.17

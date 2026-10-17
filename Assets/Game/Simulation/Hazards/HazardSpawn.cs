@@ -46,9 +46,10 @@ namespace Game.Simulation.Hazards
             return e;
         }
 
-        /// <summary>Requests the field's mines as grids; returns how many were requested into <paramref name="outRequests"/>.</summary>
+        /// <summary>Requests the field's mines as grids; returns how many were requested into <paramref name="outRequests"/>. A point
+        /// `blocked` rejects is drawn again from the same seeded sequence (a track keeps mines off its walls and posts).</summary>
         public static int MineField(EntityManager em, MineFieldDefinition def, float2 position, float yaw, ulong seed, ushort group,
-                                    IPersistentIdAllocator ids, Span<Entity> outRequests)
+                                    IPersistentIdAllocator ids, Span<Entity> outRequests, Func<float2, bool> blocked = null)
         {
             if (def == null || def.Mine == null || def.Mine.Blueprint == null) throw new ArgumentException("HazardSpawn.MineField: incomplete definition");
             // Deterministic scatter (SPEC-91 decision 9): the same seed places the same mines on every machine and every run.
@@ -63,27 +64,29 @@ namespace Game.Simulation.Hazards
                         : new float2(random.NextFloat(-def.HalfExtents.x, def.HalfExtents.x), random.NextFloat(-def.HalfExtents.y, def.HalfExtents.y));
                     float2 p = position + right * local.x + forward * local.y;
                     bool clear = true; foreach (var q in placed) if (math.distancesq(p, q) < def.MinSpacing * def.MinSpacing) { clear = false; break; }
-                    if (!clear) continue;
+                    if (!clear || blocked != null && blocked(p)) continue;
                     placed.Add(p); break;
                 }
             uint tick = 0;
             using (var clock = em.CreateEntityQuery(ComponentType.ReadOnly<Game.Core.Components.SimClock>()))
                 if (clock.TryGetSingleton<Game.Core.Components.SimClock>(out var c)) tick = c.Tick;
-            var mine = def.Mine;
             for (int i = 0; i < placed.Count; i++)
-            {
-                var p = placed[i];
-                var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, mine.Blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
-                {
-                    PersistentId = ids != null ? ids.Allocate() : 0, Pose = new RigidTransform(quaternion.RotateY(i * 1.3f), new float3(p.x, 0, p.y)),
-                    Kind = Game.Voxel.Model.GridKind.Device, Motion = Game.Voxel.Model.GridMotion.Dynamic, Profile = Game.Voxel.Model.GridProfile.Dummy
-                });
-                em.AddComponentData(root, new MineState { Phase = MinePhase.Arming, PhaseTick = tick });
-                em.AddComponentData(root, new MineFuse { Params = mine.Fuse, Group = group });
-                if (mine.Anchored) em.AddComponentData(root, new MineAnchor { Point = p, Stiffness = mine.AnchorStiffness, Damping = mine.AnchorDamping, MaxAccel = mine.AnchorMaxAccel });
-                outRequests[i] = root;
-            }
+                outRequests[i] = Mine(em, def.Mine, placed[i], i * 1.3f, group, ids != null ? ids.Allocate() : 0, tick);
             return placed.Count;
+        }
+
+        /// <summary>Requests one mine grid at p (arming from `tick`); MineField's and the dev `race mine`'s path.</summary>
+        public static Entity Mine(EntityManager em, MineDefinition mine, float2 p, float yaw, ushort group, ulong persistentId, uint tick)
+        {
+            var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, mine.Blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
+            {
+                PersistentId = persistentId, Pose = new RigidTransform(quaternion.RotateY(yaw), new float3(p.x, 0, p.y)),
+                Kind = Game.Voxel.Model.GridKind.Device, Motion = Game.Voxel.Model.GridMotion.Dynamic, Profile = Game.Voxel.Model.GridProfile.Dummy
+            });
+            em.AddComponentData(root, new MineState { Phase = MinePhase.Arming, PhaseTick = tick });
+            em.AddComponentData(root, new MineFuse { Params = mine.Fuse, Group = group });
+            if (mine.Anchored) em.AddComponentData(root, new MineAnchor { Point = p, Stiffness = mine.AnchorStiffness, Damping = mine.AnchorDamping, MaxAccel = mine.AnchorMaxAccel });
+            return root;
         }
 
         /// <summary>Destroys the zones and devices of a group.</summary>

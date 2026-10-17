@@ -57,7 +57,9 @@ namespace Game.Tests.EditMode.Simulation.Hazards
         Entity Body(float2 position, float2 velocity, float mass = 10000)
         {
             var e = EM.CreateEntity(typeof(LocalTransform), typeof(PhysicsVelocity), typeof(PhysicsMass), typeof(VoxelGrid), typeof(ExternalPush));
-            EM.SetComponentData(e, LocalTransform.FromPosition(new float3(position.x, 0, position.y)));
+            // facing its velocity, as a flown ship does
+            var facing = math.lengthsq(velocity) > 0 ? quaternion.LookRotationSafe(new float3(velocity.x, 0, velocity.y), math.up()) : quaternion.identity;
+            EM.SetComponentData(e, LocalTransform.FromPositionRotation(new float3(position.x, 0, position.y), facing));
             EM.SetComponentData(e, new PhysicsVelocity { Linear = new float3(velocity.x, 0, velocity.y) });
             EM.SetComponentData(e, new PhysicsMass { Transform = RigidTransform.identity, InverseMass = 1 / mass, InverseInertia = new float3(0, 1e-4f, 0) });
             EM.SetComponentData(e, new VoxelGrid { Kind = GridKind.Ship, CellSize = .5f, CellMin = -4, CellMax = 3 });   // 4 m box, radius ~3.5 m

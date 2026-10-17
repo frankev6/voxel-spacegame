@@ -72,7 +72,7 @@ namespace Game.Galaxy.Racing
                 {
                     if (m.Field == null) continue;
                     var requests = new Entity[m.Field.Count];
-                    HazardSpawn.MineField(em, m.Field, origin + (float2)m.Position, m.Yaw, m.Seed, group, ids, requests);
+                    HazardSpawn.MineField(em, m.Field, origin + (float2)m.Position, m.Yaw, m.Seed, group, ids, requests, p => NearWall(track, p - origin, MineWallClearance));
                 }
             if (spawnPiece != null)
                 foreach (var piece in track.Pieces)
@@ -82,6 +82,23 @@ namespace Game.Galaxy.Racing
                     if (root != Entity.Null) em.AddComponentData(root, new TrackPieceOf { Group = group });
                 }
             return race;
+        }
+
+        /// <summary>RACE-016: no mine within this of a field-wall line: anchored on a post it scrapes, cooks off and blows the fence.</summary>
+        public const float MineWallClearance = 12;
+        static bool NearWall(TrackDefinition track, float2 p, float clearance)
+        {
+            foreach (var z in track.Zones)
+            {
+                if (z.Zone == null || z.Zone.Shape != Game.Data.Hazards.ZoneShape.Path || z.Path == null) continue;
+                for (int i = 0; i + 1 < z.Path.Length; i++)
+                {
+                    float2 a = z.Path[i], ab = (float2)z.Path[i + 1] - a;
+                    float t = math.saturate(math.dot(p - a, ab) / math.max(1e-6f, math.dot(ab, ab)));
+                    if (math.distancesq(p, a + t * ab) < clearance * clearance) return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>Removes the group's zones, its race entity and its pieces (grid pieces through GridDespawnRequest).</summary>

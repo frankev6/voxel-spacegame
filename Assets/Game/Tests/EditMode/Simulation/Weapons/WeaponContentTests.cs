@@ -216,7 +216,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Assert.That(factions.CalculateEntityCount(), Is.EqualTo(1));
                 var value = tuning.GetSingleton<WeaponTuning>();
                 Assert.That(value.MaxProjectiles, Is.EqualTo(8192)); Assert.That(value.MaxCandidates, Is.EqualTo(32));
-                Assert.That(value.FixedConvergenceRad, Is.EqualTo(math.radians(3f)).Within(.0001f));
+                Assert.That(value.FixedConvergenceRad, Is.EqualTo(math.radians(6f)).Within(.0001f));
                 Assert.That(value.ExplosionImpulsePerDamage, Is.EqualTo(60));   // SPEC-91 HAZ-005 tuning (was 2) Assert.That(value.MaxTargetRange, Is.EqualTo(2500));
                 Assert.That(value.UnderCursorRadius, Is.EqualTo(30));
                 var matrix = factions.GetSingleton<FactionRelations>();

@@ -13,7 +13,7 @@ namespace Game.Editor.Content
 {
     /// <summary>RACE-016 (owner: "the material things that can be collided with should be voxel ... fences should be destructible"):
     /// the track's solid parts as voxel blueprints at 1 m cells (debris at 2 m, like the wrecks). Field-wall emitter posts, gate
-    /// pylons, the start/finish gantry and drifting debris. All are Track Frame or hull: racers' guns cut them. The energy between
+    /// pylons, the start/finish gantry and drifting debris. All are Track Frame (60 HP a cell, one plasma bolt) or hull: guns and rams break them. The energy between
     /// them (fences, curtains) and the guide markings stay light (TrackDressing).</summary>
     public static class TrackStructureBuilder
     {
@@ -32,8 +32,8 @@ namespace Game.Editor.Content
                 throw new InvalidOperationException("copy block_hull");
             var asset = AssetDatabase.LoadMainAssetAtPath(path); var so = new SerializedObject(asset);
             so.FindProperty("id").stringValue = "block_track_frame"; so.FindProperty("displayName").stringValue = "Track Frame";
-            so.FindProperty("description").stringValue = "Race-track structure: emitter posts, pylons and gantries. Tougher than hull; a sustained burst cuts it.";
-            so.FindProperty("formerIds").arraySize = 0; so.FindProperty("cellHp").floatValue = 400; so.FindProperty("cellMass").floatValue = 30;
+            so.FindProperty("description").stringValue = "Race-track structure: emitter posts, pylons and gantries. Lighter than hull: a short burst or a ram breaks it.";
+            so.FindProperty("formerIds").arraySize = 0; so.FindProperty("cellHp").floatValue = 60; so.FindProperty("cellMass").floatValue = 30;
             so.FindProperty("tradeable").boolValue = false; so.FindProperty("basePrice").intValue = 0;
             so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
         }

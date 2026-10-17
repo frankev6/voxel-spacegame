@@ -22,10 +22,12 @@ MonoBehaviour:
   radarRange: 300
   fuse:
     ArmSeconds: 1.5
-    TriggerRadius: 16
-    FuseSeconds: 0.6
-    BlastRadius: 18
-    BlastDamage: 450
+    TriggerRadius: 14
+    FuseSeconds: 0.5
+    BlastRadius: 28
+    BlastDamage: 2500
     BlastType: 2
-    MinTriggerMass: 2000
+    MinTriggerMass: 300
     TriggerFilter: 0
+    CasingHp: 600
+    BlastImpulse: 900000

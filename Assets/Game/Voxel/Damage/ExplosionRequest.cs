@@ -16,5 +16,6 @@ namespace Game.Voxel.Damage
         public ProducerKind Producer;   // Explosion for reactor/core breaches written by DMG
         public uint Sequence;
         public Entity Instigator;       // carried into the DamageEvents/ShieldHits the explosion produces (review X6)
+        public float Knockback;         // N·s of push at the centre (falls off as weight²); 0 = Amount × WeaponTuning.ExplosionImpulsePerDamage
     }
 }

@@ -65,7 +65,8 @@ namespace Game.Simulation.Spatial
                 }
                 Output.Write(new SpatialProxy { Entity = entity, Center = pose.TransformPoint(center),
                     HullRadius = hullRadius, Radius = math.max(hullRadius, reach),
-                    Kind = Hulks.HasComponent(entity) ? ProxyKind.Hulk : (ProxyKind)grid.Kind,
+                    // GridKind.Device is 4, ProxyKind 4 is Celestial: cast, mines were hit and blasted as planets (RACE-016)
+                    Kind = Hulks.HasComponent(entity) ? ProxyKind.Hulk : grid.Kind == GridKind.Device ? ProxyKind.Device : (ProxyKind)grid.Kind,
                     Flags = flags, Velocity = Velocities.HasComponent(entity) ? Velocities[entity].Linear : float3.zero,
                     Allegiance = Allegiances.HasComponent(entity) ? Allegiances[entity] : Allegiance.None });
             }

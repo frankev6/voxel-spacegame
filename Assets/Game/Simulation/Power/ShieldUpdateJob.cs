@@ -30,6 +30,9 @@ namespace Game.Simulation.Power
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
         [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
         [ReadOnly] public ComponentLookup<Hulk> Hulks;
+        // RACE-016 (owner: an explosion "should hurt and also send you flying"): a shield stops damage, not momentum. The absorbed
+        // share of a hit's push goes to the ship as a pending impulse (resolved with the tick's other damage impulses).
+        [Unity.Collections.NativeDisableParallelForRestriction] public ComponentLookup<Game.Voxel.Damage.PendingImpulse> Pending;
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
         [ReadOnly] public GridCellReader Reader;
         [ReadOnly] public BlobAssetReference<BlockModulesBlob> Modules;
@@ -125,6 +128,12 @@ namespace Game.Simulation.Power
                             Fx.Enqueue(FxEvents.ShieldRipple(pose.TransformPoint(hit.LocalPoint), math.rotate(pose.Rotation, ShieldMath.Normal(hit.LocalPoint, shield.Center, shield.Radii)), velocity, strength));
                         }
                         if (shield.Hp <= 0) { shield.Hp = 0; shield.Active = 0; shield.Flags |= ShieldFlags.Collapsed; }
+                        if (absorbed > 0 && hit.Amount > 0 && Pending.HasComponent(root))
+                        {
+                            var push = Pending[root]; if (push.Tick != Tick) push = new Game.Voxel.Damage.PendingImpulse { Tick = Tick };
+                            push.LinearWorld += hit.WorldImpulse * math.saturate(absorbed / multiplier / hit.Amount);
+                            Pending[root] = push;
+                        }
                     }
                     Overflow(root, shield, hit, (effective - absorbed) / multiplier);
                 }

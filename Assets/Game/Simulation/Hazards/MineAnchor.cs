@@ -10,5 +10,7 @@ namespace Game.Simulation.Hazards
         public float Stiffness;     // 1/s²
         public float Damping;       // 1/s
         public float MaxAccel;      // m/s²
+        public byte Placed;         // 0 until MineAnchorSystem first sees the mine: the point is set where the grid appeared (RACE-016:
+                                    // set at the spawn request, an origin rebase before the grid appeared left it ~2 km away)
     }
 }

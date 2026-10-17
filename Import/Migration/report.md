@@ -257,6 +257,17 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I011 Assets/Game/Content/Ships/ship_red_elite.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_shuttle.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Ships/ship_striker.asset: Kept hand-edited asset.
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_0.asset payload: ship_track_debris_0: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_1.asset payload: ship_track_debris_1: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_2.asset payload: ship_track_debris_2: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_3.asset payload: ship_track_debris_3: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_4.asset payload: ship_track_debris_4: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_5.asset payload: ship_track_debris_5: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_6.asset payload: ship_track_debris_6: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_7.asset payload: ship_track_debris_7: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_gantry.asset payload: ship_track_gantry: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_post.asset payload: ship_track_post: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_pylon.asset payload: ship_track_pylon: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_battleship.asset payload: ship_wreck_battleship: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_carrier.asset payload: ship_wreck_carrier: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_cruiser.asset payload: ship_wreck_cruiser: recharge infinite s > 10 s (rule R2)
@@ -487,12 +498,12 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 107 warnings, 223 infos
+0 errors, 118 warnings, 223 infos
 ```
 
 ## Summary
 
-0 errors, 107 warnings, 223 infos
+0 errors, 118 warnings, 223 infos
 
 Created: 0
 Updated: 0

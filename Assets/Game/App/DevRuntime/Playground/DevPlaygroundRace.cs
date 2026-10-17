@@ -191,21 +191,50 @@ namespace Game.App.DevRuntime.Playground
             return DevCommandResult.Ok($"blast at ({best.x:0.0}, {best.y:0.0}), {math.sqrt(bestD):0} m away (span {index})");
         }
 
+        /// <summary>Dev (RACE-016): one of the track's mines `ahead` metres in front of the player's ship, arming at once.</summary>
+        internal DevCommandResult MineAhead(float ahead)
+        {
+            if (!IsOpen) return DevCommandResult.Fail("no race open");
+            var ctx = host.Context; var em = ctx.EntityManager; var ship = ctx.PlayerShipRoot;
+            if (ship == Entity.Null || !em.HasComponent<LocalTransform>(ship)) return DevCommandResult.Fail("no player ship");
+            if (!ctx.TryGetService<Game.Data.Services.ContentService>(out var content) || !content.Catalog.TryGet<MineDefinition>(new ContentId("mine_proximity"), out var def))
+                return DevCommandResult.Fail("mine_proximity missing");
+            var pose = em.GetComponentData<LocalTransform>(ship); float3 f = math.rotate(pose.Rotation, new float3(0, 0, 1));
+            float2 at = pose.Position.xz + math.normalizesafe(f.xz) * ahead;
+            ctx.TryGetService<GameSession>(out var session);
+            em.CompleteAllTrackedJobs();
+            HazardSpawn.Mine(em, def, at, 0, Group, session != null ? session.Allocate() : 0, (uint)ctx.Tick);
+            return DevCommandResult.Ok($"mine at ({at.x:0.0}, {at.y:0.0}), {ahead:0} m ahead");
+        }
+
         internal string Info()
         {
             if (!IsOpen) return "no race open";
             var em = host.Context.EntityManager; var rs = State; var text = new System.Text.StringBuilder();
             text.Append(rs.Phase).Append(" laps ").Append(rs.Laps).Append(" tick ").Append(host.Context.Tick);
             using (var all = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>()))
-            using (var down = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>(), ComponentType.ReadOnly<ZoneOff>()))
+            using (var down = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>(), ComponentType.ReadOnly<ZoneOff>(), ComponentType.ReadOnly<LocalTransform>()))
             using (var spans = all.ToComponentDataArray<WallSpan>(Allocator.Temp))
             {
                 int seen = 0; foreach (var w in spans) if (w.Seen == 3) seen++;
                 text.Append(" spans ").Append(spans.Length).Append(" (").Append(seen).Append(" with both posts seen, ").Append(down.CalculateEntityCount()).Append(" down)");
                 using var downSpans = down.ToComponentDataArray<WallSpan>(Allocator.Temp);
-                for (int i = 0; i < downSpans.Length && i < 8; i++) text.Append(i == 0 ? " down:" : ",").Append(downSpans[i].Index).Append('/').Append(downSpans[i].Lost);
+                using var downPoses = down.ToComponentDataArray<LocalTransform>(Allocator.Temp);
+                for (int i = 0; i < downSpans.Length && i < 8; i++)
+                {
+                    var w = downSpans[i]; float2 a = downPoses[i].Position.xz + w.A, b = downPoses[i].Position.xz + w.B;
+                    text.Append(i == 0 ? " down:" : ",").Append(w.Index).Append('/').Append(w.Lost).Append($" ({a.x:0},{a.y:0} {w.CellsA}c)-({b.x:0},{b.y:0} {w.CellsB}c)");
+                }
             }
             text.Append('\n');
+            var me = host.Context.PlayerShipRoot;
+            if (me != Entity.Null && em.HasComponent<Unity.Physics.PhysicsVelocity>(me))
+            {
+                var pose = em.GetComponentData<LocalTransform>(me); var v = em.GetComponentData<Unity.Physics.PhysicsVelocity>(me); var m = em.GetComponentData<Unity.Physics.PhysicsMass>(me);
+                float3 f = math.rotate(pose.Rotation, new float3(0, 0, 1));
+                float yawRate = math.rotate(math.mul(pose.Rotation, m.InertiaOrientation), v.Angular).y;
+                text.Append($"ship x {pose.Position.x:0.0} z {pose.Position.z:0.0} heading {math.degrees(math.atan2(f.x, f.z)):0} speed {math.length(v.Linear.xz):0.0} yawRate {yawRate:0.00} angular {math.length(v.Angular):0.00}\n");
+            }
             foreach (var r in em.GetBuffer<RacerProgress>(race))
                 text.Append($"slot {r.Slot}: place {r.Place} lap {r.Lap} last gate {r.LastGate} gates {r.GatesThisLap} best {r.BestLapTicks / 60f:0.00}s flags {r.Flags}\n");
             return text.ToString();
@@ -375,7 +404,7 @@ namespace Game.App.DevRuntime.Playground
                 Vector3 g = origin + gatePositions[i]; float d = (g - at).sqrMagnitude;
                 if (d < best) { best = d; target = g; }
             }
-            dressing.SetGuide(racing && ship != Entity.Null, at, target);
+            dressing.SetGuide(false, at, target);   // owner: the guide arrow is unnecessary
             // RACE-016: spans whose emitter post was shot away go dark
             spansDown.Clear();
             using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<WallSpan>(), ComponentType.ReadOnly<ZoneOff>()))

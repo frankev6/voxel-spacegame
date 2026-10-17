@@ -8,6 +8,8 @@ namespace Game.Simulation.Hazards
     public struct MineFuse : IComponentData
     {
         public ProximityFuseParams Params;
+        public float DamageAtArm;    // GridDamageStats.DamageTaken when it armed (CasingHp counts from here)
+        public int Cells;            // solid cells when first seen
         public uint SpawnRevision;   // VoxelGrid.Revision when first seen; 0 = not yet seen
         public ushort Group;         // owner group (a track, an encounter): HazardSpawn.DespawnGroup removes it
     }

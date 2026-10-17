@@ -3102,529 +3102,529 @@ MonoBehaviour:
     Position: {x: 1713.7091, y: -773.6288}
     Yaw: 5.02769
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: 1632.6826, y: -867.16833}
-    Yaw: 0.3831413
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1370.2811, y: -1004.56085}
+    Yaw: 4.556111
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 1567.7275, y: -931.74713}
-    Yaw: 4.7882957
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: 1509.4042, y: -988.41223}
-    Yaw: 2.4446318
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1345.4027, y: -1182.6158}
+    Yaw: 5.9626436
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1393.0371, y: -1046.0646}
-    Yaw: 1.1243019
+    Position: {x: 1218.036, y: -1127.2292}
+    Yaw: 4.522453
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1116.3092, y: -1166.0785}
+    Yaw: 2.7749176
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1072.1357, y: -1301.4108}
+    Yaw: 2.0572257
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 978.1429, y: -1310.7654}
+    Yaw: 0.62211215
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1332.969, y: -1123.786}
-    Yaw: 6.106761
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: 1225.1307, y: -1129.6538}
-    Yaw: 3.6012383
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 1112.0084, y: -1152.7162}
-    Yaw: 1.9254078
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 1014.48346, y: -1223.3987}
-    Yaw: 3.944953
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 905.1221, y: -1294.3026}
-    Yaw: 4.8402176
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 817.66174, y: -1371.2205}
-    Yaw: 0.4162985
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 724.65643, y: -1402.1036}
-    Yaw: 2.4250765
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 605.3736, y: -1338.6127}
-    Yaw: 2.7805562
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 510.7418, y: -1373.4106}
-    Yaw: 6.0591817
+    Position: {x: 855.2428, y: -1318.1553}
+    Yaw: 2.2462595
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 405.59058, y: -1426.6952}
-    Yaw: 2.9996374
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 279.20786, y: -1395.0925}
-    Yaw: 3.9258149
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 149.34221, y: -1409.4084}
-    Yaw: 3.4170396
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 68.140205, y: -1426.9576}
-    Yaw: 0.8683292
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -56.769302, y: -1417.9696}
-    Yaw: 5.366816
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -144.024, y: -1448.1007}
-    Yaw: 5.833714
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -250.85666, y: -1422.8136}
-    Yaw: 5.865898
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -358.836, y: -1448.0272}
-    Yaw: 0.45616215
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -428.8746, y: -1379.4795}
-    Yaw: 1.5258359
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -548.5706, y: -1445.6477}
-    Yaw: 3.303543
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -627.9137, y: -1367.0853}
-    Yaw: 4.5658674
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -727.7852, y: -1278.9734}
-    Yaw: 5.5325522
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -831.4977, y: -1240.9664}
-    Yaw: 0.8615276
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: -942.4756, y: -1210.7288}
-    Yaw: 2.4719398
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: -1040.8671, y: -1143.1682}
-    Yaw: 4.4362855
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -1099.7753, y: -1090.3829}
-    Yaw: 2.8163443
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -1235.2684, y: -1070.4058}
-    Yaw: 0.37261242
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -1303.2705, y: -964.22614}
-    Yaw: 2.0038767
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -1448.2723, y: -996.0221}
-    Yaw: 2.370496
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -1490.0269, y: -827.38184}
-    Yaw: 2.570557
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -1543.9762, y: -777.3968}
-    Yaw: 2.6952567
+    Position: {x: 787.61786, y: -1358.5338}
+    Yaw: 5.5549364
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: -1679.1849, y: -761.9568}
-    Yaw: 4.9492855
+    Position: {x: 691.59375, y: -1383.3456}
+    Yaw: 4.132884
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 602.8945, y: -1345.5706}
+    Yaw: 5.337995
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: 524.9511, y: -1392.5405}
+    Yaw: 0.21312349
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 459.4402, y: -1433.1925}
+    Yaw: 6.0425963
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 235.16513, y: -1452.9186}
+    Yaw: 6.243322
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
+    Position: {x: 145.44156, y: -1445.3419}
+    Yaw: 0.8992407
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
+    Position: {x: 74.85001, y: -1449.8944}
+    Yaw: 5.7601986
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -0.43757743, y: -1425.292}
+    Yaw: 1.4933141
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -119.21293, y: -1423.3132}
+    Yaw: 3.7502708
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -203.32024, y: -1407.0149}
+    Yaw: 3.0642877
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -294.42908, y: -1402.1052}
+    Yaw: 0.9451001
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: -390.14896, y: -1435.4366}
+    Yaw: 2.7152295
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -500.69113, y: -1362.2366}
+    Yaw: 2.550472
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: -590.7819, y: -1350.3546}
+    Yaw: 5.4611015
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -708.666, y: -1302.3088}
+    Yaw: 3.8620214
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -824.01245, y: -1242.734}
+    Yaw: 4.3688517
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -908.16266, y: -1225.4227}
+    Yaw: 5.238464
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -989.6897, y: -1174.3793}
+    Yaw: 0.60828644
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
+    Position: {x: -1093.059, y: -1128.1051}
+    Yaw: 5.8997674
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -1186.4055, y: -1095.9949}
+    Yaw: 4.251513
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: -1243.9457, y: -1037.6852}
+    Yaw: 3.270563
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -1357.949, y: -997.47595}
+    Yaw: 6.065651
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -1475.8169, y: -1035.8867}
+    Yaw: 0.2876553
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -1479.6754, y: -850.7383}
+    Yaw: 4.2302036
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -1529.304, y: -790.6105}
+    Yaw: 2.5109015
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
+    Position: {x: -1670.7234, y: -786.35175}
+    Yaw: 3.128627
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -1793.5723, y: -753.2453}
+    Yaw: 5.953981
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
+    Position: {x: -1838.7555, y: -649.96045}
+    Yaw: 4.9566965
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -1870.7501, y: -495.35547}
+    Yaw: 2.9988701
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -1920.2305, y: -376.62558}
+    Yaw: 5.5656447
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -1941.0714, y: -266.85706}
+    Yaw: 0.42894953
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -1969.0226, y: -148.24202}
+    Yaw: 5.6665707
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -1986.7576, y: -28.93865}
+    Yaw: 3.0875068
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -2093.16, y: 71.03617}
+    Yaw: 0.4942581
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
+    Position: {x: -2023.6536, y: 196.10484}
+    Yaw: 5.1654024
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
-    Position: {x: -1745.891, y: -687.3466}
-    Yaw: 1.2810391
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -1870.8369, y: -659.6789}
-    Yaw: 3.8741503
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -1975.7771, y: -552.37335}
-    Yaw: 2.689474
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -1948.6052, y: -380.65494}
-    Yaw: 4.1486297
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -2011.292, y: -285.12518}
-    Yaw: 4.869326
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -2051.9065, y: -151.75778}
-    Yaw: 4.1448965
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -1980.7662, y: -66.72526}
-    Yaw: 5.1584353
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: -2126.8096, y: 69.62293}
-    Yaw: 2.6997004
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: -1991.2401, y: 165.36935}
-    Yaw: 3.897046
+    Position: {x: -1999.61, y: 286.28912}
+    Yaw: 5.3272495
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -2050.1638, y: 252.35547}
-    Yaw: 5.9795723
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -1935.7312, y: 356.11926}
-    Yaw: 5.666826
+    Position: {x: -1920.313, y: 384.6813}
+    Yaw: 4.2151284
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -1888.7777, y: 471.84888}
-    Yaw: 0.85208964
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -1879.7526, y: 595.65063}
-    Yaw: 4.4907646
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -1840.9929, y: 672.4725}
-    Yaw: 5.885153
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -1818.4391, y: 785.2881}
-    Yaw: 3.654372
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -1704.4434, y: 836.4166}
-    Yaw: 5.9871087
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -1619.6252, y: 911.0126}
-    Yaw: 5.1008325
+    Position: {x: -1922.5061, y: 471.26007}
+    Yaw: 1.261529
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -1514.3307, y: 935.0623}
-    Yaw: 0.94330657
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -1417.8635, y: 1010.07117}
-    Yaw: 1.4381714
+    Position: {x: -1874.5652, y: 532.56085}
+    Yaw: 2.4128838
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
-    Position: {x: -1329.0791, y: 1078.6982}
-    Yaw: 1.4841624
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -1203.7817, y: 1070.9395}
-    Yaw: 2.0856938
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: -1126.99, y: 1099.3616}
-    Yaw: 1.9719795
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -1038.5068, y: 1077.2524}
-    Yaw: 4.5234113
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -947.1813, y: 1083.5121}
-    Yaw: 5.9893856
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -864.8331, y: 1163.1599}
-    Yaw: 2.8440826
+    Position: {x: -1844.4982, y: 623.31433}
+    Yaw: 3.8938782
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: -773.15015, y: 1128.8171}
-    Yaw: 5.3696938
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -684.34106, y: 1242.6355}
-    Yaw: 5.193511
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -545.8934, y: 1192.9973}
-    Yaw: 3.7236578
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -464.24716, y: 1149.0906}
-    Yaw: 4.857732
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -370.68903, y: 1169.5001}
-    Yaw: 0.030425118
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: -258.67215, y: 899.8478}
-    Yaw: 3.2673192
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -190.52495, y: 909.30365}
-    Yaw: 1.8465856
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -86.82066, y: 802.9638}
-    Yaw: 3.2648382
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -11.677825, y: 913.69946}
-    Yaw: 3.8177633
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 356.0374, y: 888.98444}
-    Yaw: 2.3149574
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 444.3287, y: 996.6909}
-    Yaw: 2.9558232
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: 546.4665, y: 1000.1005}
-    Yaw: 6.067611
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: 644.4066, y: 1043.4615}
-    Yaw: 5.1155477
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 721.7683, y: 1086.7299}
-    Yaw: 6.129913
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 834.1231, y: 1147.0703}
-    Yaw: 6.259923
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 910.44604, y: 1153.3037}
-    Yaw: 2.885659
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 1020.39294, y: 1117.5249}
-    Yaw: 3.8584049
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 1079.7347, y: 1226.3876}
-    Yaw: 2.528849
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1204.5933, y: 1243.1101}
-    Yaw: 5.291085
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 1270.5225, y: 1319.1328}
-    Yaw: 5.447651
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 1338.8876, y: 1355.4492}
-    Yaw: 2.1682267
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 1420.7417, y: 1395.2256}
-    Yaw: 1.4387602
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 1516.4429, y: 1270.3011}
-    Yaw: 3.3047519
+    Position: {x: -1859.7566, y: 781.83105}
+    Yaw: 3.694846
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
-    Position: {x: 1573.3555, y: 1341.6293}
-    Yaw: 6.0634565
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 1656.6505, y: 1320.8418}
-    Yaw: 3.6790617
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: 1760.7811, y: 1303.7855}
-    Yaw: 5.419903
+    Position: {x: -1735.4056, y: 833.2978}
+    Yaw: 2.6118639
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1861.3484, y: 1288.7476}
-    Yaw: 0.41298127
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: 1935.7522, y: 1259.3574}
-    Yaw: 2.394282
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 2023.1594, y: 1243.2504}
-    Yaw: 1.356064
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: 2044.5646, y: 1129.8452}
-    Yaw: 2.9099522
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 2121.8823, y: 1073.426}
-    Yaw: 0.44222295
+    Position: {x: -1624.7456, y: 851.18933}
+    Yaw: 4.7845645
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 2140.377, y: 989.336}
-    Yaw: 4.303459
+    Position: {x: -1469.7252, y: 985.6698}
+    Yaw: 0.78489554
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 2173.6208, y: 873.1745}
-    Yaw: 5.971586
+    Position: {x: -1395.7942, y: 1025.0223}
+    Yaw: 3.7915044
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 2183.665, y: 760.306}
-    Yaw: 1.3857502
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: 2159.4324, y: 639.79816}
-    Yaw: 1.136855
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 2170.2644, y: 516.46747}
-    Yaw: 0.82537085
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 2162.3987, y: 408.95}
-    Yaw: 3.2453465
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 2142.872, y: 338.5778}
-    Yaw: 1.0416154
+    Position: {x: -1289.3097, y: 1078.9943}
+    Yaw: 1.6657822
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 2116.3887, y: 228.7564}
-    Yaw: 3.693099
+    Position: {x: -1186.7749, y: 1083.5823}
+    Yaw: 2.0635436
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
-    Position: {x: 1959.0798, y: 155.70879}
-    Yaw: 2.1022954
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 2016.4448, y: 23.798128}
-    Yaw: 3.3280306
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1879.0984, y: -11.07199}
-    Yaw: 2.354832
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1868.8771, y: -86.650856}
-    Yaw: 3.9777594
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 1875.2942, y: -212.24352}
-    Yaw: 1.2809893
+    Position: {x: -1094.3394, y: 1094.1}
+    Yaw: 1.0597326
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 1789.2921, y: -433.00146}
-    Yaw: 5.804242
+    Position: {x: -988.71234, y: 1108.285}
+    Yaw: 0.7034636
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: 1652.8693, y: -466.4996}
-    Yaw: 5.206196
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -896.26294, y: 1127.8917}
+    Yaw: 3.8094635
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: 1494.9619, y: -634.5533}
-    Yaw: 2.9185739
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -792.6862, y: 1099.3771}
+    Yaw: 5.813774
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
-    Position: {x: 1375.8156, y: -678.6434}
-    Yaw: 2.8067026
+    Position: {x: -687.2572, y: 1184.0651}
+    Yaw: 5.387108
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -592.0978, y: 1120.0778}
+    Yaw: 3.8731687
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -468.67346, y: 1190.6575}
+    Yaw: 2.7462487
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -349.24158, y: 1154.4341}
+    Yaw: 5.035267
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: -272.1152, y: 927.5103}
+    Yaw: 0.95222366
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: 1293.2113, y: -766.9294}
-    Yaw: 4.190942
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 1202.6746, y: -766.94617}
-    Yaw: 3.5732393
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 1190.4457, y: -903.1553}
-    Yaw: 3.8069737
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: 1075.0713, y: -894.5157}
-    Yaw: 3.4318218
+    Position: {x: -155.84964, y: 837.1995}
+    Yaw: 0.6322363
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: 996.8239, y: -995.1971}
-    Yaw: 4.8939147
+    Position: {x: -24.667727, y: 876.2734}
+    Yaw: 6.197481
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 923.4286, y: -1031.7866}
-    Yaw: 2.4450412
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 324.2059, y: 972.1711}
+    Yaw: 3.5773294
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
+    Position: {x: 434.73737, y: 960.4854}
+    Yaw: 3.268365
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 518.71826, y: 1040.9736}
+    Yaw: 0.86274487
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
-    Position: {x: 821.41156, y: -1037.1516}
-    Yaw: 0.77872074
+    Position: {x: 653.72064, y: 1040.2484}
+    Yaw: 1.5052943
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 725.15845, y: -1019.2204}
-    Yaw: 2.386037
+    Position: {x: 789.56805, y: 992.99084}
+    Yaw: 1.9261919
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
-    Position: {x: 613.45447, y: -983.54156}
-    Yaw: 2.1161768
+    Position: {x: 891.2603, y: 1083.8789}
+    Yaw: 1.8770723
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 998.7636, y: 1119.6239}
+    Yaw: 1.592894
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 544.573, y: -1166.6422}
-    Yaw: 4.102707
+    Position: {x: 1106.2084, y: 1121.2523}
+    Yaw: 2.4958472
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1127.017, y: 1250.5209}
+    Yaw: 5.8406625
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 423.1501, y: -1161.4645}
-    Yaw: 1.4175687
+    Position: {x: 1206.4419, y: 1287.8447}
+    Yaw: 0.90299517
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1308.396, y: 1307.0651}
+    Yaw: 2.2819633
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 338.91135, y: -1194.2242}
-    Yaw: 1.460139
+    Position: {x: 1412.0604, y: 1342.5991}
+    Yaw: 6.049889
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1517.0208, y: 1325.1412}
+    Yaw: 0.8438574
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: 1583.2112, y: 1407.8119}
+    Yaw: 0.40867478
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: 1675.9208, y: 1373.549}
+    Yaw: 5.8803453
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1743.8015, y: 1354.8171}
+    Yaw: 4.948649
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
-    Position: {x: 235.50612, y: -1053.6259}
-    Yaw: 1.5628371
+    Position: {x: 1792.4143, y: 1184.9701}
+    Yaw: 3.101312
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: 140.47908, y: -1098.3132}
-    Yaw: 0.55547523
+    Position: {x: 1939.6093, y: 1301.4365}
+    Yaw: 2.76294
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: 49.00741, y: -1185.4608}
-    Yaw: 4.373628
+    Position: {x: 1944.0183, y: 1136.8357}
+    Yaw: 1.9190164
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -39.552475, y: -1204.8513}
-    Yaw: 6.1918035
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: 2104.989, y: 1154.3043}
+    Yaw: 2.7992115
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
+    Position: {x: 2090.2544, y: 1032.1202}
+    Yaw: 0.6348516
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 2161.698, y: 953.08325}
+    Yaw: 3.822253
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: 2119.6174, y: 861.9678}
+    Yaw: 3.3429475
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 2187.2795, y: 767.42694}
+    Yaw: 2.0432255
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
+    Position: {x: 2135.615, y: 686.9442}
+    Yaw: 1.6974465
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
-    Position: {x: -123.45032, y: -1150.3881}
-    Yaw: 0.3242561
+    Position: {x: 2073.2483, y: 596.8736}
+    Yaw: 0.81292903
     Kind: 4
-  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
-    Position: {x: -202.1932, y: -1107.8169}
-    Yaw: 5.073189
-    Kind: 4
-  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -316.1318, y: -1206.6027}
-    Yaw: 5.067883
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 2178.862, y: 510.49683}
+    Yaw: 1.8477838
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -397.82245, y: -1201.3264}
-    Yaw: 5.0198812
+    Position: {x: 2151.4097, y: 421.55176}
+    Yaw: 1.1364532
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
-    Position: {x: -517.2362, y: -1160.3296}
-    Yaw: 2.1162992
+    Position: {x: 2123.2422, y: 320.6562}
+    Yaw: 5.4822106
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
-    Position: {x: -618.1538, y: -1078.3533}
-    Yaw: 5.861934
+    Position: {x: 2078.4846, y: 235.84879}
+    Yaw: 0.72471255
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 2078.5215, y: 158.9099}
+    Yaw: 0.06086466
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 2039.6782, y: 82.21951}
+    Yaw: 5.4475665
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: 2000.6813, y: 21.508778}
+    Yaw: 1.2418553
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 1928.8544, y: -68.5339}
+    Yaw: 5.854649
     Kind: 4
   - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
-    Position: {x: -741.0258, y: -1066.9993}
-    Yaw: 5.7340198
+    Position: {x: 1917.3158, y: -164.58258}
+    Yaw: 5.4277086
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
+    Position: {x: 1855.4058, y: -252.09991}
+    Yaw: 1.4243075
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
+    Position: {x: 1759.1758, y: -419.09308}
+    Yaw: 0.8601219
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: 1705.5807, y: -466.34842}
+    Yaw: 2.8563008
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1614.069, y: -466.26996}
+    Yaw: 0.40198767
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 1042.7203, y: -802.1626}
+    Yaw: 0.731253
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
+    Position: {x: 1007.4407, y: -921.3816}
+    Yaw: 1.804848
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 948.9667, y: -1008.64}
+    Yaw: 2.9516177
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 831.5115, y: -1059.7024}
+    Yaw: 5.0990524
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: fcb057272d8c44bb68f3c7f048efccb3, type: 2}
+    Position: {x: 735.3635, y: -1007.95074}
+    Yaw: 1.3891338
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: 674.3528, y: -1123.1803}
+    Yaw: 2.7308028
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 561.47107, y: -1155.9371}
+    Yaw: 2.0104022
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: 451.1239, y: -1163.5437}
+    Yaw: 3.2514985
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: 325.52386, y: -1162.72}
+    Yaw: 5.341379
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: 217.52893, y: -1062.9961}
+    Yaw: 4.9852967
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: 108.20703, y: -1221.8204}
+    Yaw: 2.1207852
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: 31.877928, y: -1217.5211}
+    Yaw: 1.9887172
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -76.91428, y: -1199.9733}
+    Yaw: 3.6013398
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: e00274c02d9e5484e8a97679ed939d0b, type: 2}
+    Position: {x: -155.39851, y: -1083.8481}
+    Yaw: 3.379481
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: -285.23193, y: -1192.3507}
+    Yaw: 1.986408
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
+    Position: {x: -398.32047, y: -1169.7079}
+    Yaw: 1.8388203
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -499.30478, y: -1164.0962}
+    Yaw: 2.0093045
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 3b29c7b5c4d3b4125bf6d34da5766112, type: 2}
+    Position: {x: -547.4775, y: -968.1555}
+    Yaw: 3.83629
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
+    Position: {x: -680.67395, y: -1029.6761}
+    Yaw: 1.3621314
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -804.879, y: -1034.4921}
+    Yaw: 5.933252
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -875.9501, y: -987.28314}
+    Yaw: 6.0982413
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: c506f9e58d46b46758e3eeb76a88d2a4, type: 2}
+    Position: {x: -939.7793, y: -959.9298}
+    Yaw: 5.041313
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 1758df4c1326d44bb842e57387aa8e5e, type: 2}
+    Position: {x: -959.26495, y: -807.91003}
+    Yaw: 2.432444
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
+    Position: {x: -1087.8336, y: -866.0616}
+    Yaw: 0.5098945
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: 20815fe0c153044b386113ef1a7c82f9, type: 2}
+    Position: {x: -1088.4656, y: -718.6106}
+    Yaw: 5.3084607
+    Kind: 4
+  - Blueprint: {fileID: 11400000, guid: ac18346cf6efa4b6db3956e3b5d90754, type: 2}
+    Position: {x: -1204.452, y: -772.57623}
+    Yaw: 0.40120322
     Kind: 4
   Zones:
   - Zone: {fileID: 11400000, guid: 0f81ad6acc0ce4b7c8e107fa886f1641, type: 2}

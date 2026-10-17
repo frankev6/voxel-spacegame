@@ -26,8 +26,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _Box: 240
+    - _Brightness: 0.8
     - _Checker: 0
+    - _Fill: 0.72
     - _Mode: 0
+    - _Pixel: 1
     m_Colors:
     - _Color: {r: 2.2, g: 1.3640001, b: 0.44000003, a: 2.2}
   m_BuildTextureStacks: []

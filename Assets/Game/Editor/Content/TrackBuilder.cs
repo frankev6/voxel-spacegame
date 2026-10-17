@@ -22,7 +22,7 @@ namespace Game.Editor.Content
         {
             Directory.CreateDirectory(Hazards); Directory.CreateDirectory(Racing);
             var boost = Zone("zone_boost_strip", ZoneShape.Box, new Vector2(56, 270), 0,
-                new ZoneDefinition.Effect { Kind = ZoneEffectKind.Accelerate, A = 200, B = 60, Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices });
+                new ZoneDefinition.Effect { Kind = ZoneEffectKind.Accelerate, A = 200, B = 60, Flags = ZoneEffectFlags.AffectsShips });   // ships only: a strip flung its mines into the fences
             Zone("zone_slow_field", ZoneShape.Circle, new Vector2(80, 0), 0,
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Drag, A = .7f, B = 20, Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices | ZoneEffectFlags.AffectsDebris });
             var gate = Zone("zone_gate", ZoneShape.Box, new Vector2(70, 2), 0,
@@ -32,7 +32,7 @@ namespace Game.Editor.Content
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Repel, A = 400, B = 8, C = 2, Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices | ZoneEffectFlags.AffectsDebris });
             var bounds = Zone("zone_track_bounds", ZoneShape.Path, default, 1,
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Bounds, Flags = ZoneEffectFlags.AffectsShips });
-            WreckBuilder.EnsureBlock(); TrackStructureBuilder.EnsureBlock();
+            WreckBuilder.EnsureBlock(); TrackStructureBuilder.EnsureBlock(); EnsureMineCasing();
             AssetDatabase.SaveAssets();
             var mine = Mine();
             Track("track_01", boost, gate, wall, bounds, mine);
@@ -71,17 +71,38 @@ namespace Game.Editor.Content
         }
 
         /// <summary>HAZ-008: a spiked proximity mine at 0.5 m cells (a 3-cell core, a spike on each face), its definition.</summary>
+        /// <summary>RACE-016: mine casing: sturdy (a bolt is 60, a cell 700: about a dozen hits on one spot before it breaks and the
+        /// charge cooks off) and light, so shots shove a mine around first.</summary>
+        static void EnsureMineCasing()
+        {
+            string path = "Assets/Game/Content/Blocks/block_mine_casing.asset";
+            if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset("Assets/Game/Content/Blocks/block_hull.asset", path))
+                throw new InvalidOperationException("copy block_hull");
+            var asset = AssetDatabase.LoadMainAssetAtPath(path); var so = new SerializedObject(asset);
+            so.FindProperty("id").stringValue = "block_mine_casing"; so.FindProperty("displayName").stringValue = "Mine Casing";
+            so.FindProperty("description").stringValue = "A mine's armoured shell. Shots knock the mine around; enough of them crack it and set the charge off.";
+            so.FindProperty("formerIds").arraySize = 0; so.FindProperty("cellHp").floatValue = 700; so.FindProperty("cellMass").floatValue = 6;
+            so.FindProperty("tradeable").boolValue = false; so.FindProperty("basePrice").intValue = 0;
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
+        }
+
         static MineDefinition Mine()
         {
             using var service = new Game.Data.Services.ContentService(ContentDatabaseBuilder.Rebuild());
             var catalog = service.Catalog; var content = new Game.Voxel.Model.VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
-            ushort hull = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_hull")));
+            ushort casing = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_mine_casing")));
             using var structure = new Game.Voxel.Model.VoxelStructure(.5f);
-            void Put(int x, int y, int z, byte colour) => structure.TryPlaceBlock(new Game.Voxel.Model.BlockPlacement { Block = hull, Origin = new Unity.Mathematics.int3(x, y, z), Color = colour }, content);
-            for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) for (int z = -1; z <= 1; z++) Put(x, y, z, (byte)((x + y + z & 1) == 0 ? 2 : 11));
+            void Put(int x, int y, int z, byte colour) => structure.TryPlaceBlock(new Game.Voxel.Model.BlockPlacement { Block = casing, Origin = new Unity.Mathematics.int3(x, y, z), Color = colour }, content);
+            // RACE-016: a 3.5 m sphere of mine casing (soot and graphite, a dark-red band round its waist) with six 1.5 m spikes:
+            // big enough to hit, about 1.1 t so a bolt knocks it ~12 m/s.
+            for (int x = -3; x <= 3; x++) for (int y = -3; y <= 3; y++) for (int z = -3; z <= 3; z++)
+            {
+                if (x * x + y * y + z * z > 11) continue;
+                Put(x, y, z, (byte)(y == 0 ? 2 : (x + y + z & 1) == 0 ? 1 : 11));
+            }
             foreach (var d in new[] { new Unity.Mathematics.int3(1, 0, 0), new Unity.Mathematics.int3(-1, 0, 0), new Unity.Mathematics.int3(0, 1, 0),
                 new Unity.Mathematics.int3(0, -1, 0), new Unity.Mathematics.int3(0, 0, 1), new Unity.Mathematics.int3(0, 0, -1) })
-                for (int k = 2; k <= 3; k++) Put(d.x * k, d.y * k, d.z * k, 11);
+                for (int k = 4; k <= 6; k++) Put(d.x * k, d.y * k, d.z * k, k == 6 ? (byte)14 : (byte)11);
             string bpPath = "Assets/Game/Content/Ships/ship_device_mine_proximity.asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(bpPath);
             if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, bpPath); }
@@ -98,9 +119,12 @@ namespace Game.Editor.Content
             var m = new SerializedObject(mine);
             m.FindProperty("id").stringValue = "mine_proximity"; m.FindProperty("blueprint").objectReferenceValue = blueprint;
             var fuse = m.FindProperty("fuse");
-            fuse.FindPropertyRelative("ArmSeconds").floatValue = 1.5f; fuse.FindPropertyRelative("TriggerRadius").floatValue = 16;
-            fuse.FindPropertyRelative("FuseSeconds").floatValue = .6f; fuse.FindPropertyRelative("BlastRadius").floatValue = 18;
-            fuse.FindPropertyRelative("BlastDamage").floatValue = 450; fuse.FindPropertyRelative("MinTriggerMass").floatValue = 2000;
+            // RACE-016 (owner: "it should be impactful ... hurt and also send you flying"): 2500 at the centre over 28 m, and a push of
+            // 900 kN·s (a 25 t racer at the centre leaves at ~36 m/s) through the same explosion path as every explosive.
+            fuse.FindPropertyRelative("ArmSeconds").floatValue = 1.5f; fuse.FindPropertyRelative("TriggerRadius").floatValue = 14;
+            fuse.FindPropertyRelative("FuseSeconds").floatValue = .5f; fuse.FindPropertyRelative("BlastRadius").floatValue = 28;
+            fuse.FindPropertyRelative("BlastDamage").floatValue = 2500; fuse.FindPropertyRelative("MinTriggerMass").floatValue = 300;
+            fuse.FindPropertyRelative("BlastImpulse").floatValue = 900000; fuse.FindPropertyRelative("CasingHp").floatValue = 600;   // ~10 bolts
             m.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(mine);
             AssetDatabase.SaveAssets();
             return mine;
@@ -123,7 +147,7 @@ namespace Game.Editor.Content
         static TrackLook Look() => new TrackLook
         {
             Curtain = Holo("gate", 0, new Color(1f, .62f, .2f) * 2.2f), Fence = Holo("fence", 1, new Color(.25f, .62f, 1f) * 2.0f),
-            Pad = Holo("boost", 2, new Color(.35f, 1f, .5f) * 2.6f), Halo = Holo("halo", 3, new Color(1f, .22f, .15f) * 2.6f),
+            Pad = Holo("boost", 2, new Color(.35f, 1f, .5f) * 1.8f), Halo = Holo("halo", 3, new Color(1f, .22f, .15f) * 2.6f),
             Glow = Holo("glow", 4, Color.white * 3f), Ribbon = Holo("ribbon", 5, new Color(.3f, .7f, 1f) * 2.2f),
             Solid = Holo("light", 6, Color.white * 2.6f), Surface = Holo("lane", 7, new Color(.45f, .62f, 1f) * 1.1f),
             Sign = Holo("board", 8, new Color(1f, .58f, .15f) * 2.6f), Dust = Holo("dust", 9, new Color(.7f, .8f, 1f, .55f) * .8f),
@@ -167,16 +191,16 @@ namespace Game.Editor.Content
             return best;
         }
 
-        /// <summary>RACE-016: battle debris outside the fences, every 70–130 m of wall on the side away from every route; plates that sit
-        /// on the flight plane only well clear of it. Seeded: the same track every build.</summary>
+        /// <summary>RACE-016: battle debris outside the fences, every 70–130 m of wall on the side away from every route, clear of wrecks
+        /// and mine fields (a mine scattered into a fragment cooks off); plates that sit on the flight plane only well clear of it. Seeded: the same track every build.</summary>
         static int DebrisPieces(List<TrackPiece> pieces, Dictionary<string, ShipBlueprintDefinition> parts, List<List<Vector2>> walls, List<TrackPath> routes,
-            Func<Vector2, bool> inWreck)
+            Func<Vector2, bool> blocked)
         {
             var rng = new System.Random(16); int count = 0;
             float R() => (float)rng.NextDouble();
             bool Clear(Vector2 q, float margin)
             {
-                if (inWreck(q)) return false;
+                if (blocked(q)) return false;
                 foreach (var r in routes) if (RouteDistance(r, q) < r.Width * .5f + margin) return false;
                 return true;
             }
@@ -324,7 +348,9 @@ namespace Game.Editor.Content
                 foreach (var q in posts) pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Post], Position = TrackStructureBuilder.Place(q, 0), Kind = TrackPieceKind.Pylon });
                 foreach (var (c, yaw) in pylons) pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Pylon], Position = TrackStructureBuilder.Place(c, yaw), Yaw = yaw, Kind = TrackPieceKind.Pylon });
                 pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Gantry], Position = TrackStructureBuilder.Place(byId[0].Position, byId[0].Yaw), Yaw = byId[0].Yaw, Kind = TrackPieceKind.Wall });
-                int debris = DebrisPieces(pieces, parts, keptWalls, routes, InWreck);
+                var minefields = new List<(Vector2 c, float r)>();
+                foreach (JObject m in (JArray)json["mines"]) minefields.Add((V(m["c"]), (float)m["r"]));
+                int debris = DebrisPieces(pieces, parts, keptWalls, routes, q => InWreck(q) || minefields.Exists(f => Vector2.Distance(q, f.c) < f.r + 30));
                 Debug.Log($"{id}: {posts.Count} emitter posts, {pylons.Count} pylons, {debris} debris");
             }
             AssetDatabase.SaveAssets();

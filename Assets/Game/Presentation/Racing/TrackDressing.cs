@@ -34,7 +34,7 @@ namespace Game.Presentation.Racing
             look = track.Look;
             Root = new GameObject("Race track dressing"); Root.transform.SetParent(parent, false);
             world = new GameObject("Race dressing (world)"); world.transform.SetParent(parent, false);
-            if (look.Glow == null) { Debug.LogWarning("TrackDressing: track " + track.Id + " has no Look materials (Game/Content/Build Race Track)"); return; }
+            if (look.Glow == null) { Game.Core.GameLog.Warn("Race", "TrackDressing: track " + track.IdString + " has no Look materials (Game/Content/Build Race Track)"); return; }
             Lanes(track); Walls(track); Gates(track); Pads(track); Corners(track); Grid(track); WreckLights(track); Dust(); Guide();
             haloMesh = Keep(Disc(1)); glowMesh = Keep(Sprite(1));
         }
@@ -87,11 +87,11 @@ namespace Game.Presentation.Racing
                 Color c; float pulse = .5f + .5f * Mathf.Sin(time * 3.2f + i);
                 switch (state)
                 {
-                    case MineLook.Arming: c = new Color(.55f, .6f, .75f) * 1.1f; break;
-                    case MineLook.Triggered: c = Mathf.Sin(time * 30) > 0 ? Color.white * 5 : new Color(1f, .2f, .1f) * 5; break;
-                    default: c = new Color(1f, .2f, .13f) * (1.4f + 1.6f * pulse); break;
+                    case MineLook.Arming: c = new Color(.55f, .6f, .75f) * .6f; break;
+                    case MineLook.Triggered: c = Mathf.Sin(time * 30) > 0 ? Color.white * 3 : new Color(1f, .2f, .1f) * 3; break;
+                    default: c = new Color(1f, .18f, .12f) * (.45f + .45f * pulse); break;   // owner: the red was too bright
                 }
-                Tint(halo, c, 0); Tint(glow, c * 1.2f, 0);
+                Tint(halo, c, 0); Tint(glow, c * .9f, 0);
             }
         }
 
@@ -214,8 +214,8 @@ namespace Game.Presentation.Racing
                     Vector2 normal = Normal(pts, i, false) * (radius + 1.5f);
                     fenceB.Vertex(new Vector3(p.x, -3, p.y), Color.white, new Vector2(along * way, 0), new Vector2(0, 12));
                     fenceB.Vertex(new Vector3(p.x, 9, p.y), Color.white, new Vector2(along * way, 1), new Vector2(0, 12));
-                    ribbonB.Vertex(new Vector3(p.x - normal.x, -.4f, p.y - normal.y), Color.white, new Vector2(along * way, 0), default);
-                    ribbonB.Vertex(new Vector3(p.x + normal.x, -.4f, p.y + normal.y), Color.white, new Vector2(along * way, 1), default);
+                    ribbonB.Vertex(new Vector3(p.x - normal.x, -.4f, p.y - normal.y), Color.white, new Vector2(along * way, 0), new Vector2(0, (radius + 1.5f) * 2));
+                    ribbonB.Vertex(new Vector3(p.x + normal.x, -.4f, p.y + normal.y), Color.white, new Vector2(along * way, 1), new Vector2(0, (radius + 1.5f) * 2));
                     if (i > 0) { fenceB.Quad(f0 + (i - 1) * 2, f0 + i * 2, f0 + i * 2 + 1, f0 + (i - 1) * 2 + 1); ribbonB.Quad(r0 + (i - 1) * 2, r0 + (i - 1) * 2 + 1, r0 + i * 2 + 1, r0 + i * 2); }
                 }
                 lastAlong = along;
@@ -312,10 +312,10 @@ namespace Game.Presentation.Racing
                 Vector3 c = new Vector3(z.Position.x, -.4f, z.Position.y), f = new Vector3(Mathf.Sin(z.Yaw), 0, Mathf.Cos(z.Yaw)), r = new Vector3(f.z, 0, -f.x);
                 float len = he.y * 2;
                 int k = pad.Count;
-                pad.Vertex(c - r * he.x - f * he.y, Color.white, new Vector2(0, 0), new Vector2(len, 0));
-                pad.Vertex(c + r * he.x - f * he.y, Color.white, new Vector2(1, 0), new Vector2(len, 0));
-                pad.Vertex(c + r * he.x + f * he.y, Color.white, new Vector2(1, len), new Vector2(len, 0));
-                pad.Vertex(c - r * he.x + f * he.y, Color.white, new Vector2(0, len), new Vector2(len, 0));
+                pad.Vertex(c - r * he.x - f * he.y, Color.white, new Vector2(0, 0), new Vector2(len, he.x * 2));
+                pad.Vertex(c + r * he.x - f * he.y, Color.white, new Vector2(1, 0), new Vector2(len, he.x * 2));
+                pad.Vertex(c + r * he.x + f * he.y, Color.white, new Vector2(1, len), new Vector2(len, he.x * 2));
+                pad.Vertex(c - r * he.x + f * he.y, Color.white, new Vector2(0, len), new Vector2(len, he.x * 2));
                 pad.Quad(k, k + 1, k + 2, k + 3);
                 foreach (float side in new[] { -1f, 1f })
                 {
@@ -354,10 +354,11 @@ namespace Game.Presentation.Racing
                     Vector3 c = new Vector3(at.x, 0, at.y), f = new Vector3(forward.x, 0, forward.y);
                     const float W = 24, H = 9;
                     int k = b.Count;
-                    b.Vertex(c - f * W * .5f + Vector3.up * -1, Color.white, new Vector2(0, 0), new Vector2(1, 0));
-                    b.Vertex(c + f * W * .5f + Vector3.up * -1, Color.white, new Vector2(1, 0), new Vector2(1, 0));
-                    b.Vertex(c + f * W * .5f + Vector3.up * (H - 1), Color.white, new Vector2(1, 1), new Vector2(1, 0));
-                    b.Vertex(c - f * W * .5f + Vector3.up * (H - 1), Color.white, new Vector2(0, 1), new Vector2(1, 0));
+                    var size = new Vector2(W, H);
+                    b.Vertex(c - f * W * .5f + Vector3.up * -1, Color.white, new Vector2(0, 0), size);
+                    b.Vertex(c + f * W * .5f + Vector3.up * -1, Color.white, new Vector2(1, 0), size);
+                    b.Vertex(c + f * W * .5f + Vector3.up * (H - 1), Color.white, new Vector2(1, 1), size);
+                    b.Vertex(c - f * W * .5f + Vector3.up * (H - 1), Color.white, new Vector2(0, 1), size);
                     b.Quad(k, k + 1, k + 2, k + 3);
                 }
             }
@@ -373,8 +374,8 @@ namespace Game.Presentation.Racing
                 Vector3 c = new Vector3(s.Position.x, -.5f, s.Position.y), f = new Vector3(Mathf.Sin(s.Yaw), 0, Mathf.Cos(s.Yaw)), r = new Vector3(f.z, 0, -f.x);
                 float hw = 9, hl = 15;
                 Vector3 p0 = c - r * hw - f * hl, p1 = c + r * hw - f * hl, p2 = c + r * hw + f * hl, p3 = c - r * hw + f * hl;
-                frames.Beam(p0, p1, .8f, .2f, Color.white); frames.Beam(p1, p2, .8f, .2f, Color.white);
-                frames.Beam(p2, p3, .8f, .2f, Color.white); frames.Beam(p3, p0, .8f, .2f, Color.white);
+                frames.Beam(p0, p1, 1, .2f, Color.white); frames.Beam(p1, p2, 1, .2f, Color.white);
+                frames.Beam(p2, p3, 1, .2f, Color.white); frames.Beam(p3, p0, 1, .2f, Color.white);
                 glows.Glow(p2 + Vector3.up, 4, Color.white, 1, 0); glows.Glow(p3 + Vector3.up, 4, Color.white, 1, .5f);
             }
             var lights = Add("grid frames", frames, look.Solid); var spots = Add("grid lights", glows, look.Glow);
@@ -400,7 +401,7 @@ namespace Game.Presentation.Racing
             for (int i = 0; i < 600; i++)
             {
                 var p = new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble());
-                float size = .5f + (float)rng.NextDouble() * 1.1f; var c = Color.white * (.4f + (float)rng.NextDouble() * .6f);
+                float size = .25f + (float)rng.NextDouble() * .3f; var c = Color.white * (.25f + (float)rng.NextDouble() * .4f);
                 int k = b.Count;
                 b.Vertex(p, c, new Vector2(-1, -1), new Vector2(-size, -size)); b.Vertex(p, c, new Vector2(1, -1), new Vector2(size, -size));
                 b.Vertex(p, c, new Vector2(1, 1), new Vector2(size, size)); b.Vertex(p, c, new Vector2(-1, 1), new Vector2(-size, size));
@@ -478,9 +479,9 @@ namespace Game.Presentation.Racing
                 {
                     float a0 = s * Mathf.PI * 2 / sides + Mathf.PI / sides, a1 = (s + 1) * Mathf.PI * 2 / sides + Mathf.PI / sides;
                     Vector3 d0 = new Vector3(Mathf.Cos(a0), 0, Mathf.Sin(a0)) * r, d1 = new Vector3(Mathf.Cos(a1), 0, Mathf.Sin(a1)) * r;
-                    int k = Count;
-                    Vertex(c + d0 + Vector3.up * y0, colour, new Vector2(0, 0), default); Vertex(c + d1 + Vector3.up * y0, colour, new Vector2(1, 0), default);
-                    Vertex(c + d1 + Vector3.up * y1, colour, new Vector2(1, 1), default); Vertex(c + d0 + Vector3.up * y1, colour, new Vector2(0, 1), default);
+                    int k = Count; var size = new Vector2(Vector3.Distance(d0, d1), y1 - y0);
+                    Vertex(c + d0 + Vector3.up * y0, colour, new Vector2(0, 0), size); Vertex(c + d1 + Vector3.up * y0, colour, new Vector2(1, 0), size);
+                    Vertex(c + d1 + Vector3.up * y1, colour, new Vector2(1, 1), size); Vertex(c + d0 + Vector3.up * y1, colour, new Vector2(0, 1), size);
                     Quad(k, k + 1, k + 2, k + 3);
                 }
             }
@@ -488,9 +489,9 @@ namespace Game.Presentation.Racing
             public void Strip(Vector3 c, Vector3 up, Vector3 across, float width, float y0, float y1, Color colour)
             {
                 Vector3 side = Vector3.Cross(up, across).normalized * width * .5f;
-                int k = Count;
-                Vertex(c - side + up * y0, colour, new Vector2(0, 0), default); Vertex(c + side + up * y0, colour, new Vector2(0, 1), default);
-                Vertex(c + side + up * y1, colour, new Vector2(1, 1), default); Vertex(c - side + up * y1, colour, new Vector2(1, 0), default);
+                int k = Count; var size = new Vector2(y1 - y0, width);
+                Vertex(c - side + up * y0, colour, new Vector2(0, 0), size); Vertex(c + side + up * y0, colour, new Vector2(0, 1), size);
+                Vertex(c + side + up * y1, colour, new Vector2(1, 1), size); Vertex(c - side + up * y1, colour, new Vector2(1, 0), size);
                 Quad(k, k + 1, k + 2, k + 3);
             }
             /// A box beam from a to b, `width` across (flat) and `height` tall (uv.y 0..1 across the top face and the sides).
@@ -499,9 +500,9 @@ namespace Game.Presentation.Racing
                 Vector3 along = (b - a).normalized, side = Vector3.Cross(Vector3.up, along).normalized * width * .5f, up = Vector3.up * height * .5f;
                 void Face(Vector3 o, Vector3 u)
                 {
-                    int k = Count;
-                    Vertex(a + o - u, colour, new Vector2(0, 0), default); Vertex(a + o + u, colour, new Vector2(0, 1), default);
-                    Vertex(b + o + u, colour, new Vector2(1, 1), default); Vertex(b + o - u, colour, new Vector2(1, 0), default);
+                    int k = Count; var size = new Vector2(Vector3.Distance(a, b), 2 * u.magnitude);
+                    Vertex(a + o - u, colour, new Vector2(0, 0), size); Vertex(a + o + u, colour, new Vector2(0, 1), size);
+                    Vertex(b + o + u, colour, new Vector2(1, 1), size); Vertex(b + o - u, colour, new Vector2(1, 0), size);
                     // front faces wind clockwise seen from outside: their normal cross(v1 − v0, v2 − v0) points along o
                     if (Vector3.Dot(Vector3.Cross(2 * u, b - a), o) >= 0) Quad(k, k + 1, k + 2, k + 3); else Quad(k, k + 3, k + 2, k + 1);
                 }

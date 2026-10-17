@@ -5,11 +5,11 @@ namespace Game.App.DevRuntime.Commands
     public sealed class RaceDevCommand : IDevCommand
     {
         public string Name => "race";
-        public string Usage => "race open [laps=<n>] | race start | race end | race info | race respawn | race gate=<id> [back=<m>] | race blast [radius=<m>] [damage=<n>]";
+        public string Usage => "race open [laps=<n>] | race start | race end | race info | race respawn | race gate=<id> [back=<m>] | race blast [radius=<m>] [damage=<n>] | race mine [ahead=<m>]";
         public string Summary => "Open Track 01 in the playground, start the countdown, end it, or show progress";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
-            string error = DevCommandRegistry.UnknownArgument(args, Name, "laps", "gate", "back", "x", "z", "phase", "ago", "start", "racers");
+            string error = DevCommandRegistry.UnknownArgument(args, Name, "laps", "gate", "back", "x", "z", "phase", "ago", "start", "racers", "radius", "damage", "ahead");
             if (error != null) return DevCommandResult.Fail(error);
             var playground = ctx.Host.Playground;
             if (playground == null || playground.Race == null) return DevCommandResult.Fail("playground unavailable");
@@ -30,6 +30,7 @@ namespace Game.App.DevRuntime.Commands
                 "end" => End(race),
                 "respawn" => race.Respawn(),
                 "info" => DevCommandResult.Ok(race.Info()),
+                "mine" => race.MineAhead((float)args.GetDouble("ahead", 60)),
                 "blast" => race.Blast((float)args.GetDouble("radius", 3), (float)args.GetDouble("damage", 6000)),
                 _ => DevCommandResult.Fail(Usage)
             };

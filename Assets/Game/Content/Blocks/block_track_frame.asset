@@ -15,7 +15,7 @@ MonoBehaviour:
   id: block_track_frame
   formerIds: []
   displayName: Track Frame
-  description: 'Race-track structure: emitter posts, pylons and gantries. Tougher than hull; a sustained burst cuts it.'
+  description: 'Race-track structure: emitter posts, pylons and gantries. Lighter than hull: a short burst or a ram breaks it.'
   category: 0
   rarity: 0
   basePrice: 0
@@ -32,7 +32,7 @@ MonoBehaviour:
     Bits: 16777215
   attachFaces: 63
   mirrorPartner: {fileID: 0}
-  cellHp: 400
+  cellHp: 60
   functionHp: 0
   cellMass: 30
   armorClass: 0
