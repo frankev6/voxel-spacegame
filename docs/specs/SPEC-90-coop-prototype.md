@@ -371,6 +371,19 @@ Advisory, as ADR-0042 says: measure, record, never block. Spike targets:
     - The HUD snapshot is not compared directly, because the host draws no HUD for a guest's ship. The line holds the state the HUD is built from.
 - **Tests:** `NetWriterRulesTests` (EditMode), `coop-parity.sh`.
 
+### NET-019 — Pre-merge fixes
+- **Milestone:** M4 (spike)
+- **Tier:** frontier
+- **Depends on:** `NET-018`
+- **Do:** Fix what NET-015…018 recorded as open, then merge to `main` (owner: "fix the issues you found … lets merge these changes back into main").
+- **Files:** `Assets/Game/Simulation/Flight/PropulsionJob.cs`, `Assets/Game/Simulation/Abilities/AbilitySlotApplySystem.cs`, `Assets/Game/Simulation/Power/PowerAllocateJob.cs`, `Assets/Game/App/DevRuntime/Playground/DevPlayground.cs`, `Assets/Game/Content/Abilities/ability_speed_boost.asset`
+- **Acceptance criteria:**
+  - [x] The ABL-005 braking bound passes, and a resting ship's cancelling thrusters still bleed out (`NullSpace_BleedsAtRest`).
+  - [x] A guest's energy meter pays its host-granted ability costs once (`Guest_PaysHostActivationOnce`; live 200 → 191 after a boost).
+  - [x] A guest shows the host's playground beacons, labels, radar markers and radar range.
+  - [x] The boost is back to its shipped 1.8x speed and 2x thrust.
+- **Tests:** `PropulsionTests`, `AbilitySystemTests` (EditMode), `AbilityScenarioTests` (PlayMode), full suites.
+
 ## 10. Open questions
 | # | Question | Default | Decider | Answer |
 |---|---|---|---|---|

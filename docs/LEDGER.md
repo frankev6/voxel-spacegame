@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 13 | 11 | 0 | 0 | 158 | 0 | 182 | 4 |
-| M4 | 14 | 2 | 0 | 0 | 16 | 0 | 32 | 6 |
+| M4 | 9 | 2 | 0 | 0 | 22 | 0 | 33 | 6 |
 | A0 | 4 | 1 | 0 | 1 | 10 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -521,6 +521,7 @@
 | NET-016 | One code path: abilities and status | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-015 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 69cb8412 | ability timers and effects on every machine, activation on the host, slots replicated; guest hotbar and boost prediction live; spike worktree only |
 | NET-017 | One code path: galaxy state for guests | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-016 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | d60fca59 | salvage collect and pull on every machine, notices to the pilot's machine, combat status per pilot, stance table to guests; body interactables deferred (sandbox-only co-op); spike worktree only |
 | NET-018 | One code path: enforcement | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-013 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | a59b2b2b | decisions table and test, Game.Net IL writer rules, net parity and coop-parity.sh; spike worktree only |
+| NET-019 | Pre-merge fixes | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-018 | yes | done | lead (claude-opus-5-5) | 2026-10-16 | 04518d70 | braking bound, guest energy, guest playground beacons, shipped boost, RequireRenderer in the Editor, merchant header; merged to main |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |
 | ART-003 | Mood boards per direction | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | frontier | — | yes | done | claude (claude-opus-5-5) | 2026-10-11 | a3d0d92 | 13 public-domain images added (owner-approved). Done under ADR-0019 (no per-task review) |
@@ -1235,6 +1236,18 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-16 — NET-019: pre-merge fixes and merge to main (lead, claude-opus-5-5)
+- Owner, verbatim: "fix the issues you found, im happy with the multiplayer so far, my biggest question originally with this was if its feasable at all with so many voxels and you proved it was. lets merge these changes back into main so we can continue".
+- **Fixed** (ADR-0117 note 8):
+  - ABL-005 braking bound: `PropulsionJob` keeps the exact warm start when it reaches the target measurably better than the shrunk one; `NullSpace_BleedsAtRest` keeps QA-001's resting fix.
+  - Guest energy meter pays host-granted ability costs once (`Guest_PaysHostActivationOnce`; live 200 → 191 after a guest boost).
+  - Guests show the host's playground beacons and radar range (`playground view`, live screenshot).
+  - Boost back to the shipped 1.8x speed and 2x thrust (NET-012's 4x playtest tuning removed).
+  - Found by the full suites: `VoxelConfigFactory` cleared `RequireRenderer` in a headless Editor too (NET-013); now only in a player. `MerchantView` "Leave" overflowed at 1280×720 with QA-001's fonts; panel header actions no longer shrink.
+- **Opening playthrough flake:** six isolated runs and the full run passed; not reproduced.
+- **Verified, headless full suites:** EditMode 1,805 passed, 0 failed (1 skipped, the profiler case). PlayMode 342 passed, 13 failed, 42 skipped: QA-001's twelve recorded `main` failures (test-order pollution, `-nographics` keyboard, UI Toolkit leak in R25) and R26 with the same UI Toolkit leak, which passes alone (1/0). Targeted: UI PlayMode 129/0, Flight EditMode 47/0, Abilities 16/0, Net 21/0, Power 49/0, AbilityScenario 4/0.
+- **Merge:** `main` fast-forwarded to this branch. It carries QA-001 (`task/QA-001-owner-findings`, a542ba85), which the co-op branch was built on.
 
 ### 2026-10-16 — NET-018: one code path, enforcement (lead, claude-opus-5-5)
 - **Built:**
