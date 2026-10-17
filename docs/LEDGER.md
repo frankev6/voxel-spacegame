@@ -555,12 +555,12 @@
 | RACE-005 | Race decider | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-004, HAZ-006 | no | todo |  |  |  |  |
 | RACE-006 | Respawn | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-005 | no | todo |  |  |  |  |
 | RACE-007 | Race HUD, gate visuals and results | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-005 | no | todo |  |  |  |  |
-| RACE-008 | The Dart line: Needle, Kite and Gimbal | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-003, HAZ-001 | no | todo |  |  |  |  |
+| RACE-008 | The Dart line: Needle, Kite and Gimbal | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-003, HAZ-001 | no | done | claude (claude-opus-5-5) | 2026-10-17 | (this commit) | Needle 33 t, Kite 55 t, Gimbal 24 t; spawn, validate in the ship editor, fly (95/59/115 m/s after 4 s of thrust); racers_in_game_first_build.png |
 | RACE-009 | Race replication and co-op start | [SPEC-92](specs/SPEC-92-racing.md) | M4 | frontier | RACE-006, HAZ-010 | no | todo |  |  |  |  |
 | RACE-010 | Windows dev build and remote playtest guide | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | todo |  |  |  |  |
 | RACE-011 | Two-player race playtest with Daniel | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-007, RACE-008, RACE-009, RACE-010, RACE-013, RACE-014, RACE-015 | no | todo |  |  |  |  |
 | RACE-012 | Graveyard wrecks | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-002, HAZ-001 | no | todo |  |  |  |  |
-| RACE-013 | The Ram line: Battering Ram, Salvage Tug and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | todo |  |  |  |  |
+| RACE-013 | The Ram line: Battering Ram, Salvage Tug and Hammerhead | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-008 | no | in-progress | claude (claude-opus-5-5) | 2026-10-17 | (this commit) | Hulls built: Battering Ram 126 t, Salvage Tug 84 t, Hammerhead 71 t; spawn, validate, fly (25/45/51 m/s after 4 s). Impact driver weapon pending; they carry small plasma turrets meanwhile |
 | RACE-014 | Racer abilities: Slip and Shove | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-013, HAZ-002 | no | todo |  |  |  |  |
 | RACE-015 | Track 01 set pieces | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | RACE-004, HAZ-013, HAZ-014, HAZ-016, HAZ-017, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
@@ -1279,6 +1279,17 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-17 — RACE-008: the six racers built and flying (lead, claude-opus-5-5)
+- **Pipeline.** `export_racers.py` turns each approved plan view into voxel cells:
+  - a domed hull with slope planes;
+  - plates and armour one cell proud, cabins two;
+  - "#NN" livery paints;
+  - module boxes for engines, guns and ring thrusters.
+
+  `RacerShipBuilder` feeds them through `NocturneShipBuilder` (now reusable: a source folder parameter, and paint-index tags).
+- **Builder fix.** `SeatCoreAndReactors` could seat a reactor over the core it had just placed, which cleared the core's cells and orphaned it. The Salvage Tug showed "Ship needs a core" in the playground. Seating now only lands on plain hull cells. The Gimbal also needed a tail engine, because the editor requires forward thrust.
+- **Results.** All six spawn, validate and fly (numbers in `docs/design/racing/racers.md`). RacerShipTests: core, engines and guns; every Dart lighter than every Ram; ship-editor validation clean. ProjectContentTests also pass, including the one-piece check. The Rams are slow (25–51 m/s after 4 s); tuning and the impact driver are next.
 
 ### 2026-10-17 — Owner decisions on mechanics, track and racers; amendment written (lead, claude-opus-5-5)
 - **Owner, verbatim:**

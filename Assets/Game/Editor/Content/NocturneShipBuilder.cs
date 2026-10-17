@@ -85,13 +85,14 @@ namespace Game.Editor.Content
         sealed class Target { public int3 Cell; public byte Colour; public Bits Bits; public bool Done; }
 
         // ---------------------------------------------------------------------------------------------------------- build
-        static void BuildShip(ContentService service, string id, string name, int reactors)
+        /// <summary>Builds one blueprint from a look-book-format JSON in <paramref name="source"/> (RacerShipBuilder reuses it).</summary>
+        internal static void BuildShip(ContentService service, string id, string name, int reactors, string source = Source)
         {
             var catalog = service.Catalog;
             var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
             ushort Index(string block) => catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId(block)));
             var kit = new Kit(ref service.Orientations.Value);
-            var json = JObject.Parse(File.ReadAllText(Source + id + ".json"));
+            var json = JObject.Parse(File.ReadAllText(source + id + ".json"));
 
             // Look-book cell (x, y, z) -> game cell (-x - 1, z, y), recentred: centred along the keel, keel bottom at 0.
             int3 lo = int.MaxValue, hi = int.MinValue;
@@ -104,7 +105,8 @@ namespace Game.Editor.Content
             foreach (JArray c in (JArray)json["cells"])
             {
                 var cell = Map((int)c[0], (int)c[1], (int)c[2]);
-                byte colour = TagColour.TryGetValue((string)c[3], out var k) ? k : (byte)0;
+                string tag = (string)c[3];   // a look-book tag, or "#NN" for a paint index (racers, RACE-008)
+                byte colour = TagColour.TryGetValue(tag, out var k) ? k : tag.Length > 1 && tag[0] == '#' && byte.TryParse(tag.Substring(1), out var paint) ? paint : (byte)0;
                 if (c[4].Type == JTokenType.Null) { full.Add((cell, colour)); continue; }
                 // Cell-local look-book half-spaces n . p <= d become game-local ones: n' = (-n.x, n.z, n.y), d' = d - n.x.
                 var planes = new List<(float3 n, float d)>();
@@ -413,8 +415,9 @@ namespace Game.Editor.Content
                     for (int dy = -r; dy <= r; dy++) for (int dz = -r; dz <= r; dz++)
                     {
                         var c = near + new int3(0, dy, dz); bool solid = true;
+                        // Only plain hull cells: seating over an earlier core or reactor would clear its cells and orphan it (RACE-013).
                         for (int ex = -2; ex <= 3 && solid; ex++) for (int ey = -2; ey <= 3 && solid; ey++) for (int ez = -2; ez <= 3 && solid; ez++)
-                            solid = !structure.GetCell(c + new int3(ex, ey, ez)).IsAir;
+                            solid = structure.TryGetBlockAt(c + new int3(ex, ey, ez), out _, out int instance) && instance < 0;
                         if (solid) return c;
                     }
                 return near;

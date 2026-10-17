@@ -178,6 +178,7 @@ def dart_gimbal():
     s.add("glass", M([(3.4, 0.0), (2.4, 0.7), (1.0, 0.85)]))
     s.add("gun", R(4.0, 0.2, 10.2, -0.2)); s.add("glow", C(10.4, 0, 0.3, 10))
     s.add("plate", M([(-1.6, 1.8), (-3.4, 1.4), (-3.4, 0.6), (-1.6, 0.9)]))
+    s.add("frame", bell(-4.0, 0.0, 0.6, 1.0)); s.add("glow", bell(-4.2, 0.0, 0.4, 0.6))   # tail engine: forward thrust
     for k in range(16):
         a = k * math.tau / 16
         s.add("seam", [(math.cos(a) * 5.95, math.sin(a) * 5.95), (math.cos(a) * 7.35, math.sin(a) * 7.35)])

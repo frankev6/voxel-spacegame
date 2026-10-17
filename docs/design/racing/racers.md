@@ -26,3 +26,23 @@ Picks before the decision (all six were chosen):
 - **Gimbal and the Salvage tug** are the most novel, because each brings a mechanic: omni-thrust, and the tether.
 
 The ratings are design intent. RACE-008 builds the approved shapes from DESIGN-GUIDE blocks and measures them.
+
+## First build (RACE-008, RACE-013)
+
+All six are built from the approved plans: `ArtSource/Racing/export_racers.py` extrudes them into 0.5 m voxel cells, and `RacerShipBuilder` places blocks with the NOCTURNE builder's kit matching. Each one spawns in the playground, passes ship-editor validation and flies.
+
+![The six racers in game](img/racers_in_game_first_build.png)
+
+| Ship | Cells | Mass | Speed after 4 s of full thrust |
+|---|---|---|---|
+| Needle | 1,377 | 33 t | 95 m/s |
+| Kite | 2,203 | 55 t | 59 m/s |
+| Gimbal | 960 | 24 t | 115 m/s |
+| Battering Ram | 5,219 | 126 t | 25 m/s |
+| Salvage Tug | 3,517 | 84 t | 45 m/s |
+| Hammerhead | 3,009 | 71 t | 51 m/s |
+
+Still to do:
+- **Tuning.** The Rams accelerate too slowly to race, and the Kite trails the other Darts. They get engines, then a pass in RACE-011.
+- **Weapons.** The impact driver replaces the placeholder plasma turrets (RACE-013).
+- **Abilities.** Slip and Shove are RACE-014.
