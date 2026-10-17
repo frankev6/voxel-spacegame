@@ -35,14 +35,11 @@ namespace Game.Tests.EditMode.Galaxy
             foreach (var leg in RaceLines.Build(track))
             {
                 legs.Add(new RaceLeg { From = (byte)leg.From, To = (byte)leg.To, Start = points.Length, Count = leg.Points.Count, Length = leg.Length });
-                foreach (var (p, half) in leg.Points)
-                {
-                    float2 push = RaceLines.Push(track, p);
-                    points.Add(new RaceLegPoint { Position = p, HalfWidth = half, PushSpeed = push.x, PushAccel = push.y });
-                }
+                foreach (var point in RaceLines.Points(track, leg)) points.Add(point);
             }
         }
         [TearDown] public void TearDown() => DisposeTrackedWorlds();
+        string LegOf(int point) { foreach (var l in EM.GetBuffer<RaceLeg>(race)) if (point >= l.Start && point < l.Start + l.Count) return l.From + "->" + l.To; return "?"; }
         // a mid-weight racer (strafe 15 m/s², reverse 15 m/s², yaw cap 120°/s)
         static RacerPlan.Ability Racer(float speed) => new RacerPlan.Ability { Speed = speed, Lateral = 13, Brake = 12, YawCap = math.radians(120) };
 
@@ -108,20 +105,50 @@ namespace Game.Tests.EditMode.Galaxy
     
 
         [Test]
-        public void Choose_NoBranchItCannotCorner_TheBreachSOnTheBoostStrip()
+        public void Choose_NeverABranchItCannotCorner_WhenOneItCanExists()
         {
             var legs = EM.GetBuffer<RaceLeg>(race); var points = EM.GetBuffer<RaceLegPoint>(race);
             var toFinish = RacerPlan.ToFinish(legs, track.Gates.Length);
-            int main = -1, breach = -1;
-            for (int i = 0; i < legs.Length; i++) { if (legs[i].From == 0 && legs[i].To == 1) main = i; if (legs[i].From == 0 && legs[i].To == 10) breach = i; }
-            Assert.IsTrue(main >= 0 && breach >= 0, "gate 0 forks to 1 (main) and 10 (breach)");
-            bool pushed = false;
-            for (int k = legs[breach].Start; k < legs[breach].Start + legs[breach].Count; k++) pushed |= points[k].PushSpeed > 0;
-            Assert.IsTrue(pushed, "the breach leg starts on the boost strip");
-            Assert.IsFalse(RacerPlan.Feasible(points, legs[breach], Racer(150)), "the breach S at 150 m/s on the strip is not makeable");
-            Assert.Less(RacerPlan.Excess(points, legs[main], Racer(150)), RacerPlan.Excess(points, legs[breach], Racer(150)) * .7f, "main is far closer to makeable");
-            for (uint seed = 0; seed < 64; seed++)
-                Assert.AreEqual(main, RacerPlan.Choose(legs, points, toFinish, 0, seed, 0, 0, Racer(150)), "even a weak racer stays on main at speed");
+            for (int gate = 0; gate < track.Gates.Length; gate++)
+            {
+                bool any = false;
+                for (int i = 0; i < legs.Length; i++) any |= legs[i].From == gate && RacerPlan.Feasible(points, legs[i], Racer(150));
+                if (!any) continue;
+                for (uint seed = 0; seed < 32; seed++)
+                {
+                    int leg = RacerPlan.Choose(legs, points, toFinish, gate, seed, 0, 0, Racer(150));
+                    Assert.IsTrue(RacerPlan.Feasible(points, legs[leg], Racer(150)), $"from gate {gate} (seed {seed}) a weak racer at 150 m/s picks a branch it can make");
+                }
+            }
+        }
+
+        [Test]
+        public void Strips_CoverHalfTheRoute_AndOnlyRacersThatCanMakeTheBendTakeThem()
+        {
+            var points = EM.GetBuffer<RaceLegPoint>(race); int onStrip = 0;
+            for (int k = 0; k < points.Length; k++)
+                // main's own points (the breach shares main's first stretch, where its centreline runs down the strip)
+                if (points[k].PushSpeed > 0 && points[k].HalfWidth >= 60) { onStrip++; Assert.Greater(math.abs(points[k].PushSide), .3f, $"leg point {k} ({points[k].Position}, half {points[k].HalfWidth}, side {points[k].PushSide}, leg {LegOf(k)}): the strip lies on one side, the other is clear"); }
+            var perLeg = new System.Text.StringBuilder();
+            foreach (var l in EM.GetBuffer<RaceLeg>(race))
+            {
+                int n = 0; for (int k = l.Start; k < l.Start + l.Count; k++) if (points[k].PushSpeed > 0) n++;
+                if (n > 0) perLeg.Append($" {l.From}->{l.To}:{n} (half {points[l.Start].HalfWidth})");
+            }
+            Assert.Greater(onStrip, 20, "Track 01 has its two strips on the racing line; strip points per leg:" + perLeg);
+            // a heavy racer (strafe 5, reverse 4 m/s²) keeps off both; a light, sharp one (19, 19) takes the first
+            var heavy = new RacerPlan.Ability { Lateral = 5, Brake = 4, YawCap = math.radians(120) };
+            var light = new RacerPlan.Ability { Lateral = 19, Brake = 19, YawCap = math.radians(120) };
+            foreach (var (ability, name, takes) in new[] { (heavy, "heavy", false), (light, "light", true) })
+            {
+                var line = new List<RacerLinePoint>();
+                int main = -1; var legs = EM.GetBuffer<RaceLeg>(race);
+                for (int i = 0; i < legs.Length; i++) if (legs[i].From == 0 && legs[i].To == 1) main = i;
+                RacerPlan.Build(line, EM.GetBuffer<RaceGate>(race), legs, points, -1, 1, 1, 0, ability, main);   // the main line from gate 0
+                int first = line.FindIndex(p => p.PushSpeed > 0);
+                Assert.GreaterOrEqual(first, 0, "the line from the grid crosses the start strip");
+                Assert.AreEqual(takes ? 0 : 1, line[first].Avoid, $"the {name} racer {(takes ? "takes" : "keeps off")} the start strip");
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Game.Presentation.Racing
     /// <summary>RACE-016: what a race track looks like, built from its TrackDefinition on every machine. Nothing here is simulated.
     /// Under Root (placed at the track origin each frame by the caller): the lane surface along each route, an energy fence with
     /// emitter posts along every field wall, gate pylons with an energy curtain (the next gate lit), boost pads, corner boards on the
-    /// outside of bends, the start grid and the wrecks' lights. The solid parts (emitter posts, gate pylons, the gantry, debris) are
+    /// outside of bends, the start grid and the wrecks' lights. The solid parts (emitter posts, gate pylons, debris) are
     /// voxel grids (TrackStructureBuilder); this draws only their light and the energy between them. In world space: mine halos, the guide arrow and space dust round the
     /// camera. Materials come from TrackDefinition.Look (Game/Race/Holo, one per mode, and a lit metal).</summary>
     public sealed class TrackDressing : IDisposable
@@ -259,7 +259,7 @@ namespace Game.Presentation.Racing
         int shownDown;
 
         /// Gates: two pylons, a light strip on each inner face, bands, a glow on top, and an energy curtain between them. Gate 0 gets a
-        /// gantry and a checkered curtain.
+        /// checkered curtain (no gantry over it: the camera collided with one).
         void Gates(TrackDefinition track)
         {
             for (int id = 0; id < track.Gates.Length; id++)
@@ -286,14 +286,6 @@ namespace Game.Presentation.Racing
                     lights.Strip(foot - right * side * 3.7f, Vector3.up, -right * side, 0.9f, -12, 12, Color.white);
                     glows.Glow(foot + Vector3.up * 30.5f, 10, Color.white, 0, 0);
                     glows.Glow(foot - right * side * 4f, 6, Color.white, 0, 0);
-                }
-                if (finish)
-                {
-                    // the start/finish gantry across the pylon tops, with a light strip under it
-                    Vector3 l = c - right * (half + 4.5f), r = c + right * (half + 4.5f);
-                    // the voxel gantry (ship_track_gantry) spans 21–25 m; a light strip and lamps under it
-                    lights.Beam(l + Vector3.up * 20.6f, r + Vector3.up * 20.6f, 1.4f, .3f, Color.white);
-                    for (float s = -half + 10; s <= half - 10; s += 20) glows.Glow(c + right * s + Vector3.up * 20.2f, 5, Color.white, 1, s * .01f);
                 }
                 gates.Add((Add("gate " + id + " curtain", curtain, look.Curtain), Add("gate " + id + " lights", lights, look.Solid),
                     Add("gate " + id + " glows", glows, look.Glow), g.Required, finish));

@@ -29,5 +29,10 @@ namespace Game.Galaxy.Racing
 
     /// <summary>RACE-017: the racer's line for the next few gates, relative to the track origin. Radius is the turn radius there (m).</summary>
     [InternalBufferCapacity(0)]
-    public struct RacerLinePoint : IBufferElementData { public float2 Position; public float HalfWidth; public float Radius; public float PushSpeed; }
+    public struct RacerLinePoint : IBufferElementData
+    {
+        public float2 Position; public float HalfWidth; public float Radius;
+        public float PushSpeed, PushSide;   // a boost strip across the route here, and its side (−1 left … +1 right)
+        public byte Avoid;                  // 1: this strip would launch it too fast into the bend after it, so it keeps off it
+    }
 }

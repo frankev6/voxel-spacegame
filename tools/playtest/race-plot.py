@@ -4,7 +4,7 @@
 usage: race-plot.py <trace.csv> [--track ArtSource/Racing/tracks/track_01.json] [--out Logs/race-plot] [--incidents 8]
 
 Writes, in --out:
-  overview.png    the whole track (routes, fences, gates, boost strips, mine fields, wrecks) with every racer's path; red where it
+  overview.png    the whole track (routes, fences, gates, boost strips as spawned when <trace>.boost.csv exists, mine fields, wrecks) with every racer's path; red where it
                   was outside its safe band, orange where it stalled, a ring where it re-planned its line
   incident-N.png  the worst moments, zoomed: the nose (white tick) and velocity (racer colour) every half second, and a thin line
                   to the point the AI steered for
@@ -56,7 +56,7 @@ def draw_track(d, track, v, detail):
     for w in track['wrecks']:
         o = [v.p(*q) for q in w['outline']]
         if len(o) > 2: d.polygon(o, outline=WRECK)
-    for b in track['boost']:
+    for b in track.get('boost_boxes') or track['boost']:
         c, yaw, hl, hw = b['center'], b['yaw'], b['length'] / 2, b['width'] / 2
         f, r = (math.sin(yaw), math.cos(yaw)), (math.cos(yaw), -math.sin(yaw))
         corners = [(c[0] + f[0] * a + r[0] * s, c[1] + f[1] * a + r[1] * s) for a, s in ((-hl, -hw), (-hl, hw), (hl, hw), (hl, -hw))]
@@ -189,6 +189,10 @@ def main():
     ap.add_argument('--incidents', type=int, default=8)
     a = ap.parse_args()
     track = json.load(open(a.track)); data = load(a.trace)
+    boxes = pathlib.Path(a.trace).with_suffix('.boost.csv')   # the strips as spawned (race trace writes them)
+    if boxes.exists():
+        with open(boxes, newline='') as f:
+            track['boost_boxes'] = [dict(center=[float(r['x']), float(r['z'])], yaw=float(r['yaw']), length=2 * float(r['hz']), width=2 * float(r['hx'])) for r in csv.DictReader(f)]
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
     for old in out.glob('incident-*.png'): old.unlink()
     overview(track, data, out); timeline(data, out)

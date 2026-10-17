@@ -59,7 +59,7 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
    - the **keel line** past the battleship;
    - the Break and the keel line together;
    - the outer line through the lane-gate (the portal itself comes later; today you fly the outer line).
-5. **Boost strips.** The green chevrons push you to 200 m/s, and the speed carries off the strip.
+5. **Boost strips.** The green chevrons cover the inside half of the route before a bend and push you to 200 m/s; the speed carries off the strip. Taking one is a choice: the other half is clear, and a heavy racer that cannot brake for the bend after it should keep off. The AI racers decide the same way.
 6. **Field walls** (blue) bounce you. Hitting one fast costs hull. Each wall is projected by voxel emitter posts about every 50 m; shoot a post's head off and the fence on both sides of it goes dark and stops holding anyone in. The gate pylons carry the fence beside them too. On the carrier's flight deck there is no field: the hull's trench walls are the barrier.
 7. **Mines** (red rings) arm, then blow when a ship comes within about 14 m: 2500 damage and a shove that throws a racer. Shooting one knocks it loose and sends it drifting (into a rival, or out of your line); it bounces off the fences. About ten hits crack the casing and set it off.
 8. **Guns push.** Every hit shoves the ship it hits, and every shot kicks yours back. Darts are light and get thrown about. Rams barely move, and their impact driver shoves rivals off the line.

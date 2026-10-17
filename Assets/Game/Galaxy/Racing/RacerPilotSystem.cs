@@ -40,9 +40,8 @@ namespace Game.Galaxy.Racing
         /// <summary>The fastest it may take a turn of radius r.</summary>
         public static float CornerSpeed(in Ability a, float r) => math.min(math.sqrt(a.Lateral * r), a.YawCap * .85f * r);
 
-        /// <summary>Whether a racer at its speed now can make the corners of a leg's first FeasibleSpan metres, braking all it can except
-        /// where a boost strip pushes it (it cannot brake against one). A shortcut that leaves a strip in a tight S is not for a racer
-        /// already doing 150 m/s on it.</summary>
+        /// <summary>Whether a racer at its speed now can make the corners of a leg's first FeasibleSpan metres, braking all it can. Boost
+        /// strips cover half the route and can be left alone, so they do not count here (StripAvoid decides whether to take one).</summary>
         public static bool Feasible(DynamicBuffer<RaceLegPoint> points, in RaceLeg leg, in Ability a) => Excess(points, leg, a) <= 1;
 
         /// <summary>How far over its corner limits (with 15% grace) a racer would be on a leg's first FeasibleSpan metres: ≤ 1 makeable.</summary>
@@ -53,7 +52,7 @@ namespace Game.Galaxy.Racing
             {
                 var p = points[leg.Start + i];
                 float ds = math.distance(points[leg.Start + i - 1].Position, p.Position); walked += ds;
-                v = p.PushSpeed > 0 && v < p.PushSpeed ? math.min(p.PushSpeed, math.sqrt(v * v + 2 * p.PushAccel * ds)) : math.sqrt(math.max(0, v * v - 2 * a.Brake * ds));
+                v = math.sqrt(math.max(0, v * v - 2 * a.Brake * ds));
                 float r = Radius(points[leg.Start + math.max(0, i - 3)].Position, p.Position, points[leg.Start + math.min(leg.Count - 1, i + 3)].Position);
                 worst = math.max(worst, v / (CornerSpeed(a, r) * 1.15f + 5));
             }
@@ -155,7 +154,7 @@ namespace Game.Galaxy.Racing
                 {
                     var p = points[l.Start + i];
                     if (line.Count > 0 && math.distancesq(line[line.Count - 1].Position, p.Position) < 1) continue;
-                    line.Add(new RacerLinePoint { Position = p.Position, HalfWidth = p.HalfWidth, PushSpeed = p.PushSpeed });
+                    line.Add(new RacerLinePoint { Position = p.Position, HalfWidth = p.HalfWidth, PushSpeed = p.PushSpeed, PushSide = p.PushSide });
                 }
                 at = l.To;
             }
@@ -164,7 +163,30 @@ namespace Game.Galaxy.Racing
             {
                 var p = line[i]; p.Radius = Radius(line[math.max(0, i - 3)].Position, p.Position, line[math.min(line.Count - 1, i + 3)].Position); line[i] = p;
             }
+            // Each boost strip on the line: take it only if, leaving it at its push speed, it can still make the bends after it.
+            for (int i = 0; i < line.Count; i++)
+            {
+                if (line[i].PushSpeed <= 0) continue;
+                int end = i; while (end + 1 < line.Count && line[end + 1].PushSpeed > 0) end++;
+                byte avoid = (byte)(StripTooFast(line, end, line[i].PushSpeed, ability) ? 1 : 0);
+                for (int k = i; k <= end; k++) { var p = line[k]; p.Avoid = avoid; line[k] = p; }
+                i = end;
+            }
             return line.Count > 1 ? at : -1;
+        }
+
+        /// <summary>Whether a racer leaving a strip at line point `exit` at `speed` would overshoot a bend within FeasibleSpan after it.
+        /// The line ending soon after counts as clear (it is rebuilt at the next gate with the next legs).</summary>
+        public static bool StripTooFast(List<RacerLinePoint> line, int exit, float speed, in Ability a)
+        {
+            float v = speed, walked = 0;
+            for (int i = exit + 1; i < line.Count && walked < FeasibleSpan; i++)
+            {
+                float ds = math.distance(line[i - 1].Position, line[i].Position); walked += ds;
+                v = math.sqrt(math.max(0, v * v - 2 * a.Brake * ds));
+                if (v > CornerSpeed(a, line[i].Radius) * 1.1f + 3) return true;
+            }
+            return false;
         }
     }
 
@@ -274,6 +296,7 @@ namespace Game.Galaxy.Racing
             {
                 Origin = origin, Tick = tick, Racing = (byte)(rs.Phase == RacePhase.Racing ? 1 : 0), Config = SystemAPI.GetSingleton<FlightConfig>(),
                 Hash = hash.AsReadOnly(), Collision = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld, Finished = finished,
+                Boosts = em.HasBuffer<RaceBoost>(race) ? em.GetBuffer<RaceBoost>(race).ToNativeArray(state.WorldUpdateAllocator) : new NativeArray<RaceBoost>(0, state.WorldUpdateAllocator),
                 Flights = flights, Propulsion = propulsion, Grids = grids, Velocities = velocities, Holds = holds, Mines = mines, Spawning = spawning,
             };
             var handle = job.ScheduleParallel(racers, hash.BeginRead(state.Dependency));
@@ -306,6 +329,7 @@ namespace Game.Galaxy.Racing
         [ReadOnly] public SpatialHashQueryData Hash;
         [ReadOnly] public CollisionWorld Collision;
         [ReadOnly] public NativeHashSet<byte> Finished;
+        [ReadOnly] public NativeArray<RaceBoost> Boosts;
         [ReadOnly] public ComponentLookup<FlightState> Flights;
         [ReadOnly] public ComponentLookup<PropulsionStats> Propulsion;
         [ReadOnly] public ComponentLookup<VoxelGrid> Grids;
@@ -321,6 +345,7 @@ namespace Game.Galaxy.Racing
         public const float CorridorMargin = 10;  // m kept inside the route's edge (the field walls)
         public const float MineShootMin = 70, MineShootMax = 380;   // m: outside a mine's 28 m blast, inside gun range
         public const float MineShootArc = .3f;                     // rad off the nose (fixed guns converge on the aim point)
+        public const float StripLook = 450;                        // m ahead it settles which half of the route to take for a strip
 
         struct Obstacle { public float2 Position, Velocity; public float Radius; public bool Mine; }
 
@@ -388,7 +413,7 @@ namespace Game.Galaxy.Racing
                 if (i > pilot.Index)
                 {
                     float ds = math.distance(line[i - 1].Position, line[i].Position);
-                    along += ds; if (line[i].PushSpeed <= 0) room += ds;
+                    along += ds; if (line[i].PushSpeed <= 0 || line[i].Avoid != 0) room += ds;   // no braking on a strip it takes
                 }
                 if (room > reach) break;
                 float corner = RacerPlan.CornerSpeed(ability, line[i].Radius);
@@ -404,8 +429,18 @@ namespace Game.Galaxy.Racing
             for (int i = pilot.Index + 1; i < line.Length && walked < look; i++) { walked += math.distance(line[i - 1].Position, line[i].Position); tightest = math.min(tightest, line[i].Radius); }
             float free = math.max(6, lineHalf - edgeReach);
             look = math.min(look, math.max(35, math.sqrt(8 * tightest * free * .5f)));
+            // A boost strip coming up: its half of the route if it takes it, the other half if it keeps off it.
+            float lane = pilot.Lane; bool avoidStrip = false; float stripWalk = 0;
+            for (int i = pilot.Index; i < line.Length && stripWalk < StripLook; i++)
+            {
+                if (i > pilot.Index) stripWalk += math.distance(line[i - 1].Position, line[i].Position);
+                if (line[i].PushSpeed <= 0) continue;
+                avoidStrip = line[i].Avoid != 0;
+                lane = avoidStrip ? -math.sign(line[i].PushSide) * .8f : math.sign(line[i].PushSide) * .55f;
+                break;
+            }
             float2 aim = PointAlong(line, pilot.Index, bestT, look, out float2 aimDir, out float aimHalf);
-            aim += new float2(aimDir.y, -aimDir.x) * pilot.Lane * math.max(0, aimHalf - edgeReach);
+            aim += new float2(aimDir.y, -aimDir.x) * lane * math.max(0, aimHalf - edgeReach);
             float2 toAim = aim - pos;
             float aimYaw = math.lengthsq(toAim) > 1 ? math.atan2(toAim.x, toAim.y) : yaw;
 
@@ -438,6 +473,7 @@ namespace Game.Galaxy.Racing
                 {
                     float edge = LineDistance(line, pilot.Index, pos + u * (span * k / 3), out float half) - math.max(5, half - edgeReach);
                     if (edge > 0) cost += edge / math.max(10, half) * 3;
+                    if (avoidStrip && OnStrip(pos + u * (span * k / 3), radius)) cost += 4;   // keep off a strip it cannot take
                 }
                 // bodies: closest approach within the horizon at the target speed
                 float threat = 0, mines = 0;
@@ -501,7 +537,8 @@ namespace Game.Galaxy.Racing
             // Stuck: no progress along the line for 3 s (wedged, spinning on a fence, crawling the wrong way) — back off and turn,
             // try again, and put it back at its last gate if that fails.
             pilot.Off = offLine - (lineHalf - edgeReach); pilot.Wide = math.max(pilot.Wide, pilot.Off);
-            if (pilot.Index >= pilot.ProgressIndex + 3 || pilot.ProgressTick == 0) { pilot.ProgressIndex = math.max(pilot.ProgressIndex, pilot.Index); pilot.ProgressTick = Tick; }
+            // (a jump back along the line — put back at a gate, or a new line — marks progress afresh)
+            if (pilot.Index >= pilot.ProgressIndex + 3 || pilot.Index < pilot.ProgressIndex - 10 || pilot.ProgressTick == 0) { pilot.ProgressIndex = pilot.Index; pilot.ProgressTick = Tick; }
             uint slow = Tick - pilot.ProgressTick;
             bool reverse = slow >= 180 && slow < 250 || slow >= 400 && slow < 470;
             // Outside the fence line (through a downed span, or flung over it) for 3 s: the field holds it out, so reset too.
@@ -518,7 +555,11 @@ namespace Game.Galaxy.Racing
             float faceYaw = math.lengthsq(lead) > 1 ? math.atan2(lead.x, lead.y) : steerYaw;
             float error = Planar.WrapAngle(faceYaw - yaw);
             var cmd = default(ShipCommand);
-            cmd.Turn = math.clamp(error * 3 / yawCap, -1, 1);
+            // Turn no faster than it can stop turning by the time it faces the heading (its real yaw acceleration): asking a heavy
+            // hull for the full turn rate overshot, swung the nose round and slid it sideways — the spin-outs.
+            float yawAccel = math.max(.3f, math.radians(stats.YawAccelDeg)) * .8f;
+            float rate = math.sign(error) * math.min(math.min(math.abs(error) * 3, yawCap), math.sqrt(2 * yawAccel * math.abs(error)));
+            cmd.Turn = math.clamp(rate / yawCap, -1, 1);
             // The assist adds a push's carry to whatever is commanded (ADR-0118), so command the difference: after a boost strip
             // that is reverse thrust, and the engines brake instead of holding the strip's speed.
             float2 local = FlightMath.ToLocalPlanar(new float3(want.x, 0, want.y), pose.Rotation) - flight.Carry;
@@ -537,6 +578,17 @@ namespace Game.Galaxy.Racing
             }
             command = cmd;
             pilot.TargetSpeed = target; pilot.Threat = bestThreat + bestMines;
+        }
+
+        bool OnStrip(float2 p, float radius)
+        {
+            for (int i = 0; i < Boosts.Length; i++)
+            {
+                var b = Boosts[i];
+                float2 d = p - b.Center, f = new float2(math.sin(b.Yaw), math.cos(b.Yaw)), r = new float2(f.y, -f.x);
+                if (math.abs(math.dot(d, r)) <= b.HalfExtents.x + radius && math.abs(math.dot(d, f)) <= b.HalfExtents.y) return true;
+            }
+            return false;
         }
 
         static float2 PointAlong(in DynamicBuffer<RacerLinePoint> line, int index, float t, float distance, out float2 direction, out float half)

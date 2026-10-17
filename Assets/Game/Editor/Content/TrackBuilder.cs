@@ -234,6 +234,10 @@ namespace Game.Editor.Content
 
         static Vector2 V(JToken t) => new Vector2((float)t[0], (float)t[1]);
 
+        /// <summary>RACE-017: a boost strip spans this far off the centreline (m) on the inside, to this far short of the route's edge,
+        /// and finds the inside from the route's turn over the strip and this far past it.</summary>
+        const float StripInner = 4, StripEdge = 10, StripBendLook = 800;
+
         static void Track(string id, ZoneDefinition boost, ZoneDefinition gate, ZoneDefinition wall, ZoneDefinition bounds, MineDefinition mine)
         {
             var json = JObject.Parse(File.ReadAllText(Source + id + ".json"));
@@ -317,6 +321,8 @@ namespace Game.Editor.Content
             }
             // RACE-017: a boost strip follows its route as a chain of short boxes, each along the route there. One straight box laid
             // on the chord of a bend pushed 10° off the line at its end: about all the side thrust a heavy racer has, into the wall.
+            // Owner: "narrow both boost strips to the inside half of the route so taking one is a choice": each strip covers the half
+            // on the inside of the bend it leads into (StripInner to StripEdge off the centreline), and the other half is clear.
             foreach (JObject b in (JArray)json["boost"])
             {
                 Vector2 c = V(b["center"]); float yaw = (float)b["yaw"], length = (float)b["length"], width = (float)b["width"];
@@ -337,11 +343,19 @@ namespace Game.Editor.Content
                 if (a1 <= a0 + 1) { zones.Add(new TrackZone { Zone = boost, Position = c, Yaw = yaw, HalfExtents = new Vector2(width / 2, length / 2) }); continue; }   // across a closed route's seam
                 int n = Mathf.Max(1, Mathf.CeilToInt((a1 - a0) / 90));
                 float step = (a1 - a0) / n;
+                // the inside: the way the route turns over the strip and the bend after it (yaw grows turning right)
+                float Heading(float d) { Vector2 t = At(d + 6) - At(d - 6); return Mathf.Atan2(t.x, t.y); }
+                float turn = 0;
+                for (float d = a0; d < a1 + StripBendLook; d += 24) turn += Mathf.DeltaAngle(Heading(d) * Mathf.Rad2Deg, Heading(d + 24) * Mathf.Rad2Deg);
+                float inside = turn >= 0 ? 1 : -1, half = route.Width * .5f;
+                float inner = StripInner, outer = half - StripEdge, offset = (inner + outer) * .5f * inside;
+                width = outer - inner;
                 for (int k = 0; k < n; k++)
                 {
                     float mid = a0 + (k + .5f) * step;
-                    Vector2 tangent = At(mid + 6) - At(mid - 6);
-                    zones.Add(new TrackZone { Zone = boost, Position = At(mid), Yaw = Mathf.Atan2(tangent.x, tangent.y),
+                    Vector2 tangent = At(mid + 6) - At(mid - 6); float segmentYaw = Mathf.Atan2(tangent.x, tangent.y);
+                    var right = new Vector2(Mathf.Cos(segmentYaw), -Mathf.Sin(segmentYaw));
+                    zones.Add(new TrackZone { Zone = boost, Position = At(mid) + right * offset, Yaw = segmentYaw,
                         HalfExtents = new Vector2(width / 2, step / 2 + 1) });   // +1: no gap at the joints
                 }
             }
@@ -371,10 +385,10 @@ namespace Game.Editor.Content
                     total += cells;
                 }
                 // RACE-016: the solid track parts.
-                var parts = TrackStructureBuilder.Build(service, byId[0].Width);
+                var parts = TrackStructureBuilder.Build(service);
                 foreach (var q in posts) pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Post], Position = TrackStructureBuilder.Place(q, 0), Kind = TrackPieceKind.Pylon });
                 foreach (var (c, yaw) in pylons) pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Pylon], Position = TrackStructureBuilder.Place(c, yaw), Yaw = yaw, Kind = TrackPieceKind.Pylon });
-                pieces.Add(new TrackPiece { Blueprint = parts[TrackStructureBuilder.Gantry], Position = TrackStructureBuilder.Place(byId[0].Position, byId[0].Yaw), Yaw = byId[0].Yaw, Kind = TrackPieceKind.Wall });
+                // (no gantry over the finish: owner, "everytime we pass through, the camera zooms in because it collides with them")
                 var minefields = new List<(Vector2 c, float r)>();
                 foreach (JObject m in (JArray)json["mines"]) minefields.Add((V(m["c"]), (float)m["r"]));
                 int debris = DebrisPieces(pieces, parts, keptWalls, routes, q => InWreck(q) || minefields.Exists(f => Vector2.Distance(q, f.c) < f.r + 30));
