@@ -21,6 +21,7 @@ namespace Game.Simulation.Power
         [ReadOnly] public ComponentLookup<Inhibited> Inhibits;
         [ReadOnly] public ComponentLookup<Hulk> Hulks;
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
+        [ReadOnly] public ComponentLookup<AbilityHostState> HostCharges;
 
         void Execute(Entity root, ref ShipPower power, DynamicBuffer<PowerConsumer> consumers, in PowerStats stats)
         {
@@ -47,6 +48,12 @@ namespace Game.Simulation.Power
                 for (int i = 0; i < math.min(32, slots.Length); i++)
                     if (slots[i].State == AbilitySlotState.PendingPower && slots[i].PendingCost <= budget)
                     { budget -= slots[i].PendingCost; mask |= 1u << i; }
+            }
+            // Co-op guest (ADR-0117): the authority granted these one-shot costs at this same point of its allocation.
+            if (HostCharges.HasComponent(root))
+            {
+                float total = HostCharges[root].ChargeTotal;
+                budget = math.max(0, budget - math.max(0, total - power.HostCharged)); power.HostCharged = total;
             }
             for (int i = split; i < consumers.Length; i++) Allocate(root, consumers, i, ref budget, ref demand, ref granted, ref brownout);
             power.AbilityGrantMask = mask; power.AbilityGrantTick = Tick;

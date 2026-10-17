@@ -1,6 +1,6 @@
 # ADR-0117 — Co-op: one code path for every effect (authority decides, every machine applies)
 
-**Status:** Accepted for the spike (2026-10-15). Lives with ADR-0116 on `task/NET-001-coop-prototype` in the `spaceship-game-v2-coop` worktree. Owner, after guests hit collision shapes of blocks that were gone and missed salvage tints, prompts and ability icons: "i think we have to decouple the systems and make sure that host, guest, or single player, they go through the same functions so we are not running redundant or duplicate code", and "this doesn't go just for the destruction system, for every system".
+**Status:** Accepted (2026-10-15 for the spike; merged to `main` with ADR-0116 on 2026-10-16, owner approval quoted there). Owner, after guests hit collision shapes of blocks that were gone and missed salvage tints, prompts and ability icons: "i think we have to decouple the systems and make sure that host, guest, or single player, they go through the same functions so we are not running redundant or duplicate code", and "this doesn't go just for the destruction system, for every system".
 
 ## Context
 ADR-0116 §4 switches whole systems off on guests (`AuthorityOnly`) and §7–10 replicate their results. Many of those systems mix two jobs:
@@ -162,6 +162,14 @@ There is a second form of the same problem: host simulation assumes one player (
      - What Game.Net may write is an allow-list with a reason per component: its own bookkeeping, replicated state (pilot, allegiance, poses, snapshot shield, plumes and commands, the pilot-machine target lock) and records for appliers (`AbilityHostState`; `SalvageCollected` and `PilotCombatStatus` as replicated decisions).
      - Everything else fails the test, with the call site named.
    - `net parity` and `tools/playtest/coop-parity.sh` compare one guest ship as host and guest derive it. Poses, timers and distances are left out, because they lag by design.
+
+8. **Follow-ups before the merge (2026-10-16).**
+   - **Guest energy.** `AbilitySlotApplySystem` adds each host activation's one-shot cost to `AbilityHostState.ChargeTotal`; `PowerAllocateJob` draws what it has not drawn yet (`ShipPower.HostCharged`) at the point where the host granted it. A guest's energy meter now pays its boost (live: 200 → 191 right after the press, then recharging). `AbilityCodec` keeps the applier's field when it writes the host's state.
+   - **Playground beacons on guests.** The host's playground sends `playground view=<origin>` to each guest once it is in the world; the guest shows the rings, labels, radar markers and 800 m radar range without running pads (live screenshot checked).
+   - **Shipped boost restored.** NET-012's 4x playtest tuning is gone from `ability_speed_boost` (1.8x speed, 2x thrust again), and `AbilityScenarioTests` no longer pins it.
+   - **Braking bound (note 5).** QA-001's warm-start shrink in `PropulsionJob` cost real thrust under saturated coupled demand: Gauss–Seidel could not win the 10% back each tick. The job now also solves from the exact warm start and keeps that only when its residual is measurably lower, so a null space still bleeds. `Boost_RaisesTopSpeed` passes; the new `NullSpace_BleedsAtRest` keeps the owner's resting-thruster fix (SPEC-20 decision 7).
+   - **Opening playthrough (note 4).** Six isolated runs after the allocator fix all passed; not reproduced.
+   - **Still open:** a guest's boost starts one round trip after the press (no activation prediction); dock, hail, inspect and trade for guests wait for co-op outside the sandbox.
 
 ## Consequences
 - Single-player behaviour must stay identical. Each split is a refactor of existing systems, checked by the existing damage, integrity, split, ability and interaction tests before co-op is touched.

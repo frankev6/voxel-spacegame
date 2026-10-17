@@ -13,5 +13,6 @@ namespace Game.Simulation.Power
         public uint AbilityGrantMask;   // bit i = AbilitySlot i's pending one-shot cost was granted this tick
         public uint AbilityGrantTick;   // SimClock.Tick the mask belongs to
         public ShipPowerFlags Flags;
+        public float HostCharged;       // E: AbilityHostState.ChargeTotal already drawn (co-op guest, ADR-0117)
     }
 }

@@ -25,9 +25,9 @@ MonoBehaviour:
   durationSeconds: 1
   statModifiers:
   - Stat: 1
-    Multiplier: 7.2
+    Multiplier: 1.8
   - Stat: 0
-    Multiplier: 8
+    Multiplier: 2
   shieldEnableThreshold: 0
   activationCue: {fileID: 0}
   activationFx: {fileID: 0}

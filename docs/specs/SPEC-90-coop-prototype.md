@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Spike complete: NET-002…012 working end to end in the co-op worktree |
+| **Status** | Prototype complete and merged to `main` (2026-10-16, owner approval): NET-002…018 |
 | **Area code** | NET (task IDs are `NET-001`, `NET-002`, …) |
 | **Module(s)** | `Game.Net` (folder `Assets/Game/Net/`), with session wiring in `Game.App` |
 | **Depends on specs** | SPEC-10, SPEC-12, SPEC-13 (grids, bodies, damage and splits), SPEC-20, SPEC-21 (commands, weapons), SPEC-05 (VOXS), SPEC-70 (dev commands) |
@@ -11,7 +11,7 @@
 
 > Read [01-architecture.md](../01-architecture.md), [02-conventions.md](../02-conventions.md) and [03-glossary.md](../03-glossary.md) before this spec. Where this spec departs from them, ADR-0116 records the departure.
 
-**Spike.** Lives only on `task/NET-001-coop-prototype` in the `/Users/frank/DEV/spaceship-game-v2-coop` worktree, branched from QA-001 at `a542ba85`. It never merges to `main` without the owner's approval. Design: [ADR-0116](../decisions/ADR-0116-coop-prototype-host-authority.md). Area code: NET.
+**Prototype.** Built on `task/NET-001-coop-prototype` in the `/Users/frank/DEV/spaceship-game-v2-coop` worktree, branched from QA-001 at `a542ba85`, and merged to `main` on 2026-10-16 with the owner's approval (quoted in ADR-0116). Design: [ADR-0116](../decisions/ADR-0116-coop-prototype-host-authority.md). Area code: NET.
 
 ## 1. Purpose
 Prove that 2–4 friends can play together in the playground with combat, several AI and player ships, and large chunk breaks, all looking the same on every machine without obvious errors. The architecture must be good enough to keep if the owner says yes. Tests beyond correctness checks, tuning and optimisation come later (owner, 2026-10-15).

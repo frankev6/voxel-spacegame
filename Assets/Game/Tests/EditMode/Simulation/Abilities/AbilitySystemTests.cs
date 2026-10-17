@@ -136,6 +136,25 @@ namespace Game.Tests.EditMode.Simulation.Abilities
             Assert.AreEqual(1, f.FxCount); Assert.AreEqual(1, f.SfxCount); Assert.AreEqual(FxEventFlags.PlayerSource, f.LastFx.Flags); Assert.AreEqual(SfxEventFlags.PlayerSource, f.LastSfx.Flags);
             f.Step(); Assert.AreEqual(15, f.Em.GetComponentData<ShipPower>(f.Root).Stored); Assert.AreEqual(0, f.FxCount);
         }
+        [Test] public void Guest_PaysHostActivationOnce()
+        {
+            // ADR-0117: a co-op guest applies the host's slots; its own allocator draws each host activation's one-shot cost once.
+            using var f = new Fixture(energy: 30);
+            f.Em.AddComponentData(f.Root, new AbilityHostState()); f.Em.AddBuffer<AbilityHostSlot>(f.Root);
+            var apply = f.World.GetOrCreateSystem<AbilitySlotApplySystem>(); var power = f.World.GetOrCreateSystem<PowerAllocationSystem>();
+            void Receive(byte activations)
+            {
+                var incoming = f.Em.GetBuffer<AbilityHostSlot>(f.Root); incoming.Clear();
+                incoming.Add(new AbilityHostSlot { Value = new AbilitySlot { AbilityIndex = 1, Charges = 2, ActivationCount = activations } });
+                f.Em.SetComponentData(f.Root, new AbilityHostState { Pending = 1, ShieldRequestedOn = 2, ChargeTotal = f.Em.GetComponentData<AbilityHostState>(f.Root).ChargeTotal });
+            }
+            void Tick() { apply.Update(f.World.Unmanaged); power.Update(f.World.Unmanaged); f.Em.CompleteAllTrackedJobs(); }
+            float Stored() => f.Em.GetComponentData<ShipPower>(f.Root).Stored;
+            Receive(3); Tick(); Assert.AreEqual(30, Stored(), "A slot first seen at join replays none of its history.");
+            Receive(4); Tick(); Assert.AreEqual(15, Stored());
+            Tick(); Assert.AreEqual(15, Stored(), "Charged once, not every tick.");
+            Receive(6); Tick(); Assert.AreEqual(0, Stored(), "Two activations in one message cost twice, floored at empty.");
+        }
         [Test] public void Grant_Denied()
         {
             using var f = new Fixture(energy: 14); f.Blocks(1); f.Step(ShipCommandEdges.Ability1); f.Step();

@@ -28,6 +28,7 @@ namespace Game.Simulation.Power
             allocate.Instances = state.GetBufferLookup<BlockInstance>(true); allocate.Requests = state.GetBufferLookup<PowerRequest>(true);
             allocate.Abilities = state.GetBufferLookup<AbilitySlot>(true); allocate.Inhibits = state.GetComponentLookup<Inhibited>(true);
             allocate.Hulks = state.GetComponentLookup<Hulk>(true); allocate.Spawning = state.GetComponentLookup<GridSpawning>(true);
+            allocate.HostCharges = state.GetComponentLookup<AbilityHostState>(true);
             apply.Powers = state.GetComponentLookup<ShipPower>(true); apply.Consumers = state.GetBufferLookup<PowerConsumer>(true);
             apply.Functionals = state.GetComponentTypeHandle<FunctionalBlock>(true); apply.Links = state.GetComponentTypeHandle<PowerLink>(true);
             apply.Powered = state.GetComponentTypeHandle<Powered>(); apply.Entities = state.GetEntityTypeHandle();
@@ -37,7 +38,7 @@ namespace Game.Simulation.Power
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             allocate.Instances.Update(ref state); allocate.Requests.Update(ref state); allocate.Abilities.Update(ref state);
-            allocate.Inhibits.Update(ref state); allocate.Hulks.Update(ref state); allocate.Spawning.Update(ref state);
+            allocate.Inhibits.Update(ref state); allocate.Hulks.Update(ref state); allocate.Spawning.Update(ref state); allocate.HostCharges.Update(ref state);
             allocate.Tick = SystemAPI.GetSingleton<SimClock>().Tick; allocate.Tuning = SystemAPI.GetSingleton<PowerTuning>();
             apply.Powers.Update(ref state); apply.Consumers.Update(ref state); apply.Functionals.Update(ref state);
             apply.Links.Update(ref state); apply.Powered.Update(ref state); apply.Entities.Update(ref state);

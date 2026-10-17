@@ -23,6 +23,7 @@ namespace Game.Simulation.Flight
     public partial struct PropulsionJob : IJobEntity
     {
         internal const float WarmStartDecay = .9f;
+        internal const float BleedTolerance = 1e-6f;   // weighted residual² (about 0.01 m/s² of acceleration error)
         public FlightConfig Config;
         [ReadOnly] public BlobAssetReference<BlockDefsBlob> Blocks;
         [ReadOnly] public BlobAssetReference<BlockModulesBlob> Modules;
@@ -103,9 +104,15 @@ namespace Game.Simulation.Flight
             // actuators overlap (side thrusters against the core assist, engines against assist braking, balanced by the
             // gyro). Gauss–Seidel never leaves it and the warm start carried it forever, so a resting cruiser kept 12
             // thrusters at full burn. Shrinking the warm start each tick bleeds that out (0.9^60 ≈ 0.2% after a second);
-            // the solve itself is unchanged and restores any throttle the target still needs within its sweeps.
+            // The solve is unchanged. Under a saturated, coupled demand (hard braking with offset reverse thrusters) its sweeps
+            // cannot win back the shrink each tick, which starved real thrust; the exact warm start is solved too and kept only
+            // when it reaches the target measurably better, so a null space still bleeds wherever both reach it.
+            var exact = new NativeArray<float>(throttles, Allocator.Temp);
             for (int k = 0; k < throttles.Length; k++) throttles[k] *= WarmStartDecay;
-            ThrustAllocator.Solve(problem, actuators, throttles);
+            float bled = ThrustAllocator.Solve(problem, actuators, throttles);
+            float carried = ThrustAllocator.Solve(problem, actuators, exact);
+            if (bled - carried > math.max(BleedTolerance, bled * .01f)) throttles.CopyFrom(exact);
+            exact.Dispose();
             bool firing = false;
             for (int k = 0; k < thrusters.Length; k++)
             {

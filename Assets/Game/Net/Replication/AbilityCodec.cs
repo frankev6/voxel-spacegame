@@ -53,7 +53,8 @@ namespace Game.Net.Replication
                 };
                 slots.Add(new AbilityHostSlot { Value = s });
             }
-            em.SetComponentData(root, new AbilityHostState { Pending = 1, ShieldRequestedOn = shield });
+            var state = em.GetComponentData<AbilityHostState>(root); state.Pending = 1; state.ShieldRequestedOn = shield;   // ChargeTotal is the applier's
+            em.SetComponentData(root, state);
         }
     }
 }

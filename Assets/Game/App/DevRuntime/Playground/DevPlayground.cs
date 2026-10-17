@@ -1,5 +1,6 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
+using System.Collections.Generic;
 using Game.App.DevRuntime.Commands;
 using Game.App.Flow;
 using Game.App.EditorHost;
@@ -76,6 +77,11 @@ namespace Game.App.DevRuntime.Playground
         double3 origin;
         bool active, entering, enemyRequested, tradeGranted, xenoRequested, nocturneRequested;
         bool autoEnter;
+        // Co-op: a guest shows the host's beacons (rings, labels, radar markers and zoom) without running pads; the host sends
+        // its origin to every guest once it is in the world.
+        bool guestView;
+        readonly List<Game.Core.Net.CoopPeer> peers = new();
+        readonly HashSet<byte> shownTo = new();
         int nearest = -1, pending;
         string report = "";
         internal DevPlayground(DevRuntimeHost host)
@@ -233,7 +239,25 @@ namespace Game.App.DevRuntime.Playground
                 return host.Commands.Execute("interact", host.Context);
             return activation;
         }
-        internal DevCommandResult Status() => DevCommandResult.Ok((active ? "Playground active. " : "Playground inactive. F1: playground to enter. ")
+        /// <summary>Co-op guest: show the host's playground beacons around <paramref name="hostOrigin"/>. Pads still run on the host.</summary>
+        internal DevCommandResult View(double3 hostOrigin)
+        {
+            if (!host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coop) || coop.Role != Game.Core.Net.SimRoleKind.Guest)
+                return DevCommandResult.Fail("playground view is sent to co-op guests by the host's playground");
+            ClearPresentation(); origin = hostOrigin; guestView = true; nearest = -1;
+            report = "The host's playground. Pads run on the host; salvage works from here.";
+            BuildPresentation();
+            return DevCommandResult.Ok("showing the host's playground beacons");
+        }
+        void ShowToGuests(Game.App.Session.CoopSession coop)
+        {
+            coop.GetPeers(peers);
+            shownTo.RemoveWhere(slot => !peers.Exists(peer => peer.Slot == slot && peer.InWorld));
+            foreach (var peer in peers)
+                if (peer.InWorld && shownTo.Add(peer.Slot))
+                    coop.SendGuestCommand(peer.Slot, FormattableString.Invariant($"playground view={origin.x:R},{origin.y:R},{origin.z:R}"), out _);
+        }
+        internal DevCommandResult Status() => DevCommandResult.Ok((active ? "Playground active. " : guestView ? "Showing the host's playground. " : "Playground inactive. F1: playground to enter. ")
             + (ship == null || ship.Override.IsNone ? "" : "Flying " + ship.Override + " (playground ship=starter restores the start ship). ") + Directory() + "\n" + report);
         /// <summary>QA-001: choose the playground flagship, then reset so it spawns.</summary>
         internal DevCommandResult SwitchShip(string id)
@@ -378,9 +402,17 @@ namespace Game.App.DevRuntime.Playground
             if (autoEnter && !entering && input != null && PlayerScenarioProbes.IsReady(ctx)
                 && ctx.TryGetService<IGameFlow>(out var startup) && !startup.IsTransitioning)
             { autoEnter = false; Enter(); }
-            if (!active) return;
-            if (!ctx.TryGetService<GameSession>(out var session) || !session.IsSandbox || session.IsTransitioning)
-            { active = false; ClearPresentation(); return; }
+            if (guestView)
+            {
+                if (!coop) { guestView = false; ClearPresentation(); return; }
+            }
+            else
+            {
+                if (!active) return;
+                if (!ctx.TryGetService<GameSession>(out var session) || !session.IsSandbox || session.IsTransitioning)
+                { active = false; ClearPresentation(); return; }
+                if (coopSession is Game.App.Session.CoopSession hosting && hosting.Role == Game.Core.Net.SimRoleKind.Host) ShowToGuests(hosting);
+            }
             if (courseGate >= 0 && ctx.TryGetFrame(out var courseFrame))
             {
                 if (courseRing != null) courseRing.transform.position = (float3)(origin + courseOffsets[courseGate] - courseFrame.OriginInStarSystem);
@@ -397,7 +429,8 @@ namespace Game.App.DevRuntime.Playground
             if (next != nearest)
             {
                 nearest = next;
-                if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  ·  FLY TO A BEACON" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
+                if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  ·  FLY TO A BEACON"
+                    : guestView ? pads[next].Title + "  ·  THE HOST ACTIVATES PADS" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
                 // Details only inside a ring; the beacon chart and world labels do the wayfinding (QA-001 clutter).
                 if (detail != null) { detail.text = next < 0 ? "" : pads[next].Detail; detail.style.display = next < 0 ? DisplayStyle.None : DisplayStyle.Flex; }
             }
@@ -495,7 +528,7 @@ namespace Game.App.DevRuntime.Playground
                 var hud = host.Context.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
                 if (hud != null) { hud.SetMarkers(default); hud.DisplayRangeM = 2000; }
             }
-            beaconPositions = null;
+            beaconPositions = null; shownTo.Clear();
             panel = markers = null; heading = detail = outcome = null;
             if (visuals != null) UnityEngine.Object.Destroy(visuals);
             if (material != null) UnityEngine.Object.Destroy(material);

@@ -20,6 +20,8 @@ namespace Game.Simulation.Abilities
     {
         public byte Pending;             // 1 = AbilityHostSlot holds state not yet applied
         public byte ShieldRequestedOn;   // the authority's ShieldControl.RequestedOn; 2 = the ship has none
+        public float ChargeTotal;        // E: one-shot costs of the authority's activations applied here, summed (written by the applier);
+                                         // PowerAllocateJob charges what it has not charged yet, so the guest's energy meter pays them too
     }
 
     /// <summary>ADR-0117 applier for a co-op guest: copies the host's slot decisions into AbilitySlot, so the hotbar shows them and the
@@ -70,6 +72,9 @@ namespace Game.Simulation.Abilities
                     if (known && slot.ActivationCount != seen)
                     {
                         slot.Flags |= AbilitySlotFlags.ActivatedThisTick;
+                        // The authority's allocator drew the one-shot cost of each activation; this machine's allocator draws it next.
+                        if (slot.AbilityIndex < Definitions.Value.Abilities.Length && Definitions.Value.Abilities[slot.AbilityIndex].EnergyCost > 0)
+                            host.ChargeTotal += Definitions.Value.Abilities[slot.AbilityIndex].EnergyCost * (byte)(slot.ActivationCount - seen);
                         toggled |= slot.AbilityIndex < Definitions.Value.Abilities.Length && Definitions.Value.Abilities[slot.AbilityIndex].Kind == AbilityKind.ShieldToggle;
                     }
                     slot.ActiveUntilTick = Tick + slot.ActiveUntilTick;   // remaining ticks, rebased onto this machine's clock

@@ -30,7 +30,6 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
         sealed class Fixture : IDisposable
         {
             readonly CombatScenarioTests.Fixture combat = new CombatScenarioTests.Fixture();
-            readonly Game.Tests.PlayMode.Galaxy.EncounterDirectorTests.Fields shipped = new();
             readonly BlobAssetReference<AbilityDefsBlob> abilities;
             PlayerEdgeCounters edges;
             public Entity Root { get; }
@@ -39,12 +38,6 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
             public DynamicBuffer<AbilitySlot> Slots => Em.GetBuffer<AbilitySlot>(Root);
             public Fixture()
             {
-                // These scenarios measure the shipped boost (1.8x speed, 2x thrust). The content may carry playtest tuning (NET-012: 4x),
-                // which is restored when the fixture is disposed.
-                foreach (var definition in combat.Flight.Catalog.All<AbilityDefinition>())
-                    if (definition.Kind == AbilityKind.StatBoost)
-                        shipped.Set(definition, "statModifiers", new[] { new AbilityStatMod { Stat = StatId.MaxSpeed, Multiplier = 1.8f },
-                            new AbilityStatMod { Stat = StatId.Thrust, Multiplier = 2 } });
                 AbilityContent.CreateSingletons(Em, combat.Flight.Catalog, new List<Entity>());
                 using (var query = Em.CreateEntityQuery(typeof(AbilityDefsRef))) abilities = query.GetSingleton<AbilityDefsRef>().Value;
                 var pre = World.World.GetExistingSystemManaged<GameplayPrePhysicsGroup>();
@@ -113,7 +106,7 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
             }
             public Entity InputEntity => combat.Flight.InputEntity;
             public ushort ThrusterBlock => combat.Flight.Thruster;
-            public void Dispose() { combat.Dispose(); abilities.Dispose(); shipped.Dispose(); }
+            public void Dispose() { combat.Dispose(); abilities.Dispose(); }
         }
 
         [Test] public void Boost_RaisesTopSpeed()

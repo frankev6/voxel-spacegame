@@ -107,6 +107,18 @@ namespace Game.Tests.EditMode.Simulation.Flight
         }
 
         [Test]
+        public void NullSpace_BleedsAtRest()
+        {
+            // QA-001: four thrusters that cancel exactly are a null space of the solve; the exact warm start alone kept them lit.
+            var root = Ship(); Tick();
+            var buffer = EM.GetBuffer<FlightThruster>(root);
+            for (int i = 0; i < buffer.Length; i++) { var entry = buffer[i]; entry.Throttle = 1; buffer[i] = entry; }
+            Tick(60);
+            foreach (var entry in EM.GetBuffer<FlightThruster>(root)) Assert.Less(entry.Throttle, .01f, "Cancelling throttle must bleed out at rest.");
+            Assert.Less(math.length(Velocity(root).Linear), .01f);
+        }
+
+        [Test]
         public void Forward_ReachesCap()
         {
             var root = Ship(); Command(root, new float2(0, 1)); Tick(180);
