@@ -2902,10 +2902,6 @@ MonoBehaviour:
     Position: {x: -446.8252, y: 935.82574}
     Yaw: 1.53681
     Kind: 1
-  - Blueprint: {fileID: 11400000, guid: 5793d4db3de5240cbb02e26ddd416432, type: 2}
-    Position: {x: -300.51965, y: 1015.47955}
-    Yaw: 1.53067
-    Kind: 0
   - Blueprint: {fileID: 11400000, guid: 9522c31921f1e48779046a9e7f881852, type: 2}
     Position: {x: -303.91254, y: 1288.9833}
     Yaw: 3.400772
@@ -13490,135 +13486,135 @@ MonoBehaviour:
     EmitterB: {x: -1402.74, y: -692.1}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -212.59216, y: 1016.18854}
+    Position: {x: -212.33305, y: 1048.1875}
     Yaw: 1.5788938
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -133.7454, y: 1014.9614}
+    Position: {x: -133.16826, y: 1046.9562}
     Yaw: 1.5888332
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -54.89383, y: 1014.22144}
+    Position: {x: -55.015575, y: 1046.2212}
     Yaw: 1.5669918
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: 23.927502, y: 1016.29987}
+    Position: {x: 22.233799, y: 1048.255}
     Yaw: 1.5178434
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: 102.476234, y: 1023.0822}
+    Position: {x: 98.61163, y: 1054.848}
     Yaw: 1.4497321
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: 180.31447, y: 1035.5961}
+    Position: {x: 174.12462, y: 1066.9917}
     Yaw: 1.3761367
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: 257.22278, y: 1052.9753}
+    Position: {x: 249.40309, y: 1084.0052}
     Yaw: 1.3239312
-    HalfExtents: {x: 56, y: 40.428356}
+    HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1870.8895, y: -156.65242}
+    Position: {x: -1839.276, y: -151.69444}
     Yaw: -0.1555633
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1880.015, y: -73.18}
+    Position: {x: -1848.0844, y: -71.07456}
     Yaw: -0.06584262
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1882.405, y: 10.766094}
+    Position: {x: -1850.4059, y: 10.526192}
     Yaw: 0.007497011
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1879.0353, y: 94.6811}
+    Position: {x: -1847.1195, y: 92.36137}
     Yaw: 0.07255532
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1870.3448, y: 178.21597}
+    Position: {x: -1838.6343, y: 173.9222}
     Yaw: 0.1345866
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1856.4108, y: 261.0362}
+    Position: {x: -1825.0466, y: 254.68874}
     Yaw: 0.19968225
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1836.8907, y: 342.7172}
+    Position: {x: -1806.0642, y: 334.13068}
     Yaw: 0.2716576
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
   - Zone: {fileID: 11400000, guid: 7314784e4c2594a4083364c16e7e7169, type: 2}
     Path: []
-    Position: {x: -1810.9155, y: 422.56863}
+    Position: {x: -1780.9727, y: 411.28024}
     Yaw: 0.3605218
-    HalfExtents: {x: 56, y: 42.999634}
+    HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}

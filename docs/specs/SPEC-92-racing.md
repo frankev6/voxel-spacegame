@@ -418,7 +418,8 @@ Advisory (ADR-0042):
 - **Files:** `Assets/Game/Galaxy/Racing/RaceLine.cs`, `RacerPilot.cs`, `RacerPilotSystem.cs`, `Assets/Game/App/DevRuntime/Playground/DevPlaygroundRace.cs`, `tools/playtest/race-plot.py`.
 - **Acceptance criteria:**
   - [x] Every gate edge of Track 01 has a leg along the routes (`RacerLineTests`).
-  - [x] A racer at speed never takes a branch it cannot corner (the breach S on the boost strip).
+  - [x] A racer at speed never takes a branch it cannot corner (`Choose_NeverABranchItCannotCorner_WhenOneItCanExists`).
+  - [x] Boost strips cover the inside half before a bend; a racer takes one only if it can make the bend after it (`Strips_CoverHalfTheRoute_…`).
   - [ ] Three AI racers finish a 3-lap race without a reset, losing under 5% of their mass.
 - **Tests:** `RacerLineTests`; traced races (`race trace`, `race-plot.py`).
 

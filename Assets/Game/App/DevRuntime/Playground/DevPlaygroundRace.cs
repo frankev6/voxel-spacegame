@@ -455,6 +455,15 @@ namespace Game.App.DevRuntime.Playground
             System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(tracePath));
             trace = new System.IO.StreamWriter(tracePath, false, new System.Text.UTF8Encoding(false));
             trace.WriteLine("tick,phase,slot,name,x,z,yaw,vx,vz,yawrate,mass,lap,lastgate,flags,ai,target,off,threat,steer,aimx,aimz,cmd,linefrom,lineto,index,replans");
+            // the boost strips as spawned (track space), for the plot
+            var inv = System.Globalization.CultureInfo.InvariantCulture; var em = host.Context.EntityManager;
+            using (var boxes = new System.IO.StreamWriter(System.IO.Path.ChangeExtension(tracePath, ".boost.csv"), false, new System.Text.UTF8Encoding(false)))
+            {
+                boxes.WriteLine("x,z,yaw,hx,hz");
+                if (IsOpen && em.HasBuffer<RaceBoost>(race))
+                    foreach (var b in em.GetBuffer<RaceBoost>(race))
+                        boxes.WriteLine(string.Join(",", b.Center.x.ToString("0.0", inv), b.Center.y.ToString("0.0", inv), b.Yaw.ToString("0.0000", inv), b.HalfExtents.x.ToString("0.0", inv), b.HalfExtents.y.ToString("0.0", inv)));
+            }
             return DevCommandResult.Ok("tracing to " + tracePath);
         }
 

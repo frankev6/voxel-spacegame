@@ -13,12 +13,12 @@ namespace Game.Editor.Content
 {
     /// <summary>RACE-016 (owner: "the material things that can be collided with should be voxel ... fences should be destructible"):
     /// the track's solid parts as voxel blueprints at 1 m cells (debris at 2 m, like the wrecks). Field-wall emitter posts, gate
-    /// pylons, the start/finish gantry and drifting debris. All are Track Frame (60 HP a cell, one plasma bolt) or hull: guns and rams break them. The energy between
+    /// pylons and drifting debris (no gantry over the finish: the camera collided with it). All are Track Frame (60 HP a cell, one plasma bolt) or hull: guns and rams break them. The energy between
     /// them (fences, curtains) and the guide markings stay light (TrackDressing).</summary>
     public static class TrackStructureBuilder
     {
         const string Ships = "Assets/Game/Content/Ships/", Blocks = "Assets/Game/Content/Blocks/";
-        public const string Post = "ship_track_post", Pylon = "ship_track_pylon", Gantry = "ship_track_gantry", Debris = "ship_track_debris_";
+        public const string Post = "ship_track_post", Pylon = "ship_track_pylon", Debris = "ship_track_debris_";
         public const int DebrisKinds = 8;
         /// <summary>Emitter head height (m) of a post: WallEmitterSystem probes here.</summary>
         public const float EmitterHeight = 9;
@@ -40,7 +40,7 @@ namespace Game.Editor.Content
 
         /// <summary>The blueprints by id. Each 1 m-cell structure is centred on the column x, z ∈ [−r, r]; its centre sits at (+0.5, +0.5)
         /// from the grid origin, which Place() accounts for.</summary>
-        internal static Dictionary<string, ShipBlueprintDefinition> Build(ContentService service, float gantryWidth)
+        internal static Dictionary<string, ShipBlueprintDefinition> Build(ContentService service)
         {
             var catalog = service.Catalog;
             var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
@@ -81,21 +81,6 @@ namespace Game.Editor.Content
                             put(frame, x, y, z, c);
                         }
                 }
-            });
-
-            // Start/finish gantry: a box beam across gate 0 between the pylon shafts at 21–24 m, checkered on its faces.
-            int half = (int)math.ceil(gantryWidth * .5f) + 2;
-            result[Gantry] = Make(service, content, Gantry, "Start Gantry", 1, (put) =>
-            {
-                for (int x = -half; x <= half; x++)
-                    for (int y = 21; y <= 24; y++)
-                        for (int z = -2; z <= 2; z++)
-                        {
-                            bool face = math.abs(z) == 2 || y == 21 || y == 24;
-                            byte c = face ? ((((x + 1000) / 3) + (y - 21) / 2) & 1) == 0 ? Light : Soot : Graphite;
-                            if (math.abs(x) >= half - 1) c = Steel;
-                            put(frame, x, y, z, c);
-                        }
             });
 
             // Debris: torn hull plates with ribs, and girders, at 2 m cells. The first half drift 6–36 m below the flight plane; the

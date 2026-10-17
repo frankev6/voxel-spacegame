@@ -11,8 +11,13 @@ namespace Game.Galaxy.Racing
     public struct RaceLegPoint : IBufferElementData
     {
         public float2 Position; public float HalfWidth;
-        public float PushSpeed, PushAccel;   // a boost strip here: the speed it pushes ships to, and how hard (m/s, m/s²); 0 = none
+        public float PushSpeed, PushAccel;   // a boost strip across the route here: the speed it pushes ships to, and how hard (m/s, m/s²); 0 = none
+        public float PushSide;               // where across the route the strip lies: −1 left … +1 right of the race direction
     }
+
+    /// <summary>RACE-017: a boost strip's box (track space), on the race entity, for racers steering round one.</summary>
+    [InternalBufferCapacity(0)]
+    public struct RaceBoost : IBufferElementData { public float2 Center; public float Yaw; public float2 HalfExtents; }
 
     /// <summary>RACE-017: the racing line from gate From to gate To along the route centrelines: Count points from Start in
     /// RaceLegPoint, first at From, last at To. One per edge of the gate graph. Written by TrackSpawnService.</summary>
@@ -28,6 +33,48 @@ namespace Game.Galaxy.Racing
         public const float JoinDistance = 40;
 
         public struct Leg { public int From, To; public float Length; public List<(float2 position, float halfWidth)> Points; }
+
+        /// <summary>A leg's points as stored on the race entity, with the boost strip across the route at each.</summary>
+        public static List<RaceLegPoint> Points(TrackDefinition track, in Leg leg)
+        {
+            var points = new List<RaceLegPoint>(leg.Points.Count);
+            for (int k = 0; k < leg.Points.Count; k++)
+            {
+                var (p, half) = leg.Points[k];
+                float2 dir = math.normalizesafe(leg.Points[math.min(k + 1, leg.Points.Count - 1)].position - leg.Points[math.max(k - 1, 0)].position, new float2(0, 1));
+                float3 push = PushAcross(track, p, dir, half);
+                points.Add(new RaceLegPoint { Position = p, HalfWidth = half, PushSpeed = push.x, PushAccel = push.y, PushSide = push.z });
+            }
+            return points;
+        }
+
+        /// <summary>The strongest push anywhere across the route at p (direction dir, half width half), as (speed, acceleration, side):
+        /// side is where across it the strip lies, −1 left … +1 right.</summary>
+        public static float3 PushAcross(TrackDefinition track, float2 p, float2 dir, float half)
+        {
+            float2 right = new float2(dir.y, -dir.x), best = 0; float side = 0; int hits = 0;
+            for (int k = -4; k <= 4; k++)
+            {
+                float across = k / 4.5f;
+                float2 push = Push(track, p + right * (across * half));
+                if (push.x <= 0) continue;
+                if (push.x > best.x) best = push;
+                side += across; hits++;
+            }
+            return new float3(best, hits > 0 ? side / hits : 0);
+        }
+
+        /// <summary>The boost strips' boxes (accelerating box zones that push ships).</summary>
+        public static List<RaceBoost> Boosts(TrackDefinition track)
+        {
+            var boxes = new List<RaceBoost>();
+            foreach (var z in track.Zones ?? Array.Empty<TrackZone>())
+            {
+                if (z.Zone == null || z.Zone.Shape != Game.Data.Hazards.ZoneShape.Box || Push(track, z.Position).x <= 0) continue;
+                boxes.Add(new RaceBoost { Center = z.Position, Yaw = z.Yaw, HalfExtents = z.HalfExtents.x > 0 ? (float2)z.HalfExtents : (float2)z.Zone.HalfExtents });
+            }
+            return boxes;
+        }
 
         /// <summary>The strongest ship push (boost strip) at p, as (speed it pushes to, acceleration); zero for none.</summary>
         public static float2 Push(TrackDefinition track, float2 p)
