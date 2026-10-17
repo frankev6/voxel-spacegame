@@ -61,8 +61,8 @@ namespace Game.Simulation.Ai
                 (accel.y > 0 ? env.Forward : env.Reverse) / math.max(1e-4f, math.abs(accel.y))));
             // (the assist adds a push's carry to whatever is commanded, ADR-0118: command the difference)
             float2 local = FlightMath.ToLocalPlanar(new float3(velocity.x, 0, velocity.y), rotation) + accel * (fit / env.Response) - flight.Carry;
-            cmd.Thrust.x = math.clamp(local.x / math.max(1, flight.StrafeCap), -1, 1);
-            cmd.Thrust.y = local.y >= 0 ? math.clamp(local.y / math.max(1, forwardCap), 0, 1) : math.clamp(local.y / math.max(1, flight.ReverseCap), -1, 0);
+            cmd.Thrust.x = math.clamp(local.x / math.max(1, env.StrafeCap), -1, 1);
+            cmd.Thrust.y = local.y >= 0 ? math.clamp(local.y / math.max(1, forwardCap), 0, 1) : math.clamp(local.y / math.max(1, env.ReverseCap), -1, 0);
             return cmd;
         }
 

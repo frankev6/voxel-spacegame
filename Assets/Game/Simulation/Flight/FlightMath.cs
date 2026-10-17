@@ -13,6 +13,9 @@ namespace Game.Simulation.Flight
         public static float CoreAssistForce(in FlightConfig c, float inverseMass)
             => inverseMass > 0 ? math.min(c.CoreLinearAccel / inverseMass, c.CoreMaxLinearForce) : 0;
         /// Caps after multipliers. Boost raises the forward cap only.
+        /// <summary>The speed-cap multiplier: the ship's MaxSpeed stat, and a raised shield's slowdown (owner: safer but slower).</summary>
+        public static float SpeedMultiplier(in FlightConfig c, float statMultiplier, bool shielded) =>
+            statMultiplier * (shielded && c.ShieldSpeedFraction > 0 ? c.ShieldSpeedFraction : 1f);
         public static void SpeedCaps(in FlightConfig c, float maxSpeedMultiplier, bool boost, out float forward, out float reverse, out float strafe)
         {
             float baseSpeed = c.MaxForwardSpeed * maxSpeedMultiplier;

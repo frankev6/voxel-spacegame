@@ -30,6 +30,21 @@ namespace Game.Simulation.Ai
             };
         }
 
+        /// <summary>This tick's caps exactly as propulsion will apply them (FlightMath), not last tick's FlightState: a ship's command
+        /// may be rewritten before the AI reads it (the player's own, under the autopilot), so last tick's boost flag and caps disagreed
+        /// by the boost factor, and a command sized against the wrong cap asked for a third less than it meant.</summary>
+        public static PilotEnvelope From(in PropulsionStats stats, in FlightConfig config, float speedMultiplier, float yawRateCap, float spool)
+        {
+            FlightMath.SpeedCaps(config, speedMultiplier, false, out float cruise, out float reverse, out float strafe);
+            return new PilotEnvelope
+            {
+                Forward = math.max(.5f, stats.ForwardAccel), Reverse = math.max(.5f, stats.ReverseAccel), Strafe = math.max(.5f, stats.StrafeAccel),
+                YawAccel = math.max(.2f, math.radians(stats.YawAccelDeg)), YawRate = math.max(.1f, yawRateCap),
+                Cruise = cruise, Boost = cruise * math.max(1, config.BoostSpeedMultiplier), StrafeCap = strafe, ReverseCap = reverse, Spool = spool,
+                Response = math.max(1, config.LinearAssistGain / Game.Core.SimTime.FixedTimestep),
+            };
+        }
+
         /// <summary>Main engines' spool: the thrust-weighted seconds to full of the thrusters that push forward.</summary>
         public static float ForwardSpool(DynamicBuffer<FlightThruster> thrusters)
         {

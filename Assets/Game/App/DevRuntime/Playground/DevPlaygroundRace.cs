@@ -290,6 +290,8 @@ namespace Game.App.DevRuntime.Playground
                     var ship = Entity.Null;
                     foreach (var r in em.GetBuffer<RacerProgress>(race))
                         if (r.Slot == request.Slot && r.Ship != Entity.Null && em.Exists(r.Ship) && !em.HasComponent<Hulk>(r.Ship)) { ship = r.Ship; break; }
+                    // never onto another racer: two ships put back at one gate overlapped and tore each other apart
+                    request.Position = FreeSpot(em, request.Position, request.Yaw, ship);
                     if (ship != Entity.Null) DevEcs.TeleportRoot(em, ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw));
                     else SpawnFresh(request);
                 }
@@ -373,6 +375,25 @@ namespace Game.App.DevRuntime.Playground
 
         /// <summary>RACE-006: a destroyed racer flies again in a fresh ship of its blueprint. Its hulk stays on the track as an obstacle
         /// but gives up the pilot's tags, so the camera, HUD and controls follow the new ship.</summary>
+        /// <summary>The respawn point if no other ship is within FreeRadius of it, else the first clear spot back along the route from
+        /// it or beside it (yaw is the race direction there).</summary>
+        static float2 FreeSpot(EntityManager em, float2 at, float yaw, Entity self)
+        {
+            const float FreeRadius = 45;
+            float2 forward = new float2(math.sin(yaw), math.cos(yaw)), right = new float2(forward.y, -forward.x);
+            using var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<LocalTransform>());
+            using var ships = q.ToEntityArray(Allocator.Temp);
+            using var poses = q.ToComponentDataArray<LocalTransform>(Allocator.Temp);
+            foreach (var (back, side) in new[] { (0f, 0f), (60f, 0f), (120f, 0f), (0f, 30f), (0f, -30f), (60f, 30f), (60f, -30f), (180f, 0f) })
+            {
+                float2 p = at - forward * back + right * side; bool clear = true;
+                for (int i = 0; i < ships.Length && clear; i++)
+                    clear = ships[i] == self || math.distance(poses[i].Position.xz, p) >= FreeRadius;
+                if (clear) return p;
+            }
+            return at - forward * 240;
+        }
+
         void SpawnFresh(in RaceRespawnRequest request)
         {
             var ctx = host.Context; var em = ctx.EntityManager;
