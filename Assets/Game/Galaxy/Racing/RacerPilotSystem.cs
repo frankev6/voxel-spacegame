@@ -73,7 +73,9 @@ namespace Game.Galaxy.Racing
             float2 ab = b - a, bc = c - b;
             float s = math.length(ab) + math.length(bc), turn = 0;
             if (math.lengthsq(ab) > 1e-4f && math.lengthsq(bc) > 1e-4f) turn = math.acos(math.clamp(math.dot(math.normalize(ab), math.normalize(bc)), -1, 1));
-            return turn > 1e-3f ? s / turn : 1e5f;
+            // the turn happens between the chords' midpoints, half their summed length apart (the whole length read every corner as
+            // twice as wide and planned it √2 too fast)
+            return turn > 1e-3f ? s * .5f / turn : 1e5f;
         }
 
         /// <summary>Distance from each gate to gate 0 along the shortest legs (gate 0: 0).</summary>

@@ -44,6 +44,15 @@ namespace Game.Tests.EditMode.Galaxy
         static RacerPlan.Ability Racer(float speed) => new RacerPlan.Ability { Speed = speed, Lateral = 13, Brake = 12, YawCap = math.radians(120) };
 
         [Test]
+        public void Radius_OfACircle_IsItsRadius()
+        {
+            // a 500 m circle sampled every 50 m, read across 3 points either side as the racer does
+            float2 At(int k) => new float2(math.cos(k * .1f), math.sin(k * .1f)) * 500;
+            Assert.AreEqual(500, RacerPlan.Radius(At(0), At(3), At(6)), 5);
+            Assert.AreEqual(500, RacerPlan.Radius(At(0), At(1), At(2)), 5);
+        }
+
+        [Test]
         public void Track01_EveryGateEdge_HasALegAlongTheRoutes()
         {
             var legs = RaceLines.Build(track);
