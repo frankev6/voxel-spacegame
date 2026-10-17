@@ -29,7 +29,7 @@
 |---|---|---|---|---|
 | Design system / art direction approved | SPEC-80 | approved | 2026-10-11 | NOCTURNE, as [DESIGN-GUIDE.md](design/DESIGN-GUIDE.md). Owner: "yes I approve". M0–M4 and SPEC-81 (A1) are unblocked |
 | Yarn Spinner 3 adoption | SPEC-41 | waiting for spike | — | Fallback format defined in SPEC-41 |
-| Racing and hazards specs (SPEC-91, SPEC-92, ADR-0118) | SPEC-91, SPEC-92 | waiting for owner review | — | Owner asked to "spec everything first" (2026-10-16); no code until reviewed |
+| Racing and hazards specs (SPEC-91, SPEC-92, ADR-0118) | SPEC-91, SPEC-92 | approved | 2026-10-16 | Owner: "Approved with the defaults. Merge the specs to main, then start the track layout options and racer silhouettes (RACE-002, RACE-003) and HAZ-001." |
 | First race track layout (top-down map) | SPEC-92 | waiting (RACE-002) | — | Before RACE-004 builds it |
 | Racer ship silhouettes (Dart, Ram) | SPEC-92 | waiting (RACE-003) | — | Silhouettes before voxels (ship-design direction) |
 
@@ -1149,8 +1149,8 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 498 | SPEC-40 Q36/Q37: real load safety and effect trace | Load entry refreshes location without incrementing narrative visits or emitting territory crossings; real successful dispatches produce existing EffectApplied trace. Three specified live scenarios use actual owners; acceptance pending focused checks. | Tech lead |
 | 499 | SPEC-70 Q35: real story playground | Three explicit sandbox beacons use canonical quest/clue/cargo/log/map owners, preserve quiet startup and physical world, and reset through the session. Existing entry/reset case extended; acceptance pending scope repair. | Tech lead |
 | 500 | SPEC-70 Q36: usable power, salvage and campaign trials | Resolved: prepare approved shield through editor/fleet owners before player spawn; normal ability input and real salvage transfer; same-profile campaign with no progress grants; console run shortcuts and isolated Lab reset. Details SPEC-70 Q36 and implementation 9805787b. | Tech lead |
-| 501 | 2026-10-16 | SPEC-91 §10 | Eight hit-force and hazard questions (feel targets, drift, who triggers mines, visibility, chain reactions, guest fire prediction, AI avoidance, debris pushes) | The defaults in SPEC-91 §10 | Owner (1–5), tech lead (6–8) | |
-| 502 | 2026-10-16 | SPEC-92 §10 | Eight racing questions (planar crossings, respawn and hulks, weapons, laps and players, AI racers, names, track location, ramming) | The defaults in SPEC-92 §10 | Owner | |
+| 501 | 2026-10-16 | SPEC-91 §10 | Eight hit-force and hazard questions (feel targets, drift, who triggers mines, visibility, chain reactions, guest fire prediction, AI avoidance, debris pushes) | The defaults in SPEC-91 §10 | Owner (1–5), tech lead (6–8) | Owner approved the defaults, 2026-10-16 |
+| 502 | 2026-10-16 | SPEC-92 §10 | Eight racing questions (planar crossings, respawn and hulks, weapons, laps and players, AI racers, names, track location, ramming) | The defaults in SPEC-92 §10 | Owner | Owner approved the defaults, 2026-10-16 |
 
 ## Measurements
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft for owner review (2026-10-16). Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
+| **Status** | Ready: approved by the owner with all §10 defaults (2026-10-16). Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
 | **Area code** | RACE (task IDs are `RACE-001`, `RACE-002`, …) |
 | **Module(s)** | `Game.Galaxy` (`Galaxy/Racing/`), `Game.Data` (definitions), `Game.Simulation` (`RaceHold` in command conversion), `Game.Net` (replication), `Game.UI` and `Game.Presentation` (race HUD), `Game.App` (playground pad, session), `Game.Editor` (track builder, Windows build) |
 | **Depends on specs** | SPEC-91 (zones, walls, mines, hit force), SPEC-90 and ADR-0117 (co-op), SPEC-10 (grid spawning), SPEC-20 (commands), SPEC-21 (weapons), SPEC-61 (HUD), SPEC-62 (camera) |

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft for owner review (2026-10-16). Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
+| **Status** | Ready: approved by the owner with all §10 defaults (2026-10-16). Design: [ADR-0118](../decisions/ADR-0118-hit-force-hazards-tracks.md) |
 | **Area code** | HAZ (task IDs are `HAZ-001`, `HAZ-002`, …) |
 | **Module(s)** | `Game.Simulation` (`Simulation/Hazards/`, plus changes in `Flight/` and `Weapons/`), `Game.Voxel` (`ExternalPush`), `Game.Data` (definitions, module rows), `Game.Net` (replication), `Game.Presentation` (feedback), `Game.App` (playground pad) |
 | **Depends on specs** | SPEC-13 (impulse channel, explosions), SPEC-20 (flight assist), SPEC-21 (weapons), SPEC-04 (block modules), SPEC-10 (grids), SPEC-23 (`SpatialHash`), SPEC-90 and ADR-0117 (co-op roles) |

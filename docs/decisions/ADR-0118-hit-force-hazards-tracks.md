@@ -1,6 +1,6 @@
 # ADR-0118 — Hit force, world hazards and race tracks
 
-**Status:** Proposed (2026-10-16), for the owner's review together with SPEC-91 and SPEC-92. Nothing is implemented yet.
+**Status:** Accepted (owner, 2026-10-16), with SPEC-91 and SPEC-92 and all their open-question defaults: "Approved with the defaults. Merge the specs to main, then start the track layout options and racer silhouettes (RACE-002, RACE-003) and HAZ-001."
 
 ## Context
 The owner, 2026-10-16, after inviting a second developer (Daniel) to test co-op: "make a racing minigame where we can also shoot eachother, crash into boundaries, have boost sections, interesting looping track with multiple paths and shortcuts, traps like mines in space (all of these things will get repurposed for other parts of the game, this is not just for racing, so build the foundations as well, like for example mines will be a normal thing in the actual game, and more of these). and two New ships purpose built to be good racers". And: "shooting not only should havve a small recoil on the ship that shot it, but also a clear force against the ship that got shot, obvisouly based on mass vs impact force and explosion of the shot. this adds "umph" to the fight, but also for racing, you can redirect people, obstacles or yourself with well placed shots". He asked for the full specs before any code.
