@@ -2,6 +2,7 @@
 """race-plot.py  Plot a race trace (`race trace on`) over its track.
 
 usage: race-plot.py <trace.csv> [--track ArtSource/Racing/tracks/track_01.json] [--out Logs/race-plot] [--incidents 8]
+                    [--window NAME:t0:t1 ...]   (t in seconds of trace ticks, tick / 60: zoom on a chosen moment, window-N.png)
 
 Writes, in --out:
   overview.png    the whole track (routes, fences, gates, boost strips as spawned when <trace>.boost.csv exists, mine fields, wrecks) with every racer's path; red where it
@@ -192,6 +193,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('trace'); ap.add_argument('--track', default='ArtSource/Racing/tracks/track_01.json'); ap.add_argument('--out', default='Logs/race-plot')
     ap.add_argument('--incidents', type=int, default=8)
+    ap.add_argument('--window', action='append', default=[])
     a = ap.parse_args()
     track = json.load(open(a.track)); data = load(a.trace)
     boxes = pathlib.Path(a.trace).with_suffix('.boost.csv')   # the strips as spawned (race trace writes them)
@@ -199,10 +201,15 @@ def main():
         with open(boxes, newline='') as f:
             track['boost_boxes'] = [dict(center=[float(r['x']), float(r['z'])], yaw=float(r['yaw']), length=2 * float(r['hz']), width=2 * float(r['hx'])) for r in csv.DictReader(f)]
     out = pathlib.Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    for old in out.glob('incident-*.png'): old.unlink()
+    for old in list(out.glob('incident-*.png')) + list(out.glob('window-*.png')): old.unlink()
     overview(track, data, out); timeline(data, out)
     found = incidents(data, a.incidents)
     for i, (n, slot, t0, t1) in enumerate(found, 1): incident(track, data, slot, t0, t1, i, out)
+    for i, w in enumerate(a.window, 1):
+        name, w0, w1 = w.split(':')
+        slot = next(s for s, rows in data.items() if rows and rows[0]['name'] == name)
+        incident(track, data, slot, int(float(w0) * 60), int(float(w1) * 60), 900 + i, out)
+        (out / f'incident-{900 + i}.png').rename(out / f'window-{i}.png')
     for slot, rows in sorted(data.items()):
         rr = racing(rows)
         if rr: print(f"{rr[0]['name']:8} slot {slot:3}: lap {rr[-1]['lap']} gate {rr[-1]['gate']}  outside band {seconds(rr, lambda r: r['ai'] and r['off'] > 0):.1f}s  "

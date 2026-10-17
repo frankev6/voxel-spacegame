@@ -10,7 +10,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
     {
         // a mid-weight hull: main engine 24 m/s², reverse and strafe 18, yaw 90°/s² up to 120°/s
         static PilotEnvelope Hull() => new PilotEnvelope { Forward = 24, Reverse = 18, Strafe = 18, YawAccel = math.radians(90), YawRate = math.radians(120),
-            Cruise = 160, Boost = 240, StrafeCap = 96, ReverseCap = 80, Response = 30 };
+            Cruise = 160, Boost = 240, StrafeCap = 96, ReverseCap = 80, Response = 30, YawStop = math.radians(90) };
         static FlightState Flight() => new FlightState { ForwardCap = 160, StrafeCap = 96, ReverseCap = 80, YawRateCap = math.radians(120) };
 
         [Test]
@@ -55,7 +55,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
         [Test]
         public void Turn_NoFasterThanItCanStop()
         {
-            var e = Hull(); e.YawAccel = .3f; float nose = 0;
+            var e = Hull(); e.YawAccel = .3f; e.YawStop = .3f; float nose = 0;
             // facing +x, wanting +z: a 90° turn; a slow-turning hull asks for a fraction of its cap at first
             var cmd = PilotControl.Fly(e, Flight(), quaternion.RotateY(math.PI / 2), new float2(0, 0), new float2(0, 20), 0, 160, ref nose);
             Assert.Less(cmd.Turn, 0, "turns left toward +z");

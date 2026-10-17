@@ -57,8 +57,8 @@ namespace Game.Simulation.Flight
             float thrustMultiplier = multipliers.Get(StatId.Thrust);
             float turnMultiplier = multipliers.Get(StatId.TurnRate);
             bool boost = (command.Flags & ShipCommandFlags.Boost) != 0 && (command.Flags & ShipCommandFlags.Brake) == 0;
-            bool shielded = Shields.HasComponent(entity) && Shields[entity].Active != 0 && Config.ShieldSpeedFraction > 0;
-            FlightMath.SpeedCaps(Config, multipliers.Get(StatId.MaxSpeed) * (shielded ? Config.ShieldSpeedFraction : 1), boost, out float forward, out float reverse, out float strafe);
+            bool shielded = Shields.HasComponent(entity) && Shields[entity].Active != 0;
+            FlightMath.SpeedCaps(Config, FlightMath.SpeedMultiplier(Config, multipliers.Get(StatId.MaxSpeed), shielded), boost, out float forward, out float reverse, out float strafe);
             float yawCap = FlightMath.YawRateCap(Config, turnMultiplier);
             FlightMath.Targets(Config, command.Thrust, command.Turn, command.Flags, local, forward, reverse, strafe,
                 yawCap, out float2 target, out float targetYaw);

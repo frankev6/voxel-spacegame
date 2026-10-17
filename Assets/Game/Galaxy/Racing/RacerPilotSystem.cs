@@ -6,6 +6,8 @@ using Game.Simulation.Ai;
 using Game.Simulation.Commands;
 using Game.Simulation.Flight;
 using Game.Simulation.Hazards;
+using Game.Simulation.Power;
+using Game.Data.Combat;
 using Game.Simulation.Spatial;
 using Game.Simulation.Weapons;
 using Game.Voxel.Damage;
@@ -30,7 +32,11 @@ namespace Game.Galaxy.Racing
 
         /// <summary>What a racer's ship can do, for planning: its speed now, and the side and braking accelerations it can count on.</summary>
         /// <summary>Env set: corners from the hull's grip at each speed (PilotEnvelope.CornerSpeed) with Share of it; else a fixed Lateral.</summary>
-        public struct Ability { public float Speed, Lateral, Brake, YawCap, Share; public PilotEnvelope Env; }
+        public struct Ability { public float Speed, Lateral, Brake, YawCap, Share, Reach; public PilotEnvelope Env; }   // Reach: m its hull keeps off a fence (0 = unsized)
+
+        /// <summary>How near a route's edge a hull may run: a field wall pushes a body from WallRadiusFraction of its bounding sphere off
+        /// the wall line, plus CorridorMargin. The steering job uses the same rule with the spatial hash's sphere.</summary>
+        public static float EdgeReach(float radius, float hull) => math.max(radius, ZoneSystem.WallRadiusFraction * hull + 3) + RacerSteerJob.CorridorMargin;
 
         /// <summary>From the hull's envelope: its grip is the drift grip (main engine and strafe together) it has at each speed, a little
         /// held back for response lag; a better pilot uses more of it.</summary>
@@ -62,6 +68,8 @@ namespace Game.Galaxy.Racing
                 v = math.sqrt(math.max(0, v * v - 2 * a.Brake * ds));
                 float r = Radius(points[leg.Start + math.max(0, i - 3)].Position, p.Position, points[leg.Start + math.min(leg.Count - 1, i + 3)].Position);
                 worst = math.max(worst, v / (CornerSpeed(a, r) * 1.15f + 5));
+                // and a route too narrow for the hull (a heavy racer down the 70 m breach banged both fences every lap)
+                if (a.Reach > 0) worst = math.max(worst, a.Reach / math.max(1, p.HalfWidth));
             }
             return worst;
         }
@@ -71,7 +79,9 @@ namespace Game.Galaxy.Racing
             float2 ab = b - a, bc = c - b;
             float s = math.length(ab) + math.length(bc), turn = 0;
             if (math.lengthsq(ab) > 1e-4f && math.lengthsq(bc) > 1e-4f) turn = math.acos(math.clamp(math.dot(math.normalize(ab), math.normalize(bc)), -1, 1));
-            return turn > 1e-3f ? s / turn : 1e5f;
+            // the turn happens between the chords' midpoints, half their summed length apart (the whole length read every corner as
+            // twice as wide and planned it √2 too fast)
+            return turn > 1e-3f ? s * .5f / turn : 1e5f;
         }
 
         /// <summary>Distance from each gate to gate 0 along the shortest legs (gate 0: 0).</summary>
@@ -216,6 +226,8 @@ namespace Game.Galaxy.Racing
         BufferLookup<FlightThruster> thrusters;
         ComponentLookup<Pilot> pilots;
         ComponentLookup<WeaponStats> weapons;
+        ComponentLookup<ShipStatMultipliers> multipliers;
+        ComponentLookup<ShieldState> shields;
 
         public void OnCreate(ref SystemState state)
         {
@@ -230,6 +242,7 @@ namespace Game.Galaxy.Racing
             holds = state.GetComponentLookup<RaceHold>(true); mines = state.GetComponentLookup<MineFuse>(true);
             spawning = state.GetComponentLookup<GridSpawning>(true);
             thrusters = state.GetBufferLookup<FlightThruster>(true); pilots = state.GetComponentLookup<Pilot>(true); weapons = state.GetComponentLookup<WeaponStats>(true);
+            multipliers = state.GetComponentLookup<ShipStatMultipliers>(true); shields = state.GetComponentLookup<ShieldState>(true);
         }
 
         public void OnUpdate(ref SystemState state)
@@ -280,6 +293,12 @@ namespace Game.Galaxy.Racing
                         var flightNow = em.HasComponent<FlightState>(ship) ? em.GetComponentData<FlightState>(ship) : new FlightState { ForwardCap = 120, StrafeCap = 72, ReverseCap = 60, YawRateCap = 2 };
                         var envelope = PilotEnvelope.From(em.HasComponent<PropulsionStats>(ship) ? em.GetComponentData<PropulsionStats>(ship) : default, flightNow, config, false, 0);
                         var ability = RacerPlan.AbilityOf(envelope, config, pilot.Skill, speed);
+                        if (em.HasComponent<VoxelGrid>(ship))
+                        {
+                            var g = em.GetComponentData<VoxelGrid>(ship);
+                            float hw = math.max(2, (g.CellMax.x - g.CellMin.x + 1) * g.CellSize * .5f), hl = math.max(2, (g.CellMax.z - g.CellMin.z + 1) * g.CellSize * .5f);
+                            ability.Reach = RacerPlan.EdgeReach(math.max(hw, hl * .6f), math.sqrt(hw * hw + hl * hl));
+                        }
                         pilot.LineTo = (short)RacerPlan.Build(built, em.GetBuffer<RaceGate>(race), em.GetBuffer<RaceLeg>(race), em.GetBuffer<RaceLegPoint>(race),
                             carryOn ? pilot.LineTo : from, pilot.Seed, pilot.Skill, carryOn ? lap + 1 + (int)(tick & 7) : lap, ability, switchTo);
                         var line = em.GetBuffer<RacerLinePoint>(ship);
@@ -300,7 +319,7 @@ namespace Game.Galaxy.Racing
 
             flights.Update(ref state); propulsion.Update(ref state); grids.Update(ref state); velocities.Update(ref state);
             holds.Update(ref state); mines.Update(ref state); spawning.Update(ref state);
-            thrusters.Update(ref state); pilots.Update(ref state); weapons.Update(ref state);
+            thrusters.Update(ref state); pilots.Update(ref state); weapons.Update(ref state); multipliers.Update(ref state); shields.Update(ref state);
             bool done(RacerFlags f) => (f & RacerFlags.Finished) != 0;
             var finished = new NativeHashSet<byte>(4, state.WorldUpdateAllocator);
             foreach (var r in em.GetBuffer<RacerProgress>(race)) if (done(r.Flags)) finished.Add(r.Slot);
@@ -311,6 +330,7 @@ namespace Game.Galaxy.Racing
                 Hash = hash.AsReadOnly(), Collision = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld, Finished = finished,
                 Boosts = em.HasBuffer<RaceBoost>(race) ? em.GetBuffer<RaceBoost>(race).ToNativeArray(state.WorldUpdateAllocator) : new NativeArray<RaceBoost>(0, state.WorldUpdateAllocator),
                 Flights = flights, Propulsion = propulsion, Grids = grids, Velocities = velocities, Holds = holds, Mines = mines, Spawning = spawning, Thrusters = thrusters, Pilots = pilots, Weapons = weapons,
+                Multipliers = multipliers, Shields = shields,
             };
             var handle = job.ScheduleParallel(racers, hash.BeginRead(state.Dependency));
             hash.EndRead(handle);
@@ -354,6 +374,8 @@ namespace Game.Galaxy.Racing
         [ReadOnly] public BufferLookup<FlightThruster> Thrusters;
         [ReadOnly] public ComponentLookup<Pilot> Pilots;
         [ReadOnly] public ComponentLookup<WeaponStats> Weapons;
+        [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
+        [ReadOnly] public ComponentLookup<ShieldState> Shields;
 
         // Headings tried around the line target (rad): straight first, then wider either side.
         static readonly float[] Offsets = { 0, .1f, -.1f, .21f, -.21f, .35f, -.35f, .52f, -.52f, .73f, -.73f, .98f, -.98f, 1.3f, -1.3f };
@@ -409,7 +431,7 @@ namespace Game.Galaxy.Racing
             int own = Hash.FindIndex(entity);
             float hull = own >= 0 ? Hash.Get(own).HullRadius : radius;   // its bounding sphere: mines and field walls measure to it
             // How near the line's edge it may run: a field wall pushes a body from WallRadiusFraction of its sphere off the wall line.
-            float edgeReach = math.max(radius, ZoneSystem.WallRadiusFraction * hull + 3) + CorridorMargin;
+            float edgeReach = RacerPlan.EdgeReach(radius, hull);
 
             // Where on the line: the nearest segment a little behind to well ahead; anywhere if it is far off.
             int index = math.clamp(pilot.Index, 0, line.Length - 2);
@@ -432,8 +454,10 @@ namespace Game.Galaxy.Racing
             // A boost strip ahead gives no room to brake: it pushes harder than any engine brakes.
             var stats = Propulsion.HasComponent(entity) ? Propulsion[entity] : default;
             float skill = math.saturate(pilot.Skill);
-            bool boosting = (command.Flags & ShipCommandFlags.Boost) != 0;
-            var envelope = PilotEnvelope.From(stats, flight, Config, boosting, Thrusters.HasBuffer(entity) ? PilotEnvelope.ForwardSpool(Thrusters[entity]) : 0);
+            float speedMultiplier = FlightMath.SpeedMultiplier(Config, Multipliers.HasComponent(entity) ? Multipliers[entity].Get(StatId.MaxSpeed) : 1,
+                Shields.HasComponent(entity) && Shields[entity].Active != 0);
+            var envelope = PilotEnvelope.From(stats, Config, speedMultiplier, FlightMath.YawRateCap(Config, Multipliers.HasComponent(entity) ? Multipliers[entity].Get(StatId.TurnRate) : 1),
+                Thrusters.HasBuffer(entity) ? PilotEnvelope.ForwardSpool(Thrusters[entity]) : 0);
             var ability = RacerPlan.AbilityOf(envelope, Config, skill, speed);
             float brake = ability.Brake;
             float baseCap = envelope.Cruise, boostCap = envelope.Boost;
@@ -466,12 +490,26 @@ namespace Game.Galaxy.Racing
             {
                 if (i > pilot.Index) stripWalk += math.distance(line[i - 1].Position, line[i].Position);
                 if (line[i].PushSpeed <= 0) continue;
-                avoidStrip = line[i].Avoid != 0;
+                avoidStrip = line[i].Avoid != 0 || Racing == 0 || Finished.Contains(slot.Slot);   // cruising after the flag: no strip flinging it into the field
                 lane = avoidStrip ? -math.sign(line[i].PushSide) * .8f : math.sign(line[i].PushSide) * .55f;
                 break;
             }
-            float2 aim = PointAlong(line, pilot.Index, bestT, look, out float2 aimDir, out float aimHalf);
-            aim += new float2(aimDir.y, -aimDir.x) * lane * math.max(0, aimHalf - edgeReach);
+            // The way there must stay inside the route too: at a fork a long chord cut across the corner's fence post, the casts
+            // turned the racer off it, and a heavy one swung past the branch and pinned itself on the far fence. Nearer until clear.
+            float2 aim, aimDir; float aimHalf;
+            for (int tries = 0; ; tries++)
+            {
+                aim = PointAlong(line, pilot.Index, bestT, look, out aimDir, out aimHalf);
+                aim += new float2(aimDir.y, -aimDir.x) * lane * math.max(0, aimHalf - edgeReach);
+                bool clear = true;
+                for (int k = 1; k <= 2 && clear; k++)
+                {
+                    float2 q = math.lerp(pos, aim, k / 3f);
+                    clear = LineDistance(line, pilot.Index, q, out float qHalf) <= math.max(6, qHalf - edgeReach * .5f);
+                }
+                if (clear || tries >= 4 || look <= 36) break;
+                look = math.max(35, look * .7f);
+            }
             float2 toAim = aim - pos;
             float aimYaw = math.lengthsq(toAim) > 1 ? math.atan2(toAim.x, toAim.y) : yaw;
 
@@ -493,7 +531,9 @@ namespace Game.Galaxy.Racing
 
             // Score each heading: how far it turns from the line, leaving the route, bodies it would meet, structure it would hit.
             float bestCost = float.MaxValue, bestOffset = 0, bestThreat = 0, bestMines = 0, bestClear = float.MaxValue;
-            float castLength = math.clamp(speed * 1.4f + 30, 50, 280), castRadius = math.clamp(halfWidth * .9f, 2, 14);
+            // three seconds out, to steer round a big wreck in time (at 1.4 s it saw hulks too late to turn and hit them at 100+ m/s); it brakes
+            // only for what is within the nearer reach, since a long straight cast meets the outside of every bend
+            float castLength = math.clamp(speed * 3 + 30, 50, 450), brakeReach = math.clamp(speed * 1.4f + 30, 50, 280), castRadius = math.clamp(halfWidth * .9f, 2, 14);
             for (int c = 0; c < Offsets.Length; c++)
             {
                 float heading = aimYaw + Offsets[c];
@@ -572,7 +612,22 @@ namespace Game.Galaxy.Racing
             // Threat ahead on the best heading too: ease off, and never arrive at structure faster than it can stop. Not for mines:
             // a fuse burns 0.5 s, so a fast ship is clear of the blast when it goes.
             if (bestThreat > 1) target *= math.saturate(1.1f - (bestThreat - 1) * .12f);
-            if (bestClear < float.MaxValue) target = math.min(target, math.max(12, math.sqrt(2 * brake * math.max(0, bestClear - 8)) + 10));
+            if (bestClear < brakeReach) target = math.min(target, math.max(12, math.sqrt(2 * brake * math.max(0, bestClear - 8)) + 10));
+            // A body it cannot pass on that heading (a slower rival with no room round it, a wreck, a mine it has not shot yet): no faster
+            // than it can still brake to that body's own speed before it gets there. Left to the casts it saw a ship 8 m ahead and rammed
+            // it at 60 m/s closing, and hit mine casings off a boost strip at 200 m/s.
+            float2 bestU = new float2(math.sin(aimYaw + bestOffset), math.cos(aimYaw + bestOffset));
+            for (int k = 0; k < near.Length; k++)
+            {
+                var o = near[k];
+                float2 rel = o.Position - pos; float ahead = math.dot(rel, bestU);
+                if (ahead <= 0) continue;
+                float2 w = bestU * math.max(target, 10) - o.Velocity;
+                float t = math.clamp(math.dot(rel, w) / math.max(1e-3f, math.lengthsq(w)), 0, Horizon);
+                if (math.length(rel - w * t) >= o.Radius) continue;
+                float theirs = math.max(0, math.dot(o.Velocity, bestU));
+                target = math.min(target, math.max(12, theirs + math.sqrt(2 * brake * math.max(0, ahead - o.Radius))));
+            }
             target = math.max(target, 12);
 
             // Stuck: no progress along the line for 3 s (wedged, spinning on a fence, crawling the wrong way) — back off and turn,

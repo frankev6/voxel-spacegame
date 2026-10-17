@@ -42,13 +42,14 @@ namespace Game.Simulation.Ai
             float limit = math.length(velocity) < SlideSpeed ? 0 : math.min(math.min(maxNose, env.DriftAngle + DriftSlack), sideways);
             float chosen = ChooseNose(env, d, d * along + right * lateral, limit, nose);
             // and it moves no faster than the hull can swing its nose: a slow hull chasing a jumping angle never settled
-            float step = math.min(env.YawRate, math.sqrt(env.YawAccel)) * Game.Core.SimTime.FixedTimestep * .6f;
+            float step = math.min(env.YawRate, math.sqrt(env.YawStop)) * Game.Core.SimTime.FixedTimestep * .6f;
             nose = nose + math.clamp(chosen - nose, -step, step);
 
             float faceYaw = math.atan2(d.x, d.y) + nose;
             float error = Planar.WrapAngle(faceYaw - yaw);
-            // a correction it can stop in time (the wanted direction already turns with the path; adding the curve's rate overturned it)
-            float rate = math.sign(error) * math.min(math.min(math.abs(error) * 3, env.YawRate), math.sqrt(2 * env.YawAccel * .8f * math.abs(error)));
+            // a correction it can stop in time, on the yaw it can count on mid-drift (the wanted direction already turns with the path;
+            // adding the curve's rate overturned it)
+            float rate = math.sign(error) * math.min(math.min(math.abs(error) * 3, env.YawRate), math.sqrt(2 * env.YawStop * .8f * math.abs(error)));
 
             var cmd = default(ShipCommand);
             cmd.Turn = math.clamp(rate / env.YawRate, -1, 1);
@@ -61,8 +62,8 @@ namespace Game.Simulation.Ai
                 (accel.y > 0 ? env.Forward : env.Reverse) / math.max(1e-4f, math.abs(accel.y))));
             // (the assist adds a push's carry to whatever is commanded, ADR-0118: command the difference)
             float2 local = FlightMath.ToLocalPlanar(new float3(velocity.x, 0, velocity.y), rotation) + accel * (fit / env.Response) - flight.Carry;
-            cmd.Thrust.x = math.clamp(local.x / math.max(1, flight.StrafeCap), -1, 1);
-            cmd.Thrust.y = local.y >= 0 ? math.clamp(local.y / math.max(1, forwardCap), 0, 1) : math.clamp(local.y / math.max(1, flight.ReverseCap), -1, 0);
+            cmd.Thrust.x = math.clamp(local.x / math.max(1, env.StrafeCap), -1, 1);
+            cmd.Thrust.y = local.y >= 0 ? math.clamp(local.y / math.max(1, forwardCap), 0, 1) : math.clamp(local.y / math.max(1, env.ReverseCap), -1, 0);
             return cmd;
         }
 

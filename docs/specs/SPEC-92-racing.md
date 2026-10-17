@@ -424,6 +424,7 @@ Advisory (ADR-0042):
   - [x] A racer at speed never takes a branch it cannot corner (`Choose_NeverABranchItCannotCorner_WhenOneItCanExists`).
   - [x] Boost strips cover the inside half before a bend; a racer takes one only if it can make the bend after it (`Strips_CoverHalfTheRoute_…`).
   - [ ] Three AI racers finish a 3-lap race without a reset, losing under 5% of their mass.
+  - [x] A racer never picks a branch narrower than its hull keeps from a fence (`Choose_AHullTooBigForTheBreach_NeverTakesIt`); corner radii read true (`Radius_OfACircle_IsItsRadius`).
   - [x] From the pilot's own model it holds turns strafe alone cannot by drifting, and speeds up from rest on a curve (`PilotTests`).
 - **Tests:** `RacerLineTests`, `PilotTests`; traced races (`race-ai.sh`).
 
