@@ -49,6 +49,7 @@ namespace Game.App.Session
             ["AiAnchorShiftSystem"] = SystemAuthority.AuthorityOnly,
             ["AiDecisionSystem"] = SystemAuthority.AuthorityOnly,
             ["AiSteeringSystem"] = SystemAuthority.AuthorityOnly,
+            ["RacerPilotSystem"] = SystemAuthority.AuthorityOnly,        // RACE-017: AI racers; their ships replicate
             ["FleetSystem"] = SystemAuthority.AuthorityOnly,
             ["PlayerCombatStatusSystem"] = SystemAuthority.AuthorityOnly,     // ADR-0117 decider: every pilot's combat status
             ["PlayerCombatStatusSyncSystem"] = SystemAuthority.Both,          // ADR-0117 derivation: this machine's pilot into the singleton
@@ -84,11 +85,11 @@ namespace Game.App.Session
             ["DamageStreamsSystem"] = SystemAuthority.Both,
             ["RecoilSystem"] = SystemAuthority.Both,                     // SPEC-91: shooters feel their own recoil at once
             ["ZoneSystem"] = SystemAuthority.Both,
-            ["WallEmitterSystem"] = SystemAuthority.Both,
-            ["SpinLimitSystem"] = SystemAuthority.Both,                 // RACE-016: every machine flies its own ships              // RACE-016: spatial, so every machine drops the same spans
+            ["WallEmitterSystem"] = SystemAuthority.Both,                // RACE-016: spatial, so every machine drops the same spans
+            ["SpinLimitSystem"] = SystemAuthority.Both,                  // RACE-016: every machine flies its own ships
             ["MineSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-91: arm, trigger and detonate; mines replicate as grids
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
-            ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests                       // SPEC-91: pushes everywhere; wall damage and gate contacts used on the authority
+            ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
@@ -143,6 +144,7 @@ namespace Game.App.Session
             ["SplitGraceContactSystem"] = "which split pieces may still touch their parent; poses in snapshots",
             ["ImpactEventSystem"] = "ram damage from contacts; its cells in GridDelta",
             ["RaceSystem"] = "race phase, laps, gates, places and respawns; RaceState",
+            ["RacerPilotSystem"] = "how each AI racer flies; its command and pose in snapshots",
             ["MineSystem"] = "when a mine arms, triggers and detonates; the explosion and its despawn",
             ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
             ["IntegritySystem"] = "which islands lost their connection; SplitSystem's plans",

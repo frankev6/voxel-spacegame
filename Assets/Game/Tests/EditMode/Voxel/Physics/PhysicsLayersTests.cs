@@ -11,7 +11,7 @@ namespace Game.Tests.EditMode.Voxel.Physics
             PhysicsLayers.Celestial, PhysicsLayers.Sensor, PhysicsLayers.EditorPreview };
         static CollisionFilter[] Queries() => new[] { PhysicsLayers.ProjectileQuery, PhysicsLayers.BeamQuery,
             PhysicsLayers.ExplosionQuery, PhysicsLayers.CameraOcclusionQuery, PhysicsLayers.PickingQuery,
-            PhysicsLayers.InteractionQuery, PhysicsLayers.SpawnClearanceQuery, PhysicsLayers.EditorPickQuery,
+            PhysicsLayers.InteractionQuery, PhysicsLayers.SpawnClearanceQuery, PhysicsLayers.EditorPickQuery, PhysicsLayers.NavigationQuery,
             PhysicsLayers.DebugAllQuery };
 
         [Test]
@@ -30,7 +30,7 @@ namespace Game.Tests.EditMode.Voxel.Physics
         public void Queries_HitExactlyListedLayers()
         {
             // Bit positions in this table are the body-array indices, independent of the implementation filters.
-            int[] expected = { 0b00101, 0b00101, 0b00001, 0b00001, 0b00101, 0b01101, 0b00111, 0b10001, 0b11111 };
+            int[] expected = { 0b00101, 0b00101, 0b00001, 0b00001, 0b00101, 0b01101, 0b00111, 0b10001, 0b00001, 0b11111 };
             var queries = Queries(); var bodies = Bodies();
             for (int i = 0; i < queries.Length; i++)
                 for (int j = 0; j < bodies.Length; j++)

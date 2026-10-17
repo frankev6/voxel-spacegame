@@ -27,7 +27,7 @@ namespace Game.Simulation.Hazards
     {
         internal const float JumpMetres = 50f;
         /// <summary>A wall pushes a body by this fraction of its bounding radius: a sphere round a long hull would hold it metres off.</summary>
-        internal const float WallRadiusFraction = .7f;   // RACE-016: holds a hull off the emitter posts on the line
+        public const float WallRadiusFraction = .7f;    // RACE-016: holds a hull off the emitter posts on the line
         /// <summary>The most yaw rate a wall leaves a ship with (rad/s): a glancing hit turns it along the wall, never into a spin, however
         /// long thrust keeps it pressed there.</summary>
         internal const float MaxWallSpin = .6f;

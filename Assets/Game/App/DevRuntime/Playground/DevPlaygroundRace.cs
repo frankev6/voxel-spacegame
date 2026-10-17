@@ -36,6 +36,13 @@ namespace Game.App.DevRuntime.Playground
         double3 trackOrigin;
         VisualElement hud; Label banner, status, warning, results;
         readonly Dictionary<byte, ContentHash> blueprints = new();   // each racer's ship, for respawns
+        // RACE-017: AI racers take the grid slots no pilot fills. Their race slots start here, clear of co-op pilot slots.
+        internal const byte AiSlotBase = 16;
+        static readonly string[] AiShips = { "ship_racer_needle", "ship_racer_kite", "ship_racer_gimbal", "ship_racer_hammerhead", "ship_racer_battering_ram" };
+        static readonly string[] AiNames = { "VEGA", "ORION", "LYRA", "CASSIA", "RIGEL", "NOVA", "ATLAS", "SIRIUS" };
+        readonly Dictionary<byte, string> aiNames = new();
+        bool autopilot;
+        System.IO.StreamWriter trace; string tracePath; long tracedTick = -100;
 
         internal DevPlaygroundRace(DevRuntimeHost host) { this.host = host; }
         int syncFrame; RacePhase sentPhase = (RacePhase)255;
@@ -57,7 +64,8 @@ namespace Game.App.DevRuntime.Playground
         internal bool IsFinished => IsOpen && State.Phase == RacePhase.Finished;
         RaceState State => host.Context.EntityManager.GetComponentData<RaceState>(race);
 
-        internal DevCommandResult Open(double3 padsOrigin, int laps = 0)
+        /// <summary>`ai` AI racers join (−1: one in every grid slot no pilot takes).</summary>
+        internal DevCommandResult Open(double3 padsOrigin, int laps = 0, int ai = -1)
         {
             var ctx = host.Context; var em = ctx.EntityManager;
             if (!ctx.TryGetService<Game.Data.Services.ContentService>(out var content) || !content.Catalog.TryGet<TrackDefinition>(new ContentId("track_01"), out var track))
@@ -66,7 +74,7 @@ namespace Game.App.DevRuntime.Playground
             ctx.TryGetService<GameSession>(out var session);
             End();
             em.CompleteAllTrackedJobs();
-            blueprints.Clear();
+            blueprints.Clear(); aiNames.Clear();
             trackOrigin = padsOrigin + TrackOffset;
             float2 local = (float2)(trackOrigin - frame.OriginInStarSystem).xz;
             var frameOrigin = frame.OriginInStarSystem;
@@ -87,7 +95,7 @@ namespace Game.App.DevRuntime.Playground
 
             // Every pilot (host slot 0, guests 1+) to a grid slot in slot order, held until GO.
             var pilots = new List<(byte slot, Entity ship)>();
-            using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<LocalTransform>(), ComponentType.Exclude<Hulk>()))
+            using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<LocalTransform>(), ComponentType.Exclude<Hulk>(), ComponentType.Exclude<TrackPieceOf>()))
             using (var ships = q.ToEntityArray(Allocator.Temp))
                 foreach (var s in ships) pilots.Add((em.GetComponentData<Pilot>(s).Slot, s));
             pilots.Sort((a, b) => a.slot.CompareTo(b.slot));
@@ -105,12 +113,30 @@ namespace Game.App.DevRuntime.Playground
                 if (source.Equals(default(ContentHash)) && slot == 0 && session?.Fleet?.Flagship != null) source = session.Fleet.Flagship.SourceBlueprint.Hash;
                 blueprints[slot] = source;
             }
+            // RACE-017: AI racers in the free slots, each in a different racer from the others and from the host's.
+            int aiCount = math.min(ai < 0 ? slots.Length : ai, slots.Length - racers.Count);
+            var taken = new HashSet<ContentHash>(blueprints.Values);
+            for (int k = 0, ship = 0; k < aiCount; k++)
+            {
+                ContentHash blueprint = default;
+                for (int tries = 0; tries < AiShips.Length && blueprint.Equals(default(ContentHash)); tries++, ship++)
+                {
+                    if (!content.Catalog.TryGet<ShipBlueprintDefinition>(new ContentId(AiShips[ship % AiShips.Length]), out var definition)) continue;
+                    if (taken.Add(definition.Id.Hash) || tries == AiShips.Length - 1) blueprint = definition.Id.Hash;
+                }
+                if (blueprint.Equals(default(ContentHash))) break;
+                byte slot = (byte)(AiSlotBase + k);
+                var at = slots[racers.Count];
+                blueprints[slot] = blueprint; aiNames[slot] = AiNames[k % AiNames.Length];
+                var root = SpawnAiRacer(slot, blueprint, local + at.Position, at.Yaw);
+                racers.Add(new RacerProgress { Slot = slot, LastGate = -1, Ship = root });
+            }
             slots.Dispose();
             var buffer = em.GetBuffer<RacerProgress>(race);
             foreach (var r in racers) buffer.Add(r);
             BuildVisuals(track); BuildHud();
             if (Role == Game.Core.Net.SimRoleKind.Host) { Coop?.SendAllGuests($"race view x={F(trackOrigin.x)} z={F(trackOrigin.z)} laps={State.Laps}"); sentPhase = (RacePhase)255; }
-            return DevCommandResult.Ok($"{track.DisplayName}: {racers.Count} pilot(s) on the grid, {State.Laps} laps. Press F (or race start) for the countdown.");
+            return DevCommandResult.Ok($"{track.DisplayName}: {racers.Count - aiNames.Count} pilot(s) and {aiNames.Count} AI on the grid, {State.Laps} laps. Press F (or race start) for the countdown.");
         }
 
         internal DevCommandResult Start()
@@ -134,10 +160,17 @@ namespace Game.App.DevRuntime.Playground
                 using (var q = em.CreateEntityQuery(typeof(RaceHold)))
                 using (var ships = q.ToEntityArray(Allocator.Temp))
                     foreach (var s in ships) em.RemoveComponent<RaceHold>(s);
+                var mine = ctx.PlayerShipRoot;
+                if (mine != Entity.Null && em.Exists(mine) && em.HasComponent<RacerPilot>(mine)) { em.RemoveComponent<RacerPilot>(mine); em.RemoveComponent<RacerLinePoint>(mine); }
+                // AI racers leave with the track (TrackPieceOf); they stop being pilots now, so a reopened race never binds them.
+                using (var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<TrackPieceOf>()))
+                using (var ships = q.ToEntityArray(Allocator.Temp))
+                    foreach (var s in ships) em.RemoveComponent<Pilot>(s);
                 TrackSpawnService.Despawn(em, Group);
                 using (var q = em.CreateEntityQuery(typeof(RaceRespawnRequest))) em.DestroyEntity(q);
             }
-            race = Entity.Null;
+            race = Entity.Null; autopilot = false;
+            trace?.Dispose(); trace = null;
             dressing?.Dispose(); dressing = null;
             hud?.RemoveFromHierarchy(); hud = null; banner = status = warning = results = null;
         }
@@ -259,8 +292,11 @@ namespace Game.App.DevRuntime.Playground
                         { DevEcs.TeleportRoot(em, racers[i].Ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw)); live = true; }
                     if (!live) SpawnFresh(request);
                 }
+            var mine = ctx.PlayerShipRoot;
+            if (autopilot && mine != Entity.Null && em.Exists(mine) && !em.HasComponent<RacerPilot>(mine)) RacerPilotSystem.Attach(em, mine, 1, 1);
             if (Role == Game.Core.Net.SimRoleKind.Host && (++syncFrame % 12 == 0 || State.Phase != sentPhase)) { sentPhase = State.Phase; Coop?.SendAllGuests(SyncText()); }
             if (Role == Game.Core.Net.SimRoleKind.Guest) ApplyLocalHold();
+            TraceRow();
             UpdateVisuals(); UpdateHud();
         }
 
@@ -348,7 +384,9 @@ namespace Game.App.DevRuntime.Playground
                     if (em.GetComponentData<Pilot>(h).Slot != request.Slot) continue;
                     em.RemoveComponent<Pilot>(h);
                     if (em.HasComponent<PlayerShip>(h)) em.RemoveComponent<PlayerShip>(h);
+                    if (em.HasComponent<RacerPilot>(h)) em.RemoveComponent<RacerPilot>(h);
                 }
+            if (request.Slot >= AiSlotBase) { SpawnAiRacer(request.Slot, blueprint, request.Position, request.Yaw); return; }
             if (request.Slot != 0)
             {
                 // RACE-009: a guest's fresh ship replicates as theirs (RemotePilot), so their camera and HUD follow it.
@@ -363,6 +401,119 @@ namespace Game.App.DevRuntime.Playground
                 Kind = Game.Voxel.Model.GridKind.Ship, Motion = Game.Voxel.Model.GridMotion.Dynamic, Profile = Game.Voxel.Model.GridProfile.PlayerShip
             });
             em.AddComponentData(root, Game.Simulation.Allegiance.Player);
+        }
+
+        /// <summary>RACE-017: an AI racer's ship: a crewless racer (no combat AI) flown by RacerPilotSystem, held until GO. It is a track
+        /// piece of the race group, so ending the race removes it and its hulks.</summary>
+        Entity SpawnAiRacer(byte slot, ContentHash blueprint, float2 position, float yaw)
+        {
+            var ctx = host.Context; var em = ctx.EntityManager;
+            ctx.TryGetService<GameSession>(out var session);
+            var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint, new Game.Voxel.Grid.GridSpawnParams
+            {
+                PersistentId = session != null ? session.Allocate() : 0, Pose = new RigidTransform(quaternion.RotateY(yaw), new float3(position.x, 0, position.y)),
+                Kind = Game.Voxel.Model.GridKind.Ship, Motion = Game.Voxel.Model.GridMotion.Dynamic, Profile = Game.Voxel.Model.GridProfile.Dummy
+            });
+            em.AddComponentData(root, new Game.Simulation.Allegiance { Faction = 0, Team = slot });   // a player-side ship, nobody's wingmate
+            em.AddComponentData(root, new Pilot { Slot = slot });
+            em.AddComponentData(root, Game.Core.Net.PilotName.From(aiNames.TryGetValue(slot, out var name) ? name : "AI " + slot));
+            em.AddComponentData(root, new TrackPieceOf { Group = Group });
+            RacerPilotSystem.Attach(em, root, .55f + .4f * (((slot - AiSlotBase) * 37) % 10) / 9f, (uint)(slot * 7919 + 17));
+            em.AddComponent<RaceHold>(root); em.SetComponentEnabled<RaceHold>(root, State.Phase == RacePhase.Lobby || State.Phase == RacePhase.Countdown);
+            return root;
+        }
+
+        /// <summary>RACE-017 dev: the racer AI flies this machine's ship (host or solo), to test the track hands-off.</summary>
+        internal DevCommandResult Autopilot(string mode)
+        {
+            if (Role == Game.Core.Net.SimRoleKind.Guest) return DevCommandResult.Fail("the autopilot runs on the host");
+            autopilot = mode == "on" || mode != "off" && !autopilot;
+            var em = host.Context.EntityManager; var ship = host.Context.PlayerShipRoot;
+            if (ship != Entity.Null && em.Exists(ship))
+            {
+                if (autopilot && !em.HasComponent<RacerPilot>(ship)) RacerPilotSystem.Attach(em, ship, 1, 1);
+                if (!autopilot && em.HasComponent<RacerPilot>(ship)) { em.RemoveComponent<RacerPilot>(ship); em.RemoveComponent<RacerLinePoint>(ship); }
+            }
+            return DevCommandResult.Ok(autopilot ? "autopilot on: the racer AI flies your ship (race autopilot off to fly)" : "autopilot off");
+        }
+
+        string LinePoint(Entity ship, int index)
+        {
+            var em = host.Context.EntityManager; var line = em.GetBuffer<RacerLinePoint>(ship);
+            if (index < 0 || index >= line.Length) return "-";
+            float2 p = em.GetComponentData<LocalTransform>(race).Position.xz + line[index].Position;
+            return $"({p.x:0},{p.y:0})";
+        }
+
+        /// <summary>RACE-017 dev: records every racer 10 times a second (track space) to a CSV for tools/playtest/race-plot.py.</summary>
+        internal DevCommandResult Trace(string mode, string file)
+        {
+            bool on = mode == "on" || mode != "off" && trace == null;
+            trace?.Dispose(); trace = null;
+            if (!on) return DevCommandResult.Ok("trace off: " + tracePath);
+            tracePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "..", "Logs", string.IsNullOrEmpty(file) ? "race-trace.csv" : file));
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(tracePath));
+            trace = new System.IO.StreamWriter(tracePath, false, new System.Text.UTF8Encoding(false));
+            trace.WriteLine("tick,phase,slot,name,x,z,yaw,vx,vz,yawrate,mass,lap,lastgate,flags,ai,target,off,threat,steer,aimx,aimz,cmd,linefrom,lineto,index,replans");
+            return DevCommandResult.Ok("tracing to " + tracePath);
+        }
+
+        void TraceRow()
+        {
+            var ctx = host.Context; var em = ctx.EntityManager;
+            if (trace == null || ctx.Tick - tracedTick < 6) return;   // per frame; one row per racer every 6 sim ticks
+            tracedTick = (long)ctx.Tick;
+            float2 origin = em.GetComponentData<LocalTransform>(race).Position.xz;
+            var inv = System.Globalization.CultureInfo.InvariantCulture; var rs = State;
+            foreach (var r in em.GetBuffer<RacerProgress>(race))
+            {
+                var s = r.Ship;
+                if (s == Entity.Null || !em.Exists(s) || !em.HasComponent<LocalTransform>(s)) continue;
+                var pose = em.GetComponentData<LocalTransform>(s); float2 p = pose.Position.xz - origin;
+                float3 f = math.rotate(pose.Rotation, new float3(0, 0, 1));
+                float3 v = em.HasComponent<Unity.Physics.PhysicsVelocity>(s) ? em.GetComponentData<Unity.Physics.PhysicsVelocity>(s).Linear : default;
+                float yawRate = em.HasComponent<Game.Simulation.Flight.FlightState>(s) ? em.GetComponentData<Game.Simulation.Flight.FlightState>(s).YawRate : 0;
+                float mass = em.HasComponent<Unity.Physics.PhysicsMass>(s) && em.GetComponentData<Unity.Physics.PhysicsMass>(s).InverseMass > 0 ? 1 / em.GetComponentData<Unity.Physics.PhysicsMass>(s).InverseMass : 0;
+                var row = new System.Text.StringBuilder();
+                row.Append(ctx.Tick).Append(',').Append((int)rs.Phase).Append(',').Append(r.Slot).Append(',').Append(PilotLabel(r.Slot)).Append(',')
+                    .Append(p.x.ToString("0.0", inv)).Append(',').Append(p.y.ToString("0.0", inv)).Append(',').Append(math.atan2(f.x, f.z).ToString("0.000", inv)).Append(',')
+                    .Append(v.x.ToString("0.0", inv)).Append(',').Append(v.z.ToString("0.0", inv)).Append(',').Append(yawRate.ToString("0.00", inv)).Append(',')
+                    .Append(mass.ToString("0", inv)).Append(',').Append(r.Lap).Append(',').Append(r.LastGate).Append(',').Append((int)r.Flags).Append(',');
+                if (em.HasComponent<RacerPilot>(s))
+                {
+                    var a = em.GetComponentData<RacerPilot>(s);
+                    var command = em.HasComponent<ShipCommand>(s) ? em.GetComponentData<ShipCommand>(s) : default;
+                    int flags = (int)command.Flags | (command.FireGroups != 0 ? 4 : 0);   // 1 boost, 2 brake, 4 firing
+                    row.Append(1).Append(',').Append(a.TargetSpeed.ToString("0", inv)).Append(',').Append(a.Off.ToString("0", inv)).Append(',').Append(a.Threat.ToString("0.0", inv)).Append(',')
+                        .Append(a.Steer.ToString("0.00", inv)).Append(',').Append(a.Aim.x.ToString("0", inv)).Append(',').Append(a.Aim.y.ToString("0", inv)).Append(',')
+                        .Append(flags).Append(',').Append(a.LineFrom).Append(',').Append(a.LineTo).Append(',').Append(a.Index).Append(',').Append(a.Replans);
+                }
+                else row.Append("0,,,,,,,,,,,");
+                trace.WriteLine(row.ToString());
+            }
+        }
+
+        /// <summary>RACE-017 dev: what each AI-flown racer is doing.</summary>
+        internal string AiInfo()
+        {
+            if (!IsOpen) return "no race open";
+            var em = host.Context.EntityManager; var text = new System.Text.StringBuilder();
+            using var q = em.CreateEntityQuery(ComponentType.ReadOnly<RacerPilot>(), ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<LocalTransform>());
+            using var ships = q.ToEntityArray(Allocator.Temp);
+            foreach (var s in ships)
+            {
+                var p = em.GetComponentData<RacerPilot>(s); var pose = em.GetComponentData<LocalTransform>(s);
+                float speed = em.HasComponent<Unity.Physics.PhysicsVelocity>(s) ? math.length(em.GetComponentData<Unity.Physics.PhysicsVelocity>(s).Linear.xz) : 0;
+                float mass = em.HasComponent<Unity.Physics.PhysicsMass>(s) && em.GetComponentData<Unity.Physics.PhysicsMass>(s).InverseMass > 0 ? 1 / em.GetComponentData<Unity.Physics.PhysicsMass>(s).InverseMass : 0;
+                byte slot = em.GetComponentData<Pilot>(s).Slot;
+                if (em.HasComponent<Game.Simulation.Flight.PropulsionStats>(s) && em.HasComponent<Game.Simulation.Flight.FlightState>(s))
+                {
+                    var ps = em.GetComponentData<Game.Simulation.Flight.PropulsionStats>(s); var fs = em.GetComponentData<Game.Simulation.Flight.FlightState>(s);
+                    text.Append($"[accel fwd {ps.ForwardAccel:0.0} rev {ps.ReverseAccel:0.0} strafe {ps.StrafeAccel:0.0} turn {ps.TurnRateDeg:0}°/s caps fwd {fs.ForwardCap:0} strafe {fs.StrafeCap:0} yaw {math.degrees(fs.YawRateCap):0}°/s carry {fs.Carry.x:0},{fs.Carry.y:0}] ");
+                }
+                text.Append($"{PilotLabel(slot)} (slot {slot}): x {pose.Position.x:0} z {pose.Position.z:0} speed {speed:0} target {p.TargetSpeed:0} threat {p.Threat:0.0} off {p.Off:0} wide {p.Wide:0} cmd {(em.HasComponent<ShipCommand>(s) ? em.GetComponentData<ShipCommand>(s).Flags.ToString() : "")} lane {p.Lane:0.00} steer {math.degrees(p.Steer):0} line {p.Index}/{em.GetBuffer<RacerLinePoint>(s).Length} at {LinePoint(s, p.Index)} from gate {p.LineFrom} mass {mass:0} skill {p.Skill:0.00}\n");
+            }
+            return text.Length == 0 ? "no AI racers" : text.ToString();
         }
 
         // ------------------------------------------------------------------------------------------------ visuals
@@ -493,6 +644,7 @@ namespace Game.App.DevRuntime.Playground
             using var q = em.CreateEntityQuery(ComponentType.ReadOnly<Pilot>(), ComponentType.ReadOnly<Game.Core.Net.PilotName>());
             using var ships = q.ToEntityArray(Allocator.Temp);
             foreach (var s in ships) if (em.GetComponentData<Pilot>(s).Slot == slot) return em.GetComponentData<Game.Core.Net.PilotName>(s).Value.ToString().ToUpperInvariant();
+            if (aiNames.TryGetValue(slot, out var ai)) return ai;
             return slot == LocalSlot ? "YOU" : "PILOT " + (slot + 1);
         }
 

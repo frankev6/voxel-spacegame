@@ -49,7 +49,7 @@ How to race Track 01, the Battle Graveyard, with friends over the internet. One 
 The guest loads the host's world. That takes a few seconds; the track wrecks are large.
 
 ## Racing
-1. **Open the race.** The host flies to pad **18 RACE · BATTLE GRAVEYARD** (east of FLIGHT, on the first row) and presses **F**, or types `race open` (`race open laps=1` for a quick one). Every pilot is put on the start grid, held in place.
+1. **Open the race.** The host flies to pad **18 RACE · BATTLE GRAVEYARD** (east of FLIGHT, on the first row) and presses **F**, or types `race open` (`race open laps=1` for a quick one). Every pilot is put on the start grid, held in place. **AI racers** fill the grid slots nobody takes (VEGA, ORION, LYRA… each in a different racer); `race open ai=0` races without them, `ai=1` with one.
 2. **Start it.** The host presses **F** again, or types `race start`. The countdown runs 3, 2, 1, then GO.
 3. **Laps.** Three by default. A lap counts only through the gates in order. The line through the next gate is drawn thicker.
 4. **Routes.** All of these count as laps:
@@ -89,6 +89,9 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
 | `race gate=<id> [back=<m>]` | Practice: jump `back` metres behind gate `id` |
 | `race blast` | Test: blow the emitter post nearest your ship (its fence spans drop) |
 | `race mine [ahead=<m>]` | Test: drop a mine in front of you |
+| `race autopilot [on\|off]` | The racer AI flies your ship (host or solo), to watch a lap hands-off |
+| `race ai` | What each AI-flown racer is doing: speed, target speed, line, threat |
+| `race trace [on\|off]` | Record every racer 10 times a second to `Logs/race-trace.csv`; plot it with `tools/playtest/race-plot.py Logs/race-trace.csv` |
 | `net status` | Peers, round-trip time, bandwidth |
 | `net guest <slot> "<command>"` | Run a console command on a guest |
 
@@ -96,5 +99,6 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
 - The race state reaches guests through the dev console channel, so co-op racing needs development builds.
 - Mines show their state (arming, armed, triggered) on the host only. Guests see a steady red ring.
 - Fence spans dropping on a guest when a post is shot follows the same rule as the host, but has not been checked on two machines yet.
+- AI racers run on the host only; guests see them as ordinary ships. They do not shoot yet.
 - A respawned ship has no shield. The playground fits shields only when a session starts.
 - The drifting bow, blast door, bulkheads, reactor pulses, engine wash, turrets, portal and canisters are RACE-015 and the HAZ-013 to HAZ-021 set pieces. They are not in the track yet.
