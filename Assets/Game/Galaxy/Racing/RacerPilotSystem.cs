@@ -2,10 +2,12 @@ using System.Collections.Generic;
 using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
+using Game.Simulation.Ai;
 using Game.Simulation.Commands;
 using Game.Simulation.Flight;
 using Game.Simulation.Hazards;
 using Game.Simulation.Spatial;
+using Game.Simulation.Weapons;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
 using Game.Voxel.PhysicsBody;
@@ -27,18 +29,23 @@ namespace Game.Galaxy.Racing
         public const float FeasibleSpan = 1500;  // m of a branch checked for corners it could not make
 
         /// <summary>What a racer's ship can do, for planning: its speed now, and the side and braking accelerations it can count on.</summary>
-        public struct Ability { public float Speed, Lateral, Brake, YawCap; }
+        /// <summary>Env set: corners from the hull's grip at each speed (PilotEnvelope.CornerSpeed) with Share of it; else a fixed Lateral.</summary>
+        public struct Ability { public float Speed, Lateral, Brake, YawCap, Share; public PilotEnvelope Env; }
 
-        public static Ability AbilityOf(in PropulsionStats stats, in FlightConfig config, float skill, float speed, float yawCap) => new Ability
+        /// <summary>From the hull's envelope: its grip is the drift grip (main engine and strafe together) it has at each speed, a little
+        /// held back for response lag; a better pilot uses more of it.</summary>
+        public static Ability AbilityOf(in PilotEnvelope env, in FlightConfig config, float skill, float speed) => new Ability
         {
-            Speed = speed, YawCap = yawCap,
-            Lateral = math.max(4, math.max(stats.StrafeAccel, stats.ForwardAccel * .5f)) * (.8f + .15f * math.saturate(skill)),
+            Speed = speed, YawCap = env.YawRate, Env = env,
+            Share = (.72f + .16f * math.saturate(skill)) / (1 + env.Spool),
+            Lateral = env.BestGrip * (.72f + .16f * math.saturate(skill)) / (1 + env.Spool),
             // the engines, but no faster than a push (a boost strip's) bleeds off under Brake (ADR-0118 carry)
-            Brake = math.min(math.max(3, stats.ReverseAccel), config.CarryBrakeDecel > 0 ? config.CarryBrakeDecel : 1e6f) * .85f,
+            Brake = math.min(env.Reverse, config.CarryBrakeDecel > 0 ? config.CarryBrakeDecel : 1e6f) * .9f,
         };
 
         /// <summary>The fastest it may take a turn of radius r.</summary>
-        public static float CornerSpeed(in Ability a, float r) => math.min(math.sqrt(a.Lateral * r), a.YawCap * .85f * r);
+        public static float CornerSpeed(in Ability a, float r) =>
+            math.min(a.Env.Forward > 0 ? a.Env.CornerSpeed(r, a.Share) : math.sqrt(a.Lateral * r), a.YawCap * .85f * r);
 
         /// <summary>Whether a racer at its speed now can make the corners of a leg's first FeasibleSpan metres, braking all it can. Boost
         /// strips cover half the route and can be left alone, so they do not count here (StripAvoid decides whether to take one).</summary>
@@ -206,6 +213,9 @@ namespace Game.Galaxy.Racing
         ComponentLookup<RaceHold> holds;
         ComponentLookup<MineFuse> mines;
         ComponentLookup<GridSpawning> spawning;
+        BufferLookup<FlightThruster> thrusters;
+        ComponentLookup<Pilot> pilots;
+        ComponentLookup<WeaponStats> weapons;
 
         public void OnCreate(ref SystemState state)
         {
@@ -219,6 +229,7 @@ namespace Game.Galaxy.Racing
             grids = state.GetComponentLookup<VoxelGrid>(true); velocities = state.GetComponentLookup<PhysicsVelocity>(true);
             holds = state.GetComponentLookup<RaceHold>(true); mines = state.GetComponentLookup<MineFuse>(true);
             spawning = state.GetComponentLookup<GridSpawning>(true);
+            thrusters = state.GetBufferLookup<FlightThruster>(true); pilots = state.GetComponentLookup<Pilot>(true); weapons = state.GetComponentLookup<WeaponStats>(true);
         }
 
         public void OnUpdate(ref SystemState state)
@@ -266,8 +277,9 @@ namespace Game.Galaxy.Racing
                     {
                         var built = new List<RacerLinePoint>();
                         float speed = em.HasComponent<PhysicsVelocity>(ship) ? math.length(em.GetComponentData<PhysicsVelocity>(ship).Linear.xz) : 0;
-                        var ability = RacerPlan.AbilityOf(em.HasComponent<PropulsionStats>(ship) ? em.GetComponentData<PropulsionStats>(ship) : default, config, pilot.Skill,
-                            speed, em.HasComponent<FlightState>(ship) ? em.GetComponentData<FlightState>(ship).YawRateCap : 2);
+                        var flightNow = em.HasComponent<FlightState>(ship) ? em.GetComponentData<FlightState>(ship) : new FlightState { ForwardCap = 120, StrafeCap = 72, ReverseCap = 60, YawRateCap = 2 };
+                        var envelope = PilotEnvelope.From(em.HasComponent<PropulsionStats>(ship) ? em.GetComponentData<PropulsionStats>(ship) : default, flightNow, config, false, 0);
+                        var ability = RacerPlan.AbilityOf(envelope, config, pilot.Skill, speed);
                         pilot.LineTo = (short)RacerPlan.Build(built, em.GetBuffer<RaceGate>(race), em.GetBuffer<RaceLeg>(race), em.GetBuffer<RaceLegPoint>(race),
                             carryOn ? pilot.LineTo : from, pilot.Seed, pilot.Skill, carryOn ? lap + 1 + (int)(tick & 7) : lap, ability, switchTo);
                         var line = em.GetBuffer<RacerLinePoint>(ship);
@@ -288,6 +300,7 @@ namespace Game.Galaxy.Racing
 
             flights.Update(ref state); propulsion.Update(ref state); grids.Update(ref state); velocities.Update(ref state);
             holds.Update(ref state); mines.Update(ref state); spawning.Update(ref state);
+            thrusters.Update(ref state); pilots.Update(ref state); weapons.Update(ref state);
             bool done(RacerFlags f) => (f & RacerFlags.Finished) != 0;
             var finished = new NativeHashSet<byte>(4, state.WorldUpdateAllocator);
             foreach (var r in em.GetBuffer<RacerProgress>(race)) if (done(r.Flags)) finished.Add(r.Slot);
@@ -297,7 +310,7 @@ namespace Game.Galaxy.Racing
                 Origin = origin, Tick = tick, Racing = (byte)(rs.Phase == RacePhase.Racing ? 1 : 0), Config = SystemAPI.GetSingleton<FlightConfig>(),
                 Hash = hash.AsReadOnly(), Collision = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld, Finished = finished,
                 Boosts = em.HasBuffer<RaceBoost>(race) ? em.GetBuffer<RaceBoost>(race).ToNativeArray(state.WorldUpdateAllocator) : new NativeArray<RaceBoost>(0, state.WorldUpdateAllocator),
-                Flights = flights, Propulsion = propulsion, Grids = grids, Velocities = velocities, Holds = holds, Mines = mines, Spawning = spawning,
+                Flights = flights, Propulsion = propulsion, Grids = grids, Velocities = velocities, Holds = holds, Mines = mines, Spawning = spawning, Thrusters = thrusters, Pilots = pilots, Weapons = weapons,
             };
             var handle = job.ScheduleParallel(racers, hash.BeginRead(state.Dependency));
             hash.EndRead(handle);
@@ -309,7 +322,8 @@ namespace Game.Galaxy.Racing
         {
             // its lane: a share of the free width either side of the centreline, so a pack spreads out
             float lane = ((math.hash(new uint2(seed, 91)) & 1023) / 1023f - .5f) * .6f;
-            em.AddComponentData(ship, new RacerPilot { Skill = skill, Seed = seed, LineFrom = -2, Lane = lane });
+            float aggression = .25f + .5f * ((math.hash(new uint2(seed, 17)) & 1023) / 1023f);
+            em.AddComponentData(ship, new RacerPilot { Skill = skill, Seed = seed, LineFrom = -2, Lane = lane, Aggression = aggression });
             if (!em.HasBuffer<RacerLinePoint>(ship)) em.AddBuffer<RacerLinePoint>(ship);
         }
 
@@ -337,6 +351,9 @@ namespace Game.Galaxy.Racing
         [ReadOnly] public ComponentLookup<RaceHold> Holds;
         [ReadOnly] public ComponentLookup<MineFuse> Mines;
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
+        [ReadOnly] public BufferLookup<FlightThruster> Thrusters;
+        [ReadOnly] public ComponentLookup<Pilot> Pilots;
+        [ReadOnly] public ComponentLookup<WeaponStats> Weapons;
 
         // Headings tried around the line target (rad): straight first, then wider either side.
         static readonly float[] Offsets = { 0, .1f, -.1f, .21f, -.21f, .35f, -.35f, .52f, -.52f, .73f, -.73f, .98f, -.98f, 1.3f, -1.3f };
@@ -345,9 +362,23 @@ namespace Game.Galaxy.Racing
         public const float CorridorMargin = 10;  // m kept inside the route's edge (the field walls)
         public const float MineShootMin = 70, MineShootMax = 380;   // m: outside a mine's 28 m blast, inside gun range
         public const float MineShootArc = .3f;                     // rad off the nose (fixed guns converge on the aim point)
+        public const float RivalShootArc = .2f;                    // rad off the nose for a rival
         public const float StripLook = 450;                        // m ahead it settles which half of the route to take for a strip
 
-        struct Obstacle { public float2 Position, Velocity; public float Radius; public bool Mine; }
+        enum ObstacleKind : byte { Other = 0, Mine = 1, Rival = 2, Debris = 3 }
+        struct Obstacle { public float2 Position, Velocity; public float Radius; public ObstacleKind Kind; public bool Mine => Kind == ObstacleKind.Mine; }
+
+        /// <summary>Whether another ship lies in the line of fire, nearer than the target.</summary>
+        static bool LineBlocked(in FixedList4096Bytes<Obstacle> near, int target, float2 pos, float2 rel, float d)
+        {
+            for (int j = 0; j < near.Length; j++)
+            {
+                if (j == target || near[j].Kind != ObstacleKind.Rival) continue;
+                float2 r2 = near[j].Position - pos;
+                if (math.length(r2) < d && math.dot(math.normalizesafe(r2), math.normalizesafe(rel)) > math.cos(.15f)) return true;
+            }
+            return false;
+        }
 
         void Execute(Entity entity, ref RacerPilot pilot, ref ShipCommand command, in LocalTransform pose, in Pilot slot, in DynamicBuffer<RacerLinePoint> line)
         {
@@ -401,11 +432,11 @@ namespace Game.Galaxy.Racing
             // A boost strip ahead gives no room to brake: it pushes harder than any engine brakes.
             var stats = Propulsion.HasComponent(entity) ? Propulsion[entity] : default;
             float skill = math.saturate(pilot.Skill);
-            var ability = RacerPlan.AbilityOf(stats, Config, skill, speed, flight.YawRateCap);
-            float brake = ability.Brake;
             bool boosting = (command.Flags & ShipCommandFlags.Boost) != 0;
-            float baseCap = boosting ? flight.ForwardCap / math.max(1, Config.BoostSpeedMultiplier) : flight.ForwardCap;
-            float boostCap = baseCap * math.max(1, Config.BoostSpeedMultiplier);
+            var envelope = PilotEnvelope.From(stats, flight, Config, boosting, Thrusters.HasBuffer(entity) ? PilotEnvelope.ForwardSpool(Thrusters[entity]) : 0);
+            var ability = RacerPlan.AbilityOf(envelope, Config, skill, speed);
+            float brake = ability.Brake;
+            float baseCap = envelope.Cruise, boostCap = envelope.Boost;
             float yawCap = flight.YawRateCap;
             float target = boostCap, reach = speed * speed / (2 * brake) + 80, along = -bestT * math.distance(line[pilot.Index].Position, line[pilot.Index + 1].Position), room = along;
             for (int i = pilot.Index; i < line.Length && along < reach + 600; i++)
@@ -420,7 +451,7 @@ namespace Game.Galaxy.Racing
                 target = math.min(target, math.sqrt(corner * corner + 2 * brake * math.max(0, room)));
             }
             if (pilot.Index + 2 >= line.Length) target = math.min(target, 20);   // the end of its line (it is rebuilt at the next gate)
-            target *= .86f + .14f * skill;
+            target *= .94f + .06f * skill;
             if (Racing == 0 || Finished.Contains(slot.Slot)) target = math.min(target, baseCap * .5f);
 
             // The point it steers for, ahead along the line, in its own lane. Nearer in a tight corner: a chord to a far point would
@@ -455,7 +486,9 @@ namespace Game.Galaxy.Racing
                 bool mine = Mines.HasComponent(proxy.Entity);
                 // a mine: its trigger reach to our bounding sphere; anything else: both bodies' sizes
                 float r = mine ? Mines[proxy.Entity].Params.TriggerRadius + hull + Margin : proxy.HullRadius + radius + Margin;
-                near.Add(new Obstacle { Position = proxy.Center.xz - Origin, Velocity = proxy.Velocity.xz, Radius = r, Mine = mine });
+                var kind = mine ? ObstacleKind.Mine : Pilots.HasComponent(proxy.Entity) && proxy.Kind == ProxyKind.Ship ? ObstacleKind.Rival
+                    : proxy.Kind == ProxyKind.Hulk || proxy.Kind == ProxyKind.Asteroid ? ObstacleKind.Debris : ObstacleKind.Other;
+                near.Add(new Obstacle { Position = proxy.Center.xz - Origin, Velocity = proxy.Velocity.xz, Radius = r, Kind = kind });
             }
 
             // Score each heading: how far it turns from the line, leaving the route, bodies it would meet, structure it would hit.
@@ -501,30 +534,38 @@ namespace Game.Galaxy.Racing
                 if (cost < bestCost) { bestCost = cost; bestOffset = Offsets[c]; bestThreat = threat; bestMines = mines; bestClear = clear; }
             }
             pilot.Steer = bestOffset; pilot.Aim = aim;
-            // A mine it cannot pass clear of, ahead in its guns' arc and beyond the blast: shoot it (knocked aside, or set off safely).
-            float2 gunAt = default; bool shoot = false; float nearestMine = float.MaxValue;
+            // Guns (owner: "they should be able to shoot opponents and obstacles if necessary"). First anything it cannot pass clear of
+            // on its heading — a mine from beyond its blast (knocked aside or set off safely), a hulk or a rock; then, in bursts as
+            // aggressive as the racer is, a rival ahead in the guns' arc. Never through another ship; only while racing.
+            float2 gunAt = default; bool shoot = false;
+            float range = Weapons.HasComponent(entity) ? math.min(Weapons[entity].MaxWeaponRange, MineShootMax) : 0;
+            if (range > 0 && Racing != 0 && !Finished.Contains(slot.Slot))
             {
                 float2 v = new float2(math.sin(aimYaw + bestOffset), math.cos(aimYaw + bestOffset)) * math.max(target, 10);
+                float nearest = float.MaxValue;
                 for (int k = 0; k < near.Length; k++)
                 {
                     var o = near[k];
-                    if (!o.Mine) continue;
+                    if (o.Kind == ObstacleKind.Rival) continue;
                     float2 rel = o.Position - pos; float d = math.length(rel);
-                    if (d < MineShootMin || d > MineShootMax || d >= nearestMine) continue;
+                    if (d < (o.Kind == ObstacleKind.Mine ? MineShootMin : 25) || d > range || d >= nearest) continue;
                     float2 w = v - o.Velocity;
                     float t = math.clamp(math.dot(rel, w) / math.max(1e-3f, math.lengthsq(w)), 0, Horizon);
                     if (math.length(rel - w * t) >= o.Radius) continue;                        // it passes clear of this one
-                    if (math.dot(math.normalizesafe(rel), forward) < math.cos(MineShootArc)) continue;
-                    bool blocked = false;                                                  // never through another ship
-                    for (int j = 0; j < near.Length && !blocked; j++)
-                    {
-                        if (near[j].Mine) continue;
-                        float2 r2 = near[j].Position - pos;
-                        blocked = math.length(r2) < d && math.dot(math.normalizesafe(r2), math.normalizesafe(rel)) > math.cos(.15f);
-                    }
-                    if (blocked) continue;
-                    nearestMine = d; gunAt = o.Position; shoot = true;
+                    if (math.dot(math.normalizesafe(rel), forward) < math.cos(MineShootArc) || LineBlocked(near, k, pos, rel, d)) continue;
+                    nearest = d; gunAt = o.Position; shoot = true;
                 }
+                uint burst = math.hash(new uint2(pilot.Seed, Tick / 45));
+                if (!shoot && (burst & 255) / 255f < pilot.Aggression)
+                    for (int k = 0; k < near.Length; k++)
+                    {
+                        var o = near[k];
+                        if (o.Kind != ObstacleKind.Rival) continue;
+                        float2 rel = o.Position - pos; float d = math.length(rel);
+                        if (d < 30 || d > range || d >= nearest) continue;
+                        if (math.dot(math.normalizesafe(rel), forward) < math.cos(RivalShootArc) || LineBlocked(near, k, pos, rel, d)) continue;
+                        nearest = d; gunAt = o.Position; shoot = true;
+                    }
             }
             float steerYaw = aimYaw + bestOffset;
             float2 dir = new float2(math.sin(steerYaw), math.cos(steerYaw));
@@ -546,27 +587,15 @@ namespace Game.Galaxy.Racing
             bool outside = pilot.OutsideSince != 0 && Tick - pilot.OutsideSince > 180;
             if (slow > 660 || outside || offLine > lineHalf * 2 + 400) { pilot.WantsReset = 1; pilot.ProgressTick = Tick; pilot.OutsideSince = 0; }
 
-            // Command: the velocity it wants, with the nose led into the turn so the assist can pull the drift round.
+            // Command: the wanted velocity, flown by the shared pilot (drifting where the strafe thrusters alone cannot turn it), with the
+            // curve of its line just ahead as the pull to hold.
             float2 want = dir * target;
-            // Lead only across the wanted direction: the along part (braking) is the thrusters' job, and leading into it would swing
-            // the nose round and slide the ship sideways.
-            float2 slip = want - vel; slip -= dir * math.dot(slip, dir);
-            float2 lead = want + slip * .6f;
-            float faceYaw = math.lengthsq(lead) > 1 ? math.atan2(lead.x, lead.y) : steerYaw;
-            float error = Planar.WrapAngle(faceYaw - yaw);
-            var cmd = default(ShipCommand);
-            // Turn no faster than it can stop turning by the time it faces the heading (its real yaw acceleration): asking a heavy
-            // hull for the full turn rate overshot, swung the nose round and slid it sideways — the spin-outs.
-            float yawAccel = math.max(.3f, math.radians(stats.YawAccelDeg)) * .8f;
-            float rate = math.sign(error) * math.min(math.min(math.abs(error) * 3, yawCap), math.sqrt(2 * yawAccel * math.abs(error)));
-            cmd.Turn = math.clamp(rate / yawCap, -1, 1);
-            // The assist adds a push's carry to whatever is commanded (ADR-0118), so command the difference: after a boost strip
-            // that is reverse thrust, and the engines brake instead of holding the strip's speed.
-            float2 local = FlightMath.ToLocalPlanar(new float3(want.x, 0, want.y), pose.Rotation) - flight.Carry;
-            bool boost = target > baseCap * 1.02f && speed < target - 5 && math.abs(error) < .15f && bestThreat < .5f && !reverse;
-            float cap = boost ? boostCap : baseCap;
-            cmd.Thrust.x = math.clamp(local.x / math.max(1, flight.StrafeCap), -1, 1);
-            cmd.Thrust.y = local.y >= 0 ? math.clamp(local.y / math.max(1, cap), 0, 1) : math.clamp(local.y / math.max(1, flight.ReverseCap), -1, 0);
+            float curvature = Curvature(line, pilot.Index, math.clamp(speed * .4f, 10, 80));
+            bool boost = target > baseCap * 1.02f && speed < target - 5 && math.abs(pilot.Nose) < .1f && bestThreat < .5f && !reverse;
+            float nose = pilot.Nose;
+            var cmd = PilotControl.Fly(envelope, flight, pose.Rotation, vel, want, curvature, boost ? boostCap : baseCap, ref nose);
+            pilot.Nose = nose;
+            float error = Planar.WrapAngle(steerYaw + nose - yaw);
             if (boost) cmd.Flags |= ShipCommandFlags.Boost;
             // Well over its speed with the nose about right: Brake, the only way to shed a push in time (it cannot turn meanwhile).
             if (speed > target + 12 && math.abs(error) < .12f && pilot.Off < 0) cmd.Flags = ShipCommandFlags.Brake;
@@ -578,6 +607,17 @@ namespace Game.Galaxy.Racing
             }
             command = cmd;
             pilot.TargetSpeed = target; pilot.Threat = bestThreat + bestMines;
+        }
+
+        /// <summary>Signed curvature of the line `ahead` metres on from segment i (1/m, + = turning right).</summary>
+        static float Curvature(in DynamicBuffer<RacerLinePoint> line, int i, float ahead)
+        {
+            int k = i; float walked = 0;
+            while (k + 1 < line.Length && walked < ahead) { walked += math.distance(line[k].Position, line[k + 1].Position); k++; }
+            int a = math.max(0, k - 3), c = math.min(line.Length - 1, k + 3);
+            float2 ab = line[k].Position - line[a].Position, bc = line[c].Position - line[k].Position;
+            float cross = ab.x * bc.y - ab.y * bc.x;   // < 0 turning right (yaw grows)
+            return -math.sign(cross) / math.max(1, line[k].Radius);
         }
 
         bool OnStrip(float2 p, float radius)

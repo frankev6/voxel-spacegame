@@ -30,11 +30,12 @@ namespace Game.Simulation.Flight
         public float CarryYawDecel;        // rad/s²
         public float MaxCarry;             // m/s per axis
         public float MaxCarryYaw;          // rad/s
+        public float ShieldSpeedFraction;  // 0.8: speed caps while the ship's shield is up (safer but slower); 0 = no change
         public static FlightConfig Default => new FlightConfig {
             MaxForwardSpeed = 120f, ReverseSpeedFraction = 0.5f, StrafeSpeedFraction = 0.6f, BoostSpeedMultiplier = 1.5f,
             BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, CoastDeceleration = 0.08f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
             AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, CoreLinearAccel = 0f, CoreMaxLinearForce = 0f, ThrottleEpsilon = 0.001f,
             PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f,
-            CarryDecel = 1e6f, CarryBrakeDecel = 1e6f, CarryYawDecel = 1e6f, MaxCarry = 120f, MaxCarryYaw = 3.5f };
+            CarryDecel = 1e6f, CarryBrakeDecel = 1e6f, CarryYawDecel = 1e6f, MaxCarry = 120f, MaxCarryYaw = 3.5f, ShieldSpeedFraction = .8f };
     }
 }

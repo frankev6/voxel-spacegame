@@ -23,6 +23,7 @@ namespace Game.Simulation.Flight
         ComponentLookup<Powered> powered;
         ComponentLookup<ShipStatMultipliers> multipliers;
         ComponentLookup<Game.Voxel.Damage.ExternalPush> pushes;
+        ComponentLookup<ShieldState> shields;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -38,6 +39,7 @@ namespace Game.Simulation.Flight
             powered = state.GetComponentLookup<Powered>(true);
             multipliers = state.GetComponentLookup<ShipStatMultipliers>(true);
             pushes = state.GetComponentLookup<Game.Voxel.Damage.ExternalPush>(true);
+            shields = state.GetComponentLookup<ShieldState>(true);
         }
 
         [BurstCompile]
@@ -47,7 +49,7 @@ namespace Game.Simulation.Flight
             entities.Update(ref state);
             spawning.Update(ref state);
             thrusters.Update(ref state);
-            powered.Update(ref state); multipliers.Update(ref state); pushes.Update(ref state);
+            powered.Update(ref state); multipliers.Update(ref state); pushes.Update(ref state); shields.Update(ref state);
             uint tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
             state.Dependency = new PropulsionJob
             {
@@ -56,7 +58,7 @@ namespace Game.Simulation.Flight
                 Modules = SystemAPI.GetSingleton<BlockModulesRef>().Value,
                 Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value,
                 Entities = entities, Spawning = spawning, Thrusters = thrusters, Powered = powered, Multipliers = multipliers,
-                Pushes = pushes, Tick = tick
+                Pushes = pushes, Shields = shields, Tick = tick
             }.ScheduleParallel(state.Dependency);
             state.Dependency = new ThrusterIdleJob { Thrusters = thrusters }.Schedule(state.Dependency);
         }

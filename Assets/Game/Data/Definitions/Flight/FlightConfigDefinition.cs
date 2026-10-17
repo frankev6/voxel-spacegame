@@ -34,6 +34,8 @@ namespace Game.Data.Definitions
         [SerializeField, Min(0.01f)] private float carryYawDecel = 1e6f;
         [SerializeField, Min(0)] private float maxCarry = 120f;
         [SerializeField, Min(0)] private float maxCarryYaw = 3.5f;
+        // Owner (2026-10-17): "a ship with its shield up should be slower than a ship without it on, thats the pro/con of the shield".
+        [SerializeField, Range(.3f, 1)] private float shieldSpeedFraction = .8f;
 
         public float MaxForwardSpeed => maxForwardSpeed;
         public float ReverseSpeedFraction => reverseSpeedFraction;
@@ -56,6 +58,7 @@ namespace Game.Data.Definitions
         public float IntensityFall => intensityFall;
         public float CarryDecel => carryDecel; public float CarryBrakeDecel => carryBrakeDecel; public float CarryYawDecel => carryYawDecel;
         public float MaxCarry => maxCarry; public float MaxCarryYaw => maxCarryYaw;
+        public float ShieldSpeedFraction => shieldSpeedFraction;
 
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {

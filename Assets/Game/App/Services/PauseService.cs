@@ -13,12 +13,17 @@ namespace Game.App.Services
         uint nextId = 1;
 
         bool keepRunning;
+        float runScale = 1;
+        /// <summary>RACE-017 dev (`timescale`): Time.timeScale while running. The sim still steps 1/60 s ticks, at most
+        /// SimTime.MaxTicksPerFrame a frame, so a faster run is the same simulation, only sooner; solo only (guests would fall behind).</summary>
+        public float RunScale { get => runScale; set { runScale = Math.Clamp(value, .1f, SimTime.MaxTicksPerFrame); Apply(); } }
+        void Apply() => UnityEngine.Time.timeScale = tokens.Count > 0 && !keepRunning ? 0f : runScale;
         /// <summary>Co-op spike (SPEC-90 §3.2): while a session is live, tokens are still counted (menus, input contexts) but the world
         /// keeps running, because other players share it. Only Game.App's CoopSession sets it.</summary>
         public bool KeepRunning
         {
             get => keepRunning;
-            set { keepRunning = value; UnityEngine.Time.timeScale = tokens.Count > 0 && !value ? 0f : 1f; }
+            set { keepRunning = value; Apply(); }
         }
 
         public PauseToken Acquire(string reason)
@@ -46,7 +51,7 @@ namespace Game.App.Services
             tokens.RemoveAt(i);
             if (tokens.Count == 0)
             {
-                UnityEngine.Time.timeScale = 1f;
+                Apply();
                 EventBus<PauseStateChanged>.Publish(new PauseStateChanged(false, 0));
             }
         }
@@ -61,7 +66,7 @@ namespace Game.App.Services
         public void Dispose()
         {
             bool wasPaused = tokens.Count > 0;
-            tokens.Clear();
+            tokens.Clear(); runScale = 1;
             UnityEngine.Time.timeScale = 1f;
             if (wasPaused) EventBus<PauseStateChanged>.Publish(new PauseStateChanged(false, 0));
         }

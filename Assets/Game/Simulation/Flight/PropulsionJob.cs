@@ -33,6 +33,7 @@ namespace Game.Simulation.Flight
         [ReadOnly] public ComponentLookup<Powered> Powered;
         [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
         [ReadOnly] public ComponentLookup<ExternalPush> Pushes;   // SPEC-91 §5.1 step 4: last tick's pushes become carry
+        [ReadOnly] public ComponentLookup<ShieldState> Shields;   // a raised shield slows the ship (FlightConfig.ShieldSpeedFraction)
         public uint Tick;
         // Each thruster entity belongs to exactly one ship root and is written only by that root's execute (SPEC-20 §5.3).
         [NativeDisableParallelForRestriction] public ComponentLookup<ThrusterState> Thrusters;
@@ -56,7 +57,8 @@ namespace Game.Simulation.Flight
             float thrustMultiplier = multipliers.Get(StatId.Thrust);
             float turnMultiplier = multipliers.Get(StatId.TurnRate);
             bool boost = (command.Flags & ShipCommandFlags.Boost) != 0 && (command.Flags & ShipCommandFlags.Brake) == 0;
-            FlightMath.SpeedCaps(Config, multipliers.Get(StatId.MaxSpeed), boost, out float forward, out float reverse, out float strafe);
+            bool shielded = Shields.HasComponent(entity) && Shields[entity].Active != 0 && Config.ShieldSpeedFraction > 0;
+            FlightMath.SpeedCaps(Config, multipliers.Get(StatId.MaxSpeed) * (shielded ? Config.ShieldSpeedFraction : 1), boost, out float forward, out float reverse, out float strafe);
             float yawCap = FlightMath.YawRateCap(Config, turnMultiplier);
             FlightMath.Targets(Config, command.Thrust, command.Turn, command.Flags, local, forward, reverse, strafe,
                 yawCap, out float2 target, out float targetYaw);

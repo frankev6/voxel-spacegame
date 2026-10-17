@@ -28,6 +28,7 @@ namespace Game.Simulation.Flight
             IntensityFall = def.IntensityFall,
             CarryDecel = def.CarryDecel, CarryBrakeDecel = def.CarryBrakeDecel, CarryYawDecel = def.CarryYawDecel,
             MaxCarry = def.MaxCarry, MaxCarryYaw = def.MaxCarryYaw,   // SPEC-91 carry (HAZ-002)
+            ShieldSpeedFraction = def.ShieldSpeedFraction,
         };
     }
 }

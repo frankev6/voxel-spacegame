@@ -38,3 +38,4 @@ MonoBehaviour:
   carryYawDecel: 2.1
   maxCarry: 120
   maxCarryYaw: 3.5
+  shieldSpeedFraction: 0.8
