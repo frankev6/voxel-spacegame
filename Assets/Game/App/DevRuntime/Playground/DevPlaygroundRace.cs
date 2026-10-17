@@ -285,12 +285,13 @@ namespace Game.App.DevRuntime.Playground
                 {
                     var request = em.GetComponentData<RaceRespawnRequest>(e);
                     em.DestroyEntity(e);
-                    var racers = em.GetBuffer<RacerProgress>(race);
-                    bool live = false;
-                    for (int i = 0; i < racers.Length; i++)
-                        if (racers[i].Slot == request.Slot && racers[i].Ship != Entity.Null && em.Exists(racers[i].Ship) && !em.HasComponent<Hulk>(racers[i].Ship))
-                        { DevEcs.TeleportRoot(em, racers[i].Ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw)); live = true; }
-                    if (!live) SpawnFresh(request);
+                    // Find the ship first: teleporting is a structural change and invalidates the buffer (it threw every frame after
+                    // the first respawn, which stopped the rest of this tick and left the racer respawning for good).
+                    var ship = Entity.Null;
+                    foreach (var r in em.GetBuffer<RacerProgress>(race))
+                        if (r.Slot == request.Slot && r.Ship != Entity.Null && em.Exists(r.Ship) && !em.HasComponent<Hulk>(r.Ship)) { ship = r.Ship; break; }
+                    if (ship != Entity.Null) DevEcs.TeleportRoot(em, ship, new float3(request.Position.x, 0, request.Position.y), quaternion.RotateY(request.Yaw));
+                    else SpawnFresh(request);
                 }
             var mine = ctx.PlayerShipRoot;
             if (autopilot && mine != Entity.Null && em.Exists(mine) && !em.HasComponent<RacerPilot>(mine)) RacerPilotSystem.Attach(em, mine, 1, 1);
@@ -454,7 +455,7 @@ namespace Game.App.DevRuntime.Playground
             tracePath = System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "..", "Logs", string.IsNullOrEmpty(file) ? "race-trace.csv" : file));
             System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(tracePath));
             trace = new System.IO.StreamWriter(tracePath, false, new System.Text.UTF8Encoding(false));
-            trace.WriteLine("tick,phase,slot,name,x,z,yaw,vx,vz,yawrate,mass,lap,lastgate,flags,ai,target,off,threat,steer,aimx,aimz,cmd,linefrom,lineto,index,replans");
+            trace.WriteLine("tick,phase,slot,name,x,z,yaw,vx,vz,yawrate,mass,lap,lastgate,flags,ai,target,off,threat,steer,aimx,aimz,cmd,linefrom,lineto,index,replans,thrustx,thrusty,turn,nose,lvx,lvz,tvx,tvz,throttle");
             // the boost strips as spawned (track space), for the plot
             var inv = System.Globalization.CultureInfo.InvariantCulture; var em = host.Context.EntityManager;
             using (var boxes = new System.IO.StreamWriter(System.IO.Path.ChangeExtension(tracePath, ".boost.csv"), false, new System.Text.UTF8Encoding(false)))
@@ -496,8 +497,15 @@ namespace Game.App.DevRuntime.Playground
                     row.Append(1).Append(',').Append(a.TargetSpeed.ToString("0", inv)).Append(',').Append(a.Off.ToString("0", inv)).Append(',').Append(a.Threat.ToString("0.0", inv)).Append(',')
                         .Append(a.Steer.ToString("0.00", inv)).Append(',').Append(a.Aim.x.ToString("0", inv)).Append(',').Append(a.Aim.y.ToString("0", inv)).Append(',')
                         .Append(flags).Append(',').Append(a.LineFrom).Append(',').Append(a.LineTo).Append(',').Append(a.Index).Append(',').Append(a.Replans);
+                    // what it commanded, and what the assist made of it: local velocity, its target, and the summed engine throttle
+                    var fs = em.HasComponent<Game.Simulation.Flight.FlightState>(s) ? em.GetComponentData<Game.Simulation.Flight.FlightState>(s) : default;
+                    float throttle = 0;
+                    if (em.HasBuffer<Game.Simulation.Flight.FlightThruster>(s)) foreach (var t in em.GetBuffer<Game.Simulation.Flight.FlightThruster>(s)) throttle += t.Throttle;
+                    row.Append(',').Append(command.Thrust.x.ToString("0.000", inv)).Append(',').Append(command.Thrust.y.ToString("0.000", inv)).Append(',').Append(command.Turn.ToString("0.00", inv))
+                        .Append(',').Append(a.Nose.ToString("0.00", inv)).Append(',').Append(fs.LocalVelocity.x.ToString("0.0", inv)).Append(',').Append(fs.LocalVelocity.y.ToString("0.0", inv))
+                        .Append(',').Append(fs.TargetLocalVelocity.x.ToString("0.0", inv)).Append(',').Append(fs.TargetLocalVelocity.y.ToString("0.0", inv)).Append(',').Append(throttle.ToString("0.00", inv));
                 }
-                else row.Append("0,,,,,,,,,,,");
+                else row.Append("0,,,,,,,,,,,,,,,,,,,,");
                 trace.WriteLine(row.ToString());
             }
         }

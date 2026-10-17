@@ -17,6 +17,8 @@ namespace Game.Galaxy.Racing
         public int Index;              // segment of the line the ship is on
         public float Steer;            // last chosen offset from the line target (rad), for hysteresis
         public float Lane;             // −0.3..0.3: where across the free width it holds its line
+        public float Aggression;       // 0..1: how much of the time it shoots at a rival in its sights
+        public float Nose;             // its nose angle off the wanted direction (rad, + right): the drift it holds
         public int ProgressIndex; public uint ProgressTick;
         public uint CommitUntil;
         public uint OutsideSince;      // tick it went beyond the route's edge (0 = inside)       // after switching branch it holds to the new one until this tick   // the furthest segment reached, and when: no progress for long = stuck

@@ -248,7 +248,7 @@ namespace Game.Simulation.Power
         public float3 Radii;            // semi-axes, metres, each ≥ ShieldMinRadiusMetres
         public float BoundingRadius;    // cmax(Radii)
         public uint ShapeRevision;      // ShipStats.FunctionalRevision used for the last fit
-        public byte Active;             // 1 = shield is up and blocks hits (SPEC-63 reads this name)
+        public byte Active;             // 1 = shield is up and blocks hits (SPEC-63 reads this name); also slows the ship (SPEC-20 step 4)
         public byte RippleHead;         // next ShieldRipple slot to overwrite, 0..7
         public ShieldFlags Flags;
     }

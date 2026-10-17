@@ -92,6 +92,7 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
 | `race autopilot [on\|off]` | The racer AI flies your ship (host or solo), to watch a lap hands-off |
 | `race ai` | What each AI-flown racer is doing: speed, target speed, line, threat |
 | `race trace [on\|off]` | Record every racer 10 times a second to `Logs/race-trace.csv`; plot it with `tools/playtest/race-plot.py Logs/race-trace.csv` |
+| `timescale [<1..6>]` | Solo only: run the simulation up to 6× real time to watch AI laps sooner. Ticks stay 1/60 s, so a race plays out the same; if frames cannot keep up it runs less fast, never coarser |
 | `net status` | Peers, round-trip time, bandwidth |
 | `net guest <slot> "<command>"` | Run a console command on a guest |
 
@@ -99,6 +100,7 @@ The guest loads the host's world. That takes a few seconds; the track wrecks are
 - The race state reaches guests through the dev console channel, so co-op racing needs development builds.
 - Mines show their state (arming, armed, triggered) on the host only. Guests see a steady red ring.
 - Fence spans dropping on a guest when a post is shot follows the same rule as the host, but has not been checked on two machines yet.
-- AI racers run on the host only; guests see them as ordinary ships. They do not shoot yet.
+- AI racers run on the host only; guests see them as ordinary ships. They shoot mines and wrecks in their way, and rivals now and then.
+- A ship with its shield up flies at 80% of its speed caps (all ships, not only in races): safer but slower.
 - A respawned ship has no shield. The playground fits shields only when a session starts.
 - The drifting bow, blast door, bulkheads, reactor pulses, engine wash, turrets, portal and canisters are RACE-015 and the HAZ-013 to HAZ-021 set pieces. They are not in the track yet.

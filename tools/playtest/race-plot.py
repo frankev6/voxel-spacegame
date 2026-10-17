@@ -76,6 +76,11 @@ def draw_track(d, track, v, detail):
         d.text((px, pz), str(g['id']), fill=GATE, font=f)
 
 
+def seconds(rows, test):
+    """Time (s) the rows pass `test`, from their ticks (rows are 6+ ticks apart, more at higher time scales)."""
+    return sum((b['tick'] - a['tick']) / 60 for a, b in zip(rows, rows[1:]) if test(a))
+
+
 def racing(rows): return [r for r in rows if r['phase'] == RACING or r['phase'] == 4]
 
 
@@ -200,8 +205,8 @@ def main():
     for i, (n, slot, t0, t1) in enumerate(found, 1): incident(track, data, slot, t0, t1, i, out)
     for slot, rows in sorted(data.items()):
         rr = racing(rows)
-        if rr: print(f"{rr[0]['name']:8} slot {slot:3}: lap {rr[-1]['lap']} gate {rr[-1]['gate']}  outside band {sum(1 for r in rr if r['ai'] and r['off'] > 0) / 10:.1f}s  "
-                     f"stalled {sum(1 for r in rr if r['speed'] < 10 and r['phase'] == RACING) / 10:.1f}s  mass {rr[0]['mass']:.0f}->{rr[-1]['mass']:.0f}  replans {rr[-1]['replans'] - rr[0]['replans']}")
+        if rr: print(f"{rr[0]['name']:8} slot {slot:3}: lap {rr[-1]['lap']} gate {rr[-1]['gate']}  outside band {seconds(rr, lambda r: r['ai'] and r['off'] > 0):.1f}s  "
+                     f"stalled {seconds(rr, lambda r: r['speed'] < 10 and r['phase'] == RACING):.1f}s  mass {rr[0]['mass']:.0f}->{rr[-1]['mass']:.0f}  replans {rr[-1]['replans'] - rr[0]['replans']}")
     for slot, rows in sorted(data.items()):
         gates = []
         for r in racing(rows):
@@ -209,7 +214,7 @@ def main():
         if rows: print(f"{rows[0]['name']:8} gates: {' '.join(map(str, gates))}")
     for slot, rows in sorted(data.items()):
         rr = racing(rows)
-        if rr: print(f"{rr[0]['name']:8} firing {sum(1 for r in rr if r['cmd'] & 4) / 10:.1f}s")
+        if rr: print(f"{rr[0]['name']:8} firing {seconds(rr, lambda r: r['cmd'] & 4):.1f}s")
     print(f"{len(found)} incidents; plots in {out}")
 
 

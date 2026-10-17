@@ -112,7 +112,7 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
         [Test] public void Boost_RaisesTopSpeed()
         {
             using var f = new Fixture(); f.Input(forward: true); f.Tick(240);
-            float baseline = f.Cap; Assert.AreEqual(120, baseline, .001f); Assert.That(f.ForwardSpeed, Is.EqualTo(baseline).Within(baseline * .02f));
+            float baseline = f.Cap; Assert.AreEqual(120 * FlightConfig.Default.ShieldSpeedFraction, baseline, .001f, "the fixture's shield is up: safer but slower"); Assert.That(f.ForwardSpeed, Is.EqualTo(baseline).Within(baseline * .02f));
             var originalFlight = f.Em.GetComponentData<FlightState>(f.Root);
             float originalAcceleration = f.Em.GetComponentData<PropulsionStats>(f.Root).ForwardAccel;
             f.Input(forward: true, press: AbilityKind.StatBoost); f.Tick();
@@ -162,7 +162,18 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
                 $"capacity acceleration={propulsion.ReverseAccel:G9} m/s², expiry speed={expiredSpeed:G9}, " +
                 $"ticks={settledTicks}/{limit}, allocated braking impulse={brakingImpulse:G9} N·s, final speed={f.ForwardSpeed:G9}");
             Assert.Greater(brakingImpulse, 0, "Production thruster impulses must physically remove the excess speed.");
-            Assert.That(f.ForwardSpeed, Is.EqualTo(baseline).Within(tolerance), "The installed reverse thrusters return physical speed to the original cap within the capacity-derived bound.");
+            Assert.That(f.ForwardSpeed, Is.EqualTo(baseline).Within(tolerance), $"The installed reverse thrusters return physical speed to the original cap within the capacity-derived bound (from {expiredSpeed:0.0} m/s in {settledTicks}/{limit} ticks at {propulsion.ReverseAccel:0.0} m/s², stored {f.Em.GetComponentData<ShipPower>(f.Root).Stored:0.0}, shield {f.Em.GetComponentData<ShieldState>(f.Root).Active}).");
+        }
+        [Test] public void Shield_SlowsTheShip()
+        {
+            // Owner (2026-10-17): "a ship with its shield up should be slower than a ship without it on".
+            using var f = new Fixture(); f.Input(forward: true); f.Tick(240);
+            Assert.AreEqual(120 * FlightConfig.Default.ShieldSpeedFraction, f.Cap, .001f, "shield up");
+            Assert.That(f.ForwardSpeed, Is.EqualTo(f.Cap).Within(f.Cap * .02f));
+            f.Input(forward: true, press: AbilityKind.ShieldToggle); f.Tick(2); f.Input(forward: true); f.Tick(240);
+            Assert.AreEqual(0, f.Em.GetComponentData<ShieldState>(f.Root).Active);
+            Assert.AreEqual(120, f.Cap, .001f, "shield down: the full cap");
+            Assert.That(f.ForwardSpeed, Is.EqualTo(120).Within(120 * .02f));
         }
         [Test] public void Shield_Toggle()
         {
