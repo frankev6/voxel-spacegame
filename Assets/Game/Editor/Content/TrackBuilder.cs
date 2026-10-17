@@ -6,6 +6,7 @@ using Game.Data.Definitions;
 using Game.Data.Hazards;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Game.Editor.Content
@@ -33,7 +34,8 @@ namespace Game.Editor.Content
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Bounds, Flags = ZoneEffectFlags.AffectsShips });
             WreckBuilder.EnsureBlock();
             AssetDatabase.SaveAssets();
-            Track("track_01", boost, gate, wall, bounds);
+            var mine = Mine();
+            Track("track_01", boost, gate, wall, bounds, mine);
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built track_01 and its zones (RACE-004).");
         }
@@ -68,9 +70,58 @@ namespace Game.Editor.Content
             return def;
         }
 
+        /// <summary>HAZ-008: a spiked proximity mine at 0.5 m cells (a 3-cell core, a spike on each face), its definition.</summary>
+        static MineDefinition Mine()
+        {
+            using var service = new Game.Data.Services.ContentService(ContentDatabaseBuilder.Rebuild());
+            var catalog = service.Catalog; var content = new Game.Voxel.Model.VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
+            ushort hull = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_hull")));
+            using var structure = new Game.Voxel.Model.VoxelStructure(.5f);
+            void Put(int x, int y, int z, byte colour) => structure.TryPlaceBlock(new Game.Voxel.Model.BlockPlacement { Block = hull, Origin = new Unity.Mathematics.int3(x, y, z), Color = colour }, content);
+            for (int x = -1; x <= 1; x++) for (int y = -1; y <= 1; y++) for (int z = -1; z <= 1; z++) Put(x, y, z, (byte)((x + y + z & 1) == 0 ? 2 : 11));
+            foreach (var d in new[] { new Unity.Mathematics.int3(1, 0, 0), new Unity.Mathematics.int3(-1, 0, 0), new Unity.Mathematics.int3(0, 1, 0),
+                new Unity.Mathematics.int3(0, -1, 0), new Unity.Mathematics.int3(0, 0, 1), new Unity.Mathematics.int3(0, 0, -1) })
+                for (int k = 2; k <= 3; k++) Put(d.x * k, d.y * k, d.z * k, 11);
+            string bpPath = "Assets/Game/Content/Ships/ship_device_mine_proximity.asset";
+            var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(bpPath);
+            if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, bpPath); }
+            var so = new SerializedObject(blueprint);
+            so.FindProperty("id").stringValue = "ship_device_mine_proximity"; so.FindProperty("displayName").stringValue = "PROXIMITY MINE";
+            so.FindProperty("cellSize").floatValue = .5f; so.ApplyModifiedPropertiesWithoutUndo();
+            structure.TryGetCellBounds(out var min, out var max);
+            blueprint.EditorSetPayload(Game.Voxel.Model.VoxelStructureCodec.Encode(structure, Game.Voxel.Data.VoxsBlockNames.FromCatalog(catalog), Game.Voxel.Data.VoxsEncodeOptions.ForAsset),
+                structure.SolidCellCount, new Vector3Int(min.x, min.y, min.z), new Vector3Int(max.x, max.y, max.z));
+            EditorUtility.SetDirty(blueprint);
+            string path = Hazards + "mine_proximity.asset";
+            var mine = AssetDatabase.LoadAssetAtPath<MineDefinition>(path);
+            if (mine == null) { mine = ScriptableObject.CreateInstance<MineDefinition>(); AssetDatabase.CreateAsset(mine, path); }
+            var m = new SerializedObject(mine);
+            m.FindProperty("id").stringValue = "mine_proximity"; m.FindProperty("blueprint").objectReferenceValue = blueprint;
+            var fuse = m.FindProperty("fuse");
+            fuse.FindPropertyRelative("ArmSeconds").floatValue = 1.5f; fuse.FindPropertyRelative("TriggerRadius").floatValue = 16;
+            fuse.FindPropertyRelative("FuseSeconds").floatValue = .6f; fuse.FindPropertyRelative("BlastRadius").floatValue = 18;
+            fuse.FindPropertyRelative("BlastDamage").floatValue = 450; fuse.FindPropertyRelative("MinTriggerMass").floatValue = 2000;
+            m.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(mine);
+            AssetDatabase.SaveAssets();
+            return mine;
+        }
+
+        static MineFieldDefinition MineField(string id, MineDefinition mine, int count, float radius, float spacing)
+        {
+            string path = Hazards + id + ".asset";
+            var field = AssetDatabase.LoadAssetAtPath<MineFieldDefinition>(path);
+            if (field == null) { field = ScriptableObject.CreateInstance<MineFieldDefinition>(); AssetDatabase.CreateAsset(field, path); }
+            var so = new SerializedObject(field);
+            so.FindProperty("id").stringValue = id; so.FindProperty("mine").objectReferenceValue = mine; so.FindProperty("count").intValue = count;
+            so.FindProperty("area").enumValueIndex = (int)ZoneShape.Circle; so.FindProperty("halfExtents").vector2Value = new Vector2(radius, radius);
+            so.FindProperty("minSpacing").floatValue = spacing;
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(field);
+            return field;
+        }
+
         static Vector2 V(JToken t) => new Vector2((float)t[0], (float)t[1]);
 
-        static void Track(string id, ZoneDefinition boost, ZoneDefinition gate, ZoneDefinition wall, ZoneDefinition bounds)
+        static void Track(string id, ZoneDefinition boost, ZoneDefinition gate, ZoneDefinition wall, ZoneDefinition bounds, MineDefinition mine)
         {
             var json = JObject.Parse(File.ReadAllText(Source + id + ".json"));
             string path = Racing + id + ".asset";
@@ -132,6 +183,17 @@ namespace Game.Editor.Content
             AssetDatabase.SaveAssets();
             track = AssetDatabase.LoadAssetAtPath<TrackDefinition>(path);   // reload after the database rebuild
             track.Pieces = pieces.ToArray();
+
+            // HAZ-008: the battle's old minefields, never cleared (proximity mines; the EMP, seeker and repulsor payloads are HAZ-018).
+            var fields = new List<TrackMines>(); int f = 0;
+            foreach (JObject m in (JArray)json["mines"])
+            {
+                int n = (int)m["n"]; float r = (float)m["r"];
+                var field = MineField($"minefield_track_01_{f}", mine, n, r, math.max(14, r / math.sqrt(n) * .9f));
+                fields.Add(new TrackMines { Field = field, Position = V(m["c"]), Yaw = 0, Seed = (uint)(1000 + f) });
+                f++;
+            }
+            track.MineFields = fields.ToArray();
             Debug.Log($"{id}: {pieces.Count} wrecks, {total} cells");
             EditorUtility.SetDirty(track);
             var errors = TrackValidator.Check(track);

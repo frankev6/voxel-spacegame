@@ -454,8 +454,11 @@ namespace Game.Net.Replication
                     var g = grids[id];
                     if (!g.Moving || !em.Exists(g.Entity)) continue;
                     table.TryGetValue(id, out float p);
-                    float speed = math.length(em.GetComponentData<PhysicsVelocity>(g.Entity).Linear);
-                    p += 1 + math.min(speed, 40) / 10f;
+                    var velocity = em.GetComponentData<PhysicsVelocity>(g.Entity);
+                    float speed = math.length(velocity.Linear);
+                    // A body at rest (a race's anchored mines, a parked hulk) refreshes about every 20 snapshots instead of every one.
+                    bool resting = speed < .05f && math.lengthsq(velocity.Angular) < 1e-4f;
+                    p += resting ? .05f : 1 + math.min(speed, 40) / 10f;
                     // A guest's own ship goes first in every snapshot: its prediction is corrected from it (NET-011).
                     if (em.HasComponent<RemotePilot>(g.Entity) && em.GetComponentData<RemotePilot>(g.Entity).Slot == peer.Slot) p += 1000;
                     table[id] = p; ranked.Add((id, p));

@@ -37,6 +37,7 @@ namespace Game.App.Session
                     var result = host.Commands.Execute(line, host.Context);
                     reply = result.Kind + ": " + result.Text;
                 }
+                if (line.StartsWith("race sync", StringComparison.Ordinal)) return;   // the race's state stream needs no answers
                 devWriter.Clear(); devWriter.U32(id); devWriter.Str(reply.Length > 8000 ? reply.Substring(0, 8000) : reply);
                 net.Transport.SendReliable(peer, NetMessage.DevResult, devWriter);
             });

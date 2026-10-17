@@ -15,7 +15,7 @@ namespace Game.Galaxy.Racing
     {
         /// <summary>Returns the race entity. Gate zone persistent ids are derived from the group so every machine agrees.</summary>
         public static Entity Spawn(EntityManager em, TrackDefinition track, float2 origin, ushort group, IPersistentIdAllocator ids,
-            Func<ShipBlueprintDefinition, float2, float, ulong, Entity> spawnPiece = null)
+            Func<ShipBlueprintDefinition, float2, float, ulong, Entity> spawnPiece = null, bool spawnMines = false)
         {
             if (track == null) throw new ArgumentException("TrackSpawnService.Spawn: no track");
             var errors = TrackValidator.Check(track);
@@ -64,6 +64,14 @@ namespace Game.Galaxy.Racing
             foreach (var row in rows) gates.Add(row);
             var slots = em.AddBuffer<RaceSlot>(race);
             foreach (var s in track.StartGrid) slots.Add(new RaceSlot { Position = s.Position, Yaw = s.Yaw });
+            // Mines are grids: the authority spawns them and guests receive them by replication (spawnMines only there).
+            if (spawnMines && track.MineFields != null)
+                foreach (var m in track.MineFields)
+                {
+                    if (m.Field == null) continue;
+                    var requests = new Entity[m.Field.Count];
+                    HazardSpawn.MineField(em, m.Field, origin + (float2)m.Position, m.Yaw, m.Seed, group, ids, requests);
+                }
             if (spawnPiece != null)
                 foreach (var piece in track.Pieces)
                 {

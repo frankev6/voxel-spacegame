@@ -3286,7 +3286,27 @@ MonoBehaviour:
     Yaw: 0.10158
     HalfExtents: {x: 56, y: 328.75}
     PathRadius: 0
-  MineFields: []
+  MineFields:
+  - Field: {fileID: 11400000, guid: 2067594d09ed44b53bf0d45b45cbe64d, type: 2}
+    Position: {x: 1480, y: -800}
+    Yaw: 0
+    Seed: 1000
+  - Field: {fileID: 11400000, guid: 56d807a378c544b25a86184c380ae127, type: 2}
+    Position: {x: 1280, y: -900}
+    Yaw: 0
+    Seed: 1001
+  - Field: {fileID: 11400000, guid: 199ddcb47acb7417d801581d5a6e8a38, type: 2}
+    Position: {x: -1470, y: 860}
+    Yaw: 0
+    Seed: 1002
+  - Field: {fileID: 11400000, guid: 4591a48a6cc974fe6a0dd3f3168f6b1d, type: 2}
+    Position: {x: -950, y: -500}
+    Yaw: 0
+    Seed: 1003
+  - Field: {fileID: 11400000, guid: e0154285364464eb5927f5a03fc4a6ca, type: 2}
+    Position: {x: 240, y: 1060}
+    Yaw: 0
+    Seed: 1004
   Bounds: []
   StartGrid:
   - Position: {x: -360.72, y: 1034.73}

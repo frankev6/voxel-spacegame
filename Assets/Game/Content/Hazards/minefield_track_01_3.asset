@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da069b2bbb3a741ea92786c7bef8e8c6, type: 3}
+  m_Name: minefield_track_01_3
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MineFieldDefinition
+  id: minefield_track_01_3
+  formerIds: []
+  mine: {fileID: 11400000, guid: c71d5daf2fb8f43e0baccc858535e9ca, type: 2}
+  count: 5
+  area: 1
+  halfExtents: {x: 60, y: 60}
+  minSpacing: 24.149532

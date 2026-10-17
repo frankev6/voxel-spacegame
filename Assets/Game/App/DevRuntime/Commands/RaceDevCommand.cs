@@ -19,6 +19,7 @@ namespace Game.App.DevRuntime.Commands
             if (first == "view") return race.View(new Unity.Mathematics.double3(args.GetDouble("x", 0), 0, args.GetDouble("z", 0)), (int)args.GetLong("laps", 0));
             if (first == "sync") return race.Sync(args);
             if (first == "end" && !playground.Active) { race.End(); return DevCommandResult.Ok("race ended"); }
+            if (first == "info" && !playground.Active) return DevCommandResult.Ok(race.Info());
             if (!playground.Active) return DevCommandResult.Fail("enter the playground first (playground)");
             if (args.Has("gate")) return race.ToGate((int)args.GetLong("gate", 0), (float)args.GetDouble("back", 40));
             string action = args.Positional.Count == 0 ? "info" : args.Positional[0];

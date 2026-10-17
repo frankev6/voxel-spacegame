@@ -33,6 +33,7 @@ namespace Game.App.DevRuntime.Playground
         Entity race = Entity.Null;
         GameObject visuals; Material material;
         readonly List<LineRenderer> gateLines = new();
+        readonly List<LineRenderer> mineRings = new(); GameObject mineVisuals;
         double3 trackOrigin;
         VisualElement hud; Label banner, status, warning, results;
         readonly Dictionary<byte, ContentHash> blueprints = new();   // each racer's ship, for respawns
@@ -81,7 +82,7 @@ namespace Game.App.DevRuntime.Playground
                 });
                 em.AddComponentData(root, new Game.Galaxy.Components.UniversePosition { Value = frameOrigin + new double3(at.x, 0, at.y) });
                 return root;
-            });
+            }, spawnMines: true);
             var rs = em.GetComponentData<RaceState>(race);
             if (laps > 0) { rs.Laps = (byte)math.clamp(laps, 1, 20); em.SetComponentData(race, rs); }
 
@@ -139,6 +140,8 @@ namespace Game.App.DevRuntime.Playground
             }
             race = Entity.Null;
             if (visuals != null) UnityEngine.Object.Destroy(visuals);
+            if (mineVisuals != null) UnityEngine.Object.Destroy(mineVisuals);
+            mineVisuals = null; mineRings.Clear();
             if (material != null) UnityEngine.Object.Destroy(material);
             visuals = null; material = null; gateLines.Clear();
             hud?.RemoveFromHierarchy(); hud = null; banner = status = warning = results = null;
@@ -368,6 +371,42 @@ namespace Game.App.DevRuntime.Playground
             foreach (var r in em.GetBuffer<RacerProgress>(race))
                 if (r.Slot == me) next = r.LastGate >= 0 ? em.GetBuffer<RaceGate>(race)[r.LastGate].NextMask : 1;
             for (int i = 0; i < gateLines.Count; i++) gateLines[i].widthMultiplier = (next & (1UL << i)) != 0 ? 9 : 3;
+            UpdateMines();
+        }
+
+        // HAZ-008: a ring the size of each mine's trigger radius, under it (grey arming, pulsing red armed, flashing triggered).
+        void UpdateMines()
+        {
+            if (material == null) return;
+            var em = host.Context.EntityManager;
+            if (mineVisuals == null) { mineVisuals = new GameObject("Race mines"); mineVisuals.transform.SetParent(host.transform, false); }
+            using var q = em.CreateEntityQuery(ComponentType.ReadOnly<Game.Voxel.Model.VoxelGrid>(), ComponentType.ReadOnly<LocalTransform>());
+            using var grids = q.ToEntityArray(Allocator.Temp);
+            int used = 0; float t = UnityEngine.Time.time;
+            foreach (var e in grids)
+            {
+                if (em.GetComponentData<Game.Voxel.Model.VoxelGrid>(e).Kind != Game.Voxel.Model.GridKind.Device) continue;
+                if (used == mineRings.Count)
+                {
+                    var go = new GameObject("mine"); go.transform.SetParent(mineVisuals.transform, false);
+                    var ring = go.AddComponent<LineRenderer>(); ring.sharedMaterial = material; ring.useWorldSpace = false; ring.loop = true;
+                    ring.positionCount = 32; ring.widthMultiplier = 1.2f; ring.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    for (int i = 0; i < 32; i++) { float a = i * math.PI * 2 / 32; ring.SetPosition(i, new Vector3(math.cos(a) * 16, -1, math.sin(a) * 16)); }
+                    mineRings.Add(ring);
+                }
+                var r = mineRings[used++]; r.gameObject.SetActive(true);
+                r.transform.localPosition = em.GetComponentData<LocalTransform>(e).Position;
+                Color c = new Color(1, .25f, .2f, .5f);
+                if (em.HasComponent<MineState>(e))
+                    switch (em.GetComponentData<MineState>(e).Phase)
+                    {
+                        case MinePhase.Arming: c = new Color(.6f, .6f, .6f, .4f); break;
+                        case MinePhase.Armed: c = new Color(1, .25f, .2f, .35f + .3f * math.sin(t * 3)); break;
+                        case MinePhase.Triggered: c = math.sin(t * 30) > 0 ? new Color(1, 1, 1, .95f) : new Color(1, .2f, .1f, .95f); break;
+                    }
+                r.startColor = r.endColor = c;
+            }
+            for (int i = used; i < mineRings.Count; i++) mineRings[i].gameObject.SetActive(false);
         }
 
         // ------------------------------------------------------------------------------------------------ HUD

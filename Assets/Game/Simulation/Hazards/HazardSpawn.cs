@@ -49,14 +49,56 @@ namespace Game.Simulation.Hazards
         /// <summary>Requests the field's mines as grids; returns how many were requested into <paramref name="outRequests"/>.</summary>
         public static int MineField(EntityManager em, MineFieldDefinition def, float2 position, float yaw, ulong seed, ushort group,
                                     IPersistentIdAllocator ids, Span<Entity> outRequests)
-            => throw new NotImplementedException("HAZ-008");
+        {
+            if (def == null || def.Mine == null || def.Mine.Blueprint == null) throw new ArgumentException("HazardSpawn.MineField: incomplete definition");
+            // Deterministic scatter (SPEC-91 decision 9): the same seed places the same mines on every machine and every run.
+            var random = new Unity.Mathematics.Random((uint)(seed ^ (seed >> 32) ^ 0x9E3779B9u) | 1u);
+            var placed = new System.Collections.Generic.List<float2>();
+            float2 forward = new float2(math.sin(yaw), math.cos(yaw)), right = new float2(forward.y, -forward.x);
+            for (int i = 0; i < def.Count && placed.Count < outRequests.Length; i++)
+                for (int attempt = 0; attempt < 30; attempt++)
+                {
+                    float2 local = def.Area == Game.Data.Hazards.ZoneShape.Circle
+                        ? math.sqrt(random.NextFloat()) * def.HalfExtents.x * new float2(math.cos(random.NextFloat(math.PI * 2)), math.sin(random.NextFloat(math.PI * 2)))
+                        : new float2(random.NextFloat(-def.HalfExtents.x, def.HalfExtents.x), random.NextFloat(-def.HalfExtents.y, def.HalfExtents.y));
+                    float2 p = position + right * local.x + forward * local.y;
+                    bool clear = true; foreach (var q in placed) if (math.distancesq(p, q) < def.MinSpacing * def.MinSpacing) { clear = false; break; }
+                    if (!clear) continue;
+                    placed.Add(p); break;
+                }
+            uint tick = 0;
+            using (var clock = em.CreateEntityQuery(ComponentType.ReadOnly<Game.Core.Components.SimClock>()))
+                if (clock.TryGetSingleton<Game.Core.Components.SimClock>(out var c)) tick = c.Tick;
+            var mine = def.Mine;
+            for (int i = 0; i < placed.Count; i++)
+            {
+                var p = placed[i];
+                var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, mine.Blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
+                {
+                    PersistentId = ids != null ? ids.Allocate() : 0, Pose = new RigidTransform(quaternion.RotateY(i * 1.3f), new float3(p.x, 0, p.y)),
+                    Kind = Game.Voxel.Model.GridKind.Device, Motion = Game.Voxel.Model.GridMotion.Dynamic, Profile = Game.Voxel.Model.GridProfile.Dummy
+                });
+                em.AddComponentData(root, new MineState { Phase = MinePhase.Arming, PhaseTick = tick });
+                em.AddComponentData(root, new MineFuse { Params = mine.Fuse, Group = group });
+                if (mine.Anchored) em.AddComponentData(root, new MineAnchor { Point = p, Stiffness = mine.AnchorStiffness, Damping = mine.AnchorDamping, MaxAccel = mine.AnchorMaxAccel });
+                outRequests[i] = root;
+            }
+            return placed.Count;
+        }
 
         /// <summary>Destroys the zones and devices of a group.</summary>
         public static void DespawnGroup(EntityManager em, ushort group)
         {
-            using var query = em.CreateEntityQuery(typeof(WorldZone));
-            using var entities = query.ToEntityArray(Unity.Collections.Allocator.Temp);
-            foreach (var e in entities) if (em.GetComponentData<WorldZone>(e).Group == group) em.DestroyEntity(e);
+            using (var query = em.CreateEntityQuery(typeof(WorldZone)))
+            using (var entities = query.ToEntityArray(Unity.Collections.Allocator.Temp))
+                foreach (var e in entities) if (em.GetComponentData<WorldZone>(e).Group == group) em.DestroyEntity(e);
+            using (var query = em.CreateEntityQuery(typeof(MineFuse)))
+            using (var mines = query.ToEntityArray(Unity.Collections.Allocator.Temp))
+                foreach (var e in mines)
+                {
+                    if (em.GetComponentData<MineFuse>(e).Group != group) continue;
+                    if (em.HasComponent<Game.Voxel.Model.GridDespawnRequest>(e)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, e); else em.DestroyEntity(e);
+                }
         }
 
         /// <summary>Sets one effect's Id on a spawned zone (gates carry their gate id; one gate definition serves every gate).</summary>
