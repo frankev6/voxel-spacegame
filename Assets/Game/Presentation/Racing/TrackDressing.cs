@@ -397,11 +397,11 @@ namespace Game.Presentation.Racing
         void Dust()
         {
             if (look.Dust == null) return;
-            var b = new Builder(); var rng = new System.Random(16);
+            var b = new Builder(); var rng = new Unity.Mathematics.Random(16);
             for (int i = 0; i < 600; i++)
             {
-                var p = new Vector3((float)rng.NextDouble(), (float)rng.NextDouble(), (float)rng.NextDouble());
-                float size = .25f + (float)rng.NextDouble() * .3f; var c = Color.white * (.25f + (float)rng.NextDouble() * .4f);
+                var p = new Vector3(rng.NextFloat(), rng.NextFloat(), rng.NextFloat());
+                float size = .25f + rng.NextFloat() * .3f; var c = Color.white * (.25f + rng.NextFloat() * .4f);
                 int k = b.Count;
                 b.Vertex(p, c, new Vector2(-1, -1), new Vector2(-size, -size)); b.Vertex(p, c, new Vector2(1, -1), new Vector2(size, -size));
                 b.Vertex(p, c, new Vector2(1, 1), new Vector2(size, size)); b.Vertex(p, c, new Vector2(-1, 1), new Vector2(-size, size));
