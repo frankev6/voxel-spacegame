@@ -27,6 +27,13 @@ namespace Game.Data.Definitions
         [SerializeField, Range(0.01f, 1)] private float planeCorrection = 0.2f;
         [SerializeField, Range(0.01f, 1)] private float intensityRise = 0.35f;
         [SerializeField, Range(0.01f, 1)] private float intensityFall = 0.15f;
+        // SPEC-91 §4.2 carry (ADR-0118): pushes bleed off at these rates instead of being cancelled by the assist. The defaults
+        // match FlightConfig.Default (no carry), like the core assist; config_flight sets 8, 30 and 2.1.
+        [SerializeField, Min(0.01f)] private float carryDecel = 1e6f;
+        [SerializeField, Min(0.01f)] private float carryBrakeDecel = 1e6f;
+        [SerializeField, Min(0.01f)] private float carryYawDecel = 1e6f;
+        [SerializeField, Min(0)] private float maxCarry = 120f;
+        [SerializeField, Min(0)] private float maxCarryYaw = 3.5f;
 
         public float MaxForwardSpeed => maxForwardSpeed;
         public float ReverseSpeedFraction => reverseSpeedFraction;
@@ -47,6 +54,8 @@ namespace Game.Data.Definitions
         public float PlaneCorrection => planeCorrection;
         public float IntensityRise => intensityRise;
         public float IntensityFall => intensityFall;
+        public float CarryDecel => carryDecel; public float CarryBrakeDecel => carryBrakeDecel; public float CarryYawDecel => carryYawDecel;
+        public float MaxCarry => maxCarry; public float MaxCarryYaw => maxCarryYaw;
 
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {

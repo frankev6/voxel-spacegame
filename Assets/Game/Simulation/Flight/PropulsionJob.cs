@@ -32,6 +32,8 @@ namespace Game.Simulation.Flight
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
         [ReadOnly] public ComponentLookup<Powered> Powered;
         [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
+        [ReadOnly] public ComponentLookup<ExternalPush> Pushes;   // SPEC-91 §5.1 step 4: last tick's pushes become carry
+        public uint Tick;
         // Each thruster entity belongs to exactly one ship root and is written only by that root's execute (SPEC-20 §5.3).
         [NativeDisableParallelForRestriction] public ComponentLookup<ThrusterState> Thrusters;
 
@@ -58,6 +60,17 @@ namespace Game.Simulation.Flight
             float yawCap = FlightMath.YawRateCap(Config, turnMultiplier);
             FlightMath.Targets(Config, command.Thrust, command.Turn, command.Flags, local, forward, reverse, strafe,
                 yawCap, out float2 target, out float targetYaw);
+            // ADR-0118 carry: a push is kept in the assist targets and bleeds off, so hits, boost strips and walls are felt
+            // instead of cancelled. It never exceeds the velocity the ship really has (SPEC-91 decision 3).
+            if (Tick > 0 && Pushes.HasComponent(entity))
+            {
+                var push = Pushes[entity];
+                if (push.Tick == Tick - 1) { flight.Carry += FlightMath.ToLocalPlanar(push.LinearDv, rotation); flight.CarryYaw += push.YawDv; }
+            }
+            flight.Carry = FlightMath.ClampCarry(flight.Carry, local, Config.MaxCarry);
+            flight.CarryYaw = FlightMath.ClampCarry(flight.CarryYaw, yaw, Config.MaxCarryYaw);
+            target += flight.Carry; targetYaw += flight.CarryYaw;
+            FlightMath.DecayCarry(Config, (command.Flags & ShipCommandFlags.Brake) != 0, ref flight.Carry, ref flight.CarryYaw);
             var problem = new ThrustProblem
             {
                 Target = new float3(bodyMass * (target - local) * Config.LinearAssistGain / dt,

@@ -31,6 +31,28 @@ namespace Game.Tests.EditMode.Voxel.Damage
             Assert.That(f.EM.GetComponentData<PhysicsVelocity>(body).Linear.x, Is.EqualTo(1).Within(1e-6f), "Request is consumed once");
         }
 
+        [Test] public void ExternalPush_SumsPerRoot()
+        {
+            // SPEC-91 §5.1 step 3 (HAZ-002): every impulse applied to a root this tick sums into its ExternalPush.
+            using var f = new ImpactEventSystemTests.Fixture();
+            var body = f.Body(0, 0, mass: 1000);
+            f.EM.AddComponent<ExternalPush>(body);
+            var streams = f.Test.GetSingleton<DamageStreams>();
+            for (uint i = 0; i < 2; i++)
+                streams.Impulses.PostFromMainThread(new ImpulseRequest
+                { Body = body, WorldImpulse = new float3(1000, 0, 2000), Flags = ImpulseRequestFlags.AtCenterOfMass, Producer = ProducerKind.Projectile, Sequence = i });
+            f.Tick();
+            var push = f.EM.GetComponentData<ExternalPush>(body);
+            Assert.That(math.distance(push.LinearDv, new float3(2, 0, 4)), Is.LessThan(1e-5f));
+            uint first = push.Tick;
+            streams.Impulses.PostFromMainThread(new ImpulseRequest
+            { Body = body, WorldImpulse = new float3(-1000, 0, 0), Flags = ImpulseRequestFlags.AtCenterOfMass, Producer = ProducerKind.Projectile });
+            f.Tick();
+            push = f.EM.GetComponentData<ExternalPush>(body);
+            Assert.AreNotEqual(first, push.Tick, "A new tick starts a new sum");
+            Assert.That(math.distance(push.LinearDv, new float3(-1, 0, 0)), Is.LessThan(1e-5f));
+        }
+
         [Test] public void Impulse_PlanarClamp()
         {
             using var f = new ImpactEventSystemTests.Fixture();

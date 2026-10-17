@@ -23,6 +23,7 @@ namespace Game.Voxel.Damage
         NativeList<ImpulseRequest> requests;
         ApplyRequestedImpulseJob applyRequested;
         ComponentLookup<PlanarConstraint> planar;
+        ComponentLookup<ExternalPush> pushes;
         static readonly ProfilerMarker Apply = new ProfilerMarker(ProfilerCategory.Scripts, "ImpulseApplySystem.Apply");
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
@@ -31,19 +32,21 @@ namespace Game.Voxel.Damage
             applyRequested.Masses = state.GetComponentLookup<PhysicsMass>(true);
             applyRequested.Transforms = state.GetComponentLookup<LocalTransform>(true);
             planar = state.GetComponentLookup<PlanarConstraint>(true);
+            pushes = state.GetComponentLookup<ExternalPush>();
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<SimClock>();
         }
         [BurstCompile] public void OnDestroy(ref SystemState state) { state.CompleteDependency(); requests.Dispose(); }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             var streams = SystemAPI.GetSingleton<DamageStreams>(); var data = streams.Data; uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            state.Dependency = data->AllJobs(state.Dependency); planar.Update(ref state);
-            using (Apply.Auto()) state.Dependency = new ApplyPendingImpulseJob { Tick = tick, Planar = planar }.ScheduleParallel(state.Dependency);
+            state.Dependency = data->AllJobs(state.Dependency); planar.Update(ref state); pushes.Update(ref state);
+            using (Apply.Auto()) state.Dependency = new ApplyPendingImpulseJob { Tick = tick, Planar = planar, Pushes = pushes }.ScheduleParallel(state.Dependency);
             applyRequested.Velocities.Update(ref state); applyRequested.Masses.Update(ref state); applyRequested.Transforms.Update(ref state);
             state.Dependency = new ClearRequestsJob { Requests = requests }.Schedule(state.Dependency);
             var requested = streams.Impulses.BeginRead(ref state);
             state.Dependency = SimEventGather.Schedule(requested, requests, state.Dependency);
             applyRequested.Requests = requests; applyRequested.Planar = planar; applyRequested.Data = data;
+            applyRequested.Pushes = pushes; applyRequested.Tick = tick;
             using (Apply.Auto()) state.Dependency = applyRequested.Schedule(state.Dependency);
             streams.Impulses.EndRead(state.Dependency);
             data->ImpulseHandle = state.Dependency;
