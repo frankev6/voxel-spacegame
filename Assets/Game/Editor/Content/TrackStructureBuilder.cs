@@ -117,6 +117,46 @@ namespace Game.Editor.Content
             return result;
         }
 
+        public const string Arm = "ship_track_arm", Door = "ship_track_door";
+
+        /// <summary>HAZ-013: the moving structures (ADR-0119 decision 1) at 1 m cells, for the playground and later tracks.
+        /// Arm: a 5 m hub column and a 40 m striped beam along +x, swept about the hub (the grid origin). Door: a 24 m × 12 m blast door
+        /// slab, 2 m thick, centred on the grid origin across x.</summary>
+        [MenuItem("Game/Content/Build Mechanism Props")]
+        public static void BuildMechanismProps()
+        {
+            EnsureBlock(); AssetDatabase.SaveAssets();
+            using (var service = new ContentService(ContentDatabaseBuilder.Rebuild()))
+            {
+                var catalog = service.Catalog;
+                var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
+                ushort frame = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_track_frame")));
+                ushort hull = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_hull")));
+                Make(service, content, Arm, "Sweeper Arm", 1, (put) =>
+                {
+                    for (int y = -6; y <= 6; y++) for (int x = -2; x <= 2; x++) for (int z = -2; z <= 2; z++)
+                        if (!(math.abs(x) == 2 && math.abs(z) == 2)) put(hull, x, y, z, y == 6 ? Bare : Steel);
+                    for (int x = 3; x <= 42; x++) for (int y = -1; y <= 1; y++) for (int z = -1; z <= 1; z++)
+                    {
+                        bool outer = y != 0 || z != 0;
+                        byte c = x >= 39 ? Light : outer && ((x / 3) & 1) == 0 ? Gold : outer ? Soot : Graphite;
+                        put(frame, x, y, z, c);
+                    }
+                });
+                Make(service, content, Door, "Blast Door", 1, (put) =>
+                {
+                    for (int x = -12; x <= 11; x++) for (int y = -6; y <= 5; y++) for (int z = 0; z <= 1; z++)
+                    {
+                        bool edge = x <= -11 || x >= 10 || y <= -5 || y >= 4;
+                        byte c = edge ? (((x + y) & 2) == 0 ? Gold : Soot) : (x & 3) == 0 ? Bare : Graphite;
+                        put(hull, x, y, z, c);
+                    }
+                });
+            }
+            AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
+            GameLog.Info("Content", "Built the mechanism props (HAZ-013).");
+        }
+
         /// <summary>Track-space position for a 1 m-cell structure whose centre column should stand at `centre`, spawned at `yaw`.</summary>
         internal static Vector2 Place(Vector2 centre, float yaw, float cell = 1)
         {

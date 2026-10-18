@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_track_arm
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_track_arm
+  formerIds: []
+  displayName: Sweeper Arm
+  cellSize: 1
+  payloadVersion: 1
+  payload: 564f585301000100ad53b14ec3400c7d769302a58132d210f1297c0a2aa8a812414815ec0c0c2cfc01a85fc03775e9005316063aa5f65dda2a8995461527e5ddd98e2f7ef60bf07295cbe2de4dfa787b7f3d794ed3337f7c9a8e04efa6a387f10100424438611c338811320618902c60991042e087dc76e4101ac04c22b2478df825af32d06fc00e38dca22c76d767971d50580a8b3b286252850f746547a00c349269b5ac977cd3fa74b839c03105f2b845e5112b7e52bd42d363b263c50fb986fd77933a258be45c89161915a26573416e1654994fc9587a233f2fc863b6c748f6cdd9d9e5f7a1ce5b5fcfcc56d8de3c5625f8ac72477e2bf6eb8563ed9a5a1384a191bf8deb6d0878c1706011dc31f37f904d7b91c6aa30d5cca92da796b24bdc9f244fd7165bb316251b2by
+  cellCount: 633
+  boundsMin: {x: -2, y: -6, z: -2}
+  boundsMax: {x: 42, y: 6, z: 2}

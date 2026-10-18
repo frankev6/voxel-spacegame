@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_track_door
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_track_door
+  formerIds: []
+  displayName: Blast Door
+  cellSize: 1
+  payloadVersion: 1
+  payload: 564f585301000100cd93410e82301045ff145854132f007761dd5398e8c6c426aedcb3e554ae3d15feced09d5d81b1a44c7ee8ebf4f79302d3b8f091c3253eaef7f3ed1963074070147402119cd0b20a10581d4c7bbea61d6978ea068d8a346d9ab3ed2a0823035bc81a3c2cbd0624bfe95e24ede419b6146089fcdbc36bd0b51c6319f2ec62a9a980fd346ee3f24773b0990c157898875435c5bd5b7f27cbf72254e0e19de2f800y
+  cellCount: 576
+  boundsMin: {x: -12, y: -6, z: 0}
+  boundsMax: {x: 11, y: 5, z: 1}
