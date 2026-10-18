@@ -105,6 +105,15 @@ namespace Game.Simulation.Hazards
         }
 
         /// <summary>Sets one effect's Id on a spawned zone (gates carry their gate id; one gate definition serves every gate).</summary>
+        /// <summary>HAZ-013: makes a spawned kinematic grid root a moving structure (ADR-0119 decision 1). Its pose follows the path from
+        /// mover.StartTick; give a root spawned with GridMotion.Kinematic, never a dynamic one.</summary>
+        public static void AddMover(EntityManager em, Entity root, in Game.Simulation.Mechanisms.Mover mover, ReadOnlySpan<Game.Simulation.Mechanisms.MoverPoint> points = default)
+        {
+            em.AddComponentData(root, mover);
+            var buffer = em.AddBuffer<Game.Simulation.Mechanisms.MoverPoint>(root);
+            foreach (var p in points) buffer.Add(p);
+        }
+
         public static void SetEffectId(EntityManager em, Entity zone, ushort id)
         {
             var effects = em.GetBuffer<ZoneEffect>(zone);

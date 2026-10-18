@@ -213,7 +213,11 @@ public enum MinePayload : byte { Blast = 0, Repulse = 1, Emp = 2, Gravity = 3, N
 // Game.Simulation.Mechanisms (new folder and namespace)
 public enum MoverPath : byte { Rotate = 0, Rail = 1, Drift = 2, Toggle = 3 }
 public struct Mover : IComponentData        // on kinematic roots only; writer of its PhysicsVelocity: MoverSystem
-{ public MoverPath Path; public float3 Origin; public float Rate; public float Speed; public uint StartTick; public byte Playing, Reverse; public ushort Group; }
+{ public MoverPath Path; public float3 Origin; public float Rate; public float Speed; public uint StartTick; public byte Playing, Reverse; public ushort Group;
+  public float Yaw; public float3 Velocity; public byte PingPong; }   // HAZ-013: Rotate/Drift start yaw, Drift velocity, Rail back-and-forth
+// MoverMath.Pose(mover, points, tick): Rotate = Origin at Yaw + Rate·t; Drift = Origin + Velocity·t at Yaw + Rate·t;
+// Rail = Speed·t along the points (a closed loop, or back and forth with PingPong; Reverse runs backwards);
+// Toggle = points[0] → points[1] over 1 / Rate s (Reverse travels back). A mover that is not playing holds its StartTick pose.
 [InternalBufferCapacity(0)] public struct MoverPoint : IBufferElementData { public float3 Pose; public float Yaw; }   // Rail and Toggle points
 public struct MechanismAction { public MechanismActionKind Kind; public ushort Group; public float Value; }        // record written by MechanismSystem
 public enum MechanismActionKind : byte { MoverPlay, MoverReverse, MoverSpeed, ZoneEnable, ZoneDisable, ZonePeriod, MinesArm, MinesDisarm,
