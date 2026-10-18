@@ -185,7 +185,7 @@ namespace Game.Galaxy.Racing
                 if (rs.Phase == RacePhase.Racing)
                     for (int i = 0; i < racers.Length; i++)
                     {
-                        leader = math.max(leader, racers[i].Lap);
+                        leader = math.max(leader, racers[i].Lap + 1);   // the lap being flown: Lap counts completed laps
                         if (racers[i].Place == 1 && (racers[i].Flags & RacerFlags.Finished) == 0) first = racers[i].Ship;
                     }
                 signal.ValueRW.LeaderLap = leader; signal.ValueRW.Leader = first;   // HAZ-020: the leader gauntlet turrets shoot

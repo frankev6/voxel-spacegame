@@ -31,3 +31,7 @@ MonoBehaviour:
     TriggerFilter: 0
     CasingHp: 600
     BlastImpulse: 900000
+    Payload: 0
+    PayloadStrength: 0
+    PayloadSeconds: 0
+    SeekSpeed: 0

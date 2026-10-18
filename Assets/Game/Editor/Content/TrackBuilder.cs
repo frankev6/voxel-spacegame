@@ -136,6 +136,28 @@ namespace Game.Editor.Content
             return mine;
         }
 
+        const byte ReactorSetPiece = 1;
+
+        /// <summary>RACE-015 (SPEC-92 decision 11, lap 3: "the reactor pulses every 4 s"): when the leader starts lap 3, the reactor's
+        /// period drops from 8 s to 4 s.</summary>
+        static MechanismDefinition ReactorMechanism()
+        {
+            string path = Hazards + "mechanism_track01_reactor.asset";
+            var def = AssetDatabase.LoadAssetAtPath<MechanismDefinition>(path);
+            if (def == null) { def = ScriptableObject.CreateInstance<MechanismDefinition>(); AssetDatabase.CreateAsset(def, path); }
+            var so = new SerializedObject(def);
+            so.FindProperty("id").stringValue = "mechanism_track01_reactor";
+            var rules = so.FindProperty("rules"); rules.arraySize = 1;
+            var rule = rules.GetArrayElementAtIndex(0);
+            rule.FindPropertyRelative("When").FindPropertyRelative("Kind").enumValueIndex = (int)MechanismDefinition.TriggerKind.RaceLap;
+            rule.FindPropertyRelative("When").FindPropertyRelative("Value").floatValue = 3;
+            var d = rule.FindPropertyRelative("Do"); d.arraySize = 1;
+            d.GetArrayElementAtIndex(0).FindPropertyRelative("Kind").enumValueIndex = (int)MechanismDefinition.ActionKind.ZonePeriod;
+            d.GetArrayElementAtIndex(0).FindPropertyRelative("Value").floatValue = 4;
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(def);
+            return def;
+        }
+
         static MineFieldDefinition MineField(string id, MineDefinition mine, int count, float radius, float spacing)
         {
             string path = Hazards + id + ".asset";
@@ -365,6 +387,12 @@ namespace Game.Editor.Content
                         HalfExtents = new Vector2(width / 2, step / 2 + 1) });   // +1: no gap at the joints
                 }
             }
+            // RACE-015: the reactor (HAZ-016) pulses every 8 s over its reach as set piece 1; mechanism_track01_reactor makes it every 4 s on lap 3.
+            var reactorZone = AssetDatabase.LoadAssetAtPath<ZoneDefinition>(Hazards + "zone_pulse_reactor.asset");
+            if (reactorZone != null && json["reactors"] is JArray reactors)
+                foreach (JObject r in reactors)
+                    zones.Add(new TrackZone { Zone = reactorZone, Position = V(r["c"]), HalfExtents = new Vector2((float)r["r"], (float)r["r"]),
+                        PeriodSeconds = 8, PhaseSeconds = 4, SetPiece = ReactorSetPiece });
             track.Zones = zones.ToArray();
 
             var slots = new List<TrackSlot>();
@@ -404,16 +432,25 @@ namespace Game.Editor.Content
             track = AssetDatabase.LoadAssetAtPath<TrackDefinition>(path);   // reload after the database rebuild
             track.Pieces = pieces.ToArray(); track.Lights = lights.ToArray(); track.Look = Look(); track.Paths = routes.ToArray();
 
-            // HAZ-008: the battle's old minefields, never cleared (proximity mines; the EMP, seeker and repulsor payloads are HAZ-018).
+            // HAZ-008 / RACE-015: the battle's old minefields, never cleared, each of its layout kind (HAZ-018 payloads).
             var fields = new List<TrackMines>(); int f = 0;
             foreach (JObject m in (JArray)json["mines"])
             {
                 int n = (int)m["n"]; float r = (float)m["r"];
-                var field = MineField($"minefield_track_01_{f}", mine, n, r, math.max(14, r / math.sqrt(n) * .9f));
+                string kind = (string)m["kind"];
+                var kindMine = kind == "seeker" || kind == "emp" || kind == "repulse" || kind == "gravity"
+                    ? AssetDatabase.LoadAssetAtPath<MineDefinition>(Hazards + (kind == "repulse" ? "mine_repulsor" : "mine_" + kind) + ".asset") : null;
+                var field = MineField($"minefield_track_01_{f}", kindMine != null ? kindMine : mine, n, r, math.max(14, r / math.sqrt(n) * .9f));
                 fields.Add(new TrackMines { Field = field, Position = V(m["c"]), Yaw = 0, Seed = (uint)(1000 + f) });
                 f++;
             }
             track.MineFields = fields.ToArray();
+            // RACE-015: lap events (HAZ-014) and the energy canisters (HAZ-019).
+            track.Mechanisms = new[] { new TrackMechanism { Mechanism = ReactorMechanism(), SetPiece = ReactorSetPiece } };
+            track.Canister = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>("Assets/Game/Content/Ships/ship_device_canister.asset");
+            var canisters = new List<Vector2>();
+            if (json["canisters"] is JArray cans) foreach (var c in cans) canisters.Add(V(c));
+            track.Canisters = canisters.ToArray();
             Debug.Log($"{id}: {pieces.Count} pieces, {total} wreck cells");
             EditorUtility.SetDirty(track);
             var errors = TrackValidator.Check(track);

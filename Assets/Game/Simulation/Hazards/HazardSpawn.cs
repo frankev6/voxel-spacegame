@@ -111,7 +111,7 @@ namespace Game.Simulation.Hazards
             return root;
         }
 
-        /// <summary>Destroys the zones and devices of a group.</summary>
+        /// <summary>Destroys the zones, devices and mechanisms of a group.</summary>
         public static void DespawnGroup(EntityManager em, ushort group)
         {
             using (var query = em.CreateEntityQuery(typeof(WorldZone)))
@@ -124,6 +124,9 @@ namespace Game.Simulation.Hazards
                     if (em.GetComponentData<MineFuse>(e).Group != group) continue;
                     if (em.HasComponent<Game.Voxel.Model.GridDespawnRequest>(e)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, e); else em.DestroyEntity(e);
                 }
+            using (var query = em.CreateEntityQuery(typeof(Game.Simulation.Mechanisms.Mechanism)))
+            using (var mechanisms = query.ToEntityArray(Unity.Collections.Allocator.Temp))
+                foreach (var e in mechanisms) if (em.GetComponentData<Game.Simulation.Mechanisms.Mechanism>(e).Group == group) em.DestroyEntity(e);
             using (var query = em.CreateEntityQuery(typeof(Canister)))
             using (var canisters = query.ToEntityArray(Unity.Collections.Allocator.Temp))
                 foreach (var e in canisters)

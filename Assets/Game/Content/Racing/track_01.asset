@@ -3635,6 +3635,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -302.98862, y: 1089.4401}
     EmitterB: {x: -252.64772, y: 1086.1804}
@@ -3650,6 +3653,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -252.64772, y: 1086.1804}
     EmitterB: {x: -202.56924, y: 1086.1012}
@@ -3665,6 +3671,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -202.56924, y: 1086.1012}
     EmitterB: {x: -152.4961, y: 1085.3188}
@@ -3680,6 +3689,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -152.4961, y: 1085.3188}
     EmitterB: {x: -102.42396, y: 1084.4712}
@@ -3695,6 +3707,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -102.42396, y: 1084.4712}
     EmitterB: {x: -52.345924, y: 1084.2336}
@@ -3711,6 +3726,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -52.345924, y: 1084.2336}
     EmitterB: {x: -2.2780273, y: 1085.2103}
@@ -3726,6 +3744,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -2.2780273, y: 1085.2103}
     EmitterB: {x: 47.720627, y: 1087.9874}
@@ -3741,6 +3762,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 47.720627, y: 1087.9874}
     EmitterB: {x: 97.54426, y: 1092.9924}
@@ -3757,6 +3781,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 97.54426, y: 1092.9924}
     EmitterB: {x: 147.04199, y: 1100.5625}
@@ -3772,6 +3799,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 147.04199, y: 1100.5625}
     EmitterB: {x: 196.13655, y: 1110.4265}
@@ -3788,6 +3818,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 196.13655, y: 1110.4265}
     EmitterB: {x: 244.84694, y: 1122.0465}
@@ -3803,6 +3836,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 244.84694, y: 1122.0465}
     EmitterB: {x: 293.2119, y: 1135.0326}
@@ -3818,6 +3854,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 293.2119, y: 1135.0326}
     EmitterB: {x: 341.2776, y: 1149.0879}
@@ -3834,6 +3873,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 341.2776, y: 1149.0879}
     EmitterB: {x: 389.0874, y: 1163.9916}
@@ -3849,6 +3891,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 389.0874, y: 1163.9916}
     EmitterB: {x: 436.68652, y: 1179.5555}
@@ -3864,6 +3909,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 436.68652, y: 1179.5555}
     EmitterB: {x: 484.11853, y: 1195.6218}
@@ -3879,6 +3927,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 484.11853, y: 1195.6218}
     EmitterB: {x: 531.42596, y: 1212.0518}
@@ -3894,6 +3945,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 531.42596, y: 1212.0518}
     EmitterB: {x: 578.6432, y: 1228.7393}
@@ -3910,6 +3964,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 578.6432, y: 1228.7393}
     EmitterB: {x: 625.8143, y: 1245.5569}
@@ -3925,6 +3982,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 625.8143, y: 1245.5569}
     EmitterB: {x: 672.9749, y: 1262.4036}
@@ -3940,6 +4000,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 672.9749, y: 1262.4036}
     EmitterB: {x: 720.1651, y: 1279.1678}
@@ -3955,6 +4018,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 720.1651, y: 1279.1678}
     EmitterB: {x: 767.4237, y: 1295.7374}
@@ -3970,6 +4036,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 767.4237, y: 1295.7374}
     EmitterB: {x: 814.79065, y: 1311.9945}
@@ -3986,6 +4055,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 814.79065, y: 1311.9945}
     EmitterB: {x: 862.04114, y: 1328.5791}
@@ -4001,6 +4073,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 862.04114, y: 1328.5791}
     EmitterB: {x: 908.5813, y: 1347.0634}
@@ -4016,6 +4091,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 908.5813, y: 1347.0634}
     EmitterB: {x: 954.53503, y: 1366.9644}
@@ -4032,6 +4110,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 954.53503, y: 1366.9644}
     EmitterB: {x: 1000.0658, y: 1387.8175}
@@ -4047,6 +4128,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1000.0658, y: 1387.8175}
     EmitterB: {x: 1045.3405, y: 1409.2213}
@@ -4062,6 +4146,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1045.3405, y: 1409.2213}
     EmitterB: {x: 1090.5321, y: 1430.8003}
@@ -4077,6 +4164,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1090.5321, y: 1430.8003}
     EmitterB: {x: 1135.7991, y: 1452.2205}
@@ -4092,6 +4182,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1135.7991, y: 1452.2205}
     EmitterB: {x: 1181.2954, y: 1473.1486}
@@ -4107,6 +4200,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1181.2954, y: 1473.1486}
     EmitterB: {x: 1227.178, y: 1493.2135}
@@ -4122,6 +4218,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1227.178, y: 1493.2135}
     EmitterB: {x: 1273.5808, y: 1512.041}
@@ -4137,6 +4236,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1273.5808, y: 1512.041}
     EmitterB: {x: 1320.6353, y: 1529.1709}
@@ -4152,6 +4254,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1320.6353, y: 1529.1709}
     EmitterB: {x: 1368.4304, y: 1544.1014}
@@ -4167,6 +4272,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1368.4304, y: 1544.1014}
     EmitterB: {x: 1417.0004, y: 1556.2645}
@@ -4181,6 +4289,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1417.0004, y: 1556.2645}
     EmitterB: {x: 1466.2985, y: 1565.0057}
@@ -4196,6 +4307,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1466.2985, y: 1565.0057}
     EmitterB: {x: 1516.1531, y: 1569.5552}
@@ -4211,6 +4325,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1516.1531, y: 1569.5552}
     EmitterB: {x: 1566.2126, y: 1569.4597}
@@ -4226,6 +4343,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1566.2126, y: 1569.4597}
     EmitterB: {x: 1616.1606, y: 1565.9281}
@@ -4241,6 +4361,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1616.1606, y: 1565.9281}
     EmitterB: {x: 1665.8578, y: 1559.7917}
@@ -4255,6 +4378,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1665.8578, y: 1559.7917}
     EmitterB: {x: 1715.2029, y: 1551.2727}
@@ -4270,6 +4396,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1715.2029, y: 1551.2727}
     EmitterB: {x: 1764.1063, y: 1540.5035}
@@ -4285,6 +4414,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1764.1063, y: 1540.5035}
     EmitterB: {x: 1812.48, y: 1527.5609}
@@ -4300,6 +4432,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1812.48, y: 1527.5609}
     EmitterB: {x: 1860.228, y: 1512.4747}
@@ -4315,6 +4450,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1860.228, y: 1512.4747}
     EmitterB: {x: 1907.2347, y: 1495.2175}
@@ -4330,6 +4468,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1907.2347, y: 1495.2175}
     EmitterB: {x: 1953.3627, y: 1475.734}
@@ -4345,6 +4486,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1953.3627, y: 1475.734}
     EmitterB: {x: 1998.4296, y: 1453.9114}
@@ -4360,6 +4504,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1998.4296, y: 1453.9114}
     EmitterB: {x: 2042.2087, y: 1429.6101}
@@ -4374,6 +4521,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2042.2087, y: 1429.6101}
     EmitterB: {x: 2084.391, y: 1402.6343}
@@ -4389,6 +4539,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2084.391, y: 1402.6343}
     EmitterB: {x: 2124.554, y: 1372.7401}
@@ -4404,6 +4557,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2124.554, y: 1372.7401}
     EmitterB: {x: 2162.1895, y: 1339.7285}
@@ -4418,6 +4574,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2162.1895, y: 1339.7285}
     EmitterB: {x: 2196.614, y: 1303.3873}
@@ -4433,6 +4592,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2196.614, y: 1303.3873}
     EmitterB: {x: 2226.8662, y: 1263.5146}
@@ -4448,6 +4610,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2226.8662, y: 1263.5146}
     EmitterB: {x: 2252.7407, y: 1220.663}
@@ -4462,6 +4627,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2252.7407, y: 1220.663}
     EmitterB: {x: 2274.5166, y: 1175.5824}
@@ -4477,6 +4645,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2274.5166, y: 1175.5824}
     EmitterB: {x: 2292.772, y: 1128.9615}
@@ -4492,6 +4663,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2292.772, y: 1128.9615}
     EmitterB: {x: 2307.9326, y: 1081.2413}
@@ -4507,6 +4681,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2307.9326, y: 1081.2413}
     EmitterB: {x: 2320.4094, y: 1032.7473}
@@ -4522,6 +4699,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2320.4094, y: 1032.7473}
     EmitterB: {x: 2330.547, y: 983.70917}
@@ -4537,6 +4717,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2330.547, y: 983.70917}
     EmitterB: {x: 2338.6057, y: 934.285}
@@ -4551,6 +4734,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2338.6057, y: 934.285}
     EmitterB: {x: 2344.84, y: 884.59784}
@@ -4566,6 +4752,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2344.84, y: 884.59784}
     EmitterB: {x: 2349.4355, y: 834.7315}
@@ -4581,6 +4770,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2349.4355, y: 834.7315}
     EmitterB: {x: 2352.5393, y: 784.7501}
@@ -4597,6 +4789,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2352.5393, y: 784.7501}
     EmitterB: {x: 2354.271, y: 734.70215}
@@ -4612,6 +4807,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2354.271, y: 734.70215}
     EmitterB: {x: 2354.7375, y: 684.62616}
@@ -4627,6 +4825,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2354.7375, y: 684.62616}
     EmitterB: {x: 2354.005, y: 634.55316}
@@ -4642,6 +4843,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2354.005, y: 634.55316}
     EmitterB: {x: 2352.1196, y: 584.51025}
@@ -4657,6 +4861,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2352.1196, y: 584.51025}
     EmitterB: {x: 2349.0425, y: 534.52704}
@@ -4671,6 +4878,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2349.0425, y: 534.52704}
     EmitterB: {x: 2343.7507, y: 484.7336}
@@ -4686,6 +4896,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2343.7507, y: 484.7336}
     EmitterB: {x: 2336.0042, y: 435.2613}
@@ -4701,6 +4914,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2336.0042, y: 435.2613}
     EmitterB: {x: 2330.4585, y: 384.8006}
@@ -4716,6 +4932,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2330.4585, y: 384.8006}
     EmitterB: {x: 2314.4292, y: 337.4786}
@@ -4731,6 +4950,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2314.4292, y: 337.4786}
     EmitterB: {x: 2301.1208, y: 289.20215}
@@ -4746,6 +4968,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2301.1208, y: 289.20215}
     EmitterB: {x: 2286.4143, y: 241.33232}
@@ -4761,6 +4986,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2286.4143, y: 241.33232}
     EmitterB: {x: 2270.4856, y: 193.85498}
@@ -4776,6 +5004,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2270.4856, y: 193.85498}
     EmitterB: {x: 2253.497, y: 146.74622}
@@ -4791,6 +5022,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2253.497, y: 146.74622}
     EmitterB: {x: 2235.576, y: 99.98389}
@@ -4807,6 +5041,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2235.576, y: 99.98389}
     EmitterB: {x: 2216.86, y: 53.533993}
@@ -4822,6 +5059,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2216.86, y: 53.533993}
     EmitterB: {x: 2197.4724, y: 7.3598576}
@@ -4837,6 +5077,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2197.4724, y: 7.3598576}
     EmitterB: {x: 2177.5073, y: -38.567448}
@@ -4852,6 +5095,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2177.5073, y: -38.567448}
     EmitterB: {x: 2157.0889, y: -84.295555}
@@ -4867,6 +5113,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2157.0889, y: -84.295555}
     EmitterB: {x: 2136.3362, y: -129.87184}
@@ -4882,6 +5131,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2136.3362, y: -129.87184}
     EmitterB: {x: 2115.3943, y: -175.36221}
@@ -4897,6 +5149,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2115.3943, y: -175.36221}
     EmitterB: {x: 2094.1326, y: -220.70325}
@@ -4912,6 +5167,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2094.1326, y: -220.70325}
     EmitterB: {x: 2072.1658, y: -265.70746}
@@ -4927,6 +5185,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2072.1658, y: -265.70746}
     EmitterB: {x: 2049.3818, y: -310.30316}
@@ -4942,6 +5203,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2049.3818, y: -310.30316}
     EmitterB: {x: 2025.647, y: -354.39944}
@@ -4957,6 +5221,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2025.647, y: -354.39944}
     EmitterB: {x: 2000.8425, y: -397.90317}
@@ -4972,6 +5239,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2000.8425, y: -397.90317}
     EmitterB: {x: 1974.833, y: -440.69617}
@@ -4987,6 +5257,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1974.833, y: -440.69617}
     EmitterB: {x: 1947.4994, y: -482.65613}
@@ -5002,6 +5275,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1947.4994, y: -482.65613}
     EmitterB: {x: 1918.7039, y: -523.625}
@@ -5017,6 +5293,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1918.7039, y: -523.625}
     EmitterB: {x: 1888.3394, y: -563.4447}
@@ -5032,6 +5311,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1888.3394, y: -563.4447}
     EmitterB: {x: 1856.3033, y: -601.93066}
@@ -5047,6 +5329,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1856.3033, y: -601.93066}
     EmitterB: {x: 1822.3375, y: -638.7189}
@@ -5062,6 +5347,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1822.3375, y: -638.7189}
     EmitterB: {x: 1786.2844, y: -673.4667}
@@ -5077,6 +5365,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1786.2844, y: -673.4667}
     EmitterB: {x: 1748.4276, y: -706.2416}
@@ -5092,6 +5383,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1748.4276, y: -706.2416}
     EmitterB: {x: 1709.1434, y: -737.2954}
@@ -5107,6 +5401,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1709.1434, y: -737.2954}
     EmitterB: {x: 1668.8403, y: -767.01733}
@@ -5122,6 +5419,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1668.8403, y: -767.01733}
     EmitterB: {x: 1627.9331, y: -795.9055}
@@ -5137,6 +5437,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1627.9331, y: -795.9055}
     EmitterB: {x: 1586.8174, y: -824.4968}
@@ -5152,6 +5455,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1586.8174, y: -824.4968}
     EmitterB: {x: 1545.846, y: -853.29236}
@@ -5167,6 +5473,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1545.846, y: -853.29236}
     EmitterB: {x: 1505.159, y: -882.49036}
@@ -5183,6 +5492,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1505.159, y: -882.49036}
     EmitterB: {x: 1464.5305, y: -911.76935}
@@ -5198,6 +5510,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1464.5305, y: -911.76935}
     EmitterB: {x: 1423.7971, y: -940.9029}
@@ -5213,6 +5528,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1423.7971, y: -940.9029}
     EmitterB: {x: 1382.8206, y: -969.6919}
@@ -5228,6 +5546,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1382.8206, y: -969.6919}
     EmitterB: {x: 1341.4808, y: -997.9584}
@@ -5243,6 +5564,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1341.4808, y: -997.9584}
     EmitterB: {x: 1300.1656, y: -1030.5654}
@@ -5258,6 +5582,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1300.1656, y: -1030.5654}
     EmitterB: {x: 1257.3131, y: -1052.2383}
@@ -5273,6 +5600,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1257.3131, y: -1052.2383}
     EmitterB: {x: 1214.3289, y: -1077.9309}
@@ -5288,6 +5618,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1214.3289, y: -1077.9309}
     EmitterB: {x: 1170.6646, y: -1102.4498}
@@ -5303,6 +5636,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1170.6646, y: -1102.4498}
     EmitterB: {x: 1126.2772, y: -1125.6335}
@@ -5318,6 +5654,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1126.2772, y: -1125.6335}
     EmitterB: {x: 1081.1578, y: -1147.3573}
@@ -5333,6 +5672,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1081.1578, y: -1147.3573}
     EmitterB: {x: 1035.553, y: -1168.048}
@@ -5348,6 +5690,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1035.553, y: -1168.048}
     EmitterB: {x: 989.60913, y: -1187.9752}
@@ -5363,6 +5708,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 989.60913, y: -1187.9752}
     EmitterB: {x: 943.3373, y: -1207.1257}
@@ -5378,6 +5726,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 943.3373, y: -1207.1257}
     EmitterB: {x: 896.7466, y: -1225.4893}
@@ -5393,6 +5744,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 896.7466, y: -1225.4893}
     EmitterB: {x: 849.8465, y: -1243.0468}
@@ -5409,6 +5763,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 849.8465, y: -1243.0468}
     EmitterB: {x: 802.64026, y: -1259.7635}
@@ -5424,6 +5781,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 802.64026, y: -1259.7635}
     EmitterB: {x: 755.1379, y: -1275.617}
@@ -5439,6 +5799,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 755.1379, y: -1275.617}
     EmitterB: {x: 707.3397, y: -1290.5566}
@@ -5454,6 +5817,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 707.3397, y: -1290.5566}
     EmitterB: {x: 659.2597, y: -1304.5615}
@@ -5469,6 +5835,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 659.2597, y: -1304.5615}
     EmitterB: {x: 610.8989, y: -1317.5623}
@@ -5484,6 +5853,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 610.8989, y: -1317.5623}
     EmitterB: {x: 562.27, y: -1329.5262}
@@ -5499,6 +5871,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 562.27, y: -1329.5262}
     EmitterB: {x: 513.3833, y: -1340.383}
@@ -5514,6 +5889,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 513.3833, y: -1340.383}
     EmitterB: {x: 464.25043, y: -1350.0684}
@@ -5529,6 +5907,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 464.25043, y: -1350.0684}
     EmitterB: {x: 414.89017, y: -1358.5137}
@@ -5544,6 +5925,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 414.89017, y: -1358.5137}
     EmitterB: {x: 365.35345, y: -1365.8611}
@@ -5559,6 +5943,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 365.35345, y: -1365.8611}
     EmitterB: {x: 315.7031, y: -1372.4004}
@@ -5574,6 +5961,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 315.7031, y: -1372.4004}
     EmitterB: {x: 265.95294, y: -1378.124}
@@ -5589,6 +5979,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 265.95294, y: -1378.124}
     EmitterB: {x: 216.11563, y: -1383.0402}
@@ -5604,6 +5997,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 216.11563, y: -1383.0402}
     EmitterB: {x: 166.20404, y: -1387.1233}
@@ -5619,6 +6015,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 166.20404, y: -1387.1233}
     EmitterB: {x: 116.23008, y: -1390.3557}
@@ -5634,6 +6033,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 116.23008, y: -1390.3557}
     EmitterB: {x: 66.206635, y: -1392.6975}
@@ -5649,6 +6051,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 66.206635, y: -1392.6975}
     EmitterB: {x: 16.147755, y: -1394.128}
@@ -5665,6 +6070,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 16.147755, y: -1394.128}
     EmitterB: {x: -33.929413, y: -1394.5795}
@@ -5680,6 +6088,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -33.929413, y: -1394.5795}
     EmitterB: {x: -84.004196, y: -1394.0112}
@@ -5695,6 +6106,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -84.004196, y: -1394.0112}
     EmitterB: {x: -134.05617, y: -1392.3689}
@@ -5710,6 +6124,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -134.05617, y: -1392.3689}
     EmitterB: {x: -184.05473, y: -1389.5591}
@@ -5725,6 +6142,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -184.05473, y: -1389.5591}
     EmitterB: {x: -233.9682, y: -1385.506}
@@ -5740,6 +6160,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -233.9682, y: -1385.506}
     EmitterB: {x: -283.7554, y: -1380.123}
@@ -5755,6 +6178,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -283.7554, y: -1380.123}
     EmitterB: {x: -333.36258, y: -1373.2761}
@@ -5770,6 +6196,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -333.36258, y: -1373.2761}
     EmitterB: {x: -382.72415, y: -1364.8394}
@@ -5785,6 +6214,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -382.72415, y: -1364.8394}
     EmitterB: {x: -431.75433, y: -1354.6581}
@@ -5800,6 +6232,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -431.75433, y: -1354.6581}
     EmitterB: {x: -480.30502, y: -1342.3949}
@@ -5814,6 +6249,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -480.30502, y: -1342.3949}
     EmitterB: {x: -528.31274, y: -1328.1519}
@@ -5829,6 +6267,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -528.31274, y: -1328.1519}
     EmitterB: {x: -575.76404, y: -1312.1484}
@@ -5844,6 +6285,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -575.76404, y: -1312.1484}
     EmitterB: {x: -622.65753, y: -1294.5782}
@@ -5859,6 +6303,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -622.65753, y: -1294.5782}
     EmitterB: {x: -669.017, y: -1275.6409}
@@ -5874,6 +6321,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -669.017, y: -1275.6409}
     EmitterB: {x: -714.8646, y: -1255.4944}
@@ -5890,6 +6340,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -714.8646, y: -1255.4944}
     EmitterB: {x: -760.2378, y: -1234.3024}
@@ -5905,6 +6358,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -760.2378, y: -1234.3024}
     EmitterB: {x: -805.1871, y: -1212.223}
@@ -5920,6 +6376,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -805.1871, y: -1212.223}
     EmitterB: {x: -849.76263, y: -1189.4001}
@@ -5935,6 +6394,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -849.76263, y: -1189.4001}
     EmitterB: {x: -894.02686, y: -1165.9772}
@@ -5950,6 +6412,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -894.02686, y: -1165.9772}
     EmitterB: {x: -938.04767, y: -1142.1011}
@@ -5965,6 +6430,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -938.04767, y: -1142.1011}
     EmitterB: {x: -981.8952, y: -1117.9086}
@@ -5980,6 +6448,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -981.8952, y: -1117.9086}
     EmitterB: {x: -1025.6621, y: -1093.5687}
@@ -5995,6 +6466,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1025.6621, y: -1093.5687}
     EmitterB: {x: -1069.4329, y: -1069.2372}
@@ -6011,6 +6485,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1069.4329, y: -1069.2372}
     EmitterB: {x: -1115.7869, y: -1048.771}
@@ -6026,6 +6503,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1115.7869, y: -1048.771}
     EmitterB: {x: -1157.0214, y: -1020.65826}
@@ -6041,6 +6521,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1157.0214, y: -1020.65826}
     EmitterB: {x: -1200.5924, y: -995.9696}
@@ -6056,6 +6539,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1200.5924, y: -995.9696}
     EmitterB: {x: -1243.8821, y: -970.79364}
@@ -6071,6 +6557,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1243.8821, y: -970.79364}
     EmitterB: {x: -1286.7908, y: -944.9719}
@@ -6086,6 +6575,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1286.7908, y: -944.9719}
     EmitterB: {x: -1329.1975, y: -918.33356}
@@ -6101,6 +6593,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1329.1975, y: -918.33356}
     EmitterB: {x: -1370.9769, y: -890.72534}
@@ -6116,6 +6611,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1370.9769, y: -890.72534}
     EmitterB: {x: -1411.9991, y: -862.00507}
@@ -6131,6 +6629,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1411.9991, y: -862.00507}
     EmitterB: {x: -1452.1312, y: -832.05133}
@@ -6146,6 +6647,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1452.1312, y: -832.05133}
     EmitterB: {x: -1491.2328, y: -800.76605}
@@ -6161,6 +6665,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1491.2328, y: -800.76605}
     EmitterB: {x: -1529.1781, y: -768.09106}
@@ -6176,6 +6683,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1529.1781, y: -768.09106}
     EmitterB: {x: -1566.0409, y: -734.1942}
@@ -6191,6 +6701,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1566.0409, y: -734.1942}
     EmitterB: {x: -1602.6525, y: -700.0252}
@@ -6206,6 +6719,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1602.6525, y: -700.0252}
     EmitterB: {x: -1638.9419, y: -665.5154}
@@ -6221,6 +6737,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1638.9419, y: -665.5154}
     EmitterB: {x: -1674.6716, y: -630.4268}
@@ -6236,6 +6755,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1674.6716, y: -630.4268}
     EmitterB: {x: -1709.6046, y: -594.54456}
@@ -6251,6 +6773,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1709.6046, y: -594.54456}
     EmitterB: {x: -1743.4744, y: -557.6598}
@@ -6266,6 +6791,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1743.4744, y: -557.6598}
     EmitterB: {x: -1775.98, y: -519.56854}
@@ -6281,6 +6809,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1775.98, y: -519.56854}
     EmitterB: {x: -1806.7988, y: -480.10175}
@@ -6296,6 +6827,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1806.7988, y: -480.10175}
     EmitterB: {x: -1835.5479, y: -439.10486}
@@ -6311,6 +6845,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1835.5479, y: -439.10486}
     EmitterB: {x: -1861.792, y: -396.46432}
@@ -6326,6 +6863,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1861.792, y: -396.46432}
     EmitterB: {x: -1885.0461, y: -352.12567}
@@ -6340,6 +6880,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1885.0461, y: -352.12567}
     EmitterB: {x: -1904.7312, y: -306.09232}
@@ -6355,6 +6898,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1904.7312, y: -306.09232}
     EmitterB: {x: -1920.4019, y: -258.54678}
@@ -6370,6 +6916,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1920.4019, y: -258.54678}
     EmitterB: {x: -1932.3191, y: -209.91805}
@@ -6385,6 +6934,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1932.3191, y: -209.91805}
     EmitterB: {x: -1941.1107, y: -160.62462}
@@ -6399,6 +6951,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1941.1107, y: -160.62462}
     EmitterB: {x: -1947.1814, y: -110.91995}
@@ -6414,6 +6969,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1947.1814, y: -110.91995}
     EmitterB: {x: -1950.8527, y: -60.98071}
@@ -6429,6 +6987,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1950.8527, y: -60.98071}
     EmitterB: {x: -1952.3778, y: -10.928888}
@@ -6444,6 +7005,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1952.3778, y: -10.928888}
     EmitterB: {x: -1951.9089, y: 39.145317}
@@ -6459,6 +7023,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1951.9089, y: 39.145317}
     EmitterB: {x: -1949.5718, y: 89.16675}
@@ -6474,6 +7041,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1949.5718, y: 89.16675}
     EmitterB: {x: -1945.4465, y: 139.07222}
@@ -6489,6 +7059,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1945.4465, y: 139.07222}
     EmitterB: {x: -1939.5503, y: 188.80072}
@@ -6504,6 +7077,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1939.5503, y: 188.80072}
     EmitterB: {x: -1931.8911, y: 238.28789}
@@ -6519,6 +7095,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1931.8911, y: 238.28789}
     EmitterB: {x: -1922.4214, y: 287.4597}
@@ -6534,6 +7113,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1922.4214, y: 287.4597}
     EmitterB: {x: -1911.0525, y: 336.22754}
@@ -6549,6 +7131,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1911.0525, y: 336.22754}
     EmitterB: {x: -1897.6509, y: 384.47537}
@@ -6564,6 +7149,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1897.6509, y: 384.47537}
     EmitterB: {x: -1882.011, y: 432.04285}
@@ -6579,6 +7167,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1882.011, y: 432.04285}
     EmitterB: {x: -1863.8516, y: 478.7057}
@@ -6593,6 +7184,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1863.8516, y: 478.7057}
     EmitterB: {x: -1843.0721, y: 524.2627}
@@ -6608,6 +7202,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1843.0721, y: 524.2627}
     EmitterB: {x: -1819.9352, y: 568.67206}
@@ -6623,6 +7220,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1819.9352, y: 568.67206}
     EmitterB: {x: -1794.6141, y: 611.8715}
@@ -6638,6 +7238,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1794.6141, y: 611.8715}
     EmitterB: {x: -1767.2532, y: 653.80896}
@@ -6653,6 +7256,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1767.2532, y: 653.80896}
     EmitterB: {x: -1737.9542, y: 694.4184}
@@ -6668,6 +7274,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1737.9542, y: 694.4184}
     EmitterB: {x: -1706.7914, y: 733.6137}
@@ -6683,6 +7292,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1706.7914, y: 733.6137}
     EmitterB: {x: -1673.8296, y: 771.3088}
@@ -6698,6 +7310,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1673.8296, y: 771.3088}
     EmitterB: {x: -1639.1082, y: 807.3897}
@@ -6713,6 +7328,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1639.1082, y: 807.3897}
     EmitterB: {x: -1602.6708, y: 841.73755}
@@ -6727,6 +7345,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1602.6708, y: 841.73755}
     EmitterB: {x: -1564.5173, y: 874.1647}
@@ -6742,6 +7363,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1564.5173, y: 874.1647}
     EmitterB: {x: -1524.6697, y: 904.4874}
@@ -6757,6 +7381,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1524.6697, y: 904.4874}
     EmitterB: {x: -1483.1616, y: 932.4939}
@@ -6772,6 +7399,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1483.1616, y: 932.4939}
     EmitterB: {x: -1440.0205, y: 957.90796}
@@ -6787,6 +7417,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1440.0205, y: 957.90796}
     EmitterB: {x: -1395.063, y: 979.92615}
@@ -6801,6 +7434,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1395.063, y: 979.92615}
     EmitterB: {x: -1348.2778, y: 997.748}
@@ -6816,6 +7452,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1348.2778, y: 997.748}
     EmitterB: {x: -1300.2899, y: 1012.03394}
@@ -6831,6 +7470,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1300.2899, y: 1012.03394}
     EmitterB: {x: -1251.5135, y: 1023.34955}
@@ -6846,6 +7488,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1251.5135, y: 1023.34955}
     EmitterB: {x: -1202.2295, y: 1032.2109}
@@ -6861,6 +7506,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1202.2295, y: 1032.2109}
     EmitterB: {x: -1152.6226, y: 1039.0548}
@@ -6876,6 +7524,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1152.6226, y: 1039.0548}
     EmitterB: {x: -1102.8191, y: 1044.2823}
@@ -6891,6 +7542,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1102.8191, y: 1044.2823}
     EmitterB: {x: -1052.896, y: 1048.2136}
@@ -6906,6 +7560,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1052.896, y: 1048.2136}
     EmitterB: {x: -1002.90424, y: 1051.1605}
@@ -6921,6 +7578,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1002.90424, y: 1051.1605}
     EmitterB: {x: -952.87396, y: 1053.3896}
@@ -6936,6 +7596,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -952.87396, y: 1053.3896}
     EmitterB: {x: -902.8267, y: 1055.1931}
@@ -6951,6 +7614,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -902.8267, y: 1055.1931}
     EmitterB: {x: -852.77527, y: 1056.8472}
@@ -6967,6 +7633,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -852.77527, y: 1056.8472}
     EmitterB: {x: -802.73004, y: 1058.7169}
@@ -6982,6 +7651,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -802.73004, y: 1058.7169}
     EmitterB: {x: -752.7159, y: 1061.2333}
@@ -6997,6 +7669,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -752.7159, y: 1061.2333}
     EmitterB: {x: -702.7838, y: 1065.0374}
@@ -7012,6 +7687,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -702.7838, y: 1065.0374}
     EmitterB: {x: -652.8829, y: 1069.25}
@@ -7027,6 +7705,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -652.8829, y: 1069.25}
     EmitterB: {x: -602.9265, y: 1072.755}
@@ -7042,6 +7723,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -602.9265, y: 1072.755}
     EmitterB: {x: -552.928, y: 1075.5851}
@@ -7058,6 +7742,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -552.928, y: 1075.5851}
     EmitterB: {x: -502.89917, y: 1077.851}
@@ -7073,6 +7760,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -502.89917, y: 1077.851}
     EmitterB: {x: -451.3715, y: 1084.257}
@@ -7088,6 +7778,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -451.3715, y: 1084.257}
     EmitterB: {x: -402.80133, y: 1081.3544}
@@ -7103,6 +7796,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -402.80133, y: 1081.3544}
     EmitterB: {x: -352.7518, y: 1083.034}
@@ -7118,6 +7814,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -352.7518, y: 1083.034}
     EmitterB: {x: -302.98862, y: 1089.4401}
@@ -7133,6 +7832,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -297.01138, y: 940.55994}
     EmitterB: {x: -245.44092, y: 946.22565}
@@ -7148,6 +7850,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -245.44092, y: 946.22565}
     EmitterB: {x: -193.5773, y: 945.9777}
@@ -7164,6 +7869,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -193.5773, y: 945.9777}
     EmitterB: {x: -141.71973, y: 945.0944}
@@ -7179,6 +7887,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -141.71973, y: 945.0944}
     EmitterB: {x: -89.86044, y: 944.32764}
@@ -7194,6 +7905,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -89.86044, y: 944.32764}
     EmitterB: {x: -37.996315, y: 944.34955}
@@ -7209,6 +7923,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -37.996315, y: 944.34955}
     EmitterB: {x: 13.847919, y: 945.743}
@@ -7224,6 +7941,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 13.847919, y: 945.743}
     EmitterB: {x: 65.61, y: 948.96}
@@ -7238,6 +7958,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 192.09, y: 966.56}
     EmitterB: {x: 240.70007, y: 976.9623}
@@ -7253,6 +7976,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 240.70007, y: 976.9623}
     EmitterB: {x: 288.97113, y: 988.8416}
@@ -7268,6 +7994,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 288.97113, y: 988.8416}
     EmitterB: {x: 336.93588, y: 1001.9046}
@@ -7283,6 +8012,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 336.93588, y: 1001.9046}
     EmitterB: {x: 384.62738, y: 1015.9338}
@@ -7299,6 +8031,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 384.62738, y: 1015.9338}
     EmitterB: {x: 432.07993, y: 1030.7521}
@@ -7314,6 +8049,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 432.07993, y: 1030.7521}
     EmitterB: {x: 479.33377, y: 1046.1927}
@@ -7329,6 +8067,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 479.33377, y: 1046.1927}
     EmitterB: {x: 526.4257, y: 1062.1206}
@@ -7344,6 +8085,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 526.4257, y: 1062.1206}
     EmitterB: {x: 573.3943, y: 1078.4089}
@@ -7359,6 +8103,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 573.3943, y: 1078.4089}
     EmitterB: {x: 620.27313, y: 1094.954}
@@ -7374,6 +8121,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 620.27313, y: 1094.954}
     EmitterB: {x: 667.1025, y: 1111.6385}
@@ -7389,6 +8139,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 667.1025, y: 1111.6385}
     EmitterB: {x: 713.91724, y: 1128.3643}
@@ -7404,6 +8157,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 713.91724, y: 1128.3643}
     EmitterB: {x: 760.7544, y: 1145.027}
@@ -7420,6 +8176,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 760.7544, y: 1145.027}
     EmitterB: {x: 807.6553, y: 1161.5095}
@@ -7435,6 +8194,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 807.6553, y: 1161.5095}
     EmitterB: {x: 854.6605, y: 1177.6918}
@@ -7450,6 +8212,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 854.6605, y: 1177.6918}
     EmitterB: {x: 901.63495, y: 1193.9574}
@@ -7465,6 +8230,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 901.63495, y: 1193.9574}
     EmitterB: {x: 947.9995, y: 1211.8855}
@@ -7480,6 +8248,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 947.9995, y: 1211.8855}
     EmitterB: {x: 993.78754, y: 1231.2417}
@@ -7495,6 +8266,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 993.78754, y: 1231.2417}
     EmitterB: {x: 1039.1302, y: 1251.6213}
@@ -7510,6 +8284,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1039.1302, y: 1251.6213}
     EmitterB: {x: 1084.1677, y: 1272.668}
@@ -7525,6 +8302,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1084.1677, y: 1272.668}
     EmitterB: {x: 1129.0486, y: 1294.0474}
@@ -7540,6 +8320,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1129.0486, y: 1294.0474}
     EmitterB: {x: 1173.9274, y: 1315.4307}
@@ -7555,6 +8338,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1173.9274, y: 1315.4307}
     EmitterB: {x: 1218.9644, y: 1336.4786}
@@ -7571,6 +8357,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1218.9644, y: 1336.4786}
     EmitterB: {x: 1264.3258, y: 1356.8159}
@@ -7586,6 +8375,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1264.3258, y: 1356.8159}
     EmitterB: {x: 1310.186, y: 1375.9996}
@@ -7601,6 +8393,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1310.186, y: 1375.9996}
     EmitterB: {x: 1356.7056, y: 1393.5177}
@@ -7617,6 +8412,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1356.7056, y: 1393.5177}
     EmitterB: {x: 1404.0387, y: 1408.6901}
@@ -7632,6 +8430,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1404.0387, y: 1408.6901}
     EmitterB: {x: 1452.2819, y: 1420.6348}
@@ -7648,6 +8449,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1452.2819, y: 1420.6348}
     EmitterB: {x: 1501.3964, y: 1428.1725}
@@ -7664,6 +8468,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1501.3964, y: 1428.1725}
     EmitterB: {x: 1551.0403, y: 1429.9199}
@@ -7679,6 +8486,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1551.0403, y: 1429.9199}
     EmitterB: {x: 1600.6448, y: 1426.7826}
@@ -7695,6 +8505,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1600.6448, y: 1426.7826}
     EmitterB: {x: 1649.9641, y: 1420.5966}
@@ -7710,6 +8523,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1649.9641, y: 1420.5966}
     EmitterB: {x: 1698.8745, y: 1411.7351}
@@ -7726,6 +8542,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1698.8745, y: 1411.7351}
     EmitterB: {x: 1747.262, y: 1400.357}
@@ -7741,6 +8560,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1747.262, y: 1400.357}
     EmitterB: {x: 1795.015, y: 1386.5563}
@@ -7757,6 +8579,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1795.015, y: 1386.5563}
     EmitterB: {x: 1841.9973, y: 1370.3253}
@@ -7772,6 +8597,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1841.9973, y: 1370.3253}
     EmitterB: {x: 1888.0347, y: 1351.5837}
@@ -7788,6 +8616,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1888.0347, y: 1351.5837}
     EmitterB: {x: 1932.9031, y: 1330.1978}
@@ -7803,6 +8634,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1932.9031, y: 1330.1978}
     EmitterB: {x: 1976.2612, y: 1305.9}
@@ -7819,6 +8653,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1976.2612, y: 1305.9}
     EmitterB: {x: 2017.6249, y: 1278.3525}
@@ -7835,6 +8672,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2017.6249, y: 1278.3525}
     EmitterB: {x: 2056.264, y: 1247.1106}
@@ -7851,6 +8691,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2056.264, y: 1247.1106}
     EmitterB: {x: 2091.8281, y: 1203.4567}
@@ -7867,6 +8710,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2091.8281, y: 1203.4567}
     EmitterB: {x: 2119.8345, y: 1171.1547}
@@ -7882,6 +8728,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2119.8345, y: 1171.1547}
     EmitterB: {x: 2142.8792, y: 1127.1382}
@@ -7898,6 +8747,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2142.8792, y: 1127.1382}
     EmitterB: {x: 2161.2468, y: 1080.9614}
@@ -7914,6 +8766,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2161.2468, y: 1080.9614}
     EmitterB: {x: 2175.9192, y: 1033.4747}
@@ -7929,6 +8784,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2175.9192, y: 1033.4747}
     EmitterB: {x: 2187.5564, y: 985.15027}
@@ -7945,6 +8803,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2187.5564, y: 985.15027}
     EmitterB: {x: 2196.6768, y: 936.2863}
@@ -7960,6 +8821,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2196.6768, y: 936.2863}
     EmitterB: {x: 2203.6309, y: 887.06573}
@@ -7975,6 +8839,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2203.6309, y: 887.06573}
     EmitterB: {x: 2208.7354, y: 837.6185}
@@ -7991,6 +8858,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2208.7354, y: 837.6185}
     EmitterB: {x: 2212.1875, y: 788.0278}
@@ -8006,6 +8876,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2212.1875, y: 788.0278}
     EmitterB: {x: 2214.1426, y: 738.3551}
@@ -8021,6 +8894,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2214.1426, y: 738.3551}
     EmitterB: {x: 2214.74, y: 688.64777}
@@ -8037,6 +8913,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2214.74, y: 688.64777}
     EmitterB: {x: 2214.0771, y: 638.9407}
@@ -8052,6 +8931,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2214.0771, y: 638.9407}
     EmitterB: {x: 2212.1746, y: 589.26556}
@@ -8067,6 +8949,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2212.1746, y: 589.26556}
     EmitterB: {x: 2208.9753, y: 539.6583}
@@ -8083,6 +8968,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2208.9753, y: 539.6583}
     EmitterB: {x: 2203.1606, y: 490.29404}
@@ -8098,6 +8986,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2203.1606, y: 490.29404}
     EmitterB: {x: 2194.664, y: 441.3178}
@@ -8113,6 +9004,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2194.664, y: 441.3178}
     EmitterB: {x: 2183.965, y: 392.77408}
@@ -8129,6 +9023,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2183.965, y: 392.77408}
     EmitterB: {x: 2171.383, y: 344.68246}
@@ -8144,6 +9041,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2171.383, y: 344.68246}
     EmitterB: {x: 2157.2158, y: 297.0334}
@@ -8159,6 +9059,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2157.2158, y: 297.0334}
     EmitterB: {x: 2141.7034, y: 249.8044}
@@ -8175,6 +9078,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2141.7034, y: 249.8044}
     EmitterB: {x: 2125.023, y: 202.97495}
@@ -8190,6 +9096,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2125.023, y: 202.97495}
     EmitterB: {x: 2107.3584, y: 156.50731}
@@ -8205,6 +9114,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2107.3584, y: 156.50731}
     EmitterB: {x: 2088.8547, y: 110.36719}
@@ -8220,6 +9132,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2088.8547, y: 110.36719}
     EmitterB: {x: 2069.6465, y: 64.51543}
@@ -8236,6 +9151,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2069.6465, y: 64.51543}
     EmitterB: {x: 2049.8442, y: 18.917028}
@@ -8251,6 +9169,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2049.8442, y: 18.917028}
     EmitterB: {x: 2029.5818, y: -26.478539}
@@ -8266,6 +9187,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2029.5818, y: -26.478539}
     EmitterB: {x: 2008.9819, y: -71.72224}
@@ -8281,6 +9205,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 2008.9819, y: -71.72224}
     EmitterB: {x: 1988.195, y: -116.880585}
@@ -8296,6 +9223,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1988.195, y: -116.880585}
     EmitterB: {x: 1967.0756, y: -161.88399}
@@ -8312,6 +9242,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1967.0756, y: -161.88399}
     EmitterB: {x: 1945.2238, y: -206.5358}
@@ -8327,6 +9260,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1945.2238, y: -206.5358}
     EmitterB: {x: 1922.5107, y: -250.7556}
@@ -8342,6 +9278,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1922.5107, y: -250.7556}
     EmitterB: {x: 1898.7881, y: -294.44168}
@@ -8357,6 +9296,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1898.7881, y: -294.44168}
     EmitterB: {x: 1873.91, y: -337.48}
@@ -8372,6 +9314,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1830.97, y: -405.06}
     EmitterB: {x: 1800.3326, y: -448.24805}
@@ -8388,6 +9333,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1800.3326, y: -448.24805}
     EmitterB: {x: 1767.7041, y: -489.9502}
@@ -8404,6 +9352,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1767.7041, y: -489.9502}
     EmitterB: {x: 1732.8448, y: -529.8017}
@@ -8419,6 +9370,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1732.8448, y: -529.8017}
     EmitterB: {x: 1695.22, y: -567.05}
@@ -8434,6 +9388,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1617.33, y: -631.2}
     EmitterB: {x: 1576.6631, y: -660.81396}
@@ -8449,6 +9406,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1576.6631, y: -660.81396}
     EmitterB: {x: 1535.4675, y: -689.68994}
@@ -8464,6 +9424,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1535.4675, y: -689.68994}
     EmitterB: {x: 1494.1715, y: -718.4226}
@@ -8479,6 +9442,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1494.1715, y: -718.4226}
     EmitterB: {x: 1453.1039, y: -747.4802}
@@ -8495,6 +9461,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1453.1039, y: -747.4802}
     EmitterB: {x: 1412.2727, y: -776.86957}
@@ -8510,6 +9479,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1412.2727, y: -776.86957}
     EmitterB: {x: 1371.4463, y: -806.2656}
@@ -8525,6 +9497,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1371.4463, y: -806.2656}
     EmitterB: {x: 1330.465, y: -835.4451}
@@ -8540,6 +9515,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1330.465, y: -835.4451}
     EmitterB: {x: 1289.1934, y: -864.21216}
@@ -8556,6 +9534,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1289.1934, y: -864.21216}
     EmitterB: {x: 1247.5034, y: -892.36914}
@@ -8571,6 +9552,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1247.5034, y: -892.36914}
     EmitterB: {x: 1205.2706, y: -919.7042}
@@ -8586,6 +9570,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1205.2706, y: -919.7042}
     EmitterB: {x: 1162.4121, y: -946.0466}
@@ -8602,6 +9589,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1162.4121, y: -946.0466}
     EmitterB: {x: 1118.8396, y: -971.1895}
@@ -8617,6 +9607,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1118.8396, y: -971.1895}
     EmitterB: {x: 1074.4828, y: -994.9198}
@@ -8632,6 +9625,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1074.4828, y: -994.9198}
     EmitterB: {x: 1029.3145, y: -1017.0654}
@@ -8648,6 +9644,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1029.3145, y: -1017.0654}
     EmitterB: {x: 983.54926, y: -1037.9557}
@@ -8663,6 +9662,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 983.54926, y: -1037.9557}
     EmitterB: {x: 937.4215, y: -1058.0326}
@@ -8678,6 +9680,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 937.4215, y: -1058.0326}
     EmitterB: {x: 890.9496, y: -1077.2993}
@@ -8694,6 +9699,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 890.9496, y: -1077.2993}
     EmitterB: {x: 844.13995, y: -1095.7307}
@@ -8709,6 +9717,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 844.13995, y: -1095.7307}
     EmitterB: {x: 796.9969, y: -1113.2916}
@@ -8724,6 +9735,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 796.9969, y: -1113.2916}
     EmitterB: {x: 749.53235, y: -1129.9635}
@@ -8739,6 +9753,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 749.53235, y: -1129.9635}
     EmitterB: {x: 701.7557, y: -1145.7185}
@@ -8755,6 +9772,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 701.7557, y: -1145.7185}
     EmitterB: {x: 653.66266, y: -1160.4803}
@@ -8770,6 +9790,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 653.66266, y: -1160.4803}
     EmitterB: {x: 605.2698, y: -1174.2266}
@@ -8785,6 +9808,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 605.2698, y: -1174.2266}
     EmitterB: {x: 556.5837, y: -1186.894}
@@ -8801,6 +9827,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 556.5837, y: -1186.894}
     EmitterB: {x: 507.6111, y: -1198.4042}
@@ -8816,6 +9845,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 507.6111, y: -1198.4042}
     EmitterB: {x: 458.36713, y: -1208.6901}
@@ -8831,6 +9863,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 458.36713, y: -1208.6901}
     EmitterB: {x: 408.86847, y: -1217.6713}
@@ -8847,6 +9882,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 408.86847, y: -1217.6713}
     EmitterB: {x: 359.14877, y: -1225.3384}
@@ -8862,6 +9900,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 359.14877, y: -1225.3384}
     EmitterB: {x: 309.29895, y: -1232.1093}
@@ -8877,6 +9918,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 309.29895, y: -1232.1093}
     EmitterB: {x: 259.34042, y: -1238.027}
@@ -8893,6 +9937,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 259.34042, y: -1238.027}
     EmitterB: {x: 209.28766, y: -1243.0837}
@@ -8908,6 +9955,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 209.28766, y: -1243.0837}
     EmitterB: {x: 159.15417, y: -1247.266}
@@ -8923,6 +9973,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 159.15417, y: -1247.266}
     EmitterB: {x: 108.95326, y: -1250.5406}
@@ -8939,6 +9992,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 108.95326, y: -1250.5406}
     EmitterB: {x: 58.700397, y: -1252.8833}
@@ -8954,6 +10010,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 58.700397, y: -1252.8833}
     EmitterB: {x: 8.411146, y: -1254.2341}
@@ -8969,6 +10028,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 8.411146, y: -1254.2341}
     EmitterB: {x: -41.89497, y: -1254.5518}
@@ -8985,6 +10047,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -41.89497, y: -1254.5518}
     EmitterB: {x: -92.19605, y: -1253.7693}
@@ -9000,6 +10065,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -92.19605, y: -1253.7693}
     EmitterB: {x: -142.46448, y: -1251.7968}
@@ -9015,6 +10083,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -142.46448, y: -1251.7968}
     EmitterB: {x: -195.76643, y: -1243.8048}
@@ -9031,6 +10102,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -195.76643, y: -1243.8048}
     EmitterB: {x: -242.75882, y: -1243.9154}
@@ -9046,6 +10120,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -242.75882, y: -1243.9154}
     EmitterB: {x: -292.6851, y: -1237.7465}
@@ -9061,6 +10138,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -292.6851, y: -1237.7465}
     EmitterB: {x: -342.3745, y: -1229.9005}
@@ -9077,6 +10157,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -342.3745, y: -1229.9005}
     EmitterB: {x: -391.72662, y: -1220.1571}
@@ -9092,6 +10175,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -391.72662, y: -1220.1571}
     EmitterB: {x: -440.5655, y: -1208.109}
@@ -9108,6 +10194,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -440.5655, y: -1208.109}
     EmitterB: {x: -488.79193, y: -1193.802}
@@ -9123,6 +10212,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -488.79193, y: -1193.802}
     EmitterB: {x: -536.3899, y: -1177.5226}
@@ -9139,6 +10231,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -536.3899, y: -1177.5226}
     EmitterB: {x: -583.37744, y: -1159.5555}
@@ -9154,6 +10249,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -583.37744, y: -1159.5555}
     EmitterB: {x: -629.7757, y: -1140.1154}
@@ -9169,6 +10267,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -629.7757, y: -1140.1154}
     EmitterB: {x: -675.6368, y: -1119.4376}
@@ -9185,6 +10286,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -675.6368, y: -1119.4376}
     EmitterB: {x: -721.013, y: -1097.7162}
@@ -9200,6 +10304,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -721.013, y: -1097.7162}
     EmitterB: {x: -765.9611, y: -1075.1215}
@@ -9215,6 +10322,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -765.9611, y: -1075.1215}
     EmitterB: {x: -810.55566, y: -1051.8368}
@@ -9230,6 +10340,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -810.55566, y: -1051.8368}
     EmitterB: {x: -854.86237, y: -1028.0079}
@@ -9246,6 +10359,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -854.86237, y: -1028.0079}
     EmitterB: {x: -898.9671, y: -1003.80707}
@@ -9261,6 +10377,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -898.9671, y: -1003.80707}
     EmitterB: {x: -942.95087, y: -979.38666}
@@ -9276,6 +10395,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -942.95087, y: -979.38666}
     EmitterB: {x: -986.9086, y: -954.919}
@@ -9291,6 +10413,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -986.9086, y: -954.919}
     EmitterB: {x: -1030.9327, y: -930.57166}
@@ -9306,6 +10431,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1030.9327, y: -930.57166}
     EmitterB: {x: -1074.9274, y: -906.1707}
@@ -9322,6 +10450,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1074.9274, y: -906.1707}
     EmitterB: {x: -1118.7585, y: -881.4774}
@@ -9337,6 +10468,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1118.7585, y: -881.4774}
     EmitterB: {x: -1162.3357, y: -856.3387}
@@ -9352,6 +10486,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1162.3357, y: -856.3387}
     EmitterB: {x: -1205.535, y: -830.5571}
@@ -9367,6 +10504,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1205.535, y: -830.5571}
     EmitterB: {x: -1240.1906, y: -803.7359}
@@ -9382,6 +10522,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1406.03, y: -689.55}
     EmitterB: {x: -1443.8348, y: -656.53674}
@@ -9397,6 +10540,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1443.8348, y: -656.53674}
     EmitterB: {x: -1480.6516, y: -622.4196}
@@ -9412,6 +10558,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1480.6516, y: -622.4196}
     EmitterB: {x: -1517.2816, y: -588.1021}
@@ -9428,6 +10577,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1517.2816, y: -588.1021}
     EmitterB: {x: -1553.5045, y: -553.3556}
@@ -9443,6 +10595,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1553.5045, y: -553.3556}
     EmitterB: {x: -1589.0416, y: -517.9091}
@@ -9458,6 +10613,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1589.0416, y: -517.9091}
     EmitterB: {x: -1623.6003, y: -481.50937}
@@ -9474,6 +10632,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1623.6003, y: -481.50937}
     EmitterB: {x: -1656.825, y: -443.89005}
@@ -9489,6 +10650,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1656.825, y: -443.89005}
     EmitterB: {x: -1688.2795, y: -404.7813}
@@ -9505,6 +10669,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1688.2795, y: -404.7813}
     EmitterB: {x: -1717.4216, y: -363.9249}
@@ -9520,6 +10687,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1717.4216, y: -363.9249}
     EmitterB: {x: -1743.5814, y: -321.1023}
@@ -9536,6 +10706,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1743.5814, y: -321.1023}
     EmitterB: {x: -1765.8331, y: -276.13242}
@@ -9552,6 +10725,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1765.8331, y: -276.13242}
     EmitterB: {x: -1783.1715, y: -229.05957}
@@ -9568,6 +10744,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1783.1715, y: -229.05957}
     EmitterB: {x: -1795.4639, y: -180.41202}
@@ -9583,6 +10762,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1795.4639, y: -180.41202}
     EmitterB: {x: -1803.9218, y: -130.94617}
@@ -9599,6 +10781,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1803.9218, y: -130.94617}
     EmitterB: {x: -1809.2614, y: -81.04406}
@@ -9614,6 +10799,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1809.2614, y: -81.04406}
     EmitterB: {x: -1811.9656, y: -30.928106}
@@ -9630,6 +10818,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1811.9656, y: -30.928106}
     EmitterB: {x: -1812.314, y: 19.26053}
@@ -9645,6 +10836,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1812.314, y: 19.26053}
     EmitterB: {x: -1810.5216, y: 69.41911}
@@ -9661,6 +10855,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1810.5216, y: 69.41911}
     EmitterB: {x: -1802.7816, y: 113.174446}
@@ -9676,6 +10873,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1802.7816, y: 113.174446}
     EmitterB: {x: -1800.9156, y: 169.32042}
@@ -9691,6 +10891,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1800.9156, y: 169.32042}
     EmitterB: {x: -1793.163, y: 218.9088}
@@ -9707,6 +10910,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1793.163, y: 218.9088}
     EmitterB: {x: -1783.3615, y: 268.13254}
@@ -9722,6 +10928,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1783.3615, y: 268.13254}
     EmitterB: {x: -1771.3994, y: 316.8758}
@@ -9738,6 +10947,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1771.3994, y: 316.8758}
     EmitterB: {x: -1757.0243, y: 364.96115}
@@ -9753,6 +10965,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1757.0243, y: 364.96115}
     EmitterB: {x: -1739.8828, y: 412.1284}
@@ -9769,6 +10984,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1739.8828, y: 412.1284}
     EmitterB: {x: -1719.5863, y: 458.02576}
@@ -9784,6 +11002,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1719.5863, y: 458.02576}
     EmitterB: {x: -1696.5096, y: 502.59232}
@@ -9800,6 +11021,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1696.5096, y: 502.59232}
     EmitterB: {x: -1670.8562, y: 545.728}
@@ -9816,6 +11040,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1670.8562, y: 545.728}
     EmitterB: {x: -1642.8925, y: 587.4037}
@@ -9831,6 +11058,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1642.8925, y: 587.4037}
     EmitterB: {x: -1612.6873, y: 627.4849}
@@ -9847,6 +11077,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1612.6873, y: 627.4849}
     EmitterB: {x: -1580.3976, y: 665.9061}
@@ -9862,6 +11095,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1580.3976, y: 665.9061}
     EmitterB: {x: -1546.0328, y: 702.483}
@@ -9878,6 +11114,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1546.0328, y: 702.483}
     EmitterB: {x: -1509.6827, y: 737.0866}
@@ -9893,6 +11132,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1509.6827, y: 737.0866}
     EmitterB: {x: -1471.3048, y: 769.42535}
@@ -9909,6 +11151,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1471.3048, y: 769.42535}
     EmitterB: {x: -1430.9517, y: 799.25995}
@@ -9924,6 +11169,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1430.9517, y: 799.25995}
     EmitterB: {x: -1388.6019, y: 826.1819}
@@ -9940,6 +11188,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1388.6019, y: 826.1819}
     EmitterB: {x: -1344.1173, y: 849.3712}
@@ -9956,6 +11207,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1344.1173, y: 849.3712}
     EmitterB: {x: -1297.2128, y: 867.17035}
@@ -9972,6 +11226,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1297.2128, y: 867.17035}
     EmitterB: {x: -1248.8647, y: 880.6096}
@@ -9987,6 +11244,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1248.8647, y: 880.6096}
     EmitterB: {x: -1199.7028, y: 890.70056}
@@ -10002,6 +11262,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1199.7028, y: 890.70056}
     EmitterB: {x: -1144.3108, y: 894.4976}
@@ -10017,6 +11280,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -953.02, y: 913.28}
     EmitterB: {x: -902.54596, y: 915.11896}
@@ -10032,6 +11298,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -902.54596, y: 915.11896}
     EmitterB: {x: -852.06616, y: 916.79724}
@@ -10047,6 +11316,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -852.06616, y: 916.79724}
     EmitterB: {x: -801.59247, y: 918.6457}
@@ -10062,6 +11334,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -801.59247, y: 918.6457}
     EmitterB: {x: -751.1444, y: 921.08496}
@@ -10077,6 +11352,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -751.1444, y: 921.08496}
     EmitterB: {x: -700.76526, y: 924.6582}
@@ -10093,6 +11371,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -700.76526, y: 924.6582}
     EmitterB: {x: -650.44604, y: 929.0136}
@@ -10108,6 +11389,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -650.44604, y: 929.0136}
     EmitterB: {x: -600.07, y: 932.65063}
@@ -10123,6 +11407,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -600.07, y: 932.65063}
     EmitterB: {x: -549.6472, y: 935.5709}
@@ -10138,6 +11425,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -549.6472, y: 935.5709}
     EmitterB: {x: -499.19263, y: 937.8803}
@@ -10154,6 +11444,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -499.19263, y: 937.8803}
     EmitterB: {x: -446.3085, y: 935.343}
@@ -10169,6 +11462,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -446.3085, y: 935.343}
     EmitterB: {x: -398.23996, y: 941.4277}
@@ -10184,6 +11480,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -398.23996, y: 941.4277}
     EmitterB: {x: -347.76083, y: 943.1258}
@@ -10199,6 +11498,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -347.76083, y: 943.1258}
     EmitterB: {x: -297.01138, y: 940.55994}
@@ -10214,6 +11516,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 197.77, y: 963.02}
     EmitterB: {x: 241.01408, y: 938.3658}
@@ -10229,6 +11534,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 241.01408, y: 938.3658}
     EmitterB: {x: 283.4408, y: 912.33057}
@@ -10244,6 +11552,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 283.4408, y: 912.33057}
     EmitterB: {x: 324.93765, y: 884.83875}
@@ -10259,6 +11570,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 324.93765, y: 884.83875}
     EmitterB: {x: 365.28452, y: 855.6876}
@@ -10274,6 +11588,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 365.28452, y: 855.6876}
     EmitterB: {x: 404.0917, y: 824.5208}
@@ -10289,6 +11606,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 404.0917, y: 824.5208}
     EmitterB: {x: 440.61588, y: 790.7183}
@@ -10303,6 +11623,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 440.61588, y: 790.7183}
     EmitterB: {x: 473.21082, y: 753.1453}
@@ -10318,6 +11641,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 473.21082, y: 753.1453}
     EmitterB: {x: 500.1881, y: 711.36035}
@@ -10333,6 +11659,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 500.1881, y: 711.36035}
     EmitterB: {x: 521.82837, y: 666.56006}
@@ -10348,6 +11677,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 521.82837, y: 666.56006}
     EmitterB: {x: 539.4868, y: 620.02747}
@@ -10363,6 +11695,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 539.4868, y: 620.02747}
     EmitterB: {x: 555.2427, y: 572.8071}
@@ -10378,6 +11713,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 555.2427, y: 572.8071}
     EmitterB: {x: 571.5568, y: 525.7798}
@@ -10393,6 +11731,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 571.5568, y: 525.7798}
     EmitterB: {x: 590.62024, y: 479.80362}
@@ -10408,6 +11749,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 590.62024, y: 479.80362}
     EmitterB: {x: 607.44324, y: 432.96857}
@@ -10423,6 +11767,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 607.44324, y: 432.96857}
     EmitterB: {x: 621.5625, y: 385.23444}
@@ -10439,6 +11786,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 621.5625, y: 385.23444}
     EmitterB: {x: 635.91583, y: 337.57187}
@@ -10454,6 +11804,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 635.91583, y: 337.57187}
     EmitterB: {x: 653.79236, y: 291.14142}
@@ -10470,6 +11823,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 653.79236, y: 291.14142}
     EmitterB: {x: 678.18774, y: 247.82948}
@@ -10486,6 +11842,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 678.18774, y: 247.82948}
     EmitterB: {x: 710.39386, y: 209.98555}
@@ -10501,6 +11860,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 710.39386, y: 209.98555}
     EmitterB: {x: 749.4568, y: 179.22858}
@@ -10517,6 +11879,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 749.4568, y: 179.22858}
     EmitterB: {x: 792.223, y: 153.79225}
@@ -10532,6 +11897,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 792.223, y: 153.79225}
     EmitterB: {x: 836.88245, y: 131.8206}
@@ -10547,6 +11915,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 836.88245, y: 131.8206}
     EmitterB: {x: 882.6206, y: 112.18129}
@@ -10562,6 +11933,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 882.6206, y: 112.18129}
     EmitterB: {x: 929.03613, y: 94.195145}
@@ -10578,6 +11952,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 929.03613, y: 94.195145}
     EmitterB: {x: 975.89716, y: 77.40152}
@@ -10593,6 +11970,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 975.89716, y: 77.40152}
     EmitterB: {x: 1023.0427, y: 61.42228}
@@ -10608,6 +11988,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1023.0427, y: 61.42228}
     EmitterB: {x: 1070.3722, y: 45.99513}
@@ -10623,6 +12006,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1070.3722, y: 45.99513}
     EmitterB: {x: 1117.8038, y: 30.885063}
@@ -10638,6 +12024,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1117.8038, y: 30.885063}
     EmitterB: {x: 1165.2687, y: 15.878952}
@@ -10654,6 +12043,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1165.2687, y: 15.878952}
     EmitterB: {x: 1212.7079, y: 0.79248494}
@@ -10669,6 +12061,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1212.7079, y: 0.79248494}
     EmitterB: {x: 1260.0488, y: -14.598868}
@@ -10684,6 +12079,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1260.0488, y: -14.598868}
     EmitterB: {x: 1307.22, y: -30.502586}
@@ -10699,6 +12097,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1307.22, y: -30.502586}
     EmitterB: {x: 1354.12, y: -47.18769}
@@ -10714,6 +12115,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1354.12, y: -47.18769}
     EmitterB: {x: 1400.61, y: -64.98003}
@@ -10729,6 +12133,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1400.61, y: -64.98003}
     EmitterB: {x: 1446.4908, y: -84.285614}
@@ -10744,6 +12151,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1446.4908, y: -84.285614}
     EmitterB: {x: 1491.4287, y: -105.6864}
@@ -10759,6 +12169,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1491.4287, y: -105.6864}
     EmitterB: {x: 1535.0634, y: -129.63518}
@@ -10774,6 +12187,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1535.0634, y: -129.63518}
     EmitterB: {x: 1578.3674, y: -154.18805}
@@ -10789,6 +12205,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1578.3674, y: -154.18805}
     EmitterB: {x: 1621.5623, y: -178.93245}
@@ -10804,6 +12223,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1621.5623, y: -178.93245}
     EmitterB: {x: 1664.5383, y: -204.05452}
@@ -10819,6 +12241,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1664.5383, y: -204.05452}
     EmitterB: {x: 1707.1732, y: -229.75066}
@@ -10835,6 +12260,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1707.1732, y: -229.75066}
     EmitterB: {x: 1749.314, y: -256.24838}
@@ -10850,6 +12278,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1749.314, y: -256.24838}
     EmitterB: {x: 1790.7135, y: -283.88773}
@@ -10865,6 +12296,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1790.7135, y: -283.88773}
     EmitterB: {x: 1830.988, y: -313.13684}
@@ -10879,6 +12313,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1830.988, y: -313.13684}
     EmitterB: {x: 1869.36, y: -344.83}
@@ -10894,6 +12331,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 70.06, y: 948.74}
     EmitterB: {x: 115.028336, y: 927.38403}
@@ -10909,6 +12349,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 115.028336, y: 927.38403}
     EmitterB: {x: 159.15295, y: 904.3333}
@@ -10924,6 +12367,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 159.15295, y: 904.3333}
     EmitterB: {x: 202.4813, y: 879.8181}
@@ -10940,6 +12386,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 202.4813, y: 879.8181}
     EmitterB: {x: 244.95825, y: 853.85565}
@@ -10955,6 +12404,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 244.95825, y: 853.85565}
     EmitterB: {x: 286.44827, y: 826.345}
@@ -10970,6 +12422,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 286.44827, y: 826.345}
     EmitterB: {x: 326.70438, y: 797.06195}
@@ -10985,6 +12440,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 326.70438, y: 797.06195}
     EmitterB: {x: 365.2449, y: 765.5621}
@@ -11001,6 +12459,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 365.2449, y: 765.5621}
     EmitterB: {x: 400.8926, y: 730.8471}
@@ -11017,6 +12478,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 400.8926, y: 730.8471}
     EmitterB: {x: 430.90356, y: 691.2126}
@@ -11032,6 +12496,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 430.90356, y: 691.2126}
     EmitterB: {x: 453.97092, y: 647.1409}
@@ -11048,6 +12515,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 453.97092, y: 647.1409}
     EmitterB: {x: 472.07727, y: 600.7799}
@@ -11063,6 +12533,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 472.07727, y: 600.7799}
     EmitterB: {x: 487.88385, y: 553.57117}
@@ -11078,6 +12551,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 487.88385, y: 553.57117}
     EmitterB: {x: 504.057, y: 506.4888}
@@ -11093,6 +12569,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 504.057, y: 506.4888}
     EmitterB: {x: 522.77106, y: 460.36633}
@@ -11108,6 +12587,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 522.77106, y: 460.36633}
     EmitterB: {x: 540.1011, y: 413.7216}
@@ -11123,6 +12605,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 540.1011, y: 413.7216}
     EmitterB: {x: 554.26215, y: 365.99512}
@@ -11138,6 +12623,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 554.26215, y: 365.99512}
     EmitterB: {x: 568.5602, y: 318.30978}
@@ -11153,6 +12641,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 568.5602, y: 318.30978}
     EmitterB: {x: 585.8636, y: 271.6459}
@@ -11168,6 +12659,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 585.8636, y: 271.6459}
     EmitterB: {x: 608.2973, y: 227.24568}
@@ -11183,6 +12677,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 608.2973, y: 227.24568}
     EmitterB: {x: 636.86206, y: 186.53842}
@@ -11197,6 +12694,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 636.86206, y: 186.53842}
     EmitterB: {x: 671.4173, y: 150.77248}
@@ -11212,6 +12712,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 671.4173, y: 150.77248}
     EmitterB: {x: 711.0524, y: 120.70321}
@@ -11227,6 +12730,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 711.0524, y: 120.70321}
     EmitterB: {x: 753.70154, y: 95.05394}
@@ -11242,6 +12748,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 753.70154, y: 95.05394}
     EmitterB: {x: 798.13525, y: 72.618546}
@@ -11257,6 +12766,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 798.13525, y: 72.618546}
     EmitterB: {x: 843.67633, y: 52.5145}
@@ -11272,6 +12784,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 843.67633, y: 52.5145}
     EmitterB: {x: 889.9356, y: 34.117767}
@@ -11287,6 +12802,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 889.9356, y: 34.117767}
     EmitterB: {x: 936.6759, y: 16.977266}
@@ -11302,6 +12820,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 936.6759, y: 16.977266}
     EmitterB: {x: 983.7384, y: 0.7399052}
@@ -11318,6 +12839,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 983.7384, y: 0.7399052}
     EmitterB: {x: 1031.015, y: -14.864565}
@@ -11333,6 +12857,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1031.015, y: -14.864565}
     EmitterB: {x: 1078.4236, y: -30.06305}
@@ -11348,6 +12875,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1078.4236, y: -30.06305}
     EmitterB: {x: 1125.8883, y: -45.08613}
@@ -11363,6 +12893,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1125.8883, y: -45.08613}
     EmitterB: {x: 1173.3503, y: -60.11768}
@@ -11378,6 +12911,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1173.3503, y: -60.11768}
     EmitterB: {x: 1220.7399, y: -75.37569}
@@ -11393,6 +12929,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1220.7399, y: -75.37569}
     EmitterB: {x: 1267.9902, y: -91.05941}
@@ -11408,6 +12947,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1267.9902, y: -91.05941}
     EmitterB: {x: 1315.0026, y: -107.44103}
@@ -11424,6 +12966,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1315.0026, y: -107.44103}
     EmitterB: {x: 1361.6405, y: -124.85866}
@@ -11439,6 +12984,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1361.6405, y: -124.85866}
     EmitterB: {x: 1407.714, y: -143.71333}
@@ -11454,6 +13002,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1407.714, y: -143.71333}
     EmitterB: {x: 1452.8878, y: -164.6244}
@@ -11470,6 +13021,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1452.8878, y: -164.6244}
     EmitterB: {x: 1496.6587, y: -188.32872}
@@ -11485,6 +13039,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1496.6587, y: -188.32872}
     EmitterB: {x: 1539.9717, y: -212.87617}
@@ -11500,6 +13057,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1539.9717, y: -212.87617}
     EmitterB: {x: 1583.1844, y: -237.5994}
@@ -11515,6 +13075,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1583.1844, y: -237.5994}
     EmitterB: {x: 1626.1824, y: -262.69434}
@@ -11530,6 +13093,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1626.1824, y: -262.69434}
     EmitterB: {x: 1668.8425, y: -288.3587}
@@ -11545,6 +13111,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1668.8425, y: -288.3587}
     EmitterB: {x: 1711.0046, y: -314.83182}
@@ -11561,6 +13130,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1711.0046, y: -314.83182}
     EmitterB: {x: 1752.3926, y: -342.4982}
@@ -11576,6 +13148,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1752.3926, y: -342.4982}
     EmitterB: {x: 1792.5493, y: -371.91547}
@@ -11591,6 +13166,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1792.5493, y: -371.91547}
     EmitterB: {x: 1830.42, y: -404.2}
@@ -11605,6 +13183,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1252.48, y: -799.95}
     EmitterB: {x: -1270.984, y: -764.7506}
@@ -11619,6 +13200,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1270.984, y: -764.7506}
     EmitterB: {x: -1286.9, y: -728.31}
@@ -11634,6 +13218,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1610.15, y: -628.69}
     EmitterB: {x: 1561.7432, y: -616.3803}
@@ -11649,6 +13236,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1561.7432, y: -616.3803}
     EmitterB: {x: 1513.307, y: -604.1875}
@@ -11664,6 +13254,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1513.307, y: -604.1875}
     EmitterB: {x: 1464.6854, y: -592.7584}
@@ -11679,6 +13272,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1464.6854, y: -592.7584}
     EmitterB: {x: 1416.3839, y: -580.048}
@@ -11694,6 +13290,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1416.3839, y: -580.048}
     EmitterB: {x: 1368.3717, y: -566.2801}
@@ -11709,6 +13308,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1368.3717, y: -566.2801}
     EmitterB: {x: 1320.5182, y: -551.96924}
@@ -11724,6 +13326,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1320.5182, y: -551.96924}
     EmitterB: {x: 1272.6978, y: -537.5475}
@@ -11740,6 +13345,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1272.6978, y: -537.5475}
     EmitterB: {x: 1224.7979, y: -523.3926}
@@ -11755,6 +13363,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1224.7979, y: -523.3926}
     EmitterB: {x: 1176.7109, y: -509.88867}
@@ -11770,6 +13381,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1176.7109, y: -509.88867}
     EmitterB: {x: 1128.3347, y: -497.4652}
@@ -11785,6 +13399,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1128.3347, y: -497.4652}
     EmitterB: {x: 1079.5892, y: -486.58298}
@@ -11801,6 +13418,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1079.5892, y: -486.58298}
     EmitterB: {x: 1030.6277, y: -476.70847}
@@ -11816,6 +13436,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1030.6277, y: -476.70847}
     EmitterB: {x: 981.5285, y: -467.54364}
@@ -11831,6 +13454,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 981.5285, y: -467.54364}
     EmitterB: {x: 932.29004, y: -459.15955}
@@ -11846,6 +13472,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 932.29004, y: -459.15955}
     EmitterB: {x: 882.91956, y: -451.5914}
@@ -11861,6 +13490,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 882.91956, y: -451.5914}
     EmitterB: {x: 833.43225, y: -444.8283}
@@ -11877,6 +13509,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 833.43225, y: -444.8283}
     EmitterB: {x: 783.8462, y: -438.8318}
@@ -11892,6 +13527,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 783.8462, y: -438.8318}
     EmitterB: {x: 734.18475, y: -433.49573}
@@ -11907,6 +13545,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 734.18475, y: -433.49573}
     EmitterB: {x: 684.46246, y: -428.7584}
@@ -11922,6 +13563,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 684.46246, y: -428.7584}
     EmitterB: {x: 634.6839, y: -424.6546}
@@ -11937,6 +13581,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 634.6839, y: -424.6546}
     EmitterB: {x: 584.86066, y: -421.13403}
@@ -11953,6 +13600,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 584.86066, y: -421.13403}
     EmitterB: {x: 535.0049, y: -418.10605}
@@ -11968,6 +13618,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 535.0049, y: -418.10605}
     EmitterB: {x: 485.125, y: -415.50534}
@@ -11983,6 +13636,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 485.125, y: -415.50534}
     EmitterB: {x: 435.22717, y: -413.27444}
@@ -11998,6 +13654,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 435.22717, y: -413.27444}
     EmitterB: {x: 385.31595, y: -411.36688}
@@ -12013,6 +13672,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 385.31595, y: -411.36688}
     EmitterB: {x: 335.394, y: -409.76562}
@@ -12029,6 +13691,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 335.394, y: -409.76562}
     EmitterB: {x: 285.46448, y: -408.42035}
@@ -12044,6 +13709,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 285.46448, y: -408.42035}
     EmitterB: {x: 235.52838, y: -407.3346}
@@ -12059,6 +13727,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 235.52838, y: -407.3346}
     EmitterB: {x: 185.58807, y: -406.477}
@@ -12074,6 +13745,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 185.58807, y: -406.477}
     EmitterB: {x: 135.64447, y: -405.83713}
@@ -12089,6 +13763,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 135.64447, y: -405.83713}
     EmitterB: {x: 85.69861, y: -405.39496}
@@ -12104,6 +13781,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 85.69861, y: -405.39496}
     EmitterB: {x: 35.751602, y: -405.15048}
@@ -12120,6 +13800,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 35.751602, y: -405.15048}
     EmitterB: {x: -14.195815, y: -405.00497}
@@ -12135,6 +13818,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -14.195815, y: -405.00497}
     EmitterB: {x: -64.138275, y: -404.30814}
@@ -12150,6 +13836,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -64.138275, y: -404.30814}
     EmitterB: {x: -114.07165, y: -403.11594}
@@ -12165,6 +13854,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -114.07165, y: -403.11594}
     EmitterB: {x: -163.9974, y: -401.6386}
@@ -12180,6 +13872,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -163.9974, y: -401.6386}
     EmitterB: {x: -213.9208, y: -400.07816}
@@ -12195,6 +13890,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -213.9208, y: -400.07816}
     EmitterB: {x: -263.84747, y: -398.62848}
@@ -12211,6 +13909,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -263.84747, y: -398.62848}
     EmitterB: {x: -313.78168, y: -397.47498}
@@ -12226,6 +13927,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -313.78168, y: -397.47498}
     EmitterB: {x: -363.72482, y: -396.82083}
@@ -12241,6 +13945,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -363.72482, y: -396.82083}
     EmitterB: {x: -413.6719, y: -396.8689}
@@ -12256,6 +13963,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -413.6719, y: -396.8689}
     EmitterB: {x: -463.60922, y: -397.85385}
@@ -12271,6 +13981,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -463.60922, y: -397.85385}
     EmitterB: {x: -513.5067, y: -400.0567}
@@ -12287,6 +14000,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -513.5067, y: -400.0567}
     EmitterB: {x: -563.30927, y: -403.82654}
@@ -12302,6 +14018,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -563.30927, y: -403.82654}
     EmitterB: {x: -612.9245, y: -409.5407}
@@ -12317,6 +14036,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -612.9245, y: -409.5407}
     EmitterB: {x: -662.1947, y: -417.7007}
@@ -12333,6 +14055,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -662.1947, y: -417.7007}
     EmitterB: {x: -710.83856, y: -428.98883}
@@ -12348,6 +14073,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -710.83856, y: -428.98883}
     EmitterB: {x: -758.33325, y: -444.38718}
@@ -12364,6 +14092,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -758.33325, y: -444.38718}
     EmitterB: {x: -804.32526, y: -463.83316}
@@ -12379,6 +14110,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -804.32526, y: -463.83316}
     EmitterB: {x: -848.8624, y: -486.42575}
@@ -12394,6 +14128,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -848.8624, y: -486.42575}
     EmitterB: {x: -892.17786, y: -511.28836}
@@ -12410,6 +14147,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -892.17786, y: -511.28836}
     EmitterB: {x: -934.61426, y: -537.6285}
@@ -12425,6 +14165,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -934.61426, y: -537.6285}
     EmitterB: {x: -976.5992, y: -564.6846}
@@ -12440,6 +14183,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -976.5992, y: -564.6846}
     EmitterB: {x: -1018.60846, y: -591.7025}
@@ -12455,6 +14201,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1018.60846, y: -591.7025}
     EmitterB: {x: -1061.1515, y: -617.8678}
@@ -12470,6 +14219,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1061.1515, y: -617.8678}
     EmitterB: {x: -1104.7439, y: -642.23596}
@@ -12485,6 +14237,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1104.7439, y: -642.23596}
     EmitterB: {x: -1149.6749, y: -664.0409}
@@ -12500,6 +14255,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1149.6749, y: -664.0409}
     EmitterB: {x: -1194.63, y: -685.8076}
@@ -12515,6 +14273,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1194.63, y: -685.8076}
     EmitterB: {x: -1239.481, y: -707.78894}
@@ -12530,6 +14291,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1239.481, y: -707.78894}
     EmitterB: {x: -1284.53, y: -729.36}
@@ -12545,6 +14309,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1696.4, y: -565.34}
     EmitterB: {x: 1647.2911, y: -555.32684}
@@ -12560,6 +14327,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1647.2911, y: -555.32684}
     EmitterB: {x: 1598.6364, y: -543.2634}
@@ -12575,6 +14345,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1598.6364, y: -543.2634}
     EmitterB: {x: 1550.0702, y: -530.844}
@@ -12590,6 +14363,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1550.0702, y: -530.844}
     EmitterB: {x: 1501.2968, y: -519.2712}
@@ -12606,6 +14382,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1501.2968, y: -519.2712}
     EmitterB: {x: 1452.687, y: -507.0343}
@@ -12621,6 +14400,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1452.687, y: -507.0343}
     EmitterB: {x: 1404.428, y: -493.47348}
@@ -12636,6 +14418,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1404.428, y: -493.47348}
     EmitterB: {x: 1356.3684, y: -479.21906}
@@ -12651,6 +14436,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1356.3684, y: -479.21906}
     EmitterB: {x: 1308.3767, y: -464.73727}
@@ -12667,6 +14455,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1308.3767, y: -464.73727}
     EmitterB: {x: 1260.3362, y: -450.4189}
@@ -12682,6 +14473,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1260.3362, y: -450.4189}
     EmitterB: {x: 1212.1381, y: -436.64117}
@@ -12697,6 +14491,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1212.1381, y: -436.64117}
     EmitterB: {x: 1163.6853, y: -423.7907}
@@ -12712,6 +14509,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1163.6853, y: -423.7907}
     EmitterB: {x: 1114.894, y: -412.2971}
@@ -12727,6 +14527,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1114.894, y: -412.2971}
     EmitterB: {x: 1065.8104, y: -402.1152}
@@ -12742,6 +14545,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1065.8104, y: -402.1152}
     EmitterB: {x: 1016.5898, y: -392.6175}
@@ -12757,6 +14563,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 1016.5898, y: -392.6175}
     EmitterB: {x: 967.2331, y: -383.85495}
@@ -12772,6 +14581,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 967.2331, y: -383.85495}
     EmitterB: {x: 917.7416, y: -375.88882}
@@ -12787,6 +14599,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 917.7416, y: -375.88882}
     EmitterB: {x: 868.1272, y: -368.7275}
@@ -12803,6 +14618,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 868.1272, y: -368.7275}
     EmitterB: {x: 818.40717, y: -362.34048}
@@ -12818,6 +14636,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 818.40717, y: -362.34048}
     EmitterB: {x: 768.60223, y: -356.6521}
@@ -12833,6 +14654,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 768.60223, y: -356.6521}
     EmitterB: {x: 718.72974, y: -351.58868}
@@ -12848,6 +14672,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 718.72974, y: -351.58868}
     EmitterB: {x: 668.8012, y: -347.1141}
@@ -12863,6 +14690,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 668.8012, y: -347.1141}
     EmitterB: {x: 618.8205, y: -343.26566}
@@ -12878,6 +14708,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 618.8205, y: -343.26566}
     EmitterB: {x: 568.80115, y: -339.95087}
@@ -12893,6 +14726,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 568.80115, y: -339.95087}
     EmitterB: {x: 518.7534, y: -337.1}
@@ -12909,6 +14745,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 518.7534, y: -337.1}
     EmitterB: {x: 468.68442, y: -334.6475}
@@ -12924,6 +14763,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 468.68442, y: -334.6475}
     EmitterB: {x: 418.59973, y: -332.54074}
@@ -12939,6 +14781,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 418.59973, y: -332.54074}
     EmitterB: {x: 368.5026, y: -330.75446}
@@ -12954,6 +14799,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 368.5026, y: -330.75446}
     EmitterB: {x: 318.3964, y: -329.2442}
@@ -12969,6 +14817,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 318.3964, y: -329.2442}
     EmitterB: {x: 268.28265, y: -328.00275}
@@ -12984,6 +14835,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 268.28265, y: -328.00275}
     EmitterB: {x: 218.16373, y: -327.00183}
@@ -13000,6 +14854,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 218.16373, y: -327.00183}
     EmitterB: {x: 168.0409, y: -326.2173}
@@ -13015,6 +14872,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 168.0409, y: -326.2173}
     EmitterB: {x: 121.63125, y: -321.18198}
@@ -13030,6 +14890,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 121.63125, y: -321.18198}
     EmitterB: {x: 67.787445, y: -325.2792}
@@ -13045,6 +14908,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 67.787445, y: -325.2792}
     EmitterB: {x: 17.658632, y: -325.10974}
@@ -13060,6 +14926,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: 17.658632, y: -325.10974}
     EmitterB: {x: -32.469036, y: -324.81122}
@@ -13075,6 +14944,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -32.469036, y: -324.81122}
     EmitterB: {x: -82.589584, y: -323.89597}
@@ -13091,6 +14963,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -82.589584, y: -323.89597}
     EmitterB: {x: -132.70053, y: -322.55228}
@@ -13106,6 +14981,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -132.70053, y: -322.55228}
     EmitterB: {x: -182.80606, y: -321.01163}
@@ -13121,6 +14999,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -182.80606, y: -321.01163}
     EmitterB: {x: -232.9114, y: -319.4731}
@@ -13136,6 +15017,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -232.9114, y: -319.4731}
     EmitterB: {x: -283.02222, y: -318.12158}
@@ -13151,6 +15035,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -283.02222, y: -318.12158}
     EmitterB: {x: -333.1415, y: -317.1467}
@@ -13166,6 +15053,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -333.1415, y: -317.1467}
     EmitterB: {x: -383.26868, y: -316.74213}
@@ -13182,6 +15072,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -383.26868, y: -316.74213}
     EmitterB: {x: -433.39603, y: -317.11115}
@@ -13197,6 +15090,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -433.39603, y: -317.11115}
     EmitterB: {x: -483.50458, y: -318.5056}
@@ -13212,6 +15108,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -483.50458, y: -318.5056}
     EmitterB: {x: -533.5604, y: -321.17877}
@@ -13227,6 +15126,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -533.5604, y: -321.17877}
     EmitterB: {x: -583.5063, y: -325.4284}
@@ -13242,6 +15144,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -583.5063, y: -325.4284}
     EmitterB: {x: -633.24634, y: -331.63013}
@@ -13257,6 +15162,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -633.24634, y: -331.63013}
     EmitterB: {x: -682.62866, y: -340.21188}
@@ -13272,6 +15180,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -682.62866, y: -340.21188}
     EmitterB: {x: -731.4183, y: -351.6804}
@@ -13287,6 +15198,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -731.4183, y: -351.6804}
     EmitterB: {x: -779.1906, y: -366.81784}
@@ -13302,6 +15216,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -779.1906, y: -366.81784}
     EmitterB: {x: -825.64984, y: -385.6146}
@@ -13317,6 +15234,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -825.64984, y: -385.6146}
     EmitterB: {x: -870.76416, y: -407.452}
@@ -13332,6 +15252,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -870.76416, y: -407.452}
     EmitterB: {x: -914.6589, y: -431.6535}
@@ -13347,6 +15270,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -914.6589, y: -431.6535}
     EmitterB: {x: -957.582, y: -457.5442}
@@ -13362,6 +15288,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -957.582, y: -457.5442}
     EmitterB: {x: -999.873, y: -484.45773}
@@ -13377,6 +15306,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -999.873, y: -484.45773}
     EmitterB: {x: -1041.9651, y: -511.68256}
@@ -13392,6 +15324,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1041.9651, y: -511.68256}
     EmitterB: {x: -1084.3517, y: -538.4445}
@@ -13408,6 +15343,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1084.3517, y: -538.4445}
     EmitterB: {x: -1127.6221, y: -563.7449}
@@ -13423,6 +15361,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1127.6221, y: -563.7449}
     EmitterB: {x: -1172.375, y: -586.30414}
@@ -13438,6 +15379,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1172.375, y: -586.30414}
     EmitterB: {x: -1217.5773, y: -607.9748}
@@ -13453,6 +15397,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1217.5773, y: -607.9748}
     EmitterB: {x: -1262.5896, y: -630.0391}
@@ -13468,6 +15415,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1262.5896, y: -630.0391}
     EmitterB: {x: -1307.72, y: -651.86}
@@ -13481,6 +15431,9 @@ MonoBehaviour:
     Yaw: 0
     HalfExtents: {x: 0, y: 0}
     PathRadius: 3
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 1
     EmitterA: {x: -1371.43, y: -680.33}
     EmitterB: {x: -1402.74, y: -692.1}
@@ -13490,6 +15443,9 @@ MonoBehaviour:
     Yaw: 1.5788938
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13499,6 +15455,9 @@ MonoBehaviour:
     Yaw: 1.5888332
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13508,6 +15467,9 @@ MonoBehaviour:
     Yaw: 1.5669918
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13517,6 +15479,9 @@ MonoBehaviour:
     Yaw: 1.5178434
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13526,6 +15491,9 @@ MonoBehaviour:
     Yaw: 1.4497321
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13535,6 +15503,9 @@ MonoBehaviour:
     Yaw: 1.3761367
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13544,6 +15515,9 @@ MonoBehaviour:
     Yaw: 1.3239312
     HalfExtents: {x: 28, y: 40.428356}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13553,6 +15527,9 @@ MonoBehaviour:
     Yaw: -0.1555633
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13562,6 +15539,9 @@ MonoBehaviour:
     Yaw: -0.06584262
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13571,6 +15551,9 @@ MonoBehaviour:
     Yaw: 0.007497011
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13580,6 +15563,9 @@ MonoBehaviour:
     Yaw: 0.07255532
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13589,6 +15575,9 @@ MonoBehaviour:
     Yaw: 0.1345866
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13598,6 +15587,9 @@ MonoBehaviour:
     Yaw: 0.19968225
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13607,6 +15599,9 @@ MonoBehaviour:
     Yaw: 0.2716576
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13616,6 +15611,21 @@ MonoBehaviour:
     Yaw: 0.3605218
     HalfExtents: {x: 28, y: 42.999634}
     PathRadius: 0
+    PeriodSeconds: 0
+    PhaseSeconds: 0
+    SetPiece: 0
+    Emitters: 0
+    EmitterA: {x: 0, y: 0}
+    EmitterB: {x: 0, y: 0}
+  - Zone: {fileID: 11400000, guid: be049f651d7c84541a10df2a8ceb2dbb, type: 2}
+    Path: []
+    Position: {x: 3.331934, y: -465.04828}
+    Yaw: 0
+    HalfExtents: {x: 420, y: 420}
+    PathRadius: 0
+    PeriodSeconds: 8
+    PhaseSeconds: 4
+    SetPiece: 1
     Emitters: 0
     EmitterA: {x: 0, y: 0}
     EmitterB: {x: 0, y: 0}
@@ -13640,6 +15650,19 @@ MonoBehaviour:
     Position: {x: 240, y: 1060}
     Yaw: 0
     Seed: 1004
+  Mechanisms:
+  - Mechanism: {fileID: 11400000, guid: a70dcaa9ad2d54caab6fcaa41b4607d8, type: 2}
+    SetPiece: 1
+  Canister: {fileID: 11400000, guid: 98752bbcda4cb4701b7cbeb6eba99cdb, type: 2}
+  Canisters:
+  - {x: 475.43076, y: 650.425}
+  - {x: 504.22995, y: 586.62366}
+  - {x: 615.31256, y: 340.53293}
+  - {x: -200, y: 1012}
+  - {x: -120, y: 1015}
+  - {x: -40, y: 1018}
+  - {x: -640, y: -420}
+  - {x: -560, y: -420}
   Bounds: []
   StartGrid:
   - Position: {x: -360.72, y: 1034.73}
