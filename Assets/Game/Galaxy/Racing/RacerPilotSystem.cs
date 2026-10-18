@@ -222,6 +222,7 @@ namespace Game.Galaxy.Racing
         ComponentLookup<PhysicsVelocity> velocities;
         ComponentLookup<RaceHold> holds;
         ComponentLookup<MineFuse> mines;
+        ComponentLookup<Canister> canisters;
         ComponentLookup<GridSpawning> spawning;
         BufferLookup<FlightThruster> thrusters;
         ComponentLookup<Pilot> pilots;
@@ -240,6 +241,7 @@ namespace Game.Galaxy.Racing
             flights = state.GetComponentLookup<FlightState>(true); propulsion = state.GetComponentLookup<PropulsionStats>(true);
             grids = state.GetComponentLookup<VoxelGrid>(true); velocities = state.GetComponentLookup<PhysicsVelocity>(true);
             holds = state.GetComponentLookup<RaceHold>(true); mines = state.GetComponentLookup<MineFuse>(true);
+            canisters = state.GetComponentLookup<Canister>(true);
             spawning = state.GetComponentLookup<GridSpawning>(true);
             thrusters = state.GetBufferLookup<FlightThruster>(true); pilots = state.GetComponentLookup<Pilot>(true); weapons = state.GetComponentLookup<WeaponStats>(true);
             multipliers = state.GetComponentLookup<ShipStatMultipliers>(true); shields = state.GetComponentLookup<ShieldState>(true);
@@ -318,7 +320,7 @@ namespace Game.Galaxy.Racing
                 }
 
             flights.Update(ref state); propulsion.Update(ref state); grids.Update(ref state); velocities.Update(ref state);
-            holds.Update(ref state); mines.Update(ref state); spawning.Update(ref state);
+            holds.Update(ref state); mines.Update(ref state); canisters.Update(ref state); spawning.Update(ref state);
             thrusters.Update(ref state); pilots.Update(ref state); weapons.Update(ref state); multipliers.Update(ref state); shields.Update(ref state);
             bool done(RacerFlags f) => (f & RacerFlags.Finished) != 0;
             var finished = new NativeHashSet<byte>(4, state.WorldUpdateAllocator);
@@ -329,7 +331,7 @@ namespace Game.Galaxy.Racing
                 Origin = origin, Tick = tick, Racing = (byte)(rs.Phase == RacePhase.Racing ? 1 : 0), Config = SystemAPI.GetSingleton<FlightConfig>(),
                 Hash = hash.AsReadOnly(), Collision = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld, Finished = finished,
                 Boosts = em.HasBuffer<RaceBoost>(race) ? em.GetBuffer<RaceBoost>(race).ToNativeArray(state.WorldUpdateAllocator) : new NativeArray<RaceBoost>(0, state.WorldUpdateAllocator),
-                Flights = flights, Propulsion = propulsion, Grids = grids, Velocities = velocities, Holds = holds, Mines = mines, Spawning = spawning, Thrusters = thrusters, Pilots = pilots, Weapons = weapons,
+                Flights = flights, Propulsion = propulsion, Grids = grids, Velocities = velocities, Holds = holds, Mines = mines, Canisters = canisters, Spawning = spawning, Thrusters = thrusters, Pilots = pilots, Weapons = weapons,
                 Multipliers = multipliers, Shields = shields,
             };
             var handle = job.ScheduleParallel(racers, hash.BeginRead(state.Dependency));
@@ -370,6 +372,7 @@ namespace Game.Galaxy.Racing
         [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
         [ReadOnly] public ComponentLookup<RaceHold> Holds;
         [ReadOnly] public ComponentLookup<MineFuse> Mines;
+        [ReadOnly] public ComponentLookup<Canister> Canisters;
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
         [ReadOnly] public BufferLookup<FlightThruster> Thrusters;
         [ReadOnly] public ComponentLookup<Pilot> Pilots;
@@ -522,6 +525,9 @@ namespace Game.Galaxy.Racing
             {
                 var proxy = Hash.Get(found[k]);
                 if (proxy.Entity == entity || proxy.Kind == ProxyKind.Celestial || proxy.Kind == ProxyKind.Station || proxy.HullRadius > 70) continue;
+                // an energy canister is picked up by flying through it (its reach meets the bounding sphere before the hulls touch);
+                // braking for it or shooting it (it blows up beside the shooter) only costs the racer
+                if (Canisters.HasComponent(proxy.Entity)) continue;
                 bool mine = Mines.HasComponent(proxy.Entity);
                 // a mine: its trigger reach to our bounding sphere; anything else: both bodies' sizes
                 float r = mine ? Mines[proxy.Entity].Params.TriggerRadius + hull + Margin : proxy.HullRadius + radius + Margin;
@@ -563,7 +569,7 @@ namespace Game.Galaxy.Racing
                     if (o.Mine) mines += danger * 1.5f; else threat += danger;
                 }
                 // structure: a sphere the ship's width swept ahead
-                var collector = new NavHitCollector(entity, 1);
+                var collector = new NavHitCollector(entity, 1, Canisters);
                 float clear = float.MaxValue;
                 if (Collision.SphereCastCustom(new float3(world.x, 0, world.z), castRadius, new float3(u.x, 0, u.y), castLength, ref collector, PhysicsLayers.NavigationQuery))
                 {
@@ -720,14 +726,15 @@ namespace Game.Galaxy.Racing
     internal struct NavHitCollector : ICollector<ColliderCastHit>
     {
         readonly Entity self;
+        [ReadOnly] readonly ComponentLookup<Canister> skip;   // energy canisters: flown through, never steered round
         public bool EarlyOutOnFirstHit => false;
         public float MaxFraction { get; private set; }
         public int NumHits { get; private set; }
         public float Fraction => MaxFraction;
-        internal NavHitCollector(Entity self, float maxFraction) { this.self = self; MaxFraction = maxFraction; NumHits = 0; }
+        internal NavHitCollector(Entity self, float maxFraction, ComponentLookup<Canister> skip) { this.self = self; this.skip = skip; MaxFraction = maxFraction; NumHits = 0; }
         public bool AddHit(ColliderCastHit hit)
         {
-            if (hit.Entity == self || hit.Fraction > MaxFraction) return false;
+            if (hit.Entity == self || hit.Fraction > MaxFraction || skip.HasComponent(hit.Entity)) return false;
             MaxFraction = hit.Fraction; NumHits = 1; return true;
         }
     }

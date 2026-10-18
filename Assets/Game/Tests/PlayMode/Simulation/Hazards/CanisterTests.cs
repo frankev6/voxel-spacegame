@@ -52,6 +52,28 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
             Assert.IsFalse(f.Em.Exists(canister) && f.Em.HasComponent<Canister>(canister), "the canister is spent");
         }
 
+        /// <summary>A racer flies through at race speed: the reach meets its bounding sphere before the hulls touch, so it is unhurt.</summary>
+        [Test] public void FlyThrough_AtSpeed_Unhurt()
+        {
+            using var f = New();
+            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_fighter"), default);
+            f.Ready(ship);
+            var canister = Canister(f, new float2(0, 150));
+            int cells = f.Cells(ship);
+            var v = f.Em.GetComponentData<Unity.Physics.PhysicsVelocity>(ship); v.Linear = new float3(0, 0, 100); f.Em.SetComponentData(ship, v);
+            int spentAt = -1;
+            for (int i = 0; i < 180; i++)
+            {
+                f.Flight.Command(ship, thrust: new float2(0, 1)); f.Tick();
+                if (spentAt < 0 && !(f.Em.Exists(canister) && f.Em.HasComponent<Canister>(canister))) spentAt = i;
+            }
+            float z = f.Flight.Transform(ship).Position.z;
+            Log($"FlyThrough: spent at tick {spentAt}, ship at z {z:F0}, cells {cells} -> {f.Cells(ship)}, canister exists {f.Em.Exists(canister)}");
+            Assert.GreaterOrEqual(spentAt, 0, "collected");
+            Assert.Greater(z, 200, "flew on past it");
+            Assert.AreEqual(cells, f.Cells(ship), "no cell lost");
+        }
+
         [Test] public void Shot_Explodes()
         {
             using var f = New();
