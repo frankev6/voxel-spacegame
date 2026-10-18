@@ -128,6 +128,14 @@ namespace Game.Voxel.Rendering
                     result = math.min(result, CornerAO(masks,cell,direction,su,sv));
             return result;
         }
+        /// <summary>ADR-0121: the panel byte of a large hull cell's face vertex (PackedBrickVertex.Pack), or 0.</summary>
+        internal static int Panel(uint value, int plane, int3 local)
+        {
+            int side = MeshCell.LargeSide(value);
+            if (side == 0 || plane == 255 || plane > 5) return 0;
+            int axis = plane / 2; int3 rel = MeshCell.LargeOffset(value) * 2 + local;   // half cells from the box corner, 0..2·side
+            return rel[(axis + 1) % 3] | (rel[(axis + 2) % 3] << 3) | ((side - 1) << 6);
+        }
         static int3 Vertex(ShapeFace face, int i) => i == 0 ? face.V0 : i == 1 ? face.V1 : i == 2 ? face.V2 : face.V3;
         static void Emit(ShapeFace face, int3 cell, uint value, NativeArray<uint> masks, NativeArray<int> stamps,
             NativeArray<PackedBrickVertex> weldVertices, NativeArray<uint> weldIndices, int stamp, ref Output output)
@@ -138,7 +146,7 @@ namespace Game.Voxel.Rendering
                 int3 local = Vertex(face,k), position = cell * 2 + local;
                 ao[k] = face.Plane == 255 ? 3 : AO(masks,cell,face.Plane,local);
                 var packed = PackedBrickVertex.Pack(position.x,position.y,position.z,face.Normal,MeshCell.Layer(value),MeshCell.Colour(value),
-                    ao[k],MeshCell.Damage(value),MeshCell.Scorched(value));
+                    ao[k],MeshCell.Damage(value),MeshCell.Scorched(value),Panel(value,face.Plane,local));
                 if (face.Plane == 255) { ids[k] = output.Add(packed); continue; }
                 int axis = face.Plane / 2, corner = position[(axis + 1) % 3] + 33 * position[(axis + 2) % 3];
                 if (stamps[corner] == stamp && weldVertices[corner].Lo == packed.Lo && weldVertices[corner].Hi == packed.Hi) ids[k] = weldIndices[corner];

@@ -1158,11 +1158,18 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - Check salvage and repair treat a damaged large block as ADR-0121 decision 2 says.
 - **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Content/Blocks/block_hull_large_2.asset`, `block_hull_large_3.asset`; the brick mesher input; `Assets/Game/Tests/EditMode/Data/SlopeKitTests.cs` or a new `LargeHullTests.cs`.
 - **Acceptance criteria:**
-  - [ ] Both blocks validate and spawn in all 24 orientations; a 2×2×3 or hollow box still fails `DATA-E036`.
+  - [x] Both blocks validate and spawn in all 24 orientations; a 2×2×3 or hollow box still fails `DATA-E036`.
   - [ ] The editor places, selects and deletes each as one block; the BOM counts one item.
-  - [ ] Shooting one removes cells one by one and the instance goes with its last cell.
-  - [ ] A wall of large blocks shows one plate per block, not a repeat every cell.
+  - [x] Shooting one removes cells one by one and the instance goes with its last cell.
+  - [x] A wall of large blocks shows one plate per block, not a repeat every cell. (In game: the block edges show as a panel seam; plain hull cells have no per-cell seam on the NOCTURNE plating. See `docs/design/blocks/large_hull_blocks.jpg`.)
 - **Tests:** `LargeHullTests.Validation_BoxesOnly`, `.Instance_OneBlockManyCells`, `.Damage_RemovesCellsThenInstance`.
+- **Done (2026-10-17):**
+  - Validation: `BlockDefinition.LargeHullSide`.
+  - Content: `LargeHullBuilder`, priced per cell from `block_hull`.
+  - Damage: a structural cube box of 8 or more cells is exempt from `InstanceDestroyCellFraction`, so it loses cells one by one.
+  - Panel: the snapshot stores a large cell's offset in its box (orient bits, side in bits 27–28; `MeshCell.WithLarge`). The mesher writes each face vertex's place in the block into the free top byte of the packed vertex. `BrickSurface` draws edge wear at block edges.
+  - Tests: `LargeHullTests` (EditMode 2, PlayMode 1) and `LargeHullPanelTests` 2.
+  - The editor and bill-of-materials criterion is covered by the instance being one block (`TryGetBlockAt` and `TryRemoveBlockAt` act on the whole block). It has not been checked in the editor UI.
 
 ## 10. Open questions
 
