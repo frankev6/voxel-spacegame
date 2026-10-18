@@ -177,7 +177,8 @@ namespace Game.Tests.PlayMode.App
             EM.SetComponentData(Root, new Unity.Physics.PhysicsVelocity { Linear = new Unity.Mathematics.float3(0, 0, 60) });
             yield return Until(() => playground.Race.IsOpen, "Flying through the race portal opens the race", 10);
             Assert.IsTrue(playground.Race.InLobby, "The pilot waits on the grid");
-            yield return RunCommand("race end");
+            var ended = Host.Commands.Execute("race end", Host.Context);
+            Assert.AreEqual(DevResultKind.Ok, ended.Kind, ended.Text);
             yield return Until(() => !playground.Race.IsOpen, "race end closes the race", 5);
             yield return null; yield return null;
             Assert.IsTrue(Host.Context.TryGetFrame(out frame));

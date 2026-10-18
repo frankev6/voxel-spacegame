@@ -50,7 +50,7 @@ namespace Game.App.DevRuntime.Playground
         bool active, entering;
         bool autoEnter;
         bool toRace;   // the player flew through the race portal: open the race when they arrive at the track
-        bool wasRacing;
+        bool portalRace;   // the open race was entered through the Hollow's portal (Race.Open is synchronous)
         // Co-op: a guest shows the host's playground without running stations; the host sends its origin to every guest once it is in
         // the world.
         bool guestView;
@@ -167,7 +167,7 @@ namespace Game.App.DevRuntime.Playground
             var ctx = host.Context;
             var player = ctx.PlayerShipRoot;
             if (!DevEcs.TryGetUniversePosition(ctx, player, out origin)) throw new InvalidOperationException("player position unavailable");
-            active = true; pending = 0; hollowNearest = -2; toRace = false; wasRacing = false;
+            active = true; pending = 0; hollowNearest = -2; toRace = false; portalRace = false;
             report = "The Hollow: the Khuchad Clan's haven. Fly in through the Maw; the wall lights take the colour of the next station that way, and F in a station's circle trades.";
             Race?.End();
             DevPlaygroundStory.RefreshResetMarkers(ctx);
@@ -365,17 +365,17 @@ namespace Game.App.DevRuntime.Playground
             double toTrack = located ? math.distance(ship3.xz, (origin + DevPlaygroundRace.TrackOffset).xz) : double.MaxValue;
             if (located && hollow.Built && !racing)
             {
-                if (toRace && toTrack < PlaygroundHollow.RaceArrivalRadius) { toRace = false; Report(Race.Open(origin)); }
+                if (toRace && toTrack < PlaygroundHollow.RaceArrivalRadius) { toRace = false; portalRace = Report(Race.Open(origin)).Kind != DevResultKind.Failed; }
                 else if (!toRace && math.distancesq(at, HollowLayout.RacePortal) < 80 * 80) toRace = true;
-                // the race ended (race end) with the pilot at the track: back in front of the portal, facing away from it, out to the Ring
-                else if (wasRacing && toTrack < PlaygroundHollow.RaceArrivalRadius)
+                // a race entered through the portal ended (race end): back in front of the portal, facing away from it, out to the Ring
+                else if (portalRace)
                 {
+                    portalRace = false;
                     var away = -new float2(math.sin(HollowLayout.RacePortalYaw), math.cos(HollowLayout.RacePortalYaw));
                     Place(HollowLayout.Offset + HollowLayout.RacePortal + away * 45, HollowLayout.RacePortalYaw + math.PI);
                     SetReport("Back in the Hollow, by the race portal.");
                 }
             }
-            wasRacing = racing;
             int st = located && hollow.Built ? hollow.Nearest(at) : -1;
             if (st != hollowNearest && heading != null)
             {
