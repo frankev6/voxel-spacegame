@@ -18,7 +18,7 @@ using UnityEngine;
 
 namespace Game.Tests.EditMode.Simulation.Power
 {
-    /// <summary>PWR-004's five required acceptance tests, using the shipped Fighter and production spawn/rebuild.</summary>
+    /// <summary>PWR-004's five required acceptance tests, using the shipped start WRAITH and production spawn/rebuild.</summary>
     public sealed class PowerInitSystemTests
     {
         EcsTestWorld world;
@@ -28,7 +28,7 @@ namespace Game.Tests.EditMode.Simulation.Power
         BlobAssetReference<WeaponDefsBlob> weapons;
         FactionRelations factions;
         EntityManager Em => world.EntityManager;
-        static ContentHash Fighter => new ContentId("ship_fighter").Hash;
+        static ContentHash Starter => new ContentId("ship_nocturne_wraith").Hash;
         [SetUp] public void SetUp()
         {
             content = new ContentService(AssetDatabase.LoadAssetAtPath<ContentDatabase>("Assets/Game/Content/ContentDatabase.asset"));
@@ -49,7 +49,7 @@ namespace Game.Tests.EditMode.Simulation.Power
         }
         Entity Spawn(GridProfile profile = GridProfile.PlayerShip)
         {
-            var root = GridSpawnApi.RequestSpawnBlueprint(Em, Fighter, new GridSpawnParams { PersistentId = 1, Pose = RigidTransform.identity,
+            var root = GridSpawnApi.RequestSpawnBlueprint(Em, Starter, new GridSpawnParams { PersistentId = 1, Pose = RigidTransform.identity,
                 Profile = profile, Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.NoRender });
             Frame(); return root;
         }
@@ -73,7 +73,7 @@ namespace Game.Tests.EditMode.Simulation.Power
             var root = Spawn(); VerifyBindings(root); int thrusters = 0, mounts = 0;
             foreach (var c in Em.GetBuffer<PowerConsumer>(root))
             { if (c.Module == BlockModuleId.Thruster) thrusters++; if (c.Module == BlockModuleId.WeaponMount) mounts++; }
-            Assert.AreEqual(14, thrusters); Assert.AreEqual(14, mounts);
+            Assert.AreEqual(9, thrusters); Assert.AreEqual(3, mounts);
             var functional = Em.GetBuffer<PowerConsumer>(root)[0].Functional;
             PowerRegistration.SetConsumer(Em.GetBuffer<PowerRequest>(functional), BlockModuleId.ShieldEmitter, 2, 200);
             Em.SetComponentData(functional, default(PowerLink)); Frame(); VerifyBindings(root);
@@ -90,7 +90,7 @@ namespace Game.Tests.EditMode.Simulation.Power
         [Test] public void Rebuild_Reinitialises()
         {
             var root = Spawn(); int previous = Em.GetBuffer<PowerConsumer>(root).Length;
-            Assert.IsTrue(library.TryGet(Fighter, out var source)); using var changed = source.Clone();
+            Assert.IsTrue(library.TryGet(Starter, out var source)); using var changed = source.Clone();
             ushort block = content.Catalog.GetBlockIndex(content.Catalog.Get<BlockDefinition>(new ContentId("block_shield_small")));
             Assert.AreEqual(PlaceResult.Ok, changed.TryPlaceBlock(new BlockPlacement { Block = block, Origin = new int3(80,0,0) }, new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations }));
             Em.SetComponentData(root, new ShieldControl { RequestedOn = 0 });

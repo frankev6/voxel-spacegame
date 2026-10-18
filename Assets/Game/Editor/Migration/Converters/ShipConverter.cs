@@ -9,11 +9,16 @@ using UnityEngine;
 
 namespace Game.Editor.Migration.Converters
 {
-    /// <summary>SPEC-72 §5.4: verified VOXS assets and cached summaries for the 13 legacy ships.</summary>
+    /// <summary>SPEC-72 §5.4: verified VOXS conversion and cached summaries for the 13 legacy ships. The legacy hulls are retired
+    /// (owner, 2026-10-18: "please remove all the legacy ships still in the game"), so the converter still builds, encodes and
+    /// round-trips every export ship for the report but writes no blueprint unless <see cref="WriteAssets"/> asks.</summary>
     public sealed class ShipConverter : ILegacyConverter
     {
         public string Name => "Ships";
         public int Order => 300;
+        /// <summary>For tests with their own writer root only: also write each converted hull there. The migration run leaves it off,
+        /// so it never puts a legacy ship back into Content.</summary>
+        public bool WriteAssets { get; set; }
         public void Convert(LegacyMigrationContext context)
         {
             var names = VoxsBlockNames.FromCatalog(context.Catalog);
@@ -31,7 +36,7 @@ namespace Game.Editor.Migration.Converters
                     using (decoded)
                         if (!Matches(built.Source, decoded))
                         { context.Report.Error("MIG-E054", file.RelativePath, "payload", "Decoded arrays differ from the imported structure."); continue; }
-                    context.Writer.CreateOrUpdate<ShipBlueprintDefinition>("Ships", id, so =>
+                    if (WriteAssets) context.Writer.CreateOrUpdate<ShipBlueprintDefinition>("Ships", id, so =>
                     {
                         context.Writer.Set(so, "displayName", p => p.stringValue = dto.ItemName);
                         context.Writer.Set(so, "cellSize", p => p.floatValue = built.Source.CellSize);

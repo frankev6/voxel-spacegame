@@ -8645,19 +8645,19 @@ MonoBehaviour:
   - 
   - 
   - 
-  - Take Fighter
+  - Take WRAITH
   - choose_start_ship_start_01
-  - Take Frigate
+  - Take VESPER
   - choose_start_ship_start_02
-  - Take Vestari
+  - Take DIRGE
   - choose_start_ship_start_03
-  - give_ship ship_fighter
+  - give_ship ship_nocturne_wraith
   - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
   - set_fact intro_ship_chosen true
-  - give_ship ship_frigate
+  - give_ship ship_nocturne_vesper
   - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
   - set_fact intro_ship_chosen true
-  - give_ship ship_vestari
+  - give_ship ship_nocturne_dirge
   - spawn_encounter encounter_xeno_probe_tutorial ark_station 1
   - set_fact intro_ship_chosen true
   - play_sfx cue_ui_success
@@ -11194,7 +11194,7 @@ MonoBehaviour:
     root:
       rid: 1042
   intExprs: []
-  sourcesHash: 383041485911070067
+  sourcesHash: 15898771855367231851
   references:
     version: 2
     RefIds:

@@ -73,7 +73,7 @@ for suffix, tag in TAGS.items():
 for path in ['Assets/Game/Content/Environment/Nocturne/VesperSphere.asset',
              'Assets/Game/Content/Environment/Nocturne/M_VesperSurface.mat',
              'Assets/Game/Content/Blocks/block_hull.asset', 'Assets/Game/Content/Blocks/block_core_small.asset',
-             'Assets/Game/Content/Ships/ship_vestari.asset', 'Assets/Game/Content/Ships/ship_frigate.asset']:
+             'Assets/Game/Content/Ships/ship_nocturne_vesper.asset', 'Assets/Game/Content/Ships/ship_nocturne_wraith.asset']:
     if not (ROOT / path).exists(): raise RuntimeError('Missing real resource: ' + path)
     guid(path)
 
@@ -102,7 +102,7 @@ for suffix in TAGS:
               'interaction': 0 if celestial or belt else 3 if gate else 1 if station else 5 if suffix == 'debris_field' else 2,
               'interactPrompt': 'Dock' if station else 'Jump' if gate else 'Salvage' if suffix == 'debris_field' else 'Inspect' if not celestial and not belt else '',
               'structureSource': 0 if celestial or belt else 1 if blueprint else 2,
-              'blueprint': ref('Assets/Game/Content/Ships/' + ('ship_vestari' if suffix == 'station' else 'ship_frigate') + '.asset') if blueprint else '{fileID: 0}',
+              'blueprint': ref('Assets/Game/Content/Ships/' + ('ship_nocturne_vesper' if suffix == 'station' else 'ship_nocturne_wraith') + '.asset') if blueprint else '{fileID: 0}',
               'destructible': int(not celestial and not gate), 'asteroidBlock': hull if belt else '{fileID: 0}'}
     # SPEC-30 Q36 / SYS-003: the two packed sector rings must contain the 2000 m belt.
     # Author this explicitly so fresh MIG-014 stubs cannot retain their old 500 m default.

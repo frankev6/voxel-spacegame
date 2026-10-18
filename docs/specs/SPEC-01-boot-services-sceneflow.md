@@ -109,6 +109,8 @@ public sealed class GameConfigDefinition : ContentDefinition       // exactly on
 }
 ```
 
+Shipped value: `config_game.startBlueprint` is `ship_nocturne_wraith`, the NOCTURNE WRAITH frigate. Owner, 2026-10-18: "please remove all the legacy ships still in the game. lets please use the new ones only going forward. for the default ship lets pick one of the nocturne ships"; he chose the WRAITH. The 13 legacy blueprints that MIG-008 imported (the earlier starter `ship_fighter` among them) are no longer in the game.
+
 Validation (`Validate`):
 - `FND-E001`: `startBlueprint` is null.
 - `FND-E002`: a number is out of the range in its comment.

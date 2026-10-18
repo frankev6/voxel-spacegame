@@ -153,8 +153,8 @@ namespace Game.Editor.Migration
                     report.Error("ENC-E001", id, "", "Expected locked hostile non-player faction.");
             if (!catalog.TryGet<FactionDefinition>(new ContentId("faction_raiders"), out var raiders)) return;
             if (raiders.DefaultAiProfile == null || raiders.DefaultAiProfile.IdString != "ai_default" || raiders.Doctrine.Count != 2 ||
-                raiders.Doctrine[0].blueprint == null || raiders.Doctrine[0].blueprint.IdString != "ship_fighter" || raiders.Doctrine[0].weight != 1 ||
-                raiders.Doctrine[1].blueprint == null || raiders.Doctrine[1].blueprint.IdString != "ship_striker" || raiders.Doctrine[1].weight != .6f ||
+                raiders.Doctrine[0].blueprint == null || raiders.Doctrine[0].blueprint.IdString != "ship_nocturne_wraith" || raiders.Doctrine[0].weight != 1 ||
+                raiders.Doctrine[1].blueprint == null || raiders.Doctrine[1].blueprint.IdString != "ship_nocturne_dirge" || raiders.Doctrine[1].weight != .6f ||
                 !catalog.All<FactionDefinition>().Where(f => !f.IsPlayerFaction && f != raiders).All(f => raiders.Stances.Any(s => s.other == f && s.stance == FactionStanceValue.Hostile)))
                 report.Error("ENC-E004", "faction_raiders", "", "Canonical doctrine/AI/hostility differs from ENC-010.");
             foreach (var pair in new[] { (Faction: "faction_ark", System: "starsys_ark_start"), (Faction: "faction_vestari", System: "starsys_whisper") })

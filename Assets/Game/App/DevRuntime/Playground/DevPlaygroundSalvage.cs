@@ -30,8 +30,8 @@ namespace Game.App.DevRuntime.Playground
         internal const int WrecksPerReset = 3;
         internal const string PadId = "salvage";
         internal const string PadTitle = "12  SALVAGE / RECOVER CARGO";
-        internal const string PadDetail = "F prepares one stationary fighter wreck nearby. Wait for the HUD Salvage prompt, then press F again.\nThe normal salvage owner pulls the wreck into your hold; item toasts list the haul (I opens cargo). A full hold leaves salvage on that same wreck; make room and return. Three wrecks per playground reset.";
-        [Game.Core.StaticStateOk("constant content id")] static readonly ContentId BlueprintId = new("ship_fighter");
+        internal const string PadDetail = "F prepares one stationary WRAITH wreck nearby. Wait for the HUD Salvage prompt, then press F again.\nThe normal salvage owner pulls the wreck into your hold; item toasts list the haul (I opens cargo). A full hold leaves salvage on that same wreck; make room and return. Three wrecks per playground reset.";
+        [Game.Core.StaticStateOk("constant content id")] static readonly ContentId BlueprintId = new("ship_nocturne_wraith");
         readonly DevRuntimeHost host;
         readonly Action<string> report;
         World world;
@@ -85,12 +85,12 @@ namespace Game.App.DevRuntime.Playground
                 return DevCommandResult.Ok("All three salvage wrecks have been issued. playground reset clears this trial and its cargo through the session owners.");
             if (!content.Catalog.TryGet<ShipBlueprintDefinition>(BlueprintId, out var blueprint)
                 || !registry.TryGetBlueprint(blueprint.Id.Hash, out var source) || source == null || !source.Data.IsCreated)
-                return DevCommandResult.Fail("The approved fighter blueprint is unavailable.");
+                return DevCommandResult.Fail("The WRAITH wreck blueprint is unavailable.");
             var config = content.Catalog.Get<EconomyConfigDefinition>(new ContentId("config_economy"));
             if (source.SolidCellCount <= 0 || source.SolidCellCount > config.MaxSalvageCells)
-                return DevCommandResult.Fail("The approved fighter does not fit the production salvage cell limit.");
+                return DevCommandResult.Fail("The WRAITH wreck does not fit the production salvage cell limit.");
             if (math.floor(source.SolidCellCount * config.ScrapPerCell) < 1 || config.SalvageMaxScrap < 1)
-                return DevCommandResult.Fail("The approved fighter has no guaranteed scrap under the current salvage configuration.");
+                return DevCommandResult.Fail("The WRAITH wreck has no guaranteed scrap under the current salvage configuration.");
             double3 absolute = padPosition + new double3(0, 0, 48); // inside the 40 m production reach (QA-001)
             float3 local = (float3)(absolute - frame.OriginInStarSystem);
             if (!math.all(math.isfinite(local))) return DevCommandResult.Fail("Salvage position exceeds the local frame.");
@@ -115,7 +115,7 @@ namespace Game.App.DevRuntime.Playground
                 world = ctx.World; target = request; persistentId = id; issued++; observedSalvage = false;
                 int version = ++generation;
                 pending = host.AddOperation(new Preparation(this, world, request, id, version));
-                SetStatus("Preparing salvage wreck " + issued + "/" + WrecksPerReset + " from the approved Fighter. Cargo stays unchanged until you salvage it.");
+                SetStatus("Preparing salvage wreck " + issued + "/" + WrecksPerReset + " from a WRAITH. Cargo stays unchanged until you salvage it.");
                 return DevCommandResult.Pending(pending, status);
             }
             catch

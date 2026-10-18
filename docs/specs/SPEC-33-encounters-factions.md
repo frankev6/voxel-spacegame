@@ -1014,23 +1014,23 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
      - `faction_ark` ("ARK Expedition"): player, locked, owns `starsys_ark_start` (SPEC-42 §4.12).
      - `faction_raiders` ("Raiders"):
        - −100, locked, Hostile to every other non-player faction;
-       - doctrine `ship_fighter` 1.0 and `ship_striker` 0.6;
+       - doctrine `ship_nocturne_wraith` 1.0 and `ship_nocturne_dirge` 0.6 (the retired `ship_fighter` and `ship_striker` until 2026-10-18);
        - `defaultAiProfile ai_default`.
      - `faction_vestari` owns `starsys_whisper`.
-  3. **Author the encounters below** (all `faction_raiders` unless stated). `starsys_drift` has danger 2 (SPEC-42 §4.12).
+  3. **Author the encounters below** (all `faction_raiders` unless stated). `starsys_drift` has danger 2 (SPEC-42 §4.12). The rosters are the shipped ones: the legacy hulls were retired on 2026-10-18 (owner: "lets please use the new ones only going forward"); the merchant's VESPER is a stand-in until a civilian ship line exists.
 
   | ID | Kind | Ships (count) | Director | Notes |
   |---|---|---|---|---|
-  | `encounter_raiders` | Ambush | `ship_fighter` 2–3 | weight 1, danger 1–3 | distance 1,600–2,200 m |
-  | `encounter_xeno_probe_tutorial` | Story | `ship_frigate` 3 | — | `faction_xeno` |
-  | `encounter_whisper_hunter` | Story | `ship_red_elite` 1 | — | |
-  | `encounter_traveling_merchant` | Merchant | `ship_freighter` 1, `ai_civilian` | weight 0.5, danger 0–2 | `faction_vestari`, hailable, `uniquePerVisit` |
-  | `encounter_glass_worms` | Story | `ship_beetle` 3 | — | `faction_xeno` |
-  | `encounter_doppelganger` | Story | `ship_crescent` 1 | — | `faction_xeno` |
-  | `encounter_scavenger_king` | Story | `ship_bastion` 1, `ship_fighter` 2 | — | |
-  | `encounter_jungle_beasts` | Story | `ship_beetle` 4 | — | `faction_xeno` |
-  | `encounter_solar_parasite` | Story | `ship_butterfly` 2 | — | `faction_xeno` |
-  | `encounter_extraction_guardians` | Story | `ship_striker` 2, `ship_frigate` 1 | — | |
+  | `encounter_raiders` | Ambush | `ship_nocturne_wraith` 2–3 | weight 1, danger 1–3 | distance 1,600–2,200 m |
+  | `encounter_xeno_probe_tutorial` | Story | `ship_xeno_husk` 3 | — | `faction_xeno` |
+  | `encounter_whisper_hunter` | Story | `ship_nocturne_vesper` 1 | — | |
+  | `encounter_traveling_merchant` | Merchant | `ship_nocturne_vesper` 1, `ai_civilian` | weight 0.5, danger 0–2 | `faction_vestari`, hailable, `uniquePerVisit` |
+  | `encounter_glass_worms` | Story | `ship_xeno_husk` 3 | — | `faction_xeno` |
+  | `encounter_doppelganger` | Story | `ship_nocturne_wraith` 1 | — | `faction_xeno` |
+  | `encounter_scavenger_king` | Story | `ship_nocturne_dirge` 1, `ship_nocturne_wraith` 2 | — | |
+  | `encounter_jungle_beasts` | Story | `ship_xeno_husk` 4 | — | `faction_xeno` |
+  | `encounter_solar_parasite` | Story | `ship_xeno_broodmother` 1 | — | `faction_xeno` |
+  | `encounter_extraction_guardians` | Story | `ship_nocturne_wraith` 2, `ship_nocturne_dirge` 1 | — | |
 - **Files:** `Assets/Game/Editor/Migration/Encounters/FleetEncounterConverter.cs`; `Assets/Game/Content/Factions/*.asset`; `Assets/Game/Content/Encounters/*.asset`; `Assets/Game/Tests/EditMode/Editor/Migration/FleetEncounterConverterTests.cs`
 - **Acceptance criteria:**
   - [ ] The content validates with zero ENC errors.

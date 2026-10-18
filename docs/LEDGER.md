@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 19 | 10 | 0 | 0 | 46 | 0 | 75 | 10 |
+| M4 | 14 | 11 | 1 | 0 | 51 | 0 | 77 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -489,7 +489,6 @@
 | DEV-017 | inv, give and facts commands | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-009, ECO-001, NAR-001 | yes | done | economy (gpt-6.1-sol high) | 2026-10-13 | 40421f42 | Real inv/give/facts owners, probes and CLI; three required cases pass in focused seven-case batch. |
 | DEV-018 | save, load and jump commands; toworld.sh | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, PERS-001, TRV-001, HUD-001 | yes | in-progress | combat (gpt-6.1-sol high) | 2026-10-14 | f6304ccd | Save/load/jump commands integrated; all 3 required checks pass (position fixture corrected a5833668); real menu routing/toworld acceptance still HUD-002-dependent; Q430 |
 | DEV-021 | Interactive development playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M3 | standard | DEV-008, DEV-009, DEV-010, DEV-017, FND-021 | yes | done | astra (gpt-6) | 2026-10-14 | 9805787b | Fourteen playable areas; power/shield/boost, actual salvage and isolated campaign. Direct run shortcuts and Lab/campaign reset. Expanded owner-feature case passes 2.50s; live power/cargo inspected. Paused for independent QA, not owner acceptance. |
-| DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | TST-007 | Whole-game frame budgets | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M3 | frontier | TST-003, SPEC-31, SPEC-33, SPEC-61, SPEC-21 | no | todo |  |  |  |  |
 | MIG-012 | Faction converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ENC-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | e9d50f3c | Three exact factions generated; duplicate skipped, player/AI ownership preserved; rerun byte/GUID/manifest stable |
 | MIG-013 | Loot table converter | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-008, ECO-001 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 3d65849 | Protected ordered loot assets/catalog; rerun byte-identical; 1 required and 1 migration-safety test |
@@ -512,6 +511,8 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
+| DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
+| DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | blocked | lead (claude-opus-5-5) | 2026-10-18 | — | Waiting for owner: choose layout D (recommended), A, B or C, approve the civilian ship classes, and decide whether the city hangs below the flight plane (docs/design/hub/hub-options.md). |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1286,6 +1287,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-18 — Batch 5: legacy ships removed, the WRAITH starts, hub option D's Siphons (lead, claude-opus-5-5)
+- Frank: "please remove all the legacy ships still in the game. lets please use the new ones only going forward." All 13 legacy blueprints are gone (content database, migration manifest, encounters, factions, bodies, playground bays, menu showcase). The start ship is the NOCTURNE **WRAITH** (owner's pick); the starter choice offers WRAITH, VESPER and DIRGE. The migration converter writes blueprints only when asked (`ShipConverter.WriteAssets`); the gate's ship count is 116.
+- Tests re-measured on the WRAITH: flight thrust and braking now read the blueprint's own thrusters, the EMP check thrusts until the inhibit ends, the framing zoom fits its 26 m hull, power and weapon counts are its 9 thrusters and 3 small plasma turrets (360 DPS, 4.5 draw, 600 m), and the opening fight holds a 25 m standoff and stops aiming at dead probes. PowerBalanceTests' legacy reference table is ignored until it is rebuilt for the NOCTURNE line. The WRAITH has no reverse or lateral thrusters (braking takes twice the fighter's time) and the core assist keeps 600 of its 800 kN under EMP: a refit and an owner question follow.
+- DEV-023 option D after owner review ("the moon ... is unnecessary", "i asked for contraptions syphoning the black hole's energy"): the moon and the mirror petals are gone. Eight **Siphons** reach in from the Harbour Ring: a funnel of magnetic coils at the disk's edge pulls a plasma stream up a lattice boom into a converter with tanks and radiators; the converters' lee is the flare shelter. Play-zoom renders (`hub_play_*_d.jpg`) and a self-review list for the owner: chiefly, the city's mass should hang below the flight plane so the 55° camera sees roofs, not walls.
 
 ### 2026-10-18 — DEV-022: the playground becomes the ARK Proving Grounds (lead, claude-opus-5-5)
 - Frank: "the dev playground doesn't work well as a playground at all right now, its hard to find which circle does what ... the placeground should be in a bustling spacehub that I can explore organicaly". The beacon circles are gone. You spawn on a plaza beside a hub station; a ring of real lane-gate portals leads to nine districts (flight school, weapons range, combat arena, hazard yard, mechanism works, shipyard, market docks, salvage yard, race control), and each district has a portal home. Lanes with running lights and two traffic loops (rail movers) link them.

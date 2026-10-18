@@ -24,10 +24,10 @@ MonoBehaviour:
   relationLocked: 0
   stances: []
   doctrine:
-  - blueprint: {fileID: 11400000, guid: 29c3046b7a70146029f523cf0d57fee2, type: 2}
+  - blueprint: {fileID: 11400000, guid: d303be7d48fb24838aa9abb8085795fd, type: 2}
     weight: 0.5
     aiProfile: {fileID: 0}
-  - blueprint: {fileID: 11400000, guid: 522f0b4212e46493aa673898f8f04a53, type: 2}
+  - blueprint: {fileID: 11400000, guid: f2a8c13b403454123b7105a849149abf, type: 2}
     weight: 1
     aiProfile: {fileID: 0}
   defaultAiProfile: {fileID: 0}

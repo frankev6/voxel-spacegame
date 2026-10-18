@@ -82,7 +82,7 @@ namespace Game.Editor
             if (!(cache.orbitRadiusM < belt.orbitRadiusM + belt.template.BeltWidthM * .5f))
                 throw new InvalidOperationException("Drift cache must be inside the belt outer edge.");
             var outpost = whisper.Bodies.Single(b => b.key == "whisper_outpost").template;
-            if (outpost.StructureSource != StructureSource.Blueprint || outpost.Blueprint?.IdString != "ship_vestari")
+            if (outpost.StructureSource != StructureSource.Blueprint || outpost.Blueprint?.IdString != "ship_nocturne_vesper")
                 throw new InvalidOperationException("Outpost requires the existing turret-equipped blueprint.");
             if (!VoxelStructureCodec.TryDecode(outpost.Blueprint.Payload, catalog, out var structure, out string error))
                 throw new InvalidOperationException("Outpost blueprint cannot decode: " + error);

@@ -61,8 +61,8 @@ namespace Game.App.DevRuntime.Playground
             { GameLog.Warn(LogCategories.Dev, "Playground ship " + Override + " could not be decoded; flying the starter."); return; }
             var clone = source.Clone();
             // Owner: "when i ran "playground ship=ship_nocturne_requiem", it doesn't work, only worked with the wraith". The
-            // shield fit commits through the ship editor, which refuses a ship in several pieces; older content (ship_red_elite)
-            // still carries loose cells, so only the largest face-connected piece flies here.
+            // shield fit commits through the ship editor, which refuses a ship in several pieces; a blueprint that carries loose cells
+            // would fail it, so only the largest face-connected piece flies here.
             int loose = KeepLargestPiece(clone, new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations });
             if (loose > 0) GameLog.Warn(LogCategories.Dev, "Playground ship " + Override + ": removed " + loose + " cells not connected to the hull.");
             session.Fleet.ReplaceStructure(ship.PersistentId, clone);

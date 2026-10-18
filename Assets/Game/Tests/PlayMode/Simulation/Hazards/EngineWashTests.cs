@@ -23,13 +23,14 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
             return new Aabb { Min = t.TransformPoint(local.Min), Max = t.TransformPoint(local.Max) };
         }
 
-        /// <summary>The Needle (Vestari racer, two Sprint M and a Sprint S astern) at full forward thrust; a fighter 30 m behind its stern.
-        /// Returns the summed external push on the fighter over half a second.</summary>
+        /// <summary>The Needle (Vestari racer, two Sprint M and a Sprint S astern) at full forward thrust; a WRAITH 30 m behind its stern.
+        /// Returns the summed external push on the WRAITH over half a second.</summary>
         static float3 Tailgate(bool wash)
         {
             using var f = wash ? new CombatFixture(false, typeof(EngineWashSystem)) : new CombatFixture(false);
             var leader = f.Flight.SpawnBlueprint(Blueprint(f, "ship_racer_needle"), new float3(0, 0, 0));
-            var tail = f.Flight.SpawnBlueprint(Blueprint(f, "ship_fighter"), new float3(0, 0, -80));
+            // TODO(batch-5): re-measure on WRAITH; the -0.05 m/s push floor was measured on the lighter retired Fighter.
+            var tail = f.Flight.SpawnBlueprint(Blueprint(f, "ship_nocturne_wraith"), new float3(0, 0, -80));
             f.Ready(leader, tail);
             float stern = Box(f, leader).Min.z; var tailBox = Box(f, tail);
             var pose = f.Flight.Transform(tail); pose.Position.z += stern - 30 - tailBox.Max.z; f.Em.SetComponentData(tail, pose);
@@ -49,7 +50,7 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
             var with = Tailgate(true); var without = Tailgate(false);
             TestContext.WriteLine($"Tailgater push over 0.5 s: with wash {with}, without {without}");
             System.IO.Directory.CreateDirectory("Logs"); System.IO.File.WriteAllText("Logs/engine-wash.txt", $"tailgater dv over 0.5 s: {with} (without wash {without})\n");
-            Assert.Less(with.z, -.05f, "the fighter 30 m behind the Needle's stern is pushed back");
+            Assert.Less(with.z, -.05f, "the WRAITH 30 m behind the Needle's stern is pushed back");
             Assert.AreEqual(0, without.z, 1e-6f, "nothing else pushes it");
             Assert.Less(math.abs(with.x), math.abs(with.z), "the push runs along the exhaust");
         }

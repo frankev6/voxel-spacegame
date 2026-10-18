@@ -46,7 +46,7 @@ ship_vestari,946,0,946,0,972,36,21,1";
             defs.Add(AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/Game/Content/Items/item_missing.asset"));
             context = new LegacyMigrationContext(LegacyContentIndex.Load(legacyRoot, report), LegacyIdMap.Default,
                 new LegacyAssetWriter(Root, new MigrationManifest(), false, report), report, false, legacyRoot) { Catalog = ContentCatalog.Build(defs, report) };
-            new ShipConverter().Convert(context); Assert.IsFalse(report.HasErrors, report.ToText());
+            new ShipConverter { WriteAssets = true }.Convert(context); Assert.IsFalse(report.HasErrors, report.ToText());
         }
         [OneTimeTearDown] public void Clean() { if (ownsRoot) AssetDatabase.DeleteAsset(Root); }
         [Test] public void RealExport_MatchesExpectedTable()
@@ -99,7 +99,7 @@ ship_vestari,946,0,946,0,972,36,21,1";
         {
             var paths = context.Writer.Outcomes.Select(o => o.AssetPath).Distinct().ToArray();
             var bytes = paths.ToDictionary(p => p, File.ReadAllBytes); var metas = paths.ToDictionary(p => p, p => File.ReadAllBytes(p + ".meta"));
-            int start = context.Writer.Outcomes.Count; context.Ships.Clear(); new ShipConverter().Convert(context);
+            int start = context.Writer.Outcomes.Count; context.Ships.Clear(); new ShipConverter { WriteAssets = true }.Convert(context);
             var second = context.Writer.Outcomes.Skip(start).ToArray(); Assert.AreEqual(13, second.Length);
             Assert.IsTrue(second.All(o => o.Outcome == WriteOutcome.Unchanged));
             foreach (string path in paths) { CollectionAssert.AreEqual(bytes[path], File.ReadAllBytes(path)); CollectionAssert.AreEqual(metas[path], File.ReadAllBytes(path + ".meta")); }

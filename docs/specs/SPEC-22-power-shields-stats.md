@@ -431,7 +431,7 @@ Energy sources and consumers come from SPEC-04 modules (`PowerSource`, `PowerSto
 - R2 Recharge: with weapons idle and shields up, `Capacity / (Generation − ShieldDraw) ≤ 10 s`.
 - R3 Shield break time: with the SPEC-21 reference loadout of the same class firing at 60 % hit rate, the shield breaks in 15–50 % of the hull time-to-kill (SPEC-21 §4.9).
 
-Reference ships (legacy blueprints as converted by SPEC-72; weapon draws from SPEC-21 §4.9; core = gen 40, storage 200):
+Reference ships (legacy blueprints as converted by SPEC-72; weapon draws from SPEC-21 §4.9; core = gen 40, storage 200). **These hulls were retired on 2026-10-18** (owner: "lets please use the new ones only going forward"); `PowerBalanceTests.ReferenceShips_MatchTable` is ignored until this table is re-measured on the new ship lines (WRAITH, VESPER, DIRGE):
 
 | Ship | Sources | Gen E/s | Cap E | Weapons (count × draw) | WeaponDraw | Shields | Sustain (R1) | Recharge (R2) |
 |---|---|---|---|---|---|---|---|---|

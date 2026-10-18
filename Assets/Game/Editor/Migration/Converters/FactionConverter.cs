@@ -14,6 +14,16 @@ namespace Game.Editor.Migration.Converters
         public string Name => "Factions";
         public int Order => 400;
 
+        /// <summary>The legacy hulls are retired (owner, 2026-10-18: "lets please use the new ones only going forward"), so a legacy
+        /// doctrine row flies its replacement here. The Khuchad Clan is many small ships led by one larger: the common shuttle
+        /// becomes the WRAITH and the rarer fighter the DIRGE, as in the shipped faction.</summary>
+        internal static readonly IReadOnlyDictionary<(string Faction, string Ship), string> RetiredDoctrineShips =
+            new Dictionary<(string Faction, string Ship), string>
+            {
+                [("faction_khuchad_clan", "ship_shuttle")] = "ship_nocturne_wraith",
+                [("faction_khuchad_clan", "ship_fighter")] = "ship_nocturne_dirge",
+            };
+
         // The lead's targeted generation job checks the entire input before touching any output.
         internal bool Preflight(LegacyMigrationContext context)
         { foreach (var ignored in Plans(context)) { } return !context.Report.HasErrors; }
@@ -97,6 +107,7 @@ namespace Game.Editor.Migration.Converters
                     { Invalid(context, file, field + ".weight", "Doctrine weight must be a finite, representable positive float."); valid = false; continue; }
                     if (!context.IdMap.TryMap(LegacyIdKind.Ship, row.ShipKey, out string shipId))
                     { context.Report.Error("MIG-E003", file.RelativePath, field + ".shipKey", "Legacy ship key is not mapped: " + row.ShipKey); valid = false; continue; }
+                    if (shipId != null && RetiredDoctrineShips.TryGetValue((id, shipId), out string replacement)) shipId = replacement;
                     if (shipId == null || context.Catalog == null || !context.Catalog.TryGet<ShipBlueprintDefinition>(new ContentId(shipId), out var blueprint))
                     { context.Report.Error("MIG-E004", file.RelativePath, field + ".shipKey", "Mapped doctrine blueprint is unavailable in the current catalog: " + shipId); valid = false; continue; }
                     var entry = new DoctrineEntry { blueprint = blueprint, weight = (float)row.Weight };

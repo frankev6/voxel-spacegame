@@ -16,7 +16,7 @@ using UnityEngine.TestTools;
 
 namespace Game.Tests.PlayMode.DevTools
 {
-    /// <summary>DEV-016: real boot, imported Fighter, command front-end, input sampling and physics.</summary>
+    /// <summary>DEV-016: real boot, the start WRAITH, command front-end, input sampling and physics.</summary>
     public sealed class ReplayCommandTests : GameFlowFixture
     {
         DevCommandResult Command(string line)

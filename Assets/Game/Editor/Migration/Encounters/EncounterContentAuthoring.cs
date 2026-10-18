@@ -87,7 +87,7 @@ namespace Game.Editor.Migration.Encounters
             Require<FactionDefinition>(context, "faction_tlaxcala"); Require<FactionDefinition>(context, "faction_khuchad_clan");
             var start = Require<AuthoredStarSystemDefinition>(context, "starsys_ark_start");
             var whisper = Require<AuthoredStarSystemDefinition>(context, "starsys_whisper");
-            Require<ShipBlueprintDefinition>(context, "ship_fighter"); Require<ShipBlueprintDefinition>(context, "ship_striker");
+            Require<ShipBlueprintDefinition>(context, "ship_nocturne_wraith"); Require<ShipBlueprintDefinition>(context, "ship_nocturne_dirge");
             Require<AiProfileDefinition>(context, "ai_default");
             if (ark != null && (!ark.IsPlayerFaction || !ark.RelationLocked || ark.DisplayName != "ARK Expedition"))
                 context.Report.Error("ENC-E001", "faction_ark", "", "Preserve/reconcile the canonical locked ARK Expedition player faction first.");
@@ -175,7 +175,7 @@ namespace Game.Editor.Migration.Encounters
                     p.arraySize = 2;
                     for (int i = 0; i < 2; i++)
                     {
-                        var entry = p.GetArrayElementAtIndex(i); string id = i == 0 ? "ship_fighter" : "ship_striker";
+                        var entry = p.GetArrayElementAtIndex(i); string id = i == 0 ? "ship_nocturne_wraith" : "ship_nocturne_dirge";
                         entry.FindPropertyRelative("blueprint").objectReferenceValue = context.Catalog.Get<ShipBlueprintDefinition>(new ContentId(id));
                         entry.FindPropertyRelative("weight").floatValue = i == 0 ? 1 : .6f;
                         entry.FindPropertyRelative("aiProfile").objectReferenceValue = null;

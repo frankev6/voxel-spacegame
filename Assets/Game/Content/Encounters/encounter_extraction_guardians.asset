@@ -18,11 +18,11 @@ MonoBehaviour:
   faction: {fileID: 11400000, guid: e5493608f85ad410a962eb0be18a23a4, type: 2}
   kind: 3
   ships:
-  - blueprint: {fileID: 11400000, guid: 7c3178c4cec8049a3a03d42498ef7ba9, type: 2}
+  - blueprint: {fileID: 11400000, guid: f2a8c13b403454123b7105a849149abf, type: 2}
     aiProfile: {fileID: 0}
     countMin: 2
     countMax: 2
-  - blueprint: {fileID: 11400000, guid: 6861f1006d5e848e2bc8d0cf43c520bb, type: 2}
+  - blueprint: {fileID: 11400000, guid: d303be7d48fb24838aa9abb8085795fd, type: 2}
     aiProfile: {fileID: 0}
     countMin: 1
     countMax: 1
