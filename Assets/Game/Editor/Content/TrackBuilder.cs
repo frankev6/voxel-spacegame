@@ -466,7 +466,7 @@ namespace Game.Editor.Content
                     int best = 0;
                     for (int i = 1; i < main.Count; i++) if ((V(main[i]) - q).sqrMagnitude < (V(main[best]) - q).sqrMagnitude) best = i;
                     Vector2 t = V(main[(best + 1) % main.Count]) - V(main[(best + main.Count - 1) % main.Count]);
-                    return (q, Mathf.Atan2(t.x, t.y));
+                    return (V(main[best]), Mathf.Atan2(t.x, t.y));   // on the centreline: the plan's marks sit up to 60 m off it
                 }
                 var (entry, entryYaw) = OnMain(V(gatesJson[0]["at_p"])); var (exit, exitYaw) = OnMain(V(gatesJson[1]["at_p"]));
                 portals.Add(new TrackPortal { Entry = entry, EntryYaw = entryYaw, Exit = exit, ExitYaw = exitYaw, Width = width, JamSeconds = PortalJamSeconds, SetPiece = PortalSetPiece });

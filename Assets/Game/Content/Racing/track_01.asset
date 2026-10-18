@@ -15666,9 +15666,9 @@ MonoBehaviour:
   - {x: -640, y: -420}
   - {x: -560, y: -420}
   Portals:
-  - Entry: {x: 2100, y: -60}
+  - Entry: {x: 2095.01, y: -51.68}
     EntryYaw: -2.718212
-    Exit: {x: 860, y: -1035}
+    Exit: {x: 903.65, y: -1147.63}
     ExitYaw: -1.9499102
     Width: 140
     JamSeconds: 6
