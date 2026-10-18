@@ -17,5 +17,6 @@ namespace Game.Data.Definitions
         Tracer = 11,         // state: projectile tracer look (never sent as an event)
         ShieldShell = 12,    // state: shield shell look (never sent as an event)
         RamImpact = 13,      // collision contact/energy event (SPEC-13 §5.2, ADR-0058)
+        Impact = 14,         // event: a hard shove (SPEC-91 §5.1 step 5); camera shake only, no visual default (FxBatchJob skips it)
     }
 }

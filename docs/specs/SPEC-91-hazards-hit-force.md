@@ -252,7 +252,7 @@ public struct EnergyGrantRequest { public Entity Ship; public float Energy; publ
    2. **Clamp to reality**, per axis `a ∈ {x, y}`: if `sign(Carry.a) ≠ sign(local.a)`, set `Carry.a = 0`; else `Carry.a = sign × min(|Carry.a|, |local.a|)`. `CarryYaw` is clamped the same way against `ωy`. Then clamp each to `maxCarry` and `maxCarryYaw`.
    3. **Targets.** `tx += Carry.x`, `tz += Carry.y` and `tω += CarryYaw`, added after the command targets are computed, including in the `Brake` case.
    4. **Decay.** `d = (Brake ? carryBrakeDecel : carryDecel) × dt`. `Carry = Carry × max(0, |Carry| − d) / |Carry|`, so it shrinks as a vector. `CarryYaw` shrinks toward 0 by `carryYawDecel × dt`.
-5. **Feedback.** A root whose `|LinearDv| ≥ 2 m/s` in one tick emits an `FxEvent` of kind `Impact` with `Scale = |Δv|`. CAM-008's screen shake already listens to `FxEvent` scale for the `PlayerShip`.
+5. **Feedback.** A root whose `|LinearDv| ≥ 1.5 m/s` in one tick emits an `FxEvent` of kind `Impact` with `Scale = |Δv|` (`ExternalPushFeedbackSystem`, after `ImpulseApplySystem`; `FxKind.Impact` = 14 has no visual default). The 1.5 m/s line was lowered from 2 when the measured table became the baseline (HAZ-005), so a siege shell on the starter fighter (1.7 m/s) shakes too. CAM-008's screen shake already listens to `FxEvent` scale for the `PlayerShip`.
 
 ### 5.2 Zones (`ZoneSystem`, per tick)
 1. Gather zones (`WorldZone`, `ZoneEffect`, `ZonePathPoint`) sorted by `PersistentId`.
@@ -317,6 +317,21 @@ Advisory (ADR-0042):
 | Recoil, railgun (shooter) | 1–2 m/s | — | — |
 
 With `carryDecel = 8 m/s²`, a 5 m/s shove plays out over about 0.6 s, and a 40 m/s boost surge over about 5 s.
+
+**Measured (HAZ-005, 2026-10-17, `HitForceFeelTests.Table_WithinTargets`)** with the shipped values (`knockbackScale` 1, `recoilScale` 0.17, `explosionImpulsePerDamage` 60). The owner flew it and said it "feels right", so **this measured table is the baseline**; the test holds each row within ±15%.
+
+| Shot | Starter fighter (24.6 t) | NOCTURNE WRAITH (70.4 t) | NOCTURNE REQUIEM (396 t) |
+|---|---|---|---|
+| Small plasma, centre hit (22.5 kg at 400 m/s) | 0.37 m/s | 0.13 m/s | 0.023 m/s |
+| Railgun, bow hit (50 kg at 1,200 m/s) | 2.44 m/s, yaw kick 27°/s | 0.85 m/s, 6°/s | 0.15 m/s |
+| Siege cannon, direct hit (95 kg at 420 m/s, 4 m blast) | 1.68 m/s | 0.70 m/s | 0.10 m/s |
+| Recoil, small plasma round (shooter) | 0.06 m/s | — | — |
+| Recoil, railgun (shooter) | 0.41 m/s | — | — |
+
+Why the rows sit below the first targets:
+- The targets assumed a light ship of about 10 t; the starter fighter is 24.6 t. A centre hit carries exactly the shot's momentum (the plasma row is 9,000 N·s ÷ the mass to within 1%).
+- "Siege blast at 10 m" cannot happen: the siege blast radius is 4 m. A direct hit is shell momentum alone (95 × 420 = 39,900 N·s): `ExplosionJob` scales a root's blast push by `(1 − d / radius)²`, where `d` is the distance from the blast to the centre of the root's **grid bounds**, not to the cells it hits. A shell bursting on the hull of any ship wider than its blast radius is too far from that centre to push it. Mines (`Knockback` set, larger radii) still push as designed. Pushing from the hit cells instead is a follow-up, not part of this baseline.
+- Recoil rows are measured on a 4.9 t test hull and converted to the fighter by mass; recoil is the shot's momentum × 0.17.
 
 ## 9. Tasks
 
@@ -418,9 +433,9 @@ With `carryDecel = 8 m/s²`, a 5 m/s shove plays out over about 0.6 s, and a 40 
   - `Assets/Game/Content/Weapons/*.asset`, `Assets/Game/Content/Tuning/*`;
   - `Assets/Game/Simulation/Flight/PropulsionJob.cs` (feedback event) or a small `ExternalPushFeedbackSystem`.
 - **Acceptance criteria:**
-  - [ ] Every row of the §8 table is within range, or recorded with the reason it is not.
+  - [x] Every row of the §8 table is within range, or recorded with the reason it is not (measured table and reasons in §8; the owner took the measured feel as the baseline).
   - [ ] Existing ram, AI combat and turret-lead scenarios pass.
-  - [ ] The camera shakes on a railgun hit to the player.
+  - [x] The camera shakes on a railgun hit to the player (an `Impact` event at 2.4 m/s against the 1.5 m/s line, and its shake rule; not watched live).
 - **Tests:** `HitForceFeelTests.Table_WithinTargets`; the existing AI combat, ram damage and turret-lead tests pass.
 
 ### HAZ-006 — Zones: shapes, query and push effects
@@ -690,7 +705,7 @@ With `carryDecel = 8 m/s²`, a 5 m/s shove plays out over about 0.6 s, and a 40 
 ## 10. Open questions
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | Are the §8 feel targets the right strength? | As written; tune in HAZ-005 and adjust after the owner flies it | Owner |
+| 1 | Are the §8 feel targets the right strength? | As written; tune in HAZ-005 and adjust after the owner flies it | Owner. **Answered 2026-10-17:** the owner flew it: "feels right" |
 | 2 | Should knocked ships drift (carry), or snap back under assist? | Carry, decaying at 8 m/s² | Owner |
 | 3 | Who sets off a mine: any ship after arming, or only hostiles to whoever laid it? | Any ship (decision 8); hostile-only is a per-mine filter | Owner |
 | 4 | Are mines visible? | Yes: blinking light when armed, radar marker within 300 m | Owner |

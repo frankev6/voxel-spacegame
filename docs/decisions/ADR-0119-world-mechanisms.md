@@ -1,6 +1,6 @@
 # ADR-0119 — World mechanisms: moving structures, mechanisms, portals and the wider hazard set
 
-**Status:** Proposed (2026-10-17), with the SPEC-91 and SPEC-92 amendments for the owner's review.
+**Status:** Accepted (2026-10-17). The owner approved it, with the SPEC-91 and SPEC-92 amendments, as written.
 
 ## Context
 The owner reviewed the racing mechanics sheet (RACE-002) on 2026-10-17: "i love all the mechanics except the grapple pylon (lets scratch that), and the "places that change" is less of a mechanic and more a design consideration using the other mechanics". The day before: "these mechanics should general and for me to be able to use them in real world exploration too".

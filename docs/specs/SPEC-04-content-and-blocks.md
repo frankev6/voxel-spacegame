@@ -53,7 +53,7 @@ This spec defines how every piece of authored content is identified, stored, val
 10. **Mirroring uses chiral partners defined against the local X reflection.** A block's mirror partner has footprint `Sx(F) + MirrorOffset` (set equality). `MirrorIndex` = self for achiral blocks. Mirrored placement is computed by §5.6, never by negating Euler angles. Reason: 06-C2/C3.
 11. **`ItemDefinition.cs` is owned by this spec.** SPEC-50 may add economy fields to it in its own task, below the marked line, and must not change or remove the base fields in §4.4. Reason: one class, two designers, no merge ambiguity.
 12. **Block functions are composable modules (ADR-0013).** A functional block carries a list of `BlockModule`s (at most one per `BlockModuleId`); each module bakes one unmanaged row into `BlockModulesBlob`, and systems read only the rows of the modules they own. `BlockCategory` is display-only. Reason: a new function (hangar, repair bay) is a new module, never an edit of an enum, a fat struct or a central switch; mixed blocks (reactor + explosive, core + power) are free.
-13. **Single-cell structural blocks use the grid palette; a block uses a `BlockInstance` iff it is Functional or has more than one cell** (`BlockDef.RequiresInstance`). ADR-0018/0028 permit the two-cell long slope with per-cell shapes; other multi-cell structural kits remain owner gates. A block is Functional iff it has at least one module. Each structural cell is meshed independently.
+13. **Single-cell structural blocks use the grid palette; a block uses a `BlockInstance` iff it is Functional or has more than one cell** (`BlockDef.RequiresInstance`). ADR-0018/0028 permit the two-cell long slope with per-cell shapes, and ADR-0121 (owner, 2026-10-17) the 2×2×2 and 3×3×3 large hull cubes; other multi-cell structural kits remain owner gates. A block is Functional iff it has at least one module. Each structural cell is meshed independently.
 14. **Content errors fail loudly**: in the editor (postprocessor + console), in CI (`-executeMethod`, exit code 1), at build time (build fails) and at boot (`ContentValidationException`). Never silently at runtime. Reason: conventions §6.
 15. **Missing content degrades, never rejects.** Unknown IDs read from saves resolve to `block_missing` / `item_missing` and are recorded for a warning (SPEC-05 surfaces them). Reason: 04-B1.
 16. **Content assets live in `Assets/Game/Content/<Area>/<id>.asset`; the database asset is `Assets/Game/Content/ContentDatabase.asset`.** All definition *classes* are in `Assets/Game/Data/Definitions/<Area>/` with namespace `Game.Data.Definitions` (architecture §3.2 wins over the sub-folder namespace rule).
@@ -885,7 +885,7 @@ flowchart LR
 | DATA-E033 | Error | Clearance cell inside the footprint, or duplicate clearance cell |
 | DATA-E034 | Error | `AllowedOrientations` is 0 or has bits above 23 |
 | DATA-E035 | Error | Kind/module mismatch: Structural or Prop with any module, or Functional without modules |
-| DATA-E036 | Error | Structural shape/footprint outside approved kit: single Cube/Wedge/HipCorner, or exactly root High + +Y Low with scalar shape High |
+| DATA-E036 | Error | Structural shape/footprint outside approved kit: single Cube/Wedge/HipCorner, exactly root High + +Y Low with scalar shape High, or a full 2×2×2 or 3×3×3 box of Cube cells rooted at its corner (ADR-0121) |
 | DATA-E037 | Error | Non-structural block with `Shape ≠ Cube` |
 | DATA-E038 | Error | Prop or Functional block without `propMesh` |
 | DATA-E039 | Error | `cellHp ≤ 0` or `cellMass ≤ 0` |
@@ -1146,6 +1146,23 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - [x] Invalid shape values, lengths, non-structural overrides and unapproved multi-cell structural footprints fail validation. The approved long slope has High at the root and Low at +Y.
   - [x] Both registered assets pass project validation, have the specified values and reuse existing icons. No new visual assets or ships.
 - **Tests:** `SlopeKitTests.Validation_ApprovedKitOnly`, `SlopeKitTests.Bake_CanonicalShapeMappingAndHash`, `SlopeKitTests.ShippedKit_ValuesAndInstances`; existing full validation/performance suites.
+
+### DATA-013 — Large hull blocks (ADR-0121)
+- **Milestone:** M4
+- **Tier:** standard — two content blocks, a validation case and a mesher input, all specified by ADR-0121
+- **Depends on:** `DATA-012`
+- **Do:**
+  - Let `DATA-E036` accept a full 2×2×2 or 3×3×3 box of `Cube` cells rooted at its corner.
+  - Add `block_hull_large_2` and `block_hull_large_3`: hull material, per-cell HP and mass as `block_hull`, self-mirrored with `MirrorOffset` (1,0,0) and (2,0,0), on the editor palette after the slope kit.
+  - Pass each instance cell's footprint offset to the brick mesher so the hull panel layout spans the block (SPEC-11).
+  - Check salvage and repair treat a damaged large block as ADR-0121 decision 2 says.
+- **Files:** `Assets/Game/Data/Definitions/Blocks/BlockDefinition.cs`; `Assets/Game/Content/Blocks/block_hull_large_2.asset`, `block_hull_large_3.asset`; the brick mesher input; `Assets/Game/Tests/EditMode/Data/SlopeKitTests.cs` or a new `LargeHullTests.cs`.
+- **Acceptance criteria:**
+  - [ ] Both blocks validate and spawn in all 24 orientations; a 2×2×3 or hollow box still fails `DATA-E036`.
+  - [ ] The editor places, selects and deletes each as one block; the BOM counts one item.
+  - [ ] Shooting one removes cells one by one and the instance goes with its last cell.
+  - [ ] A wall of large blocks shows one plate per block, not a repeat every cell.
+- **Tests:** `LargeHullTests.Validation_BoxesOnly`, `.Instance_OneBlockManyCells`, `.Damage_RemovesCellsThenInstance`.
 
 ## 10. Open questions
 
