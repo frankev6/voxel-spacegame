@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MineDefinition
   id: mine_emp
   formerIds: []
-  blueprint: {fileID: 11400000, guid: 24935e697e1ca4b4299363fd8395e907, type: 2}
+  blueprint: {fileID: 11400000, guid: fa9febcc89f6c450c9a1f25b07409b90, type: 2}
   anchored: 1
   anchorStiffness: 0.4
   anchorDamping: 0.8

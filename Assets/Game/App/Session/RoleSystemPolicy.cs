@@ -88,7 +88,8 @@ namespace Game.App.Session
             ["WallEmitterSystem"] = SystemAuthority.Both,                // RACE-016: spatial, so every machine drops the same spans
             ["SpinLimitSystem"] = SystemAuthority.Both,                  // RACE-016: every machine flies its own ships
             ["MineSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-91: arm, trigger and detonate; mines replicate as grids
-            ["PickupSystem"] = SystemAuthority.AuthorityOnly,            // HAZ-019: who collects a canister; the grant and its despawn
+            ["PickupSystem"] = SystemAuthority.AuthorityOnly,
+            ["PulseSystem"] = SystemAuthority.AuthorityOnly,             // HAZ-016: pulse damage and shield drain; one raycast per ship per pulse            // HAZ-019: who collects a canister; the grant and its despawn
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
             ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
@@ -151,6 +152,7 @@ namespace Game.App.Session
             ["RaceSystem"] = "race phase, laps, gates, places and respawns; RaceState",
             ["RacerPilotSystem"] = "how each AI racer flies; its command and pose in snapshots",
             ["MineSystem"] = "when a mine arms, triggers and detonates; the explosion and its despawn",
+            ["PulseSystem"] = "which ships a pulse reaches and what it does to them; cells in GridDelta, shields in snapshots",
             ["PickupSystem"] = "which ship collects each energy canister; its despawn (stored energy is the ship's own)",
             ["MoverSystem"] = "where each moving structure is; its pose in snapshots",
             ["MechanismSystem"] = "which mechanism rules fire and when their actions fall due; the owners' state in snapshots",

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dbc1ea9372594f798404fceed083e3e, type: 3}
+  m_Name: zone_solar_flare
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ZoneDefinition
+  id: zone_solar_flare
+  formerIds: []
+  shape: 0
+  halfExtents: {x: 300, y: 300}
+  pathRadius: 0
+  effects:
+  - Kind: 6
+    A: 180
+    B: 320
+    C: 1
+    Id: 0
+    Flags: 1

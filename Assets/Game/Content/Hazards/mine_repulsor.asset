@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MineDefinition
   id: mine_repulsor
   formerIds: []
-  blueprint: {fileID: 11400000, guid: 24935e697e1ca4b4299363fd8395e907, type: 2}
+  blueprint: {fileID: 11400000, guid: bf2956f3ffbab419d81c9c83e268f1b4, type: 2}
   anchored: 1
   anchorStiffness: 0.4
   anchorDamping: 0.8

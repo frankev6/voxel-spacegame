@@ -16,14 +16,20 @@ namespace Game.Editor.Content
             TrackBuilder.Zone("zone_gravity_moon", ZoneShape.Circle, new Vector2(450, 0), 0,
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Attract, A = 720000, B = 40,
                     Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices | ZoneEffectFlags.AffectsDebris });
+            // HAZ-016 pulses (ADR-0119 decision 4), given a schedule where they are placed: a reactor that flashes from its core over
+            // 140 m, and a solar flare sweeping a 600 m square from behind (C = 1). A: hull damage; B: extra drain on a raised shield.
+            TrackBuilder.Zone("zone_pulse_reactor", ZoneShape.Circle, new Vector2(140, 0), 0,
+                new ZoneDefinition.Effect { Kind = ZoneEffectKind.Pulse, A = 260, B = 240, C = 0, Flags = ZoneEffectFlags.AffectsShips });
+            TrackBuilder.Zone("zone_solar_flare", ZoneShape.Box, new Vector2(300, 300), 0,
+                new ZoneDefinition.Effect { Kind = ZoneEffectKind.Pulse, A = 180, B = 320, C = 1, Flags = ZoneEffectFlags.AffectsShips });
             Switch();
             BlastDoorMechanism();
             // HAZ-018 (ADR-0119 decision 6): the mine family on the proximity mine's body. Payload values: MinePayload.
             // Gravity: GM 18 000 pulls 80 m/s² at its 15 m softening radius, 20 m/s² at 30 m and 1.3 m/s² at its 120 m edge.
-            Mine("mine_repulsor", true, ("Payload", 1), ("PayloadStrength", 1200000), ("BlastRadius", 32), ("BlastDamage", 0), ("BlastImpulse", 0));
-            Mine("mine_emp", true, ("Payload", 2), ("PayloadSeconds", 3), ("BlastRadius", 30), ("BlastDamage", 0), ("BlastImpulse", 0));
-            Mine("mine_seeker", false, ("SeekSpeed", 22), ("TriggerRadius", 8), ("BlastDamage", 1800), ("BlastRadius", 22), ("BlastImpulse", 600000));
-            Mine("mine_gravity", true, ("Payload", 3), ("PayloadStrength", 18000), ("PayloadSeconds", 6), ("BlastRadius", 120), ("BlastDamage", 0), ("BlastImpulse", 0));
+            Mine("mine_repulsor", true, 4, "REPULSOR MINE", ("Payload", 1), ("PayloadStrength", 1200000), ("BlastRadius", 32), ("BlastDamage", 0), ("BlastImpulse", 0));
+            Mine("mine_emp", true, 8, "EMP MINE", ("Payload", 2), ("PayloadSeconds", 3), ("BlastRadius", 30), ("BlastDamage", 0), ("BlastImpulse", 0));
+            Mine("mine_seeker", false, 6, "SEEKER MINE", ("SeekSpeed", 22), ("TriggerRadius", 8), ("BlastDamage", 1800), ("BlastRadius", 22), ("BlastImpulse", 600000));
+            Mine("mine_gravity", true, 7, "GRAVITY MINE", ("Payload", 3), ("PayloadStrength", 18000), ("PayloadSeconds", 6), ("BlastRadius", 120), ("BlastDamage", 0), ("BlastImpulse", 0));
             CanisterBlock();
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             CanisterBlueprint();
@@ -31,8 +37,10 @@ namespace Game.Editor.Content
             GameLog.Info("Content", "Built the hazard content (ADR-0119).");
         }
 
-        /// <summary>A copy of mine_proximity with the given fuse fields changed (field name, value; enums by index).</summary>
-        static void Mine(string id, bool anchored, params (string field, float value)[] changes)
+        /// <summary>A copy of mine_proximity with the given fuse fields changed (field name, value; enums by index), on its own body:
+        /// the same casing with a band of `band` (paint index: 4 blue, 6 orange, 7 purple, 8 cyan) and its own name, so a pilot can
+        /// tell the payloads apart.</summary>
+        static void Mine(string id, bool anchored, byte band, string displayName, params (string field, float value)[] changes)
         {
             const string Hazards = "Assets/Game/Content/Hazards/";
             string path = Hazards + id + ".asset";
@@ -40,6 +48,7 @@ namespace Game.Editor.Content
                 throw new System.InvalidOperationException("copy mine_proximity");
             var asset = AssetDatabase.LoadMainAssetAtPath(path); var so = new SerializedObject(asset);
             so.FindProperty("id").stringValue = id; so.FindProperty("anchored").boolValue = anchored;
+            so.FindProperty("blueprint").objectReferenceValue = TrackBuilder.MineBlueprint("ship_device_" + id, displayName, band);
             var fuse = so.FindProperty("fuse");
             foreach (var (field, value) in changes)
             {

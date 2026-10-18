@@ -89,6 +89,16 @@ namespace Game.Simulation.Hazards
             return root;
         }
 
+        /// <summary>HAZ-015/016: puts a spawned zone on a schedule: on for onSeconds of every periodSeconds, starting phaseSeconds into
+        /// the period. A Pulse zone fires on the first tick of each on window.</summary>
+        public static void Schedule(EntityManager em, Entity zone, float periodSeconds, float onSeconds, float phaseSeconds = 0)
+        {
+            uint period = (uint)math.max(1, math.round(periodSeconds * 60));
+            var s = new ZoneSchedule { PeriodTicks = period, OnTicks = (uint)math.clamp(math.round(onSeconds * 60), 1, period),
+                PhaseTicks = (uint)math.round(math.max(0, phaseSeconds) * 60) % period, Enabled = 1 };
+            if (em.HasComponent<ZoneSchedule>(zone)) em.SetComponentData(zone, s); else em.AddComponentData(zone, s);
+        }
+
         /// <summary>HAZ-019: requests one energy canister (a kinematic device of one Pickup + Explosive block) at p.</summary>
         public static Entity Canister(EntityManager em, ShipBlueprintDefinition blueprint, float2 p, float yaw, ushort group, ulong persistentId)
         {

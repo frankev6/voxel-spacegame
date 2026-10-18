@@ -636,10 +636,18 @@ Why the rows sit below the first targets:
   - Visual: a pulse ring or a flare sweep, with the shadows shown.
 - **Files:** `Assets/Game/Simulation/Hazards/PulseJob.cs`; `Assets/Game/Presentation/Hazards/ZoneVisualSystem.cs`.
 - **Acceptance criteria:**
-  - [ ] A ship in the open takes the pulse; a ship behind a wreck does not.
-  - [ ] Shield drain applies before hull damage.
-  - [ ] It is deterministic.
-- **Tests:** `PulseTests.Open_TakesPulse`, `.Shadowed_Safe`, `.Deterministic`.
+  - [x] A ship in the open takes the pulse; a ship behind a wreck does not.
+  - [x] Shield drain applies before hull damage.
+  - [x] It is deterministic.
+- **Tests:** `PulseTests.Open_TakesPulse`, `.Shadowed_Safe`, `.Shield_DrainsFirst`, `.Deterministic`.
+- **Done (2026-10-17):**
+  - `PulseSystem` (authority) fires a Pulse zone on the first tick of each window of its `ZoneSchedule` (`PulseMath.Fires`; a pulse zone with no schedule never fires; `HazardSpawn.Schedule` sets one).
+  - Each live ship with its centre of mass inside is hit unless a physics ray from the source to that centre hits another grid or chunk first. The source is the zone centre for C = 0 (a reactor), or a point far back along the zone's forward for C = 1 (a flare).
+  - A raised shield takes A + B as one shield hit, so it drains first and `ShieldSystem` passes any overflow to the hull. A ship without a shield takes A as energy damage on the face toward the source.
+  - Content: `zone_pulse_reactor` (A 260, B 240 over 140 m) and `zone_solar_flare` (A 180, B 320 over a 600 m square).
+  - Tests: three pulses take ~1050 off a ship in the open, 0 behind a wreck slab; a 2500-HP shield loses 500 per pulse with the hull untouched; two runs match exactly.
+  - Visual (`ZoneVisualSystem`, every machine): the reach rim and the lit ground brighten over the 0.75 s before a pulse, then a ring sweeps out in 0.3 s. Shadows show as dark wedges, cut by the same rays. See [pulse_reactor.jpg](../design/racing/img/pulse_reactor.jpg): the warning above, the pulse below.
+  - Playground pad 19 HAZARDS puts the reactor, a slab to hide behind, five canisters and one mine of each payload in one place. Each payload mine now has its own body and name: a band of blue (repulsor), cyan (EMP), orange (seeker) or purple (gravity).
 
 ### HAZ-017 — Engine wash
 - **Milestone:** M4

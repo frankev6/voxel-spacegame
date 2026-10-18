@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_device_mine_repulsor
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_device_mine_repulsor
+  formerIds: []
+  displayName: REPULSOR MINE
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f585301000100ad526d4e8430107dd362b2864262f8a3e1301e65a3c418b2bbf8c373ec15f4427a02150f60940b18b09dd26e816a34911fd3371fbcce9b0e80f3417f7472b9bda936eb5ddd5cadab8bdbbab93e024048094448083956a411d097c6e2831d64da0a03da99af2ce02038d795ce7f2787b2a0ea391a5516383735a7a1eb4ae9d91cca64c8168b2a3967b3682812037b2bc21fd22433115c24a6ca94032f3aa7b9d359b7b1d247e28188ff9b881909709c1820966581849cdd070a72a11cff7af9d8e937899602e7f5cc91dd5372088fd68ed00e8e47f4f41b516fd1a24f1fdd9ff25e693ea9b5f3ad2b5fc8bda54b8996cc77c67fddfde5dd7e7efee9aa4c17c96e57a1cd17y
+  cellCount: 189
+  boundsMin: {x: -6, y: -6, z: -6}
+  boundsMax: {x: 6, y: 6, z: 6}

@@ -86,33 +86,39 @@ namespace Game.Editor.Content
             so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
         }
 
-        static MineDefinition Mine()
+        /// <summary>RACE-016 / HAZ-018: a mine body: a 3.5 m sphere of mine casing (soot and graphite, a band of `band` round its waist)
+        /// with six 1.5 m spikes, big enough to hit, about 1.1 t so a bolt knocks it ~12 m/s. Each payload has its own band colour.</summary>
+        internal static ShipBlueprintDefinition MineBlueprint(string id, string displayName, byte band)
         {
             using var service = new Game.Data.Services.ContentService(ContentDatabaseBuilder.Rebuild());
             var catalog = service.Catalog; var content = new Game.Voxel.Model.VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
             ushort casing = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_mine_casing")));
             using var structure = new Game.Voxel.Model.VoxelStructure(.5f);
             void Put(int x, int y, int z, byte colour) => structure.TryPlaceBlock(new Game.Voxel.Model.BlockPlacement { Block = casing, Origin = new Unity.Mathematics.int3(x, y, z), Color = colour }, content);
-            // RACE-016: a 3.5 m sphere of mine casing (soot and graphite, a dark-red band round its waist) with six 1.5 m spikes:
-            // big enough to hit, about 1.1 t so a bolt knocks it ~12 m/s.
             for (int x = -3; x <= 3; x++) for (int y = -3; y <= 3; y++) for (int z = -3; z <= 3; z++)
             {
                 if (x * x + y * y + z * z > 11) continue;
-                Put(x, y, z, (byte)(y == 0 ? 2 : (x + y + z & 1) == 0 ? 1 : 11));
+                Put(x, y, z, (byte)(y == 0 ? band : (x + y + z & 1) == 0 ? 1 : 11));
             }
             foreach (var d in new[] { new Unity.Mathematics.int3(1, 0, 0), new Unity.Mathematics.int3(-1, 0, 0), new Unity.Mathematics.int3(0, 1, 0),
                 new Unity.Mathematics.int3(0, -1, 0), new Unity.Mathematics.int3(0, 0, 1), new Unity.Mathematics.int3(0, 0, -1) })
                 for (int k = 4; k <= 6; k++) Put(d.x * k, d.y * k, d.z * k, k == 6 ? (byte)14 : (byte)11);
-            string bpPath = "Assets/Game/Content/Ships/ship_device_mine_proximity.asset";
+            string bpPath = "Assets/Game/Content/Ships/" + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(bpPath);
             if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, bpPath); }
             var so = new SerializedObject(blueprint);
-            so.FindProperty("id").stringValue = "ship_device_mine_proximity"; so.FindProperty("displayName").stringValue = "PROXIMITY MINE";
+            so.FindProperty("id").stringValue = id; so.FindProperty("displayName").stringValue = displayName;
             so.FindProperty("cellSize").floatValue = .5f; so.ApplyModifiedPropertiesWithoutUndo();
             structure.TryGetCellBounds(out var min, out var max);
             blueprint.EditorSetPayload(Game.Voxel.Model.VoxelStructureCodec.Encode(structure, Game.Voxel.Data.VoxsBlockNames.FromCatalog(catalog), Game.Voxel.Data.VoxsEncodeOptions.ForAsset),
                 structure.SolidCellCount, new Vector3Int(min.x, min.y, min.z), new Vector3Int(max.x, max.y, max.z));
             EditorUtility.SetDirty(blueprint);
+            return blueprint;
+        }
+
+        static MineDefinition Mine()
+        {
+            var blueprint = MineBlueprint("ship_device_mine_proximity", "PROXIMITY MINE", 2);
             string path = Hazards + "mine_proximity.asset";
             var mine = AssetDatabase.LoadAssetAtPath<MineDefinition>(path);
             if (mine == null) { mine = ScriptableObject.CreateInstance<MineDefinition>(); AssetDatabase.CreateAsset(mine, path); }
