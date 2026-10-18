@@ -343,6 +343,17 @@ def blender_main(key, draft):
     for k_, pb in panel_bm.items():
         pm = bpy.data.meshes.new("panels_" + k_); pb.to_mesh(pm); pb.free()
         po = bpy.data.objects.new("panels_" + k_, pm); scene.collection.objects.link(po); pm.materials.append(pmat[k_])
+    # option E: whatever stands above the cut plane on the rock is cut away with it in a cutaway shot
+    cut_hide = []
+    if opt.get("rock"):
+        for ob in [o_ for o_ in scene.collection.objects if o_.name == "city" or o_.name.startswith("panels_")]:
+            hi_me = ob.data.copy(); hi = bpy.data.objects.new(ob.name + "_high", hi_me); scene.collection.objects.link(hi)
+            for me_, keep_above in ((ob.data, False), (hi_me, True)):
+                b_ = bmesh.new(); b_.from_mesh(me_)
+                bmesh.ops.bisect_plane(b_, geom=b_.verts[:] + b_.edges[:] + b_.faces[:], plane_co=(0, 0, 24.0), plane_no=(0, 0, 1),
+                                       clear_inner=keep_above, clear_outer=not keep_above)
+                b_.to_mesh(me_); b_.free()
+            cut_hide.append(hi)
 
     # ---- ships: boxes in livery, engine glow and plume when under way, nav light at the bow
     ship_mats = {k: mat_flat("hull_" + k, v[0], 0.45, 0.4) for k, v in LIVERY.items()}
@@ -625,6 +636,8 @@ def blender_main(key, draft):
         # the game camera: behind and above the target, pitched down; a cut shot hides the rock above the flight plane
         if rock_high is not None:
             rock_high.hide_render = cut; rock_section.hide_render = not cut
+            for o_ in cut_hide:
+                o_.hide_render = cut
         p = math.radians(pitch)
         back = polar(yaw + 180, dist * math.cos(p), target)
         cam.location = (back[0], back[1], dist * math.sin(p))

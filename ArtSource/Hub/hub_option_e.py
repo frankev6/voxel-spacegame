@@ -11,7 +11,13 @@ at the flight plane. Inside the rock, and near its cliffs, the rock above the pl
 cutaway), so the tunnels are flown like any street.
 
 Who runs it: the Khuchad Clan. Raiders are hostile everywhere else (SPEC-33, relation locked); here they are only
-customers, and what they take is fenced, chopped and sold.
+customers, and what they take is sold in the black market.
+
+Owner, on the first version: "no need for the sun you have at the center, its just an asteroid, doesn't have a core like
+that. also you borrowed too much of the design things we talked about for #4 into here which i didn't ask for, also whats
+the with the rotating thing at the top and also all the holes at the top of the asteroid? why would the bazaar be open to
+the top?" So: a plain rock with no pits or reactor; everything inside it enclosed; only what was asked for (the black
+market and its merchants, the pirates' docks, tunnels and highways, construction around the rock); working lamps, not neon.
 """
 import math
 import random
@@ -97,241 +103,229 @@ def edge_point(b, c, step=6.0):
     return polar(b, r, c), r
 
 
+def den(C, c, r, district, name, liv, cls, rng):
+    """A merchant's den: a small cavern off a tunnel, its stock stacked round the wall, the merchant's ship moored in it,
+    one lit sign over the door."""
+    for k in range(int(r / 10)):
+        a = k * 360 / int(r / 10) + rng.uniform(-6, 6)
+        q = polar(a, r - 14, c)
+        C.b(box(q, a + 90, rng.uniform(14, 24), rng.uniform(10, 16)), rng.uniform(-6, 8), -rng.uniform(30, 60), "cargo", district,
+            lit=rng.uniform(0.2, 0.5), roof=rng.choice([liv, None]))
+    C.ship(polar(rng.uniform(0, 360), r * 0.35, c), rng.uniform(0, 360), cls, liv, "docked")
+    C.fx.append(dict(type="neon", c=polar(200, r - 6, c), heading=110, length=18, height=7, z=16, col="#FFB000"))
+    for k in range(4):
+        C.fx.append(dict(type="flash", c=polar(k * 90 + 45, r * 0.7, c), z=30, r=2.5, col="#FFC070"))
+    C.holos.append(dict(text=name, at=c, district=district, small=True))
+
+
 def option_e():
     C = City("E", 21)
     rng = random.Random(21)
     A, B = LOBES[0][0], LOBES[1][0]
 
-    # ---- tunnels at the flight plane: the Ring highway round both lobes, the Maw in from the south, spurs to the
-    # caverns, the Smugglers' Run out the back to a hidden gate, a vent north, the passage into the Den
+    # ---- tunnels at the flight plane: the Ring highway round both lobes, the Maw in from the south, the back door
+    # out the east, spurs to the dens, the docks and the Den
     ring = [(-60, -200), (-360, -200), (-560, 0), (-500, 260), (-260, 400), (40, 290), (300, 140), (560, 20), (640, -160),
             (470, -300), (230, -260), (40, -210), (-60, -200)]
     maw = [(0, -900), (0, -420), (-20, -205)]
-    run = [(640, -160), (820, -200), (1000, -260)]
-    vent = [(-260, 400), (-240, 720)]
-    den = [(560, 20), (640, 90)]
-    spurs = [[(-200, -200), (-290, -80)], [(470, -300), (440, -200)], [(40, -210), (95, -125)], [(300, 140), (160, 20)]]
-    tunnels = [(ring, 84), (maw, 96), (run, 56), (vent, 50), (den, 70)] + [(s, 56) for s in spurs]
+    back = [(640, -160), (820, -200), (960, -230)]
+    to_den = [(560, 20), (640, 90)]
+    spurs = [[(-200, -200), (-290, -110)], [(470, -300), (440, -215)], [(40, -210), (100, -120)], [(40, 290), (100, 245)],
+             [(-560, 0), (-570, -60)], [(-260, 400), (-110, 345)]]
+    tunnels = [(ring, 84), (maw, 96), (back, 60), (to_den, 70)] + [(s_, 50) for s_ in spurs]
 
-    # ---- caverns: (centre, radius, floor, ceiling); a ceiling of None is open to space
-    bazaar, chop, fence, drop, furnace = (-330, 120), (430, -80), (-560, -130), (120, 255), (110, -60)
-    caverns = [(bazaar, 215, -70, None), (chop, 130, -60, 90), (fence, 100, -50, 70), (drop, 105, -90, 80),
-               (furnace, 80, -340, None)]
-    craters = [((-620, 330), 90, 60), ((250, 380), 70, 50), ((640, -330), 60, 40), ((-120, -390), 50, 30)]
-    rock = build_rock(tunnels, caverns, craters)
+    # ---- caverns, all enclosed: the Market, the pirates' Docks, four merchants' dens
+    market, docks = (-330, 120), (430, -80)
+    dens = [((-570, -135), 75, "GUNSMITH", "khu", "hauler"), ((115, 205), 62, "PARTS", "tlax", "hauler"),
+            ((110, -60), 70, "SALVAGE", "scav", "tug"), ((-90, 320), 56, "SMUGGLER", "vest", "courier")]
+    caverns = [(market, 205, -80, 110), (docks, 135, -70, 90)] + [(c, r, -50, 70) for c, r, _, _, _ in dens]
+    rock = build_rock(tunnels, caverns, [])
 
-    # ---- the lanes the traffic flies: the Ring both ways, in and out through the Maw, the Run
+    # ---- the lanes the traffic flies
     C.lane(ring, "tunnel", closed=True, oneway=False)
-    C.traffic_on(ring, 12, [("hauler", "khu"), ("courier", "scav"), ("wraith", "khu"), ("tug", "scav"), ("shuttle", "civ")], 51)
-    C.lane([(30, -1900), (30, -900), (20, -420), (-10, -215)], "approach_in")
-    C.lane([(-30, -215), (-30, -420), (-30, -900), (-30, -1900)], "approach_out")
-    C.traffic_on([(30, -1900), (30, -900), (20, -420)], 3, [("hauler", "khu"), ("wraith", "scav"), ("courier", "vest")], 52)
-    C.traffic_on([(-30, -420), (-30, -900), (-30, -1900)], 2, [("hauler", "scav"), ("tug", "scav")], 53, 0.4)
-    C.lane(run, "tunnel", oneway=False)
-    C.lane(vent, "tunnel", oneway=False)
-    for s in spurs + [den]:
-        C.lane(s, "tunnel", oneway=False)
-    # light strips along every tunnel wall
+    C.traffic_on(ring, 10, [("hauler", "khu"), ("courier", "scav"), ("wraith", "khu"), ("tug", "scav"), ("shuttle", "civ")], 51)
+    C.lane([(30, -1700), (30, -900), (20, -420), (-10, -215)], "approach_in")
+    C.lane([(-30, -215), (-30, -420), (-30, -900), (-30, -1700)], "approach_out")
+    C.traffic_on([(30, -1700), (30, -900), (20, -420)], 2, [("hauler", "khu"), ("wraith", "scav")], 52)
+    C.traffic_on([(-30, -420), (-30, -900), (-30, -1700)], 2, [("hauler", "scav"), ("tug", "scav")], 53, 0.4)
+    for t_ in [back, to_den] + spurs:
+        C.lane(t_, "tunnel", oneway=False)
+    # working lamps: a sodium strip along the highway walls, lamps at intervals in the side tunnels
     for pts, w in tunnels:
-        for s in (-1, 1):
+        for s_ in (-1, 1):
             side = []
             for a, b in zip(pts, pts[1:]):
                 hd = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
-                side += [polar(hd + 90, s * (w / 2 - 4), a), polar(hd + 90, s * (w / 2 - 4), b)]
-            C.fx.append(dict(type="neon_line", pts=[(round(x, 1), round(y, 1)) for x, y in side], z=-24,
-                             col="#FFB347" if w > 80 else "#9FB4C8"))
+                side += [polar(hd + 90, s_ * (w / 2 - 4), a), polar(hd + 90, s_ * (w / 2 - 4), b)]
+            if w > 80:
+                C.fx.append(dict(type="neon_line", pts=[(round(x, 1), round(y, 1)) for x, y in side], z=-24, col="#C8782A"))
+            else:
+                for a, b in zip(side[::2], side[1::2]):
+                    n = max(1, int(math.dist(a, b) / 40))
+                    for k in range(n):
+                        f = (k + 0.5) / n
+                        C.fx.append(dict(type="flash", c=(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f), z=-20, r=2.0,
+                                         col="#FFC070"))
 
-    # ---- the Maw: the one front door, a gun-lined throat with a field gate and the Clan's sign over it
+    # ---- the Maw: the front door, two gun emplacements on its lip, docking lights down its throat
     mouth, _ = edge_point(180, (0, -420))
-    for s in (1, -1):
-        for k, dy in enumerate((0, 70, 150)):
-            p = (s * (70 + k * 10), mouth[1] + dy)
-            C.shape("sphere", p, "maw", "turret", 0.6, 34, r=14)
-            for t_ in (-1, 1):
-                C.shape("truss", (p[0] + t_ * 5, p[1] - 30), "maw", "barrel", 0.0, 38, heading=180, length=46, width=3)
-            C.fx.append(dict(type="turret", c=p, facing=180 + s * 15, reach=520, arc=100))
-    C.fx.append(dict(type="field_wall", a=(-48, mouth[1] - 10), b=(48, mouth[1] - 10)))
-    C.fx.append(dict(type="scanner", a=(-46, mouth[1] + 40), b=(46, mouth[1] + 40)))
-    for k in range(10):
-        C.fx.append(dict(type="neon", c=(rng.uniform(-90, 90), mouth[1] + rng.uniform(-30, 10)), heading=90, length=rng.uniform(14, 40),
-                         height=rng.uniform(6, 14), z=rng.uniform(50, 140), col=rng.choice(["#FF2E88", "#FFB000", "#FF5530", "#22E6FF"])))
-    C.holos.append(dict(text="THE HOLLOW", at=(0, mouth[1] - 40), district="maw"))
-    C.district("maw", "THE MAW", mouth, "The one front door: a gun-lined throat, a field gate, the Clan's scan.", [], None)
+    for s_ in (1, -1):
+        p = (s_ * 95, mouth[1] + 40)
+        C.shape("sphere", p, "maw", "turret", 0.6, 30, r=14)
+        for t_ in (-1, 1):
+            C.shape("truss", (p[0] + t_ * 5, p[1] - 30), "maw", "barrel", 0.0, 34, heading=180, length=46, width=3)
+        C.fx.append(dict(type="turret", c=p, facing=180 + s_ * 15, reach=520, arc=100))
+    for k in range(6):
+        for s_ in (1, -1):
+            C.fx.append(dict(type="flash", c=(s_ * 44, mouth[1] - 120 + k * 60), z=0, r=3, col="#FFF0D0" if k % 2 else "#FFB347"))
+    C.fx.append(dict(type="neon", c=(0, mouth[1] - 6), heading=90, length=60, height=10, z=70, col="#FF5530"))
+    C.holos.append(dict(text="THE MAW", at=(0, mouth[1] - 70), district="maw", small=True))
 
-    # ---- the approach: no picket, but a maze: boulders and mines either side of a channel marked by red lamps,
-    # captured prizes chained outside as a warning and an advertisement
-    for k in range(70):
-        x = rng.choice([-1, 1]) * rng.uniform(140, 900); y = rng.uniform(-1750, -560)
-        if abs(x) < 160:
-            continue
-        C.fx.append(dict(type="boulder", c=(round(x, 1), round(y, 1)), r=round(rng.uniform(10, 55), 1)))
-    for s in (1, -1):
-        C.fx.append(dict(type="minefield", c=(s * 330, -1250), r=170, n=20, kind="prox"))
-        C.fx.append(dict(type="minefield", c=(s * 520, -820), r=150, n=16, kind="seeker"))
-    for y in range(-1800, -560, 140):
-        for s in (1, -1):
-            C.fx.append(dict(type="flash", c=(s * 120, y), z=0, r=4, col="#FF3C28"))
-    for k, (c, hd) in enumerate((((-420, -720), 30), ((480, -600), 320), ((-700, -420), 70))):
-        C.fx.append(dict(type="hulk", c=c, heading=hd, length=rng.uniform(110, 170), width=rng.uniform(30, 44), bow=True,
-                         cut_back=True))
-        anchor, _ = edge_point(bearing_of((c[0] - A[0], c[1] - A[1])) if k != 1 else 200, A if k != 1 else B)
-        C.fx.append(dict(type="beam", a=c, za=0, b=anchor, zb=0, col="#7A7F86"))
-    spawn = dict(c=(30, -1900), heading=0)
-    C.fx.append(dict(type="marker", c=(30, -1500)))
+    # ---- the approach: an ordinary rock field round the asteroid, a few navigation beacons on the way in
+    for k in range(44):
+        x = rng.choice([-1, 1]) * rng.uniform(150, 900); y = rng.uniform(-1600, -560)
+        C.fx.append(dict(type="boulder", c=(round(x, 1), round(y, 1)), r=round(rng.uniform(8, 45), 1)))
+    for y in range(-1500, -560, 260):
+        C.fx.append(dict(type="flash", c=(90, y), z=0, r=4, col="#FFB347"))
+        C.fx.append(dict(type="flash", c=(-90, y), z=0, r=4, col="#FFB347"))
+    spawn = dict(c=(30, -1700), heading=0)
 
-    # ---- outside: the station grown over the rock. Docking spars with the Clan's and its customers' ships, habitat
-    # blocks bolted to the cliffs, a hab ring on the high ground, radiators, masts and the ore mass driver
+    # ---- the construction built onto and round the rock: docking spars, modules bolted to the cliffs, scaffolding
+    # over the flanks, a girder belt round the waist, radiators, masts, the ore mass driver
     for b, c in ((235, A), (290, A), (330, A), (20, A), (60, B), (110, B), (150, B)):
         p, r = edge_point(b, c)
-        L = rng.uniform(150, 260)
+        L = rng.uniform(150, 240)
         C.shape("truss", polar(b, L / 2 - 20, p), "outer", "spar", 0.6, 0, heading=b, length=L, width=8)
-        for j in range(rng.randint(2, 4)):
-            cls = rng.choice(["hauler", "wraith", "courier", "cruiser", "tug"])
+        for j in range(rng.randint(1, 3)):
+            cls = rng.choice(["hauler", "wraith", "courier", "tug"])
             side = 1 if j % 2 else -1
             C.ship(polar(b + 90, side * (CLASSES[cls][1] / 2 + 8), polar(b, 30 + j * 55, p)), b + 90 * side, cls,
                    rng.choice(["khu", "khu", "scav", "scav", "vest", "tlax"]), "docked")
         C.fx.append(dict(type="flash", c=polar(b, L - 20, p), z=8, r=3, col="#FF3C28"))
-    for k in range(26):
+    for k in range(30):
         c = rng.choice([A, B])
         b = rng.uniform(0, 360)
+        if c == A and abs((b - 180 + 180) % 360 - 180) < 25:       # keep the Maw clear
+            continue
         p, r = edge_point(b, c)
-        if abs(((b - 180) + 180) % 360 - 180) < 25 and c == A:        # keep the Maw clear
+        q = polar(b, -rng.uniform(10, 50), p)
+        L_, W_ = rng.uniform(30, 80), rng.uniform(18, 36)
+        top = min(surface(*q) + rng.uniform(10, 40), 240)
+        C.b(box(q, b + rng.choice([0, 90]), L_, W_), top, -rng.uniform(60, 200), "hab", "outer", lit=rng.uniform(0.4, 0.8))
+    for k in range(7):                                            # scaffolding over the flanks: a lattice of girders
+        c = rng.choice([A, B])
+        p = polar(rng.uniform(0, 360), rng.uniform(120, 320) * (1 if c == A else 0.7), c)
+        hd = rng.uniform(0, 180)
+        for i in range(4):
+            for s_ in (0, 90):
+                q = polar(hd + s_, (i - 1.5) * 28, p)
+                C.shape("truss", q, "outer", "gantry", 0.8, surface(*q) + 14, heading=hd + 90 - s_, length=100, width=3)
+    belt = []                                                     # the girder belt hugging the rock at its waist
+    for b in range(0, 360, 6):
+        c = A if (b > 200 or b < 20) else B
+        p, r = edge_point(b, c)
+        belt.append(polar(b, 22, p))
+    for a, b in zip(belt, belt[1:] + belt[:1]):
+        if math.dist(a, b) > 160 or (abs(a[0]) < 120 and a[1] < -250):   # not across the lobes' join, not over the Maw
             continue
-        q = polar(b, -rng.uniform(10, 60), p)
-        L_, W_ = rng.uniform(30, 90), rng.uniform(18, 40)
-        top = rng.uniform(40, 180)
-        C.b(box(q, b + rng.choice([0, 90]), L_, W_), top, -rng.uniform(60, 200), "hab", "outer", lit=rng.uniform(0.5, 1.0))
-        if rng.random() < 0.6:
-            C.fx.append(dict(type="neon", c=polar(b, 6, q), heading=b + 90, length=rng.uniform(10, 30), height=rng.uniform(6, 14),
-                             z=round(top + 10, 1), col=rng.choice(["#FF2E88", "#22E6FF", "#FFB000", "#9DFF3C"])))
-    hr = (-20, 60)
-    C.shape("torus", hr, "outer", "hab_ring", 0.9, surface(*hr) + 40, R=130, r=14, spokes=4, hub=28)
-    C.shape("sphere", hr, "outer", "hub", 0.8, surface(*hr) + 40, r=28)
-    C.shape("panel", hr, "outer", "mast", 0.9, surface(*hr) + 20, heading=0, length=10, thick=10, height=40)
-    for k in range(5):
+        mid = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+        C.shape("truss", mid, "outer", "gantry", 0.8, 70, heading=math.degrees(math.atan2(b[0] - a[0], b[1] - a[1])),
+                length=math.dist(a, b), width=6)
+    for k in range(4):
         p = polar(rng.uniform(0, 360), rng.uniform(80, 300), A)
-        if math.dist(p, bazaar) < 260 or math.dist(p, hr) < 170:
-            continue
         for f in range(6):
             q = polar(90, (f - 2.5) * 8, p)
             C.shape("panel", q, "outer", "radiator", 0.0, surface(*q) + 8, heading=0, length=70, thick=1.5, height=24)
-    for k in range(6):
+    for k in range(5):
         p = polar(rng.uniform(0, 360), rng.uniform(60, 260), rng.choice([A, B]))
-        hm = rng.uniform(80, 160)
+        hm = rng.uniform(70, 140)
         C.shape("panel", p, "outer", "mast", 0.9, surface(*p) + hm / 2, heading=0, length=5, thick=5, height=hm)
     md, _ = edge_point(30, B)
-    C.shape("truss", polar(30, 220, md), "outer", "rail", 0.6, 20, heading=30, length=480, width=10)
-    for k in range(6):
+    C.shape("truss", polar(30, 200, md), "outer", "rail", 0.6, 20, heading=30, length=420, width=10)
+    for k in range(5):
         C.fx.append(dict(type="canister", c=polar(30, 80 + k * 70, md)))
-    C.district("outer", "THE OUTER WORKS", polar(300, 300, A), "Docking spars, habitat blocks bolted to the cliffs, the hab "
-               "ring on the high ground, radiators and the ore mass driver.", [], None)
 
-    # ---- the Black Bazaar: an old crater roofed by nothing, its walls terraced with stalls at the flight plane
-    for k in range(34):
-        a = k * 360 / 34 + rng.uniform(-3, 3)
-        q = polar(a, 196, bazaar)
-        col = rng.choice(["#FF2E88", "#22E6FF", "#FFB000", "#9DFF3C", "#B44CFF"])
-        C.b(box(q, a + 90, rng.uniform(22, 36), rng.uniform(14, 22)), rng.uniform(-4, 12), -rng.uniform(40, 90), "stall", "bazaar",
-            lit=rng.uniform(0.7, 1.0), roof=rng.choice(["khu", "scav", "vest", None]))
-        C.fx.append(dict(type="neon", c=polar(a, -14, q), heading=a + 90, length=rng.uniform(12, 26), height=rng.uniform(6, 12),
-                         z=rng.uniform(16, 40), col=col))
-        if rng.random() < 0.45:
+    # ---- the Market: the black market in the rock's largest cavern, stalls on ledges round its wall, stolen cargo on
+    # the floor, the Quartermaster's console the one reset
+    for k in range(30):
+        a = k * 12 + rng.uniform(-3, 3)
+        q = polar(a, 186, market)
+        C.b(box(q, a + 90, rng.uniform(22, 34), rng.uniform(14, 20)), rng.uniform(-4, 10), -rng.uniform(40, 80), "stall", "bazaar",
+            lit=rng.uniform(0.5, 0.9), roof=rng.choice(["khu", "scav", "vest", None]))
+        if k % 3 == 0:
+            C.fx.append(dict(type="flash", c=polar(a, -16, q), z=26, r=2.5, col="#FFC070"))
+        if rng.random() < 0.35:
             cls = rng.choice(["shuttle", "courier", "tug", "hauler"])
             C.ship(polar(a, -(22 + CLASSES[cls][1] / 2), q), a + 90, cls, rng.choice(["khu", "scav", "vest", "tlax", "civ"]), "docked")
-    for k in range(3):                                             # the stacks of stolen cargo on the crater floor
-        C.b(box(polar(k * 120 + 30, 80, bazaar), k * 120, 70, 40), -40, -70, "cargo", "bazaar", lit=0.2, roof="khu")
-    C.fx.append(dict(type="lab", c=bazaar))                        # the Quartermaster: the one reset
-    C.lane([polar(a, 130, bazaar) for a in range(0, 360, 6)], "street", closed=True, oneway=False)
-    C.traffic_on([polar(a, 130, bazaar) for a in range(0, 361, 6)], 6, [("shuttle", "civ"), ("courier", "scav"), ("tug", "khu")], 54)
-    C.district("bazaar", "THE BLACK BAZAAR", bazaar, "An open crater, its walls terraced with stalls: stolen blocks, "
-               "unregistered weapons, salvage with the serials ground off. The Quartermaster's console is the one reset.",
-               ["Black-market blocks and weapons", "The Quartermaster: reset everything"], "BAZAAR")
+    for k in range(5):
+        C.b(box(polar(k * 72 + 20, 80, market), k * 72, rng.uniform(40, 70), rng.uniform(24, 36)), -46, -80, "cargo", "bazaar",
+            lit=0.2, roof="khu")
+    C.fx.append(dict(type="lab", c=market))
+    C.lane([polar(a, 125, market) for a in range(0, 360, 6)], "street", closed=True, oneway=False)
+    C.traffic_on([polar(a, 125, market) for a in range(0, 360, 6)], 5, [("shuttle", "civ"), ("courier", "scav"), ("tug", "khu")], 54)
+    C.holos.append(dict(text="THE MARKET", at=market, district="bazaar", small=True))
+    C.district("bazaar", "THE MARKET", market, "The black market in the rock's largest cavern: stolen blocks, unregistered "
+               "weapons, salvage with the serials ground off. The Quartermaster's console is the one reset.",
+               ["Black-market blocks and weapons", "The Quartermaster: reset everything"], None)
 
-    # ---- the Chop Shop: stolen ships stripped for parts, and the cradle where you refit your own, no questions
-    for k, (dx, dy, hd, cls) in enumerate(((-40, 40, 70, "cruiser"), (50, -30, 250, "hauler"), (-20, -70, 100, "wraith"))):
-        c = (chop[0] + dx, chop[1] + dy)
-        C.ship(c, hd, cls, rng.choice(["vest", "tlax"]), "docked")
-        L, W = CLASSES[cls]
-        for s in (-1, 1):
-            C.shape("truss", polar(hd + 90, s * (W / 2 + 12), c), "chop", "gantry", 0.8, 10, heading=hd, length=L + 20, width=5)
-        for j in range(3):
-            C.fx.append(dict(type="flash", c=polar(hd, rng.uniform(-L / 3, L / 3), polar(hd + 90, rng.choice([-1, 1]) * W * 0.4, c)),
-                             z=8, r=2.5, col="#BFE8FF"))
-    C.shape("torus", (chop[0] + 70, chop[1] + 60), "chop", "coil", 1.0, 0, R=34, r=5, upright=True, heading=40)
-    C.holos.append(dict(text="REFIT", at=(chop[0] + 70, chop[1] + 60), district="chop", small=True))
-    C.district("chop", "THE CHOP SHOP", chop, "Stolen ships stripped for parts under gantries; the refit cradle edits yours.",
-               ["Refit cradle: edit your ship", "Parts off stolen hulls"], "CHOP SHOP")
+    # ---- the merchants' dens off the tunnels, each one dealer
+    for c, r, name, liv, cls in dens:
+        den(C, c, r, "fence", name, liv, cls, rng)
+    C.district("fence", "THE DENS", dens[0][0], "Single dealers in small caverns off the tunnels: a gunsmith, a parts broker, "
+               "a salvage broker, a smuggler.", ["GUNSMITH: weapons", "PARTS: blocks and engines", "SALVAGE: buys and sells wreckage",
+                                                 "SMUGGLER: contraband cargo"], None)
 
-    # ---- the Fence: brokers for anything taken off someone else's ship, their haulers alongside
-    for k in range(2):
-        q = polar(k * 140 + 20, 45, fence)
-        for i in range(3):
-            for j in range(4):
-                C.b(box(polar(k * 140 + 110, (j - 1.5) * 24, polar(k * 140 + 20, (i - 1) * 13, q)), k * 140 + 110, 22, 10), 6, -6, "cargo",
-                    "fence", lit=0.15, roof=rng.choice(["khu", "scav", None]))
-    C.ship((fence[0] + 30, fence[1] - 50), 60, "hauler", "scav", "docked")
-    C.district("fence", "THE FENCE", fence, "Brokers for stolen cargo and salvage.", ["Sell anything, no papers"], "FENCE")
-
-    # ---- the Drop: a pit where crews settle things, ledges of spectators round it
-    C.shape("torus", drop, "drop", "stands", 0.95, -30, R=92, r=10)
-    C.shape("torus", drop, "drop", "stands", 0.95, -60, R=74, r=8)
-    C.fx.append(dict(type="arena", c=drop, r=80))
-    s1, s2 = polar(60, 40, drop), polar(250, 40, drop)
-    C.ship(s1, 240, "wraith", "khu", "cruise"); C.ship(s2, 60, "wraith", "scav", "cruise")
-    C.fx.append(dict(type="beam", a=s1, za=0, b=polar(70, 12, s2), zb=0, col="#FF7A2F"))
-    C.district("drop", "THE DROP", drop, "A pit in the rock where crews settle things; the ledges round it fill up.",
-               ["Duels and brawls"], "THE DROP")
-
-    # ---- the Furnace: the reactor in the rock's waist, in a shaft open to space; its pulse sweeps the tunnels by it
-    C.fx.append(dict(type="reactor", c=furnace, r=160, light=2.5e7))
-    for k in range(4):
-        C.shape("panel", polar(k * 90 + 45, 64, furnace), "furnace", "bulkhead", 0.2, 0, heading=k * 90 + 135, length=40, thick=8,
-                height=50)
-    C.district("furnace", "THE FURNACE", furnace, "The haven's reactor in a shaft through the rock; its pulse sweeps the tunnels "
-               "beside it. Hide behind the bulkheads.", ["The reactor pulse: shadows are shelter"], None)
+    # ---- the Docks: the pirates' berths inside the rock, crews' ships along the cavern wall, repairs under way
+    for k in range(9):
+        a = k * 40 + 10
+        cls = rng.choice(["wraith", "wraith", "cruiser", "hauler"])
+        q = polar(a, 135 - CLASSES[cls][1] / 2 - 14, docks)
+        C.shape("truss", polar(a, 135 - 8, docks), "chop", "arm", 0.6, 0, heading=a, length=20, width=5)
+        C.ship(q, a + 90, cls, rng.choice(["khu", "scav", "scav"]), "docked")
+        if k % 3 == 0:
+            C.fx.append(dict(type="flash", c=q, z=10, r=2.5, col="#BFE8FF"))
+    C.holos.append(dict(text="THE DOCKS", at=docks, district="chop", small=True))
+    C.district("chop", "THE DOCKS", docks, "The pirates' berths inside the rock; crews' ships along the cavern wall.",
+               ["Pirate crews and their ships"], None)
 
     # ---- the Den: an old warship rammed into the rock long ago, its hangar the Clan's own
     den_c = (760, 150)
     C.fx.append(dict(type="hulk", c=den_c, heading=55, length=460, width=120, bow=True, cut_back=False))
-    for k in range(5):
-        C.ship(polar(55 + 90, (k - 2) * 26, polar(55, -60 + (k % 2) * 40, den_c)), 235, rng.choice(["wraith", "cruiser"]), "khu", "docked")
-    for k in range(8):
-        C.fx.append(dict(type="flash", c=polar(55, -200 + k * 50, polar(145, 62, den_c)), z=30, r=3, col="#FF7A2F"))
-    C.district("den", "THE DEN", den_c, "A warship rammed into the rock long ago; its hangar is the Clan's own.",
-               ["The Clan's crews and their ships"], "THE DEN")
-
-    # ---- the back door: the Smugglers' Run ends at a lane gate nobody admits to
-    C.fx.append(dict(type="portal", c=(1060, -280), facing=110, width=80))
-    C.district("run", "THE SMUGGLERS' RUN", (900, -230), "A back tunnel to a lane gate nobody admits to.", [], None)
+    for k in range(4):
+        C.ship(polar(55 + 90, (k - 1.5) * 26, polar(55, -60 + (k % 2) * 40, den_c)), 235, rng.choice(["wraith", "cruiser"]), "khu", "docked")
+    for k in range(6):
+        C.fx.append(dict(type="flash", c=polar(55, -150 + k * 50, polar(145, 62, den_c)), z=30, r=3, col="#FFC070"))
+    C.holos.append(dict(text="THE DEN", at=den_c, district="den", small=True))
+    C.district("den", "THE DEN", den_c, "A warship rammed into the rock long ago; its hangar is the Clan's own.", [], None)
+    C.district("outer", "THE OUTER WORKS", polar(300, 300, A), "Spars, modules on the cliffs, scaffolding, the girder belt.", [], None)
+    C.district("maw", "THE MAW", mouth, "The front door.", [], None)
 
     callouts = [
-        ((30, -1900), "You spawn outside; follow the red lamps through the boulders and mines"),
-        ((0, mouth[1]), "The Maw: the one front door, guns, a field gate, the Clan's scan"),
-        (bazaar, "The Black Bazaar: an open crater of stalls; the Quartermaster is the one reset"),
+        ((30, -1700), "You spawn outside the rock field; the beacons lead to the Maw"),
+        ((0, mouth[1]), "The Maw: the front door, two gun emplacements, docking lights"),
         ((-450, 330), "The Ring: the highway inside the rock, both ways, round both lobes"),
-        (chop, "The Chop Shop: stolen ships stripped; refit your own"),
-        (fence, "The Fence: sell anything, no papers"),
-        (drop, "The Drop: a fighting pit in the rock"),
-        (furnace, "The Furnace: the reactor shaft; its pulse sweeps the tunnels"),
+        (market, "The Market: the black market in the largest cavern; the Quartermaster is the one reset"),
+        (dens[0][0], "The dens: a gunsmith, a parts broker, a salvage broker, a smuggler"),
+        (docks, "The Docks: the pirates' berths inside the rock"),
         (den_c, "The Den: the Clan's hangar in a rammed warship"),
-        ((1060, -280), "The Smugglers' Run: the back door to a hidden gate"),
-        (polar(300, 400, A), "The Outer Works: spars, cliff habitats, the hab ring"),
+        ((960, -230), "The back door: a second way out"),
+        (polar(300, 400, A), "Outside: spars, modules on the cliffs, scaffolding, the girder belt, the mass driver"),
     ]
     return dict(key="E", title="OPTION E  ·  THE HOLLOW", name="THE HOLLOW",
-                subtitle="A pirate haven built into an asteroid: tunnels and caverns inside, the station grown over the rock.",
-                spawn=spawn, bounds=(-1250, -2000, 1300, 900), wall=0, seed=21, rock=dict(cell=CELL, cols=rock),
-                concept=("The Khuchad Clan's haven, cut into a two-lobed asteroid 1.7 km long. You come in through a maze of "
-                         "boulders and mines along a channel of red lamps to the Maw, the one front door. Inside, the Ring "
-                         "highway runs round both lobes at the flight plane, two ways, lit along its walls, with caverns off it: "
-                         "the Black Bazaar in an open crater, the Chop Shop, the Fence, the Drop, the Furnace in the rock's waist "
-                         "and the Den in a warship rammed into the rock. Outside, the station has grown over the rock: docking "
-                         "spars, habitat blocks bolted to the cliffs, a hab ring on the high ground, the ore mass driver. Inside "
-                         "the rock the roof hides round you, so the tunnels fly like streets."),
-                strengths=["Small and intimate: a few dozen ships, every one with a reason to be there",
-                           "Tunnels and caverns are a new kind of flying: tight, lit, two-way",
-                           "A different feel from Meridian: rough, hidden, run by one clan"],
+                subtitle="A pirate haven built into an asteroid: tunnels and caverns inside, construction built onto the rock.",
+                spawn=spawn, bounds=(-1250, -1800, 1300, 900), wall=0, seed=21, rock=dict(cell=CELL, cols=rock),
+                concept=("The Khuchad Clan's haven, built into a two-lobed asteroid 1.7 km long. You come in through the rock "
+                         "field along a few beacons to the Maw. Inside, the Ring highway runs round both lobes at the flight "
+                         "plane, two ways, lit by working lamps. Off it are the Market (the black market, in the largest "
+                         "cavern), four merchants' dens, the pirates' Docks and the Den, a warship rammed into the rock. "
+                         "Outside, the station is built onto the rock: docking spars, modules bolted to the cliffs, scaffolding, "
+                         "a girder belt round its waist and an ore mass driver. Inside the rock the roof hides round you, so the "
+                         "tunnels fly like streets."),
+                strengths=["Small and quiet: about forty ships, every one with a reason to be there",
+                           "Tunnels and caverns are a new kind of flying: tight, two-way, lit",
+                           "A different feel from Meridian: rough, hidden, one clan's rock"],
                 costs=["Tunnels need the roof cutaway round the player (the camera looks down)",
                        "The rock is voxels at 12 m: about 8,000 columns to build and to collide with"],
-                play_shots=[("bazaar", bazaar, 700), ("ring", (-480, 120), 650), ("chop", chop, 520), ("maw", (0, mouth[1] - 60), 700),
-                            ("den", den_c, 800), ("furnace", furnace, 600)],
+                play_shots=[("market", market, 650), ("ring", (-480, 120), 650), ("docks", docks, 520), ("maw", (0, mouth[1] - 60), 700),
+                            ("den", den_c, 800), ("dens", (115, 120), 520)],
                 callouts=callouts, **C.data())
