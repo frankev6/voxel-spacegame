@@ -2,12 +2,16 @@
 
 Start with `Assets/Game/Scenes/World.unity` and Play, or run `tools/playtest/playground.sh`. Use the visible **Console** control (F1 also works). All commands below are in-game console commands. From a terminal, use `tools/playtest/g.sh dev --cmd 'COMMAND'`; pending operations can be polled with `tools/playtest/g.sh op --id N`.
 
+## The hub (DEV-022)
+
+The playground is the ARK Proving Grounds: spawn on the plaza, fly out through a blue portal to one of nine districts (the directory beside the spawn gives their bearings), and come home through each district's ← HUB PORTAL. F stations are dashed rings with their name on the floor; red rings reset one district; RESET EVERYTHING on the plaza resets the session. Details: [tools/playtest/README.md](../tools/playtest/README.md#interactive-development-playground-dev-021).
+
 ## Entry, navigation and reset
 
 - `playground` enters the isolated `dev-playground` profile, preserving a prior real campaign through normal exit-save.
 - `playground status` lists the available areas and last result.
 - `playground run=<id>` closes the console, moves to the area and activates it. Close any other screen first.
-- `playground goto=<id>` moves without activation; close Console and press F within the ring.
+- `playground goto=<station>` moves onto a station's pad without activating it (`goto=district:<id>` to a district's entrance, `goto=hub` to the plaza); close Console and press F. Menu-only screens (cargo, settings, fleet, story, survey, map, power) are `run=` only.
 - `playground ship=<blueprint>` resets the playground flying that ship, for example `ship_nocturne_wraith`, `ship_nocturne_requiem`, `ship_nocturne_vesper`, `ship_nocturne_dirge`, `ship_xeno_husk` or `ship_fighter`. `playground ship=starter` restores the start ship; a wrong id lists every ship. The choice lasts across resets until the Editor restarts and never touches a campaign fleet (QA-001).
 - `playground reset` discards the current practice session and recreates the quiet sandbox, including from its Blueprint Lab or practice campaign. Saved blueprints/settings and already-written profile saves are not deleted. It never resets another profile's saved campaign.
 
@@ -15,7 +19,7 @@ Start with `Assets/Game/Scenes/World.unity` and Play, or run `tools/playtest/pla
 
 | Command | What to exercise |
 |---|---|
-| `playground run=flight` | Four-gate course. W/S forward/reverse; A/D turn; Q/E (or Shift+A/D) strafe; Ctrl boost; X brake; wheel zoom. |
+| `playground run=flight` | Six-gate slalom in the flight school. W/S forward/reverse; A/D turn; Q/E (or Shift+A/D) strafe; Ctrl boost; X brake; wheel zoom. |
 | `playground run=range` | Space fires at the enlarged procedural station. Cut narrow bridges; observe detached sections, damage, colliders, debris, VFX/audio. |
 | `playground run=combat` | One hostile fighter per reset. AI pursuit, firing, incoming damage and defeat flow. Reset before trying quiet features. |
 | `playground run=power` | Live energy supply/demand, shield HP and ability charges/cooldowns. Use shield/boost buttons and normal equipped ability keys. |

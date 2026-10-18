@@ -143,29 +143,27 @@ W/S requests forward/reverse thrust, A/D turns, Shift+A/D strafes while the turn
 
 From a terminal at the repository root, run `tools/playtest/playground.sh`. This enters Play if necessary, starts the playground and waits for readiness. No manual console setup is needed.
 
-**Reset everything with `playground reset` in Console.** This restores the player and procedural station and clears enemies, broken pieces, projectiles, inventory grants, facts and trial state. Reset remains a command. Entry uses the separate `dev-playground` profile and saves any prior real campaign before switching; a failed save stops entry safely.
+**Reset everything with the RESET EVERYTHING pad or `playground reset`.** This restores the player and every district and clears enemies, broken pieces, projectiles, inventory grants, facts and trial state. Entry uses the separate `dev-playground` profile and saves any prior real campaign before switching; a failed save stops entry safely.
 
-Use `playground run=<id>` to close Console, move to a trial and activate it, or fly into a ring and press **F**. Full reviewer checklist: [QA-PLAYGROUND](../../docs/QA-PLAYGROUND.md).
+**The ARK Proving Grounds (DEV-022).** The playground is a space hub. You spawn on the plaza beside the hub station; a ring of blue lane-gate portals (the real HAZ-021 portals) round it leads to nine districts, each about one group of mechanics, and a portal in each district (← HUB PORTAL) brings you back. You can also fly between them: lanes with running lights lead out from the portals, shuttles and freighters circle on two traffic loops. Every sign is dot-matrix text on the floor; every F pad is a dashed ring with its name; red rings are resets.
 
-Available trials:
+| District (bearing from the plaza) | What is there |
+|---|---|
+| FLIGHT SCHOOL (SE) | SLALOM: six numbered gates, the next one lit. BOOST STRIP: a real boost pad. BRAKE BOX: F arms it; come in faster than 40 m/s and stop inside, and it times you. |
+| WEAPONS RANGE (S) | The breakable target station and six target fighters 100–260 m from the pad. |
+| COMBAT ARENA (SW) | DUEL: one raider fighter. XENO WAVE: two husks and a broodmother. Cover walls. |
+| HAZARD YARD (W) | A reactor pulsing every 4 s with a slab to hide behind, energy canisters, one mine of each payload with its effect written beside it. |
+| MECHANISM WORKS (NW) | Sweeper arm, sliding door, switch door (shoot the gold post), a portal that jams for 6 s behind each ship. |
+| SHIPYARD (N) | Ten ships on plinths; F on a ship's pad swaps you into it and rebuilds the playground, putting you back at that pad. BLUEPRINT LAB pad. |
+| MARKET DOCKS (NE) | A merchant freighter at a pier; TRADE hails it (ARK Station Market; first visit grants 2,000 test credits). |
+| SALVAGE YARD (E) | Hull chunks and gutted ships; SALVAGE prepares a wreck you pull into your hold at its real Salvage prompt. |
+| RACE CONTROL (S, beyond the range) | OPEN TRACK 01, then F again on the grid starts the countdown. |
 
-- `flight`: begin a four-checkpoint course; fly through each highlighted ring.
-- `range`: align with the stationary target; hold Space to shoot and break off its structures.
-- `combat`: spawn one actual hostile fighter per reset.
-- `cargo`: grant test fuel/credits and open the inventory; drag, inspect, sort or stack cargo.
-- `settings`: open the real settings screen and change settings.
-- `merchant`: open ARK Station Market; buy/sell actual cargo and stock. First visit grants 2,000 test credits.
-- `fleet`: inspect committed ship designs and stats.
-- `editor`: leave the sandbox and open the real creative Blueprint Lab.
-- `story`: accept the authored Survey Local Materials quest, reveal Fragmented Warning and Hidden Research Station, and open the real ship log. Track/untrack the quest, read the clue, or use **Rumors → Show on map**.
-- `survey`: collect one actual palladium per interaction, topping up to three, and reopen the quest log to inspect progress. The collection objective becomes done at three; ARK hand-in still belongs to campaign station dialogue.
-- `map`: open the actual galaxy map with the research-station rumor selected. Pan/zoom and inspect known systems and the rumor marker. An unknown target keeps its uncharted presentation.
+Each district's exhibits spawn the first time you come near it. Its red RESET pad puts that district back as it started (respawns what you broke, clears what you woke) and leaves the rest alone. RESET EVERYTHING on the plaza (or `playground reset`) rebuilds the whole session. PRACTICE CAMPAIGN on the plaza starts the real opening campaign in the playground profile.
 
-- `power`: live power/shield/ability instruments; `playground run=shield` and `playground run=boost` trigger real equipped abilities.
-- `campaign`: real opening campaign in the isolated profile, including station dialogue, docked editor and travel. `playground run=station` reaches ARK interaction after opening dialogue.
-- `salvage`: prepare a bounded approved fighter wreck, then use F at its real Salvage prompt to recover cargo.
+Console: `playground goto=<station>` moves you onto a station's pad, `goto=district:<id>` to a district's entrance, `goto=hub` to the plaza; `playground run=<station>` goes there and presses F. Screens that are only menus have no place in the world and stay console shortcuts: `playground run=cargo | settings | fleet | story | survey | map | power`, and `run=shield` / `run=boost` trigger the equipped abilities. `playground status` lists every id. The hub's structures come from *Game/Content/Build Playground Hub*.
 
-`playground goto=<id>` teleports to any of those areas. `playground status` lists them. The old informational facts/grid/directory circles were removed; inspection commands remain available but do not count as playable activities. `editor` opens the actual creative Blueprint Lab: place/remove blocks, undo/redo, inspect overlays, and save blueprints. Exit the Lab to Main Menu, then run `playground reset` to return. Stored blueprints survive playground resets. The story/survey/map beacons form a far-south preview area. Their explicit actions use the registered quest/clue owners, log query and map presenters; the generated galaxy is metadata only, with no body load or player relocation. Quest/clue evaluation and marker refresh occur on those actions; automatic campaign dialogue stays disabled. Reset clears their quest, clue/seen state, cargo and map metadata through normal session owners. Use the campaign portal for actual station dialogue, docked fleet editing and travel. The preview pads do not grant campaign progression. `playground reset` also returns directly from the isolated Lab/campaign.
+Story, survey and map use the registered quest/clue owners, log query and map presenters; the generated galaxy is metadata only, with no body load or player relocation, and reset clears them. `editor` opens the creative Blueprint Lab; `playground reset` returns directly from it and from the practice campaign. Full reviewer checklist: [QA-PLAYGROUND](../../docs/QA-PLAYGROUND.md).
 
 CLI while playing: `tools/playtest/g.sh dev --cmd "playground reset"`; poll its returned operation with `tools/playtest/g.sh op --id N`.
 
