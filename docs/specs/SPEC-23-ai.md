@@ -222,7 +222,7 @@ namespace Game.Simulation.Ai
     {
         public AiState State;
         public sbyte OrbitSign;          // +1 or −1
-        public byte FireBlocked;         // 1 = an ally is in the line of fire (autofire suspended)
+        public byte FireBlocked;         // autofire suspended: 1 = an ally is in the line of fire, 2 = rock or a structure is (§5.4 step 7)
         public byte Initialized;         // 0 = zeroed by profile conversion; AiAnchorShiftSystem completes it (§5.3 step 0)
         public byte AbilityEdges;        // bits 0..3 = Ability1..4 chosen on the last think (§5.4 step 8)
         public AiState PreviousState;    // state before the last think (EngageStart trigger)
@@ -349,7 +349,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
 
 ### 5.4 `AiDecisionSystem`
 
-`AiThinkJob : IJobEntity` (`ScheduleParallel`) over roots with `AiBrain`, `ShipTarget`, `WeaponControl`, `Allegiance`, `LocalTransform`, `PersistentId`, `WithNone<PlayerShip, Hulk>`; reads the hash (`BeginRead/EndRead`), `FactionRelations`, `ShipStats`, `WeaponStats` (optional), `Dormant`, `GridSpawning`, `PhysicsVelocity`. Writes only its own entity's `AiBrain`, `ShipTarget`, `WeaponControl`.
+`AiThinkJob : IJobEntity` (`ScheduleParallel`) over roots with `AiBrain`, `ShipTarget`, `WeaponControl`, `Allegiance`, `LocalTransform`, `PersistentId`, `WithNone<PlayerShip, Hulk>`; reads the hash (`BeginRead/EndRead`), `FactionRelations`, `ShipStats`, `WeaponStats` (optional), `Dormant`, `GridSpawning`, `PhysicsVelocity`, `Allegiance` of other entities, and the `PhysicsWorldSingleton` collision world (optional: without one nothing obstructs a line of fire). Writes only its own entity's `AiBrain`, `ShipTarget`, `WeaponControl`.
 1. Skip if `GridSpawning` enabled. `interval = profile.ThinkIntervalTicks × (Dormant ? DormantThinkMultiplier : 1)`; skip unless `(Tick + (uint)PersistentId.Value) % interval == 0`. `ThinkCount++`, `LastThinkTick = Tick`; `rng` per decision 7.
 2. **Target validity:** current `ShipTarget.Value` must exist in the hash (`FindIndex ≥ 0`), be `Kind ∈ {Ship, Station}` and hostile; else clear.
 3. **Target choice** (Role `Civilian`: never; otherwise every think): `QuerySphere(own centre, SensorRange)`; candidates = hostile proxies of kind Ship/Station other than self. `score = d / max(1, range) − (PlayerShip flag ? PlayerBias : 0) − (index == current ? Stickiness : 0)` with `d` = centre distance and `range = WeaponStats.MaxWeaponRange` (or `SensorRange` without stats); lowest score wins, ties by lower proxy index. Write `ShipTarget` (and `SinceTick` on change).
@@ -368,7 +368,7 @@ Brains created after a rebase start with `ShiftSequence = record.Sequence` (step
    - `Idle`/`Hold`: `GoalPosition = pos`, heading = current, speed 0.
 6. **Local avoidance:** `QuerySegment(pos, GoalPosition, ownHullRadius)`; the first proxy (by index) that is not self and not the target, whose hull (`HullRadius + ownHullRadius + AvoidanceMargin`) the segment passes through → shift `GoalPosition` sideways (perpendicular in XZ, toward the side of the segment the proxy centre is not on) by that clearance.
 8. **Abilities** (review X5): `AbilityEdges = 0`, `AbilityEdgesTick = Tick`, `PreviousState` = the state before step 4. If the root has an `AbilitySlot` buffer (SPEC-24, read-only, last tick's values): for each rule of the profile in order, find slot `k < 4` with `AbilityIndex == rule.AbilityIndex`, `State == Ready`, `Blocked == 0`; if found and the trigger holds, `AbilityEdges |= 1 << k`. Triggers: `EngageStart` = state became `Engage` this think; `Fleeing` = state `Flee`; `HullBelow` = `ShipStats.MassFraction < Threshold`; `ShieldBelow` = `ShieldState.MaxHp > 0 && Hp < Threshold × MaxHp`; `ShieldOff` = `ShieldState.MaxHp > 0 && ShieldControl.RequestedOn == 0`; `HasTarget` = target set.
-7. **Weapons:** `WeaponControl = { Autofire = (State == Engage || State == Hold) && target set && FireBlocked == 0 ? 1 : 0, AimMode = TargetLead }`. `FireBlocked`: if `AvoidFriendlyFire`, `QuerySegment(pos, targetCentre, 2)` contains a non-hostile proxy (not self, not target) whose hull the segment crosses before the target → 1, else 0.
+7. **Weapons:** `WeaponControl = { Autofire = (State == Engage || State == Hold) && target set && FireBlocked == 0 ? 1 : 0, AimMode = TargetLead }`. `FireBlocked`: if `AvoidFriendlyFire`, `QuerySegment(pos, targetCentre, 2)` contains a non-hostile proxy (not self, not target) whose hull the segment crosses before the target → 1. Otherwise, when the brain would fire (the autofire condition above holds), the **line of fire**: one `CastRay(own centre → target centre, PhysicsLayers.ProjectileQuery)` against the collision world (grid and celestial colliders, what shots hit), ignoring self, hits nearer than the own hull radius (a gun set into rock starts its ray inside it, and its barrels reach past its centre) and live hostile grids (the shot still hits an enemy); any other hit (scenery rock, a station or other structure, a wreck, a neutral or allied hull, a planet) before the target's own first hit → 2, else 0. The target is kept, so the brain resumes fire on the think the line clears. Only the selected target is checked, only on think ticks, and the result stays in the brain until the next think. The hash's scenery proxies are too coarse for this (the Hollow's rock tiles are 256 m circles), so the check uses colliders. Fleet members following their leader (§5.7) apply the same rule with `State == Engage`. Reason: the Hollow's outer turrets picked a player in the tunnels and fired into the rock (2026-10-18).
 
 ### 5.5 `AiSteeringSystem`
 
@@ -403,6 +403,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | Situation | Required behaviour |
 |---|---|
 | No hostile in range | Patrol/Idle; `Autofire = 0`; `ShipTarget` cleared |
+| Rock or a structure between a gunner and its target | `FireBlocked = 2`, `Autofire = 0`; the target is kept and fire resumes on the think the line clears (§5.4 step 7) |
 | Target becomes a hulk or is destroyed | Cleared at the next think; autofire stops (SPEC-21 also requires a hostile target) |
 | Unarmed ship (`MaxWeaponRange == 0`) with role Combat | Treated as Civilian for state choice (flees hostiles) |
 | No `ShipStats`/`WeaponStats`/`PropulsionStats` (before SPEC-22 init) | Defaults: hull 1, range = `SensorRange × 0.5`, `aBrake = 2` |
@@ -425,7 +426,7 @@ Members think cheaply: in `AiDecisionSystem`, a root with `FleetMember` whose `L
 | GC | 0 B per tick | AI-012 |
 
 **Scale notes:**
-- Thinking: 50 ships / 10-tick interval = 5 thinks per tick × ≈ 10 µs (one sphere query + 2 segment queries + scoring) ≈ 50 µs worker per tick. Steering: O(ships) × ≈ 0.3 µs.
+- Thinking: 50 ships / 10-tick interval = 5 thinks per tick × ≈ 10 µs (one sphere query + 2 segment queries + scoring, plus one ray cast when the brain would fire) ≈ 50 µs worker per tick. Steering: O(ships) × ≈ 0.3 µs.
 - The hash is the only all-pairs structure; nothing in this spec loops over all ships per ship.
 - Rejected approaches: per-ship scans of all entities; `NativeParallelMultiHashMap` iteration for query output order; AI writing `PhysicsVelocity`; per-tick target re-selection for every ship.
 
