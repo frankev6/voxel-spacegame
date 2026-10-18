@@ -45,3 +45,6 @@ The review page said this needed a brick-format change and saved memory. Both cl
 ## Alternatives rejected
 - **Editor stamps:** the owner chose real blocks.
 - **A packed large-cell format** (one record for 8 or 27 cells): damage would have to split the record back into cells, and every system that reads cells would need a new case. That is a large change for a builder convenience.
+
+## Amendment (2026-10-18, DEV-023): a 4×4×4 block
+Owner, for the Hollow (hub option E): "so that the game doesn't lag the asteroid should be built of larger voxels", then "no, i meant 2x2s and 3x3s or even 4x4s". `block_hull_large_4` (4×4×4, 64 cells) joins the two blocks above on the same terms, and `DATA-E036` accepts a full cube of side 2, 3 or 4. The Hollow's rock is built almost entirely of 2×2×2 and 4×4×4 blocks at 2 m cells. As the Context says, large blocks do not save memory per cell. The rock stays cheap because only its shell is stored.

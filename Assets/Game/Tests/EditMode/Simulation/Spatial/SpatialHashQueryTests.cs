@@ -102,6 +102,19 @@ namespace Game.Tests.EditMode.Simulation.Spatial
                 Compare(f, a, b, r.NextFloat(0, 100), true);
             }
         }
+        [Test] public void Scenery_OnlyHitTestsSeeIt()
+        {
+            // DEV-023: the Hollow's rock tiles stop shots (hit tests ask for scenery) without filling the AI's queries
+            using var f = new Fixture(0, dense: true);
+            f.Hash.Proxies.Add(new SpatialProxy { Entity = new Entity { Index = 1, Version = 2 }, Center = float3.zero, Radius = 10 });
+            f.Hash.Proxies.Add(new SpatialProxy { Entity = new Entity { Index = 2, Version = 2 }, Center = float3.zero, Radius = 10, Flags = ProxyFlags.Scenery });
+            f.Hash.Cells.Add(SpatialHash.CellKey(new int2(-1, -1)), new int2(0, 2)); f.Hash.Cells.Add(SpatialHash.CellKey(new int2(0, 0)), new int2(0, 2));
+            f.Hash.EntryIndices.Add(0); f.Hash.EntryIndices.Add(1);
+            var output = new FixedList512Bytes<int>();
+            Assert.AreEqual(1, f.Hash.QuerySphere(float3.zero, 5, ref output), "targeting and avoidance skip scenery");
+            Assert.AreEqual(0, output[0]);
+            Assert.AreEqual(2, f.Hash.QuerySegment(new float3(-20, 0, 0), new float3(20, 0, 0), 1, ref output, scenery: true), "hit tests see it");
+        }
         [Test] public void Sphere_MatchesBruteForce()
         {
             using var f = new Fixture(10000); var r = new Unity.Mathematics.Random(55831);

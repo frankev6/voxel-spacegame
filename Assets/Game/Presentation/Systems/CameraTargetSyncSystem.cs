@@ -147,7 +147,8 @@ namespace Game.Presentation.Systems
                     float length = math.distance(focus, end), skip = math.min(math.max(0, rig.TargetRadius), length * .5f);
                     float3 start = focus + (end - focus) * (skip / math.max(length, 1e-3f));
                     var ray = new RaycastInput { Start = start, End = end, Filter = PhysicsLayers.CameraOcclusionQuery };
-                    var collector = new IgnoreEntityClosestHitCollector(lastTarget);
+                    var collector = new IgnoreEntityClosestHitCollector(lastTarget, GetComponentLookup<Game.Voxel.Rendering.CameraSeeThrough>(true),
+                        GetComponentLookup<Game.Voxel.Rendering.GridRenderHidden>(true));
                     var collision = physics.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
                     if (collision.CastRay(ray, ref collector))
                         limit = math.max(rig.Config.OcclusionMinDistance, skip + collector.ClosestHit.Fraction * (length - skip) - rig.Config.OcclusionMargin);

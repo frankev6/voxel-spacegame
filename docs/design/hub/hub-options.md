@@ -134,6 +134,35 @@ Left to right, top to bottom: the arrival, the Maw, the cutaway, the Market, the
 
 **How it is built.** The rock is voxels: a grid of 12 m columns, each one or two solid spans; a tunnel or cavern is the gap between them, cut at the flight plane (about 7,900 columns). Because the camera looks down, the rock above the flight plane hides round the player inside the rock and near its cliffs (the cutaway render shows what you see), so the tunnels fly like streets. It needs the cutaway as new camera work; the traffic, merchants and docking already exist.
 
+### E in the game (first build, 2026-10-18)
+
+You said: "Lets build this latest version into the game", then "so that the game doesn't lag the asteroid should be built of larger voxels" and "i meant 2x2s and 3x3s or even 4x4s". In the playground, `playground goto=hollow` takes you to its approach. It sits 9 km east of the ARK Proving Grounds, which stay as they were.
+
+- **The rock** is 2.4 million cells at 2 m, nearly all in large hull blocks of 2×2×2 and 4×4×4 (the new `block_hull_large_4`; ADR-0121 amended). Only its shell is stored, so it costs about as much as its surface. It is cut into 256 m tiles, each split at +24 m into a low piece and a high piece. The tunnels and caverns run at the flight plane (floor −24 m, ceiling +24 m), and the rock's height is compressed to +40…+124 m so the camera stays above it.
+- **The cutaway.** While you are under the rock, its pieces above +24 m are not drawn, and the camera sees through the rock instead of zooming in on it. Two small engine additions do this: `GridRenderHidden` and `CameraSeeThrough`.
+- **Defences.** 25 guns, all real Clan turrets (Khuchad Clan, neutral to you), fire at the flight plane: twin heavy batteries in casemates beside the Maw, flak on its lip, two inner guns behind the blast doors, light guns on ledges round the cliffs, and the four forts. Each fort turns steadily on its rock, 3.5–6° a second, with its guns. They are medium turrets with a ±90° arc, so, as you asked, a fort can only bring its guns to bear for part of each turn.
+- **Ships.** Traffic flies on its own AI (yours: "should be using normal ai movement"): eight routes through the Maw, round the Ring both ways, to the Docks, out the back door and round the Market. Six Clan gunships hold station off the Maw and the Den, and 37 ships are moored at berths and dens.
+- **Stations (F).** The Market and four dens (Gunsmith, Parts, Salvage, Smuggler) trade, the Docks put out canisters, and the Quartermaster resets the Hollow.
+- **Pipeline.** `ArtSource/Hub/hollow_export.py` voxelises the design into `hollow/hollow_layout.json`. `hollow_codegen.py` writes the blocks file and the runtime layout `HollowLayout.g.cs`. *Game/Content/Build Hollow* builds the 92 blueprints.
+- **Rock tiles keep their islands.** A tile can hold several separate lumps of rock or structure. They are static scenery that is never flown or edited, so `ProjectContentTests.ShipBlueprints_AreOnePiece` skips them (`HollowBuilder.IsScenery`). Shooting one apart breaks the loose bits off as debris. The approach field's boulders are free asteroid grids, so they are built as one piece.
+- **First playtest fixes.**
+  - Two inbound traffic routes began at your arrival point, so their ships spawned on you and wrecked your ship. Traffic now starts partway along each route, and a one-way ship only starts its route again once you are clear of the start.
+  - Lamps were drawn at their 20–40 m light reach and signs at about 100 m a letter; both are now to scale.
+  - The static rock tiles no longer enter the AI's spatial index. Their 193 grids were overflowing its 127-proxy queries.
+  - The interaction query now does a broadphase pass before measuring exact distances. It had been measuring the distance to every child box of the rock within 600 m, which cost 6–9 ms a frame under the rock. It now costs under 0.5 ms.
+  - Main-thread time in the Editor is 4–9 ms anywhere in the Hollow, against about 4 ms in open space, with 3.2 M solid cells loaded.
+
+- **After your playtests** (rock, light, holograms, tunnels, ships):
+  - *Rock, not hull.* A rock layer of its own, decided per 2 m voxel: slate, pale stone, ochre seams, rust strata and basalt; crater fields stepped into blocky terraces, each step lit on one side and shadowed on the other.
+  - *Lit like a station.* Under the roof there is no sun: a cool fill, a faint haze, and 600 lamps in the districts' colours (pink and amber at the Market, ember at the Gunsmith, teal at Parts, violet at the Smuggler, cyan and lime at the Docks, blue and aqua in the tunnels), with halos of lit dust, drifting motes, pulsing beacons and flickering welders. The lights on the outer rock are hidden while you are inside.
+  - *Holograms that guide.* Each station has its district's emblem turning beyond it (a crate, a shield, a turret, a gear, a wreck, a gem, a ship) over a projector ring on the floor. Holo boards name each place with its trade ("GUNS AMMO MODS", "ASK NOTHING"); they lean back and turn to face the camera. From the Maw, a lane in each station's colour runs along the tunnel floors to it, its dashes flowing toward it; where routes share a tunnel the lanes run side by side and peel off at the junctions, where chevrons point each way.
+  - *Natural tunnels.* The Ring and the side tunnels meander, vary in width, and have rough stepped walls, alcoves, pillars and three floor levels. Every side tunnel runs on into its cavern (the one toward the Market stopped short), and the exporter checks that every station, den and berth is reachable from the Maw.
+  - *Ships that behave.* Traffic starts spaced along its routes, steers 60 m ahead so it never arrives and circles mid-route, and is put back on its route out of sight when stuck. The WRAITH has sprint engines and six manoeuvring pods: it now accelerates 60 % harder, strafes over twice as hard and turns three times as fast.
+
+![The Hollow in the game](img/hollow_ingame_sheet.jpg)
+
+- **Playtest.** `playground goto=hollow@x,z[,yaw]` puts you anywhere in the Hollow, in its own metres (the Maw is near 0,−330; the forts are at ±800).
+
 ## The first three options
 
 All three maps are at true scale; every building, lane, berth and ship on them comes from `ArtSource/Hub/hub_layouts.py` (coordinates in [hub_options.json](hub_options.json)). The arrival renders are block-outs from the game camera (55° pitch, 40° field of view), pulled back to the arrival zoom; buildings are plain extrusions with lit windows (`ArtSource/Hub/hub_arrival.py`).

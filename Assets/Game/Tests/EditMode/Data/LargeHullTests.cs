@@ -34,7 +34,8 @@ namespace Game.Tests.EditMode.Data
             Assert.IsFalse(E036(Block("block_box3", BlockKind.Structural, Box(3, 3, 3))), "3×3×3");
             Assert.IsTrue(E036(Block("block_box223", BlockKind.Structural, Box(2, 2, 3))), "2×2×3 is not a cube");
             Assert.IsTrue(E036(Block("block_hollow", BlockKind.Structural, Box(3, 3, 3, hollow: true))), "a hollow box is not full");
-            Assert.IsTrue(E036(Block("block_box4", BlockKind.Structural, Box(4, 4, 4))), "only sides 2 and 3");
+            Assert.IsFalse(E036(Block("block_box4", BlockKind.Structural, Box(4, 4, 4))), "4×4×4 (DEV-023, the Hollow's rock)");
+            Assert.IsTrue(E036(Block("block_box5", BlockKind.Structural, Box(5, 5, 5))), "only sides 2, 3 and 4");
             var shifted = Box(2, 2, 2).Select(c => c - Vector3Int.one).ToArray();
             Assert.AreEqual(0, BlockDefinition.LargeHullSide(shifted), "rooted at its corner");
             var wedged = Block("block_wedged", BlockKind.Structural, Box(2, 2, 2), edit: so =>
@@ -52,7 +53,7 @@ namespace Game.Tests.EditMode.Data
             using var content = Shipped();
             var voxel = new VoxelContent { Blocks = content.BlockDefs, Orientations = content.Orientations };
             var hull = content.Catalog.Get<BlockDefinition>(new ContentId("block_hull"));
-            foreach (int side in new[] { 2, 3 })
+            foreach (int side in new[] { 2, 3, 4 })
             {
                 var asset = content.Catalog.Get<BlockDefinition>(new ContentId("block_hull_large_" + side));
                 Assert.AreEqual(0, Validate(asset).ErrorCount, asset.IdString);

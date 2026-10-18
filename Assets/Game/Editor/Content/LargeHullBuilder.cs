@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Game.Editor.Content
 {
     /// <summary>DATA-013 (ADR-0121, owner: "Yes, as real large blocks"): block_hull_large_2 and block_hull_large_3, cubes of hull material
-    /// placed as one block. Same per-cell HP and mass as block_hull; achiral (self-mirrored); all 24 orientations.</summary>
+    /// placed as one block; block_hull_large_4 for the Hollow's rock (DEV-023, owner: "2x2s and 3x3s or even 4x4s"). Same per-cell HP and mass as block_hull; achiral (self-mirrored); all 24 orientations.</summary>
     public static class LargeHullBuilder
     {
         const string Blocks = "Assets/Game/Content/Blocks/";
@@ -14,12 +14,12 @@ namespace Game.Editor.Content
         [MenuItem("Game/Content/Build Large Hull Blocks")]
         public static void Build()
         {
-            Make(2); Make(3);
+            Make(2); Make(3); Make(4);
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built the large hull blocks (ADR-0121).");
         }
 
-        static void Make(int side)
+        internal static void Make(int side)
         {
             string id = "block_hull_large_" + side, path = Blocks + id + ".asset";
             if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset(Blocks + "block_hull.asset", path))

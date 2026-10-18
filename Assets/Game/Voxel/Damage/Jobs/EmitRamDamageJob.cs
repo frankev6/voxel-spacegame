@@ -54,8 +54,12 @@ namespace Game.Voxel.Damage.Jobs
                 float energy = DamageMath.RamEnergy(impulse, InverseMass(pair.A), InverseMass(pair.B), Config.RamRestitutionCorrection);
                 if (energy < Config.MinRamEnergyJ) continue;
                 float hardnessA = Hardness(pair.A, point, -normal), hardnessB = Hardness(pair.B, point, normal);
-                Emit(pair.A, pair.B, point, -normal, energy, Share(hardnessB, hardnessA), (uint)ordinal * 2);
-                Emit(pair.B, pair.A, point, normal, energy, Share(hardnessA, hardnessB), (uint)ordinal * 2 + 1);
+                // blame goes to the body that drove into the other (DEV-023 playtest: a cruiser that rammed the player turned the
+                // whole Hollow hostile): each body's speed into the other along the normal (A to B); the body pushed away is not to
+                // blame for the damage it took. Near-equal (head-on) blames both.
+                float intoB = math.dot(Velocity(pair.A), normal), intoA = -math.dot(Velocity(pair.B), normal);
+                Emit(pair.A, pair.B, point, -normal, energy, Share(hardnessB, hardnessA), (uint)ordinal * 2, intoA >= intoB - RamBlameToleranceMs);
+                Emit(pair.B, pair.A, point, normal, energy, Share(hardnessA, hardnessB), (uint)ordinal * 2 + 1, intoB >= intoA - RamBlameToleranceMs);
                 Pairs[key] = Tick; Data->Current.RamEvents++;
                 Fx.Enqueue(new FxEvent { Kind = FxKind.RamImpact, Pos = point, Dir = normal, Scale = math.clamp(math.pow(energy / 1e5f, 1f / 3), .5f, 4) });
                 if (Config.CueRamImpact.Value != 0) Sfx.Enqueue(new SfxEvent { Cue = Config.CueRamImpact, Pos = point, Volume = math.clamp(.3f + .15f * math.log10(energy / 2e4f), .3f, 1) });
@@ -75,6 +79,8 @@ namespace Game.Voxel.Damage.Jobs
             if (math.isinf(other)) return 1;
             return other / (own + other);
         }
+        const float RamBlameToleranceMs = 2;
+        float3 Velocity(Entity body) => Velocities.HasComponent(body) ? Velocities[body].Linear : float3.zero;
         float InverseMass(Entity body) => Velocities.HasComponent(body) && Masses.HasComponent(body) ? Masses[body].InverseMass : 0;
         float3 LocalPoint(Entity grid, float3 point, float3 into) => Transforms[grid].InverseTransformPoint(point + into * (.5f * Cells.Grids[grid].CellSize));
         float Hardness(Entity grid, float3 point, float3 into)
@@ -86,14 +92,16 @@ namespace Game.Voxel.Damage.Jobs
             ref var def = ref Blocks.Value.Blocks[block]; float multiplier = Config.Multiplier(DamageType.Ram, def.ArmorClass);
             return multiplier > 0 ? def.CellHp / multiplier : float.PositiveInfinity;
         }
-        void Emit(Entity grid, Entity other, float3 point, float3 into, float energy, float share, uint sequence)
+        /// <summary>Ram damage to `grid` from `other`. `otherRammed`: `other` drove into `grid`, so `other` (its owner) is the
+        /// instigator; otherwise the damage is `grid`'s own doing and it is its own instigator (no provocation, no kill credit).</summary>
+        void Emit(Entity grid, Entity other, float3 point, float3 into, float energy, float share, uint sequence, bool otherRammed)
         {
             if (!Cells.Grids.HasComponent(grid) || !Transforms.HasComponent(grid)) return;
             var transform = Transforms[grid]; var size = Cells.Grids[grid].CellSize;
             Damage.Write(new DamageEvent { Grid = grid, LocalPoint = LocalPoint(grid, point, into),
                 LocalDir = math.rotate(math.inverse(transform.Rotation), into), Amount = energy * Config.RamHpPerJoule * share,
                 Radius = math.clamp(Config.RamRadiusBaseCells + Config.RamRadiusCellsPerSqrtMJ * math.sqrt(energy / 1e6f), .75f, Config.RamRadiusMaxCells) * size,
-                Type = DamageType.Ram, Source = other, Instigator = Owners.HasComponent(other) ? Owners[other].Owner : other,
+                Type = DamageType.Ram, Source = other, Instigator = !otherRammed ? grid : Owners.HasComponent(other) ? Owners[other].Owner : other,
                 Producer = ProducerKind.Impact, Sequence = sequence, Flags = DamageEventFlags.NoImpulse });
         }
     }

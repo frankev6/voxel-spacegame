@@ -41,7 +41,7 @@ namespace Game.Simulation.Weapons
             {
                 if (!(explosion.Radius > 0) || !math.isfinite(explosion.Radius) || !math.all(math.isfinite(explosion.WorldPos))) continue;
                 var candidates = new FixedList512Bytes<int>();
-                int count = Hash.QuerySphere(explosion.WorldPos, explosion.Radius, ref candidates);
+                int count = Hash.QuerySphere(explosion.WorldPos, explosion.Radius, ref candidates, scenery: true);
                 // A blast must reach every overlapped grid. Overflow falls back to the canonical sorted proxy list.
                 if (count > candidates.Capacity)
                 {

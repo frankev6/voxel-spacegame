@@ -48,7 +48,9 @@ namespace Game.Presentation.Systems
 
         protected override void OnCreate()
         {
-            grids = GetEntityQuery(ComponentType.ReadOnly<VoxelGrid>(), ComponentType.ReadOnly<LocalToWorld>(), ComponentType.Exclude<PlayerShip>());
+            // scenery (SpatialScenery: the Hollow's rock tiles) gets no tag: no floating name over every piece of rock
+            grids = GetEntityQuery(ComponentType.ReadOnly<VoxelGrid>(), ComponentType.ReadOnly<LocalToWorld>(), ComponentType.Exclude<PlayerShip>(),
+                ComponentType.Exclude<Game.Simulation.Spatial.SpatialScenery>());
             players = GetEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalToWorld>());
         }
         public void Bind(VisualElement worldLayer, IHudNames names, Camera camera)

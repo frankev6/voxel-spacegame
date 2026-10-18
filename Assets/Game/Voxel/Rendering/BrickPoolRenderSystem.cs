@@ -15,15 +15,17 @@ namespace Game.Voxel.Rendering
     [UpdateAfter(typeof(BrickMeshApplySystem))]
     public partial struct BrickPoolRenderSystem : ISystem
     {
+        ComponentLookup<GridRenderHidden> hidden;
         public void OnCreate(ref SystemState state)
-        { state.RequireForUpdate<VoxelRenderRuntime>(); state.RequireForUpdate<VoxelRenderCamera>(); }
+        { state.RequireForUpdate<VoxelRenderRuntime>(); state.RequireForUpdate<VoxelRenderCamera>(); hidden = state.GetComponentLookup<GridRenderHidden>(true); }
         public void OnUpdate(ref SystemState state)
         {
             var runtime = SystemAPI.GetSingleton<VoxelRenderRuntime>();
             var camera = SystemAPI.GetSingleton<VoxelRenderCamera>().Value.Value;
             if (runtime.IsReady == 0 || !camera) return;
             var pool = runtime.Managed.Value.Pool;
-            new TransformJob { Matrices = pool.WorldMatrices }.ScheduleParallel(state.Dependency).Complete();
+            hidden.Update(ref state);
+            new TransformJob { Matrices = pool.WorldMatrices, Hidden = hidden }.ScheduleParallel(state.Dependency).Complete();
             float shadowDistance = GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset pipeline ? pipeline.shadowDistance : 0;
             pool.Render(camera, shadowDistance);
         }
@@ -32,9 +34,12 @@ namespace Game.Voxel.Rendering
         {
             // Applied handles are unique per brick. Only live bricks participate; deleted slots retire before submission.
             [NativeDisableParallelForRestriction] public NativeArray<float4x4> Matrices;
+            [ReadOnly] public ComponentLookup<GridRenderHidden> Hidden;
             void Execute(in Game.Voxel.Model.Brick brick, in BrickRenderState render, in LocalToWorld transform)
             {
                 if (render.HasMesh == 0) return;
+                // DEV-023: a hidden grid's bricks collapse to a point far below every frustum and shadow range
+                if (Hidden.HasComponent(brick.Grid)) { Matrices[render.Handle.Slot] = float4x4.TRS(new float3(0, -1e7f, 0), quaternion.identity, new float3(0)); return; }
                 // QA-001: the affine matrix's bottom row is unused by every consumer (positions take .xyz); it carries the
                 // brick's grid cell offset so the shader can plate the hull continuously across bricks.
                 var matrix = transform.Value; float3 offset = (float3)(brick.Coord * 16);

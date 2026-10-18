@@ -161,18 +161,18 @@ namespace Game.Data.Definitions
             }
             if (!approved && LargeHullSide(cells) > 0)
             {
-                // ADR-0121: a full 2×2×2 or 3×3×3 box of Cube cells rooted at its corner (large hull blocks).
+                // ADR-0121: a full 2×2×2, 3×3×3 or 4×4×4 box of Cube cells rooted at its corner (large hull blocks).
                 approved = true;
                 for (int i = 0; i < cells.Length; i++) approved &= GetShape(i) == Game.Data.Blocks.BlockShape.Cube;
             }
-            if (!approved) scope.Error("DATA-E036", nameof(cells), "Structural blocks must use the approved single-cell kit, root High / +Y Low long slope, or a full 2×2×2 or 3×3×3 cube box (ADR-0121).");
+            if (!approved) scope.Error("DATA-E036", nameof(cells), "Structural blocks must use the approved single-cell kit, root High / +Y Low long slope, or a full 2×2×2, 3×3×3 or 4×4×4 cube box (ADR-0121).");
         }
 
-        /// <summary>ADR-0121: the side (2 or 3) when <paramref name="footprint"/> is exactly the cube box [0, side)³, else 0.</summary>
+        /// <summary>ADR-0121: the side (2, 3, or 4 for the Hollow's rock, DEV-023) when <paramref name="footprint"/> is exactly the cube box [0, side)³, else 0.</summary>
         public static int LargeHullSide(UnityEngine.Vector3Int[] footprint)
         {
             if (footprint == null) return 0;
-            int side = footprint.Length == 8 ? 2 : footprint.Length == 27 ? 3 : 0;
+            int side = footprint.Length == 8 ? 2 : footprint.Length == 27 ? 3 : footprint.Length == 64 ? 4 : 0;
             if (side == 0) return 0;
             var seen = new System.Collections.Generic.HashSet<UnityEngine.Vector3Int>();
             foreach (var c in footprint)

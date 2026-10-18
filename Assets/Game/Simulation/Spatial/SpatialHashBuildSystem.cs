@@ -43,7 +43,8 @@ namespace Game.Simulation.Spatial
                 Spawning = state.GetComponentLookup<GridSpawning>(true), Shields = state.GetComponentLookup<ShieldState>(true),
                 Velocities = state.GetComponentLookup<PhysicsVelocity>(true), Allegiances = state.GetComponentLookup<Allegiance>(true),
                 Hulks = state.GetComponentLookup<Hulk>(true), Dormancy = state.GetComponentLookup<Dormant>(true),
-                Players = state.GetComponentLookup<PlayerShip>(true), Brains = state.GetComponentLookup<AiBrain>(true)
+                Players = state.GetComponentLookup<PlayerShip>(true), Brains = state.GetComponentLookup<AiBrain>(true),
+                Scenery = state.GetComponentLookup<SpatialScenery>(true)
             };
             state.RequireForUpdate<GameplayActive>();
         }
@@ -53,7 +54,7 @@ namespace Game.Simulation.Spatial
             gather.Entities.Update(ref state); gather.Transforms.Update(ref state);
             gather.Grids.Update(ref state); gather.Bodies.Update(ref state); gather.Spawning.Update(ref state);
             gather.Shields.Update(ref state); gather.Velocities.Update(ref state); gather.Allegiances.Update(ref state);
-            gather.Hulks.Update(ref state); gather.Dormancy.Update(ref state); gather.Players.Update(ref state); gather.Brains.Update(ref state);
+            gather.Hulks.Update(ref state); gather.Dormancy.Update(ref state); gather.Players.Update(ref state); gather.Brains.Update(ref state); gather.Scenery.Update(ref state);
             var stream = new NativeStream(math.max(1, query.CalculateChunkCountWithoutFiltering()), Allocator.TempJob);
             gather.Output = stream.AsWriter();
             var dependency = hash.Access.Acquire(state.Dependency);

@@ -796,7 +796,7 @@ Director timing and roll indices are not saved (a load starts a new visit, decis
 |---|---|
 | Player shoots a neutral station for 3 s | Relation −10 per second; Hostile after crossing −25; the station's turrets and that faction's ships engage from the next tick; one `FactionRelationChanged` per change |
 | Player shoots a locked faction (raiders) | No change |
-| Ram damage to a neutral (source = player root) | Counts as provocation (same rule) |
+| Ram damage to a neutral (source = player root) | Counts as provocation (same rule) when the player drove into it: ram damage is blamed on the body moving into the other (both when head-on); a ship that rams the player is to blame for its own damage (DEV-023 playtest) |
 | Narrative `adjust_relation` and `relation()` in the same frame | `GetRelation` includes the queued request |
 | Relation changes while ships are mid-fight | The matrix flips at the next tick; SPEC-23 re-targets on its next think |
 | Story encounter requested while travelling or before the star system is loaded | Pending; spawned once the star system is Ready and travel is Idle |

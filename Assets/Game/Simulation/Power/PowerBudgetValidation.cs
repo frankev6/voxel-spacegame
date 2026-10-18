@@ -24,6 +24,8 @@ namespace Game.Simulation.Power
                 // A failed decode is already diagnosed by BlueprintLibrary, not a fabricated power budget.
                 if (!blueprints.TryGet(blueprint.Id.Hash, out var structure)) continue;
                 var budget = Measure(structure, catalog);
+                // no power parts at all (scenery such as the Hollow's rock): nothing to budget
+                if (budget.Generation == 0 && budget.Capacity == 0 && budget.WeaponDraw == 0 && budget.ShieldDraw == 0 && budget.ThrusterDraw == 0) continue;
                 string path = assetPath?.Invoke(blueprint);
                 if (string.IsNullOrEmpty(path)) path = "content:" + blueprint.IdString;
                 if (budget.SustainSeconds < 30)

@@ -49,6 +49,10 @@ namespace Game.App.DevRuntime.Playground
         double3[] beaconPositions;
         PlaygroundHubDressing dressing;
         PlaygroundHubWorld world;
+        // DEV-023 option E: the Hollow, 9 km east of the ARK Proving Grounds, built the first time a pilot goes there
+        PlaygroundHollow hollow;
+        int hollowNearest = -2;
+        bool inHollow;
         PlaygroundHub.District here;
         string resumeAt;                    // a station to return to after a reset (the shipyard pad after a ship swap)
         int courseGate = -1;
@@ -181,12 +185,14 @@ namespace Game.App.DevRuntime.Playground
             DevPlaygroundStory.RefreshResetMarkers(ctx);
             world = new PlaygroundHubWorld(ctx, origin);
             world.Build();
+            hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin); hollowNearest = -2; inHollow = false;
             if (world.Missing != null) { report = world.Missing; GameLog.Warn(LogCategories.Dev, world.Missing); }
             BuildPresentation();
             string resume = resumeAt; resumeAt = null;
             if (resume == null || GoTo(resume).Kind == DevResultKind.Failed) Place(PlaygroundHub.Spawn, PlaygroundHub.SpawnYaw);
         }
         internal bool Active => active;
+        internal PlaygroundHollow Hollow => hollow;
         internal double3 Origin => origin;
         DevCommandResult Place(float2 at, float yaw)
         {
@@ -201,6 +207,32 @@ namespace Game.App.DevRuntime.Playground
         {
             if (!active || entering) return DevCommandResult.Fail("enter with playground first");
             if (id == "hub" || id == "plaza") { var moved = Place(PlaygroundHub.Spawn, PlaygroundHub.SpawnYaw); return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At the plaza."); }
+            if (id == "hollow" && hollow != null)
+            {
+                hollow.Build();
+                var moved = Place(HollowLayout.Offset + HollowLayout.Spawn, HollowLayout.SpawnYaw);
+                if (moved.Kind == DevResultKind.Failed) return moved;
+                return hollow.Missing != null ? DevCommandResult.Fail(hollow.Missing) : DevCommandResult.Ok("Off the Hollow: the Maw is ahead. The Clan keeps the peace here.");
+            }
+            // hollow@x,z[,yaw°]: anywhere in the Hollow (its own metres), for playtests and shots
+            if (id.StartsWith("hollow@", StringComparison.Ordinal) && hollow != null)
+            {
+                var parts = id.Substring(7).Split(',');
+                var ci = System.Globalization.CultureInfo.InvariantCulture;
+                if (parts.Length < 2 || !float.TryParse(parts[0], System.Globalization.NumberStyles.Float, ci, out float x)
+                    || !float.TryParse(parts[1], System.Globalization.NumberStyles.Float, ci, out float z)) return DevCommandResult.Fail("goto=hollow@x,z[,yaw degrees]");
+                float yaw = parts.Length > 2 && float.TryParse(parts[2], System.Globalization.NumberStyles.Float, ci, out float deg) ? math.radians(deg) : 0;
+                hollow.Build();
+                var moved = Place(HollowLayout.Offset + new float2(x, z), yaw);
+                return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok($"In the Hollow at {x:0}, {z:0}.");
+            }
+            if (hollow != null && hollow.Built)
+                foreach (var st in HollowLayout.Stations)
+                    if (st.Id == id)
+                    {
+                        var moved = Place(HollowLayout.Offset + st.Position, st.Yaw);
+                        return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + st.Title + ". Press F.");
+                    }
             // a station first (several share their district's id); district:<id> is the district's entrance
             foreach (var pad in pads)
                 if (pad.Id == id)
@@ -278,7 +310,7 @@ namespace Game.App.DevRuntime.Playground
         }
         string Directory()
         {
-            var text = new System.Text.StringBuilder("Console: playground reset | playground run=<station> | playground goto=<station> or goto=district:<id>\nDistricts: hub");
+            var text = new System.Text.StringBuilder("Console: playground reset | playground run=<station> | playground goto=<station> or goto=district:<id> | playground goto=hollow (option E)\nDistricts: hub");
             foreach (var d in PlaygroundHub.Districts) text.Append(", ").Append(d.Id);
             text.Append("\nStations:");
             foreach (var pad in pads) if (pad.Kind != PlaygroundHub.StationKind.FlyShip) text.Append(' ').Append(pad.Id);
@@ -292,6 +324,11 @@ namespace Game.App.DevRuntime.Playground
                 return DevCommandResult.Fail("Activate a playground station in Flight context");
             // On the race grid F starts the countdown (or the next race after the results).
             if (Race != null && Race.IsOpen && (Race.InLobby || Race.IsFinished)) { var started = Race.Start(); SetReport(started.Text); return started; }
+            if (hollow != null && hollow.Built && DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var shipAt))
+            {
+                int there = hollow.Nearest(hollow.Relative(shipAt));
+                if (there >= 0) return Report(hollow.Activate(there));
+            }
             int index = Nearest();
             if (index < 0) return DevCommandResult.Fail("Fly onto a station's F pad first");
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status == DevOperationStatus.Running)
@@ -447,12 +484,36 @@ namespace Game.App.DevRuntime.Playground
                 dressing?.SetCourseGate(courseGate);
             }
             if (brakeState > 0 && located) BrakeTest(ctx, at);
+            if (hollow != null && !guestView)
+            {
+                if (located && !hollow.Built && HollowLayout.Near(at - HollowLayout.Offset, 1500)) hollow.Build();
+                hollow.Tick(located, ship3);
+                // the report greets the Hollow, not the Proving Grounds the pilot left behind
+                bool atHollow = located && HollowLayout.Near(at - HollowLayout.Offset, 600);
+                if (atHollow != inHollow)
+                {
+                    inHollow = atHollow; nearest = -2;   // and the heading names it
+                    SetReport(atHollow ? "The Hollow: the Khuchad Clan's haven. Each district has its colours; its emblem turns over its station, and F in a station's circle trades."
+                        : here == null ? "The plaza: fly out through a portal to visit a district." : world?.Intro(here) ?? here.Tagline);
+                }
+                int st = located && hollow.Built ? hollow.Nearest(at - HollowLayout.Offset) : -1;
+                if (st != hollowNearest)
+                {
+                    hollowNearest = st; nearest = -2;
+                    if (st >= 0 && heading != null)
+                    {
+                        heading.text = HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
+                        if (detail != null) detail.style.display = DisplayStyle.None;
+                    }
+                }
+            }
             int next = Nearest();
-            if (next != nearest)
+            if (next != nearest && hollowNearest < 0)
             {
                 nearest = next;
-                string where = here == null ? "ARK PROVING GROUNDS" : here.Title;
-                if (heading != null) heading.text = next < 0 ? where + (here == null ? "  ·  FLY THROUGH A PORTAL" : "  ·  " + here.Tagline)
+                bool atHollow = located && HollowLayout.Near(at - HollowLayout.Offset, 600);
+                string where = atHollow ? "THE HOLLOW" : here == null ? "ARK PROVING GROUNDS" : here.Title;
+                if (heading != null) heading.text = next < 0 ? where + (atHollow ? "  ·  KHUCHAD CLAN HAVEN" : here == null ? "  ·  FLY THROUGH A PORTAL" : "  ·  " + here.Tagline)
                     : guestView ? pads[next].Title + "  ·  THE HOST ACTIVATES STATIONS" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
                 // Details only on a pad; the floor signs do the wayfinding (QA-001 clutter).
                 if (detail != null) { detail.text = next < 0 ? "" : pads[next].Detail; detail.style.display = next < 0 ? DisplayStyle.None : DisplayStyle.Flex; }
@@ -526,6 +587,7 @@ namespace Game.App.DevRuntime.Playground
             beaconPositions = null; shownTo.Clear();
             panel = null; heading = detail = outcome = null;
             dressing?.Dispose(); dressing = null; courseGate = -1;
+            hollow?.Dispose();
         }
         public void Dispose()
         {

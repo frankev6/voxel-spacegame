@@ -42,6 +42,9 @@ def export(ship_id, s):
         cells.append([int(c[0]), int(c[1]), int(c[2]), str(tag), planes])
     mods = [[kind, [int(v) for v in mn], [[float(v) for v in row] for row in Rm], [int(v) for v in size], [int(v) for v in rsz]]
             for kind, mn, Rm, size, rsz, _ in s.mods]
+    if ship_id == "ship_nocturne_wraith":
+        import wraith_refit   # engines and manoeuvring pods (owner: "we have to improve the wraith's engines and controls")
+        mods = wraith_refit.apply(mods)
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, ship_id + ".json")
     with open(path, "w") as f:

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_hollow_gun_heavy
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_hollow_gun_heavy
+  formerIds: []
+  displayName: Hollow Heavy Battery
+  cellSize: 2
+  payloadVersion: 1
+  payload: 564f5853010001008d92df4ac3301487cf69523bede6e6fe5cc89cbe834f20ccf708b1161d7676d40d6f732fdefa3abb157ae113f8060abe80d4e4a43d5018b85092afbf7ced494200e0aab22d1cde6479f2a0ee3759a6325ddca5ea72e0a3242f52f5b4d45936f24191ea649d173e9bd4925ee964c1e9f439d5abfc51ad326ddfd57a5314e95a2dd3dbc56689003041984422b20444820998644da2f150341e8ac6b3d478c01eb007ec017b923dc99e644f7a2f80388410e06d2e0003a26b09888edee721f4426711059e3a885684720606d1d84dc60cd260d88212ff9710694120eb710cf4ff97b38ec1431219ba067b2d28710f69bba3868f3ea6036383f3a1d35eddb6d19f0e40753a3470e2f26e03df48438ffa2fe134fb44f61bbbdced2c3028a82ec381c1a80525ee21c5bb4ec495a8a647066352188e0df65b50e25ed2ae1371ad3b72f3bf48c3cf8cb480ae09f4c7b47bea3f2fea993fy
+  cellCount: 149
+  boundsMin: {x: -4, y: -2, z: -4}
+  boundsMax: {x: 3, y: 1, z: 3}
