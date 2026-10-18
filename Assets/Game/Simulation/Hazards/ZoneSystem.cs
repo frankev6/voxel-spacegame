@@ -76,8 +76,11 @@ namespace Game.Simulation.Hazards
                 Bodies = new NativeList<BodyRow>(Allocator.TempJob), LastCom = lastCom, Contacts = contacts.Current,
                 Authority = authority, Dt = Game.Core.SimTime.FixedTimestep,
             };
+            uint tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
             foreach (var e in zoneEntities)
             {
+                // HAZ-015: a scheduled zone acts only on its on ticks (ADR-0119 decision 4), whatever its kind.
+                if (SystemAPI.HasComponent<ZoneSchedule>(e) && !ZoneSchedule.IsOn(SystemAPI.GetComponent<ZoneSchedule>(e), tick)) continue;
                 var zone = SystemAPI.GetComponent<WorldZone>(e); var pose = SystemAPI.GetComponent<LocalTransform>(e);
                 var row = new ZoneRow { Zone = zone, Position = pose.Position.xz, EffectStart = job.Effects.Length, PointStart = job.Points.Length };
                 foreach (var effect in SystemAPI.GetBuffer<ZoneEffect>(e)) job.Effects.Add(effect);
@@ -179,6 +182,16 @@ namespace Game.Simulation.Hazards
                                 case ZoneEffectKind.Repel:
                                     Repel(row, effect, body, com, v, hasLast, last, sequence);
                                     break;
+                                case ZoneEffectKind.Attract:
+                                {
+                                    // HAZ-015 gravity well: GM / max(r, rmin)² toward the zone centre, inside the zone (ADR-0119 decision 4).
+                                    if (!Inside(row, com, forward, right, 0)) break;
+                                    float2 toward = row.Position - com; float r = math.length(toward);
+                                    if (r < 1e-4f) break;
+                                    float soft = math.max(r, effect.B), accel = effect.A / (soft * soft);
+                                    Push(body, toward / r * (accel * Dt * body.Mass), true, sequence);
+                                    break;
+                                }
                                 case ZoneEffectKind.Gate:
                                     if (!hasLast || row.Zone.Shape != ZoneShape.Box) break;
                                     sbyte crossed = GateCrossing(row.Position, forward, right, row.Zone.HalfExtents.x, last, com);

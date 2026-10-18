@@ -48,7 +48,7 @@ namespace Game.Editor.Content
             EditorApplication.Exit(code);
         }
 
-        static ZoneDefinition Zone(string id, ZoneShape shape, Vector2 half, float radius, params ZoneDefinition.Effect[] effects)
+        internal static ZoneDefinition Zone(string id, ZoneShape shape, Vector2 half, float radius, params ZoneDefinition.Effect[] effects)
         {
             string path = Hazards + id + ".asset";
             var def = AssetDatabase.LoadAssetAtPath<ZoneDefinition>(path);

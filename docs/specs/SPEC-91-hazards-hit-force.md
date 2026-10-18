@@ -607,9 +607,10 @@ Why the rows sit below the first targets:
 - **Do:** Add the `Attract` effect (every machine) and `ZoneSchedule` gating for every kind. Add `zone_gravity_moon` content.
 - **Files:** `Assets/Game/Simulation/Hazards/ZoneJobs.cs`; `Assets/Game/Content/Hazards/zone_gravity_moon.asset`.
 - **Acceptance criteria:**
-  - [ ] A coasting ship curves into an orbit-like arc around a well.
-  - [ ] A scheduled zone is on exactly its `OnTicks` per period.
+  - [x] A coasting ship curves into an orbit-like arc around a well.
+  - [x] A scheduled zone is on exactly its `OnTicks` per period.
 - **Tests:** `GravityZoneTests.Attract_CurvesPath`, `ZoneScheduleTests.OnOff_TickExact`.
+- **Done (2026-10-17):** `ZoneSystem` skips a scheduled zone off its on ticks (`ZoneSchedule.IsOn`) and applies `Attract` as `GM / max(r, rmin)²` toward the centre. `zone_gravity_moon`: GM 720 000 m³/s², softened inside 40 m, reach 450 m (a 60 m/s circular orbit at 200 m).
 
 ### HAZ-016 — Pulses with shadows (flares and reactors)
 - **Milestone:** M4
