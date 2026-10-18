@@ -27,7 +27,7 @@ LIVERY = {"tlax": ("#1F7A4D", "#5BE3A1"), "vest": ("#E4E9EE", "#9FD8FF"), "khu":
 CLASSES = {"shuttle": (14, 6), "courier": (22, 8), "wraith": (28, 12), "tug": (32, 14), "cruiser": (52, 24),
            "hauler": (64, 20), "freighter": (140, 34), "barge": (190, 52), "liner": (240, 46)}
 DISTRICT = {"maw": "#FF5530", "bazaar": "#FF2E88", "chop": "#22E6FF", "fence": "#FFB000", "drop": "#FF7A2F",
-            "furnace": "#FF8A2A", "den": "#FF5530", "outer": "#BEBAAC", "run": "#9DFF3C", "harbour": "#FFE2B0", "exchange": "#5BE3A1", "yards": "#F2B705", "range": "#FF5530", "pit": "#FF7A2F",
+            "furnace": "#FF8A2A", "den": "#FF5530", "outer": "#BEBAAC", "run": "#9DFF3C", "defence": "#FF5530", "harbour": "#FFE2B0", "exchange": "#5BE3A1", "yards": "#F2B705", "range": "#FF5530", "pit": "#FF7A2F",
             "institute": "#9FD8FF", "breakers": "#FFB347", "foundry": "#FF6A2A", "circuit": "#7CFF9A", "old_town": "#BEBAAC",
             "gate": "#FFF1D6", "relic": "#FFC86B"}
 LANE = {"approach_in": "#7CFF9A", "approach_out": "#FFB347", "harbour": "#FFE2B0", "boulevard": "#9FE0C8",
@@ -146,7 +146,7 @@ def blender_main(key, draft):
     tone_l = bm.faces.layers.float_color.new("tone")
     lit_l = bm.faces.layers.float.new("lit")
     acc_l = bm.faces.layers.float_color.new("accent")
-    TONE = {"keel": "#E2D6B8", "rib": "#E2D6B8", "hull_new": "#7FA0B4", "spire": "#CFC8B8", "spire_top": "#E0DACB", "gatehouse": "#CFC8B8", "relic_foot": "#ECE7DC", "sanctum": "#E4E9EE",
+    TONE = {"silo": "#2A2C30", "keel": "#E2D6B8", "rib": "#E2D6B8", "hull_new": "#7FA0B4", "spire": "#CFC8B8", "spire_top": "#E0DACB", "gatehouse": "#CFC8B8", "relic_foot": "#ECE7DC", "sanctum": "#E4E9EE",
             "warehouse": "#6C7075", "industrial": "#5E625E", "hangar": "#545A60", "cargo": "#7A6A4A", "market": "#A6A6A0",
             "wall": "#4A4E52", "bastion": "#5A5E62", "keel": "#8A8478", "rib": "#6C7075", "rib_tip": "#A6A6A0"}
     DTONE = {"exchange": ["#B8AE98", "#C9BFA6", "#A89E8A"], "foundry": ["#4E5258", "#5A5E64", "#444A50"],
@@ -663,7 +663,7 @@ def blender_main(key, draft):
         shot("hub_cutaway", (60, -40), 2300, cut=True)
     for ps in opt.get("play_shots", []):
         name_, tgt, dist = ps[:3]
-        shot("hub_play_" + name_, tuple(tgt), dist, cut=key == "E" and name_ not in ("maw",))
+        shot("hub_play_" + name_, tuple(tgt), dist, cut=key == "E" and name_ != "maw" and (len(ps) < 4 or ps[3] != "out"))
     print("HUB done")
 
 
