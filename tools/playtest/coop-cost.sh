@@ -9,8 +9,8 @@ secs=${1:-15}
 host() { "$G" dev --cmd "$1" 2>/dev/null; }
 guest() { "$G" dev --cmd "net guest $1 \"$2\"" >/dev/null 2>&1; sleep ${3:-1}; "$G" dev --cmd "net reply" 2>/dev/null; }
 
-host "playground run=range" >/dev/null
-host "playground run=combat" >/dev/null
+host "range" >/dev/null
+host "spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true" >/dev/null
 for slot in 1 2; do host "net bring $slot" >/dev/null; done
 sleep 3
 host "net costreset" >/dev/null; for slot in 1 2; do guest $slot "net costreset" 0.2 >/dev/null; done

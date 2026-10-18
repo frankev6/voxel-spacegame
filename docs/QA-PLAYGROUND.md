@@ -2,16 +2,16 @@
 
 Start with `Assets/Game/Scenes/World.unity` and Play, or run `tools/playtest/playground.sh`. Use the visible **Console** control (F1 also works). All commands below are in-game console commands. From a terminal, use `tools/playtest/g.sh dev --cmd 'COMMAND'`; pending operations can be polled with `tools/playtest/g.sh op --id N`.
 
-## The hub (DEV-022)
+## The Hollow (DEV-023)
 
-The playground is the ARK Proving Grounds: spawn on the plaza, fly out through a blue portal to one of nine districts (the directory beside the spawn gives their bearings), and come home through each district's ← HUB PORTAL. F stations are dashed rings with their name on the floor; red rings reset one district; RESET EVERYTHING on the plaza resets the session. Details: [tools/playtest/README.md](../tools/playtest/README.md#interactive-development-playground-dev-021).
+The playground is the Hollow, the Khuchad Clan's haven in an asteroid (the ARK Proving Grounds were retired on 2026-10-18). You spawn at its entrance, outside the Maw. The Ring and the side tunnels lead to the stations; the light strips along the walls take the colour of the next station that way. F in a station's circle activates it: the Market and the dens trade, the Docks put out energy canisters, the Quartermaster resets the Hollow. The race portal in an alcove off the Ring south-east of the Maw junction (TRACK 01 · RACE PORTAL) opens the race on Track 01; `race end` brings you back.
 
 ## Entry, navigation and reset
 
 - `playground` enters the isolated `dev-playground` profile, preserving a prior real campaign through normal exit-save.
-- `playground status` lists the available areas and last result.
-- `playground run=<id>` closes the console, moves to the area and activates it. Close any other screen first.
-- `playground goto=<station>` moves onto a station's pad without activating it (`goto=district:<id>` to a district's entrance, `goto=hub` to the plaza); close Console and press F. Menu-only screens (cargo, settings, fleet, story, survey, map, power) are `run=` only.
+- `playground status` lists the stations, the screens and the last result.
+- `playground run=<id>` closes the console and opens a screen, or moves to a station and activates it. Close any other screen first.
+- `playground goto=<station>` moves into a station's circle without activating it (`goto=hollow` to the entrance, `goto=hollow@x,z[,yaw]` anywhere); close Console and press F. Menu-only screens (cargo, settings, fleet, story, survey, map, power, campaign, editor, race) are `run=` only.
 - `playground ship=<blueprint>` resets the playground flying that ship, for example `ship_nocturne_wraith`, `ship_nocturne_requiem`, `ship_nocturne_vesper`, `ship_nocturne_dirge`, `ship_xeno_husk` or `ship_racer_needle`. `playground ship=starter` restores the start ship (the WRAITH); a wrong id lists every ship. The choice lasts across resets until the Editor restarts and never touches a campaign fleet (QA-001).
 - `playground reset` discards the current practice session and recreates the quiet sandbox, including from its Blueprint Lab or practice campaign. Saved blueprints/settings and already-written profile saves are not deleted. It never resets another profile's saved campaign.
 
@@ -19,15 +19,13 @@ The playground is the ARK Proving Grounds: spawn on the plaza, fly out through a
 
 | Command | What to exercise |
 |---|---|
-| `playground run=flight` | Six-gate slalom in the flight school. W/S forward/reverse; A/D turn; Q/E (or Shift+A/D) strafe; Ctrl boost; X brake; wheel zoom. |
-| `playground run=range` | Space fires at the enlarged procedural station. Cut narrow bridges; observe detached sections, damage, colliders, debris, VFX/audio. |
-| `playground run=combat` | One hostile raider WRAITH per reset. AI pursuit, firing, incoming damage and defeat flow. Reset before trying quiet features. |
+| `range` | Spawns the breakable procedural station; Space fires at it. Cut narrow bridges; observe detached sections, damage, colliders, debris, VFX/audio. |
+| `spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true` | One hostile raider WRAITH. AI pursuit, firing, incoming damage and defeat flow. Reset before trying quiet features. |
 | `playground run=power` | Live energy supply/demand, shield HP and ability charges/cooldowns. Use shield/boost buttons and normal equipped ability keys. |
 | `playground run=shield` | Toggle the real shield; reports the fixed-step result. Cooldown/HP restrictions remain real. |
 | `playground run=boost` | Request Speed Boost; hold W to feel the increased thrust. Charges, energy and cooldown remain real. |
-| `playground run=salvage` | Prepare a WRAITH wreck. Recover its actual salvage with F at the HUD prompt, or repeat the command once ready; inspect transferred cargo. Three wrecks maximum per reset. |
 | `playground run=cargo` | Actual inventory, test fuel/credits, sorting/stacking and item inspection. |
-| `playground run=merchant` | Actual market, stock, prices, buying and selling. |
+| `playground run=market` | The Hollow's Market: actual stock, prices, buying and selling (first visit grants 2,000 test credits). |
 | `playground run=fleet` | Fleet roster and committed ship statistics. |
 | `playground run=editor` | Creative Blueprint Lab: place/remove/rotate, mirror, undo/redo, overlays, validate and save. Reset directly to return. |
 | `playground run=settings` | Real display/audio/control/accessibility settings and rebinding. Settings persist beyond reset. |

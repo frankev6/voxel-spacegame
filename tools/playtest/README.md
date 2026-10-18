@@ -143,25 +143,13 @@ W/S requests forward/reverse thrust, A/D turns, Shift+A/D strafes while the turn
 
 From a terminal at the repository root, run `tools/playtest/playground.sh`. This enters Play if necessary, starts the playground and waits for readiness. No manual console setup is needed.
 
-**Reset everything with the RESET EVERYTHING pad or `playground reset`.** This restores the player and every district and clears enemies, broken pieces, projectiles, inventory grants, facts and trial state. Entry uses the separate `dev-playground` profile and saves any prior real campaign before switching; a failed save stops entry safely.
+**Reset everything with `playground reset`** (or the Quartermaster's station, which resets the Hollow). This restores the player and the Hollow and clears enemies, broken pieces, projectiles, inventory grants, facts and trial state. Entry uses the separate `dev-playground` profile and saves any prior real campaign before switching; a failed save stops entry safely.
 
-**The ARK Proving Grounds (DEV-022).** The playground is a space hub. You spawn on the plaza beside the hub station; a ring of blue lane-gate portals (the real HAZ-021 portals) round it leads to nine districts, each about one group of mechanics, and a portal in each district (← HUB PORTAL) brings you back. You can also fly between them: lanes with running lights lead out from the portals, shuttles and freighters circle on two traffic loops. Every sign is dot-matrix text on the floor; every F pad is a dashed ring with its name; red rings are resets.
+**The Hollow (DEV-023 option E).** The playground is the Khuchad Clan's haven in an asteroid. You spawn at its entrance, outside the Maw. Inside, the Ring and the side tunnels lead to the stations: the Market, the Quartermaster (resets the Hollow), the Gunsmith, Parts, Salvage and Smuggler dens, and the Docks (energy canisters). F in a station's circle activates it. The light strips along the walls take the colour of the next station that way. The ARK Proving Grounds and their exhibit districts are retired (owner, 2026-10-18).
 
-| District (bearing from the plaza) | What is there |
-|---|---|
-| FLIGHT SCHOOL (SE) | SLALOM: six numbered gates, the next one lit. BOOST STRIP: a real boost pad. BRAKE BOX: F arms it; come in faster than 40 m/s and stop inside, and it times you. |
-| WEAPONS RANGE (S) | The breakable target station and six target fighters 100–260 m from the pad. |
-| COMBAT ARENA (SW) | DUEL: one raider fighter. XENO WAVE: two husks and a broodmother. Cover walls. |
-| HAZARD YARD (W) | A reactor pulsing every 4 s with a slab to hide behind, energy canisters, one mine of each payload with its effect written beside it. |
-| MECHANISM WORKS (NW) | Sweeper arm, sliding door, switch door (shoot the gold post), a portal that jams for 6 s behind each ship. |
-| SHIPYARD (N) | Ten ships on plinths; F on a ship's pad swaps you into it and rebuilds the playground, putting you back at that pad. BLUEPRINT LAB pad. |
-| MARKET DOCKS (NE) | A merchant freighter at a pier; TRADE hails it (ARK Station Market; first visit grants 2,000 test credits). |
-| SALVAGE YARD (E) | Hull chunks and gutted ships; SALVAGE prepares a wreck you pull into your hold at its real Salvage prompt. |
-| RACE CONTROL (S, beyond the range) | OPEN TRACK 01, then F again on the grid starts the countdown. |
+**The race.** A portal inside the Hollow (TRACK 01 · RACE PORTAL, in an alcove off the Ring south-east of the Maw junction, at 80, −150) takes you to Track 01: the race opens and puts every pilot on the grid; F starts the countdown; `race end` brings you back beside the portal. `race open` also opens it from anywhere.
 
-Each district's exhibits spawn the first time you come near it. Its red RESET pad puts that district back as it started (respawns what you broke, clears what you woke) and leaves the rest alone. RESET EVERYTHING on the plaza (or `playground reset`) rebuilds the whole session. PRACTICE CAMPAIGN on the plaza starts the real opening campaign in the playground profile.
-
-Console: `playground goto=<station>` moves you onto a station's pad, `goto=district:<id>` to a district's entrance, `goto=hub` to the plaza; `playground run=<station>` goes there and presses F. Screens that are only menus have no place in the world and stay console shortcuts: `playground run=cargo | settings | fleet | story | survey | map | power`, and `run=shield` / `run=boost` trigger the equipped abilities. `playground status` lists every id. The hub's structures come from *Game/Content/Build Playground Hub*.
+Console: `playground goto=hollow` (the entrance), `goto=<station>` (market, quartermaster, den_gunsmith, den_parts, den_salvage, den_smuggler, docks) or `goto=hollow@x,z[,yaw]` (anywhere, in the Hollow's metres); `playground run=<station>` goes there and presses F. Screens and trials that are only menus stay console shortcuts: `playground run=cargo | settings | fleet | story | survey | map | power | campaign | editor | race`, and `run=shield` / `run=boost` trigger the equipped abilities. `playground status` lists every id. The Hollow's content comes from *Game/Content/Build Hollow*. For a hostile to fight, `spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true`; `range` spawns the breakable test station.
 
 Story, survey and map use the registered quest/clue owners, log query and map presenters; the generated galaxy is metadata only, with no body load or player relocation, and reset clears them. `editor` opens the creative Blueprint Lab; `playground reset` returns directly from it and from the practice campaign. Full reviewer checklist: [QA-PLAYGROUND](../../docs/QA-PLAYGROUND.md).
 

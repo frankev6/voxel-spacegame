@@ -13,6 +13,14 @@ namespace Game.App.DevRuntime.Playground
         internal static readonly float2 Offset = new float2(9000, 0);
         internal const string Faction = "faction_khuchad_clan";
         internal const float StationRadius = 18;
+        /// <summary>Where the playground puts a pilot (owner: "load into the entrance of the asteroid"): outside the Maw, off the
+        /// traffic lane through it, facing in.</summary>
+        internal static readonly float2 Entrance = new float2(-90, -472);
+        internal const float EntranceYaw = .55f;
+        /// <summary>The race portal: in an alcove off the Ring south-east of the Maw junction (about 58 m wide, open to the south), 61 m
+        /// from every traffic route (a portal takes any ship). A ship crosses it heading `RacePortalYaw`, into the alcove.</summary>
+        internal static readonly float2 RacePortal = new float2(80, -150);
+        internal const float RacePortalYaw = .21f, RacePortalWidth = 40;
 
         internal enum Layer : byte { Low, High, Struct, Fort }
         internal enum StationKind : byte { Merchant, Rearm, Reset }

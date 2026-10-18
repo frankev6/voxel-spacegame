@@ -4,7 +4,7 @@
 . "$(dirname "$0")/_env.sh"
 export UNITY_PROJECT_PATH="$PROJECT_ROOT"
 G="$PT_DIR/g.sh"
-"$G" dev --cmd "playground run=range" | tail -1
+"$G" dev --cmd "range" | tail -1
 for slot in 1 2 3; do "$G" dev --cmd "net bring $slot" >/dev/null 2>&1; done
 sleep 2
 for x in 24 30 36 42 48; do

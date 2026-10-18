@@ -636,6 +636,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Tests:** `PlaygroundTests.Enter_Interact_Reset` (one owner-feature functional test; direct operations, no combat soak).
 
 ### DEV-022 — The ARK Proving Grounds: a mechanics hub
+- **Retired (owner, 2026-10-18):** "remove the current playground it was superseeded by the asteroid, i want to load into the entrance of the asteroid when i hit playground", keeping the race. The playground is now the Hollow (DEV-023); the hub, its districts, exhibits and `ship_hub_*` blueprints are deleted; the race is reached by a portal in the Hollow or `race open`.
 - **Milestone:** M4
 - **Tier:** frontier — world layout, presentation and composition over many owners
 - **Depends on:** `DEV-021`, `HAZ-013`, `HAZ-021`, `RACE-016`
