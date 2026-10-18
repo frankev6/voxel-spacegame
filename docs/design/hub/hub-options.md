@@ -96,6 +96,35 @@ Left to right, top to bottom: the arrival, the core, the Forge, the Salvage Yard
 
 You agreed all ten. Applied in the block-out: the city's mass hangs below the flight plane (roofs at 14–44 m below it; masts, coils, guns, signs and ships rise above); walls carry lit floor strips and neon trim bands instead of the window grid; every quarter has its own material; roofs carry neon sign boards and blades, and street edges neon trim (cyberpunk, as you asked); streets are 80 m wide and carry twice the traffic; lane lights are sparse and quiet, the Horizon Line is the one strong ring; radiators are rows of thin fins; the converters are power stations with field coils and visible conduits; hazard beacons ring each nozzle; the disk is brighter on its approaching side. Still for the build: the black hole's lensing and the physics hand-over for distant traffic.
 
+## Option E: The Hollow (a pirate haven in an asteroid)
+
+> "lets make an option 5, much smaller version, not as "bustling city", its a station built into an moon/asteroid, with space station construction portruding outside/around the moon, and also tunnels and highways INSIDE it, that the player can go into. like the station is built into and as part of the asteroid, not as many ships goin in and out and not as large scale as the meridian. it is primarily a black market merchant / pirate haven."
+
+![Option E](img/hub_option_e.png)
+
+| Arrival | Cutaway: the rock above the flight plane removed |
+|---|---|
+| ![E arrival](img/hub_arrival_e.jpg) | ![E cutaway](img/hub_cutaway_e.jpg) |
+
+The Khuchad Clan's haven, cut into a two-lobed asteroid 1.7 km long: about a third of Meridian's width and a few dozen ships rather than hundreds. Raiders are hostile everywhere else (SPEC-33 locks their relation); here they are only customers, and what they take is fenced, chopped and sold.
+
+- **The approach.** No picket. You spawn outside and follow a channel of red lamps through a maze of boulders and mine belts. Captured prizes hang chained outside the rock, a warning and an advertisement.
+- **The Maw.** The one front door: a gun-lined throat, a field gate across it, the Clan's scan, a cluster of neon over it.
+- **The Ring.** The highway inside the rock, at the flight plane, two ways round both lobes, lit along both walls. Spurs lead off it to the caverns; the Smugglers' Run leaves out the back to a lane gate nobody admits to, and a vent runs out the north.
+- **The Black Bazaar.** An old crater open to space, its walls terraced with stalls at the flight plane: stolen blocks, unregistered weapons, salvage with the serials ground off. Stolen cargo is stacked on the crater floor. The **Quartermaster**'s console is the one reset.
+- **The Chop Shop.** A cavern where stolen ships are stripped under gantries, and the refit cradle where you edit your own ship, no questions.
+- **The Fence.** Brokers for anything taken off someone else's ship, their haulers alongside.
+- **The Drop.** A pit in the rock where crews settle things, ledges of spectators round it.
+- **The Furnace.** The haven's reactor, in a shaft through the rock's waist open to space. Its pulse sweeps the tunnels beside it; the bulkheads are the shelter.
+- **The Den.** A warship rammed into the rock long ago. Its hangar is the Clan's own.
+- **The Outer Works.** The station has grown over the rock: docking spars with the Clan's and its customers' ships, habitat blocks bolted to the cliffs with their neon, a hab ring on the high ground, radiators, masts and the ore mass driver.
+
+![E at play zoom](img/hub_play_sheet_e.jpg)
+
+Left to right, top to bottom: the arrival, the Maw, the cutaway, the Black Bazaar, the Ring by the Bazaar, the Chop Shop, the Maw at play zoom, the Den, the Furnace.
+
+**How it is built.** The rock is voxels: a grid of 12 m columns, each one or two solid spans; a tunnel or cavern is the gap between them, cut at the flight plane (about 7,900 columns). Because the camera looks down, the rock above the flight plane hides round the player inside the rock and near its cliffs (the cutaway render shows what you see), so the tunnels fly like streets. It needs the cutaway as new camera work; everything else (traffic, the reactor pulse, mines, the lane gate, the refit cradle) exists.
+
 ## The first three options
 
 All three maps are at true scale; every building, lane, berth and ship on them comes from `ArtSource/Hub/hub_layouts.py` (coordinates in [hub_options.json](hub_options.json)). The arrival renders are block-outs from the game camera (55° pitch, 40° field of view), pulled back to the arrival zoom; buildings are plain extrusions with lit windows (`ArtSource/Hub/hub_arrival.py`).
@@ -197,5 +226,5 @@ The world tells you what things are; text is the last resort.
 
 ## Decisions
 
-1. **Which city:** D (recommended), A, B or C, or a mix. (Your review of D's quarters and the polish list are applied above.)
+1. **Which hub:** D (recommended for the capital), E (the pirate haven), A, B or C, or a mix. D and E are different kinds of place and could both exist: Meridian as the capital, the Hollow as the haven you find later.
 2. **The civilian ship line:** approve the class list above, then silhouettes come for approval before any 3D.
