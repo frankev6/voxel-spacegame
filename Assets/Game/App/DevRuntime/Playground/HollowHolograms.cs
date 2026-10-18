@@ -90,7 +90,7 @@ namespace Game.App.DevRuntime.Playground
                 Board(parent, look, maw ? "THE HOLLOW" : d.Name ?? s.Text, maw ? "FOLLOW THE WALL LIGHTS" : d.Trade,
                     new Vector3(s.Position.x, floor, s.Position.z) + (maw ? new Vector3(math.sin(s.Yaw), 0, math.cos(s.Yaw)) * 40 : Vector3.zero), s.Yaw, d);
             }
-            // the race portal's board, at the back of its alcove: a ship coming to the portal reads it through the gate
+            // the race portal's board, 24 m beyond the gate: a ship coming to the portal reads it through the gate
             Board(parent, look, Racing.Name, Racing.Trade, new Vector3(RacePortal.x + math.sin(RacePortalYaw) * 24, floor, RacePortal.y + math.cos(RacePortalYaw) * 24),
                 RacePortalYaw, Racing);
             foreach (var st in Stations)
@@ -138,9 +138,12 @@ namespace Game.App.DevRuntime.Playground
         /// takes the colour of the next station that way, with a flowing line of light above it toward that station. Strips on the trunk
         /// from the Maw (it leads everywhere) and in the caverns stay white. Call before the neons are drawn: <see cref="Guided"/>
         /// says which of them are drawn here instead.</summary>
-        internal void Plan()
+        internal void Plan() => guides = PlanGuides();
+        /// <summary>For each neon strip: the path it guides along (its station's), where its ends fall along it and the side the tunnel
+        /// is on; path −1 for strips that guide nowhere. Static layout only, so the map export (HollowMap) draws the same guides.</summary>
+        internal static (int path, float a, float b, float2 inward)[] PlanGuides()
         {
-            guides = new (int path, float a, float b, float2 inward)[Neons.Length];
+            var guides = new (int path, float a, float b, float2 inward)[Neons.Length];
             var totals = new float[Paths.Length];
             for (int k = 0; k < Paths.Length; k++) totals[k] = Along(Paths[k].Points, Paths[k].Points[^1]).along;
             for (int i = 0; i < Neons.Length; i++)
@@ -166,6 +169,12 @@ namespace Game.App.DevRuntime.Playground
                 var pts = Paths[best].Points;
                 guides[i] = (best, Along(pts, n.A).along, Along(pts, n.B).along, inward);
             }
+            return guides;
+        }
+        /// <summary>A station's district colour (its guides', lamps' and board's first colour).</summary>
+        internal static bool TryDistrictColour(string station, out Color colour)
+        {
+            bool found = Districts.TryGetValue(station, out var d); colour = d.A; return found;
         }
         internal bool Guided(int neon) => guides != null && neon < guides.Length && guides[neon].path >= 0;
         (int path, float a, float b, float2 inward)[] guides;

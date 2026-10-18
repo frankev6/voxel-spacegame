@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Run Pipeline tests with project ownership and exact result-inventory validation."""
+"""Run tests in the open Editor with project ownership and exact result-inventory validation. EditMode goes through Pipeline's
+run_tests; PlayMode goes through Unity's TestRunnerApi (Game.DevTools.Editor.Tests.LiveTestRun, DEV-026), because Pipeline entered
+Play before the runner's first task and every live PlayMode run failed ("This cannot be used during play mode")."""
 from collections import Counter
 import json
 import pathlib
@@ -88,6 +90,8 @@ def run(root, mode, name_filter, category, output):
     status = call('test_status')
     if isinstance(status, dict) and status.get('status') == 'running':
         raise RuntimeError('Unity already has an active test request. No replacement request dispatched.')
+    if mode.casefold() == 'playmode':
+        return run_direct(root, mode, name_filter, category, output, call, log)
     listing = call('list_tests', '--mode', mode.lower())
     expected = select_tests(listing, mode, name_filter, category)
     dispatch_category = category
@@ -134,6 +138,54 @@ def run(root, mode, name_filter, category, output):
             ET.SubElement(failure, 'message').text = test.get('Message', '')
             ET.SubElement(failure, 'stack-trace').text = test.get('StackTrace', '')
     ET.ElementTree(xml).write(output, encoding='utf-8', xml_declaration=True)
+
+
+def run_direct(root, mode, name_filter, category, output, call, log):
+    """PlayMode through TestRunnerApi: exactly the inventory's tests, the runner's NUnit XML at `output`, then the same identity
+    check as the Pipeline path. Never stops a Play session it did not start."""
+    editor = call('editor_status')
+    if isinstance(editor, dict) and editor.get('playMode') not in (None, 'stopped'):
+        raise RuntimeError('The Editor is in Play; stop it (or wait for the playtest) and run again. Not stopped for you.')
+    listing = call('list_tests', '--mode', mode.lower())
+    expected = select_tests(listing, mode, name_filter, category)
+    names = pathlib.Path(root) / 'Logs/tools/live-test-names.txt'
+    names.parent.mkdir(parents=True, exist_ok=True)
+    names.write_text('\n'.join(sorted(expected)) + '\n', encoding='utf-8')
+    status_path = pathlib.Path(root) / 'Logs/tools/live-test-status.json'
+    try:
+        if json.loads(status_path.read_text(encoding='utf-8')).get('state') == 'running' and time.time() - status_path.stat().st_mtime < 1800:
+            raise RuntimeError('A live TestRunnerApi run is still going (Logs/tools/live-test-status.json). No replacement request dispatched.')
+    except (OSError, ValueError):
+        pass
+    status_path.unlink(missing_ok=True)
+    pathlib.Path(output).unlink(missing_ok=True)
+    request = dict(mode=mode, nameFilter=name_filter, category=category, inventory=sorted(expected.elements()), runner='TestRunnerApi')
+    started = call('eval', f'return Game.DevTools.Editor.Tests.LiveTestRun.Start("{mode}", "{names}", "{pathlib.Path(output).resolve()}");')
+    if isinstance(started, dict):
+        started = started.get('result')
+    log.write_text(json.dumps(dict(request=request, receipt=started), indent=2) + '\n')
+    if started != 'started':
+        raise RuntimeError('Live PlayMode run not started: ' + str(started))
+    deadline = time.monotonic() + 1800
+    state = {}
+    while time.monotonic() < deadline:
+        time.sleep(1)
+        try:
+            state = json.loads(status_path.read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            continue
+        if state.get('state') in ('completed', 'error'):
+            break
+    else:
+        raise RuntimeError('Live PlayMode run exceeded 1800 seconds; it may still be running in Unity.')
+    log.write_text(json.dumps(dict(request=request, receipt=started, status=state), indent=2) + '\n')
+    if state.get('state') != 'completed':
+        raise RuntimeError('Live PlayMode run failed: ' + str(state.get('message')))
+    cases = [c.get('fullname') for c in ET.parse(output).getroot().iter('test-case')]
+    if Counter(cases) != expected:
+        missing = list((expected - Counter(cases)).elements())[:3]
+        unexpected = list((Counter(cases) - expected).elements())[:3]
+        raise RuntimeError(f'Test result identity mismatch; missing {missing}; unexpected {unexpected}.')
 
 
 def main():

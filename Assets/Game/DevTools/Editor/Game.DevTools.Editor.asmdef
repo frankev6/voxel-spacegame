@@ -28,7 +28,9 @@
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.InputSystem",
         "Unity.VisualEffectGraph.Runtime",
-        "Unity.Pipeline.Attributes"
+        "Unity.Pipeline.Attributes",
+        "UnityEditor.TestRunner",
+        "UnityEngine.TestRunner"
     ],
     "includePlatforms": [
         "Editor"

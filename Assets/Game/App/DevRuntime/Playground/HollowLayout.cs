@@ -17,10 +17,12 @@ namespace Game.App.DevRuntime.Playground
         /// traffic lane through it, facing in.</summary>
         internal static readonly float2 Entrance = new float2(-90, -472);
         internal const float EntranceYaw = .55f;
-        /// <summary>The race portal: in an alcove off the Ring south-east of the Maw junction (about 58 m wide, open to the south), 61 m
-        /// from every traffic route (a portal takes any ship). A ship crosses it heading `RacePortalYaw`, into the alcove.</summary>
-        internal static readonly float2 RacePortal = new float2(80, -150);
-        internal const float RacePortalYaw = .21f, RacePortalWidth = 40;
+        /// <summary>The race portal: in the Market's cavern north-east of the Market: its posts 22 m from the rock, 76 m from every
+        /// station's guided path, 71 m from every traffic route and 89 m from the berths (a portal takes any ship; its first spot sat on
+        /// the Salvage path). Chosen with tools/hollow-map.py's overlay.
+        /// A ship crosses it heading `RacePortalYaw` (north).</summary>
+        internal static readonly float2 RacePortal = new float2(-160, 110);
+        internal const float RacePortalYaw = 0, RacePortalWidth = 40;
 
         internal enum Layer : byte { Low, High, Struct, Fort }
         internal enum StationKind : byte { Merchant, Rearm, Reset }

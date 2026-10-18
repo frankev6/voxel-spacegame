@@ -675,6 +675,28 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [x] Answers in under a second over the Hollow (600 m radius find at 10–20 m steps: 0.4–0.6 s in the Editor).
 - **Tests:** `DevProbeTests.Clearance_Ray_AndShipsIgnored`, `DevProbeTests.Flood_StopsAtWalls_PassesGaps`.
 
+### DEV-025 — The Hollow's map without Play
+- **Milestone:** M4
+- **Tier:** standard — an Editor export and a drawing script
+- **Depends on:** `DEV-023`
+- **Do:** Owner (2026-10-18) asked for tools for building big places. `HollowMap.Export` (Editor, no Play) slices `hollow_blocks.bin` at the flight plane into `Logs/hollow-map/rock.png` and writes everything the game places to `overlay.json`, the wall guides through `HollowHolograms.PlanGuides` (the planner the game runs). `tools/hollow-map.py` draws them on a labelled 100 m grid, whole or round a point, layer by layer.
+- **Files:** `Assets/Game/Editor/Content/HollowMap.cs`, `tools/hollow-map.{sh,py}`, `HollowHolograms.PlanGuides`.
+- **Acceptance criteria:**
+  - [x] One command, about a second, with or without an open Editor (refuses during Play).
+  - [x] Its first use found the race portal on the Salvage path (moved, see the ledger).
+- **Tests:** none automated (an image tool); checked by eye against the live Hollow.
+
+### DEV-026 — Live PlayMode tests in the open Editor
+- **Milestone:** M4
+- **Tier:** standard — test tooling
+- **Depends on:** `DEV-002`
+- **Do:** Every live PlayMode run through Pipeline's `run_tests` failed: Pipeline entered Play before the test runner's first task (`CreateBootstrapSceneTask`), which then threw "This cannot be used during play mode". `LiveTestRun.Start` runs exactly the inventory's tests through `TestRunnerApi` and writes the runner's NUnit XML; `tools/live-tests.py` uses it for PlayMode, polls its status file and checks the result's identity against the inventory as before.
+- **Files:** `Assets/Game/DevTools/Editor/Tests/LiveTestRun.cs`, `tools/live-tests.py`.
+- **Acceptance criteria:**
+  - [x] PlayMode classes run live and the Editor stays open (PlaygroundTests 12 s, HollowTests 24 s).
+  - [x] Refuses during Play and over an active request; keeps the previous output then.
+- **Tests:** `tools/tests/test_unity_tools.py` (6 pass); live runs of `PlaygroundTests` and `HollowTests`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
