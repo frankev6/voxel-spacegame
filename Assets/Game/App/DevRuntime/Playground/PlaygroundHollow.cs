@@ -112,7 +112,9 @@ namespace Game.App.DevRuntime.Playground
                 if (root == Entity.Null) continue;
                 em.AddComponent<CameraSeeThrough>(root);
                 if (piece.Layer == Layer.High) high.Add(root);
-                if (!fort) { em.AddComponent<SpatialScenery>(root); continue; }
+                // the rock and the districts' structures are scenery: shots stop on them but break nothing (a tile is several lumps, and
+                // the first stray hit split them off as debris: owner, "a bunch of their structures were just braking off on their own")
+                if (!fort) { em.AddComponent<SpatialScenery>(root); em.AddComponent<Game.Voxel.Damage.DamageImmune>(root); continue; }
                 // the rock turns about its centre, its fort and guns with it
                 HazardSpawn.AddMover(em, root, new Mover { Path = MoverPath.Rotate, Origin = Sim(piece.Origin, frame), Rate = Forts[piece.Fort].Rate,
                     Yaw = 0, StartTick = tick, Playing = 1, Group = Group });
@@ -139,7 +141,7 @@ namespace Game.App.DevRuntime.Playground
                     if (!id.IsNone) guards.Add((id, g.Position));
                     taken.Add((g.Position, 80));
                 }
-                taken.Add((Spawn, 140));
+                taken.Add((Spawn, 140)); taken.Add((Entrance, 140));
                 foreach (var m in Moorings) taken.Add((m.Position, 60));
                 foreach (var route in Traffic)
                 {
@@ -161,6 +163,11 @@ namespace Game.App.DevRuntime.Playground
             if (catalog.TryGet<ShipBlueprintDefinition>(new ContentId("ship_device_canister"), out var canister))
                 foreach (var st in Stations)
                     if (st.Kind == StationKind.Rearm) Canisters(em, canister, session, frame, st);
+            // the race portal (owner: "inside the hollow there should be a portal to the race"): out by Track 01, where the race opens
+            if (catalog.TryGet<ZoneDefinition>(new ContentId("zone_gate"), out var gate))
+                HazardSpawn.Portal(em, gate, Sim(RacePortal, frame).xz, RacePortalYaw, Sim(RaceExit, frame).xz, math.PI, RacePortalWidth, 0, Group,
+                    session.Allocate(), session.Allocate());
+            else missing.Add("zone_gate");
             BuildDressing(catalog);
         }
 
@@ -298,6 +305,10 @@ namespace Game.App.DevRuntime.Playground
         }
 
         static readonly Unity.Profiling.ProfilerMarker AirMarker = new("Hollow.Air"), TrafficMarker = new("Hollow.Traffic");
+        /// <summary>The race portal's exit, Hollow-relative: north of Track 01, clear of it (the track is laid when the race opens).</summary>
+        internal static float2 RaceExit => (float2)DevPlaygroundRace.TrackOffset.xz + new float2(0, 600) - Offset;
+        /// <summary>A pilot this close to the track after the race portal arrives there: the race opens.</summary>
+        internal const float RaceArrivalRadius = 1500;
         double steeredAt;
         const float LookAhead = 60;   // far enough that a ship never arrives, near enough not to cut a tunnel's bends into the rock
 
@@ -425,6 +436,15 @@ namespace Game.App.DevRuntime.Playground
                 lamp.range = math.max(8, l.Radius) * 2.6f;
                 lamp.intensity = (l.Kind == "beacon" ? .5f : l.Kind == "flash" ? .6f : .45f) * lamp.range * lamp.range;
                 air.AddLamp(lamp, l.Kind, (l.Position.x + l.Position.z) * .01f);
+            }
+            // the race portal's two posts, lit amber
+            foreach (float side in new[] { -1f, 1f })
+            {
+                var post = new GameObject("race portal lamp").AddComponent<UnityEngine.Light>(); post.transform.SetParent(dressing.transform, false);
+                post.transform.localPosition = new Vector3(RacePortal.x + side * (RacePortalWidth * .5f + 3), 6, RacePortal.y);
+                post.type = LightType.Point; post.shadows = LightShadows.None; post.color = new Color(1f, .66f, .16f);
+                post.range = 70; post.intensity = .5f * post.range * post.range;
+                air.AddLamp(post, "beacon", side);
             }
             air.Build(dressing.transform, roof.transform);
             holograms.Build(dressing.transform, look, FloorY);

@@ -59,7 +59,8 @@ namespace Game.Editor.Content
                 ushort hull = Block("block_hull"), frame = Block("block_track_frame");
                 var large = new[] { hull, hull, Block("block_hull_large_2"), Block("block_hull_large_3"), Block("block_hull_large_4") };
                 var rock = new[] { Block(RockBlock), Block(RockBlock), Block(RockBlock + "_large_2"), Block(RockBlock + "_large_3"), Block(RockBlock + "_large_4") };
-                var kit = new Kit(Block("block_core_small"), Block("block_reactor_small"), Block("block_capacitor_small"), Block("weapon_plasma_turret_medium"));
+                var kit = new Kit(Block("block_core_small"), Block("block_reactor_small"), Block("block_capacitor_small"), Block("weapon_plasma_turret_medium"),
+                    Block("weapon_siege_cannon_heavy"));
 
                 using var reader = new BinaryReader(File.OpenRead(Source));
                 if (Encoding.ASCII.GetString(reader.ReadBytes(4)) != "HOLW" || reader.ReadInt32() != 1) throw new InvalidDataException(Source);
@@ -117,23 +118,26 @@ namespace Game.Editor.Content
 
         delegate void Put(ushort block, int3 origin, byte colour, byte orient);
 
-        /// <summary>A gun's working parts at `at`: core, reactor and capacitor behind, one medium turret (two when heavy) in front facing
-        /// local +z, its barrels' clearance ahead left open; the whole kit turned by the yaw-only orientation `orient` (0, 4, 8, 12).</summary>
+        /// <summary>A gun's working parts at `at`: core, reactor and capacitor behind; in front, facing local +z with their barrels'
+        /// clearance ahead left open, two siege cannons on a heavy gun and two medium plasma turrets on a light one (owner, of guns that
+        /// took ten minutes to kill a WRAITH: "we gotta give them strong cannons"); the whole kit turned by the yaw-only orientation
+        /// `orient` (0, 4, 8, 12). Two siege cannons draw 50 of the small reactor's 60.</summary>
         readonly struct Kit
         {
-            readonly ushort core, reactor, capacitor, turret;
-            internal Kit(ushort core, ushort reactor, ushort capacitor, ushort turret) { this.core = core; this.reactor = reactor; this.capacitor = capacitor; this.turret = turret; }
+            readonly ushort core, reactor, capacitor, turret, cannon;
+            internal Kit(ushort core, ushort reactor, ushort capacitor, ushort turret, ushort cannon)
+            { this.core = core; this.reactor = reactor; this.capacitor = capacitor; this.turret = turret; this.cannon = cannon; }
             internal void Place(Put put, int3 at, bool big, byte orient)
             {
                 void Part(ushort block, int x, int z, byte colour) => put(block, at + OrientationTables.Rotate(new int3(x, 0, z), orient), colour, orient);
                 if (big)
                 {
                     Part(core, -3, -3, Soot); Part(reactor, 1, -3, Graphite); Part(capacitor, -1, -3, Graphite);
-                    Part(turret, -3, 0, Steel); Part(turret, 1, 0, Steel);
+                    Part(cannon, -4, 0, Steel); Part(cannon, 0, 0, Steel);
                 }
                 else
                 {
-                    Part(core, -2, -2, Soot); Part(reactor, 0, -2, Graphite); Part(turret, -1, 0, Steel);
+                    Part(core, -2, -2, Soot); Part(reactor, 0, -2, Graphite); Part(turret, -3, 0, Steel); Part(turret, 1, 0, Steel);
                 }
             }
         }

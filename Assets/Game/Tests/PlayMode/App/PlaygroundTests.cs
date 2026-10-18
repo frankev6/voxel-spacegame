@@ -12,6 +12,7 @@ using Game.Narrative.ShipLog;
 using Game.Tests.PlayMode.UI;
 using Game.UI.Data;
 using Game.App.DevRuntime;
+using Game.App.DevRuntime.Playground;
 using Game.App.Session;
 using Game.Core;
 using Game.Economy;
@@ -41,11 +42,15 @@ namespace Game.Tests.PlayMode.App
             var ui = Services.Get<UIRoot>();
             Assert.NotNull(ui.RootElement.Q<Button>("btn-open-console"), "Console access cannot require F1");
             Assert.NotNull(ui.RootElement.Q<Button>("btn-enter-playground"));
-            // DEV-022: the hub spawns you on the plaza, off every pad; the flight school's slalom is a station in its district
-            Assert.AreEqual(DevResultKind.Failed, Host.Commands.Execute("playground activate", Host.Context).Kind, "No station under the spawn");
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=flight", Host.Context).Kind);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=flight", Host.Context).Kind);
-            StringAssert.Contains("gate 1 / 6", Host.Commands.Execute("playground status", Host.Context).Text);
+            // the playground is the Hollow: the pilot starts at its entrance, outside the Maw, off every station
+            var playground = Host.Playground;
+            EM.CompleteAllTrackedJobs();
+            Assert.IsTrue(Host.Context.TryGetFrame(out var frame));
+            var entrance = playground.Origin + new Unity.Mathematics.double3(HollowLayout.Offset.x + HollowLayout.Entrance.x, 0, HollowLayout.Offset.y + HollowLayout.Entrance.y);
+            Assert.Less(Unity.Mathematics.math.distance((Unity.Mathematics.double3)EM.GetComponentData<LocalTransform>(Root).Position + frame.OriginInStarSystem, entrance), 30,
+                "Playground entry puts the pilot at the Hollow's entrance");
+            Assert.IsTrue(playground.Hollow.Built, "The Hollow is built at entry");
+            Assert.AreEqual(DevResultKind.Failed, Host.Commands.Execute("playground activate", Host.Context).Kind, "No station at the entrance");
             var originalPlayer = Root;
             Assert.IsTrue(Services.TryGet<FiringRangeService>(out var range));
             var originalStation = range.Target;
@@ -59,10 +64,10 @@ namespace Game.Tests.PlayMode.App
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=settings", Host.Context).Kind);
             Assert.IsTrue(ui.Navigator.Get<SettingsView>().IsOpen);
             ui.Navigator.Pop(ui.Navigator.Get<SettingsView>());
-            // a real F press on the market's TRADE pad hails the merchant
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=merchant", Host.Context).Kind);
+            // a real F press in the Hollow market's circle hails the merchant
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=market", Host.Context).Kind);
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F hold=0.02", Host.Context).Kind);
-            yield return Until(() => ui.Navigator.Get<MerchantView>().IsOpen, "F on the TRADE pad opens the real merchant screen", 5);
+            yield return Until(() => ui.Navigator.Get<MerchantView>().IsOpen, "F in the market's circle opens the real merchant screen", 5);
             Assert.NotNull(Services.Get<EconomyService>().Merchants.Current);
             ui.Navigator.Pop(ui.Navigator.Get<MerchantView>());
             Assert.IsNull(Services.Get<EconomyService>().Merchants.Current);
@@ -165,28 +170,19 @@ namespace Game.Tests.PlayMode.App
             yield return RunCommand("playground run=boost");
             EM.CompleteAllTrackedJobs();
             Assert.Greater(EM.GetComponentData<global::Game.Simulation.Power.ShipStatMultipliers>(Root).Get(global::Game.Data.Combat.StatId.Thrust), 1);
-            int scrapBefore = economy.Inventory.CountOf(new ContentId("resource_scrap"));
-            yield return RunCommand("playground run=salvage");
-            Assert.AreEqual(scrapBefore, economy.Inventory.CountOf(new ContentId("resource_scrap")), "Wreck preparation grants no cargo.");
-            yield return Until(() => Host.Context.TryGetInteractionTarget(out var salvageTarget)
-                && salvageTarget.Kind == InteractionKind.Salvage && salvageTarget.InRange != 0,
-                "Actual salvage prompt is available", 3);
-            yield return RunCommand("playground run=salvage");
-            Assert.Greater(economy.Inventory.CountOf(new ContentId("resource_scrap")), scrapBefore, "Production salvage transfers actual cargo.");
-            Assert.IsFalse(ui.Navigator.Get<InventoryView>().IsOpen, "QA-001: salvage leaves the pull animation visible");
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=combat", Host.Context).Kind);
-            yield return RunCommand("playground activate");
-            EM.CompleteAllTrackedJobs();
-            using (var fighters = EM.CreateEntityQuery(typeof(AiBrain), typeof(Allegiance)))
-            using (var allegiances = fighters.ToComponentDataArray<Allegiance>(Allocator.Temp))
-            using (var factions = EM.CreateEntityQuery(typeof(FactionRelations)))
-            {
-                bool hostile = false;
-                var matrix = factions.GetSingleton<FactionRelations>();
-                foreach (var allegiance in allegiances) hostile |= matrix.IsHostile(Allegiance.Player, allegiance);
-                Assert.IsTrue(hostile, "Combat trial must spawn an actual hostile faction, not only a differently numbered team");
-            }
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind, "Repeated combat activation cannot spawn another fighter");
+            // the race portal inside the Hollow: flying through it opens the race on Track 01; race end brings the pilot back
+            Assert.IsTrue(Host.Context.TryGetFrame(out frame));
+            var gate = playground.Origin + new Unity.Mathematics.double3(HollowLayout.Offset.x + HollowLayout.RacePortal.x, 0, HollowLayout.Offset.y + HollowLayout.RacePortal.y - 30);
+            global::Game.App.DevRuntime.DevEcs.TeleportRoot(EM, Root, (Unity.Mathematics.float3)(gate - frame.OriginInStarSystem), Unity.Mathematics.quaternion.identity);
+            EM.SetComponentData(Root, new Unity.Physics.PhysicsVelocity { Linear = new Unity.Mathematics.float3(0, 0, 60) });
+            yield return Until(() => playground.Race.IsOpen, "Flying through the race portal opens the race", 10);
+            Assert.IsTrue(playground.Race.InLobby, "The pilot waits on the grid");
+            yield return RunCommand("race end");
+            yield return Until(() => !playground.Race.IsOpen, "race end closes the race", 5);
+            yield return null; yield return null;
+            Assert.IsTrue(Host.Context.TryGetFrame(out frame));
+            var back = (Unity.Mathematics.double3)EM.GetComponentData<LocalTransform>(Root).Position + frame.OriginInStarSystem;
+            Assert.Less(Unity.Mathematics.math.distance(back, gate), 150, "race end puts the pilot back by the portal");
             var standings = Services.Get<Game.Galaxy.Services.FactionService>();
             var neutral = standings.Indices.ByIndex(1);
             Assert.IsFalse(neutral.RelationLocked);
@@ -204,8 +200,7 @@ namespace Game.Tests.PlayMode.App
             Assert.IsTrue(EM.Exists(range.Target));
             StringAssert.Contains("credits 0", Host.Commands.Execute("inv", Host.Context).Text);
             StringAssert.Contains("Playground active", Host.Commands.Execute("playground status", Host.Context).Text);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=editor", Host.Context).Kind);
-            yield return RunCommand("playground activate");
+            yield return RunCommand("playground run=editor");
             Assert.AreEqual(global::Game.Core.Flow.GameScene.BlueprintLab, Game.Session.CurrentScene);
             Assert.IsNotNull(UnityEngine.Object.FindAnyObjectByType<Game.App.EditorHost.ShipEditorHost>());
             Assert.AreEqual(global::Game.Core.InputContext.Editor, Services.Get<global::Game.Input.InputService>().CurrentContext);

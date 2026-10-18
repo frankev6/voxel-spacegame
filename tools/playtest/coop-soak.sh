@@ -14,7 +14,7 @@ field() { sed -nE "s/.*$1.*/\\1/p" | head -1; }
 
 "$PT_DIR/coop.sh" start | tail -1 || exit 1
 "$PT_DIR/coop.sh" guest 2 | tail -1 || exit 1
-host "playground run=combat" >/dev/null
+host "spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true" >/dev/null
 for slot in 1 2; do host "net bring $slot" >/dev/null; done
 sleep 3
 

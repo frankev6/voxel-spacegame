@@ -27,17 +27,16 @@ using UnityEngine.UIElements;
 
 namespace Game.App.DevRuntime.Playground
 {
-    /// <summary>DEV-021: development-only presentation and command composition. Simulation remains with its owners.</summary>
+    /// <summary>DEV-021: development-only presentation and command composition. Simulation remains with its owners. The playground is the Hollow (DEV-023 option E).</summary>
     internal sealed class DevPlayground : IDisposable
     {
-        // DEV-022: the F pads are the hub's stations (PlaygroundHub). Screens that are only menus (cargo, settings, fleet, story log,
-        // survey, map, power instruments) have no place in the world; they stay console shortcuts: playground run=<id>.
-        [Game.Core.StaticStateOk("constant id list")] static readonly string[] ConsoleOnly = { "cargo", "settings", "fleet", "story", "survey", "map", "power" };
+        // The playground is the Hollow (owner, 2026-10-18: "remove the current playground it was superseeded by the asteroid, i want
+        // to load into the entrance of the asteroid"): the ARK Proving Grounds and their exhibit districts are gone. Screens and trials
+        // that are only menus stay console shortcuts: playground run=<id>. The race stays: a portal inside the Hollow, or race open.
+        [Game.Core.StaticStateOk("constant id list")] static readonly string[] ConsoleOnly = { "cargo", "settings", "fleet", "story", "survey", "map", "power", "campaign", "editor", "race" };
         readonly DevRuntimeHost host;
-        readonly PlaygroundHub.Station[] pads = PlaygroundHub.Stations;
         DevPlaygroundPower power;
         DevPlaygroundShip ship;
-        DevPlaygroundSalvage salvage;
         internal DevPlaygroundRace Race { get; private set; }
         readonly DevPlaygroundCampaign campaign = new();
         InputService input;
@@ -45,28 +44,19 @@ namespace Game.App.DevRuntime.Playground
         VisualElement panel, launcher;
         Label heading, detail, outcome;
         Button enterButton;
-        // QA-001: districts appear on the game's own HUD radar as point-of-interest blips, not on a second map.
-        double3[] beaconPositions;
-        PlaygroundHubDressing dressing;
-        PlaygroundHubWorld world;
-        // DEV-023 option E: the Hollow, 9 km east of the ARK Proving Grounds, built the first time a pilot goes there
         PlaygroundHollow hollow;
         int hollowNearest = -2;
-        bool inHollow;
-        PlaygroundHub.District here;
-        string resumeAt;                    // a station to return to after a reset (the shipyard pad after a ship swap)
-        int courseGate = -1;
-        // the brake box: 0 idle, 1 armed (waiting for a fast entry), 2 timing a stop
-        int brakeState; double brakeStart; float brakeSpeed;
         double3 origin;
-        bool active, entering, enemyRequested, tradeGranted, xenoRequested;
+        bool active, entering;
         bool autoEnter;
-        // Co-op: a guest shows the host's beacons (rings, labels, radar markers and zoom) without running pads; the host sends
-        // its origin to every guest once it is in the world.
+        bool toRace;   // the player flew through the race portal: open the race when they arrive at the track
+        bool wasRacing;
+        // Co-op: a guest shows the host's playground without running stations; the host sends its origin to every guest once it is in
+        // the world.
         bool guestView;
         readonly List<Game.Core.Net.CoopPeer> peers = new();
         readonly HashSet<byte> shownTo = new();
-        int nearest = -1, pending;
+        int pending;
         string report = "";
         internal DevPlayground(DevRuntimeHost host)
         { this.host = host; autoEnter = Application.isEditor && Game.App.Testing.GameRootTestHooks.SaveRoot == null && SceneManager.GetActiveScene().name == "World"; }
@@ -75,7 +65,6 @@ namespace Game.App.DevRuntime.Playground
             input = service; ui = root;
             power = new DevPlaygroundPower(host.Context, ui);
             ship = new DevPlaygroundShip(host.Context);
-            salvage = new DevPlaygroundSalvage(host, SetReport);
             Race = new DevPlaygroundRace(host); Race.Bind(root);
             input.Controls.Flight.Interact.performed += OnInteract;
             launcher = new VisualElement { name = "dev-launcher", pickingMode = PickingMode.Ignore };
@@ -137,7 +126,7 @@ namespace Game.App.DevRuntime.Playground
             public EntryOperation(DevPlayground owner, Awaitable<FlowResult> flow)
             { this.owner = owner; session = new SessionDevOperation(flow, true, false, 45); }
             public DevOperationStatus Status => session.Status;
-            public string Message => Status == DevOperationStatus.Succeeded ? "Playground ready. F activates nearby pads; F1: playground reset. Use playground status for the directory." : session.Message;
+            public string Message => Status == DevOperationStatus.Succeeded ? "Playground ready at the Hollow's entrance. F in a station's circle; F1: playground reset. playground status lists the stations." : session.Message;
             public double TimeoutSeconds => 45;
             public void Tick(DevContext ctx)
             {
@@ -178,18 +167,15 @@ namespace Game.App.DevRuntime.Playground
             var ctx = host.Context;
             var player = ctx.PlayerShipRoot;
             if (!DevEcs.TryGetUniversePosition(ctx, player, out origin)) throw new InvalidOperationException("player position unavailable");
-            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; pending = 0; nearest = -1; here = null;
-            courseGate = -1; brakeState = 0;
-            report = "Welcome to the ARK Proving Grounds. Fly out through a portal to visit a district.";
-            salvage?.Reset(); Race?.End();
+            active = true; pending = 0; hollowNearest = -2; toRace = false; wasRacing = false;
+            report = "The Hollow: the Khuchad Clan's haven. Fly in through the Maw; the wall lights take the colour of the next station that way, and F in a station's circle trades.";
+            Race?.End();
             DevPlaygroundStory.RefreshResetMarkers(ctx);
-            world = new PlaygroundHubWorld(ctx, origin);
-            world.Build();
-            hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin); hollowNearest = -2; inHollow = false;
-            if (world.Missing != null) { report = world.Missing; GameLog.Warn(LogCategories.Dev, world.Missing); }
+            hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin);
+            hollow.Build();
+            if (hollow.Missing != null) { report = hollow.Missing; GameLog.Warn(LogCategories.Dev, hollow.Missing); }
             BuildPresentation();
-            string resume = resumeAt; resumeAt = null;
-            if (resume == null || GoTo(resume).Kind == DevResultKind.Failed) Place(PlaygroundHub.Spawn, PlaygroundHub.SpawnYaw);
+            Place(HollowLayout.Offset + HollowLayout.Entrance, HollowLayout.EntranceYaw);
         }
         internal bool Active => active;
         internal PlaygroundHollow Hollow => hollow;
@@ -202,20 +188,20 @@ namespace Game.App.DevRuntime.Playground
                 (float3)(origin + new double3(at.x, 0, at.y) - frame.OriginInStarSystem), quaternion.RotateY(yaw));
             return DevCommandResult.Ok("");
         }
-        /// <summary>Moves the player to a station (in front of it, facing it), a district's entrance, or the plaza ("hub").</summary>
+        /// <summary>Moves the player to the Hollow's entrance ("hollow"), anywhere in it (hollow@x,z[,yaw°]) or a station (in front of
+        /// it, facing it).</summary>
         internal DevCommandResult GoTo(string id)
         {
-            if (!active || entering) return DevCommandResult.Fail("enter with playground first");
-            if (id == "hub" || id == "plaza") { var moved = Place(PlaygroundHub.Spawn, PlaygroundHub.SpawnYaw); return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At the plaza."); }
-            if (id == "hollow" && hollow != null)
+            if (!active || entering || hollow == null) return DevCommandResult.Fail("enter with playground first");
+            if (id == "hollow" || id == "entrance" || id == "hub")
             {
                 hollow.Build();
-                var moved = Place(HollowLayout.Offset + HollowLayout.Spawn, HollowLayout.SpawnYaw);
+                var moved = Place(HollowLayout.Offset + HollowLayout.Entrance, HollowLayout.EntranceYaw);
                 if (moved.Kind == DevResultKind.Failed) return moved;
-                return hollow.Missing != null ? DevCommandResult.Fail(hollow.Missing) : DevCommandResult.Ok("Off the Hollow: the Maw is ahead. The Clan keeps the peace here.");
+                return hollow.Missing != null ? DevCommandResult.Fail(hollow.Missing) : DevCommandResult.Ok("At the Hollow's entrance: the Maw is ahead. The Clan keeps the peace here.");
             }
             // hollow@x,z[,yaw°]: anywhere in the Hollow (its own metres), for playtests and shots
-            if (id.StartsWith("hollow@", StringComparison.Ordinal) && hollow != null)
+            if (id.StartsWith("hollow@", StringComparison.Ordinal))
             {
                 var parts = id.Substring(7).Split(',');
                 var ci = System.Globalization.CultureInfo.InvariantCulture;
@@ -226,25 +212,12 @@ namespace Game.App.DevRuntime.Playground
                 var moved = Place(HollowLayout.Offset + new float2(x, z), yaw);
                 return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok($"In the Hollow at {x:0}, {z:0}.");
             }
-            if (hollow != null && hollow.Built)
-                foreach (var st in HollowLayout.Stations)
-                    if (st.Id == id)
-                    {
-                        var moved = Place(HollowLayout.Offset + st.Position, st.Yaw);
-                        return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + st.Title + ". Press F.");
-                    }
-            // a station first (several share their district's id); district:<id> is the district's entrance
-            foreach (var pad in pads)
-                if (pad.Id == id)
+            hollow.Build();
+            foreach (var st in HollowLayout.Stations)
+                if (st.Id == id)
                 {
-                    var moved = Place(pad.Position, pad.Yaw);
-                    return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + pad.Title + ". Press F to activate.");
-                }
-            foreach (var d in PlaygroundHub.Districts)
-                if (d.Id == id || "district:" + d.Id == id)
-                {
-                    var moved = Place(d.Arrival, d.Yaw);
-                    return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + d.Title + ".");
+                    var moved = Place(HollowLayout.Offset + st.Position, st.Yaw);
+                    return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + st.Title + ". Press F.");
                 }
             if (Array.IndexOf(ConsoleOnly, id) >= 0) return DevCommandResult.Fail(id + " is a screen, not a place: playground run=" + id + " opens it.");
             return DevCommandResult.Fail("Unknown place. " + Directory());
@@ -267,13 +240,10 @@ namespace Game.App.DevRuntime.Playground
                 pending = result.Kind == DevResultKind.Pending ? result.OperationId : 0;
                 SetReport(result.Text); return result;
             }
-            if (Array.IndexOf(ConsoleOnly, id) >= 0) return Report(Execute(id, null));
+            if (Array.IndexOf(ConsoleOnly, id) >= 0) return Report(Execute(id));
+            // a Hollow station: fly there and press F
             var moved = GoTo(id);
-            if (moved.Kind == DevResultKind.Failed) return moved;
-            var activation = Activate();
-            if (id == "salvage" && activation.Kind == DevResultKind.Ok && salvage.Target != Entity.Null)
-                return host.Commands.Execute("interact", host.Context);
-            return activation;
+            return moved.Kind == DevResultKind.Failed ? moved : Activate();
         }
         DevCommandResult Report(DevCommandResult result)
         {
@@ -286,8 +256,8 @@ namespace Game.App.DevRuntime.Playground
         {
             if (!host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coop) || coop.Role != Game.Core.Net.SimRoleKind.Guest)
                 return DevCommandResult.Fail("playground view is sent to co-op guests by the host's playground");
-            ClearPresentation(); origin = hostOrigin; guestView = true; nearest = -1;
-            report = "The host's playground. Stations run on the host; salvage works from here.";
+            ClearPresentation(); origin = hostOrigin; guestView = true;
+            report = "The host's playground: the Hollow. Stations run on the host.";
             BuildPresentation();
             return DevCommandResult.Ok("showing the host's playground");
         }
@@ -310,10 +280,8 @@ namespace Game.App.DevRuntime.Playground
         }
         string Directory()
         {
-            var text = new System.Text.StringBuilder("Console: playground reset | playground run=<station> | playground goto=<station> or goto=district:<id> | playground goto=hollow (option E)\nDistricts: hub");
-            foreach (var d in PlaygroundHub.Districts) text.Append(", ").Append(d.Id);
-            text.Append("\nStations:");
-            foreach (var pad in pads) if (pad.Kind != PlaygroundHub.StationKind.FlyShip) text.Append(' ').Append(pad.Id);
+            var text = new System.Text.StringBuilder("Console: playground reset | playground goto=hollow (the entrance), goto=<station> or goto=hollow@x,z[,yaw] | playground run=<station or screen>\nStations:");
+            foreach (var st in HollowLayout.Stations) text.Append(' ').Append(st.Id);
             text.Append("\nScreens (run only): ").Append(string.Join(", ", ConsoleOnly)).Append("; shield / boost trigger equipped abilities; station: ARK in the practice campaign\n");
             return text.ToString();
         }
@@ -324,63 +292,21 @@ namespace Game.App.DevRuntime.Playground
                 return DevCommandResult.Fail("Activate a playground station in Flight context");
             // On the race grid F starts the countdown (or the next race after the results).
             if (Race != null && Race.IsOpen && (Race.InLobby || Race.IsFinished)) { var started = Race.Start(); SetReport(started.Text); return started; }
+            if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status == DevOperationStatus.Running)
+                return DevCommandResult.Fail("Previous station operation is still running");
             if (hollow != null && hollow.Built && DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var shipAt))
             {
                 int there = hollow.Nearest(hollow.Relative(shipAt));
                 if (there >= 0) return Report(hollow.Activate(there));
             }
-            int index = Nearest();
-            if (index < 0) return DevCommandResult.Fail("Fly onto a station's F pad first");
-            if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status == DevOperationStatus.Running)
-                return DevCommandResult.Fail("Previous station operation is still running");
-            var pad = pads[index];
-            switch (pad.Kind)
-            {
-                case PlaygroundHub.StationKind.ResetAll: return Enter();
-                case PlaygroundHub.StationKind.ResetDistrict:
-                    if (pad.District == PlaygroundHub.Salvage) salvage?.Reset();
-                    if (pad.District == PlaygroundHub.Combat) { enemyRequested = false; xenoRequested = false; }
-                    if (pad.District == PlaygroundHub.Flight) { courseGate = -1; brakeState = 0; dressing?.SetCourseGate(-1); }
-                    world.Reset(pad.District);
-                    return Report(DevCommandResult.Ok(pad.District.Title + " is back as it started."));
-                case PlaygroundHub.StationKind.FlyShip:
-                    resumeAt = pad.Id;
-                    var swapped = SwitchShip(pad.Ship);
-                    if (swapped.Kind == DevResultKind.Failed) resumeAt = null;
-                    return Report(swapped);
-            }
-            return Report(Execute(pad.Id, pad));
+            return DevCommandResult.Fail("Fly into a station's circle first");
         }
-        /// <summary>What a station (or a console-only screen) does.</summary>
-        DevCommandResult Execute(string id, PlaygroundHub.Station pad)
+        /// <summary>What a console-only screen or trial does.</summary>
+        DevCommandResult Execute(string id)
         {
             var ctx = host.Context;
             switch (id)
             {
-                case "flight":
-                    courseGate = 0; dressing?.SetCourseGate(0);
-                    return DevCommandResult.Ok("Slalom: gate 1 / " + PlaygroundHub.Course.Length + ". Fly through the lit ring; reverse, strafe and brake through the turns.");
-                case "boost_strip": return DevCommandResult.Ok("Fly up the green strip ahead on the right for a speed kick. Ctrl fires your boost ability.");
-                case "brake":
-                    brakeState = 1;
-                    return DevCommandResult.Ok("Brake test armed: fly out, come back into the box faster than 40 m/s and stop inside it (X brakes).");
-                case "range":
-                    return ctx.TryGetService<FiringRangeService>(out var range) && ctx.EntityManager.Exists(range.Target)
-                        ? DevCommandResult.Ok("Target station ahead. Space to fire; aim at a bridge to cut a pod off. RESET WEAPONS RANGE restores it.")
-                        : DevCommandResult.Fail("The target station is gone: RESET WEAPONS RANGE brings a new one.");
-                case "combat":
-                    if (enemyRequested) return DevCommandResult.Ok("The raider is already out. RESET COMBAT ARENA clears it.");
-                    var duel = Spawn(pad, "spawn blueprint=ship_nocturne_wraith", 0, 330, "faction_raiders", "");
-                    if (duel.Kind != DevResultKind.Failed) enemyRequested = true;
-                    return duel;
-                case "xeno":
-                    if (xenoRequested) return DevCommandResult.Ok("The xeno wave is already awake. RESET COMBAT ARENA clears it.");
-                    var wave = Spawn(pad, "spawn blueprint=ship_xeno_husk", -80, 330, "faction_xeno", " count=2 spacing=70");
-                    if (wave.Kind != DevResultKind.Failed) wave = Spawn(pad, "spawn blueprint=ship_xeno_broodmother", 0, 460, "faction_xeno", "");
-                    if (wave.Kind != DevResultKind.Failed) xenoRequested = true;
-                    return wave;
-                case "hazards": return DevCommandResult.Ok(pad.Detail);
-                case "movers": return DevCommandResult.Ok(pad.Detail);
                 case "cargo":
                     var result = host.Commands.Execute("give item=resource_fuel count=5", ctx);
                     if (result.Kind != DevResultKind.Failed)
@@ -389,22 +315,11 @@ namespace Game.App.DevRuntime.Playground
                         if (result.Kind != DevResultKind.Failed && ctx.TryGetService<UiComposition>(out var cargoUi)) cargoUi.ShowInventory();
                     }
                     return result;
-                case "merchant":
-                    if (ctx.TryGetService<EconomyService>(out var economy) && ctx.TryGetService<ContentService>(out var content)
-                        && ctx.TryGetService<MerchantPresenter>(out var merchant)
-                        && content.Catalog.TryGet<MerchantDefinition>(new ContentId("merchant_station_market"), out var market))
-                    {
-                        if (!tradeGranted) { economy.Wallet.Add(2000); tradeGranted = true; }
-                        merchant.Show(economy.Merchants.OpenSession(market, 0, false, null), null);
-                        return DevCommandResult.Ok("The merchant answers: ARK Station Market. Buy and sell against real stock and cargo.");
-                    }
-                    return DevCommandResult.Fail("Merchant services unavailable");
                 case "story":
                 case "survey":
                 case "map":
                     return DevPlaygroundStory.Activate(ctx, ui, id);
                 case "power": return power.Activate(ctx, ui, "power");
-                case "salvage": return salvage.Activate(ctx, ui, origin + new double3(pad.Position.x, 0, pad.Position.y));
                 case "race": return Race.Open(origin);
                 case "campaign": return campaign.Activate(ctx, ui);
                 case "editor":
@@ -418,26 +333,7 @@ namespace Game.App.DevRuntime.Playground
                     if (!ctx.TryGetService<UiComposition>(out var screens)) return DevCommandResult.Fail("UI unavailable");
                     screens.ShowSettings(); return DevCommandResult.Ok("Settings opened.");
             }
-            return DevCommandResult.Ok(pad?.Detail ?? "");
-        }
-        /// <summary>A hostile ship from the spawn command at a point in the station's district (x right, z forward of its entrance pad).</summary>
-        DevCommandResult Spawn(PlaygroundHub.Station pad, string command, float x, float z, string faction, string extra)
-        {
-            if (!host.Context.TryGetFrame(out var frame)) return DevCommandResult.Fail("frame unavailable");
-            var at = pad.Position + pad.District.Right * x + pad.District.Forward * z;
-            var local = (float3)(origin + new double3(at.x, 0, at.y) - frame.OriginInStarSystem);
-            return host.Commands.Execute(FormattableString.Invariant($"{command} x={local.x:0.##} z={local.z:0.##} face=player faction={faction} team=2 ai=true{extra}"), host.Context);
-        }
-        int Nearest()
-        {
-            if (!DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var position)) return -1;
-            int found = -1; double best = PlaygroundHub.StationRadius * PlaygroundHub.StationRadius;
-            for (int i = 0; i < pads.Length; i++)
-            {
-                double distance = math.lengthsq(position.xz - (origin.xz + (double2)pads[i].Position));
-                if (distance <= best) { best = distance; found = i; }
-            }
-            return found;
+            return DevCommandResult.Fail("Unknown screen " + id);
         }
         internal void Tick()
         {
@@ -445,107 +341,51 @@ namespace Game.App.DevRuntime.Playground
             bool coop = host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coopSession) && coopSession.Role != Game.Core.Net.SimRoleKind.Solo;
             if (enterButton != null) enterButton.style.display = active || coop ? DisplayStyle.None : DisplayStyle.Flex;
             var ctx = host.Context;
-            power?.Tick(ctx); salvage?.Tick(); Race?.Tick();
+            power?.Tick(ctx); Race?.Tick();
             if (autoEnter && !entering && input != null && PlayerScenarioProbes.IsReady(ctx)
                 && ctx.TryGetService<IGameFlow>(out var startup) && !startup.IsTransitioning)
             { autoEnter = false; Enter(); }
             if (guestView)
             {
-                if (!coop) { guestView = false; ClearPresentation(); return; }
+                if (!coop) { guestView = false; ClearPresentation(); }
+                return;
             }
-            else
-            {
-                if (!active) return;
-                if (!ctx.TryGetService<GameSession>(out var session) || !session.IsSandbox || session.IsTransitioning)
-                { active = false; ClearPresentation(); return; }
-                if (coopSession is Game.App.Session.CoopSession hosting && hosting.Role == Game.Core.Net.SimRoleKind.Host) ShowToGuests(hosting);
-            }
-            if (!ctx.TryGetFrame(out var frame)) return;
-            if (dressing != null) dressing.Root.transform.position = (float3)(origin - frame.OriginInStarSystem);
+            if (!active) return;
+            if (!ctx.TryGetService<GameSession>(out var session) || !session.IsSandbox || session.IsTransitioning)
+            { active = false; ClearPresentation(); return; }
+            if (coopSession is Game.App.Session.CoopSession hosting && hosting.Role == Game.Core.Net.SimRoleKind.Host) ShowToGuests(hosting);
+            if (!ctx.TryGetFrame(out _) || hollow == null) return;
             bool located = DevEcs.TryGetUniversePosition(ctx, ctx.PlayerShipRoot, out var ship3);
-            float2 at = located ? (float2)(ship3.xz - origin.xz) : new float2(float.MaxValue, float.MaxValue);
-            // a district fills with its exhibits the first time a pilot comes near it
-            var district = located ? PlaygroundHub.DistrictAt(at, 160) : null;
-            if (district != null && !guestView && world != null && !world.IsPopulated(district)) world.Populate(district);
-            if (located)
+            float2 at = located ? (float2)(ship3.xz - origin.xz) - HollowLayout.Offset : new float2(float.MaxValue, float.MaxValue);
+            if (located && !hollow.Built && HollowLayout.Near(at, 1500)) hollow.Build();
+            hollow.Tick(located, ship3);
+            // the race portal (owner: "inside the hollow there should be a portal to the race") lands the pilot off the track; the race
+            // opens and puts them on its grid
+            bool racing = Race != null && Race.IsOpen;
+            double toTrack = located ? math.distance(ship3.xz, (origin + DevPlaygroundRace.TrackOffset).xz) : double.MaxValue;
+            if (located && hollow.Built && !racing)
             {
-                var inside = PlaygroundHub.DistrictAt(at);
-                if (inside != here)
+                if (toRace && toTrack < PlaygroundHollow.RaceArrivalRadius) { toRace = false; Report(Race.Open(origin)); }
+                else if (!toRace && math.distancesq(at, HollowLayout.RacePortal) < 80 * 80) toRace = true;
+                // the race ended (race end) with the pilot at the track: back in front of the portal, facing away from it, out to the Ring
+                else if (wasRacing && toTrack < PlaygroundHollow.RaceArrivalRadius)
                 {
-                    here = inside; nearest = -2;
-                    SetReport(inside == null ? "The plaza: fly out through a portal to visit a district." : world?.Intro(inside) ?? inside.Tagline);
+                    var away = -new float2(math.sin(HollowLayout.RacePortalYaw), math.cos(HollowLayout.RacePortalYaw));
+                    Place(HollowLayout.Offset + HollowLayout.RacePortal + away * 45, HollowLayout.RacePortalYaw + math.PI);
+                    SetReport("Back in the Hollow, by the race portal.");
                 }
             }
-            if (courseGate >= 0 && located && math.distancesq(at, PlaygroundHub.Course[courseGate]) < 18 * 18)
+            wasRacing = racing;
+            int st = located && hollow.Built ? hollow.Nearest(at) : -1;
+            if (st != hollowNearest && heading != null)
             {
-                courseGate++;
-                if (courseGate == PlaygroundHub.Course.Length) { courseGate = -1; SetReport("Slalom complete: all six gates. Back on the SLALOM pad, F runs it again."); }
-                else SetReport("Slalom: gate " + (courseGate + 1) + " / " + PlaygroundHub.Course.Length + ".");
-                dressing?.SetCourseGate(courseGate);
-            }
-            if (brakeState > 0 && located) BrakeTest(ctx, at);
-            if (hollow != null && !guestView)
-            {
-                if (located && !hollow.Built && HollowLayout.Near(at - HollowLayout.Offset, 1500)) hollow.Build();
-                hollow.Tick(located, ship3);
-                // the report greets the Hollow, not the Proving Grounds the pilot left behind
-                bool atHollow = located && HollowLayout.Near(at - HollowLayout.Offset, 600);
-                if (atHollow != inHollow)
-                {
-                    inHollow = atHollow; nearest = -2;   // and the heading names it
-                    SetReport(atHollow ? "The Hollow: the Khuchad Clan's haven. Each district has its colours; its emblem turns over its station, and F in a station's circle trades."
-                        : here == null ? "The plaza: fly out through a portal to visit a district." : world?.Intro(here) ?? here.Tagline);
-                }
-                int st = located && hollow.Built ? hollow.Nearest(at - HollowLayout.Offset) : -1;
-                if (st != hollowNearest)
-                {
-                    hollowNearest = st; nearest = -2;
-                    if (st >= 0 && heading != null)
-                    {
-                        heading.text = HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                        if (detail != null) detail.style.display = DisplayStyle.None;
-                    }
-                }
-            }
-            int next = Nearest();
-            if (next != nearest && hollowNearest < 0)
-            {
-                nearest = next;
-                bool atHollow = located && HollowLayout.Near(at - HollowLayout.Offset, 600);
-                string where = atHollow ? "THE HOLLOW" : here == null ? "ARK PROVING GROUNDS" : here.Title;
-                if (heading != null) heading.text = next < 0 ? where + (atHollow ? "  ·  KHUCHAD CLAN HAVEN" : here == null ? "  ·  FLY THROUGH A PORTAL" : "  ·  " + here.Tagline)
-                    : guestView ? pads[next].Title + "  ·  THE HOST ACTIVATES STATIONS" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                // Details only on a pad; the floor signs do the wayfinding (QA-001 clutter).
-                if (detail != null) { detail.text = next < 0 ? "" : pads[next].Detail; detail.style.display = next < 0 ? DisplayStyle.None : DisplayStyle.Flex; }
+                hollowNearest = st;
+                bool atHollow = located && HollowLayout.Near(at, 600);
+                heading.text = st >= 0 ? HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE"
+                    : atHollow ? "THE HOLLOW  ·  KHUCHAD CLAN HAVEN" : Race != null && Race.IsOpen ? "TRACK 01  ·  BATTLE GRAVEYARD" : "THE HOLLOW";
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
-            if (beaconPositions != null && ctx.World != null && ctx.World.IsCreated)
-            {
-                beaconPositions[0] = origin + new double3(PlaygroundHub.Plaza.x, 0, PlaygroundHub.Plaza.y);
-                for (int i = 0; i < PlaygroundHub.Districts.Length; i++)
-                    beaconPositions[i + 1] = origin + new double3(PlaygroundHub.Districts[i].Centre.x, 0, PlaygroundHub.Districts[i].Centre.y);
-                var hud = ctx.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
-                if (hud != null) { hud.SetMarkers(beaconPositions); hud.DisplayRangeM = 2200; }
-            }
-        }
-        /// The brake box: armed by its pad; a pilot entering faster than 40 m/s starts the clock, which stops when the ship is
-        /// still (under 1 m/s) inside the box, or fails when it leaves.
-        void BrakeTest(DevContext ctx, float2 at)
-        {
-            var em = ctx.EntityManager;
-            if (!em.HasComponent<Unity.Physics.PhysicsVelocity>(ctx.PlayerShipRoot)) return;
-            float speed = math.length(em.GetComponentData<Unity.Physics.PhysicsVelocity>(ctx.PlayerShipRoot).Linear.xz);
-            var d = PlaygroundHub.Flight;
-            float2 rel = at - d.At(-175, 120);
-            bool inside = math.abs(math.dot(rel, d.Right)) < 22 && math.abs(math.dot(rel, d.Forward)) < 22;
-            if (brakeState == 1 && inside && speed > 40) { brakeState = 2; brakeStart = UnityEngine.Time.timeAsDouble; brakeSpeed = speed; SetReport(FormattableString.Invariant($"Into the box at {speed:0} m/s: stop!")); }
-            else if (brakeState == 2 && !inside) { brakeState = 1; SetReport("Overshot the box. Come round and try again."); }
-            else if (brakeState == 2 && speed < 1)
-            {
-                brakeState = 1;
-                SetReport(FormattableString.Invariant($"Stopped from {brakeSpeed:0} m/s in {UnityEngine.Time.timeAsDouble - brakeStart:0.00} s inside the box. Again?"));
-            }
         }
         void SetReport(string value)
         {
@@ -562,15 +402,12 @@ namespace Game.App.DevRuntime.Playground
             panel.AddToClassList("panel"); panel.style.position = Position.Absolute; panel.style.left = 24; panel.style.top = 96;
             panel.style.maxWidth = 420; panel.style.paddingLeft = 12; panel.style.paddingRight = 12;
             panel.style.paddingTop = 8; panel.style.paddingBottom = 8;
-            heading = AddLabel(panel, "ARK PROVING GROUNDS", "text-s");
+            heading = AddLabel(panel, "THE HOLLOW", "text-s");
             detail = AddLabel(panel, "", "text-xs"); detail.AddToClassList("text-muted");
             detail.style.whiteSpace = WhiteSpace.Normal; detail.style.display = DisplayStyle.None;
             outcome = AddLabel(panel, report, "text-xs"); outcome.style.whiteSpace = WhiteSpace.Normal;
             ui.GetLayer(UILayer.Hud).Add(panel);
-            beaconPositions = new double3[PlaygroundHub.Districts.Length + 1];
-            if (host.Context.TryGetService<ContentService>(out var content) && content.Catalog.TryGet<TrackDefinition>(new ContentId("track_01"), out var track))
-                dressing = new PlaygroundHubDressing(track.Look, host.transform);
-            nearest = -2;
+            hollowNearest = -2;
         }
         static Label AddLabel(VisualElement parent, string text, string style)
         {
@@ -579,20 +416,14 @@ namespace Game.App.DevRuntime.Playground
         void ClearPresentation()
         {
             panel?.RemoveFromHierarchy();
-            if (beaconPositions != null && host.Context.World != null && host.Context.World.IsCreated)
-            {
-                var hud = host.Context.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
-                if (hud != null) { hud.SetMarkers(default); hud.DisplayRangeM = 2000; }
-            }
-            beaconPositions = null; shownTo.Clear();
+            shownTo.Clear();
             panel = null; heading = detail = outcome = null;
-            dressing?.Dispose(); dressing = null; courseGate = -1;
             hollow?.Dispose();
         }
         public void Dispose()
         {
             if (input != null) input.Controls.Flight.Interact.performed -= OnInteract;
-            power?.Dispose(); ship?.Dispose(); campaign.Dispose(); salvage?.Dispose(); Race?.Dispose();
+            power?.Dispose(); ship?.Dispose(); campaign.Dispose(); Race?.Dispose();
             active = false; ClearPresentation();
             launcher?.RemoveFromHierarchy(); launcher = null;
         }

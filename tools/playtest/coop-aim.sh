@@ -14,7 +14,7 @@ host "net sim 60 0 0" >/dev/null; guest "net sim 60 0 0" 0.3 >/dev/null
 for round in $(seq 1 $rounds); do
   for mode in off on; do
     host "net anchor $mode" >/dev/null; guest "net anchor $mode" 0.3 >/dev/null
-    host "playground run=combat" >/dev/null; host "net bring 1" >/dev/null; sleep 3
+    host "spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true" >/dev/null; host "net bring 1" >/dev/null; sleep 3
     id=$(guest "aim target=nearest_hostile track=$secs" 0.5 | sed -nE 's/.*id:([0-9]+).*/\1/p' | head -1)
     [[ -z "$id" ]] && { echo "round $round $mode: no hostile"; continue; }
     before=$(cells $id)

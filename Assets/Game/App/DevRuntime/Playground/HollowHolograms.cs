@@ -35,6 +35,7 @@ namespace Game.App.DevRuntime.Playground
             { "docks", new District(Cyan, Lime, "ship", "DOCKS", "REARM  BERTHS") },
         };
         static readonly District Tunnels = new(Blue, Aqua, null, null, null);
+        static readonly District Racing = new(Amber, Ice, null, "TRACK 01", "RACE PORTAL");
 
         /// <summary>The district round `p` (Hollow metres): the nearest station within 170 m, else the tunnels'.</summary>
         internal static District At(float2 p)
@@ -89,6 +90,9 @@ namespace Game.App.DevRuntime.Playground
                 Board(parent, look, maw ? "THE HOLLOW" : d.Name ?? s.Text, maw ? "FOLLOW THE WALL LIGHTS" : d.Trade,
                     new Vector3(s.Position.x, floor, s.Position.z) + (maw ? new Vector3(math.sin(s.Yaw), 0, math.cos(s.Yaw)) * 40 : Vector3.zero), s.Yaw, d);
             }
+            // the race portal's board, at the back of its alcove: a ship coming to the portal reads it through the gate
+            Board(parent, look, Racing.Name, Racing.Trade, new Vector3(RacePortal.x + math.sin(RacePortalYaw) * 24, floor, RacePortal.y + math.cos(RacePortalYaw) * 24),
+                RacePortalYaw, Racing);
             foreach (var st in Stations)
             {
                 if (!Districts.TryGetValue(st.Id, out var d)) continue;
