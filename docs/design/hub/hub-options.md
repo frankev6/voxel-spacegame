@@ -119,15 +119,14 @@ The Khuchad Clan's haven, built into a two-lobed asteroid 1.7 km long: about a t
 - **The Den.** A warship rammed into the rock long ago; its hangar is the Clan's own.
 - **Outside.** The station is built onto and round the rock: docking spars with ships moored, modules bolted to the cliffs, scaffolding over the flanks, a girder belt round its waist, radiators, masts and an ore mass driver.
 
-**Defences, for the alien attack to come.** You said: "needs more defenses and strong ones, I'm planning in the future to have an alien attack the station and you have to help". The rock is defended in five layers, all the way round, their fields of fire overlapping (the red arcs on the map), so an attack from any side meets guns at every range and you always have a battery to fight beside:
+**Defences, for the alien attack to come.** You said: "needs more defenses and strong ones, I'm planning in the future to have an alien attack the station and you have to help", then "i meant more defenses near the entrance and weaker defenses around, i like that some smaller asteroids have defenses though" and "there will be ships defending too". So the strength is at the front door, and ships do most of the defending:
 
-1. **The outlying forts.** Four fortified rocks 1.1 km out, one on each diagonal, each with two heavy guns facing out and one covering the gap behind. They fire first.
-2. **The heavy batteries.** Big guns in casemates cut into the cliffs, all round both lobes.
-3. **The gun towers.** Heavy turrets on armoured plinths on the high ground, firing out over the rock.
-4. **The flak.** Light quick turrets round the rock's edge and on the girder belt, against swarms.
-5. **The last line.** Two fields of missile silos on the high ground, and the Maw sealed by blast doors that run out of the rock, with guns inside the throat and a field gate behind them.
+- **The Maw.** Twin heavy batteries in the cliffs either side of it, two gun towers on the rock above it, flak on its lip, a field of missile silos behind it, and in its throat the blast doors, two inner guns and a field gate.
+- **The small rocks.** Four outlying asteroids 1.1 km out each carry a fort with two heavy guns; two of them cover the approach. You said: "the smaller asteroids arounds should rotate constantly so that the guns attached can't always face the necessary angle." Each rock turns slowly and steadily (3.5–6° a second, alternating directions), its fort turning with it, so a fort's guns bear on a given point for only part of each turn.
+- **The rest of the rock.** A light gun every 50° or so round the edge, no more.
+- **The ships.** Clan gunships on station off the Maw, and more launching from the Den up their own lane; the Docks rearm and repair.
 
-The Clan's gunships launch from the Den up their own lane; the Docks rearm and repair (energy canisters). About sixty guns in all, run as AI turrets. The attack itself is a later design: which layers fall in what order, where you are needed, and what you can rebuild.
+About thirty guns in all. The attack itself is a later design: where it comes from, what falls first, and where you are needed.
 
 ![E at play zoom](img/hub_play_sheet_e.jpg)
 
