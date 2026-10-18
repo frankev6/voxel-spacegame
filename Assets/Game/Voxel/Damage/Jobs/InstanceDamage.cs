@@ -21,8 +21,11 @@ namespace Game.Voxel.Damage.Jobs
             if ((instance.Flags & BlockInstanceFlags.Destroyed) != 0) return;
             ref var def = ref Access.Blocks.Value.Blocks[instance.Block];
             int count = def.Cells.Length;
+            // ADR-0121: a large hull block (a structural cube box) loses cells one by one and goes with its last; other multi-cell
+            // blocks collapse once InstanceDestroyCellFraction of their footprint is gone.
+            bool cellByCell = def.Kind == BlockKind.Structural && def.Shape == BlockShape.Cube && count >= 8;
             bool lost = instance.CellsAlive == 0 || (def.FunctionHp > 0 && instance.FunctionHp <= 0) ||
-                (count >= 2 && count - instance.CellsAlive >= (int)math.ceil(Config.InstanceDestroyCellFraction * count));
+                (!cellByCell && count >= 2 && count - instance.CellsAlive >= (int)math.ceil(Config.InstanceDestroyCellFraction * count));
             if (!lost) return;
             // Mark first, so collapsing the rest of a footprint cannot recursively collapse it again.
             instance.Flags |= BlockInstanceFlags.Destroyed; Access.Instances[index] = instance;
