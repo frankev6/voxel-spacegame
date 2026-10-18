@@ -90,6 +90,7 @@ namespace Game.App.Session
             ["MineSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-91: arm, trigger and detonate; mines replicate as grids
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
+            ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
             ["MoverSystem"] = SystemAuthority.AuthorityOnly,             // HAZ-013 decider: moving structures (ADR-0119)
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ExternalPushFeedbackSystem"] = SystemAuthority.Both,       // HAZ-005: camera-shake events from this machine's applied pushes

@@ -578,11 +578,12 @@ Why the rows sit below the first targets:
   - Add a playground rotating arm and a door to try them.
 - **Files:** `Assets/Game/Simulation/Mechanisms/MoverSystem.cs`, `MoverMath.cs`; `Assets/Game/Galaxy/Systems/OriginRebaseSystem.cs`; tests.
 - **Acceptance criteria:**
-  - [ ] A rotating arm sweeps at its rate with no drift over 10 minutes.
-  - [ ] A ship in its path is batted aside and takes ram damage.
-  - [ ] A toggle door opens and closes in its duration.
-  - [ ] Two runs are identical.
+  - [x] A rotating arm sweeps at its rate with no drift over 10 minutes.
+  - [x] A ship in its path is batted aside and takes ram damage.
+  - [x] A toggle door opens and closes in its duration.
+  - [x] Two runs are identical.
 - **Tests:** `MoverTests.Rotate_TickExact`, `.Rail_PingPong`, `.Toggle_Duration`, `.BatsShip`, `.Deterministic`.
+- **Done (2026-10-17):** `MoverMath.Pose` is a pure function of path and tick; `MoverSystem` sets the kinematic velocity that lands each mover on it. Measured: yaw error under 1e-3 rad over 10 minutes; the starter fighter is batted to 23 m/s and loses 4 cells. A 1.9 t synthetic hull is shoved without ram damage, because each tick of a sweep is under the 20 kJ ram floor. Playground pad 17: sweeper arm and blast door.
 
 ### HAZ-014 — Mechanisms: switches and actions
 - **Milestone:** M4
@@ -631,10 +632,11 @@ Why the rows sit below the first targets:
 - **Do:** Implement `EngineWashSystem` (ADR-0119 decision 5): a cone behind each firing thruster, with strength from `MaxForce × Intensity`, never pushing its own ship. Heat damage is authority only.
 - **Files:** `Assets/Game/Simulation/Hazards/EngineWashSystem.cs`.
 - **Acceptance criteria:**
-  - [ ] A tailgating fighter 30 m behind a boosting ship is pushed back measurably.
-  - [ ] The owner ship feels nothing extra.
+  - [x] A tailgating fighter 30 m behind a boosting ship is pushed back measurably.
+  - [x] The owner ship feels nothing extra.
   - [ ] A dead engine section set to fire (by a mechanism) pushes across a straight.
 - **Tests:** `EngineWashTests.Tailgater_Pushed`, `.Owner_Unaffected`.
+- **Done except the mechanism criterion (2026-10-17):** reach `12 m × √(MaxForce × Intensity / 10 kN)` (Sprint M 37 m, Torch L 93 m), a 15° cone, a push of `0.3 × MaxForce × Intensity` falling off linearly to the reach, and heat inside the first 30 % (authority). A dead engine section fired by a mechanism waits for HAZ-014.
 
 ### HAZ-018 — Mine payloads and seekers
 - **Milestone:** M4
