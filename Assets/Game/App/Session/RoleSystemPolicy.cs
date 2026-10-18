@@ -91,6 +91,7 @@ namespace Game.App.Session
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
+            ["ExternalPushFeedbackSystem"] = SystemAuthority.Both,       // HAZ-005: camera-shake events from this machine's applied pushes
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
             ["BeamStepSystem"] = SystemAuthority.Both,

@@ -30,7 +30,7 @@ namespace Game.Tests.EditMode.Simulation.Hazards
             Assert.AreEqual(10, (byte)BlockModuleId.ProximityFuse);
             Assert.AreEqual(25, (ushort)RngPurpose.Salvage);
             Assert.AreEqual(26, (ushort)RngPurpose.HazardScatter);
-            CollectionAssert.AreEqual(new byte[] { 0, 1, 2, 3, 4 }, Enum.GetValues(typeof(ZoneEffectKind)).Cast<ZoneEffectKind>().Select(k => (byte)k).ToArray());
+            CollectionAssert.AreEqual(new byte[] { 0, 1, 2, 3, 4, 5, 6 }, Enum.GetValues(typeof(ZoneEffectKind)).Cast<ZoneEffectKind>().Select(k => (byte)k).ToArray());
             CollectionAssert.AreEqual(new byte[] { 0, 1, 2 }, Enum.GetValues(typeof(ZoneShape)).Cast<ZoneShape>().Select(k => (byte)k).ToArray());
             CollectionAssert.AreEqual(new byte[] { 0, 1, 2, 3 }, Enum.GetValues(typeof(MinePhase)).Cast<MinePhase>().Select(k => (byte)k).ToArray());
         }

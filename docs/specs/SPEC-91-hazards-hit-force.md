@@ -560,8 +560,8 @@ Why the rows sit below the first targets:
   - Add the `EnergyGrantRequest` channel to SPEC-22's power streams, with no consumer yet.
 - **Files:** `Assets/Game/Simulation/Mechanisms/*.cs`; `Assets/Game/Data/Hazards/*.cs`; `Assets/Game/Data/Blocks/*`; `Assets/Game/Data/Definitions/Hazards/MechanismDefinition.cs`; `Assets/Game/Simulation/Power/*Streams*.cs`; `docs/01-architecture.md`.
 - **Acceptance criteria:**
-  - [ ] Compiles; existing tests pass.
-  - [ ] Enum appends keep every existing value.
+  - [x] Compiles; existing tests pass.
+  - [x] Enum appends keep every existing value.
 - **Tests:** `MechanismContractTests.EnumValues_Appended`, `.Modules_Registered`.
 
 ### HAZ-013 — Moving structures

@@ -225,7 +225,10 @@ namespace Game.Simulation.Power
     {
         public Game.Data.Streams.SimEventChannel<StatModifierRequest> StatModifiers;
         public Game.Data.Streams.SimEventChannel<InhibitRequest> Inhibits;
+        public Game.Data.Streams.SimEventChannel<EnergyGrantRequest> EnergyGrants;   // ADR-0119 (HAZ-012); consumer: HAZ-019
     }
+    // ADR-0119 decision 7: add energy to a ship's storage, capped by capacity. Producer: energy canisters (BlockModuleId.Pickup).
+    public struct EnergyGrantRequest { public Entity Ship; public float Energy; public ProducerKind Producer; public uint Sequence; }
     }
 }
 ```
@@ -503,7 +506,7 @@ Complexity: O(consumers + ability slots) per ship, O(functional entities) for jo
 
 ### 5.3b `StatusSystem` (ADR-0016)
 
-`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))] [UpdateAfter(typeof(PowerDemandGroup))] [UpdateBefore(typeof(PowerAllocationSystem))]`. `OnCreate` creates `StatusChannels` (`SimEventChannel<StatModifierRequest>.Create("stat_modifiers")`, `<InhibitRequest>("inhibits")`); `OnDestroy` disposes them. Per tick (`tick = SimClock.Tick`; `BeginTick(tick)` on both):
+`[UpdateInGroup(typeof(GameplayPrePhysicsGroup))] [UpdateAfter(typeof(PowerDemandGroup))] [UpdateBefore(typeof(PowerAllocationSystem))]`. `OnCreate` creates `StatusChannels` (`SimEventChannel<StatModifierRequest>.Create("stat_modifiers")`, `<InhibitRequest>("inhibits")`, `<EnergyGrantRequest>("energy_grants")`); `OnDestroy` disposes them. Until HAZ-019 adds its consumer, `StatusSystem` discards the energy grants each tick. Per tick (`tick = SimClock.Tick`; `BeginTick(tick)` on both):
 1. **Inhibits:** `BeginRead` → gather → stable sort by `(Target.Index, Producer, Sequence, gather position)`; one `IJob`: target with `Inhibited` → `UntilTick = max(UntilTick, tick + DurationTicks)`, `Reason`; target that is a grid root → the same for every live instance's `Functional` (via `BlockInstance`); others dropped. Writes through lookups, single-threaded (requests are few).
 2. **Stat modifiers:** `BeginRead` → gather → stable sort by `(Root.Index, Producer, SourceId, Stat, Sequence, gather position)`; one `IJob` per tick: for each request on a root with `ShipStatModifier`: find the element with the same `(Producer, SourceId, Stat)`; cancel (`Multiplier == 1` or `UntilTick ≤ tick`) → remove it; else upsert `{Multiplier, UntilTick}`.
 3. **Expiry:** `IJobEntity` over roots with a non-empty `ShipStatModifier` (`ScheduleParallel`): remove elements with `tick ≥ UntilTick` (stable removal).

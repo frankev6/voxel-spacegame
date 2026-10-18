@@ -38,7 +38,8 @@ namespace Game.Simulation.Power
             owned = new StatusChannels
             {
                 StatModifiers = SimEventChannel<StatModifierRequest>.Create("stat_modifiers"),
-                Inhibits = SimEventChannel<InhibitRequest>.Create("inhibits")
+                Inhibits = SimEventChannel<InhibitRequest>.Create("inhibits"),
+                EnergyGrants = SimEventChannel<EnergyGrantRequest>.Create("energy_grants")
             };
             channelEntity = state.EntityManager.CreateSingleton(owned);
             inhibits = new NativeList<InhibitRequest>(16, Allocator.Persistent);
@@ -60,13 +61,16 @@ namespace Game.Simulation.Power
             // Discard every pending producer stream and main-thread inbox when leaving gameplay.
             owned.Inhibits.BeginRead(ref state); owned.Inhibits.EndRead(state.Dependency);
             owned.StatModifiers.BeginRead(ref state); owned.StatModifiers.EndRead(state.Dependency);
+            owned.EnergyGrants.BeginRead(ref state); owned.EnergyGrants.EndRead(state.Dependency);
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            owned.Inhibits.BeginTick(tick); owned.StatModifiers.BeginTick(tick);
+            owned.Inhibits.BeginTick(tick); owned.StatModifiers.BeginTick(tick); owned.EnergyGrants.BeginTick(tick);
+            // Energy grants have no consumer until HAZ-019: discard them so the stream never grows.
+            owned.EnergyGrants.BeginRead(ref state); owned.EnergyGrants.EndRead(state.Dependency);
             inhibited.Update(ref state); instances.Update(ref state); modifierBuffers.Update(ref state);
             var inhibitSet = owned.Inhibits.BeginRead(ref state);
             var modifierSet = owned.StatModifiers.BeginRead(ref state);
@@ -89,7 +93,7 @@ namespace Game.Simulation.Power
         public void OnDestroy(ref SystemState state)
         {
             state.CompleteDependency();
-            owned.Inhibits.Dispose(); owned.StatModifiers.Dispose();
+            owned.Inhibits.Dispose(); owned.StatModifiers.Dispose(); owned.EnergyGrants.Dispose();
             if (inhibits.IsCreated) inhibits.Dispose(); if (modifiers.IsCreated) modifiers.Dispose();
             if (sortedInhibits.IsCreated) sortedInhibits.Dispose(); if (sortedModifiers.IsCreated) sortedModifiers.Dispose();
             if (state.EntityManager.Exists(channelEntity)) state.EntityManager.DestroyEntity(channelEntity);
