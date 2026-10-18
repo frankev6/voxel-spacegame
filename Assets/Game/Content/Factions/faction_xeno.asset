@@ -22,7 +22,13 @@ MonoBehaviour:
   liveryColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   basePlayerRelation: -100
   relationLocked: 1
-  stances: []
+  stances:
+  - other: {fileID: 11400000, guid: d99f75d8e50854821befde04cf014763, type: 2}
+    stance: 2
+  - other: {fileID: 11400000, guid: 449948a8b54a142c7b5fcdeaab8c1279, type: 2}
+    stance: 2
+  - other: {fileID: 11400000, guid: e09de45a585434042837b723f0c59ccf, type: 2}
+    stance: 2
   doctrine: []
   defaultAiProfile: {fileID: 11400000, guid: 1f6ee70d73ab47f8b1ec22b58dc3f096, type: 2}
   ownedStarSystems: []

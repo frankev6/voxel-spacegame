@@ -1,0 +1,49 @@
+scenario xeno_swarm
+desc "Play it yourself: three waves of Xeno ships come at the Hollow from the south and you help the Clan hold the Maw. Turn round from the entrance to meet them; the Clan's patrols and wall guns fight them too (Xenos are hostile to every faction). Reports how long each wave took and what the Hollow lost (owner 2026-10-18: the aliens attack the hollow and I'm helping to defend it, against a BUNCH of xeno ships)"
+status active
+tags play combat xeno hollow
+timeout 1800
+# from Boot: the menu first, so the flow is free
+wait scene == "MainMenu" timeout=30
+wait ticks=30
+playground
+wait player.ready timeout=60
+relation faction=faction_khuchad_clan set=0
+# the Hollow builds and its guns arm; time to click into the Game view and turn round
+wait ticks=600
+let clan0 = ships.alive("faction_khuchad_clan")
+let rock0 = damage.taken("Station")
+let splits0 = ecs.count("SplitOrigin")
+let t0 = sim.seconds
+# wave 1: eight husks up the traffic lane from the south (you start at (-90, -472) Hollow metres; these are 800 m south)
+spawn blueprint=ship_xeno_husk faction=faction_xeno dx=-180 dz=-800 count=8 spacing=50 face=player
+# a wave ends when two or fewer are left, when you fall, or after 150 s (then the next one joins it)
+wait ships.alive("faction_xeno") <= 2 || player.dead || sim.seconds > $t0 + 150 timeout=900
+report wave1_seconds = sim.seconds - $t0
+assert player.dead == false "you fell in wave 1"
+wait ticks=300
+# wave 2: twelve husks from both flanks, south-west past the small rock and south-east
+let t1 = sim.seconds
+spawn blueprint=ship_xeno_husk faction=faction_xeno dx=-760 dz=-620 count=6 spacing=50 face=player
+spawn blueprint=ship_xeno_husk faction=faction_xeno dx=380 dz=-700 count=6 spacing=50 face=player
+wait ships.alive("faction_xeno") <= 2 || player.dead || sim.seconds > $t1 + 180 timeout=900
+report wave2_seconds = sim.seconds - $t1
+assert player.dead == false "you fell in wave 2"
+wait ticks=300
+# wave 3: two broodmothers up the middle behind fourteen husks on three sides
+let t2 = sim.seconds
+spawn blueprint=ship_xeno_broodmother faction=faction_xeno dx=-150 dz=-1000 count=2 spacing=250 face=player
+spawn blueprint=ship_xeno_husk faction=faction_xeno dx=-200 dz=-750 count=6 spacing=50 face=player
+spawn blueprint=ship_xeno_husk faction=faction_xeno dx=-760 dz=-560 count=4 spacing=50 face=player
+spawn blueprint=ship_xeno_husk faction=faction_xeno dx=420 dz=-640 count=4 spacing=50 face=player
+wait ships.alive("faction_xeno") == 0 || player.dead timeout=1200
+report wave3_seconds = sim.seconds - $t2
+report xeno_left = ships.alive("faction_xeno")
+report clan_ships_lost = $clan0 - ships.alive("faction_khuchad_clan")
+report station_damage = damage.taken("Station") - $rock0
+report station_cells_loose = damage.detached("Station")
+report splits = ecs.count("SplitOrigin") - $splits0
+report clan_relation = relation("faction_khuchad_clan")
+report hull_left = player.hull
+assert player.dead == false "you fell in wave 3"
+assert logs.exceptions == 0 "no exceptions"

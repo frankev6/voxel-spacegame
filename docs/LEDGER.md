@@ -1292,6 +1292,14 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-18 — Xeno swarm on the Hollow, a scenario to play (lead, claude-opus-5-5)
+- Owner: "can we run the combat scenario in a way i can watch and participate, the enemies should be a BUNCH of xeno ships", then "the scenario should be the aliens attack the hollow and im helping to defend it".
+- `TestData/Scenarios/xeno_swarm.scenario` (tagged `play`): `scenario.sh xeno_swarm timeout=1800` with the Editor open starts Play at the Hollow entrance and leaves the controls to the player. Three waves come from the south: 8 husks; 12 husks from both flanks; 14 husks and 2 broodmothers. It reports each wave's time, Clan ships lost, station damage, rock knocked loose and splits, and fails naming the wave the player fell in.
+- `faction_xeno` is now hostile to the Clan, Tlaxcala and Vestari, as the Raiders are to everyone: the Clan's patrols and wall guns fight Xenos anywhere, not just in this scenario.
+- New probe `ships.alive("faction")` (§6.2).
+- First found: Xenos spawned by `playground` next to the player sat in Engage with fire blocked, because the player starts at the entrance against the rock. The waves now come from open space.
+- Check run with the player parked (no asserts): after 3.5 min, 26 of 36 Xenos still alive, 2 of 14 Clan ships lost, about 107,000 station damage, the player untouched, frame time 12 ms. The Clan cannot hold alone.
+
 ### 2026-10-18 — Tools for big builds: probe, the Hollow map, live PlayMode tests (lead, claude-opus-5-5)
 - Owner: "is there any tools to make your life easier when making big things like we just made this asteroid", then "go ahead with your top down map render, in game tests, and saved repro scenarios".
 - DEV-024 `probe`, DEV-025 `tools/hollow-map.sh`, DEV-026 live PlayMode runs (see SPEC-70).

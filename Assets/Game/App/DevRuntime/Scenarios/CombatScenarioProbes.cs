@@ -1,6 +1,11 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
 using Game.Core;
+using Game.Data.Definitions;
+using Game.Data.Services;
+using Game.Simulation;
+using Game.Galaxy.Services;
+using Game.Simulation.Factions;
 using Game.Simulation.Power;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
@@ -11,8 +16,8 @@ namespace Game.App.DevRuntime.Scenarios
 {
     /// <summary>DEV-027: what a fight did, for repro scenarios that report numbers. The player's hull (ShipStats.MassFraction, the HUD's
     /// meter, 0..1), shield points and whether it is a hulk; per grid kind (Ship, Station, Asteroid, Hulk, Device), the damage taken, the
-    /// cells knocked loose and how many grids took any (GridDamageStats, cumulative since each grid spawned); and the sim clock in
-    /// seconds.</summary>
+    /// cells knocked loose and how many grids took any (GridDamageStats, cumulative since each grid spawned); the sim clock in
+    /// seconds; and how many of a faction's ships still fly (ships.alive, not hulks).</summary>
     public static class CombatScenarioProbes
     {
         sealed class Probe : IScenarioProbe
@@ -40,6 +45,20 @@ namespace Game.App.DevRuntime.Scenarios
                     }
                     return Number(Name == "damage.grids" ? grids : sum);
                 }
+                if (Name == "ships.alive")
+                {
+                    if (!ctx.TryGetService<ContentService>(out var content) || !content.Catalog.TryGet<FactionDefinition>(new ContentId(RequireString(args[0])), out var faction))
+                        throw new InvalidOperationException("unknown faction");
+                    FactionIndexMap indices;
+                    if (ctx.TryGetService<FactionService>(out var factions)) indices = factions.Indices;
+                    else if (!ctx.TryGetService(out indices)) throw new InvalidOperationException("faction index map unavailable");
+                    byte index = indices.IndexOf(faction); int count = 0;
+                    using var roots = ctx.GridEntities();
+                    foreach (var e in roots)
+                        if (em.GetComponentData<VoxelGrid>(e).Kind == GridKind.Ship && !em.HasComponent<Hulk>(e) && em.HasComponent<Allegiance>(e)
+                            && em.GetComponentData<Allegiance>(e).Faction == index) count++;
+                    return Number(count);
+                }
                 var player = ctx.PlayerShipRoot;
                 bool alive = player != Entity.Null && em.Exists(player);
                 switch (Name)
@@ -55,7 +74,7 @@ namespace Game.App.DevRuntime.Scenarios
         internal static void Register(ScenarioProbeRegistry registry)
         {
             foreach (string name in new[] { "player.dead", "player.hull", "player.shield", "sim.seconds" }) registry.Register(new Probe(name));
-            foreach (string name in new[] { "damage.taken", "damage.detached", "damage.grids" }) registry.Register(new Probe(name, 1));
+            foreach (string name in new[] { "damage.taken", "damage.detached", "damage.grids", "ships.alive" }) registry.Register(new Probe(name, 1));
         }
     }
 }

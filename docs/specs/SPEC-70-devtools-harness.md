@@ -252,7 +252,7 @@ Built-in probes (DEV-005 unless noted):
 | `quest("id")`, `clue("id")` (SPEC-42 QST-010) | Status name of the latest instance (`"None"` if never started); clue ordinal (0 = not found) |
 | `encounters.active`, `encounters.ships`, `relation("faction_id")`, `stance("faction_id")`, `encounter_defeated("encounter_id")` (SPEC-33 ENC-012) | Director counts; relation −100..100; stance name; defeats since the run started |
 | `fx.drained`, `sfx.voices` (DEV-011) | `FxStats.EventsDrained` last frame; `AudioStats.ActiveSfxVoices` |
-| `player.hull`, `player.shield`, `player.dead`, `damage.taken("Kind")`, `damage.detached("Kind")`, `damage.grids("Kind")`, `sim.seconds` (DEV-027) | `ShipStats.MassFraction` (the HUD's hull meter, 0..1); `ShieldState.Hp`; the player is a hulk; per grid kind, the sums of `GridDamageStats.DamageTaken` and `CellsDetached` and the count of grids with any damage (cumulative since each spawned); `SimClock` tick / 60 |
+| `player.hull`, `player.shield`, `player.dead`, `damage.taken("Kind")`, `damage.detached("Kind")`, `damage.grids("Kind")`, `sim.seconds` (DEV-027), `ships.alive("faction_id")` | `ShipStats.MassFraction` (the HUD's hull meter, 0..1); `ShieldState.Hp`; the player is a hulk; per grid kind, the sums of `GridDamageStats.DamageTaken` and `CellsDetached` and the count of grids with any damage (cumulative since each spawned); `SimClock` tick / 60; ship grids of that faction that are not hulks |
 
 `report NAME = expr` (DEV-027) is a `let` whose value is also a result: it goes into the result JSON's `"metrics"` object in order, and `tools/playtest/scenario.sh` prints each as `name = value`. Repro scenarios report what a fix is about (seconds to a kill, damage, splits) as well as asserting it.
 
@@ -705,7 +705,7 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Tier:** standard — scenario language and probes
 - **Depends on:** `DEV-005`, `DEV-023`
 - **Do:** Owner (2026-10-18): "go ahead with your ... saved repro scenarios". Each Hollow fix had been checked with a one-off shell script. `report` and the combat probes (§6.2) let a scenario file hold the repro and its measurements; `tools/playtest/scenario.sh <name>` runs one and prints them. Tagged `hollow`, not `regression`, so `ScenarioFileTests` does not run them in the suite.
-- **Files:** `ScenarioParser.cs`, `ScenarioRunner.cs`, `ScenarioStatement.cs`, `Scenarios/CombatScenarioProbes.cs`, `tools/playtest/scenario.sh`, `TestData/Scenarios/hollow_hostile_entrance.scenario`, `hollow_traffic_calm.scenario`.
+- **Files:** `ScenarioParser.cs`, `ScenarioRunner.cs`, `ScenarioStatement.cs`, `Scenarios/CombatScenarioProbes.cs`, `tools/playtest/scenario.sh`, `TestData/Scenarios/hollow_hostile_entrance.scenario`, `hollow_traffic_calm.scenario`, `xeno_swarm.scenario` (played by hand, tagged `play`).
 - **Acceptance criteria:**
   - [x] `report` records metrics in the result JSON and the shell prints them.
   - [x] The two Hollow repros run and pass on the current build.
