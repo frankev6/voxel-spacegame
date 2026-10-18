@@ -31,7 +31,8 @@ DISTRICT = {"harbour": "#FFE2B0", "exchange": "#5BE3A1", "yards": "#F2B705", "ra
             "gate": "#FFF1D6", "relic": "#FFC86B"}
 LANE = {"approach_in": "#7CFF9A", "approach_out": "#FFB347", "harbour": "#FFE2B0", "boulevard": "#9FE0C8",
         "avenue_in": "#7CFF9A", "avenue_out": "#FFB347", "district": "#9FE0C8", "launch": "#F2B705", "gate_in": "#FFC86B",
-        "gate_out": "#FFC86B", "street": "#FFE2B0"}
+        "gate_out": "#FFC86B", "street": "#FFE2B0", "current": "#78DCFF",
+        "drain": "#FF6A2A", "slingshot": "#7CFF9A"}
 
 
 def hexrgb(h, a=1.0):
@@ -148,9 +149,94 @@ def blender_main(key, draft):
             "wall": "#4A4E52", "bastion": "#5A5E62", "keel": "#8A8478", "rib": "#6C7075", "rib_tip": "#A6A6A0"}
     import random
     rng = random.Random(7)
+    from mathutils import Matrix, Vector
+    panel_bm = {k: bmesh.new() for k in ("collector", "radiator", "mirror", "mirror_petal")}
+
+    def torus(bm_, c, z, R, r, upright=False, heading=0.0, seg=64, tube=10):
+        rows = []
+        for i in range(seg):
+            u = 2 * math.pi * i / seg
+            row = []
+            for j in range(tube):
+                w = 2 * math.pi * j / tube
+                a, h_ = R + r * math.cos(w), r * math.sin(w)
+                if upright:      # the ring stands across the plane, its axis along `heading`
+                    ax = polar(heading + 90, a * math.cos(u))
+                    co = (c[0] + ax[0] + polar(heading, h_)[0], c[1] + ax[1] + polar(heading, h_)[1], z + a * math.sin(u))
+                else:
+                    co = (c[0] + a * math.cos(u), c[1] + a * math.sin(u), z + h_)
+                row.append(bm_.verts.new(co))
+            rows.append(row)
+        out = []
+        for i in range(seg):
+            for j in range(tube):
+                a_, b_ = rows[i][j], rows[(i + 1) % seg][j]
+                c_, d_ = rows[(i + 1) % seg][(j + 1) % tube], rows[i][(j + 1) % tube]
+                out.append(bm_.faces.new((a_, b_, c_, d_)))
+        return out
+
+    def faces_of(verts):
+        return list({f for v in verts for f in v.link_faces})
+
+    def add_shape(bm_, b):
+        s_, c, z, p_ = b["shape"], b["c"], b["z"], b["p"]
+        if s_ == "torus":
+            fs = torus(bm_, c, z, p_["R"], p_["r"], p_.get("upright", False), p_.get("heading", 0.0))
+            for k in range(p_.get("spokes", 0)):
+                a = k * 360 / p_["spokes"]
+                mid = polar(a, (p_["hub"] + p_["R"]) / 2, c)
+                M = Matrix.Translation((mid[0], mid[1], z)) @ Matrix.Rotation(-math.radians(a), 4, "Z") @ \
+                    Matrix.Diagonal((p_["r"] * 0.4, p_["R"] - p_["hub"], p_["r"] * 0.4, 1))
+                fs += faces_of(bmesh.ops.create_cube(bm_, size=1, matrix=M)["verts"])
+            return fs
+        if s_ == "drum":
+            M = Matrix.Translation((c[0], c[1], z)) @ Matrix.Rotation(-math.radians(p_["heading"]), 4, "Z") @ Matrix.Rotation(math.radians(90), 4, "X")
+            return faces_of(bmesh.ops.create_cone(bm_, cap_ends=True, segments=28, radius1=p_["radius"], radius2=p_["radius"],
+                                                  depth=p_["length"], matrix=M)["verts"])
+        if s_ == "sphere":
+            return faces_of(bmesh.ops.create_uvsphere(bm_, u_segments=24, v_segments=12, radius=p_["r"],
+                                                      matrix=Matrix.Translation((c[0], c[1], z)))["verts"])
+        if s_ == "petal":
+            # a tilted, slightly dished mirror: z rises linearly from its inner to its outer edge
+            nu, nv = 16, 10
+            grid = []
+            for i in range(nu + 1):
+                row = []
+                for j in range(nv + 1):
+                    u, v_ = i / nu, j / nv
+                    b_ = p_["bearing"] - p_["width"] / 2 + p_["width"] * u
+                    r_ = p_["r0"] + (p_["r1"] - p_["r0"]) * v_
+                    q = polar(b_, r_)
+                    zz = p_["z0"] + (p_["z1"] - p_["z0"]) * v_ - math.copysign(p_["sag"], p_["z1"]) * (1 - (2 * u - 1) ** 2)
+                    row.append(bm_.verts.new((q[0], q[1], zz)))
+                grid.append(row)
+            out = []
+            for i in range(nu):
+                for j in range(nv):
+                    out.append(bm_.faces.new((grid[i][j], grid[i + 1][j], grid[i + 1][j + 1], grid[i][j + 1])))
+            bmesh.ops.solidify(bm_, geom=out, thickness=4.0)
+            return out
+        if s_ in ("panel", "truss"):
+            t_ = p_.get("thick", p_.get("width", 4)); hgt = p_.get("height", p_.get("width", 4))
+            M = Matrix.Translation((c[0], c[1], z)) @ Matrix.Rotation(-math.radians(p_["heading"]), 4, "Z") @ \
+                Matrix.Diagonal((t_, p_["length"], hgt, 1))
+            return faces_of(bmesh.ops.create_cube(bm_, size=1, matrix=M)["verts"])
+        return []
+
     for b in opt["buildings"]:
         pts = b["pts"]
         if len(pts) < 3:
+            continue
+        if b.get("shape"):
+            if b["shape"] in ("panel", "petal") and b["kind"] in panel_bm:
+                add_shape(panel_bm[b["kind"]], b)
+                continue
+            faces = add_shape(bm, b)
+            t = TONE.get(b["kind"], rng.choice(["#A6A6A0", "#B8B4A8", "#CFC8B8", "#8A8E86"]))
+            tc = hexrgb(t); ac = hexrgb(DISTRICT.get(b.get("district") or "", "#FFE2B0"))
+            k = 0.8 + rng.random() * 0.3
+            for f in faces:
+                f[tone_l] = (tc[0] * k, tc[1] * k, tc[2] * k, 1); f[lit_l] = b["lit"]; f[acc_l] = ac
             continue
         lo, hi = b["d"], b["h"]
         vb = [bm.verts.new((x, y, lo)) for x, y in pts]
@@ -180,6 +266,18 @@ def blender_main(key, draft):
     bm.to_mesh(me); bm.free()
     city = bpy.data.objects.new("city", me); scene.collection.objects.link(city)
     me.materials.append(city_mat)
+    # collector vanes face the disk (dark glass, gold edge light), radiators glow with waste heat, mirrors reflect
+    def petal_mat():
+        # polished mirror catching the disk: bright metal, a warm sheen, and a lit focusing grid
+        m = mat_flat("petal", "#F2F4F8", 0.06, 1.0)
+        b_ = m.node_tree.nodes["Principled BSDF"]
+        b_.inputs["Emission Color"].default_value = hexrgb("#FFE6C0"); b_.inputs["Emission Strength"].default_value = 0.25
+        return m
+    pmat = {"collector": mat_flat("collector", "#1A2238", 0.15, 0.9), "radiator": mat_emit("radiator", "#C2461E", 2.2),
+            "mirror": mat_flat("mirror", "#C8D0DA", 0.05, 1.0), "mirror_petal": petal_mat()}
+    for k_, pb in panel_bm.items():
+        pm = bpy.data.meshes.new("panels_" + k_); pb.to_mesh(pm); pb.free()
+        po = bpy.data.objects.new("panels_" + k_, pm); scene.collection.objects.link(po); pm.materials.append(pmat[k_])
 
     # ---- ships: boxes in livery, engine glow and plume when under way, nav light at the bow
     ship_mats = {k: mat_flat("hull_" + k, v[0], 0.45, 0.4) for k, v in LIVERY.items()}
@@ -275,6 +373,78 @@ def blender_main(key, draft):
         elif t == "scanner":
             add_box("scan", ((fx["a"][0] + fx["b"][0]) / 2, fx["a"][1]), 90, math.dist(fx["a"], fx["b"]), 3, 3, 30,
                     mat_emit("scan", "#BFD6FF", 40.0))
+        elif t == "black_hole":
+            c = fx["c"]
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=fx["horizon"] * 2.2, location=(c[0], c[1], 0), segments=48, ring_count=24)
+            bh = mat_flat("horizon", "#000000", 1.0, 0.0); bh.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value = 0.0
+            bpy.context.active_object.data.materials.append(bh)
+
+            def disk(name, r0, r1, rot, strength, faces_cam=False):
+                bpy.ops.mesh.primitive_circle_add(vertices=128, radius=r1, fill_type="NOTHING", location=(c[0], c[1], 0))
+                o = bpy.context.active_object; o.name = name
+                bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT")
+                bpy.ops.mesh.extrude_region_move(); bpy.ops.transform.resize(value=(r0 / r1, r0 / r1, 1))
+                bpy.ops.object.mode_set(mode="OBJECT")
+                o.rotation_euler = rot
+                m = bpy.data.materials.new(name); m.use_nodes = True
+                nt = m.node_tree; N, Lk = nt.nodes, nt.links; N.clear()
+                tc = N.new("ShaderNodeTexCoord"); vl = N.new("ShaderNodeVectorMath"); vl.operation = "LENGTH"
+                Lk.new(tc.outputs["Object"], vl.inputs[0])
+                mr = N.new("ShaderNodeMapRange"); mr.inputs["From Min"].default_value = r0; mr.inputs["From Max"].default_value = r1
+                Lk.new(vl.outputs["Value"], mr.inputs["Value"])
+                ramp = N.new("ShaderNodeValToRGB"); el = ramp.color_ramp.elements
+                el[0].position = 0.0; el[0].color = hexrgb("#DCE8FF"); el[1].position = 1.0; el[1].color = (0.08, 0.01, 0.0, 1)
+                e2 = el.new(0.12); e2.color = hexrgb("#FFF0D0"); e3 = el.new(0.45); e3.color = hexrgb("#FF8A2A")
+                Lk.new(mr.outputs["Result"], ramp.inputs["Fac"])
+                wv = N.new("ShaderNodeTexWave"); wv.wave_type = "RINGS"; wv.inputs["Scale"].default_value = 0.0; wv.inputs["Distortion"].default_value = 6
+                wv.inputs["Scale"].default_value = 18.0 / r1 * 40
+                Lk.new(tc.outputs["Object"], wv.inputs["Vector"])
+                mix = N.new("ShaderNodeMath"); mix.operation = "MULTIPLY_ADD"; mix.inputs[1].default_value = 0.5; mix.inputs[2].default_value = 0.6
+                Lk.new(wv.outputs["Fac"], mix.inputs[0])
+                st = N.new("ShaderNodeMath"); st.operation = "MULTIPLY"; st.inputs[1].default_value = strength
+                Lk.new(mix.outputs[0], st.inputs[0])
+                em = N.new("ShaderNodeEmission"); Lk.new(ramp.outputs["Color"], em.inputs["Color"]); Lk.new(st.outputs[0], em.inputs["Strength"])
+                tr = N.new("ShaderNodeBsdfTransparent"); ms = N.new("ShaderNodeMixShader")
+                al = N.new("ShaderNodeMath"); al.operation = "SUBTRACT"; al.inputs[0].default_value = 1.0
+                Lk.new(mr.outputs["Result"], al.inputs[1])
+                Lk.new(al.outputs[0], ms.inputs["Fac"]); Lk.new(tr.outputs[0], ms.inputs[1]); Lk.new(em.outputs[0], ms.inputs[2])
+                out = N.new("ShaderNodeOutputMaterial"); Lk.new(ms.outputs[0], out.inputs[0])
+                m.blend_method = "BLEND" if hasattr(m, "blend_method") else None
+                o.data.materials.append(m)
+            disk("disk", fx["horizon"] * 2.4, fx["disk"], (0, 0, 0), 4.0)
+            # the far side of the disk, lensed up over the hole, and the photon ring: billboards facing the camera
+            disk("lensed", fx["horizon"] * 2.3, fx["horizon"] * 6.0, (math.radians(35), 0, 0), 3.0)
+            bpy.ops.mesh.primitive_torus_add(major_radius=fx["horizon"] * 2.35, minor_radius=1.6, location=(c[0], c[1], 0),
+                                             rotation=(math.radians(35), 0, 0))
+            bpy.context.active_object.data.materials.append(mat_emit("photon", "#FFF6E8", 60.0))
+            pl = bpy.data.lights.new("disk_l", "POINT"); pl.energy = 1.2e9; pl.color = hexrgb("#FFC890")[:3]; pl.shadow_soft_size = 200
+            lo_ = bpy.data.objects.new("disk_l", pl); lo_.location = (c[0], c[1], 40); scene.collection.objects.link(lo_)
+        elif t == "buoys":
+            n = int(2 * math.pi * fx["r"] / fx.get("every", 60))
+            col = "#FF3C28" if fx["col"][1] < 100 else "#FFB347"
+            mb = mat_emit("buoy" + col, col, 60.0)
+            for k in range(n):
+                q = polar(k * 360 / n, fx["r"], fx["c"])
+                bpy.ops.mesh.primitive_uv_sphere_add(radius=3.5, location=(q[0], q[1], 0), segments=8, ring_count=4)
+                bpy.context.active_object.data.materials.append(mb)
+        elif t == "conduit":
+            mc = mat_emit("conduit", "#9FD8FF", 18.0)
+            pts = fx["pts"]
+            for a, b in zip(pts, pts[1:]):
+                c = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); hd = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
+                add_box("conduit", c, hd, math.dist(a, b), 3, 3, 8, mc)
+        elif t == "beam":
+            a, b = fx["a"], fx["b"]
+            from mathutils import Vector
+            p0, p1 = Vector((a[0], a[1], fx["za"])), Vector((b[0], b[1], fx["zb"]))
+            d_ = p1 - p0
+            bpy.ops.mesh.primitive_cylinder_add(radius=3.0, depth=d_.length, location=(p0 + p1) / 2, vertices=8)
+            o = bpy.context.active_object
+            o.rotation_euler = d_.to_track_quat("Z", "Y").to_euler()
+            o.data.materials.append(mat_emit("beam", "#FFF0D0", 25.0))
+        elif t == "canister":
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=5, location=(fx["c"][0], fx["c"][1], 0), segments=8, ring_count=4)
+            bpy.context.active_object.data.materials.append(mat_emit("cell", "#FFB347", 40.0))
         elif t == "marker":
             bpy.ops.mesh.primitive_uv_sphere_add(radius=5, location=(fx["c"][0], fx["c"][1], 0))
             bpy.context.active_object.data.materials.append(mat_emit("marker", "#7CFF9A", 50.0))
@@ -321,8 +491,9 @@ def blender_main(key, draft):
     add_box("player", sp, 0, 28, 12, 6, 0, ship_mats["noct"])
     add_box("player_eng", polar(0, -14, sp), 0, 2, 9, 3, 0, glow_mats["vest"])
     add_box("player_plume", polar(0, -30, sp), 0, 28, 4, 2, 0, plume)
-    arrive = {"A": ((sp[0], sp[1] + 2050), 3300), "B": ((sp[0] - 500, sp[1] + 1900), 2900), "C": ((sp[0], sp[1] + 1700), 2700)}
-    entry = {"A": ((70, -1750), 900), "B": ((600, -1700), 1300), "C": ((0, 300), 1300)}
+    arrive = {"A": ((sp[0], sp[1] + 2050), 3300), "B": ((sp[0] - 500, sp[1] + 1900), 2900), "C": ((sp[0], sp[1] + 1700), 2700),
+              "D": ((sp[0], sp[1] + 2050), 3300)}
+    entry = {"A": ((70, -1750), 900), "B": ((600, -1700), 1300), "C": ((0, 300), 1300), "D": ((0, -250), 1500)}
     shot("hub_arrival", *arrive[key])
     shot("hub_entry", *entry[key])
     print("HUB done")

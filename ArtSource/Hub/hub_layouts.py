@@ -114,6 +114,31 @@ class City:
         self.buildings.append(dict(pts=[(round(x, 1), round(y, 1)) for x, y in pts], h=h, d=d, kind=kind,
                                    district=district, lit=lit, roof=roof))
 
+    def shape(self, shape, c, district=None, kind=None, lit=0.6, z=0.0, **p):
+        """A space form (DEV-023 option D; owner: "form follows function and also different shapes and sizes that make
+        sense in SPACE"), centred on its own level rather than standing on a floor:
+        torus (R, r, spokes): a rotating habitat ring lying in the plane; drum (heading, length, radius): a habitat
+        cylinder, axis along heading; sphere (r): a tank or pod; panel (heading, length, thick, height): a collector
+        vane or radiator fin; truss (heading, length, width): an open lattice beam."""
+        if shape == "torus":
+            pts = ngon(c, p["R"] + p["r"], 24)
+        elif shape == "drum":
+            pts = box(c, p["heading"], p["length"], 2 * p["radius"])
+        elif shape == "sphere":
+            pts = ngon(c, p["r"], 16)
+        elif shape == "petal":
+            pts = annulus(p["r0"], p["r1"], p["bearing"] - p["width"] / 2, p["bearing"] + p["width"] / 2)
+        elif shape in ("panel", "truss"):
+            pts = box(c, p["heading"], p["length"], p.get("thick", p.get("width", 4)))
+        else:
+            raise ValueError(shape)
+        half = {"torus": p.get("r", 10), "drum": p.get("radius", 20), "sphere": p.get("r", 10),
+                "panel": p.get("height", 20) / 2, "truss": p.get("width", 6) / 2,
+                "petal": abs(p.get("z1", 0)) if shape == "petal" else 0}[shape]
+        self.buildings.append(dict(pts=[(round(x, 1), round(y, 1)) for x, y in pts], h=round(z + half, 1), d=round(z - half, 1),
+                                   kind=kind or shape, district=district, lit=lit, roof=None, shape=shape, c=(round(c[0], 1), round(c[1], 1)),
+                                   z=round(z, 1), p={k: (round(v, 2) if isinstance(v, float) else v) for k, v in p.items()}))
+
     def lane(self, pts, kind, closed=False, oneway=True):
         self.lanes.append(dict(pts=[(round(x, 1), round(y, 1)) for x, y in pts], kind=kind, closed=closed, oneway=oneway))
 
@@ -212,7 +237,8 @@ def exhibit_row(city, start, heading, names, district, spacing=95):
 # A city is dense: every block between its streets is built up, and open space exists only where something happens
 # (a harbour basin, a firing range, an arena bowl). The fabric fills what the set pieces and streets leave free.
 LANE_HALF = {"approach_in": 70, "approach_out": 70, "harbour": 90, "boulevard": 80, "avenue_in": 45, "avenue_out": 45,
-             "district": 70, "launch": 110, "gate_in": 120, "gate_out": 120, "street": 30}
+             "district": 70, "launch": 110, "gate_in": 120, "gate_out": 120, "street": 30,
+             "current": 110, "drain": 60, "slingshot": 50}
 # style: footprint (min, max) m, height (min, max) m above the plane, depth (min, max) below it, kind, chance of a podium
 STYLES = {
     "tower": ((34, 80), (220, 640), (-400, -1100), "hab", 0.55),
@@ -884,7 +910,54 @@ def shade(col, k):
     return tuple(max(0, min(255, int(c * k))) for c in col)
 
 
+def draw_shape(v, b, rng):
+    s, c, p = b["shape"], b["c"], b["p"]
+    dim = 1.0 if b["z"] > -120 else 0.3            # the lower orbits, under the plane, drawn dim
+    acc = DISTRICT_COL.get(b.get("district") or "", (226, 228, 220))
+    if s == "torus":
+        R, r = p["R"], p["r"]
+        v.circle(c, R, outline=shade((150, 152, 144), dim) + (255,), width=max(v.px(2), v.m(2 * r)))
+        v.circle(c, R + r, outline=shade(acc, dim) + (120,), width=v.px(1))
+        n = int(R * 0.6 * b["lit"])
+        for k in range(n):
+            v.dot(polar(k * 360 / max(n, 1), R, c), 1.0, (255, 226, 176, int(200 * dim)))
+        for k in range(p.get("spokes", 0)):
+            a = k * 360 / p["spokes"]
+            v.line([polar(a, p["hub"], c), polar(a, R - r, c)], shade((120, 122, 116), dim) + (255,), max(v.px(1.5), v.m(4)))
+        if p.get("hub"):
+            v.circle(c, p["hub"], fill=shade((140, 142, 136), dim) + (255,))
+    elif s == "drum":
+        pts = b["pts"]
+        v.poly(pts, fill=shade((128, 130, 124), dim) + (255,), outline=shade(acc, dim) + (150,), width=v.px(1))
+        for k in range(1, 6):
+            q0 = lerp(pts[0], pts[3], k / 6); q1 = lerp(pts[1], pts[2], k / 6)
+            v.line([q0, q1], (255, 226, 176, int(110 * dim)), v.px(1))
+    elif s == "sphere":
+        v.circle(c, p["r"], fill=shade((150, 148, 138), dim * 0.9) + (255,), outline=shade(acc, dim) + (140,), width=v.px(1))
+        v.circle((c[0] - p["r"] * 0.3, c[1] + p["r"] * 0.3), p["r"] * 0.45, fill=(255, 255, 255, int(28 * dim)))
+    elif s == "panel":
+        col = {"collector": (40, 46, 70), "radiator": (150, 60, 36)}.get(b["kind"], (90, 92, 88))
+        v.poly(b["pts"], fill=shade(col, dim) + (255,), outline=shade(acc if b["kind"] != "radiator" else (255, 120, 60), dim) + (200,),
+               width=v.px(1))
+    elif s == "petal":
+        # a tilted mirror: bright where it faces the disk, its edge lit; rising petals solid, dipping ones dimmer
+        up = p["z1"] > 0
+        n = 10
+        for i in range(n):
+            f0, f1 = i / n, (i + 1) / n
+            seg = annulus(p["r0"] + (p["r1"] - p["r0"]) * f0, p["r0"] + (p["r1"] - p["r0"]) * f1, p["bearing"] - p["width"] / 2,
+                          p["bearing"] + p["width"] / 2)
+            k = (1 - f0) * (1.0 if up else 0.6)
+            v.poly(seg, fill=(int(150 + 90 * k), int(170 + 70 * k), int(200 + 50 * k), int(150 + 80 * k)))
+        v.poly(b["pts"], outline=(255, 236, 200, 255), width=v.px(2))
+    elif s == "truss":
+        pts = b["pts"]
+        v.line([lerp(pts[0], pts[3], 0.5), lerp(pts[1], pts[2], 0.5)], shade((150, 150, 140), dim) + (220,), max(v.px(1.5), v.m(p.get("width", 6))))
+
+
 def draw_building(v, b, rng):
+    if b.get("shape"):
+        return draw_shape(v, b, rng)
     pts = b["pts"]
     base = (70, 72, 68)
     tone = KIND_TONE.get(b["kind"], 1.0) * (0.75 + min(b["h"], 600) / 1400)
@@ -936,6 +1009,7 @@ LANE_STYLE = {
     "approach_in": ((124, 255, 154), 4), "approach_out": ((255, 179, 71), 4), "harbour": ((255, 226, 176), 3),
     "boulevard": ((159, 224, 200), 3), "avenue_in": ((124, 255, 154), 2), "avenue_out": ((255, 179, 71), 2),
     "district": ((159, 224, 200), 2), "launch": ((242, 183, 5), 3), "gate_in": ((255, 200, 107), 4), "gate_out": ((255, 200, 107), 3),
+    "current": ((120, 220, 255), 5), "drain": ((255, 106, 42), 3), "slingshot": ((124, 255, 154), 3), "street": ((255, 226, 176), 1),
 }
 
 
@@ -1011,9 +1085,45 @@ def draw_fx(v, fx, fonts):
         v.dot(fx["c"], 4, (159, 216, 255, 255))
     elif t == "portal":
         portal(v, fx["c"], 90 - fx["facing"] + 90, fx["width"])
+    elif t == "black_hole":
+        c = fx["c"]
+        # the accretion disk: banded, hot white-blue inside to dull orange outside; the shadow; the photon ring
+        rng_ = random.Random(3)
+        n = 60
+        for i in range(n, 0, -1):
+            f = i / n
+            r = fx["horizon"] * 2.5 + (fx["disk"] - fx["horizon"] * 2.5) * f
+            col = lerp((255, 236, 200), (200, 70, 24), f) if f > 0.2 else lerp((210, 228, 255), (255, 236, 200), f / 0.2)
+            band = 0.55 + 0.45 * rng_.random()
+            v.circle(c, r, outline=tuple(int(x) for x in col) + (int((40 + 190 * (1 - f) ** 1.6) * band),), width=max(1, int(v.m((fx["disk"]) / n * 1.3))))
+        v.circle(c, fx["horizon"] * 2.6, outline=(255, 250, 235, 255), width=v.px(3))
+        v.circle(c, fx["horizon"] * 2.2, fill=(0, 0, 0, 255))
+    elif t == "buoys":
+        n = int(2 * math.pi * fx["r"] / fx.get("every", 60))
+        for k in range(n):
+            v.dot(polar(k * 360 / n, fx["r"], fx["c"]), 2.6, tuple(fx["col"]) + (230,))
+    elif t == "contour":
+        v.circle(fx["c"], fx["r"], outline=GRAVITY + (int(fx.get("a", 50)),), width=v.px(1.5))
+        for k in range(16):
+            a = k * 22.5 + 11
+            v.arrow(polar(a, fx["r"] + 30, fx["c"]), polar(a, fx["r"] - 30, fx["c"]), GRAVITY + (int(fx.get("a", 50)) + 40,), v.px(1.5), head=v.px(5))
+    elif t == "conduit":
+        for w_, al in ((14, 30), (6, 90), (2, 255)):
+            v.line(fx["pts"], (159, 216, 255, al), v.px(w_))
+    elif t == "beam":
+        for w_, al in ((10, 40), (3, 255)):
+            v.line([fx["a"], fx["b"]], (255, 236, 200, al), v.px(w_))
+    elif t == "flare_shadow":
+        v.poly(fx["pts"], fill=(0, 0, 0, 90))
+    elif t == "canister":
+        canister(v, fx["c"], 0.8)
     elif t == "relic_gate":
         for w_, al in ((60, 30), (26, 80), (8, 220)):
             v.line([fx["a"], fx["b"]], (255, 200, 107, al), v.px(w_))
+
+
+UNDER_FX = ("moon", "reactor", "minefield", "slow_field", "debris", "arena", "engine_stand", "black_hole", "contour",
+            "flare_shadow", "conduit")
 
 
 def draw_option(opt):
@@ -1039,14 +1149,14 @@ def draw_option(opt):
     img.paste(Image.blend(img, tint, 1.0), mask=glow.point(lambda x: int(x * 0.16)))
     d = v.d = ImageDraw.Draw(img, "RGBA")
     for fx in opt["fx"]:
-        if fx["type"] in ("moon", "reactor", "minefield", "slow_field", "debris", "arena", "engine_stand"):
+        if fx["type"] in UNDER_FX:
             draw_fx(v, fx, None)
     for ln in opt["lanes"]:
         draw_lane(v, ln)
     for b in sorted(opt["buildings"], key=lambda b: b["h"]):
         draw_building(v, b, rng)
     for fx in opt["fx"]:
-        if fx["type"] not in ("moon", "reactor", "minefield", "slow_field", "debris", "arena", "engine_stand"):
+        if fx["type"] not in UNDER_FX:
             draw_fx(v, fx, None)
     for be in opt["berths"]:
         L = be["length"]
@@ -1133,7 +1243,8 @@ def draw_option(opt):
 
 
 def main():
-    opts = [option_a(), option_b(), option_c()]
+    import hub_option_d
+    opts = [option_a(), option_b(), option_c(), hub_option_d.option_d()]
     for o in opts:
         print(draw_option(o), len(o["buildings"]), "buildings", len(o["ships"]), "ships")
     os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)

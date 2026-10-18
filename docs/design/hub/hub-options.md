@@ -24,15 +24,43 @@
 >
 > "i want to spawn outside the hub and the first impression as one enters this space hub should be grand, a city with traffic and multiple buildings, sections etc."
 
+After the first three options:
+
+> "make a fourth option with the gravity well at the core being a black hole and that is the stations power, and also teaches you how that mechanic works, but its better integrated than your options. i live the option a meridian you made, use that as a baseline for option a and integrate this idea. i also want to say when i said "buildings" you're thinking very blocky rectangles of a human city, im thinking form follows function and also different shapes and sizes that make sense in SPACE, you're following a "tall skinny skyscrapper building" when theres no sky and no gravity downwards. the spacehub uses the black hole in the center as their source of power, and everything is build around that central idea"
+>
+> "what are all those balls and rectangles meant to be, buildings?? i would rather it feel more like a DENSE bustling hub than sparse and uniform and boring with a bunch of shapes you know?"
+>
+> "also buildings can be connected into large dense clusters, i want megastructures"
+>
+> "and large mirror structures around the black hole syphoning its energy"
+
 ## What went wrong with the Proving Grounds
 
 It was a test menu laid out on the floor: a 1 km plaza with nine circles round it, a sign on everything and a reset pad in every circle. It never asked what a real city would be, why anything is where it is, or who works there. A real capital is dense, built up between its streets, and everything in it has a reason: the reactor powers the city, the defences guard it, merchants trade where the ships dock. This design starts there.
 
-## The three cities
+## Option D: Meridian on the hole (recommended)
+
+![Option D](img/hub_option_d.png)
+
+| Arrival | The core |
+|---|---|
+| ![D arrival](img/hub_arrival_d.jpg) | ![D core](img/hub_entry_d.jpg) |
+
+Option A's Meridian, rebuilt round a black hole. The hole is why the city exists, and everything in it follows from that:
+
+- **Power.** Eight mirror petals, 420 m long, ring the accretion disk. They tilt out of the plane like an iris, alternately rising above it and dipping below, and focus the disk's light onto eight receivers. Conduits carry the power out to every quarter; energy canisters (cells) float at their nodes.
+- **The first lesson is the gravity well.** Its pull falls off as 1/r²: 0.7 m/s² at the wall, 2.4 m/s² on the Current, 11.4 m/s² (the WRAITH's full thrust) at the **Horizon Line**, a ring of red buoys 600 m out. Inside it a starter ship cannot climb out. You feel the pull from the outer markers.
+- **The Current** is the circular orbit 1300 m out (about 56 m/s). It is the city's ring road: the inbound lane bends into it, and if you cut your engines on it you orbit for free.
+- **Flares.** The Breakers feed scrap down **the Drain**, a decaying-orbit spiral; every wreck that reaches the disk makes it flare (the reactor-pulse mechanic at city scale). The mirrors' shadows are the shelter.
+- **The Slingshot.** The Circuit's warm-up trial dives round the hole and out again: a gravity assist you learn by doing. The quarry moon outside the Forge is a second well to slingshot between.
+- **Megastructures.** Each quarter is a few huge connected slabs, cut by narrow flight streets, stepped in tiers above and below the plane, with the city's deep decks hanging hundreds of metres beneath. Tanks, radiator fins, masts and docking arms cover them, and ships dock along every street. Open space is left only where something happens: the firing lanes, the arena, the drydocks, the slipways.
+- **Space forms, not skyscrapers.** Nothing stands on a floor. Habitat rings spin for weight, drums point their axis at the hole, radiators stand edge-on to it and the mirrors face it. Every form is centred on its own level.
+
+## The first three options
 
 All three maps are at true scale; every building, lane, berth and ship on them comes from `ArtSource/Hub/hub_layouts.py` (coordinates in [hub_options.json](hub_options.json)). The arrival renders are block-outs from the game camera (55° pitch, 40° field of view), pulled back to the arrival zoom; buildings are plain extrusions with lit windows (`ArtSource/Hub/hub_arrival.py`).
 
-### Option A: Harbour City (recommended)
+### Option A: Harbour City (the base for D)
 
 ![Option A](img/hub_option_a.png)
 
@@ -62,14 +90,16 @@ A city grown along the 5.4 km keel of the colony ship that brought the settlers.
 
 Station islands round an Aksharan gate, a hoop 1.3 km across standing through the plane, that still opens onto other systems. Ships flash in between its feet every few seconds. It has the strongest landmark of the three, but it is an archipelago rather than a city, and it commits the mystery's Aksharans early.
 
-### Why A
+### Why D, and why it builds on A
 
-- It is the only one that feels like a city everywhere you fly: buildings on both sides, traffic in every street. You are one small ship among liners and freighters.
+A's walled harbour city, which you liked, keeps its nine quarters and its arrival; D gives it one idea that explains the whole city.
+
+- A is the only one that feels like a city everywhere you fly: buildings on both sides, traffic in every street. You are one small ship among liners and freighters.
 - Each quarter is one avenue from the harbour, so a new player learns the city in one lap, without any signs.
 - The hazards sit where a city would have them: the reactor in the power quarter, turrets on the wall, the old minefield outside it, the quarry moon's gravity.
 - C's gate could still stand outside A's wall as the Circuit's start gate, if you want the landmark too.
 
-## The quarters (every option has the same nine)
+## The quarters (every option has the same nine; D's names in brackets)
 
 | Quarter | Why it is there | What you can do |
 |---|---|---|
@@ -80,7 +110,7 @@ Station islands round an Aksharan gate, a hoop 1.3 km across standing through th
 | **The Pit** | The Khuchad arena | Pick a bout at one of four gates (raider duel, raider wing, xeno swarm, cruiser bout) and fight it in a 600 m bowl ringed by a field wall, in front of a crowd whose lights flash on every kill. |
 | **The Institute** | The engineering gallery | Every special block and mechanism, working, in its own bay along a flyway: prismatic mirror, salvage magnet, portal blocks, shield emitter, reactor, switch and blast door, sweeper arm, rails, repulsor, EMP, seeker, gravity and proximity mines, energy canisters, impact driver. |
 | **Breakers' Yard** | Shipbreakers | Hulks on slipways being cut apart by rigs; the debris drifts free for anyone with a magnet. Tugs tow a fresh wreck in every few minutes. Sell what you salvage at the Swap. |
-| **The Foundry** | Power and industry | The city's reactor pulses behind blast bulkheads (hide in their shadows). Ore barges come in from the quarry moon outside the wall (its gravity well, the refinery's slow field). The old defence minefield lies beyond: proximity and seeker mines. |
+| **The Foundry** (the Forge) | Power and industry | The city's reactor pulses behind blast bulkheads (hide in their shadows). Ore barges come in from the quarry moon outside the wall (its gravity well, the refinery's slow field). The old defence minefield lies beyond: proximity and seeker mines. |
 | **The Circuit** | The racing quarter | Racers line up in the pit lane under the grandstand; the start portal outside the wall opens onto Track 01. |
 
 Habitation towers fill the blocks between the quarters (Old Town round the harbour is the tallest): no gameplay, just the skyline and the people who live there.
@@ -120,11 +150,12 @@ The world tells you what things are; text is the last resort.
 ## How it gets built
 
 - **The city fabric** (the thousands of buildings) is static, instanced meshes with box colliders, under the city's hard-light shields (hits flash and bounce): a 1.6 M-cell voxel city would blow the budgets. Everything you play with is voxel and destructible: the merchant houses, drydocks, targets, exhibits, hulks, the arena stands, every ship.
+- **The hole (D):** the existing gravity-well system with a 1/r² pull and a kill radius at the horizon (you respawn at Harbour Control); the flares are the pulse system with the mirrors as shadow casters; the new work is the black hole's look (a lensing shader, the disk, the flares).
 - **Occlusion:** a building between the camera and your ship fades to a hologram outline.
 - **Lower levels:** the city runs on down below the plane, lit, out of reach.
 - **Streaming:** fabric and traffic within 2.5 km of you are live; the rest of the skyline is a few draw calls.
 
 ## Decisions
 
-1. **Which city:** A (recommended), B or C, or a mix.
+1. **Which city:** D (recommended), A, B or C, or a mix.
 2. **The civilian ship line:** approve the class list above, then silhouettes come for approval before any 3D.
