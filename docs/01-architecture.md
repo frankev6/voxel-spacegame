@@ -420,7 +420,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `ZoneSchedule` | `ZoneSystem` (the clock and zone actions) | Read |
 | `MechanismAction` records | `MechanismSystem` (authority, ADR-0119) | Each action's owner applies it: `MoverSystem`, `ZoneSystem`, `MineSystem`, AI targeting, the portal applier |
 | `TargetOverride` | AI targeting, from `TargetPolicy` actions | Read by turret targeting |
-| Ship energy from `EnergyGrantRequest` | `StatusChannels.EnergyGrants` consumer (none until HAZ-019; `StatusSystem` discards) | Post requests |
+| Ship energy from `EnergyGrantRequest` | `PowerAllocationSystem` (HAZ-019: adds each grant to `ShipPower.Stored`, capped, before allocating) | `PickupSystem` (authority) posts requests |
 | `ShipStatModifier`, `Inhibited` | `StatusSystem` (SPEC-22) from the `StatModifierRequest` / `InhibitRequest` channels (ADR-0016) | Post requests |
 | `PropulsionStats` / `WeaponStats` | `PropulsionStatsSystem` (SPEC-20) / `WeaponStatsSystem` (SPEC-21) | Read |
 | `PowerRequest` element of module m | The feature that owns m (`Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup`); `ConsumerIndex`: `PowerInitSystem` | Read by `PowerAllocationSystem` |

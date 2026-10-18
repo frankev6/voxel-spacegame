@@ -24,6 +24,9 @@ namespace Game.Editor.Content
             Mine("mine_emp", true, ("Payload", 2), ("PayloadSeconds", 3), ("BlastRadius", 30), ("BlastDamage", 0), ("BlastImpulse", 0));
             Mine("mine_seeker", false, ("SeekSpeed", 22), ("TriggerRadius", 8), ("BlastDamage", 1800), ("BlastRadius", 22), ("BlastImpulse", 600000));
             Mine("mine_gravity", true, ("Payload", 3), ("PayloadStrength", 18000), ("PayloadSeconds", 6), ("BlastRadius", 120), ("BlastDamage", 0), ("BlastImpulse", 0));
+            CanisterBlock();
+            AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
+            CanisterBlueprint();
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built the hazard content (ADR-0119).");
         }
@@ -81,6 +84,45 @@ namespace Game.Editor.Content
             var modules = so.FindProperty("modules"); modules.arraySize = 1;
             modules.GetArrayElementAtIndex(0).managedReferenceValue = new Game.Data.Blocks.SwitchModule { Params = new Game.Data.Blocks.SwitchParams { TriggerDamage = 1 } };
             so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
+        }
+
+        /// <summary>HAZ-019 (ADR-0119 decision 7): the energy canister block, built from the small capacitor. Flying within 5 m of it
+        /// grants 60 energy (four speed boosts); two plasma bolts break it and its charge goes off.</summary>
+        static void CanisterBlock()
+        {
+            const string Blocks = "Assets/Game/Content/Blocks/", path = Blocks + "block_canister.asset";
+            if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset(Blocks + "block_capacitor_small.asset", path))
+                throw new System.InvalidOperationException("copy block_capacitor_small");
+            var asset = AssetDatabase.LoadMainAssetAtPath(path); var so = new SerializedObject(asset);
+            so.FindProperty("id").stringValue = "block_canister"; so.FindProperty("displayName").stringValue = "Energy Canister";
+            so.FindProperty("description").stringValue = "A charged energy cell. Fly through it to top up your power; shoot it and it blows.";
+            so.FindProperty("formerIds").arraySize = 0; so.FindProperty("cellHp").floatValue = 60; so.FindProperty("functionHp").floatValue = 100;
+            so.FindProperty("tradeable").boolValue = false; so.FindProperty("basePrice").intValue = 0;
+            var modules = so.FindProperty("modules"); modules.arraySize = 2;
+            modules.GetArrayElementAtIndex(0).managedReferenceValue = new Game.Data.Blocks.PickupModule { Params = new Game.Data.Blocks.PickupParams { Energy = 60, Reach = 5 } };
+            modules.GetArrayElementAtIndex(1).managedReferenceValue = new Game.Data.Blocks.ExplosiveModule { Params = new Game.Data.Blocks.ExplosiveParams { BlastRadiusCells = 6, BlastDamage = 500 } };
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
+        }
+
+        /// <summary>HAZ-019: ship_device_canister, the canister block alone at 1 m cells (2 × 2 × 1 m).</summary>
+        static void CanisterBlueprint()
+        {
+            using var service = new Game.Data.Services.ContentService(ContentDatabaseBuilder.Rebuild());
+            var catalog = service.Catalog; var content = new Game.Voxel.Model.VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
+            ushort block = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_canister")));
+            using var structure = new Game.Voxel.Model.VoxelStructure(1f);
+            if (structure.TryPlaceBlock(new Game.Voxel.Model.BlockPlacement { Block = block, Origin = default, Color = 6 }, content) != Game.Voxel.Model.PlaceResult.Ok)
+                throw new System.InvalidOperationException("place block_canister");
+            const string bpPath = "Assets/Game/Content/Ships/ship_device_canister.asset";
+            var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(bpPath);
+            if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, bpPath); }
+            var so = new SerializedObject(blueprint);
+            so.FindProperty("id").stringValue = "ship_device_canister"; so.FindProperty("displayName").stringValue = "ENERGY CANISTER";
+            so.FindProperty("cellSize").floatValue = 1f; so.ApplyModifiedPropertiesWithoutUndo();
+            structure.TryGetCellBounds(out var min, out var max);
+            blueprint.EditorSetPayload(Game.Voxel.Model.VoxelStructureCodec.Encode(structure, Game.Voxel.Data.VoxsBlockNames.FromCatalog(catalog), Game.Voxel.Data.VoxsEncodeOptions.ForAsset),
+                structure.SolidCellCount, new Vector3Int(min.x, min.y, min.z), new Vector3Int(max.x, max.y, max.z));
+            EditorUtility.SetDirty(blueprint);
         }
     }
 }

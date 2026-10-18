@@ -89,6 +89,18 @@ namespace Game.Simulation.Hazards
             return root;
         }
 
+        /// <summary>HAZ-019: requests one energy canister (a kinematic device of one Pickup + Explosive block) at p.</summary>
+        public static Entity Canister(EntityManager em, ShipBlueprintDefinition blueprint, float2 p, float yaw, ushort group, ulong persistentId)
+        {
+            var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
+            {
+                PersistentId = persistentId, Pose = new RigidTransform(quaternion.RotateY(yaw), new float3(p.x, 0, p.y)),
+                Kind = Game.Voxel.Model.GridKind.Device, Motion = Game.Voxel.Model.GridMotion.Kinematic, Profile = Game.Voxel.Model.GridProfile.Dummy
+            });
+            em.AddComponentData(root, new Canister { Group = group, Instance = -1 });
+            return root;
+        }
+
         /// <summary>Destroys the zones and devices of a group.</summary>
         public static void DespawnGroup(EntityManager em, ushort group)
         {
@@ -100,6 +112,13 @@ namespace Game.Simulation.Hazards
                 foreach (var e in mines)
                 {
                     if (em.GetComponentData<MineFuse>(e).Group != group) continue;
+                    if (em.HasComponent<Game.Voxel.Model.GridDespawnRequest>(e)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, e); else em.DestroyEntity(e);
+                }
+            using (var query = em.CreateEntityQuery(typeof(Canister)))
+            using (var canisters = query.ToEntityArray(Unity.Collections.Allocator.Temp))
+                foreach (var e in canisters)
+                {
+                    if (em.GetComponentData<Canister>(e).Group != group) continue;
                     if (em.HasComponent<Game.Voxel.Model.GridDespawnRequest>(e)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, e); else em.DestroyEntity(e);
                 }
         }

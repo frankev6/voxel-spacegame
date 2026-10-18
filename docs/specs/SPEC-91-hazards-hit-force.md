@@ -684,9 +684,10 @@ Why the rows sit below the first targets:
   - Add `device_canister`, carrying an `Explosive` block so a shot sets it off.
 - **Files:** `Assets/Game/Simulation/Hazards/PickupSystem.cs`; `Assets/Game/Simulation/Power/PowerAllocationSystem.cs`; content.
 - **Acceptance criteria:**
-  - [ ] Flying through a canister raises stored energy by its amount, once.
-  - [ ] Shooting one explodes it.
+  - [x] Flying through a canister raises stored energy by its amount, once.
+  - [x] Shooting one explodes it.
 - **Tests:** `CanisterTests.Pickup_GrantsOnce`, `.Shot_Explodes`.
+- **Done (2026-10-17):** `PickupSystem` (authority) grants a canister to the nearest ship whose bounding sphere comes within its reach (ties by `Entity.Index`) and despawns it; `PowerAllocationSystem` adds the grant to `ShipPower.Stored`, capped, before allocating. `block_canister` (from the small capacitor: `Pickup` 60 energy over 5 m, `Explosive` 500 over 6 cells) in `ship_device_canister`, spawned kinematic by `HazardSpawn.Canister`. A fighter flying through gains 60.7 (with a tick of generation) once; two plasma bolts break one and its blast takes cells off a slab 3 m away. The look is the capacitor's for now.
 
 ### HAZ-020 — Gauntlet turrets
 - **Milestone:** M4
