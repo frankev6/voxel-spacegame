@@ -488,8 +488,8 @@ Advisory (ADR-0042):
 | 2 | When a racer is destroyed, is it a 3 s respawn at the last gate, with its hulk left as an obstacle? | Yes (decision 7) | Owner |
 | 3 | Are all weapons live in races, or only the racers' own? | Racers' own loadouts only; other ships cannot join a race | Owner |
 | 4 | Laps and player count? | 3 laps, 2–4 pilots | Owner |
-| 5 | AI racers to fill the grid? | Not now | Owner |
-| 6 | Track name and racer names? | Labels `track_01`, Dart and Ram until the owner names them | Owner |
+| 5 | AI racers to fill the grid? | Not now | Owner. **Superseded 2026-10-17:** the owner asked for AI racers (RACE-017) |
+| 6 | Track name and racer names? | Labels `track_01`, Dart and Ram until the owner names them | Owner. **Answered 2026-10-17:** the track is **Battle Graveyard**; the racer lines keep Dart and Ram |
 | 7 | Where is the track in the world? | Playground, 1,500 m south of the pads (decision 10) | Owner |
 | 8 | Should ramming a rival count as a legal move? | Yes; rams already deal damage both ways | Owner |
 

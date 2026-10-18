@@ -690,7 +690,7 @@ With `carryDecel = 8 m/s²`, a 5 m/s shove plays out over about 0.6 s, and a 40 
 ## 10. Open questions
 | # | Question | Default if unanswered | Decider |
 |---|---|---|---|
-| 1 | Are the §8 feel targets the right strength? | As written; tune in HAZ-005 and adjust after the owner flies it | Owner |
+| 1 | Are the §8 feel targets the right strength? | As written; tune in HAZ-005 and adjust after the owner flies it | Owner. **Answered 2026-10-17:** the owner flew it: "feels right" |
 | 2 | Should knocked ships drift (carry), or snap back under assist? | Carry, decaying at 8 m/s² | Owner |
 | 3 | Who sets off a mine: any ship after arming, or only hostiles to whoever laid it? | Any ship (decision 8); hostile-only is a per-mine filter | Owner |
 | 4 | Are mines visible? | Yes: blinking light when armed, radar marker within 300 m | Owner |

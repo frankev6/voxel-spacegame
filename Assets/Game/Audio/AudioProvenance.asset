@@ -14,137 +14,137 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Editor::Game.Editor.Audio.AudioProvenanceTable
   entries:
   - clip: {fileID: 8300000, guid: 6018603c4e4093f4d9b64b192396f362, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: c76691d2db334db4493227c5c3efe8ac, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 9223dd0675dbd5746935bcf0e383fd8d, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: a77649c4049e92d41a8e57c3f8478f66, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 2
-    note: AI-generated-looking / unknown origin, awaiting owner (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 778c28874465c334aaef62e1bf52b56c, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 2
-    note: AI-generated-looking / unknown origin, awaiting owner (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 04f0e5a8cbde6744bb2c524ca0fb832a, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 0e821dd27320b2d4ab9589a0f85718ed, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: e8d03ea372f66014ca52886ce83c7691, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 52234431db73df649b50a89875be863e, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: fd7e1cb2f44d86443b6215a01bea0e3f, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 1a6b13551699a3b4da2058b6af1e495b, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 24ef121871b080342a5a1735ea9be720, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 564f13e1bd2d7d143ab887dd120f1760, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: f61a886e237ba8747bc32780fb5b8a0a, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 2709695e6ba319b4a93f0cdf4ae3064c, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 0e3b9742f3331f3478b7df0d7c0da8b1, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: fd2daab841acc5f45bdadfe794b3d157, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: a7e262ca1dcf3ed449f0098a3b8e00d0, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: fdc7f2ede5112fe46b8ab1e7165cdac2, type: 3}
-    source: carried over from the prototype
-    licence: unknown
-    status: 0
-    note: Awaiting owner licence confirmation (AUD-011)
+    source: carried over from the prototype; purchased by the owner
+    licence: commercial licence (owner purchase)
+    status: 1
+    note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
   - clip: {fileID: 8300000, guid: 0894c4b46da6c40f9ac94903bd3179a1, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: 416a96a847a034e8d833bdfc5f632182, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: a25e6c623a74548e9b9a6b276aaae0b1, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: 3b4140ad3d513466488ffa5fc971b354, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: bff18a7142ef74f1181d73f572deddf8, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: f32241bd7be694eae8638b517cd45cab, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: 1dde6b9e711bc47f09e8a642335c1f31, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open
   - clip: {fileID: 8300000, guid: 769486934bbff475395407c905289a78, type: 3}
     source: procedural, ArtSource/Audio/ui_sounds.py (QA-001)
     licence: own work
-    status: 0
-    note: Generated 2026-10-14 by deterministic script, no samples or AI model; awaiting owner review of the sound
+    status: 1
+    note: Generated 2026-10-14 by deterministic script, no samples or AI model; licence own work (AUD-011); owner review of the sound still open

@@ -35,6 +35,12 @@ namespace Game.Tests.EditMode.Presentation.Audio
             foreach (var cue in AudioReleaseBuildCheck.FindCues())
                 foreach (var clip in cue.Clips) Assert.IsFalse(blocked.Contains(clip), cue.name + " references blocked " + clip.name);
         }
+        // AUD-011: the owner ruled on every clip (2026-10-17), so a new Unverified row means an unreviewed clip slipped in.
+        [Test, Category("Gate")] public void NoUnverifiedRows()
+        {
+            foreach (var entry in Table().entries)
+                Assert.AreNotEqual(ProvenanceStatus.Unverified, entry.status, (entry.clip ? entry.clip.name : "missing clip") + " is still Unverified");
+        }
         [Test] public void ReleaseCheck_FailsOnUnverified()
         {
             var table = ScriptableObject.CreateInstance<AudioProvenanceTable>();
