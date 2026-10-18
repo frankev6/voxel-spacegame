@@ -294,6 +294,7 @@ assert ecs.count("Brick") > 0 "voxels present"
 | `newgame` | `seed` (ulong, required), `ship` (start scenario id, default `ContentId.None` = SPEC-01 default), `intro` (false), `profile` (`harness`) | Edit mode (CLI wrapper only): open `Assets/Game/Scenes/Boot.unity`, enter play mode, wait for the host. Then select the save profile (`SaveService.ListProfiles()` entry whose display name is `profile`, else `CreateProfile(profile)`; `SetActiveProfile(id)`), set `GameRootTestHooks.SkipIntroScreens = !intro` for the next boot only when the CLI wrapper started play mode, and call `IGameFlow.NewGameAsync(new NewGameArgs("Harness", seed, false, ship))` (SPEC-02 §4.8). Done when `player.ready` (or context `Dialog` when `intro=true`). Timeout 60 s | Pending → `in world: seed S, player id P` |
 | `sandbox` | `player` (true), `seed` (1) | `SceneFlow.EnterSandboxAsync(new SandboxArgs(player, seed))` (SPEC-01 §4.3). Done when `GameplayActive` exists (and `player.ready` when `player=true`). Timeout 30 s | Pending |
 | `teleport` | `x`,`z` (local) or `sx`,`sz` (star-system metres; converted with `FrameOrigin`) or `near` (body query) + `offset` (40), `yaw` (degrees, keep current) | `DevEcs.TeleportRoot` (§5.4). `near`: body via `DevBodyQuery.TryFind` (§6.4); target = body centre − (0, 0, surfaceRadius + offset) | Ok: new local and universe position |
+| `probe` | `x`,`z` (required); `x2`,`z2` (a line); `find` with `radius` (200), `clear` (30), `count` (5), `routes` (Hollow traffic routes, metres), `roof`; `reach` (8, ship radius; 0 = off), `step` (10), `hollow` (Hollow coordinates), `ships` (count ships, hulks and devices; off) | Reads the physics world on the main thread (`DevProbe`, DEV-024): point distance for clearance, vertical rays for floor and roof, a ray for the line, a clearance grid and a 4-connected flood from the player for reachability. Writes nothing | Ok: the point's clearance, nearest body, floor, roof and reachability; the line's first blocker; or the best spots, one per clearing |
 | `spawn` | `blueprint` (required), `x`,`z` or `dx`,`dz` (relative to player; default dz=80), `yaw` or `face=player`, `faction` (id), `team` (1), `count` (1), `spacing` (60), `ai` (true) | One `ShipSpawnService.Spawn` per ship, placed along +X by `spacing`. Done when every requested `PersistentId` has a grid root. Timeout 10 s | Pending → `spawned N: ids …` |
 | `aim` | `target` = `nearest_hostile` (default) \| `nearest` \| `id:<PersistentId>` \| `point` with `x`,`z`; `track` (0 s) | Projects the target with `GameplayCamera.WorldToScreenPoint`, moves the AgentMouse; with `track > 0` an operation re-aims every frame. Hostile = `Allegiance.Team` differs from the player's | Ok or Pending |
 | `fire` | `group` (1..3, default 1), `seconds` (0.5) | Presses the first bound control of action `Flight/FirePrimary` (1), `Flight/FireSecondary` (2) or `Flight/FireTertiary` (3) (SPEC-03 §4.2) through `DevInputInjector` for `seconds` | Pending |
@@ -661,6 +662,18 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [ ] The owner chooses a layout and approves the civilian ship classes.
   - [ ] Built: the spawn outside the wall, the nine quarters, real AI traffic, the one reset.
 - **Tests:** to be named with the build.
+
+### DEV-024 — `probe`: asking the colliders where things fit
+- **Milestone:** M4
+- **Tier:** standard — a read-only dev command
+- **Depends on:** `DEV-023`
+- **Do:** Owner (2026-10-18): "is there any tools to make your life easier when making big things like we just made this asteroid". Placing the Hollow's race portal took four rounds of exporting voxel occupancy into Blender's Python. `probe` asks the live physics world: clearance and the nearest body at a point, floor and roof, the first thing on a line, whether the player's ship can fly there, and `find` for the clearest reachable spots that meet conditions (clear radius, distance from the Hollow's traffic routes, under a roof).
+- **Files:** `Assets/Game/App/DevRuntime/DevProbe.cs`, `Commands/ProbeDevCommand.cs`.
+- **Acceptance criteria:**
+  - [x] Point, line and find modes in local or Hollow coordinates; moving ships ignored unless asked for.
+  - [x] Reachability by a flood over the flight plane from the player's ship.
+  - [x] Answers in under a second over the Hollow (600 m radius find at 10–20 m steps: 0.4–0.6 s in the Editor).
+- **Tests:** `DevProbeTests.Clearance_Ray_AndShipsIgnored`, `DevProbeTests.Flood_StopsAtWalls_PassesGaps`.
 
 ## 10. Open questions
 
