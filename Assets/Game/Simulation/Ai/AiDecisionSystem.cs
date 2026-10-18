@@ -11,6 +11,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using Unity.Physics;
 
 namespace Game.Simulation.Ai
 {
@@ -33,6 +34,8 @@ namespace Game.Simulation.Ai
         ComponentLookup<FleetMember> members;
         ComponentLookup<Game.Simulation.Mechanisms.TargetOverride> overrides;
         NativeHashMap<Entity, FleetLeaderDecision> leaders;
+        ComponentLookup<Allegiance> allegiances;
+        CollisionWorld noCollision;   // stands in for the physics world where there is none (decision tests); never cast against
         internal int SphereQueryCount => overflow[2];
 
         [BurstCompile]
@@ -56,6 +59,8 @@ namespace Game.Simulation.Ai
             members = state.GetComponentLookup<FleetMember>(true);
             overrides = state.GetComponentLookup<Game.Simulation.Mechanisms.TargetOverride>(true);
             leaders = new NativeHashMap<Entity, FleetLeaderDecision>(128, Allocator.Persistent);
+            allegiances = state.GetComponentLookup<Allegiance>(true);
+            noCollision = new CollisionWorld(0, 0);
         }
 
         [BurstCompile]
@@ -64,6 +69,7 @@ namespace Game.Simulation.Ai
             state.Dependency.Complete();
             if (overflow.IsCreated) overflow.Dispose();
             if (leaders.IsCreated) leaders.Dispose();
+            noCollision.Dispose();
         }
 
         [BurstCompile]
@@ -72,7 +78,8 @@ namespace Game.Simulation.Ai
             entities.Update(ref state); hulks.Update(ref state); spawning.Update(ref state);
             dormant.Update(ref state); shipStats.Update(ref state); weaponStats.Update(ref state);
             shields.Update(ref state); shieldControls.Update(ref state); abilities.Update(ref state);
-            members.Update(ref state); overrides.Update(ref state);
+            members.Update(ref state); overrides.Update(ref state); allegiances.Update(ref state);
+            bool physics = SystemAPI.TryGetSingleton<PhysicsWorldSingleton>(out var world);
             var hash = SystemAPI.GetSingleton<SpatialHash>();
             var think = new AiThinkJob
             {
@@ -81,7 +88,8 @@ namespace Game.Simulation.Ai
                 Entities = entities, Hulks = hulks, Spawning = spawning, Dormant = dormant,
                 ShipStats = shipStats, WeaponStats = weaponStats, Shields = shields,
                 ShieldControls = shieldControls, Abilities = abilities, Overflow = overflow,
-                Members = members, Leaders = leaders, MemberPass = 0, Overrides = overrides,
+                Members = members, Leaders = leaders, MemberPass = 0, Overrides = overrides, Allegiances = allegiances,
+                Collision = physics ? world.CollisionWorld : noCollision, HasCollision = (byte)(physics ? 1 : 0),
             };
             var handle = think.ScheduleParallel(hash.BeginRead(state.Dependency));
             handle = new ClearFleetLeaders { Leaders = leaders }.Schedule(handle);

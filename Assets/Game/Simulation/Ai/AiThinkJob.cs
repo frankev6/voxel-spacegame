@@ -9,12 +9,14 @@ using Game.Simulation.Spatial;
 using Game.Simulation.Weapons;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
+using Game.Voxel.PhysicsBody;
 using Game.Voxel.Rendering;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
 
 namespace Game.Simulation.Ai
@@ -37,6 +39,10 @@ namespace Game.Simulation.Ai
         [ReadOnly] public BufferLookup<AbilitySlot> Abilities;
         [ReadOnly] public ComponentLookup<FleetMember> Members;
         [ReadOnly] public ComponentLookup<Game.Simulation.Mechanisms.TargetOverride> Overrides;
+        [ReadOnly] public ComponentLookup<Allegiance> Allegiances;
+        // Grid colliders for the line-of-fire check (§5.4 step 9). HasCollision = 0: no physics world (tests), nothing obstructs.
+        [ReadOnly] public CollisionWorld Collision;
+        public byte HasCollision;
         [ReadOnly] internal NativeHashMap<Entity, FleetLeaderDecision> Leaders;
         public byte MemberPass;
         // Only atomic telemetry writes cross roots. Neither counter nor warning order affects decisions.
@@ -79,8 +85,8 @@ namespace Game.Simulation.Ai
                 brain.State = leaderDecision.State;
                 SetAbilities(ref brain, ref profile, entity, hull, target.Value != Entity.Null);
                 int targetIndex = Hash.FindIndex(target.Value);
-                brain.FireBlocked = (byte)(profile.AvoidFriendlyFire != 0 && targetIndex >= 0
-                    && FriendlyFire(entity, target.Value, allegiance, pose.Position, Hash.Get(targetIndex).Center) ? 1 : 0);
+                brain.FireBlocked = FireBlock(ref profile, entity, target.Value, allegiance, pose.Position, center, ownRadius,
+                    targetIndex, brain.State == AiState.Engage);
                 control = new WeaponControl { Autofire = (byte)(brain.State == AiState.Engage
                     && targetIndex >= 0 && brain.FireBlocked == 0 ? 1 : 0), AimMode = WeaponAimMode.TargetLead };
                 return;
@@ -133,8 +139,8 @@ namespace Game.Simulation.Ai
             if (brain.State != AiState.Idle && brain.State != AiState.Hold)
                 Avoid(ref brain, entity, target.Value, pose.Position, ownRadius);
             SetAbilities(ref brain, ref profile, entity, hull, target.Value != Entity.Null);
-            brain.FireBlocked = (byte)(profile.AvoidFriendlyFire != 0 && selected >= 0
-                && FriendlyFire(entity, target.Value, allegiance, pose.Position, Hash.Get(selected).Center) ? 1 : 0);
+            brain.FireBlocked = FireBlock(ref profile, entity, target.Value, allegiance, pose.Position, center, ownRadius,
+                selected, brain.State == AiState.Engage || brain.State == AiState.Hold);
             control = new WeaponControl
             {
                 Autofire = (byte)((brain.State == AiState.Engage || brain.State == AiState.Hold)
@@ -223,6 +229,62 @@ namespace Game.Simulation.Ai
                 if (!Crosses(position, brain.GoalPosition, proxy.Center, clearance)) continue;
                 brain.GoalPosition += side * (math.dot(proxy.Center - position, side) > 0 ? -clearance : clearance);
                 break;
+            }
+        }
+
+        /// <summary>Why autofire is held for the target at `targetIndex` (§5.4 step 9): 1 = an ally is in the line of fire,
+        /// 2 = rock or a structure is (checked only when the brain would otherwise fire), 0 = clear.</summary>
+        byte FireBlock(ref AiProfile profile, Entity self, Entity target, in Allegiance allegiance, float3 position, float3 center,
+            float ownRadius, int targetIndex, bool firing)
+        {
+            if (targetIndex < 0) return 0;
+            float3 destination = Hash.Get(targetIndex).Center;
+            if (profile.AvoidFriendlyFire != 0 && FriendlyFire(self, target, allegiance, position, destination)) return 1;
+            return (byte)(firing && Obstructed(self, target, allegiance, center, destination, ownRadius) ? 2 : 0);
+        }
+
+        /// <summary>One ray from the gunner's centre to the target's against grid and celestial colliders (what shots hit): true when
+        /// something other than the gunner, the target or a live hostile is met before the target. Hits within the gunner's own hull
+        /// radius are ignored: a gun set into rock starts its ray inside it, and its barrels reach past its centre.</summary>
+        bool Obstructed(Entity self, Entity target, in Allegiance allegiance, float3 start, float3 end, float ownRadius)
+        {
+            if (HasCollision == 0) return false;
+            float length = math.distance(start, end);
+            if (length <= ownRadius) return false;
+            var collector = new LineOfFireCollector
+            {
+                Self = self, Target = target, Allegiance = allegiance, MinFraction = ownRadius / length,
+                Entities = Entities, Hulks = Hulks, Allegiances = Allegiances, Relations = Relations,
+                MaxFraction = 1, TargetFraction = 2, BlockerFraction = 2,
+            };
+            Collision.CastRay(new RaycastInput { Start = start, End = end, Filter = PhysicsLayers.ProjectileQuery }, ref collector);
+            return collector.BlockerFraction < collector.TargetFraction;
+        }
+
+        /// <summary>The nearest target hit and the nearest blocking hit along a line of fire (order-independent, so deterministic).</summary>
+        struct LineOfFireCollector : ICollector<RaycastHit>
+        {
+            public Entity Self, Target;
+            public Allegiance Allegiance;
+            public float MinFraction, TargetFraction, BlockerFraction;
+            [ReadOnly] public EntityStorageInfoLookup Entities;
+            [ReadOnly] public ComponentLookup<Hulk> Hulks;
+            [ReadOnly] public ComponentLookup<Allegiance> Allegiances;
+            [ReadOnly] public FactionRelations Relations;
+            public bool EarlyOutOnFirstHit => false;
+            public float MaxFraction { get; set; }
+            public int NumHits { get; private set; }
+
+            public bool AddHit(RaycastHit hit)
+            {
+                if (hit.Entity == Self || hit.Fraction < MinFraction || hit.Fraction > MaxFraction || !Entities.Exists(hit.Entity)) return false;
+                if (hit.Entity == Target) TargetFraction = math.min(TargetFraction, hit.Fraction);
+                // a live hostile in the way still takes the shot; anything else (rock, a wreck, a neutral or allied hull, a planet) stops it
+                else if (!Hulks.HasComponent(hit.Entity) && Allegiances.HasComponent(hit.Entity)
+                    && Relations.IsHostile(Allegiance, Allegiances[hit.Entity])) return false;
+                else BlockerFraction = math.min(BlockerFraction, hit.Fraction);
+                MaxFraction = hit.Fraction; NumHits++;
+                return true;
             }
         }
 
