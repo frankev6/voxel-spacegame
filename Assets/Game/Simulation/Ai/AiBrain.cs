@@ -8,7 +8,7 @@ namespace Game.Simulation.Ai
     {
         public AiState State;
         public sbyte OrbitSign;          // +1 or −1
-        public byte FireBlocked;         // 1 = an ally is in the line of fire (autofire suspended)
+        public byte FireBlocked;         // autofire suspended: 1 = an ally is in the line of fire, 2 = rock or a structure is (§5.4 step 7)
         public byte Initialized;         // 0 = zeroed by profile conversion; AiAnchorShiftSystem completes it (§5.3 step 0)
         public byte AbilityEdges;        // bits 0..3 = Ability1..4 chosen on the last think (§5.4 step 8)
         public AiState PreviousState;    // state before the last think (EngageStart trigger)

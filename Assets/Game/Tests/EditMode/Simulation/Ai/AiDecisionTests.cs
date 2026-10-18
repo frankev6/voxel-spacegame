@@ -16,7 +16,10 @@ using NUnit.Framework;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Physics;
 using Unity.Transforms;
+using BoxCollider = Unity.Physics.BoxCollider;
+using Collider = Unity.Physics.Collider;
 
 namespace Game.Tests.EditMode.Simulation.Ai
 {
@@ -161,6 +164,27 @@ namespace Game.Tests.EditMode.Simulation.Ai
             Assert.AreEqual(0, f.Brain(ship).FireBlocked, "An ally beyond the target does not block.");
         }
 
+        // The Hollow's outer turrets picked a player in the tunnels and fired into the rock: a gunner holds fire while rock or a
+        // structure is between it and its target, but keeps the target, and fires once the line clears.
+        [Test] public void LineOfFire_RockBlocksTurret()
+        {
+            using var f = new Fixture(AiRole.Turret); var turret = f.Ship();
+            var enemy = f.Enemy(new float3(0, 0, 100));
+            var rock = f.Grid(new float3(0, 0, 50), 255, GridKind.Asteroid); f.Em.AddComponent<SpatialScenery>(rock);
+            var mount = f.Em.CreateEntity();   // the rock the turret is set into: its ray starts inside it
+            f.Colliders((rock, new float3(0, 0, 50), new float3(40, 40, 4)), (mount, float3.zero, new float3(2)));
+            f.Step(10); Assert.AreEqual(AiState.Hold, f.Brain(turret).State); Assert.AreEqual(enemy, f.Target(turret).Value);
+            Assert.AreEqual(2, f.Brain(turret).FireBlocked); Assert.AreEqual(0, f.Control(turret).Autofire);
+            var other = f.Enemy(new float3(0, 0, 50));   // a hostile hull in the way still takes the shot
+            f.Colliders((other, new float3(0, 0, 50), new float3(4)), (mount, float3.zero, new float3(2)));
+            f.Step(20); Assert.AreEqual(enemy, f.Target(turret).Value);
+            Assert.AreEqual(0, f.Brain(turret).FireBlocked); Assert.AreEqual(1, f.Control(turret).Autofire);
+            f.Em.DestroyEntity(other);
+            f.Colliders((rock, new float3(0, 0, 150), new float3(40, 40, 4)), (mount, float3.zero, new float3(2)));
+            f.Step(30); Assert.AreEqual(0, f.Brain(turret).FireBlocked, "Rock beyond the target does not block.");
+            Assert.AreEqual(1, f.Control(turret).Autofire);
+        }
+
         [Test] public void Avoidance_ShiftsGoal()
         {
             using var f = new Fixture(); var ship = f.Ship();
@@ -228,7 +252,32 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 using var query = Em.CreateEntityQuery(ComponentType.ReadOnly<SpatialHash>());
                 query.GetSingleton<SpatialHash>().CompleteAccess();
             }
-            public void Dispose() { Em.CompleteAllTrackedJobs(); world.Dispose(); profiles.Dispose(); factions.Dispose(); }
+            PhysicsWorld physics; bool hasPhysics;
+            readonly System.Collections.Generic.List<BlobAssetReference<Collider>> boxes = new();
+            /// <summary>Replaces the physics world with static boxes (entity, centre, size) on the grid layer.</summary>
+            public void Colliders(params (Entity entity, float3 center, float3 size)[] bodies)
+            {
+                Em.CompleteAllTrackedJobs();
+                if (hasPhysics) physics.Dispose();
+                physics = new PhysicsWorld(bodies.Length, 0, 0); hasPhysics = true;
+                var statics = physics.StaticBodies;
+                for (int i = 0; i < bodies.Length; i++)
+                {
+                    var box = BoxCollider.Create(new BoxGeometry { Size = bodies[i].size, Orientation = quaternion.identity }, Game.Voxel.PhysicsBody.PhysicsLayers.Grid);
+                    boxes.Add(box);
+                    statics[i] = new RigidBody { Entity = bodies[i].entity, Collider = box, WorldFromBody = new RigidTransform(quaternion.identity, bodies[i].center), Scale = 1 };
+                }
+                physics.CollisionWorld.BuildBroadphase(ref physics, 1f / 60, float3.zero);
+                using var query = Em.CreateEntityQuery(ComponentType.ReadWrite<PhysicsWorldSingleton>());
+                if (query.IsEmpty) Em.CreateSingleton(new PhysicsWorldSingleton { PhysicsWorld = physics });
+                else query.SetSingleton(new PhysicsWorldSingleton { PhysicsWorld = physics });
+            }
+            public void Dispose()
+            {
+                Em.CompleteAllTrackedJobs(); world.Dispose(); profiles.Dispose(); factions.Dispose();
+                if (hasPhysics) physics.Dispose();
+                foreach (var box in boxes) box.Dispose();
+            }
         }
             // QA-001: fights happen on screen and enemies stop backing away from a player who closes in.
         [Test]

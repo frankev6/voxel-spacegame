@@ -1288,6 +1288,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-18 — AI holds fire when rock or a structure blocks the line to its target (claude-opus-5-5)
+- Owner, watching the Hollow: "the turrets from the outside started shooting inside the asteroid". Since `SpatialScenery` the shots stopped at the rock, but the turrets still fired into it.
+- SPEC-23 §5.4 step 7 (amended): when a brain would fire, `AiThinkJob` casts one ray from its centre to its target against the grid and celestial colliders (`PhysicsLayers.ProjectileQuery`). Anything other than itself, the target or a live hostile hit before the target sets `FireBlocked = 2` and holds autofire. The target is kept. Hits within the gunner's own hull radius are ignored (guns set into rock). The check runs only on think ticks, only for the selected target, and fleet followers use it too. With no physics world, nothing blocks.
+- Test `AiDecisionTests.LineOfFire_RockBlocksTurret`. AI EditMode tests: 38 passed.
+- Live check in the playground at the Market with the Clan at −60: 20 Clan AIs target the player and none fire (15 rock-blocked, 5 ally-blocked). Outside the rock at hollow@1300,−700, 5 with a clear line fire and the ones behind rock hold. No errors in the log.
+
 ### 2026-10-18 — DEV-023 option E after playtests: rock, light, holograms, wayfinding, natural tunnels, the WRAITH refit (lead, claude-opus-5-5)
 - Owner, across several playtests: "the texture of the asteroid should be rock not the ship hull texture", "inside the asteroid the source of light seems to still be the sun", "lack of atmosphere", "most ships are just colliding everywhere", "arrival ships are all going crazy", "text floating", "we have to improve the wraith's engines and controls", "lights from the outside of the asteroid is showing in front of the camera", then "bring back the detail, and make the rocks a bit colored and darker ... make them look blocky and voxely", "the tunnels should be tunneled less linear and more naturally ... a tunnel that doesn't reach its destination", "lights can be different colors than just boring white, also add interesting 2d and 3d holograms ... guide players instead of saying 'THE MARKET'", "wtf is all the dots".
 - **Rock:** a new brick layer style 6 (`RockSurface.hlsl`, `NocturneBrickLook.BakeRock`, `block_rock*`): decided per voxel cell, minerals in several colours and strata, crater fields stepped into terraces with lit and shadowed step edges, a 1 m grain.
