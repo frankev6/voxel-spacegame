@@ -19,6 +19,8 @@ namespace Game.Simulation.Mechanisms
         public float Yaw;           // Rotate, Drift: yaw at StartTick
         public float3 Velocity;     // Drift: m/s
         public byte PingPong;       // Rail: 1 = back and forth along the points, 0 = a closed loop
+        // HAZ-014 addition
+        public uint PausedTick;     // tick a MoverPlay action paused it at (it holds that pose); 0 = not paused
     }
 
     /// <summary>Rail and Toggle points, local frame (shifted with origin rebases).</summary>

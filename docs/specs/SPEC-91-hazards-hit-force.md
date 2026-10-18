@@ -229,6 +229,16 @@ public struct PortalTransit { public Entity Body; public ulong From, To; public 
 public struct TargetOverride : IComponentData { public Entity Target; public byte Policy; }   // on a turret group root (0 none, 1 leader, 2 fixed)
 public struct EnergyGrantRequest { public Entity Ship; public float Energy; public ProducerKind Producer; public uint Sequence; }  // SPEC-22 channel
 
+// HAZ-014: placed mechanisms and the action channel (Game.Simulation.Mechanisms)
+public struct Mechanism : IComponentData { public ushort Group; }   // + buffers MechanismRule { Kind, Group, Value, Offset, ActionStart, ActionCount }
+                                                                    //   and MechanismRuleAction { Kind, Group, Value, DelayTicks } (HazardSpawn.Mechanism)
+public struct MechanismGroup : IComponentData { public ushort Group; }   // on roots whose Switch blocks and instances fire this group's triggers
+public struct MechanismActions : IComponentData { public NativeList<MechanismAction> Current; public uint Tick; }   // writer: MechanismSystem
+public struct RaceLapSignal : IComponentData { public int LeaderLap; }   // writer: RaceSystem; read by RaceLap triggers
+// Action values (MechanismActionMath, poses stay continuous): MoverPlay Value < 0 pauses, else plays; MoverReverse Value > 0 runs backwards
+// (Toggle: to the first point), < 0 forwards (to the second), 0 flips; MoverSpeed Rotate/Drift rad/s, Rail m/s, Toggle travel s;
+// ZonePeriod Value = period s, keeping the on share. Mover gains PausedTick.
+
 // Content
 // MechanismDefinition: rules { trigger (kind, group or zone or block, value), actions[] }; placed with a group id by HazardSpawn
 ```
@@ -595,10 +605,15 @@ Why the rows sit below the first targets:
   - Implement `HazardSpawn` support for mechanism groups.
 - **Files:** `Assets/Game/Simulation/Mechanisms/MechanismSystem.cs`, `MechanismActions.cs`; `Assets/Game/Content/Blocks/block_switch.asset`; `Assets/Game/Content/Hazards/*`.
 - **Acceptance criteria:**
-  - [ ] Shooting a switch slams its door for its time, then the door reopens.
-  - [ ] A timer toggles a zone.
-  - [ ] Each action changes only state its owner writes (the role-policy test passes).
+  - [x] Shooting a switch slams its door for its time, then the door reopens.
+  - [x] A timer toggles a zone.
+  - [x] Each action changes only state its owner writes (the role-policy test passes).
 - **Tests:** `MechanismTests.Switch_SlamsDoor`, `.Timer_TogglesZone`, `.Actions_RouteToOwners`.
+- **Done (2026-10-17):**
+  - `MechanismSystem` (authority, post-physics after damage, zones and mines) reads switch hits (function HP drop ≥ `TriggerDamage`), destroyed instances, gate crossings and bounds entries from `ZoneContacts`, timers and `RaceLapSignal`. It writes due actions into `MechanismActions.Current`. `MoverSystem` and `ZoneSystem` apply them on their next update.
+  - Content: `block_switch`, `mechanism_blast_door` and `ship_track_switch`; playground pad 17 has a switch door.
+  - Tests: `MechanismTests.Switch_SlamsDoor` (PlayMode, a real plasma shot), `.Timer_TogglesZone`, `MechanismRoutingTests.Actions_RouteToOwners`, and `MechanismActionMathTests` (continuity).
+  - **Open:** the narrative `ICondition` trigger needs a managed bridge. Mine, turret, portal, spawn and narrative actions are written but have no owner yet (HAZ-018 to HAZ-022).
 
 ### HAZ-015 — Gravity wells and zone schedules
 - **Milestone:** M4
@@ -607,9 +622,10 @@ Why the rows sit below the first targets:
 - **Do:** Add the `Attract` effect (every machine) and `ZoneSchedule` gating for every kind. Add `zone_gravity_moon` content.
 - **Files:** `Assets/Game/Simulation/Hazards/ZoneJobs.cs`; `Assets/Game/Content/Hazards/zone_gravity_moon.asset`.
 - **Acceptance criteria:**
-  - [ ] A coasting ship curves into an orbit-like arc around a well.
-  - [ ] A scheduled zone is on exactly its `OnTicks` per period.
+  - [x] A coasting ship curves into an orbit-like arc around a well.
+  - [x] A scheduled zone is on exactly its `OnTicks` per period.
 - **Tests:** `GravityZoneTests.Attract_CurvesPath`, `ZoneScheduleTests.OnOff_TickExact`.
+- **Done (2026-10-17):** `ZoneSystem` skips a scheduled zone off its on ticks (`ZoneSchedule.IsOn`) and applies `Attract` as `GM / max(r, rmin)²` toward the centre. `zone_gravity_moon`: GM 720 000 m³/s², softened inside 40 m, reach 450 m (a 60 m/s circular orbit at 200 m).
 
 ### HAZ-016 — Pulses with shadows (flares and reactors)
 - **Milestone:** M4
@@ -647,10 +663,17 @@ Why the rows sit below the first targets:
   - Add three mine contents: `mine_repulsor`, `mine_emp` and `mine_seeker`.
 - **Files:** `Assets/Game/Simulation/Hazards/MineSystem.cs`; `Assets/Game/Content/Hazards/*`.
 - **Acceptance criteria:**
-  - [ ] A repulsor shoves without damage.
-  - [ ] An EMP stops thrust for its seconds while carry keeps the ship drifting.
-  - [ ] A seeker reaches a slow ship and not a fast one.
+  - [x] A repulsor shoves without damage.
+  - [x] An EMP stops thrust for its seconds while carry keeps the ship drifting.
+  - [x] A seeker reaches a slow ship and not a fast one.
 - **Tests:** `MinePayloadTests.Repulse_NoDamage`, `.Emp_InhibitsThrusters`, `.Gravity_TemporaryWell`, `.Seeker_ChasesSlowShip`.
+- **Done (2026-10-17):** every payload except None shows as a blast. Only Blast deals damage.
+  - **Repulse:** throws directly, `PayloadStrength × (1 − d/r)²` to each body's centre of mass. A blast without damage carries no push.
+  - **Emp:** inhibits every thruster of each ship in reach for `PayloadSeconds`.
+  - **Gravity:** leaves an `Attract` zone (`MineWell`, softened inside 15 m) for `PayloadSeconds`.
+  - **Seeker:** an armed seeker drifts toward the nearest ship within 8 trigger radii, at most `SeekSpeed`.
+  - Content: `mine_repulsor` (1.2 MN·s over 32 m), `mine_emp` (3 s over 30 m), `mine_seeker` (22 m/s, unanchored) and `mine_gravity` (GM 18 000 over 120 m for 6 s).
+  - `MinePayloadTests` 4/4.
 
 ### HAZ-019 — Energy canisters
 - **Milestone:** M4

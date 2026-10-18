@@ -34,12 +34,13 @@ namespace Game.Simulation.Hazards
         /// <summary>The share of a device's approach speed a field wall sends back (ships: none, the wall only stops them).</summary>
         internal const float DeviceBounce = .6f;
         Entity contactsEntity;
+        uint appliedActions;   // MechanismActions.Tick already applied (HAZ-014)
         NativeHashMap<Entity, float2> lastCom;
         EntityQuery zones, bodies;
 
         public void OnCreate(ref SystemState state)
         {
-            lastCom = new NativeHashMap<Entity, float2>(64, Allocator.Persistent);
+            lastCom = new NativeHashMap<Entity, float2>(64, Allocator.Persistent); appliedActions = uint.MaxValue;
             contactsEntity = state.EntityManager.CreateEntity(typeof(ZoneContacts));
             state.EntityManager.SetName(contactsEntity, "ZoneContacts");
             state.EntityManager.SetComponentData(contactsEntity, new ZoneContacts { Current = new NativeList<ZoneContact>(16, Allocator.Persistent) });
@@ -76,8 +77,25 @@ namespace Game.Simulation.Hazards
                 Bodies = new NativeList<BodyRow>(Allocator.TempJob), LastCom = lastCom, Contacts = contacts.Current,
                 Authority = authority, Dt = Game.Core.SimTime.FixedTimestep,
             };
+            uint tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
+            // HAZ-014: last tick's mechanism actions for zones (this system owns ZoneSchedule). Applied before the schedule is read.
+            bool zoneActions = SystemAPI.TryGetSingleton<Game.Simulation.Mechanisms.MechanismActions>(out var actions) && actions.Current.IsCreated
+                && actions.Current.Length > 0 && actions.Tick != appliedActions;
+            if (zoneActions) appliedActions = actions.Tick;
             foreach (var e in zoneEntities)
             {
+                if (zoneActions)
+                {
+                    ushort group = SystemAPI.GetComponent<WorldZone>(e).Group; bool has = SystemAPI.HasComponent<ZoneSchedule>(e);
+                    var schedule = has ? SystemAPI.GetComponent<ZoneSchedule>(e) : new ZoneSchedule { Enabled = 1 };
+                    bool changed = false;
+                    foreach (var a in actions.Current)
+                        if (group != 0 && a.Group == group && Game.Simulation.Mechanisms.MechanismActionMath.IsZone(a.Kind))
+                        { Game.Simulation.Mechanisms.MechanismActionMath.Apply(ref schedule, a); changed = true; }
+                    if (changed) { if (has) SystemAPI.SetComponent(e, schedule); else state.EntityManager.AddComponentData(e, schedule); }
+                }
+                // HAZ-015: a scheduled zone acts only on its on ticks (ADR-0119 decision 4), whatever its kind.
+                if (SystemAPI.HasComponent<ZoneSchedule>(e) && !ZoneSchedule.IsOn(SystemAPI.GetComponent<ZoneSchedule>(e), tick)) continue;
                 var zone = SystemAPI.GetComponent<WorldZone>(e); var pose = SystemAPI.GetComponent<LocalTransform>(e);
                 var row = new ZoneRow { Zone = zone, Position = pose.Position.xz, EffectStart = job.Effects.Length, PointStart = job.Points.Length };
                 foreach (var effect in SystemAPI.GetBuffer<ZoneEffect>(e)) job.Effects.Add(effect);
@@ -179,6 +197,16 @@ namespace Game.Simulation.Hazards
                                 case ZoneEffectKind.Repel:
                                     Repel(row, effect, body, com, v, hasLast, last, sequence);
                                     break;
+                                case ZoneEffectKind.Attract:
+                                {
+                                    // HAZ-015 gravity well: GM / max(r, rmin)² toward the zone centre, inside the zone (ADR-0119 decision 4).
+                                    if (!Inside(row, com, forward, right, 0)) break;
+                                    float2 toward = row.Position - com; float r = math.length(toward);
+                                    if (r < 1e-4f) break;
+                                    float soft = math.max(r, effect.B), accel = effect.A / (soft * soft);
+                                    Push(body, toward / r * (accel * Dt * body.Mass), true, sequence);
+                                    break;
+                                }
                                 case ZoneEffectKind.Gate:
                                     if (!hasLast || row.Zone.Shape != ZoneShape.Box) break;
                                     sbyte crossed = GateCrossing(row.Position, forward, right, row.Zone.HalfExtents.x, last, com);

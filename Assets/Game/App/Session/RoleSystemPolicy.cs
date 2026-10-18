@@ -91,7 +91,8 @@ namespace Game.App.Session
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
             ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
-            ["MoverSystem"] = SystemAuthority.AuthorityOnly,             // HAZ-013 decider: moving structures (ADR-0119)
+            ["MoverSystem"] = SystemAuthority.AuthorityOnly,
+            ["MechanismSystem"] = SystemAuthority.AuthorityOnly,         // HAZ-014 decider: triggers to action records (ADR-0119)             // HAZ-013 decider: moving structures (ADR-0119)
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ExternalPushFeedbackSystem"] = SystemAuthority.Both,       // HAZ-005: camera-shake events from this machine's applied pushes
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
@@ -150,6 +151,7 @@ namespace Game.App.Session
             ["RacerPilotSystem"] = "how each AI racer flies; its command and pose in snapshots",
             ["MineSystem"] = "when a mine arms, triggers and detonates; the explosion and its despawn",
             ["MoverSystem"] = "where each moving structure is; its pose in snapshots",
+            ["MechanismSystem"] = "which mechanism rules fire and when their actions fall due; the owners' state in snapshots",
             ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
             ["IntegritySystem"] = "which islands lost their connection; SplitSystem's plans",
             ["SplitSystem"] = "how a grid splits into ships, hulks and chunks; GridSpawn and ChunkSpawn",

@@ -15,6 +15,7 @@ struct BrickSurfaceInput
     float ao;
     float3 faceNormal;   // grid-space face normal (QA-001 plating); positionCells and uv are grid-local
     float xenoDepth;     // ADR-0115: cells below the grown surface at this smooth vertex (0 for block faces)
+    float3 panel;        // ADR-0121: large hull block position on the face (cells) and side; z = 0 for ordinary cells
 };
 float BrickHash(float2 p)
 {
@@ -79,9 +80,19 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     s.metallic = mask.r; s.smoothness = saturate(mask.g - .1h * min(stage, 1u));
     float2 inCell = frac(i.uv);
     float edgeDistance = min(min(inCell.x, 1 - inCell.x), min(inCell.y, 1 - inCell.y));
+    // ADR-0121: a large hull block wears at its own edges, not at every cell inside it, and its edges show as a panel seam, so a
+    // wall of them reads as one plate per block.
+    half panelSeam = 0;
+    if (i.panel.z > .5)
+    {
+        edgeDistance = min(min(i.panel.x, i.panel.z - i.panel.x), min(i.panel.y, i.panel.z - i.panel.y));
+        float seamAA = max(fwidth(edgeDistance), 1e-4);
+        panelSeam = 1 - smoothstep(.035 - seamAA, .035 + seamAA, edgeDistance);
+    }
     half wearWidth = .05h * p1.a * (stage > 0 ? 1.4h : 1);
     half wear = wearWidth > 0 ? 1 - smoothstep(wearWidth * .4h, wearWidth, edgeDistance) : 0;
     albedo = lerp(albedo, half3(.42, .43, .45), wear * .8h);
+    albedo *= 1 - panelSeam * .55h;
     s.metallic = lerp(s.metallic, 1, wear); s.smoothness = lerp(s.smoothness, .55h, wear);
     half crackAmount = stage > 1 ? p1.b * (stage - 1) * .5h : 0;
     half crack = 0;

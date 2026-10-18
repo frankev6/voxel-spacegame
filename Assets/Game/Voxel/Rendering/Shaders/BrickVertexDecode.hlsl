@@ -106,6 +106,7 @@ struct BrickVertex
     float3 normal, tangent;   // face table normal/tangent, or the smooth Xeno normal (ADR-0115)
     uint smooth;
     float xenoDepth;          // cells below the grown surface of the deepest tissue sample (exposed flesh glows)
+    float3 panel;             // ADR-0121: position in cells from the large block's box corner on the face's two in-plane axes, and its side (0 = none)
 };
 
 float3 BrickOctDecode(float2 e)
@@ -133,6 +134,8 @@ void BrickDecodeShared(inout BrickVertex v, uint3 position, uint normalByte, uin
         v.positionCells = position * 0.5;
         v.normal = kBrickNormals[normalByte]; v.tangent = kBrickTangents[normalByte];
         v.xenoDepth = 0; v.ao = (flags & 3u) / 3.0; v.normalIndex = normalByte; v.scorched = (flags >> 4u) & 1u;
+        uint side = (loTop >> 6u) & 3u;
+        v.panel = side != 0 ? float3((loTop & 7u) * .5, ((loTop >> 3u) & 7u) * .5, side + 1) : 0;
     }
     v.damage = (flags >> 2u) & 3u;
 }

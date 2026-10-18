@@ -36,6 +36,12 @@ The review page said this needed a brick-format change and saved memory. Both cl
 - **The ship editor** needs no new tool: large blocks are on the palette like the engines.
 - **Memory:** a hull built mostly from large blocks has one instance per 8 or 27 cells. That is acceptable for ships; huge stations should keep using plain hull cells.
 
+## Implementation notes (DATA-013, 2026-10-17)
+- **Collapse rule:** the multi-cell collapse rule (`InstanceDestroyCellFraction`, half the footprint) would have removed a large block after half its cells were gone. Structural cube boxes are exempt, which decision 2 needs.
+- **Panel layout:** carried with no new storage:
+  - the render snapshot reuses a large cell's orient bits for its offset, since a cube looks the same in every orientation;
+  - the packed vertex uses the top byte of `Lo`, which only smooth Xeno vertices used before.
+
 ## Alternatives rejected
 - **Editor stamps:** the owner chose real blocks.
 - **A packed large-cell format** (one record for 8 or 27 cells): damage would have to split the record back into cells, and every system that reads cells would need a new case. That is a large change for a builder convenience.

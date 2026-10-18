@@ -159,7 +159,25 @@ namespace Game.Data.Definitions
                 approved = high >= 0 && low >= 0 && GetShape(high) == Game.Data.Blocks.BlockShape.LongSlopeHigh
                     && GetShape(low) == Game.Data.Blocks.BlockShape.LongSlopeLow;
             }
-            if (!approved) scope.Error("DATA-E036", nameof(cells), "Structural blocks must use the approved single-cell kit or root High / +Y Low long slope.");
+            if (!approved && LargeHullSide(cells) > 0)
+            {
+                // ADR-0121: a full 2×2×2 or 3×3×3 box of Cube cells rooted at its corner (large hull blocks).
+                approved = true;
+                for (int i = 0; i < cells.Length; i++) approved &= GetShape(i) == Game.Data.Blocks.BlockShape.Cube;
+            }
+            if (!approved) scope.Error("DATA-E036", nameof(cells), "Structural blocks must use the approved single-cell kit, root High / +Y Low long slope, or a full 2×2×2 or 3×3×3 cube box (ADR-0121).");
+        }
+
+        /// <summary>ADR-0121: the side (2 or 3) when <paramref name="footprint"/> is exactly the cube box [0, side)³, else 0.</summary>
+        public static int LargeHullSide(UnityEngine.Vector3Int[] footprint)
+        {
+            if (footprint == null) return 0;
+            int side = footprint.Length == 8 ? 2 : footprint.Length == 27 ? 3 : 0;
+            if (side == 0) return 0;
+            var seen = new System.Collections.Generic.HashSet<UnityEngine.Vector3Int>();
+            foreach (var c in footprint)
+                if (c.x < 0 || c.y < 0 || c.z < 0 || c.x >= side || c.y >= side || c.z >= side || !seen.Add(c)) return 0;
+            return side;
         }
 
         void ValidateMirror(Game.Data.Validation.ValidationScope scope)

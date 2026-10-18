@@ -11,10 +11,12 @@ namespace Game.Voxel.Rendering
     public struct PackedBrickVertex
     {
         public uint Lo, Hi;
-        public static PackedBrickVertex Pack(int x, int y, int z, int normal, int layer, int colour, int ao, int damage, bool scorched)
+        /// <param name="panel">ADR-0121 large hull panel byte (Lo's top byte, block faces only): bits 0-2 and 3-5 the vertex's position
+        /// in half cells from its block's box corner along the face's two in-plane grid axes, bits 6-7 the block side − 1 (0 = none).</param>
+        public static PackedBrickVertex Pack(int x, int y, int z, int normal, int layer, int colour, int ao, int damage, bool scorched, int panel = 0)
         {
             uint flags = (uint)(ao & 3) | ((uint)(damage & 3) << 2) | (scorched ? 16u : 0u);
-            return new PackedBrickVertex { Lo = (uint)x | ((uint)y << 8) | ((uint)z << 16),
+            return new PackedBrickVertex { Lo = (uint)x | ((uint)y << 8) | ((uint)z << 16) | ((uint)(panel & 255) << 24),
                 Hi = (uint)normal | ((uint)layer << 8) | ((uint)colour << 16) | (flags << 24) };
         }
         /// <summary>ADR-0115 smooth (Xeno surface-nets) vertex, flag bit 5: positions in eighths of a cell offset by half a cell

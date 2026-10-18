@@ -21,10 +21,11 @@ namespace Game.Simulation.Mechanisms
         NativeReference<uint> appliedShift;     // OriginShiftRecord.Sequence already applied; uint.MaxValue = not seen yet
         NativeReference<float3> shift;           // this tick's delta, zero when none
         ComponentLookup<OriginShiftRecord> shifts;
+        uint appliedActions;                     // MechanismActions.Tick already applied
 
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
-            appliedShift = new NativeReference<uint>(uint.MaxValue, Allocator.Persistent);
+            appliedShift = new NativeReference<uint>(uint.MaxValue, Allocator.Persistent); appliedActions = uint.MaxValue;
             shift = new NativeReference<float3>(Allocator.Persistent);
             shifts = state.GetComponentLookup<OriginShiftRecord>(true);
             state.RequireForUpdate<GameplayActive>();
@@ -41,9 +42,19 @@ namespace Game.Simulation.Mechanisms
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             shifts.Update(ref state);
+            uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
+            // HAZ-014: last tick's mechanism actions for movers (the decider writes them; this system owns Mover).
+            if (SystemAPI.TryGetSingleton<MechanismActions>(out var actions) && actions.Current.IsCreated && actions.Current.Length > 0 && actions.Tick != appliedActions)
+            {
+                appliedActions = actions.Tick;
+                state.CompleteDependency();
+                foreach (var mover in SystemAPI.Query<RefRW<Mover>>())
+                    foreach (var a in actions.Current)
+                        if (MechanismActionMath.IsMover(a.Kind) && a.Group == mover.ValueRO.Group) MechanismActionMath.Apply(ref mover.ValueRW, a, tick);
+            }
             SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out var shiftEntity);
             state.Dependency = new ShiftJob { Shifts = shifts, ShiftEntity = shiftEntity, Applied = appliedShift, Delta = shift }.Schedule(state.Dependency);
-            state.Dependency = new MoveJob { Tick = SystemAPI.GetSingleton<SimClock>().Tick, Delta = shift }.ScheduleParallel(state.Dependency);
+            state.Dependency = new MoveJob { Tick = tick, Delta = shift }.ScheduleParallel(state.Dependency);
         }
 
         [BurstCompile] struct ShiftJob : IJob

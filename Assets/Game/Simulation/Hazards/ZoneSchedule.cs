@@ -9,5 +9,9 @@ namespace Game.Simulation.Hazards
     {
         public uint PeriodTicks, OnTicks, PhaseTicks;
         public byte Enabled;
+
+        /// <summary>HAZ-015: whether the zone acts on <paramref name="tick"/>.</summary>
+        public static bool IsOn(in ZoneSchedule s, uint tick)
+            => s.Enabled != 0 && (s.PeriodTicks == 0 || (tick + s.PhaseTicks) % s.PeriodTicks < s.OnTicks);
     }
 }

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 671b06ca4b6d5472093e0c476a4cf0da, type: 3}
+  m_Name: mine_seeker
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MineDefinition
+  id: mine_seeker
+  formerIds: []
+  blueprint: {fileID: 11400000, guid: 24935e697e1ca4b4299363fd8395e907, type: 2}
+  anchored: 0
+  anchorStiffness: 0.4
+  anchorDamping: 0.8
+  anchorMaxAccel: 6
+  radarRange: 300
+  fuse:
+    ArmSeconds: 1.5
+    TriggerRadius: 8
+    FuseSeconds: 0.5
+    BlastRadius: 22
+    BlastDamage: 1800
+    BlastType: 2
+    MinTriggerMass: 300
+    TriggerFilter: 0
+    CasingHp: 600
+    BlastImpulse: 600000
+    Payload: 0
+    PayloadStrength: 0
+    PayloadSeconds: 0
+    SeekSpeed: 22

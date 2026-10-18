@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034775fdc0f1d496eabade816d4bab44, type: 3}
+  m_Name: block_switch
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.BlockDefinition
+  id: block_switch
+  formerIds: []
+  displayName: Switch
+  description: 'A shootable switch. Hitting it fires its mechanism: a blast door slams, a field turns off, a gate jams.'
+  category: 0
+  rarity: 0
+  basePrice: 0
+  maxStack: 999
+  icon: {fileID: -527274513, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  tradeable: 0
+  kind: 2
+  shape: 0
+  cells:
+  - {x: 0, y: 0, z: 0}
+  shapes: 
+  clearance: []
+  allowedOrientations:
+    Bits: 16777215
+  attachFaces: 63
+  mirrorPartner: {fileID: 0}
+  cellHp: 400
+  functionHp: 5000
+  cellMass: 20
+  armorClass: 0
+  materialLayer: 7
+  propMesh: {fileID: 8210001044619210013, guid: 63a3bcd06c5b4114096dfe9e982274e0, type: 3}
+  blockCategory: 7
+  modules:
+  - rid: 6548929156867162237
+  grantedAbilities: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 6548929156867162237
+      type: {class: SwitchModule, ns: Game.Data.Blocks, asm: Game.Data}
+      data:
+        Params:
+          TriggerDamage: 1
+          Group: 0

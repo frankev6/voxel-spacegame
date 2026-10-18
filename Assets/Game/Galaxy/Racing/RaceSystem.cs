@@ -178,6 +178,13 @@ namespace Game.Galaxy.Racing
                 RaceRules.Places(racers, d);
             }
             em.SetComponentData(race, rs);
+            // HAZ-014: the leader's lap for RaceLap mechanism triggers (ADR-0119 decision 9: places change by lap).
+            if (SystemAPI.TryGetSingletonRW<Game.Simulation.Mechanisms.RaceLapSignal>(out var signal))
+            {
+                int leader = 0;
+                if (rs.Phase == RacePhase.Racing) for (int i = 0; i < racers.Length; i++) leader = math.max(leader, racers[i].Lap);
+                signal.ValueRW.LeaderLap = leader;
+            }
         }
     }
 }

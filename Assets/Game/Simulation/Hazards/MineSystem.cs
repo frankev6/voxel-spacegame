@@ -1,5 +1,6 @@
 using Game.Core.Components;
 using Game.Core.Systems;
+using Game.Data.Blocks;
 using Game.Data.Combat;
 using Game.Simulation.Power;
 using Game.Voxel.Damage;
@@ -19,18 +20,20 @@ namespace Game.Simulation.Hazards
     [UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(DamageStreamsSystem)), UpdateBefore(typeof(Game.Simulation.Weapons.ExplosionSystem))]
     public partial struct MineSystem : ISystem
     {
-        EntityQuery mines, ships;
+        EntityQuery mines, ships, wellQuery;
         public void OnCreate(ref SystemState state)
         {
             mines = state.GetEntityQuery(typeof(MineState), typeof(MineFuse), ComponentType.ReadOnly<VoxelGrid>(), ComponentType.ReadOnly<LocalTransform>(),
                 ComponentType.ReadOnly<PhysicsMass>());
             ships = state.GetEntityQuery(ComponentType.ReadOnly<VoxelGrid>(), ComponentType.ReadOnly<LocalTransform>(), ComponentType.ReadOnly<PhysicsMass>(),
                 ComponentType.Exclude<Hulk>(), ComponentType.Exclude<MineFuse>());
-            state.RequireForUpdate(mines); state.RequireForUpdate<SimClock>(); state.RequireForUpdate<DamageStreams>();
+            wellQuery = state.GetEntityQuery(ComponentType.ReadOnly<MineWell>());
+            state.RequireForUpdate<SimClock>(); state.RequireForUpdate<DamageStreams>();   // runs while mines or wells remain
         }
 
         public void OnUpdate(ref SystemState state)
         {
+            if (mines.IsEmpty && wellQuery.IsEmpty) return;
             state.CompleteDependency();
             var em = state.EntityManager;
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
@@ -38,6 +41,10 @@ namespace Game.Simulation.Hazards
             using var mineEntities = mines.ToEntityArray(Allocator.Temp);
             using var shipEntities = ships.ToEntityArray(Allocator.Temp);
             var spent = new NativeList<Entity>(Allocator.Temp);
+            bool hasStatus = SystemAPI.TryGetSingleton<StatusChannels>(out var status);
+            // HAZ-018: gravity mines' temporary wells end on time.
+            using (var wells = wellQuery.ToEntityArray(Allocator.Temp))
+                foreach (var w in wells) if (tick >= em.GetComponentData<MineWell>(w).UntilTick) em.DestroyEntity(w);
             for (int m = 0; m < mineEntities.Length; m++)
             {
                 var e = mineEntities[m];
@@ -86,15 +93,12 @@ namespace Game.Simulation.Hazards
                             if (best == Entity.Null || s.Index < best.Index) best = s;
                         }
                         if (best != Entity.Null) mine = Trigger(mine, tick, best);
+                        else if (p.SeekSpeed > 0) Seek(em, streams, e, (uint)m, centre, p, shipEntities);
                         break;
                     case MinePhase.Triggered:
                         float fuseSeconds = hit ? math.min(p.FuseSeconds, .15f) : p.FuseSeconds;
                         if (tick - mine.PhaseTick < (uint)(fuseSeconds * 60)) break;
-                        streams.Explosions.PostFromMainThread(new ExplosionRequest
-                        {
-                            WorldPos = centre, Radius = p.BlastRadius, Amount = p.BlastDamage, Type = p.BlastType, Source = e,
-                            Producer = ProducerKind.Hazard, Sequence = (uint)m, Instigator = mine.TriggeredBy, Knockback = p.BlastImpulse
-                        });
+                        Detonate(em, streams, hasStatus, status, e, (uint)m, centre, p, mine.TriggeredBy, shipEntities, tick);
                         mine.Phase = MinePhase.Spent; mine.PhaseTick = tick;
                         spent.Add(e);
                         break;
@@ -106,6 +110,92 @@ namespace Game.Simulation.Hazards
             spent.Dispose();
         }
         static MineState Trigger(MineState mine, uint tick, Entity by) => new MineState { Phase = MinePhase.Triggered, PhaseTick = tick, TriggeredBy = by };
+
+        /// <summary>HAZ-018 (ADR-0119 decision 6): what the mine releases. Every payload but None shows as a blast (one ExplosionRequest);
+        /// only Blast deals damage. Repulse throws with its strength through the same blast path; Emp switches off the thrusters of every
+        /// ship in reach for PayloadSeconds (SPEC-22 inhibit); Gravity leaves an Attract zone at the centre for PayloadSeconds.</summary>
+        static void Detonate(EntityManager em, DamageStreams streams, bool hasStatus, StatusChannels status, Entity mine, uint index, float3 centre,
+            in ProximityFuseParams p, Entity by, NativeArray<Entity> ships, uint tick)
+        {
+            if (p.Payload == MinePayload.None) return;
+            streams.Explosions.PostFromMainThread(new ExplosionRequest
+            {
+                WorldPos = centre, Radius = p.BlastRadius, Amount = p.Payload == MinePayload.Blast ? p.BlastDamage : 0, Type = p.BlastType, Source = mine,
+                Producer = ProducerKind.Hazard, Sequence = index, Instigator = by,
+                Knockback = p.Payload == MinePayload.Blast ? p.BlastImpulse : 0
+            });
+            if (p.Payload == MinePayload.Repulse)
+            {
+                // A blast without damage carries no push, so the repulsor throws directly: PayloadStrength N·s at the centre, falling off
+                // as (1 − d / radius)² with the distance to each body's centre of mass.
+                uint k = 0;
+                foreach (var s in ships)
+                {
+                    var mass = em.GetComponentData<PhysicsMass>(s);
+                    if (mass.InverseMass <= 0) continue;
+                    float3 com = em.GetComponentData<LocalTransform>(s).TransformPoint(mass.CenterOfMass);
+                    float2 away = com.xz - centre.xz; float d = math.length(away), w = math.saturate(1 - d / p.BlastRadius);
+                    if (w <= 0 || d < 1e-3f) continue;
+                    float2 j = away / d * (p.PayloadStrength * w * w);
+                    streams.Impulses.PostFromMainThread(new ImpulseRequest { Body = s, WorldImpulse = new float3(j.x, 0, j.y), Flags = ImpulseRequestFlags.AtCenterOfMass,
+                        Producer = ProducerKind.Hazard, Sequence = 0x20000000u | (index << 12) | k++ });
+                }
+            }
+            if (p.Payload == MinePayload.Emp && hasStatus)
+            {
+                uint k = 0, ticks = (uint)math.max(1, math.round(p.PayloadSeconds * 60));
+                foreach (var s in ships)
+                {
+                    if (em.GetComponentData<VoxelGrid>(s).Kind != GridKind.Ship || !em.HasBuffer<Game.Simulation.Flight.FlightThruster>(s)) continue;
+                    var mass = em.GetComponentData<PhysicsMass>(s);
+                    if (math.distance(em.GetComponentData<LocalTransform>(s).TransformPoint(mass.CenterOfMass).xz, centre.xz) > p.BlastRadius) continue;
+                    foreach (var t in em.GetBuffer<Game.Simulation.Flight.FlightThruster>(s))
+                        status.Inhibits.PostFromMainThread(new InhibitRequest { Target = t.Thruster, DurationTicks = ticks, Reason = EmpReason,
+                            Producer = ProducerKind.Hazard, Sequence = (index << 16) | k++ });
+                }
+            }
+            if (p.Payload == MinePayload.Gravity)
+            {
+                var well = em.CreateEntity(typeof(WorldZone), typeof(LocalTransform), typeof(MineWell));
+                em.SetComponentData(well, new WorldZone { Shape = Game.Data.Hazards.ZoneShape.Circle, HalfExtents = new float2(p.BlastRadius, 0),
+                    Position = centre.xz, PersistentId = (1UL << 62) | ((ulong)tick << 16) | index });
+                em.SetComponentData(well, LocalTransform.FromPosition(new float3(centre.x, 0, centre.z)));
+                em.SetComponentData(well, new MineWell { UntilTick = tick + (uint)math.max(1, math.round(p.PayloadSeconds * 60)) });
+                em.AddBuffer<ZoneEffect>(well).Add(new ZoneEffect { Kind = Game.Data.Hazards.ZoneEffectKind.Attract, A = p.PayloadStrength, B = GravitySoftening,
+                    Flags = Game.Data.Hazards.ZoneEffectFlags.AffectsShips | Game.Data.Hazards.ZoneEffectFlags.AffectsDevices | Game.Data.Hazards.ZoneEffectFlags.AffectsDebris });
+            }
+        }
+
+        /// <summary>A gravity mine's well is softened inside this radius (m): its pull tops out at GM / 15².</summary>
+        public const float GravitySoftening = 15;
+        /// <summary>Inhibit reason of a mine EMP (SPEC-22 Inhibited.Reason).</summary>
+        public const byte EmpReason = 3;
+        /// <summary>A seeker hunts ships within this many trigger radii.</summary>
+        public const float SeekRangeTriggers = 8;
+
+        /// <summary>HAZ-018 seeker: an armed mine with SeekSpeed drifts toward the nearest heavy-enough ship in range, its speed capped at
+        /// SeekSpeed, so it closes on a slow ship and is outrun by a fast one.</summary>
+        static void Seek(EntityManager em, DamageStreams streams, Entity mine, uint index, float3 centre, in ProximityFuseParams p, NativeArray<Entity> ships)
+        {
+            var mass = em.GetComponentData<PhysicsMass>(mine);
+            if (mass.InverseMass <= 0 || !em.HasComponent<PhysicsVelocity>(mine)) return;
+            float range = p.TriggerRadius * SeekRangeTriggers, best = float.MaxValue; float2 target = 0;
+            foreach (var s in ships)
+            {
+                if (em.GetComponentData<VoxelGrid>(s).Kind != GridKind.Ship) continue;
+                var sm = em.GetComponentData<PhysicsMass>(s);
+                if (sm.InverseMass <= 0 || 1f / sm.InverseMass < p.MinTriggerMass) continue;
+                float2 at = em.GetComponentData<LocalTransform>(s).TransformPoint(sm.CenterOfMass).xz; float d = math.distance(at, centre.xz);
+                if (d < range && d < best) { best = d; target = at; }
+            }
+            if (best == float.MaxValue) return;
+            float2 v = em.GetComponentData<PhysicsVelocity>(mine).Linear.xz, want = math.normalizesafe(target - centre.xz) * p.SeekSpeed;
+            float2 dv = want - v; float most = p.SeekSpeed * 1.5f * Game.Core.SimTime.FixedTimestep;   // reaches its speed in about 2/3 s
+            if (math.length(dv) > most) dv = math.normalize(dv) * most;
+            streams.Impulses.PostFromMainThread(new ImpulseRequest { Body = mine, WorldImpulse = new float3(dv.x, 0, dv.y) / mass.InverseMass,
+                Flags = ImpulseRequestFlags.AtCenterOfMass, Producer = ProducerKind.Hazard, Sequence = 0x40000000u | index });
+        }
+
     }
 
     /// <summary>SPEC-91 §5.3 step 5: a capped spring holds an anchored mine near its point (every machine). The point is where the mine

@@ -56,8 +56,17 @@ namespace Game.Voxel.Rendering
             if (shape == (int)BlockShape.Xeno) orient = (byte)((cell.Flags & XenoDepth.Mask) >> (XenoDepth.Shift + 1));
             isPropRoot = def.Kind == BlockKind.Prop && (!cell.IsInstance || (cell.Flags & (byte)CellFlags.InstanceRoot) != 0);
             prop = new BrickPropInstance { Block = block, Orient = orient, Color = colour };
-            return MeshCell.Encode(def.Kind == BlockKind.Structural ? 1 : 2, def.Kind == BlockKind.Structural ? shape : 0,
+            uint encoded = MeshCell.Encode(def.Kind == BlockKind.Structural ? 1 : 2, def.Kind == BlockKind.Structural ? shape : 0,
                 orient, def.MaterialLayer, colour, 3 - (cell.Hp >> 6), (cell.Flags & (byte)CellFlags.Scorched) != 0);
+            // ADR-0121: a large hull cell records where it sits in its block's grid-aligned box, so the panel spans the block.
+            int side = def.Cells.Length == 8 ? 2 : def.Cells.Length == 27 ? 3 : 0;
+            if (cell.IsInstance && side != 0 && def.Kind == BlockKind.Structural && def.Shape == BlockShape.Cube)
+            {
+                int3 far = orientations.Rotate(new int3(side - 1), orient);
+                int3 boxMin = instance.Origin + math.min(int3.zero, far);
+                encoded = MeshCell.WithLarge(encoded, side, math.clamp(position - boxMin, 0, side - 1));
+            }
+            return encoded;
         }
         internal static uint Missing(Cell cell, ref byte warnings)
         {
