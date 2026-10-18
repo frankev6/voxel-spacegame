@@ -514,6 +514,8 @@
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
 | DEV-024 | `probe`: asking the colliders where things fit | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Owner asked for tools for building big places. Clearance, floor/roof, line of sight, reachability and `find` for spots that fit, in local or Hollow coordinates. DevProbeTests pass. |
+| DEV-025 | The Hollow's map without Play | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | `tools/hollow-map.sh`: the flight-plane slice with every placed thing, about a second, no Play. First use moved the race portal off the Salvage path. |
+| DEV-026 | Live PlayMode tests in the open Editor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-002 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Through TestRunnerApi instead of Pipeline's run_tests, which entered Play too early; PlaygroundTests 12 s live, Editor kept open. |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1288,6 +1290,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-18 — Tools for big builds: probe, the Hollow map, live PlayMode tests (lead, claude-opus-5-5)
+- Owner: "is there any tools to make your life easier when making big things like we just made this asteroid", then "go ahead with your top down map render, in game tests, and saved repro scenarios".
+- DEV-024 `probe`, DEV-025 `tools/hollow-map.sh`, DEV-026 live PlayMode runs (see SPEC-70).
+- The map's first use: the guided path to SALVAGE ran straight through the race portal at (80, −150), so a pilot following the salvage guides would have been sent to the track (its placement had checked traffic routes, not the stations' paths). Moved to (−160, 110) in the Market's cavern, facing north: posts 22 m from the rock, 76 m from every path, 71 m from traffic, 89 m from the berths. Its lamp posts now follow its facing. `PlaygroundTests` passes live with the new spot.
 
 ### 2026-10-18 — AI holds fire when rock or a structure blocks the line to its target (claude-opus-5-5)
 - Owner, watching the Hollow: "the turrets from the outside started shooting inside the asteroid". Since `SpatialScenery` the shots stopped at the rock, but the turrets still fired into it.

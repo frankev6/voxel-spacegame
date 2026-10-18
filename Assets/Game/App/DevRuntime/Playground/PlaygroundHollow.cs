@@ -441,7 +441,8 @@ namespace Game.App.DevRuntime.Playground
             foreach (float side in new[] { -1f, 1f })
             {
                 var post = new GameObject("race portal lamp").AddComponent<UnityEngine.Light>(); post.transform.SetParent(dressing.transform, false);
-                post.transform.localPosition = new Vector3(RacePortal.x + side * (RacePortalWidth * .5f + 3), 6, RacePortal.y);
+                var across = new float2(math.cos(RacePortalYaw), -math.sin(RacePortalYaw)) * side * (RacePortalWidth * .5f + 3);
+                post.transform.localPosition = new Vector3(RacePortal.x + across.x, 6, RacePortal.y + across.y);
                 post.type = LightType.Point; post.shadows = LightShadows.None; post.color = new Color(1f, .66f, .16f);
                 post.range = 70; post.intensity = .5f * post.range * post.range;
                 air.AddLamp(post, "beacon", side);
