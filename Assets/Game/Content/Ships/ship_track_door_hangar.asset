@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_track_door_hangar
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_track_door_hangar
+  formerIds: []
+  displayName: Flight Deck Blast Door
+  cellSize: 1
+  payloadVersion: 1
+  payload: 564f585301000100ed944d0a02310c85df4b1d10052f2073168f22e846b0e0cabd37f1a863531184495d9476c8c22c024948f3faf507781ca664dc9ce2ed7c3d5eee310e00882d311024765807a6149e29a0c0f4f8910fe00a08906f2f3a0366898596bc9adde25cdcb4479e572973be645bef569672c39f5b153769ce2d9d8471bb3f259d5baa4ab9513a1c7057a1ca36850bfd1d859d334fb1f3cad2b3b8f10db2f72ba824e753d6886c3ec5f9652665661dff88b614dd09d5bbf802y
+  cellCount: 1536
+  boundsMin: {x: -32, y: -6, z: 0}
+  boundsMax: {x: 31, y: 5, z: 1}

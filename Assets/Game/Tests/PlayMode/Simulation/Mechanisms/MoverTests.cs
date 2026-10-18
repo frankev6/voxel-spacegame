@@ -52,6 +52,27 @@ namespace Game.Tests.PlayMode.Simulation.Mechanisms
 
         static float Yaw(CombatFixture f, Entity root) => Planar.YawFromForward(math.mul(f.Flight.Transform(root).Rotation, new float3(0, 0, 1)));
 
+        /// <summary>A rebase while the mover's grid is still spawning (no physics body yet) shifts its path too: Track 01's rig spawned
+        /// across one was dragged 2.3 km off its hub.</summary>
+        [Test] public void Rebase_WhileSpawning_ShiftsPath()
+        {
+            using var f = New();
+            // a root still spawning: its pose, no physics body yet
+            var arm = f.Em.CreateEntity(typeof(LocalTransform));
+            f.Em.SetComponentData(arm, LocalTransform.Identity);
+            HazardSpawn.AddMover(f.Em, arm, new Mover { Path = MoverPath.Rotate, Origin = new float3(0, 0, 0), Rate = .5f, StartTick = Tick(f), Playing = 1 });
+            Entity record;
+            using (var q = f.Em.CreateEntityQuery(typeof(OriginShiftRecord)))
+                record = q.IsEmpty ? f.Em.CreateEntity(typeof(OriginShiftRecord)) : q.GetSingletonEntity();
+            f.Tick();   // MoverSystem takes the current record as its frame
+            var r = f.Em.GetComponentData<OriginShiftRecord>(record);
+            f.Em.SetComponentData(record, new OriginShiftRecord { Sequence = r.Sequence + 1, Delta = new float3(100, 0, -50) });
+            f.Tick();
+            var origin = f.Em.GetComponentData<Mover>(arm).Origin;
+            TestContext.WriteLine($"Rebase while spawning: mover origin {origin}");
+            Assert.AreEqual(100, origin.x, 1e-3f); Assert.AreEqual(-50, origin.z, 1e-3f);
+        }
+
         [Test] public void Rotate_TickExact()
         {
             using var f = New();

@@ -403,7 +403,11 @@ Advisory (ADR-0042):
   - The reactor (set piece 1, 420 m reach) pulses every 8 s. `mechanism_track01_reactor` makes it every 4 s when the leader starts lap 3. `RaceLapSignal.LeaderLap` is now the lap being flown (it was the laps completed, one behind the trigger's "starts lap Value").
   - The five minefields use their layout kinds: one proximity, one seeker, two EMP and one repulsor field. The eight canisters lie on the north-east bend, the start straight and the south hall.
   - `Track01Tests.LapEvents_Fire` covers this.
-  - Still to come: the drifting bow (`.Break_Narrows`), the rig's sweeping arms, the flight-deck door and its switch, the battleship turrets waking on lap 2, the engine section, and the portal pair (HAZ-021).
+  - **Batch 4 (2026-10-17):** the lane-gate portal pair, the salvage rig and the flight-deck door.
+    - `TrackDefinition.Portals` (set piece 2): GATE IN to GATE OUT across the 140 m main route, one way, jammed 6 s after each use (HAZ-021). The skipped gates 13 and 4 are optional (gate 3 leads to 5), so a lap through the portal is valid. Racers thrown through it rejoin their leg from gate 3 at once (`RacerPilot.LastPosition`, a jump over 60 m in a tick).
+    - `TrackDefinition.Movers` and `Switches`: `ship_track_rig`, the salvage rig, turns at its hub (1900, 1700), one turn in 50 s, its two arms reaching 520 m across the outer corner (tips at 65 m/s). `ship_track_door_hangar`, a 64 m blast door, rests slid into the carrier's side; shooting the switch post that faces the outer line slams it across the flight deck for 5 s (`mechanism_blast_door` on set piece 3). Movers spawn through `TrackSpawnService.Spawn`'s `spawnMover` (kinematic station grids).
+    - `Track01Tests.SetPieces_Spawn` covers them.
+  - Still to come: the drifting bow (`.Break_Narrows`: it pivots about its centre, which a Mover path cannot express yet), the battleship turrets waking on lap 2 (needs turret stations), and the engine section (HAZ-017).
 
 ### RACE-016 — Track look and destructible track structures
 - **Milestone:** M4

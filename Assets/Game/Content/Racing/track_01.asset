@@ -15653,6 +15653,8 @@ MonoBehaviour:
   Mechanisms:
   - Mechanism: {fileID: 11400000, guid: a70dcaa9ad2d54caab6fcaa41b4607d8, type: 2}
     SetPiece: 1
+  - Mechanism: {fileID: 11400000, guid: d392f12fe26bf4ec6bda7c3deb0437d3, type: 2}
+    SetPiece: 3
   Canister: {fileID: 11400000, guid: 98752bbcda4cb4701b7cbeb6eba99cdb, type: 2}
   Canisters:
   - {x: 475.43076, y: 650.425}
@@ -15663,6 +15665,36 @@ MonoBehaviour:
   - {x: -40, y: 1018}
   - {x: -640, y: -420}
   - {x: -560, y: -420}
+  Portals:
+  - Entry: {x: 2100, y: -60}
+    EntryYaw: -2.718212
+    Exit: {x: 860, y: -1035}
+    ExitYaw: -1.9499102
+    Width: 140
+    JamSeconds: 6
+    SetPiece: 2
+  Movers:
+  - Blueprint: {fileID: 11400000, guid: 61e581c13665d42c7afb49c904757a7f, type: 2}
+    Kind: 0
+    Position: {x: 1900, y: 1700}
+    To: {x: 0, y: 0}
+    Yaw: -2.6179938
+    Rate: 0.12566371
+    StartAtTo: 0
+    SetPiece: 0
+  - Blueprint: {fileID: 11400000, guid: 6de76a51271ff4c7da4df23adbf8b68d, type: 2}
+    Kind: 1
+    Position: {x: -1230.8005, y: 478.1601}
+    To: {x: -1294.8, y: 478.4}
+    Yaw: 0.0037485582
+    Rate: 1
+    StartAtTo: 0
+    SetPiece: 3
+  Switches:
+  - Blueprint: {fileID: 11400000, guid: 6540a51a5078345e793b0cc17b1d80b9, type: 2}
+    Position: {x: -1434.426, y: 365.0447}
+    Yaw: 0.88609165
+    SetPiece: 3
   Bounds: []
   StartGrid:
   - Position: {x: -360.72, y: 1034.73}

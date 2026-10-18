@@ -54,7 +54,10 @@ namespace Game.Simulation.Mechanisms
             }
             SystemAPI.TryGetSingletonEntity<OriginShiftRecord>(out var shiftEntity);
             state.Dependency = new ShiftJob { Shifts = shifts, ShiftEntity = shiftEntity, Applied = appliedShift, Delta = shift }.Schedule(state.Dependency);
-            state.Dependency = new MoveJob { Tick = tick, Delta = shift }.ScheduleParallel(state.Dependency);
+            // every mover's path follows a rebase, including one whose grid is still spawning (no physics yet: MoveJob skips it,
+            // while OriginRebaseSystem already shifted its pending pose; a big rig spawning across a rebase was dragged off its hub)
+            state.Dependency = new ShiftPathJob { Delta = shift }.ScheduleParallel(state.Dependency);
+            state.Dependency = new MoveJob { Tick = tick }.ScheduleParallel(state.Dependency);
         }
 
         [BurstCompile] struct ShiftJob : IJob
@@ -74,19 +77,24 @@ namespace Game.Simulation.Mechanisms
             }
         }
 
+        [BurstCompile] partial struct ShiftPathJob : IJobEntity
+        {
+            [ReadOnly] public NativeReference<float3> Delta;
+            void Execute(ref Mover mover, DynamicBuffer<MoverPoint> points)
+            {
+                var d = Delta.Value;
+                if (!math.any(d != 0)) return;
+                mover.Origin += d;
+                if (mover.Path != MoverPath.Drift) for (int i = 0; i < points.Length; i++) { var p = points[i]; p.Pose += d; points[i] = p; }
+            }
+        }
+
         [BurstCompile] partial struct MoveJob : IJobEntity
         {
             public uint Tick;
-            [ReadOnly] public NativeReference<float3> Delta;
-            void Execute(ref Mover mover, ref PhysicsVelocity velocity, DynamicBuffer<MoverPoint> points, in LocalTransform transform, in PhysicsMass mass)
+            void Execute(in Mover mover, ref PhysicsVelocity velocity, DynamicBuffer<MoverPoint> points, in LocalTransform transform, in PhysicsMass mass)
             {
                 if (mass.InverseMass != 0) return;   // dynamic bodies never move on a path (ADR-0119)
-                var d = Delta.Value;
-                if (math.any(d != 0))
-                {
-                    mover.Origin += d;
-                    if (mover.Path != MoverPath.Drift) for (int i = 0; i < points.Length; i++) { var p = points[i]; p.Pose += d; points[i] = p; }
-                }
                 MoverMath.Pose(mover, points.AsNativeArray(), Tick + 1, out float3 position, out float yaw);
                 velocity = PhysicsVelocity.CalculateVelocityToTarget(mass, transform.Position, transform.Rotation,
                     new RigidTransform(Planar.YawRotation(yaw), position), 1f / SimTime.FixedTimestep);

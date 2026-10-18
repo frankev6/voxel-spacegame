@@ -21,6 +21,7 @@ namespace Game.Galaxy.Racing
         public float Nose;             // its nose angle off the wanted direction (rad, + right): the drift it holds
         public int ProgressIndex; public uint ProgressTick;
         public uint CommitUntil;
+        public float2 LastPosition;   // track space, last tick: a jump (a portal) means it is somewhere else on its legs
         public uint OutsideSince;      // tick it went beyond the route's edge (0 = inside)       // after switching branch it holds to the new one until this tick   // the furthest segment reached, and when: no progress for long = stuck
         // telemetry (race ai)
         public float TargetSpeed, Threat;

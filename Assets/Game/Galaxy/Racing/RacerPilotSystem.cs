@@ -282,7 +282,17 @@ namespace Game.Galaxy.Racing
                     bool carryOn = !fresh && pilot.LineTo >= 0 && pilot.Index >= length - 25;
                     // Pushed onto another branch (a strip, traffic, a hit): change its mind rather than fight back across the field.
                     int switchTo = -1;
-                    if (!fresh && !carryOn && pilot.Off > 25 && tick % 10 == 0 && tick >= pilot.CommitUntil)
+                    // HAZ-021: through a portal (a jump no ship flies in a tick): rejoin whichever leg from its last gate runs past
+                    // where it came out, at once, or it would turn back for the gate it skipped and be reset in front of the portal again.
+                    float2 now = em.GetComponentData<LocalTransform>(ship).Position.xz - origin;
+                    bool jumped = math.lengthsq(pilot.LastPosition) > 0 && math.distancesq(now, pilot.LastPosition) > RacerSteerJob.PortalJump * RacerSteerJob.PortalJump;
+                    pilot.LastPosition = now;
+                    if (!fresh && jumped)
+                    {
+                        int leg = RacerPlan.NearestLeg(em.GetBuffer<RaceLeg>(race), em.GetBuffer<RaceLegPoint>(race), math.max(0, (int)from), now, out _);
+                        if (leg >= 0) { switchTo = leg; pilot.CommitUntil = tick + 180; }
+                    }
+                    if (switchTo < 0 && !fresh && !carryOn && pilot.Off > 25 && tick % 10 == 0 && tick >= pilot.CommitUntil)
                     {
                         float2 at = em.GetComponentData<LocalTransform>(ship).Position.xz - origin;
                         int leg = RacerPlan.NearestLeg(em.GetBuffer<RaceLeg>(race), em.GetBuffer<RaceLegPoint>(race), math.max(0, (int)from), at, out float d);
@@ -382,6 +392,7 @@ namespace Game.Galaxy.Racing
 
         // Headings tried around the line target (rad): straight first, then wider either side.
         static readonly float[] Offsets = { 0, .1f, -.1f, .21f, -.21f, .35f, -.35f, .52f, -.52f, .73f, -.73f, .98f, -.98f, 1.3f, -1.3f };
+        public const float PortalJump = 60;      // m in one tick: a portal transit, not flight
         public const float LineUpNose = .12f;    // rad: the most it drifts while lining up a shot at a mine in its way
         public const float Horizon = 3;          // s: how far ahead other bodies are predicted
         public const float Margin = 5;           // m kept from anything, on top of both radii

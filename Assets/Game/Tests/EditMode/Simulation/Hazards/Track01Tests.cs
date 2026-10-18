@@ -50,5 +50,51 @@ namespace Game.Tests.EditMode.Simulation.Hazards
             using (var q = EM.CreateEntityQuery(typeof(WorldZone))) Assert.AreEqual(0, q.CalculateEntityCount(), "despawn clears the set pieces too");
             using (var q = EM.CreateEntityQuery(typeof(Mechanism))) Assert.AreEqual(0, q.CalculateEntityCount(), "and the track's mechanisms");
         }
+        /// <summary>The portal, the rig and the flight-deck door with its switch: what each is and which set piece drives it.</summary>
+        [Test] public void SetPieces_Spawn()
+        {
+            var track = UnityEditor.AssetDatabase.LoadAssetAtPath<TrackDefinition>("Assets/Game/Content/Racing/track_01.asset");
+            Assert.IsNotNull(track);
+            Entity Stand(ShipBlueprintDefinition b, float2 at, float yaw, ulong id)
+            {
+                var e = EM.CreateEntity(typeof(Unity.Transforms.LocalTransform));
+                EM.SetComponentData(e, Unity.Transforms.LocalTransform.FromPositionRotation(new float3(at.x, 0, at.y), quaternion.RotateY(yaw)));
+                EM.SetName(e, b.IdString);
+                return e;
+            }
+            TrackSpawnService.Spawn(EM, track, float2.zero, Group, null, Stand, false, Stand);
+            using (var q = EM.CreateEntityQuery(typeof(PortalLink), typeof(WorldZone)))
+            {
+                Assert.AreEqual(1, q.CalculateEntityCount(), "one lane-gate portal");
+                var link = q.GetSingleton<PortalLink>(); var entry = q.GetSingleton<WorldZone>();
+                Assert.AreEqual(6, link.JamSeconds, 1e-4f, "jams 6 s after each use");
+                Assert.AreEqual(140, entry.HalfExtents.x * 2, 1e-3f, "across the whole route");
+                foreach (var e in EM.GetBuffer<ZoneEffect>(q.GetSingletonEntity())) Assert.AreEqual(HazardSpawn.PortalGateId, e.Id, "never counted as a race gate");
+            }
+            Entity rig = Entity.Null, door = Entity.Null, post = Entity.Null;
+            using (var q = EM.CreateEntityQuery(typeof(Mover)))
+            using (var movers = q.ToEntityArray(Allocator.Temp))
+                foreach (var m in movers) { if (EM.GetComponentData<Mover>(m).Path == MoverPath.Rotate) rig = m; else door = m; }
+            using (var q = EM.CreateEntityQuery(typeof(MechanismGroup), typeof(Unity.Transforms.LocalTransform)))
+                post = q.GetSingletonEntity();
+            Assert.AreNotEqual(Entity.Null, rig, "the salvage rig turns"); Assert.AreNotEqual(Entity.Null, door, "the flight-deck door");
+            var rigMover = EM.GetComponentData<Mover>(rig);
+            Assert.AreEqual(1900, rigMover.Origin.x, 1e-3f); Assert.AreEqual(1700, rigMover.Origin.z, 1e-3f);
+            Assert.AreEqual(2 * math.PI / 50, rigMover.Rate, 1e-5f, "one turn in 50 s");
+            var doorMover = EM.GetComponentData<Mover>(door);
+            Assert.AreEqual(MoverPath.Toggle, doorMover.Path); Assert.AreEqual(1, doorMover.Reverse, "rests open");
+            var points = EM.GetBuffer<MoverPoint>(door);
+            Assert.AreEqual(64, math.distance(points[0].Pose, points[1].Pose), 1e-2f, "slides 64 m into the hull");
+            Assert.AreEqual(EM.GetComponentData<MechanismGroup>(post).Group, doorMover.Group, "the switch drives the door");
+            using (var q = EM.CreateEntityQuery(typeof(Mechanism)))
+            using (var ms = q.ToEntityArray(Allocator.Temp))
+            {
+                bool found = false;
+                foreach (var m in ms) found |= EM.GetComponentData<Mechanism>(m).Group == doorMover.Group;
+                Assert.IsTrue(found, "with the blast door's mechanism in its group");
+            }
+            TrackSpawnService.Despawn(EM, Group);
+            using (var q = EM.CreateEntityQuery(typeof(PortalLink))) Assert.AreEqual(0, q.CalculateEntityCount(), "despawn clears the portal");
+        }
     }
 }
