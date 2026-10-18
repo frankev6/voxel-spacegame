@@ -512,7 +512,7 @@
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
-| DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | blocked | lead (claude-opus-5-5) | 2026-10-18 | — | Waiting for owner: choose the hub (D recommended for the capital, E the pirate haven, or A–C) and approve the civilian ship classes (docs/design/hub/hub-options.md). |
+| DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1287,6 +1287,30 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-18 — DEV-023 option E built into the game: the Hollow in the playground (lead, claude-opus-5-5)
+- Owner: "the smaller asteroids arounds should rotate constantly so that the guns attached can't always face the necessary angle", "Lets build this latest version into the game", "so that the game doesn't lag the asteroid should be built of larger voxels ... i meant 2x2s and 3x3s or even 4x4s".
+- The design is voxelised (`ArtSource/Hub/hollow_export.py` → `hollow_codegen.py` → *Game/Content/Build Hollow*) into 92 blueprints: 28 low and 38 high pieces (the rock is cut into 256 m tiles and split at +24 m), 16 structure pieces, 4 forts, 2 guns and 4 boulders. In all, 2.4 M cells at 2 m, 99.98 % of the rock in 2×2×2 and 4×4×4 blocks. `block_hull_large_4` is new, and ADR-0121 is amended to allow it.
+- Runtime `PlaygroundHollow`, reached with `playground goto=hollow`, 9 km east of the ARK grounds:
+  - static rock and structure grids;
+  - the forts as kinematic grids on a Rotate mover, armed as `ai_turret` grids with ±90° medium turrets;
+  - 21 static Clan turret grids;
+  - 37 moored ships and 44 boulders;
+  - traffic on `ai_hollow_traffic`, steered by moving its patrol anchor along 8 routes;
+  - 6 gunships on `ai_hollow_guard`;
+  - the stations: merchants, canisters, the Quartermaster's reset.
+- Engine: `GridRenderHidden` (the brick renderer skips a grid while it is tagged) gives the cutaway when the player is under the rock. `CameraSeeThrough` stops the flight camera pulling in behind rock. Test: `HollowTests` (play mode), passing headless.
+- The Hollow's static tiles keep their islands, so `ShipBlueprints_AreOnePiece` skips them (`HollowBuilder.IsScenery`). The boulders, which are free asteroid grids, are now one piece.
+- The full EditMode suite also surfaced older failures:
+  - Fixed: `SystemGroupOrderTests.PrePhysics_ShipCommandGroupFirst`. HAZ-021's `PortalTransitSystem` shared the first pre-physics bucket with `ShipCommandGroup`, so their order was arbitrary. It now runs `UpdateAfter(ShipCommandGroup)`, still before propulsion.
+  - Still failing in this worktree, and not caused by this work: two audio tests (`AudioCueConverterTests.BlockedClip_IsRejectedAndOtherEntriesContinue` and `AudioContentTests.NoCueReferencesBlockedClips`). They expect the protected AUD-007 import's two blocked clips, which this worktree doesn't have.
+- `playground goto=hollow@x,z[,yaw]` places you anywhere in the Hollow, for playtests.
+- Fixes from the first in-game playtest:
+  - Traffic spawned on the player's arrival point (two routes start there) and wrecked the player's ship. Ships now start partway along each route, and one-way ships restart only once the player is clear; `HollowTests` checks that the player survives arrival.
+  - Glows and signs were mis-scaled: a light's reach was used as its sprite size, and a sign's letter height as its font pixel size.
+  - New `SpatialHidden` tag keeps static rock tiles out of the spatial hash, ending the AI 127-proxy query overflow.
+  - `InteractionQueryJob` now runs `OverlapAabb` and then `CalculateDistance` per interactable body, instead of an all-hits point-distance query over every collider child. That cut 6–9 ms of main-thread time under the rock.
+  - `PowerBudgetValidation` skips blueprints with no power parts, which removed 86 PWR-W002 warnings.
 
 ### 2026-10-18 — DEV-023 option E: the Hollow, a pirate haven in an asteroid (lead, claude-opus-5-5)
 - Frank asked for a fifth option: smaller, a station built into an asteroid with construction around it and tunnels and highways inside, few ships, a black-market and pirate haven. The Khuchad Clan's haven in a two-lobed rock 1.7 km long: an approach maze of boulders and mines along a channel of red lamps, the Maw (guns, a field gate, the scan), the Ring highway inside at the flight plane, and caverns off it (the Black Bazaar in an open crater with the Quartermaster's reset, the Chop Shop with the refit cradle, the Fence, the Drop, the Furnace reactor shaft, the Den in a rammed warship), the Smugglers' Run to a hidden lane gate, and the Outer Works grown over the rock. 71 ships.

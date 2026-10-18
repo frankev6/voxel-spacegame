@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_hollow_boulder_0
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_hollow_boulder_0
+  formerIds: []
+  displayName: Hollow Boulder 10 m
+  cellSize: 2
+  payloadVersion: 1
+  payload: 564f5853010001009552596e134110ade76e3c63c6cee210b001931d66f30f27e02616a02848584242e2bffe39140718f90cfe8eac9c21e9a99e6a8f83632996bafd6a7dafba8688bedcbb1f86dfe6bfbeff9cfdf8339fcfe65f7fdf5ccf3e838852501619e31081f248804345440d2a8da2c25093971a8a3cca8c69504e8aa6a4fd520afdc858cd23ab791437c8aa2fb7ca9659652badb2a5d61aadb581c3361579ac1545ac0aca3828b09a378d952335aaaab48a0aab15a9d52e53abb31514b410250daf512d25a982cc84298df266a4bc53133822adc88d77c6003a448b09b1dbcf40eea4cbf8b40116d81586c31d485b3a108b96e388319124052b6c71c58cf78ce3dae8b5f0ed53819e6fef4ebff9afcfd06b588e5f884ab9efd03216f82886bf2de3547428a8768713e9dedd9852a8ef8f4ea4e2c4136e181f180752ac60b5cd75c6d867bc92d1da78c838945405d5735283dec70fa5be914b705bff378148f6f715632c8d1454d8194e1e2fbefe9e96e831de315e8bb616be7d3af092f1561a2a58fdeffa3b0a9b6f36be1ecea5751846f2150c2ed677859de105cec538f78b6b19cb7120b5eeecd52f58d35d32f6182399a48d8f186f8446418567a4268c81b814acb6b9fa22afefb5b68de38d075a6f7afd505d7a00y
+  cellCount: 320
+  boundsMin: {x: -4, y: -2, z: -6}
+  boundsMax: {x: 5, y: 3, z: 5}

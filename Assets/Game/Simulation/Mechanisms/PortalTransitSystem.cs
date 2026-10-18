@@ -19,7 +19,8 @@ namespace Game.Simulation.Mechanisms
     /// pose goes from the entry gate's frame to the exit gate's (same offset, turned by the difference of their yaws), its linear
     /// velocity turns with it (angular velocity is body-local and stays) and graphical smoothing restarts at the new pose. The second
     /// writer of a root's LocalTransform (architecture §8), for transits only; ZoneSystem skips the jump's gate crossings (JumpMetres).</summary>
-    [UpdateInGroup(typeof(GameplayPrePhysicsGroup), OrderFirst = true)]
+    // after the ship commands (SPEC-33 §5 decision 3: only FactionStandingSystem precedes ShipCommandGroup), still before propulsion
+    [UpdateInGroup(typeof(GameplayPrePhysicsGroup), OrderFirst = true), UpdateAfter(typeof(ShipCommandGroup))]
     public partial struct PortalTransitSystem : ISystem
     {
         Entity singleton;

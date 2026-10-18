@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_hollow_gun_light
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_hollow_gun_light
+  formerIds: []
+  displayName: Hollow Light Gun
+  cellSize: 2
+  payloadVersion: 1
+  payload: 564f5853010001007591514e834010866776a1d05612a3f109d13b7802937a8f0d52a2c6459a15e22b17e8ab67f2ad17c0f4021abd80d1995dd8fad012183efeff67675800e0fa978ee0e456d7c5a3ba6fb5563a3777a5ba3a7652519b523d57b9d6a74e30655e34b5715afa52e6abfa49ad744ecfaa698d291b5595cb87b642003842380b65480496d093180847177174894657785778573857c05c8204785d48522ddd0490d8d4db2246448af51974881d4fe241761830f478d043b4ad400cf7d829db547630e9d0061d7ce01e899688ace48117a173c6832213accfa7dcf15b0ecd68d864c659573ff1dfc336b3a109158a6d329a55d8653d50a390a1c7c3de384440d714ec1449609b44bbfa8e369bc4bbba47daa4f476c41bc39b04f0857396d717ee63f8ef58e1e792f00fy
+  cellCount: 85
+  boundsMin: {x: -3, y: -2, z: -3}
+  boundsMax: {x: 2, y: 1, z: 2}

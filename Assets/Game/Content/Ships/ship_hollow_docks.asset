@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_hollow_docks
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_hollow_docks
+  formerIds: []
+  displayName: Hollow Docks
+  cellSize: 2
+  payloadVersion: 1
+  payload: 564f5853010001009d53b14a0341109dd9dc2597cb662362a1cd9d855fe00788888588f80b4145140c0882fd451011fd0611b1f6332cad528b04144b2da2a2119d37b7ac888568e066dfbc79fb76ee764244b31ff233e96a677b6dabbdb9dbe98c7ec17667656763bd3d6d8888c98d18727de629c948e01df3a487331c7934c7a947f3ec3c4a78d1a3115ef6c8f29247861782ee8c83f08483f29483f49cc389f71c8eec7338f35ae1986149e926d7acc9c4a610d890b730a0222d773361a546642556a0684a8c1468bc443516805dc6909af277d3a34cfcb4c2bfdae5a8c1a75776e6829ca88e14b5bdac64a9284f6a206afbec19cbeaa9f80262d0111eab5df6f887fba174e9ca57f8937b8eabc7e53ed413d043681255c6211754f39b87405554decb65df85ee2afe31fac1a848fee73868a1a744c2739e8288a95412b8834cb901189dc501370a56ee05b27a815cf54f586ce159a257b6588ec7d5afe2bb8e896013ffd1653881ed56048f79cb0f9f8e1e81eb66cabde96839f920b7e540d8a61fa11a02aa9196bb988926b6a4ce2bd256410e8c15407405123d57f1471143fe6e78a0638a0aff6a854bff04y
+  cellCount: 194
+  boundsMin: {x: 0, y: -1, z: 0}
+  boundsMax: {x: 117, y: 0, z: 119}

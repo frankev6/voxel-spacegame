@@ -32,7 +32,7 @@ namespace Game.Simulation.Spatial
         public void OnCreate(ref SystemState state)
         {
             query = new EntityQueryBuilder(Allocator.Temp).WithAll<LocalTransform>()
-                .WithAny<VoxelGrid, SpatialBody>().WithOptions(EntityQueryOptions.IgnoreComponentEnabledState).Build(ref state);
+                .WithAny<VoxelGrid, SpatialBody>().WithNone<SpatialHidden>().WithOptions(EntityQueryOptions.IgnoreComponentEnabledState).Build(ref state);
             hash = SpatialHash.Create(128);
             singleton = state.EntityManager.CreateEntity(typeof(SpatialHash));
             state.EntityManager.SetComponentData(singleton, hash);

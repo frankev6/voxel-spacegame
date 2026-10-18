@@ -56,17 +56,21 @@ namespace Game.Galaxy.Interaction
             float3 center = Transforms[player].Position; float radius = 10;
             int proxy = Spatial.FindIndex(player);
             if (proxy >= 0) { var value = Spatial.Get(proxy); center = value.Center; radius = value.HullRadius; }
-            using var hits = new NativeList<DistanceHit>(Allocator.Temp);
-            var hitStorage = hits;
-            var collector = new AllHitsCollector<DistanceHit>(QueryRadius + radius, ref hitStorage);
-            Physics.CalculateDistance(new PointDistanceInput { Position = center, MaxDistance = QueryRadius + radius,
-                Filter = PhysicsLayers.InteractionQuery }, ref collector);
-            for (int i = 0; i < hits.Length; i++)
+            // the broadphase first, then the exact distance only to interactable bodies: a full point-distance query visits every
+            // child box of every collider in range, and a large static grid (the Hollow's rock tiles) has thousands
+            float reachMax = QueryRadius + radius;
+            using var bodies = new NativeList<int>(Allocator.Temp);
+            var inRadius = bodies;
+            Physics.OverlapAabb(new OverlapAabbInput { Aabb = new Aabb { Min = center - reachMax, Max = center + reachMax },
+                Filter = PhysicsLayers.InteractionQuery }, ref inRadius);
+            for (int i = 0; i < bodies.Length; i++)
             {
-                var hit = hits[i]; Entity candidate = hit.Entity;
+                var body = Physics.Bodies[bodies[i]]; Entity candidate = body.Entity;
                 if (candidate == player) continue;
                 if (!Interactables.HasComponent(candidate) && Owners.HasComponent(candidate)) candidate = Owners[candidate].Anchor;
                 if (!Interactables.HasComponent(candidate)) continue;
+                if (!body.CalculateDistance(new PointDistanceInput { Position = center, MaxDistance = reachMax,
+                    Filter = PhysicsLayers.InteractionQuery }, out DistanceHit hit)) continue;
                 if (Bodies.HasComponent(candidate) && Bodies[candidate].Grid == player) continue;
                 var interactable = Interactables[candidate];
                 float distance = math.max(0, hit.Distance - radius);
@@ -76,7 +80,7 @@ namespace Game.Galaxy.Interaction
                 if (target.Target != Entity.Null && (inRange < target.InRange ||
                     inRange == target.InRange && (distance > target.DistanceM ||
                     distance == target.DistanceM && candidate.Index >= target.Target.Index))) continue;
-                Entity grid = Bodies.HasComponent(candidate) ? Bodies[candidate].Grid : hit.Entity;
+                Entity grid = Bodies.HasComponent(candidate) ? Bodies[candidate].Grid : body.Entity;
                 ulong id = Ids.HasComponent(grid) ? Ids[grid].Value : 0;
                 target = new InteractionTarget { Target = candidate, Body = interactable.Body, Kind = interactable.Kind,
                     InRange = inRange, TemplateIndex = interactable.TemplateIndex, DistanceM = distance, GridPersistentId = id };
