@@ -2,7 +2,7 @@
 
 Writes hollow/hollow_blocks.bin, read by Game/Content/Build Hollow (Assets/Game/Editor/Content/HollowBuilder.cs), and
 Assets/Game/App/DevRuntime/Playground/HollowLayout.g.cs, the runtime layout (where each piece spawns, the forts, guns, lights,
-neon, signs, stations, moored ships, traffic routes, gunships and the cutaway mask).
+neon, signs, stations, moored ships, traffic routes, gunships, the wayfinding waypoints and paths, and the cutaway mask).
 
 bin: "HOLW", int32 version 1, int32 piece count; per piece: id and name (int16 length + UTF-8), int32 block count, blocks as
 int16 i, j, k, byte side, byte colour, byte material (0 rock, 1 hull, 2 trim); int32 gun count, guns as int16 i, j, k, byte big,
@@ -158,6 +158,20 @@ def main():
     for k, bo in enumerate(d.get("boulders", [])):
         size = min(range(4), key=lambda i: abs((10, 20, 30, 44)[i] - bo["r"]))
         w(f"            new Boulder(new float2({f(bo['x'])}, {f(bo['z'])}), {size}, {f((k * 2.399963) % 6.283185)}),")
+    w("        };")
+    # wayfinding: at each junction, tunnel mouth and the Maw's entrance, the heading (yaw) of the first leg toward each station
+    w("        [Game.Core.StaticStateOk(\"generated layout\")] internal static readonly Waypoint[] Waypoints =")
+    w("        {")
+    for wp in d.get("waypoints", []):
+        ids = list(wp["to"])
+        w(f"            new Waypoint(new float2({f(wp['x'])}, {f(wp['z'])}), new[] {{ {', '.join(q(i) for i in ids)} }}, "
+          f"new[] {{ {', '.join(f(wp['to'][i]) for i in ids)} }}),")
+    w("        };")
+    # each station's shortest flight-band path from the Maw's entrance, a point every ~20 m
+    w("        [Game.Core.StaticStateOk(\"generated layout\")] internal static readonly (string Station, float2[] Points)[] Paths =")
+    w("        {")
+    for sid, pts in d.get("paths", {}).items():
+        w(f"            ({q(sid)}, new[] {{ {', '.join(f'new float2({f(x)}, {f(z)})' for x, z in pts)} }}),")
     w("        };")
     ins = d["inside"]
     w(f"        internal const float InsideCell = {f(ins['cell'])}, InsideX0 = {f(ins['x0'])}, InsideZ0 = {f(ins['z0'])};")

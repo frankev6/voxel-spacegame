@@ -38,6 +38,13 @@ namespace Game.Tests.PlayMode.App
             yield return new WaitForSeconds(6);
             var player = Host.Context.PlayerShipRoot;
             Assert.IsTrue(EM.Exists(player) && EM.GetComponentData<VoxelGrid>(player).Kind == GridKind.Ship, "the player survives arriving at the Hollow");
+            // and no ship spawned on another: every traffic ship and gunship is still a flying, crewed ship
+            using (var q = EM.CreateEntityQuery(ComponentType.ReadOnly<AiBrain>(), ComponentType.ReadOnly<VoxelGrid>()))
+            {
+                using var brains = q.ToEntityArray(Allocator.Temp);
+                int flying = 0; foreach (var e in brains) if (EM.GetComponentData<VoxelGrid>(e).Kind == GridKind.Ship) flying++;
+                Assert.GreaterOrEqual(flying, HollowLayout.Traffic.Length + HollowLayout.Gunships.Length, "no Hollow ship is wrecked on arrival");
+            }
 
             // the forts turn steadily on their rocks
             using (var q = EM.CreateEntityQuery(ComponentType.ReadOnly<Mover>(), ComponentType.ReadOnly<CameraSeeThrough>(), ComponentType.ReadOnly<LocalTransform>()))

@@ -31,10 +31,12 @@ namespace Game.Editor.Content
         [Game.Core.StaticStateOk("constant palette additions")]
         static readonly (int index, string name, Color32 colour)[] Palette =
         {
-            (40, "Rock 1", new Color32(0x3A, 0x34, 0x2E, 255)), (41, "Rock 2", new Color32(0x42, 0x3B, 0x33, 255)),
-            (42, "Rock 3", new Color32(0x4A, 0x42, 0x39, 255)), (43, "Rock 4", new Color32(0x2F, 0x2B, 0x27, 255)),
-            (44, "Rock 5", new Color32(0x55, 0x4B, 0x40, 255)), (45, "Rock 6", new Color32(0x39, 0x33, 0x2D, 255)),
-            (46, "Rock section", new Color32(0x1A, 0x15, 0x12, 255)),
+            // light grey stone (owner: "subtle large moon craters, soft, and light gray"); RockSurface.hlsl shades the craters
+            // within a few percent of each other: the blocks must not read as a patchwork, the craters carry the variation
+            (40, "Rock 1", new Color32(0xB2, 0xB0, 0xAB, 255)), (41, "Rock 2", new Color32(0xB5, 0xB3, 0xAE, 255)),
+            (42, "Rock 3", new Color32(0xB0, 0xAE, 0xA9, 255)), (43, "Rock 4", new Color32(0xB4, 0xB2, 0xAC, 255)),
+            (44, "Rock 5", new Color32(0xB7, 0xB5, 0xB0, 255)), (45, "Rock 6", new Color32(0xB1, 0xAF, 0xAA, 255)),
+            (46, "Rock section", new Color32(0x8E, 0x8C, 0x88, 255)),
             (48, "Neon pink", new Color32(0xFF, 0x2E, 0x88, 255)), (49, "Neon cyan", new Color32(0x22, 0xE6, 0xFF, 255)),
             (50, "Neon amber", new Color32(0xFF, 0xB0, 0x00, 255)),
         };
@@ -44,7 +46,9 @@ namespace Game.Editor.Content
         {
             if (!File.Exists(Source)) throw new FileNotFoundException("Run python3 ArtSource/Hub/hollow_codegen.py first", Source);
             TrackStructureBuilder.EnsureBlock(); LargeHullBuilder.Make(4); EnsurePalette();
-            EnsureProfile(TrafficProfile, "ai_civilian", 12); EnsureProfile(GuardProfile, "ai_default", 160);
+            for (int side = 1; side <= 4; side++) EnsureRock(side);
+            Game.Editor.Art.NocturneBrickLook.BakeRock();   // the rock layer's shading (style 6)
+            EnsureProfile(TrafficProfile, "ai_civilian", 12); EnsureProfile(GuardProfile, "ai_default", 60);   // a tight patrol: the posts sit close to the rock
             AssetDatabase.SaveAssets();
             int pieces = 0, cells = 0;
             using (var service = new ContentService(ContentDatabaseBuilder.Rebuild()))
@@ -54,6 +58,7 @@ namespace Game.Editor.Content
                 ushort Block(string id) => catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId(id)));
                 ushort hull = Block("block_hull"), frame = Block("block_track_frame");
                 var large = new[] { hull, hull, Block("block_hull_large_2"), Block("block_hull_large_3"), Block("block_hull_large_4") };
+                var rock = new[] { Block(RockBlock), Block(RockBlock), Block(RockBlock + "_large_2"), Block(RockBlock + "_large_3"), Block(RockBlock + "_large_4") };
                 var kit = new Kit(Block("block_core_small"), Block("block_reactor_small"), Block("block_capacitor_small"), Block("weapon_plasma_turret_medium"));
 
                 using var reader = new BinaryReader(File.OpenRead(Source));
@@ -73,7 +78,7 @@ namespace Game.Editor.Content
                     {
                         // gun kits first, so the rock never takes their cells
                         foreach (var g in mounts) kit.Place(put, new int3(g.i, g.j, g.k), g.big != 0, g.orient);
-                        foreach (var b in list) put(b.m == 2 && b.s == 1 ? frame : large[math.clamp((int)b.s, 1, 4)], new int3(b.i, b.j, b.k), b.c, 0);
+                        foreach (var b in list) put(b.m == 2 && b.s == 1 ? frame : (b.m == 0 ? rock : large)[math.clamp((int)b.s, 1, 4)], new int3(b.i, b.j, b.k), b.c, 0);
                     });
                     pieces++; cells += made;
                 }
@@ -84,11 +89,28 @@ namespace Game.Editor.Content
                 for (int k = 0; k < BoulderRadii.Length; k++)
                 {
                     int size = k;
-                    cells += Make(service, content, Boulder + k, "Hollow Boulder " + BoulderRadii[k] + " m", 2, put => Rock(put, large[2], BoulderRadii[size], size));
+                    cells += Make(service, content, Boulder + k, "Hollow Boulder " + BoulderRadii[k] + " m", 2, put => Rock(put, rock[2], BoulderRadii[size], size));
                 }
             }
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", $"Built the Hollow: {pieces} pieces and two guns, {cells} cells.");
+        }
+
+        public const string RockBlock = "block_rock";
+
+        /// <summary>Rock blocks (owner: "the texture of the asteroid should be rock not the ship hull texture"): block_hull and the large
+        /// hull cubes with the rock material layer, so the Hollow's stone shades as stone (RockSurface.hlsl) and keeps hull's HP and mass.</summary>
+        static void EnsureRock(int side)
+        {
+            const string blocks = "Assets/Game/Content/Blocks/";
+            string from = side == 1 ? "block_hull" : "block_hull_large_" + side, id = side == 1 ? RockBlock : RockBlock + "_large_" + side, path = blocks + id + ".asset";
+            if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset(blocks + from + ".asset", path)) throw new InvalidOperationException("copy " + from);
+            var asset = AssetDatabase.LoadMainAssetAtPath(path); var so = new SerializedObject(asset);
+            so.FindProperty("id").stringValue = id; so.FindProperty("formerIds").arraySize = 0;
+            so.FindProperty("displayName").stringValue = side == 1 ? "Rock" : $"Rock {side}×{side}×{side}";
+            so.FindProperty("description").stringValue = "Asteroid stone: scenery for stations built into rock.";
+            so.FindProperty("materialLayer").intValue = Game.Editor.Art.NocturneBrickLook.Rock;
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
         }
 
         static string Read(BinaryReader r) => Encoding.UTF8.GetString(r.ReadBytes(r.ReadInt16()));

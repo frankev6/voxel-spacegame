@@ -78,6 +78,13 @@ namespace Game.App.DevRuntime.Playground
             internal readonly float2 Position; internal readonly int Size; internal readonly float Yaw;
             internal Boulder(float2 position, int size, float yaw) { Position = position; Size = size; Yaw = yaw; }
         }
+        /// <summary>A junction or tunnel mouth where a pilot chooses: for each station reachable from it, the heading of the first leg of
+        /// the shortest way there (wayfinding holograms point along it).</summary>
+        internal readonly struct Waypoint
+        {
+            internal readonly float2 Position; internal readonly string[] To; internal readonly float[] Yaw;
+            internal Waypoint(float2 position, string[] to, float[] yaw) { Position = position; To = to; Yaw = yaw; }
+        }
         internal readonly struct Beacon
         {
             internal readonly float2 Position; internal readonly Color Colour;

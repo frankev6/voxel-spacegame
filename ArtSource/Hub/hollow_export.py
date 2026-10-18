@@ -145,6 +145,39 @@ def offset_line(pts, d, closed=False):
     return out
 
 
+def chaikin(pts, closed=False, iters=3):
+    """Corner cutting: a polyline's corners rounded (the ends of an open one kept)."""
+    P = list(pts[:-1]) if closed and pts[0] == pts[-1] else list(pts)
+    for _ in range(iters):
+        Q = [] if closed else [P[0]]
+        n = len(P)
+        for i in range(n if closed else n - 1):
+            a, b = P[i], P[(i + 1) % n]
+            Q += [(0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]), (0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1])]
+        P = Q if closed else Q + [P[-1]]
+    return P + [P[0]] if closed else P
+
+
+def arclen(pts):
+    s = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        s.append(s[-1] + math.dist(a, b))
+    return s
+
+
+def normals(pts, closed=False):
+    """Unit right-hand normals of a dense polyline."""
+    n = len(pts)
+    out = []
+    for i in range(n):
+        a = pts[i - 1] if (closed or i > 0) else pts[i]
+        b = pts[(i + 1) % n] if (closed or i < n - 1) else pts[i]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dz) or 1.0
+        out.append((dz / L, -dx / L))
+    return out
+
+
 # ---------------------------------------------------------------- the rock field (numpy, the design's formulas)
 def noise(x, y, seed):
     v = 0.0
@@ -405,6 +438,81 @@ class Exporter:
         self.fort_b = [round(math.degrees(math.atan2(f["c"][0] - self.station_c[0], f["c"][1] - self.station_c[1])) % 360)
                        for f in self.forts]
 
+    # ------------------------------------------------------------ natural tunnels (owner: "the tunnels should be tunneled less
+    # linear and more naturally, also ... there is a tunnel that doesn't reach its destination")
+    def naturalise(self):
+        """Every tunnel bored through the rock, not extruded. The Ring's corners rounded and its line meandering in gentle
+        S-curves (no straight run over ~80 m), still meeting the Maw's throat head on; each side tunnel meandering between its
+        ends, starting on the new Ring and running on into its cavern when it stopped short of it (the Market's south tunnel
+        stopped 3.5 m short of the Market's wall: the owner's dead end); each one's width breathing along it and flaring where
+        it opens. The Maw's throat stays straight (its doors, field gate and guns are laid along it); its walls get the noise."""
+        smooth = lambda t: t * t * (3 - 2 * t)
+        new, self.tprof, self.tgoal = [], [], []       # tgoal: where each side tunnel leads (a cavern's index, "den", "out")
+        ring0, maw0 = self.ring, self.maw_t
+        # the Ring: a whole number of waves round it, so it closes; held still where the Maw comes in
+        P = densify(chaikin(densify(ring0, 40.0), closed=True, iters=3), 8.0)     # corners rounded locally, ~15 m in
+        P[-1] = P[0]
+        s = arclen(P); tot = s[-1]
+        N = normals(P[:-1], closed=True); N.append(N[0])
+        k1 = max(3, round(tot / 240)); k2 = max(k1 + 2, round(tot / 105))
+        ring, hw = [], []
+        for p, si, n in zip(P, s, N):
+            ph = 2 * math.pi * si / tot
+            hold = smooth(min(math.dist(p, maw0[-1]) / 110, 1.0))
+            off = hold * (10.0 * math.sin(k1 * ph + 0.7) + 4.0 * math.sin(k2 * ph + 2.1))
+            ring.append((p[0] + n[0] * off, p[1] + n[1] * off))
+            hw.append(41.5 + 2.5 * math.sin((k1 + 1) * ph + 1.3) + 1.5 * math.sin(k2 * ph - 0.4))   # 75..91 m wide
+        ring[-1] = ring[0]
+        on_ring = lambda q: min(((seg_dist(q, a, b), a, b) for a, b in zip(ring, ring[1:])), key=lambda t: t[0])
+        for pts, w in self.tunnels:
+            if pts is ring0:
+                new.append((ring, w)); self.tprof.append(dict(kind="ring", s=np.array(arclen(ring)), hw=np.array(hw), base=min(hw) - 2))
+                self.tgoal.append(None)
+                continue
+            if pts is maw0:
+                new.append((maw0, w)); self.tprof.append(dict(kind="maw", s=np.array(arclen(maw0)), hw=np.full(len(maw0), w / 2), base=w / 2))
+                self.tgoal.append(None)
+                continue
+            traffic = pts is self.back                          # the back door: one-way traffic flies out through it
+            pts = list(pts)
+            if poly_dist(pts[0], ring0) < 5:
+                _, a, b = on_ring(pts[0])                       # it starts on the Ring: on the new one
+                ax, az = b[0] - a[0], b[1] - a[1]
+                t = max(0.0, min(1.0, ((pts[0][0] - a[0]) * ax + (pts[0][1] - a[1]) * az) / (ax * ax + az * az or 1)))
+                pts[0] = (a[0] + ax * t, a[1] + az * t)
+            c, r = min(((cv[0], cv[1]) for cv in self.caverns if cv[3] is not None), key=lambda cv: math.dist(cv[0], pts[-1]) - cv[1])
+            gap = math.dist(c, pts[-1]) - w / 2 - r
+            self.tgoal.append(next(i for i, cv in enumerate(self.caverns) if cv[0] == c) if gap < 40 else
+                              "out" if float(self.rf.field(*pts[-1])) <= 0 else "den")
+            if -w / 2 < gap < 40:                               # it ends at a cavern: run it well into it
+                u = ((pts[-1][0] - c[0]) / math.dist(c, pts[-1]), (pts[-1][1] - c[1]) / math.dist(c, pts[-1]))
+                pts.append((c[0] + u[0] * r * 0.7, c[1] + u[1] * r * 0.7))
+                if gap > 0:
+                    self.log.append(f"dead end fixed: the tunnel from ({pts[0][0]:.0f}, {pts[0][1]:.0f}) stopped {gap:.1f} m short "
+                                    f"of the cavern at ({c[0]:.0f}, {c[1]:.0f}); it now runs {r * 0.3 + gap + w / 2:.0f} m on into it")
+            D = densify(chaikin(densify(pts, 30.0), iters=3), 8.0)
+            s = arclen(D); tot = s[-1]
+            N = normals(D)
+            amp = 6.0 if tot < 160 else 11.0
+            wl = max(110.0, min(200.0, tot / 1.5))
+            base = (max(w, 76.0) if traffic else w) / 2
+            seed = (pts[0][0] * 0.013 + pts[0][1] * 0.007) % 6.283
+            out, hws = [], []
+            for p, si, n in zip(D, s, N):
+                hold = smooth(min(si / 45, (tot - si) / 45, 1.0))
+                off = hold * amp * (math.sin(2 * math.pi * si / wl + seed) + 0.35 * math.sin(2 * math.pi * si / (wl * 0.45) + 2 * seed))
+                out.append((p[0] + n[0] * off, p[1] + n[1] * off))
+                flare = 0.4 * math.exp(-si / 30) + (0.0 if traffic else 0.4 * math.exp(-(tot - si) / 30))
+                hws.append(max(base * (1 + 0.22 * math.sin(2 * math.pi * si / (wl * 0.7) + seed * 1.7)), 38.0 if traffic else 23.0) * (1 + flare))
+            new.append((out, w))
+            self.tprof.append(dict(kind="side", s=np.array(arclen(out)), hw=np.array(hws),
+                                   base=36.0 if traffic else min(0.8 * w / 2, min(hws) - 2)))    # the back door is meant to open
+            if traffic:
+                self.back = out
+        self.tunnels = new
+        self.ring = ring
+        self.ring_w = 2 * (max(hw) + 6)
+
     # ------------------------------------------------------------ the rock: classification at 2 m
     def classify(self):
         rf = self.rf
@@ -423,29 +531,95 @@ class Exporter:
         kind = np.where(foot, 1, 0).astype(np.int8)          # 0 outside, 1 rock, 2 tunnel, 3 cavern
         cav = np.full(foot.shape, -1, np.int16)
         fj = np.full(foot.shape, -6, np.int16)               # floor, coarse index (y = -24)
+        rng = random.Random(43)
+        edge = edt(~foot, 12) * CC                            # m from the rock's outside: nothing natural breaks through it
+        wn = 2.2 * noise(GX * 1.9, GZ * 1.9, 31) + 1.0 * noise(GX * 4.3, GZ * 4.3, 37)     # the walls' noise, about +-5 m
+        # caverns: an outline that bulges and wanders (outward only, so nothing built in them is buried)
         for idx, (c, r, fl, ce) in enumerate(self.caverns):
-            mm = foot & (np.hypot(GX - c[0], GZ - c[1]) < r)
             if ce is None:
                 continue                                      # a crater: a dent in the top only, never a hole
+            dd = np.hypot(GX - c[0], GZ - c[1])
+            th = np.arctan2(GX - c[0], GZ - c[1])
+            h = 0.6 * np.sin(3 * th + idx * 1.7) + 0.4 * np.sin(5 * th - idx * 2.9)
+            reff = r * (1 + 0.09 * (0.5 + 0.5 * h)) + np.abs(wn) * 0.8
+            mm = foot & ((dd < r) | ((dd < reff) & (edge >= 12)))
             kind[mm] = 3; cav[mm] = idx
             fj[mm] = -8 if idx == self.market_i else -6        # the Market's floor at -32
+        # tunnels: each one's width (its profile along it) plus the walls' noise; beyond its design width only away from the
+        # rock's outside, so a wall never breaks through to space (the Maw's throat and the back door are meant to)
         self.tdist = []
-        for pts, w in self.tunnels:
-            d = np.full(foot.shape, np.inf)
-            for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+        corr = np.zeros(foot.shape, bool)
+        tunnel_at = np.zeros(foot.shape, bool)
+        for (pts, w), pr in zip(self.tunnels, self.tprof):
+            d = np.full(foot.shape, np.inf); sn = np.zeros(foot.shape)
+            S = pr["s"]
+            for i, ((ax, ay), (bx, by)) in enumerate(zip(pts, pts[1:])):
                 dx, dy = bx - ax, by - ay
                 L2 = dx * dx + dy * dy
                 t = np.clip(((GX - ax) * dx + (GZ - ay) * dy) / L2, 0, 1) if L2 > 0 else 0.0
-                d = np.minimum(d, np.hypot(GX - (ax + dx * t), GZ - (ay + dy * t)))
+                dd = np.hypot(GX - (ax + dx * t), GZ - (ay + dy * t))
+                better = dd < d
+                d = np.where(better, dd, d); sn = np.where(better, S[i] + t * math.sqrt(L2), sn)
             self.tdist.append(d)
-            corr = d < w / 2 if not hasattr(self, "_corr") else (self._corr | (d < w / 2))
-            self._corr = corr
-            mm = foot & (kind == 1) & (d < w / 2)
+            if pr["kind"] == "maw":
+                cut = d < w / 2 + np.maximum(wn, 0) * 0.6      # the throat: bulges only (its doors and guns stand on its walls)
+            else:
+                cut = (d < pr["base"]) | ((d < np.interp(sn, S, pr["hw"]) + wn) & (edge >= 12))
+            corr |= cut
+            mm = foot & (kind == 1) & cut
             kind[mm] = 2
+            if pr["kind"] != "maw":
+                tunnel_at |= mm
+        self._corr = corr
+        # alcoves and side pockets, 10-30 m deep, beside the lanes (half of them a pit, floor -28)
+        self.pockets = 0
+        for (pts, w), pr in zip(self.tunnels, self.tprof):
+            if pr["kind"] == "maw":
+                continue
+            S, HW = pr["s"], pr["hw"]
+            Nn = normals(pts, closed=pr["kind"] == "ring")
+            sp = rng.uniform(40, 120)
+            while sp < S[-1] - 40:
+                i = int(np.searchsorted(S, sp))
+                side = rng.choice((-1, 1)); depth = rng.uniform(10, 30)
+                cc = (pts[i][0] + Nn[i][0] * side * (HW[i] + depth * 0.35), pts[i][1] + Nn[i][1] * side * (HW[i] + depth * 0.35))
+                rad = depth * 0.55 + 6
+                mm = foot & (kind == 1) & (edge >= 12) & (np.hypot(GX - cc[0], GZ - cc[1]) < rad * (1 + 0.12 * noise(GX * 3, GZ * 3, 47)))
+                if mm.any():
+                    kind[mm] = 2; tunnel_at |= mm; self.pockets += 1
+                    if rng.random() < 0.5:
+                        fj[mm] = -7
+                sp += rng.uniform(110, 190)
+        # the tunnels' floors wander a little: raised shelves at -20, dips to -28 (the Maw's throat stays level)
+        nf = noise(GX * 1.3 + 50, GZ * 1.3, 23) / 1.6
+        fj = np.where(tunnel_at & (nf > 0.55), -5, np.where(tunnel_at & (nf < -0.6), -7, fj)).astype(np.int16)
         # the Den: the rammed warship's hangar is cut into the rock where its stern lies in it
         hl = self.hulk_frame(GX, GZ)
         mm = foot & (np.abs(hl[1]) < self.hulk["width"] / 2 - 4) & (hl[0] > -self.hulk_body - 4) & (hl[0] < 4) & (kind == 1)
         kind[mm] = 3; cav[mm] = -2
+        # pillars and rock spurs left standing in the wide places, well off every route, station and building
+        lanes = self.pre_lanes = [[tuple(p) for p in r["route"]] + ([tuple(r["route"][0])] if r["loop"] else []) for r in self.routes()]
+        spots = [(s_["x"], s_["z"]) for s_ in self.stations()] + [centroid([tuple(q) for q in b["pts"]]) for b in self.opt["buildings"]]
+        wall = edt(kind < 2, 10) * CC
+        hulk_zone = (np.abs(hl[1]) < self.hulk["width"] / 2 + 10) & (hl[0] > -self.hulk_body - 20) & (hl[0] < 200)
+        cand = np.argwhere((kind >= 2) & (cav != -2) & ~hulk_zone)
+        self.pillars = []
+        for n in rng.sample(range(len(cand)), min(len(cand), 4000)):
+            if len(self.pillars) >= 18:
+                break
+            i, k = cand[n]
+            p = (float(GX[i, k]), float(GZ[i, k]))
+            R = rng.uniform(6, 12)
+            wd = float(wall[i, k])
+            if not (wd < 0.8 * R or R + 12 < wd < R + 40):   # a spur off a wall, or a pillar with room to fly round it
+                continue
+            if min(poly_dist(p, L_) for L_ in lanes) < R + 40 or min(math.dist(p, q) for q in spots) < R + 40:
+                continue
+            if any(math.dist(p, q) < 90 for q in self.pillars):
+                continue
+            mm = foot & (np.hypot(GX - p[0], GZ - p[1]) < R * (1 + 0.18 * noise(GX * 2.6, GZ * 2.6, 53)))
+            kind[mm] = 1; cav[mm] = -1
+            self.pillars.append(p)
         self.kind, self.cav, self.fj = kind, cav, fj
         self.inner = kind >= 2
         dtop = rf.top(GX, GZ)
@@ -740,8 +914,9 @@ class Exporter:
             elif dist == "chop" and k == "arm":
                 apts = box(c, p_["heading"], p_["length"], 4)
                 tip = polar(p_["heading"], p_["length"] / 2 + 2, c)
-                if self.col_kind(*tip)[0] == 2:              # its outer end stands in a tunnel: it would block the lane
-                    self.log.append(f"docks arm at bearing {p_['heading']:.0f} dropped: it stands across a tunnel mouth")
+                if self.col_kind(*tip)[0] == 2 or min(poly_dist(q, L_) for q in (tip, c) for L_ in self.pre_lanes) < 30:
+                    # its outer end stands in a tunnel, or it reaches into a route: it would block the lane
+                    self.log.append(f"docks arm at bearing {p_['heading']:.0f} dropped: it stands across a tunnel mouth or a route")
                     self.dropped_arms.append(c)
                     continue
                 self.solid("docks", apts, -2, 2, HULL["metal"], hollow=False, fine=True)
@@ -1122,14 +1297,16 @@ class Exporter:
         neon = []
         for f in opt["fx"]:
             if f["type"] == "neon_line":
-                y = self.light_y(*f["pts"][0], f["z"])
-                for a, b in zip(f["pts"], f["pts"][1:]):
-                    if math.dist(a, b) > 0.5:
-                        neon.append(dict(ax=round(a[0], 1), az=round(a[1], 1), bx=round(b[0], 1), bz=round(b[1], 1), y=round(y, 1),
-                                         col=f["col"].upper()))
+                # the design's tunnel-edge lines ran straight along the old axes, across cavern floors, rock and out past the
+                # Maw: the tunnels' edges are lit by the light strips along the walls' feet instead (Furnisher.wall_pipes), in
+                # short segments that bend with the wall and stop at each cavern's mouth
+                continue
             elif f["type"] == "neon":
                 a = polar(f["heading"], -f["length"] / 2, f["c"]); b = polar(f["heading"], f["length"] / 2, f["c"])
                 y = self.light_y(*f["c"], f["z"])
+                if any(self.col_kind(*q)[0] == 1 and y < self.ytop_at(*q) for q in (a, b, f["c"])):
+                    self.log.append(f"neon bar at ({f['c'][0]:.0f}, {f['c'][1]:.0f}) dropped: the natural walls put it in the rock")
+                    continue
                 neon.append(dict(ax=round(a[0], 1), az=round(a[1], 1), bx=round(b[0], 1), bz=round(b[1], 1), y=round(y, 1),
                                  col=f["col"].upper()))
             elif f["type"] == "field_wall":                   # the field gate across the Maw's throat, wall to wall
@@ -1172,7 +1349,10 @@ class Exporter:
                 if s["c"][1] < my - 200:
                     gs.append(dict(blueprint="ship_nocturne_wraith", x=s["c"][0], z=s["c"][1], radius=140.0))
                 elif poly_dist(tuple(s["c"]), [tuple(p) for p in launch] + [polar(55, 700, self.hulk["c"])]) < 40:
-                    gs.append(dict(blueprint="ship_nocturne_wraith", x=s["c"][0], z=s["c"][1], radius=110.0))
+                    # beside the launch lane, alternately left and right of it, not on it (the Den's traffic flies out there)
+                    side = 1 if len(gs) % 2 else -1
+                    q = polar(self.hulk["heading"] + 90 * side, 45, tuple(s["c"]))
+                    gs.append(dict(blueprint="ship_nocturne_wraith", x=round(q[0], 1), z=round(q[1], 1), radius=110.0))
         L["gunships"] = gs
         L["stations"] = self.stations()
         L["traffic"] = self.routes()
@@ -1244,20 +1424,24 @@ class Exporter:
         jb = max((jb0 + o_ for o_ in (0, -10, 10, -20, 20, -30, 30)),
                  key=lambda b_: min(seg_dist(q, join, polar(b_, R, mk)) for q in docked) - abs(b_ - jb0) * 0.05)
         lane = lambda b0, b1, st=10: [polar(b, R, mk) for b in np.arange(b0, b1 + 0.1, st)]
+        # keep right on the Ring and its connectors (owner: "most ships are just colliding everywhere"): every route on the Ring
+        # flies the loops' lane for its direction, 10 m right of the centreline, so no two routes meet head on
+        kr = lambda pts: offset_line(pts, 10)
         to_m = min((ring_path(jm, sm), ring_path(jm, (sm + 1) % n)), key=lambda q: poly_len(q) + math.dist(q[-1], join))
-        r1 = maw_in + to_m + [join] + lane(jb, jb + 200)
+        r1 = maw_in + kr(to_m + [join, polar(jb, R, mk)]) + lane(jb, jb + 200)
         r2 = offset_line(self.ring, 10, closed=True)
         r3 = offset_line(self.ring[::-1], 10, closed=True)
-        spur = min((pts for pts, w in self.tunnels if w <= 50), key=lambda t: math.dist(t[-1], self.docks))
-        r4 = maw_in + ring_path(jm, idx(spur[0])) + [spur[-1], self.docks]
         back = self.back
         sd, jd = nearest_seg(self.docks)
-        r5 = [self.docks, jd] + min((ring_path(sd, idx(back[0])), ring_path((sd + 1) % n, idx(back[0]))),
-                                    key=lambda q: poly_len(q) + math.dist(q[0], jd)) + list(back[1:])
+        # to the Docks through their wide mouth on the Ring (the 50 m spur to their south leaves a ship 23 m from its walls)
+        to_d = min((ring_path(jm, sd), ring_path(jm, (sd + 1) % n)), key=lambda q: poly_len(q) + math.dist(q[-1], jd))
+        r4 = maw_in + kr(to_d + [jd, self.docks])
+        r5 = kr([self.docks, jd] + min((ring_path(sd, idx(back[0])), ring_path((sd + 1) % n, idx(back[0]))),
+                                       key=lambda q: poly_len(q) + math.dist(q[0], jd))) + list(back[1:])
         ext = polar(math.degrees(math.atan2(back[-1][0] - back[-2][0], back[-1][1] - back[-2][1])), 200, back[-1])
         r5 = r5 + [ext]
         r6 = lane(0, 360)
-        r7 = lane(jb + 160, jb + 360) + [join] + list(reversed(to_m)) + maw_out
+        r7 = lane(jb + 160, jb + 360) + kr([polar(jb + 360, R, mk), join] + list(reversed(to_m))) + maw_out
         hc, hd = self.hulk["c"], self.hulk["heading"]
         r8 = [polar(hd, 40, hc), polar(hd, 160, hc), polar(hd, 700, hc)]
         routes = [("maw_to_market", r1, False, "ship_nocturne_vesper"), ("ring_clockwise", r2, True, "ship_nocturne_wraith"),
@@ -1278,6 +1462,73 @@ class Exporter:
                 rs = rs[:-1]
             out.append(dict(name=name, blueprint=bp, route=[list(p) for p in rs], loop=loop))
         return out
+
+    # ------------------------------------------------------------ berths (owner: "most ships are just colliding everywhere")
+    def berth_ok(self, q, m, placed, L, occ, routes):
+        """Whether a moored ship (blueprint length l) may lie at q: in open air beyond its half-length + 15 m from rock and
+        structure cells at the flight plane, 10 m clear of the other berths, 40 m from every route, off the stations' circles,
+        the gunship posts and the field's boulders, on the same side of the rock's edge as the design put it."""
+        h = ship_len(m["blueprint"]) / 2
+        b = L["bounds"]
+        if not (b[0] + h < q[0] < b[2] - h and b[1] + h < q[1] < b[3] - h):
+            return False
+        k = self.col_kind(*q)[0]
+        if k == 1 or (k == 0) != m["_out"]:
+            return False
+        if any(math.dist(q, (o["x"], o["z"])) < h + ship_len(o["blueprint"]) / 2 + BERTH_GAP for o in placed):
+            return False
+        if any(math.dist(q, (s["x"], s["z"])) < STATION_R + h + 2 for s in L["stations"]):
+            return False
+        if any(math.dist(q, (g["x"], g["z"])) < h + 30 for g in L["gunships"]):
+            return False
+        if any(math.dist(q, (bo["x"], bo["z"])) < boulder_reach(bo["r"]) + h + BERTH_GAP for bo in L["boulders"]):
+            return False
+        if any(poly_dist(q, pts) < max(BERTH_LANE, h + ROUTE_CLEAR) for pts in routes):
+            return False
+        return occ.clear_at_least(q, h + BERTH_ROCK)
+
+    def berth_moored(self, L, occ):
+        """Every moored ship where the design docked it if that berth is clear; else the nearest clear berth within 160 m; else
+        dropped (never overlapped)."""
+        routes = [route_pts(r) for r in L["traffic"]]
+        ships = L["moored"]
+        for m in ships:
+            m["_out"] = self.col_kind(m["x"], m["z"])[0] == 0
+        placed, left = [], []
+        for m in ships:
+            (placed if self.berth_ok((m["x"], m["z"]), m, placed, L, occ, routes) else left).append(m)
+        moved = dropped = 0
+        for n, m in enumerate(left):
+            spot = None
+            for r in range(4, 161, 4):
+                for a in range(0, 360, 10):
+                    q = polar(a + n * 7, r, (m["x"], m["z"]))
+                    if self.berth_ok(q, m, placed, L, occ, routes):
+                        spot = q; break
+                if spot:
+                    break
+            if spot:
+                self.log.append(f"moored {m['blueprint'][14:]} at ({m['x']:.0f}, {m['z']:.0f}) moved {r} m to a clear berth")
+                m["x"], m["z"] = round(spot[0], 1), round(spot[1], 1)
+                placed.append(m); moved += 1
+            else:
+                self.log.append(f"moored {m['blueprint'][14:]} at ({m['x']:.0f}, {m['z']:.0f}) dropped: no clear berth within 160 m")
+                dropped += 1
+        order = {id(m): i for i, m in enumerate(ships)}
+        L["moored"] = sorted(placed, key=lambda m: order[id(m)])
+        self.berths = dict(design=len(ships), kept=len(ships) - len(left), moved=moved, dropped=dropped)
+
+    def recheck_berths(self, L, occ):
+        """After the routes moved: drop any berth a route now passes too close to (and say so)."""
+        routes = [route_pts(r) for r in L["traffic"]]
+        keep = []
+        for m in L["moored"]:
+            if self.berth_ok((m["x"], m["z"]), m, keep, L, occ, routes):
+                keep.append(m)
+            else:
+                self.log.append(f"moored {m['blueprint'][14:]} at ({m['x']:.0f}, {m['z']:.0f}) dropped after the routes moved")
+                self.berths["dropped"] += 1
+        L["moored"] = keep
 
 
 def blueprint(cls, livery):
@@ -1342,6 +1593,1083 @@ def world_cells(p, band=None):
     return B, oi, ok_
 
 
+# ---------------------------------------------------------------- the static pieces on one grid
+def edt(occ, R):
+    """Distance in cells from each cell's centre to the nearest edge of an occupied cell: exact, capped at R cells."""
+    W, H = occ.shape
+    g = np.zeros((W, H))
+    last = np.full(H, -1e9)
+    for i in range(W):
+        last = np.where(occ[i], i, last); g[i] = i - last
+    last = np.full(H, 1e9)
+    for i in range(W - 1, -1, -1):
+        last = np.where(occ[i], i, last); g[i] = np.minimum(g[i], last - i)
+    g = np.minimum(np.maximum(g - 0.5, 0.0), R) ** 2
+    d2 = g.copy()
+    for dz in range(1, R + 1):
+        e = (dz - 0.5) ** 2
+        d2[:, dz:] = np.minimum(d2[:, dz:], g[:, :-dz] + e)
+        d2[:, :-dz] = np.minimum(d2[:, :-dz], g[:, dz:] + e)
+    return np.minimum(np.sqrt(d2), R)
+
+
+class Occupancy:
+    """Every piece's blocks on one global 2 m grid: the flight band (blocks touching y -8..+8, and the guns' grids), the columns
+    of the high layer (the cutaway mask), the floor band y -36..-8 in 3D (where the floor clutter goes) and the band's
+    distance field (for the berths and the routes)."""
+    J0, J1 = -18, -4                                     # the floor band, cells: y -36 .. -8
+
+    def __init__(self, pieces, guns, field=True):
+        allB = []
+        for p in pieces:
+            B, oi, ok_ = world_cells(p)
+            allB.append((p, B, oi, ok_))
+        self.allB = allB
+        gx0 = min(oi + int(B[:, 0].min()) for _, B, oi, _ in allB) - 2
+        gz0 = min(ok_ + int(B[:, 2].min()) for _, B, _, ok_ in allB) - 2
+        gx1 = max(oi + int((B[:, 0] + B[:, 3]).max()) for _, B, oi, _ in allB) + 2
+        gz1 = max(ok_ + int((B[:, 2] + B[:, 3]).max()) for _, B, _, ok_ in allB) + 2
+        self.gx0, self.gz0, self.gx1, self.gz1 = gx0, gz0, gx1, gz1
+        W, H = self.W, self.H = gx1 - gx0, gz1 - gz0
+        band = np.zeros((W, H), bool); bpid = np.full((W, H), -1, np.int32); high = np.zeros((W, H), bool)
+        low = np.zeros((W, self.J1 - self.J0, H), bool)
+        for n, (p, B, oi, ok_) in enumerate(allB):
+            for sz in (1, 2, 3, 4):
+                Bs = B[B[:, 3] == sz]
+                if not len(Bs):
+                    continue
+                for a in range(sz):
+                    for c in range(sz):
+                        ii = Bs[:, 0] + oi - gx0 + a; kk = Bs[:, 2] + ok_ - gz0 + c
+                        if p["motion"] == "static":
+                            bsel = (Bs[:, 1] < 4) & (Bs[:, 1] + sz > -4)
+                            band[ii[bsel], kk[bsel]] = True
+                            bpid[ii[bsel], kk[bsel]] = n
+                            for b_ in range(sz):
+                                jj = Bs[:, 1] + b_ - self.J0
+                                ls = (jj >= 0) & (jj < low.shape[1])
+                                low[ii[ls], jj[ls], kk[ls]] = True
+                        if p["layer"] == "high":
+                            high[ii, kk] = True
+        # guns' grids stand in the band too
+        for gi_, g in enumerate(guns):
+            if g["fort"] >= 0:
+                continue
+            a = 9 if g["big"] else 7
+            i0, i1 = int((g["x"] - a) / CELL) - gx0, int((g["x"] + a) / CELL) - gx0
+            k0, k1 = int((g["z"] - a) / CELL) - gz0, int((g["z"] + a) / CELL) - gz0
+            band[max(i0, 0):i1 + 1, max(k0, 0):k1 + 1] = True
+            bpid[max(i0, 0):i1 + 1, max(k0, 0):k1 + 1] = -100 - gi_
+        self.band, self.bpid, self.high, self.low = band, bpid, high, low
+        if field:
+            self.df = edt(band, 40) * CELL
+            self.dgx, self.dgz = np.gradient(self.df)
+
+    def cell(self, x, z):
+        return (np.clip(np.floor(np.asarray(x) / CELL).astype(int) - self.gx0, 0, self.W - 1),
+                np.clip(np.floor(np.asarray(z) / CELL).astype(int) - self.gz0, 0, self.H - 1))
+
+    def clear(self, p, reach=60.0):
+        """Exact distance from p to the nearest cell in the flight band (capped at reach)."""
+        ci_, ck_ = p[0] / CELL - self.gx0, p[1] / CELL - self.gz0
+        r = int(reach / CELL) + 1
+        i0, i1 = max(int(ci_) - r, 0), min(int(ci_) + r + 1, self.W); k0, k1 = max(int(ck_) - r, 0), min(int(ck_) + r + 1, self.H)
+        if i1 <= i0 or k1 <= k0:
+            return reach
+        sub = self.band[i0:i1, k0:k1]
+        if not sub.any():
+            return reach
+        ii, kk = np.nonzero(sub)
+        dx = np.maximum(np.abs(ii + i0 + 0.5 - ci_) - 0.5, 0); dz = np.maximum(np.abs(kk + k0 + 0.5 - ck_) - 0.5, 0)
+        return float(min(np.hypot(dx, dz).min() * CELL, reach))
+
+    def clear_at_least(self, p, need):
+        """Whether p is at least `need` m from the band (the field first, exact only near the threshold)."""
+        i, k = self.cell(p[0], p[1])
+        v = float(self.df[i, k])
+        if v >= need + 1.6 and v < 79:
+            return True
+        if v < need - 1.6:
+            return False
+        return self.clear(p, need + 4) >= need
+
+    def blame(self, p):
+        ci_, ck_ = int(p[0] / CELL) - self.gx0, int(p[1] / CELL) - self.gz0
+        sub = self.bpid[max(ci_ - 14, 0):ci_ + 15, max(ck_ - 14, 0):ck_ + 15]
+        return sorted({self.allB[v][0]["id"] if v >= 0 else "gun %d" % (-100 - v) for v in np.unique(sub[sub != -1])})
+
+
+# ---------------------------------------------------------------- ships and routes (owner: "most ships are just colliding everywhere")
+SHIP_LEN = {"ship_nocturne_wraith": 20.0, "ship_nocturne_vesper": 45.0}    # about a third as wide as long; any other: 50 m
+ROUTE_CLEAR = 25.0     # a route: from rock / structure / gun cells in y -8..+8, gunship posts, moored hulls and boulders
+BERTH_ROCK = 15.0      # a moored ship: beyond its half-length from rock / structure cells in y -8..+8
+BERTH_GAP = 10.0       # two moored ships: beyond the sum of their half-lengths, centre to centre
+BERTH_LANE = 40.0      # a moored ship's centre from every route
+STATION_R = 18.0       # a station's circle (PlaygroundHollow.StationRadius)
+CLUTTER_LANE = 30.0    # floor clutter from every route
+BOULDER_R = (10, 20, 30, 44)
+
+
+def ship_len(bp):
+    return SHIP_LEN.get(bp, 50.0)
+
+
+def boulder_reach(r):
+    """How far a field boulder's lumps reach: the game's rock of the nearest radius, bumps up to 30 % (HollowBuilder.Rock)."""
+    return 1.3 * min(BOULDER_R, key=lambda b: abs(b - r))
+
+
+def route_pts(r):
+    return [tuple(p) for p in r["route"]] + ([tuple(r["route"][0])] if r["loop"] else [])
+
+
+def densify(pts, step):
+    out = [tuple(pts[0])]
+    for a, b in zip(pts, pts[1:]):
+        n = max(1, int(math.ceil(math.dist(a, b) / step)))
+        out += [(a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n) for k in range(1, n + 1)]
+    return out
+
+
+def rdp(pts, tol):
+    """Douglas-Peucker: the fewest points within tol of the line."""
+    if len(pts) < 3:
+        return list(pts)
+    d = [seg_dist(p, pts[0], pts[-1]) for p in pts[1:-1]]
+    i = max(range(len(d)), key=d.__getitem__)
+    if d[i] <= tol:
+        return [pts[0], pts[-1]]
+    return rdp(pts[:i + 2], tol)[:-1] + rdp(pts[i + 1:], tol)
+
+
+def route_obstacles(L):
+    """Point obstacles for the routes: (x, z, radius, need from the centre)."""
+    obs = [(g["x"], g["z"], 0.0, ROUTE_CLEAR, "gunship post") for g in L["gunships"]]
+    for m in L["moored"]:
+        h = ship_len(m["blueprint"]) / 2
+        obs.append((m["x"], m["z"], h, max(BERTH_LANE, h + ROUTE_CLEAR), "moored " + m["blueprint"][14:]))
+    for b in L["boulders"]:
+        r = boulder_reach(b["r"])
+        obs.append((b["x"], b["z"], r, r + ROUTE_CLEAR, "boulder"))
+    return obs
+
+
+def route_clearance(occ, r, obs, step=5.0):
+    """A route sampled every `step` m: (minimum clearance, where, what): to the band's cells, gunship posts, moored hulls (their
+    centre less half their length) and boulders (their centre less their lumps' reach)."""
+    best = (1e9, None, "")
+    for q in densify(route_pts(r), step):
+        c = occ.clear(q, 40.0)
+        if c < best[0]:
+            best = (c, q, "rock/structure")
+        for x, z, rad, need, what in obs:
+            d = math.dist(q, (x, z)) - rad
+            if d < best[0]:
+                best = (d, q, what)
+    return best
+
+
+def nudge(occ, pts, loop, obs, target=ROUTE_CLEAR + 2.5, iters=120):
+    """Push a route off whatever it passes too close to: the dense route's displacement is pushed by the band's distance field and
+    the point obstacles, then smoothed along the route, so only the offending stretches move and the rest keeps its exact shape."""
+    P0 = np.array(densify(pts, 5.0))
+    if loop:
+        P0 = P0[:-1]
+    D = np.zeros_like(P0)
+    O = np.array([(x, z) for x, z, _, _, _ in obs]) if obs else np.zeros((0, 2))
+    need = np.array([n for _, _, _, n, _ in obs]) + 2.5 if obs else np.zeros(0)
+    for _ in range(iters):
+        P = P0 + D
+        i, k = occ.cell(P[:, 0], P[:, 1])
+        c = occ.df[i, k]
+        gx, gz = occ.dgx[i, k], occ.dgz[i, k]
+        gl = np.hypot(gx, gz) + 1e-9
+        push = np.clip(target - c, 0, 1.5)
+        D[:, 0] += gx / gl * push; D[:, 1] += gz / gl * push
+        if len(O):
+            V = P[:, None, :] - O[None, :, :]
+            T = np.gradient(P0, axis=0)                 # a route right over an obstacle steps aside, to its right
+            Nr = np.column_stack([T[:, 1], -T[:, 0]]) / (np.hypot(T[:, 0], T[:, 1])[:, None] + 1e-9)
+            V = V + Nr[:, None, :] * 0.05
+            dist = np.hypot(V[..., 0], V[..., 1]) + 1e-9
+            amt = np.clip(need[None, :] - dist, 0, 1.5)
+            D += (V / dist[..., None] * amt[..., None]).sum(axis=1)
+        for _ in range(2):                              # smooth the displacement along the route
+            if loop:
+                D = D + 0.35 * ((np.roll(D, 1, 0) + np.roll(D, -1, 0)) / 2 - D)
+            else:
+                D[1:-1] = D[1:-1] + 0.35 * ((D[:-2] + D[2:]) / 2 - D[1:-1])
+    P = P0 + D
+    out = [tuple(map(float, p)) for p in P]
+    if loop:
+        out.append(out[0])
+    out = rdp(out, 0.5)
+    out = resample(out, 60.0)
+    if loop:
+        out = out[:-1]
+    return out
+
+
+# ---------------------------------------------------------------- wayfinding: reachability, junctions, the stations' paths
+class Wayfinder:
+    """Shortest paths through the flight band on an 8 m grid, over cells at least `clear` m from rock, structure and guns at
+    y -8..+8 (keeping to the middle where it can): what is reachable from the Maw, every tunnel's connection, the junctions'
+    signposts and each station's path from the Maw."""
+    C = 8.0
+    N8 = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0), (1, 1, 1.414), (1, -1, 1.414), (-1, 1, 1.414), (-1, -1, 1.414)]
+
+    def __init__(self, occ, clear=8.0):
+        f = int(self.C / CELL)
+        W, H = occ.W // f, occ.H // f
+        df = occ.df[:W * f, :H * f].reshape(W, f, H, f).min(axis=(1, 3))
+        self.W, self.H = W, H
+        self.free = (df >= clear).ravel()
+        self.pen = (1 + 2 * np.clip(30 - df, 0, 30) / 30).ravel()
+        self.x0, self.z0 = occ.gx0 * CELL, occ.gz0 * CELL
+        self.runs = {}
+
+    def node(self, p):
+        i = int((p[0] - self.x0) / self.C); k = int((p[1] - self.z0) / self.C)
+        best = None
+        for r in range(0, 4):                           # the nearest free node within 3 nodes
+            for di in range(-r, r + 1):
+                for dk in range(-r, r + 1):
+                    a, b = i + di, k + dk
+                    if 0 <= a < self.W and 0 <= b < self.H and self.free[a * self.H + b]:
+                        d = di * di + dk * dk
+                        if best is None or d < best[0]:
+                            best = (d, a * self.H + b)
+            if best:
+                return best[1]
+        return None
+
+    def at(self, n):
+        i, k = divmod(n, self.H)
+        return (self.x0 + (i + 0.5) * self.C, self.z0 + (k + 0.5) * self.C)
+
+    def run(self, key, p):
+        """Dijkstra from p: (cost to every node, the next node toward p)."""
+        import heapq
+        W, H, free, pen = self.W, self.H, self.free, self.pen
+        dist = np.full(W * H, np.inf); nxt = np.full(W * H, -1, np.int64)
+        src = self.node(p)
+        dist[src] = 0.0
+        heap = [(0.0, src)]
+        while heap:
+            d, n = heapq.heappop(heap)
+            if d > dist[n]:
+                continue
+            i, k = divmod(n, H)
+            for di, dk, ln in self.N8:
+                a, b = i + di, k + dk
+                if not (0 <= a < W and 0 <= b < H):
+                    continue
+                m = a * H + b
+                if not free[m] or (di and dk and not (free[a * H + k] and free[i * H + b])):
+                    continue
+                nd = d + ln * 0.5 * (pen[n] + pen[m])
+                if nd < dist[m]:
+                    dist[m] = nd; nxt[m] = n
+                    heapq.heappush(heap, (nd, m))
+        self.runs[key] = (dist, nxt, src)
+        return self.runs[key]
+
+    def reach(self, key, p):
+        n = self.node(p)
+        return n is not None and np.isfinite(self.runs[key][0][n])
+
+    def chain(self, key, p):
+        """The nodes from p to the run's source."""
+        dist, nxt, src = self.runs[key]
+        n = self.node(p)
+        if n is None or not np.isfinite(dist[n]):
+            return None
+        out = [n]
+        while out[-1] != src:
+            out.append(int(nxt[out[-1]]))
+        return out
+
+    def heading(self, key, p, ahead=40.0):
+        """The yaw of the first leg of the shortest path from p toward the run's source."""
+        c = self.chain(key, p)
+        if not c or len(c) < 2:
+            return None
+        q = self.at(c[min(len(c) - 1, int(ahead / self.C))])
+        return round(math.atan2(q[0] - p[0], q[1] - p[1]) % (2 * math.pi), 4)
+
+
+def path_points(wf, occ, key, p, step=20.0):
+    """The shortest flight-band path from the run's source to p, smoothed where that stays clear, a point every ~20 m."""
+    c = wf.chain(key, p)
+    if not c:
+        return None
+    raw = [wf.at(n) for n in reversed(c)]
+    sm = []
+    for i in range(len(raw)):
+        w = raw[max(0, i - 3):i + 4]
+        q = (sum(a for a, _ in w) / len(w), sum(b for _, b in w) / len(w))
+        sm.append(q if occ.clear(q, 12.0) >= 6.0 else raw[i])
+    sm[0], sm[-1] = raw[0], tuple(p)
+    out, acc = [sm[0]], 0.0
+    for a, b in zip(sm, sm[1:]):
+        acc += math.dist(a, b)
+        if acc >= step:
+            out.append(b); acc = 0.0
+    if out[-1] != sm[-1]:
+        out.append(sm[-1])
+    return [[round(x, 1), round(z, 1)] for x, z in out]
+
+
+def wayfind(E, occ, L):
+    """Reachability from the Maw (every station, den, dock, berth and tunnel end), each side tunnel's connection to where it
+    leads, the junctions' signposts and the stations' paths. Returns report lines."""
+    lines = []
+    wf = Wayfinder(occ)
+    entrance = (E.real_mouth[0], E.real_mouth[1] - 50)
+    wf.run("maw", entrance)
+    st = {s["id"]: (s["x"], s["z"]) for s in L["stations"]}
+    for sid, p in st.items():
+        wf.run(sid, p)
+    h = E.hulk
+    hangar = polar(h["heading"], -E.hulk_body * 0.4, polar(h["heading"], -(h["length"] - E.hulk_body) / 2, h["c"]))
+    wf.run("den", hangar)
+    # 1. reachable from the Maw
+    checks = [("station " + k, p) for k, p in st.items()] + [("den " + d["name"].lower(), d["c"]) for d in E.dens]
+    checks += [("the Docks", E.docks), ("the Market", E.market), ("the Den's hangar", hangar)]
+    checks += [(f"berth {m['blueprint'][14:]} ({m['x']:.0f}, {m['z']:.0f})", (m["x"], m["z"])) for m in L["moored"]]
+    for pts, w in E.tunnels:
+        if pts[0] != pts[-1]:
+            checks += [(f"tunnel end ({q[0]:.0f}, {q[1]:.0f})", q) for q in (pts[0], pts[-1]) if E.col_kind(*q)[0] >= 2]
+    bad = [name for name, p in checks if not wf.reach("maw", p)]
+    lines.append(f"reachable from the Maw (8 m grid, >= 8 m from rock / structure in y -8..+8): {len(checks) - len(bad)}/{len(checks)}"
+                 + ("" if not bad else " UNREACHABLE: " + "; ".join(bad)))
+    # 2. every side tunnel reaches where it leads: its far end is near its cavern by a path, not only back round the Ring
+    dead, ratios = [], []
+    for (pts, w), goal in zip(E.tunnels, E.tgoal):
+        if goal is None or goal == "out":
+            continue                                     # the Ring, the Maw's throat, the back door (it leaves the rock)
+        end = pts[-1]
+        key = "den" if goal == "den" else next(s["id"] for s in L["stations"] if E.col_kind(s["x"], s["z"])[1] == goal)
+        target = st.get(key, hangar)
+        c_ = wf.chain(key, end)
+        ln = sum(math.dist(wf.at(a), wf.at(b)) for a, b in zip(c_, c_[1:])) if c_ else np.inf
+        ratio = ln / max(math.dist(end, target), 1.0)
+        ratios.append(f"{key} {ratio:.1f}")
+        if not ratio < 2.0:
+            dead.append(f"({pts[0][0]:.0f}, {pts[0][1]:.0f}) -> ({end[0]:.0f}, {end[1]:.0f}) to {key}: path {ratio:.1f}x the straight line")
+    lines.append("side tunnels reaching their destination (path from the tunnel's end / straight line): " + ", ".join(ratios)
+                 + ("; all connected" if not dead else "; DEAD ENDS " + "; ".join(dead)))
+    # 3. the junctions and mouths where a ship chooses, and the Maw's entrance: the heading toward each station
+    cands = [entrance, E.maw_t[-1]]
+    for pts, w in E.tunnels:
+        if pts[0] == pts[-1] or pts is E.maw_t:
+            continue
+        cands.append(pts[0])
+        c, r = min(((cv[0], cv[1]) for cv in E.caverns if cv[3] is not None), key=lambda cv: math.dist(cv[0], pts[-1]) - cv[1])
+        cands.append(next((q for q in pts if math.dist(q, c) < r), pts[-1]))
+    for c in (E.market, E.docks):                       # where a cavern opens straight onto the Ring
+        cands.append(min(E.ring, key=lambda q: math.dist(q, c)))
+    wps = []
+    for p in cands:
+        if any(math.dist(p, (w_["x"], w_["z"])) < 40 for w_ in wps) or not wf.reach("maw", p):
+            continue
+        to = {}
+        for sid in st:
+            y = wf.heading(sid, p)
+            if y is not None:
+                to[sid] = y
+        wps.append(dict(x=round(p[0], 1), z=round(p[1], 1), to=to))
+    L["waypoints"] = wps
+    L["paths"] = {sid: path_points(wf, occ, "maw", p) for sid, p in st.items() if wf.reach("maw", p)}
+    lines.append(f"waypoints {len(wps)}; paths from the Maw: " + ", ".join(f"{k} {len(v)} pts" for k, v in L["paths"].items()))
+    return lines
+
+
+# ---------------------------------------------------------------- the floors (owner: "empty open spaces with nothing")
+# A well-kept station built into the rock, not a cave (owner: "its in the future and this feels like an ugly dark cave"): tidy
+# industry on the floors, lit panels and light bars on it, light strips along the walls' bases and round the stations and pads,
+# cool white light with neon accents. Salvage mess only in the salvage den; rubble only in the rough side tunnels. Every piece of
+# it below y = -10, so the flight band (-8..+8) stays as it was; none of it within 30 m of a route, in a station's circle or
+# under a berth. It ships in the cavern's structure piece, or in the rock tile's low piece in the tunnels.
+CRATE = (4, 6, 3, 19, 5, 2, 13, 1, 8)                # container and crate colours: contrast with the light grey rock
+METAL = (1, 13, 11)                                  # tanks, machinery, frames
+PANEL = (20, 20, 20, 49, 48)                         # lit panels and light bars: mostly cool white, some cyan and pink
+COOL = ("#DCEBFF", "#DCEBFF", "#DCEBFF", "#BFF4FF", "#BFF4FF", "#22E6FF", "#FF2E88")
+CONTAINERS = ((6, 2, 2), (4, 2, 2), (3, 1, 1), (2, 1, 1))     # cells: 12x4x4 m to 4x2x2 m
+MIX = {
+    "market": (("containers", 3), ("crates", 2), ("rack", 2), ("tanks", 1), ("machinery", 1.5), ("htank", 1), ("cable", 0.3)),
+    "docks": (("containers", 3), ("tanks", 3), ("htank", 2), ("machinery", 2), ("rack", 1.5), ("crates", 1), ("cable", 0.4)),
+    "den": (("containers", 2), ("crates", 2), ("rack", 2), ("machinery", 1.5), ("tanks", 1), ("girders", 0.5), ("cable", 0.3)),
+    "den_salvage": (("wreck", 3), ("pile", 3), ("girders", 2), ("containers", 1), ("crates", 1)),
+    "den_hulk": (("containers", 3), ("machinery", 2), ("rack", 2), ("tanks", 1.5), ("htank", 1), ("crates", 1), ("cable", 0.3)),
+    "side": (("rubble", 3), ("boulder", 1.5), ("crates", 1.5), ("girders", 1), ("containers", 1), ("rack", 0.5)),
+    "ring": (("crates", 3), ("rack", 1), ("cable", 0.3)),
+}
+DENSITY = {"market": 70, "docks": 60, "den": 45, "den_salvage": 35, "den_hulk": 55, "side": 130, "ring": 90}   # floor cells per cluster
+
+
+class Furnisher:
+    TOP = -6                                          # the highest cell clutter may fill: its top at y = -10
+
+    def __init__(self, E, occ, L, budget, seed=31):
+        self.E, self.occ, self.L, self.budget = E, occ, L, budget
+        self.rng = random.Random(seed)
+        W, H, J0 = occ.W, occ.H, occ.J0
+        self.NJ = occ.low.shape[1]
+        self.topi = self.TOP - J0
+        X = (np.arange(W) + occ.gx0 + 0.5) * CELL; Z = (np.arange(H) + occ.gz0 + 0.5) * CELL
+        self.X, self.Z = X, Z
+        ci = np.floor((X - E.rx0) / CC).astype(int); ck = np.floor((Z - E.rz0) / CC).astype(int)
+        vx = (ci >= 0) & (ci < E.kind.shape[0]); vz = (ck >= 0) & (ck < E.kind.shape[1])
+        sub = np.ix_(ci[vx], ck[vz]); at = np.ix_(vx, vz)
+        kind = np.zeros((W, H), np.int8); kind[at] = E.kind[sub]
+        cav = np.full((W, H), -1, np.int16); cav[at] = E.cav[sub]
+        fj = np.full((W, H), -6, np.int16); fj[at] = E.fj[sub]
+        tun = np.full((W, H), -1, np.int16); tun[at] = np.argmin(np.stack(E.tdist), axis=0)[sub]
+        # the Den's hangar: the warship's cavity, in the rock or out of it
+        a, l = E.hulk_frame(X[:, None], Z[None, :])
+        hk = E.hulk; bow = hk["length"] - E.hulk_body
+        hw = np.where(a > 0, hk["width"] / 2 - (hk["width"] / 2 - 32) * np.clip(a / max(bow, 1), 0, 1), hk["width"] / 2)
+        hangar = (np.abs(l) < hw - 4) & (a > -E.hulk_body) & (a < bow)
+        self.inner = (kind >= 2) | hangar
+        self.fmap = (np.where(hangar & (kind < 2), -12, 2 * fj) - J0).astype(int)
+        fm = np.clip(self.fmap, 1, self.NJ - 1)
+        I, K = np.meshgrid(np.arange(W), np.arange(H), indexing="ij")
+        low = occ.low
+        above = np.cumsum(low[:, ::-1, :], axis=1)[:, ::-1, :]          # occupied cells at or above each j
+        self.floor_ok = self.inner & low[I, fm - 1, K] & (above[I, fm, K] == 0)
+        # regions
+        names = ["market", "docks"] + ["den_" + d["name"].lower() for d in E.dens] + ["den_hulk", "ring", "side"]
+        self.names = names
+        rid = np.full((W, H), -1, np.int16)
+        rid[(kind == 3) & (cav == E.market_i)] = 0
+        rid[(kind == 3) & (cav == E.docks_i)] = 1
+        for n, d in enumerate(E.dens):
+            rid[(kind == 3) & (cav == d["i"])] = 2 + n
+        rid[hangar | ((kind == 3) & (cav == -2))] = names.index("den_hulk")
+        ring_i = next(i for i, t in enumerate(E.tunnels) if t[0] is E.ring)
+        rid[(kind == 2) & (tun == ring_i) & (rid < 0)] = names.index("ring")
+        rid[(kind == 2) & (rid < 0)] = names.index("side")
+        rid[~self.inner] = -1
+        self.rid = rid
+        self.wall_d = edt(~self.inner, 12) * CELL                       # m from the rock's walls
+        # where nothing goes: within 30 m of a route, in a station's circle, under a berth
+        excl = np.zeros((W, H), bool)
+        for r in L["traffic"]:
+            for p, q in zip(route_pts(r), route_pts(r)[1:]):
+                self.mark_near_seg(excl, p, q, CLUTTER_LANE + 1.5)
+        for s in L["stations"]:
+            self.mark_near_seg(excl, (s["x"], s["z"]), (s["x"], s["z"]), STATION_R + 1.5)
+        for m in L["moored"]:
+            self.mark_near_seg(excl, (m["x"], m["z"]), (m["x"], m["z"]), ship_len(m["blueprint"]) / 2 + 4)
+        self.excl = excl
+        self.keep = self.floor_ok & ~excl & (rid >= 0)
+        self.lab = np.full(low.shape, -1, np.int16)
+        self.classes = []
+        self.count = {}
+        self.cells = 0
+        self.lights, self.neon = [], []
+
+    def mark_near_seg(self, mask, a, b, r):
+        occ = self.occ
+        x0, x1 = min(a[0], b[0]) - r, max(a[0], b[0]) + r; z0, z1 = min(a[1], b[1]) - r, max(a[1], b[1]) + r
+        i0, i1 = max(int(x0 / CELL) - occ.gx0, 0), min(int(x1 / CELL) - occ.gx0 + 2, occ.W)
+        k0, k1 = max(int(z0 / CELL) - occ.gz0, 0), min(int(z1 / CELL) - occ.gz0 + 2, occ.H)
+        if i1 <= i0 or k1 <= k0:
+            return
+        X = self.X[i0:i1, None]; Z = self.Z[None, k0:k1]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L2 = dx * dx + dz * dz
+        t = np.clip(((X - a[0]) * dx + (Z - a[1]) * dz) / L2, 0, 1) if L2 > 0 else 0.0
+        mask[i0:i1, k0:k1] |= np.hypot(X - (a[0] + dx * t), Z - (a[1] + dz * t)) < r
+
+    def cls(self, c, m):
+        if (c, m) not in self.classes:
+            self.classes.append((c, m))
+        return self.classes.index((c, m))
+
+    # ------------------------------------------------------------ placing
+    def place(self, boxes, kind, f, clip=False, min_cells=1):
+        """Boxes (i0, i1, j0, j1, k0, k1, colour, material), grid cells, j in the floor band. Whole, or (clip) only the cells
+        that are free, over this floor and allowed. Returns the cells placed."""
+        occ, todo, n = self.occ, [], 0
+        if self.cells > self.budget:
+            return 0
+        for i0, i1, j0, j1, k0, k1, c, m in boxes:
+            a0, a1, b0, b1 = max(i0, 0), min(i1, occ.W), max(k0, 0), min(k1, occ.H)
+            c0, c1 = max(j0, 0), min(j1, self.topi + 1)
+            if (a0, a1, b0, b1, c0, c1) != (i0, i1, k0, k1, j0, j1):
+                if not clip:
+                    return 0
+                if a1 <= a0 or b1 <= b0 or c1 <= c0:
+                    continue
+            ok = (~occ.low[a0:a1, c0:c1, b0:b1] & (self.lab[a0:a1, c0:c1, b0:b1] < 0)
+                  & (self.keep[a0:a1, b0:b1] & (self.fmap[a0:a1, b0:b1] == f))[:, None, :])
+            if not clip and not ok.all():
+                return 0
+            todo.append((a0, a1, c0, c1, b0, b1, ok, self.cls(c, m)))
+            n += int(ok.sum())
+        if n < min_cells:
+            return 0
+        for a0, a1, c0, c1, b0, b1, ok, ci in todo:
+            self.lab[a0:a1, c0:c1, b0:b1][ok] = ci
+        self.cells += n
+        self.count[kind] = self.count.get(kind, 0) + 1
+        return n
+
+    def light(self, i, k, f, col, r=8.0, dy=3.0, prio=1):
+        self.lights.append(dict(x=round(float(self.X[i]), 1), y=round((f + self.occ.J0) * CELL + dy, 1), z=round(float(self.Z[k]), 1),
+                                col=col, r=r, kind="lamp", _p=prio))
+
+    def thin_lights(self, cap):
+        """At most `cap` lamps (they are real point lights): the stations', pads' and strips' first, the clutter's evenly."""
+        first = [l for l in self.lights if l["_p"] == 0]
+        rest = [l for l in self.lights if l["_p"] != 0]
+        room = max(cap - len(first), 0)
+        if len(rest) > room:
+            rest = [rest[int(i * len(rest) / room)] for i in range(room)] if room else []
+        self.lights = [{k: v for k, v in l.items() if k != "_p"} for l in first + rest]
+
+    def strip(self, pts, y, col):
+        pts = densify(pts, 16.0)                          # short segments, so a strip bends with its wall
+        for a, b in zip(pts, pts[1:]):
+            if math.dist(a, b) > 0.5:
+                self.neon.append(dict(ax=round(a[0], 1), az=round(a[1], 1), bx=round(b[0], 1), bz=round(b[1], 1), y=round(y, 1), col=col))
+
+    # ------------------------------------------------------------ the pieces of clutter (anchor i, k on floor f; ax: long axis)
+    @staticmethod
+    def R(i, k, ax, a0, a1, b0, b1, j0, j1, c, m):
+        return (i + a0, i + a1, j0, j1, k + b0, k + b1, c, m) if ax == 0 else (i + b0, i + b1, j0, j1, k + a0, k + a1, c, m)
+
+    def containers(self, i, k, f, ax):
+        """A row of container stacks, one size, 1-3 high, doors at one end; light bars on some."""
+        rng, R = self.rng, self.R
+        lc, wc, hc = rng.choice(CONTAINERS)
+        out, b = [], 0
+        for _ in range(rng.randint(1, 4)):
+            for lev in range(rng.choice((1, 1, 2, 2, 3)) if hc == 2 else rng.choice((1, 2))):
+                j0 = f + lev * hc
+                if j0 + hc - 1 > self.topi:
+                    break
+                c = rng.choice(CRATE)
+                out.append(R(i, k, ax, 0, lc - 1, b, b + wc, j0, j0 + hc, c, 1))
+                out.append(R(i, k, ax, lc - 1, lc, b, b + wc, j0, j0 + hc, 11 if c != 11 else 1, 1))
+                if lc >= 4 and rng.random() < 0.5:                     # a light bar along its top edge
+                    out[-2] = R(i, k, ax, 0, lc - 1, b, b + wc, j0, j0 + hc - 1, c, 1)
+                    out.append(R(i, k, ax, 0, lc - 1, b, b + wc - 1, j0 + hc - 1, j0 + hc, c, 1))
+                    out.append(R(i, k, ax, 0, lc - 1, b + wc - 1, b + wc, j0 + hc - 1, j0 + hc, rng.choice(PANEL), 2))
+            b += wc + rng.choice((0, 0, 1))
+        return out
+
+    def crates(self, i, k, f, ax):
+        rng, out = self.rng, []
+        for _ in range(rng.randint(3, 7)):
+            a, b = rng.randint(0, 4), rng.randint(0, 4)
+            ln = rng.choice((1, 1, 2))
+            c = rng.choice(CRATE)
+            out.append(self.R(i, k, ax, a, a + ln, b, b + 1, f, f + 1, c, 1))
+            if rng.random() < 0.35:
+                out.append(self.R(i, k, ax, a, a + 1, b, b + 1, f + 1, f + 2, rng.choice(CRATE), 1))
+        return out
+
+    def rack(self, i, k, f, ax):
+        """A cargo rack: frame posts and shelves, crates on them, a lit strip along the top."""
+        rng, R = self.rng, self.R
+        ln, h = rng.randint(4, 7), rng.randint(3, 5)
+        fc = rng.choice(METAL)
+        out = []
+        for a in range(0, ln, 2):
+            out.append(R(i, k, ax, a, a + 1, 0, 2, f, f + h, fc, 2))
+        for a in range(ln):
+            if a % 2:
+                for lev in range(0, h - 1, 2):
+                    if rng.random() < 0.8:
+                        out.append(R(i, k, ax, a, a + 1, 0, 2, f + lev, f + lev + 1, rng.choice(CRATE), 1))
+            out.append(R(i, k, ax, a, a + 1, 0, 2, f + h - 1, f + h, rng.choice(PANEL) if a % 2 else fc, 2))
+        return out
+
+    def tanks(self, i, k, f, ax):
+        """A tank farm: 1-3 upright tanks in a row, a lit band round each one's top, a pipe between them."""
+        rng = self.rng
+        rc = rng.choice((1.5, 2.0, 2.5)); h = rng.randint(3, min(6, self.topi - f + 1))
+        n = math.ceil(rc)
+        col = rng.choice((1, 13, 4, 11))
+        band = rng.choice((20, 20, 49, 22))
+        out = []
+        for t in range(rng.randint(1, 3)):
+            ca = t * (2 * n + 1)
+            for a in range(-n, n):
+                for b in range(-n, n):
+                    d = math.hypot(a + 0.5, b + 0.5)
+                    if d > rc:
+                        continue
+                    out.append(self.R(i, k, ax, ca + a, ca + a + 1, b, b + 1, f, f + h - 1, col, 1))
+                    out.append(self.R(i, k, ax, ca + a, ca + a + 1, b, b + 1, f + h - 1, f + h, band if d > rc - 1 else col, 2 if d > rc - 1 else 1))
+            if t:
+                out.append(self.R(i, k, ax, ca - n - 1, ca - n + 1, 0, 1, f + 1, f + 2, 13, 1))
+        return out
+
+    def htank(self, i, k, f, ax):
+        """A horizontal gas tank on saddles, its end caps and a lit stripe."""
+        rng = self.rng
+        ln = rng.randint(5, 8)
+        body = rng.choice((13, 4, 3, 1))
+        out = []
+        for b, u in ((1, 0), (0, 1), (1, 1), (2, 1), (1, 2)):
+            out.append(self.R(i, k, ax, 1, ln - 1, b, b + 1, f + u, f + u + 1, body if (b, u) != (1, 2) else rng.choice(PANEL),
+                              1 if (b, u) != (1, 2) else 2))
+            out.append(self.R(i, k, ax, 0, 1, b, b + 1, f + u, f + u + 1, 13, 1))
+            out.append(self.R(i, k, ax, ln - 1, ln, b, b + 1, f + u, f + u + 1, 13, 1))
+        for a in (1, ln - 2):
+            for b in (0, 2):
+                out.append(self.R(i, k, ax, a, a + 1, b, b + 1, f, f + 1, 1, 1))
+        return out
+
+    def machinery(self, i, k, f, ax):
+        """A machine: a base, a housing, a lit panel and an exhaust stack."""
+        rng, R = self.rng, self.R
+        la, lb = rng.choice(((3, 3), (4, 3), (4, 4)))
+        out = [R(i, k, ax, 0, la, 0, lb, f, f + 2, rng.choice(METAL), 1),
+               R(i, k, ax, 1, la - 1, 1, lb - 1, f + 2, f + 3, rng.choice((1, 13, 4)), 1),
+               R(i, k, ax, 0, 1, 1, lb - 1, f + 1, f + 2, rng.choice(PANEL + (22,)), 2),
+               R(i, k, ax, la - 1, la, lb - 1, lb, f + 2, f + 5, 16, 1)]
+        out[0] = R(i, k, ax, 1, la, 0, lb, f, f + 2, out[0][6], 1)
+        out.append(R(i, k, ax, 0, 1, 0, 1, f, f + 2, 1, 1)); out.append(R(i, k, ax, 0, 1, lb - 1, lb, f, f + 2, 1, 1))
+        out.append(R(i, k, ax, 0, 1, 1, lb - 1, f, f + 1, 1, 1))
+        return out
+
+    def girders(self, i, k, f, ax):
+        rng = self.rng
+        out = []
+        ln = rng.randint(6, 10)
+        n = rng.randint(2, 3)
+        for b in range(n):
+            out.append(self.R(i, k, ax, 0, ln, b, b + 1, f, f + 1, rng.choice((1, 13, 6)), rng.choice((1, 2))))
+        if rng.random() < 0.6:
+            out.append(self.R(i, k, ax, 1, ln - 1, 0, n, f + 1, f + 2, rng.choice((1, 13)), 2))
+        return out
+
+    def cable(self, i, k, f, ax):
+        rng = self.rng
+        a1, b1 = rng.randint(6, 14), rng.randint(3, 8)
+        return [self.R(i, k, ax, 0, a1, 0, 1, f, f + 1, 11, 1), self.R(i, k, ax, a1 - 1, a1, 1, b1, f, f + 1, 11, 1)]
+
+    def pile(self, i, k, f, ax):
+        """A salvage pile: a heap of scrap, hull plates and frames."""
+        rng = self.rng
+        R_, hm = rng.uniform(2.0, 4.0), rng.randint(2, 4)
+        out = []
+        n = math.ceil(R_)
+        for a in range(-n, n + 1):
+            for b in range(-n, n + 1):
+                d = math.hypot(a, b)
+                if d > R_:
+                    continue
+                h = int(round(hm * (1 - d / R_) + rng.uniform(-0.6, 0.8)))
+                for u in range(max(h, 0)):
+                    out.append(self.R(i, k, ax, a, a + 1, b, b + 1, f + u, f + u + 1, rng.choice((11, 10, 14, 13, 18, 1, 6)),
+                                      2 if rng.random() < 0.15 else 1))
+        return out
+
+    def wreck(self, i, k, f, ax):
+        """A wrecked hull section: half a hull's shell lying on the floor, ribs inside, holes and a torn end."""
+        rng = self.rng
+        ln, rc = rng.randint(5, 9), rng.choice((3.0, 3.5, 4.0))
+        col = rng.choice((18, 10, 11, 13))
+        n = math.ceil(rc)
+        out = []
+        for b in range(-n, n):
+            for u in range(n):
+                d = math.hypot(b + 0.5, u + 0.5)
+                end = ln - rng.randint(0, 2)
+                for a in range(end):
+                    if rc - 1.2 <= d <= rc and rng.random() > 0.12:
+                        out.append(self.R(i, k, ax, a, a + 1, b, b + 1, f + u, f + u + 1, 10 if rng.random() < 0.25 else col, 1))
+                    elif a % 3 == 1 and rc - 2.2 <= d < rc - 1.2:
+                        out.append(self.R(i, k, ax, a, a + 1, b, b + 1, f + u, f + u + 1, 1, 2))
+        return out
+
+    def rubble(self, i, k, f, ax, R_=None):
+        """Fallen rock against a wall (or a boulder on the floor): a lumpy heap on the 4 m lattice, rock tones."""
+        rng = self.rng
+        R_ = R_ or rng.uniform(5.0, 11.0)
+        V = 0.6 * R_
+        n = int(math.ceil(R_ * 1.2 / CC))
+        out = []
+        seed = rng.uniform(0, 50)
+        i, k = i - (i + self.occ.gx0) % 2, k - (k + self.occ.gz0) % 2       # on the rock's 4 m lattice
+        for a in range(-n, n):
+            for b in range(-n, n):
+                for u in range(int(math.ceil(V * 1.2 / CC))):
+                    x, y, z = (a + 0.5) * CC, (u + 0.5) * CC - 0.25 * V, (b + 0.5) * CC
+                    if self.E.lumpy(np.array(x), np.array(y), np.array(z), R_, V, seed):
+                        out.append((i + 2 * a, i + 2 * a + 2, f + 2 * u, f + 2 * u + 2, k + 2 * b, k + 2 * b + 2, 40 + rng.randint(0, 3), 0))
+        return out
+
+    def scaffold(self, i, k, f, ax, side):
+        """Scaffolding against a wall: frame posts and rails, a deck at half height, lit panels on the rail."""
+        rng, R = self.rng, self.R
+        ln, h = rng.randint(4, 8), rng.randint(4, min(6, self.topi - f + 1))
+        fc = rng.choice((1, 13))
+        b0, b1 = (0, 2) if side > 0 else (-1, 1)
+        out = []
+        for a in range(ln):
+            if a % 2 == 0:
+                out.append(R(i, k, ax, a, a + 1, b0, b1, f, f + h - 1, fc, 2))
+            else:
+                out.append(R(i, k, ax, a, a + 1, b0, b1, f + h // 2, f + h // 2 + 1, 13, 1))
+            out.append(R(i, k, ax, a, a + 1, b0, b1, f + h - 1, f + h, rng.choice(PANEL) if a % 3 == 1 else fc, 2))
+        return out
+
+    def pad(self, i, k, f):
+        """A landing pad: a 14 m floor plate, its edge and centre cross lit."""
+        out = []
+        for a in range(7):
+            for b in range(7):
+                edge = a in (0, 6) or b in (0, 6)
+                cross = (a == 3 or b == 3) and 1 <= a <= 5 and 1 <= b <= 5
+                out.append((i + a, i + a + 1, f, f + 1, k + b, k + b + 1, 20 if edge else (49 if cross else 1), 2 if edge or cross else 1))
+        return out
+
+    # ------------------------------------------------------------ signs (owner: the text was floating, huge, one mirrored)
+    def place_signs(self):
+        """Every sign flat on the floor (0.5 m over it), letters 4-6 m (THE MAW 8), turned to the heading of the main approach to
+        it (the flight camera turns with the ship) and laid on that approach just before its station: outside the station's
+        circle, never under a berth."""
+        E, L, occ = self.E, self.L, self.occ
+        st = {s["id"]: (s["x"], s["z"]) for s in L["stations"]}
+        routes = {r["name"]: route_pts(r) for r in L["traffic"]}
+        hd = lambda a, b: math.degrees(math.atan2(b[0] - a[0], b[1] - a[1])) % 360
+
+        def route_mouth(name, c, r):                    # where a route first enters a cavern
+            return next((p for p in densify(routes[name], 4.0) if math.dist(p, c) < r - 4), c)
+
+        def tunnel_mouth(c, r):                         # where the side tunnel into a cavern opens into it
+            ends = [pts for pts, w in E.tunnels if pts[0] != pts[-1] and math.dist(pts[-1], c) < r + 45]
+            if not ends:
+                return None
+            pts = min(ends, key=lambda t: math.dist(t[-1], c))
+            return next((q for q in pts if math.dist(q, c) < r), pts[-1])
+
+        a, b = E.maw_t[1], E.maw_t[2]
+        throat = lambda z: (a[0] + (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]), z)
+        plan = {"THE MAW": (None, hd(a, b), throat(E.real_mouth[1] + 12)),
+                "BLAST DOORS": (None, hd(a, b), throat(E.real_mouth[1] + 36))}
+        m = route_mouth("maw_to_market", E.market, E.market_r)
+        plan["THE MARKET"] = (st["market"], hd(m, st["market"]), None)
+        m = route_mouth("maw_to_docks", E.docks, E.docks_r)
+        plan["THE DOCKS"] = (st["docks"], hd(m, st["docks"]), None)
+        for d in E.dens:
+            s = st["den_" + d["name"].lower()]
+            m = tunnel_mouth(d["c"], d["r"]) or d["c"]
+            plan[d["name"]] = (s, hd(m, s), None)
+        h = E.hulk
+        bc = polar(h["heading"], -(h["length"] - E.hulk_body) / 2, h["c"])
+        plan["THE DEN"] = (None, h["heading"] % 360, polar(h["heading"], -E.hulk_body * 0.25, bc))   # in from the stern
+        self.signmask = np.zeros(self.keep.shape, bool)
+        out = []
+        for sg in L["signs"]:
+            size = {"THE MAW": 8.0, "BLAST DOORS": 4.0, "THE MARKET": 6.0, "THE DOCKS": 6.0, "THE DEN": 6.0}.get(sg["text"], 5.0)
+            w = (len(sg["text"]) * 6 - 1) / 7 * size
+            stn, heading, at = plan[sg["text"]]
+            u = (math.sin(math.radians(heading)), math.cos(math.radians(heading)))
+            if stn is not None:                          # on the approach, just before the station's circle (else just past it)
+                back = STATION_R + size / 2 + 6
+                cands = [(stn[0] - u[0] * (back + t) + u[1] * s_, stn[1] - u[1] * (back + t) - u[0] * s_)
+                         for t in range(0, 41, 4) for s_ in (0, 8, -8, 16, -16, 24, -24)]
+                cands += [(stn[0] + u[0] * (back + t) + u[1] * s_, stn[1] + u[1] * (back + t) - u[0] * s_)
+                          for t in range(0, 41, 4) for s_ in (0, 8, -8, 16, -16)]
+            else:
+                cands = [(at[0] + u[0] * t + u[1] * s_, at[1] + u[1] * t - u[0] * s_)
+                         for t in (0, 4, -4, 8, -8, 12, -12, 16, -16, 24, -24, 32, 40, 48) for s_ in (0, 6, -6, 12, -12)]
+            spot = None
+            for p in cands:
+                cells = self.sign_cells(p, u, w, size, 1.0)
+                if cells is not None:
+                    spot = p; break
+            if spot is None:
+                E.log.append(f"sign {sg['text']}: no clear floor near its station, left at ({sg['x']}, {sg['z']})")
+                out.append(sg); continue
+            i, k = occ.cell(*spot)
+            f = int(self.fmap[i, k])
+            ii, kk = self.sign_cells(spot, u, w, size, 3.0, check=False)
+            self.signmask[ii, kk] = True
+            out.append(dict(text=sg["text"], x=round(spot[0], 1), y=round((f + occ.J0) * CELL + 0.5, 1), z=round(spot[1], 1),
+                            yaw=round(math.radians(heading), 4), col=sg["col"], size=size))
+        L["signs"] = out
+        self.excl |= self.signmask
+        self.keep &= ~self.signmask
+
+    def sign_cells(self, p, u, w, h, margin, check=True):
+        """The floor cells under a sign's rectangle (w along its lines, h along u); None if any is not clear floor."""
+        occ = self.occ
+        r = math.hypot(w, h) / 2 + margin + 2
+        i0, k0 = occ.cell(p[0] - r, p[1] - r); i1, k1 = occ.cell(p[0] + r, p[1] + r)
+        I, K = np.meshgrid(np.arange(i0, i1 + 1), np.arange(k0, k1 + 1), indexing="ij")
+        dx, dz = self.X[I] - p[0], self.Z[K] - p[1]
+        along, across = dx * u[0] + dz * u[1], dx * u[1] - dz * u[0]
+        m = (np.abs(along) <= h / 2 + margin) & (np.abs(across) <= w / 2 + margin)
+        I, K = I[m], K[m]
+        if not check:
+            return I, K
+        ci, ck = occ.cell(*p)
+        f = self.fmap[ci, ck]
+        if not (self.floor_ok[I, K] & (self.fmap[I, K] == f) & ~self.signmask[I, K]).all():
+            return None
+        X, Z = self.X[I], self.Z[K]
+        for s in self.L["stations"]:
+            if (np.hypot(X - s["x"], Z - s["z"]) < STATION_R + 1.5).any():
+                return None
+        for mo in self.L["moored"]:
+            if (np.hypot(X - mo["x"], Z - mo["z"]) < ship_len(mo["blueprint"]) / 2 + 2).any():
+                return None
+        return I, K
+
+    # ------------------------------------------------------------ the floors
+    def furnish(self):
+        occ, rng, E, L = self.occ, self.rng, self.E, self.L
+        stations = [(s["x"], s["z"]) for s in L["stations"]]
+        par = ((np.arange(occ.W) + occ.gx0) % 2 == 0)[:, None] & ((np.arange(occ.H) + occ.gz0) % 2 == 0)[None, :]
+        wallside = self.keep & (self.wall_d < 2.5)
+        # 1. pipes along the walls' feet (everywhere), with brackets and warning lights; light strips above them
+        self.wall_pipes()
+        # 2. landing pads by the stations
+        for s in L["stations"]:
+            for r in range(30, 64, 4):
+                done = False
+                for b in range(0, 360, 20):
+                    p = polar(b, r, (s["x"], s["z"]))
+                    i, k = occ.cell(*p)
+                    i, k = int(i) - 3, int(k) - 3
+                    f = int(self.fmap[i + 3, k + 3])
+                    if self.place(self.pad(i, k, f), "landing pad", f):
+                        y = (f + occ.J0) * CELL + 2.6
+                        x0, z0 = (i + occ.gx0) * CELL - 1, (k + occ.gz0) * CELL - 1
+                        self.strip([(x0, z0), (x0 + 16, z0), (x0 + 16, z0 + 16), (x0, z0 + 16), (x0, z0)], y, "#22E6FF")
+                        for c in ((i, k), (i + 6, k + 6)):
+                            self.light(c[0], c[1], f, "#DCEBFF", 8.0, 4.0, prio=0)
+                        done = True; break
+                if done:
+                    break
+        # 3. clusters, region by region: denser near the stations and in the dens, sparse along the highway
+        for code, reg in enumerate(self.names):
+            mix = MIX.get(reg, MIX["den"] if reg.startswith("den_") else None)
+            m = self.keep & (self.rid == code)
+            cand = np.argwhere(m & par)
+            if not len(cand):
+                continue
+            dens_key = reg if reg in DENSITY else "den"
+            target = max(4, int(m.sum() / DENSITY[dens_key]))
+            px, pz = self.X[cand[:, 0]], self.Z[cand[:, 1]]
+            dst = np.min([np.hypot(px - x, pz - z) for x, z in stations], axis=0)
+            w = 1 + 4 * np.exp(-dst / 45.0)
+            w = w / w.sum()
+            kinds, wts = zip(*mix)
+            nprng = np.random.default_rng(code + 7)
+            placed = 0
+            for _ in range(target * 10):
+                if placed >= target:
+                    break
+                i, k = cand[nprng.choice(len(cand), p=w)]
+                kind = rng.choices(kinds, wts)[0]
+                f = int(self.fmap[i, k])
+                ax = rng.randint(0, 1)
+                if kind in ("rubble", "boulder"):
+                    if kind == "rubble":
+                        near = np.argwhere(wallside[max(i - 8, 0):i + 9, max(k - 8, 0):k + 9])
+                        if not len(near):
+                            continue
+                        ii, kk = near[rng.randrange(len(near))]
+                        i, k = max(i - 8, 0) + ii, max(k - 8, 0) + kk
+                    n = self.place(self.rubble(i, k, f, ax, None if kind == "rubble" else rng.uniform(4.0, 7.0)), kind, f, clip=True, min_cells=16)
+                elif kind in ("pile", "wreck", "cable"):
+                    n = self.place(getattr(self, kind)(i, k, f, ax), kind, f, clip=True, min_cells=6)
+                else:
+                    n = self.place(getattr(self, kind)(i, k, f, ax), kind, f)
+                if n:
+                    placed += 1
+                    if rng.random() < (0.5 if reg in ("ring", "side") else 0.8):
+                        self.light_near(i, k, f, reg)
+                    for _ in range(rng.randint(0, 1 if reg in ("ring", "side") else 3)):     # its neighbours: a yard, not a scatter
+                        sk = rng.choices(kinds, wts)[0]
+                        if sk in ("rubble", "boulder", "pile", "wreck"):
+                            continue
+                        a_, b_ = i + rng.randint(-9, 9), k + rng.randint(-9, 9)
+                        a_, b_ = a_ - (a_ + occ.gx0) % 2, b_ - (b_ + occ.gz0) % 2
+                        if 0 <= a_ < occ.W and 0 <= b_ < occ.H and self.keep[a_, b_] and self.fmap[a_, b_] == f:
+                            self.place(getattr(self, sk)(a_, b_, f, ax if rng.random() < 0.7 else 1 - ax), sk, f,
+                                       clip=sk == "cable", min_cells=4)
+            # scaffolding against the walls of the caverns
+            if reg not in ("ring", "side"):
+                ws = np.argwhere(wallside & (self.rid == code) & par)
+                for _ in range(min(len(ws), 40)):
+                    if self.count.get("scaffold " + reg, 0) >= max(2, target // 6):
+                        break
+                    i, k = ws[rng.randrange(len(ws))]
+                    f = int(self.fmap[i, k])
+                    # the wall's side: along the axis the wall distance changes least
+                    gx = self.wall_d[min(i + 1, occ.W - 1), k] - self.wall_d[max(i - 1, 0), k]
+                    gz = self.wall_d[i, min(k + 1, occ.H - 1)] - self.wall_d[i, max(k - 1, 0)]
+                    ax = 1 if abs(gx) > abs(gz) else 0
+                    side = 1 if (gx if ax == 1 else gz) > 0 else -1
+                    if self.place(self.scaffold(int(i), int(k), f, ax, side), "scaffold", f):
+                        self.count["scaffold " + reg] = self.count.get("scaffold " + reg, 0) + 1
+                        self.light(int(i), int(k), f, rng.choice(COOL[:5]), 8.0, 6.0)
+        # 4. light rings on the floor under the stations' circles
+        for s in L["stations"]:
+            i, k = occ.cell(s["x"], s["z"])
+            f = int(self.fmap[i, k]) if self.inner[i, k] else -12 - occ.J0
+            y = (f + occ.J0) * CELL + 1.0
+            ring = [polar(b, STATION_R + 2, (s["x"], s["z"])) for b in range(0, 361, 15)]
+            self.strip(ring, y, "#22E6FF" if s["kind"] != "reset" else "#FF2E88")
+            for b in range(0, 360, 90):
+                q = polar(b + 45, STATION_R + 3, (s["x"], s["z"]))
+                self.lights.append(dict(x=round(q[0], 1), y=round(y + 2, 1), z=round(q[1], 1), col="#DCEBFF", r=9.0, kind="lamp", _p=0))
+        for s in [k for k in self.count if k.startswith("scaffold ")]:
+            del self.count[s]
+
+    def solid_at(self, x, y, z):
+        """Whether the cell at (x, y, z) in the floor band holds rock, a structure or clutter."""
+        occ = self.occ
+        i, k = occ.cell(x, z)
+        j = int(math.floor(y / CELL)) - occ.J0
+        return 0 <= j < self.NJ and (occ.low[i, j, k] or self.lab[i, j, k] >= 0)
+
+    def clean_lights(self):
+        """No light strip passes through rock, a structure or the clutter (each is cut there, sampled every metre), and no lamp
+        sits inside any of them."""
+        out = []
+        for s_ in self.neon:
+            a, b, y = (s_["ax"], s_["az"]), (s_["bx"], s_["bz"]), s_["y"]
+            n = max(2, int(math.dist(a, b)) + 1)
+            run = []
+            for t in list(np.linspace(0, 1, n)) + [None]:
+                q = None if t is None else (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+                if q is not None and not self.solid_at(q[0], y, q[1]):
+                    run.append(q); continue
+                if len(run) >= 2 and math.dist(run[0], run[-1]) >= 2.0:
+                    out.append(dict(s_, ax=round(run[0][0], 1), az=round(run[0][1], 1), bx=round(run[-1][0], 1), bz=round(run[-1][1], 1)))
+                run = []
+        self.neon_cut = len(out) - len(self.neon)
+        self.neon = out
+        self.lights = [l for l in self.lights if not self.solid_at(l["x"], l["y"], l["z"])]
+
+    def light_near(self, i, k, f, reg):
+        """A floor lamp beside a piece of clutter: a free cell next to it."""
+        occ, rng = self.occ, self.rng
+        for _ in range(12):
+            a, b = i + rng.randint(-4, 6), k + rng.randint(-4, 6)
+            if 0 <= a < occ.W and 0 <= b < occ.H and self.keep[a, b] and self.lab[a, f, b] < 0 and not occ.low[a, f, b]:
+                col = rng.choice(COOL) if reg not in ("docks", "den_salvage") or rng.random() < 0.6 else "#FFB347"
+                self.light(a, b, f, col, 8.0, 3.0)
+                return
+
+    def wall_pipes(self):
+        """Pipes along the walls' feet, a second run above in places, brackets, warning lamps; light strips along the walls."""
+        occ = self.occ
+        foot = self.keep & (self.wall_d < 2.5)
+        I, K = np.nonzero(foot)
+        gx, gz = (I + occ.gx0) * CELL, (K + occ.gz0) * CELL
+        on = (np.sin(gx / 37.0) * np.cos(gz / 29.0) + 0.5 * np.sin((gx + gz) / 13.0)) > -0.45
+        upper = (np.sin(gx / 23.0 + 1.3) * np.cos(gz / 31.0 - 0.4)) > 0.05
+        n = 0
+        for i, k, o, u, x, z in zip(I, K, on, upper, gx, gz):
+            if not o:
+                continue
+            f = int(self.fmap[i, k])
+            run = 13 if (int(x / 40) + int(z / 40)) % 3 else 16
+            boxes = [(i, i + 1, f, f + 1, k, k + 1, run, 1)]
+            if u:
+                boxes.append((i, i + 1, f + 2, f + 3, k, k + 1, 1, 1))
+                bracket = (int(x / CELL) + int(z / CELL)) % 5 == 0
+                lamp = (int(x / CELL) * 7 + int(z / CELL) * 3) % 23 == 0
+                if bracket or lamp:
+                    boxes.append((i, i + 1, f + 1, f + 2, k, k + 1, 22 if lamp else 1, 2))
+            n += self.place(boxes, "pipe cell", f, clip=True) > 0
+        self.pipe_m = n * CELL
+        del self.count["pipe cell"]
+        # light strips: a cool white line along every wall's foot, 2 m up, where the floor runs along the wall
+        lines = 0
+        for reg_code, reg in enumerate(self.names):
+            m = self.floor_ok & (self.rid == reg_code) & (self.wall_d < 2.5) & (self.wall_d > 0)
+            col = {"market": "#FF2E88", "docks": "#22E6FF", "den_smuggler": "#FF2E88"}.get(reg, "#DCEBFF")
+            pts = np.argwhere(m)
+            # chain the wall's foot cells into runs, nearest neighbour first
+            left = {(int(a), int(b)) for a, b in pts}
+            while left:
+                c = left.pop()
+                run = [c]
+                for end in (0, 1):
+                    while True:
+                        cur = run[-1] if end == 0 else run[0]
+                        nxt = next(((cur[0] + da, cur[1] + db) for da, db in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
+                                    if (cur[0] + da, cur[1] + db) in left), None)
+                        if nxt is None:
+                            break
+                        left.discard(nxt)
+                        if end == 0:
+                            run.append(nxt)
+                        else:
+                            run.insert(0, nxt)
+                if len(run) < 6:
+                    continue
+                f = int(self.fmap[run[0]])
+                P = [((a + occ.gx0 + 0.5) * CELL, (b + occ.gz0 + 0.5) * CELL) for a, b in run]
+                P = rdp(P, 1.0)
+                self.strip(P, (f + occ.J0) * CELL + 6.5, col)       # on the wall, over the pipes
+                lines += 1
+                for a, b in run[::40]:                      # a lamp every 80 m along the strip
+                    self.light(a, b, f, col, 9.0, 5.0, prio=0)
+        self.strip_runs = lines
+
+    def emit(self, pieces):
+        """The clutter's cells packed into blocks, into the cavern's structure piece or the rock tile's low piece."""
+        occ, E = self.occ, self.E
+        I, J, K = np.nonzero(self.lab >= 0)
+        if not len(I):
+            return {}
+        gi, gk = I + occ.gx0, K + occ.gz0
+        reg = self.rid[I, K]
+        tunnel = (reg == self.names.index("ring")) | (reg == self.names.index("side")) | (reg < 0)
+        ti, tk = (gi - E.ri0) // TILE, (gk - E.rk0) // TILE
+        code = np.where(tunnel, 1000 + ti * 100 + tk, reg)
+        byid = {p["id"]: p for p in pieces}
+        added = {}
+        for cd in np.unique(code):
+            sel = code == cd
+            i, j, k = I[sel], J[sel], K[sel]
+            o = (i.min() - (i.min() + occ.gx0) % 2, j.min() - (j.min() + occ.J0) % 2, k.min() - (k.min() + occ.gz0) % 2)
+            lab = np.full((i.max() - o[0] + 1, j.max() - o[1] + 1, k.max() - o[2] + 1), -1, np.int16)
+            lab[i - o[0], j - o[1], k - o[2]] = self.lab[i, j, k]
+            covered = np.zeros(lab.shape, bool)
+            out = []
+            for ci in np.unique(lab[lab >= 0]):
+                al = lab == ci
+                b = pack(al, al, covered, schedule=COARSE_SCHEDULE if self.classes[ci][1] == 0 else SCHEDULE)
+                c, m = self.classes[ci]
+                out.append(np.column_stack([b[:, 0] + o[0] + occ.gx0, b[:, 1] + o[1] + occ.J0, b[:, 2] + o[2] + occ.gz0,
+                                            b[:, 3], np.full(len(b), c), np.full(len(b), m)]))
+            B = np.concatenate(out).astype(np.int64)
+            if cd >= 1000:
+                t_i, t_k = (cd - 1000) // 100, (cd - 1000) % 100
+                pid = f"ship_hollow_rock_low_{t_i}_{t_k}"
+                B[:, 0] -= E.ri0 + t_i * TILE; B[:, 2] -= E.rk0 + t_k * TILE
+                if pid not in byid:
+                    byid[pid] = dict(id=pid, name=f"Hollow Rock Low {t_i} {t_k}", layer="low", origin=[E.rx0 + t_i * TILE * CELL, 0.0,
+                                     E.rz0 + t_k * TILE * CELL], motion="static", fort=-1, blocks=np.zeros((0, 6), np.int64))
+                    pieces.append(byid[pid])
+            else:
+                g = self.names[cd]
+                pid = "ship_hollow_" + g
+                if pid not in byid:
+                    byid[pid] = dict(id=pid, name="Hollow " + " ".join(w.title() for w in g.split("_")), layer="struct",
+                                     origin=[0.0, 0.0, 0.0], motion="static", fort=-1, blocks=np.zeros((0, 6), np.int64))
+                    pieces.append(byid[pid])
+            byid[pid]["blocks"] = np.concatenate([byid[pid]["blocks"], B])
+            added[pid] = added.get(pid, 0) + len(B)
+        return added
+
+
 def stage_compute(design_path, work):
     global np
     import numpy
@@ -1354,6 +2682,7 @@ def stage_compute(design_path, work):
                     "den": (255, 85, 48), "outer": (190, 186, 172), "defence": (255, 85, 48)}
     E = Exporter(D)
     E.dropped_arms = []
+    E.naturalise()
     E.classify()
     E.reanchor_maw()
     E.place_guns()
@@ -1363,69 +2692,56 @@ def stage_compute(design_path, work):
     rock = E.pack_rock()
     sp = E.pack_structures()
     struct = []
-    names = {}
     for p in sp:
         g = p["group"]
         nm = "Hollow " + " ".join(w.title() for w in g.split("_"))
         hid = "_high" if p["layer"] == "high" else ""
         struct.append(dict(id="ship_hollow_" + g + hid, name=nm + (" (high)" if hid else ""), layer=p["layer"], origin=[0.0, 0.0, 0.0],
                            motion="static", fort=-1, blocks=p["blocks"]))
-    # re-base each structure piece on its own min corner (x, z); heights stay absolute (origin y = 0)
-    for p in struct:
-        B = p["blocks"]
-        mi, mk = int(B[:, 0].min()), int(B[:, 2].min())
-        B[:, 0] -= mi; B[:, 2] -= mk
-        p["origin"] = [mi * CELL, 0.0, mk * CELL]
     forts = E.build_forts()
-    pieces = split_big(rock + struct + forts)
-    for p in pieces:
-        piece_check(p)
+    pieces = rock + struct + forts                    # the structures still in global cells (origin 0), re-based below
     L = E.lists()
 
-    # ---- global occupancy on the 2 m lattice (static pieces): top heights, band [-8, 8), the cutaway mask
-    statics = [p for p in pieces if p["motion"] == "static"]
-    allB = []
+    # ---- berths and routes, against the flight band of what was built
+    occ = Occupancy(pieces, L["guns"])
+    obs0 = route_obstacles(L)
+    before = {r["name"]: route_clearance(occ, r, obs0) for r in L["traffic"]}
+    E.berth_moored(L, occ)
+    obs = route_obstacles(L)
+    for r in L["traffic"]:
+        if route_clearance(occ, r, obs)[0] < ROUTE_CLEAR + 0.5:
+            r["route"] = [list(p) for p in nudge(occ, route_pts(r), r["loop"], obs)]
+    E.recheck_berths(L, occ)
+    obs = route_obstacles(L)
+    after = {r["name"]: route_clearance(occ, r, obs) for r in L["traffic"]}
+    way_lines = wayfind(E, occ, L)
+
+    # ---- the floors: signs, then the clutter and its lights (all below y = -10: the band and the checks above stand)
+    budget = 2_480_000 - sum(int((p["blocks"][:, 3].astype(np.int64) ** 3).sum()) for p in pieces)
+    F = Furnisher(E, occ, L, budget)
+    F.place_signs()
+    F.furnish()
+    F.clean_lights()
+    F.thin_lights(600 - len(L["lights"]))
+    added = F.emit(pieces)
+    L["lights"] += F.lights
+    L["neon"] += F.neon
+
+    # re-base each structure piece on its own min corner (x, z); heights stay absolute (origin y = 0)
     for p in pieces:
-        B, oi, ok_ = world_cells(p)
-        if p["motion"] == "rotate":
-            oi, ok_ = int(round(p["origin"][0] / CELL)), int(round(p["origin"][2] / CELL))
-        allB.append((p, B, oi, ok_))
-    gx0 = min(oi + int(B[:, 0].min()) for _, B, oi, _ in allB) - 2
-    gz0 = min(ok_ + int(B[:, 2].min()) for _, B, _, ok_ in allB) - 2
-    gx1 = max(oi + int((B[:, 0] + B[:, 3]).max()) for _, B, oi, _ in allB) + 2
-    gz1 = max(ok_ + int((B[:, 2] + B[:, 3]).max()) for _, B, _, ok_ in allB) + 2
-    W, H = gx1 - gx0, gz1 - gz0
-    top = np.full((W, H), -999, np.int16); pid = np.full((W, H), -1, np.int32); band = np.zeros((W, H), bool)
-    bpid = np.full((W, H), -1, np.int32)
-    high = np.zeros((W, H), bool)
-    for n, (p, B, oi, ok_) in enumerate(allB):
-        for sz in (1, 2, 3, 4):
-            Bs = B[B[:, 3] == sz]
-            if not len(Bs):
-                continue
-            for a in range(sz):
-                for c in range(sz):
-                    ii = Bs[:, 0] + oi - gx0 + a; kk = Bs[:, 2] + ok_ - gz0 + c
-                    tp = (Bs[:, 1] + sz).astype(np.int16)
-                    order = np.argsort(tp)
-                    ii, kk, tp = ii[order], kk[order], tp[order]
-                    better = tp > top[ii, kk]
-                    top[ii[better], kk[better]] = tp[better]; pid[ii[better], kk[better]] = n
-                    if p["motion"] == "static":
-                        bsel = (Bs[order, 1] < 4) & (Bs[order, 1] + sz > -4)
-                        band[ii[bsel], kk[bsel]] = True
-                        bpid[ii[bsel], kk[bsel]] = n
-                    if p["layer"] == "high":
-                        high[ii, kk] = True
-    # guns' grids stand in the band too
-    for g in L["guns"]:
-        if g["fort"] >= 0:
-            continue
-        a = 9 if g["big"] else 7
-        i0, i1 = int((g["x"] - a) / CELL) - gx0, int((g["x"] + a) / CELL) - gx0
-        k0, k1 = int((g["z"] - a) / CELL) - gz0, int((g["z"] + a) / CELL) - gz0
-        band[max(i0, 0):i1 + 1, max(k0, 0):k1 + 1] = True
-        bpid[max(i0, 0):i1 + 1, max(k0, 0):k1 + 1] = -100 - L["guns"].index(g)
+        if p["motion"] == "static" and p["origin"] == [0.0, 0.0, 0.0]:
+            B = p["blocks"]
+            mi, mk = int(B[:, 0].min()), int(B[:, 2].min())
+            B[:, 0] -= mi; B[:, 2] -= mk
+            p["origin"] = [mi * CELL, 0.0, mk * CELL]
+    pieces = split_big(pieces)
+    for p in pieces:
+        piece_check(p)
+
+    # ---- the final pieces on one grid: the cutaway mask, the checks, the images
+    fin = Occupancy(pieces, L["guns"], field=False)
+    allB, gx0, gz0, gx1, gz1, W, H, high = fin.allB, fin.gx0, fin.gz0, fin.gx1, fin.gz1, fin.W, fin.H, fin.high
+    band_changed = int((fin.band != occ.band).sum())       # the floor clutter never reaches the flight band: 0
     # the cutaway mask at 16 m
     ic0, kc0 = int(math.floor(gx0 * CELL / 16)), int(math.floor(gz0 * CELL / 16))
     ic1, kc1 = int(math.ceil(gx1 * CELL / 16)), int(math.ceil(gz1 * CELL / 16))
@@ -1437,98 +2753,15 @@ def stage_compute(design_path, work):
     ins = ins[xi[0]:xi[-1] + 1, zk[0]:zk[-1] + 1]
     L["inside"] = dict(cell=16, x0=float((ic0 + xi[0]) * 16), z0=float((kc0 + zk[0]) * 16), w=int(ins.shape[0]), h=int(ins.shape[1]),
                        rows=["".join("1" if ins[c, r] else "0" for c in range(ins.shape[0])) for r in range(ins.shape[1])])
-
-    # ---- traffic clearance: >= 20 m from any rock / structure / gun cell in the y band [-8, 8]
-    viol = []
-    def blame(p):
-        ci_, ck_ = int(p[0] / CELL) - gx0, int(p[1] / CELL) - gz0
-        sub = bpid[max(ci_ - 10, 0):ci_ + 11, max(ck_ - 10, 0):ck_ + 11]
-        out = set()
-        for v in np.unique(sub[sub != -1]):
-            out.add(allB[v][0]["id"] if v >= 0 else "gun %d (%s)" % (-100 - v, L["guns"][-100 - v]["group"]))
-        return sorted(out)
-
-    def clearance(p):
-        ci_, ck_ = (p[0] / CELL) - gx0, (p[1] / CELL) - gz0
-        r = 12
-        i0, i1 = max(int(ci_) - r, 0), min(int(ci_) + r + 1, W); k0, k1 = max(int(ck_) - r, 0), min(int(ck_) + r + 1, H)
-        sub = band[i0:i1, k0:k1]
-        if not sub.any():
-            return 99.0
-        ii, kk = np.nonzero(sub)
-        dx = np.maximum(np.abs(ii + i0 + 0.5 - ci_) - 0.5, 0); dz = np.maximum(np.abs(kk + k0 + 0.5 - ck_) - 0.5, 0)
-        return float(np.hypot(dx, dz).min() * CELL)
-    LEN = {"shuttle": (14, 6), "courier": (22, 8), "wraith": (28, 12), "tug": (32, 14), "cruiser": (52, 24), "hauler": (64, 20)}
-    lanes = [[tuple(p) for p in r["route"]] + ([tuple(r["route"][0])] if r["loop"] else []) for r in L["traffic"]]
-
-    def lane_gap(q):
-        best = (1e9, None, None)
-        for pts in lanes:
-            for a, b in zip(pts, pts[1:]):
-                d = seg_dist(q, a, b)
-                if d < best[0]:
-                    best = (d, a, b)
-        return best
-    for m in L["moored"]:
-        Lm, Bm = LEN.get(m["cls"], (40, 16))
-        need = Lm / 2 + 12
-        d, a, b = lane_gap((m["x"], m["z"]))
-        if d >= need:
-            continue
-        # away from the lane until clear (perpendicular first, then any direction); it must stay in open air, on the same
-        # side of the rock's edge, and off the other ships
-        ux, uz = b[0] - a[0], b[1] - a[1]; ul = math.hypot(ux, uz) or 1
-        nx, nz = -uz / ul, ux / ul
-        side = 1 if (m["x"] - a[0]) * nx + (m["z"] - a[1]) * nz >= 0 else -1
-        dirs = [(side * nx, side * nz), (-side * nx, -side * nz)] + [(math.sin(math.radians(t)), math.cos(math.radians(t))) for t in range(0, 360, 30)]
-        moved = False
-        was = E.col_kind(m["x"], m["z"])[0]
-        for step in range(2, 90, 2):
-            for dx_, dz_ in dirs:
-                q = (m["x"] + dx_ * step, m["z"] + dz_ * step)
-                if lane_gap(q)[0] < need or clearance(q) < Bm / 2 + 4:
-                    continue
-                if any(o is not m and math.dist(q, (o["x"], o["z"])) < (Lm + LEN.get(o["cls"], (40, 16))[0]) / 2 + 4 for o in L["moored"]):
-                    continue
-                if (E.col_kind(*q)[0] == 0) != (was == 0):
-                    continue
-                E.log.append(f"moored {m['cls']} at ({m['x']:.0f}, {m['z']:.0f}) moved {step} m off the lane")
-                m["x"], m["z"] = round(q[0], 1), round(q[1], 1)
-                moved = True
-                break
-            if moved:
-                break
-        if not moved:
-            E.log.append(f"moored {m['cls']} at ({m['x']:.0f}, {m['z']:.0f}) dropped: {d:.0f} m from a lane and no clear berth near")
-            m["drop"] = True
-    L["moored"] = [m for m in L["moored"] if not m.get("drop")]
-    route_report = []
-    for r in L["traffic"]:
-        pts = r["route"] + ([r["route"][0]] if r["loop"] else [])
-        mn = 99.0
-        for a, b in zip(pts, pts[1:]):
-            n = max(1, int(math.dist(a, b) / 2))
-            for t in range(n + 1):
-                q = (a[0] + (b[0] - a[0]) * t / n, a[1] + (b[1] - a[1]) * t / n)
-                c = clearance(q)
-                mn = min(mn, c)
-                if c < 20:
-                    viol.append((r["name"], round(q[0], 1), round(q[1], 1), round(c, 1)))
-        near = []
-        for m in L["moored"]:
-            Lm = {"shuttle": 14, "courier": 22, "wraith": 28, "tug": 32, "cruiser": 52, "hauler": 64}.get(m["cls"], 40)
-            d = poly_dist((m["x"], m["z"]), [tuple(p) for p in pts])
-            if d < Lm / 2 + 12:
-                near.append((m["cls"], m["x"], m["z"], round(d, 1)))
-        route_report.append((r["name"], len(r["route"]), round(mn, 1), near))
+    final = {r["name"]: route_clearance(fin, r, obs) for r in L["traffic"]}
     # stations in open air at y = 0
     st_report = []
     for s in L["stations"]:
         k = E.col_kind(s["x"], s["z"])[0]
         assert k != 1, f"station {s['id']} is inside the rock"
-        st_report.append((s["id"], round(clearance((s["x"], s["z"])), 1)))
+        st_report.append((s["id"], round(occ.clear((s["x"], s["z"])), 1)))
     # guns: a ledge under each (-8..-2) and its footprint clear from -2 to +12, of every piece
-    occ = {}
+    gocc = {}
     for p, B, oi, ok_ in allB:
         for sz in (1, 2, 3, 4):
             Bs = B[B[:, 3] == sz]
@@ -1537,11 +2770,11 @@ def stage_compute(design_path, work):
                     for c in range(sz):
                         for t in zip(Bs[:, 0] + oi + a, Bs[:, 1] + b_, Bs[:, 2] + ok_ + c):
                             if -4 <= t[1] < 6:
-                                occ.setdefault(p["motion"] if p["motion"] == "static" else p["id"], set()).add(t)
+                                gocc.setdefault(p["motion"] if p["motion"] == "static" else p["id"], set()).add(t)
     gun_bad = []
     for gi_, g in enumerate(L["guns"]):
         key = "static" if g["fort"] < 0 else f"ship_hollow_fort_{g['fort']}"
-        o = occ.get(key, set())
+        o = gocc.get(key, set())
         a, b_ = (9, 9) if g["big"] else (7, 7)
         hd = g["yaw"]
         ux, uz = math.sin(hd), math.cos(hd)
@@ -1562,8 +2795,8 @@ def stage_compute(design_path, work):
     tot_cells = sum(cells(p["blocks"]) for p in pieces)
     tot_blocks = sum(len(p["blocks"]) for p in pieces)
     rockp = [p for p in pieces if p["layer"] in ("low", "high")]
-    rock_cells = sum(cells(p["blocks"]) for p in rockp)
-    rock_big = sum(cells(p["blocks"][p["blocks"][:, 3] >= 2]) for p in rockp)
+    rock_cells = sum(cells(p["blocks"][p["blocks"][:, 5] == 0]) for p in rockp)       # the stone (the floor clutter in a tile aside)
+    rock_big = sum(cells(p["blocks"][(p["blocks"][:, 3] >= 2) & (p["blocks"][:, 5] == 0)]) for p in rockp)
     by_size = {s: [0, 0] for s in (1, 2, 3, 4)}
     for p in pieces:
         for s in (1, 2, 3, 4):
@@ -1586,17 +2819,26 @@ def stage_compute(design_path, work):
     lines.append(f"guns {len(L['guns'])}, lights {len(L['lights'])}, neon {len(L['neon'])}, signs {len(L['signs'])}, "
                  f"stations {len(L['stations'])}, moored {len(L['moored'])}, traffic {len(L['traffic'])}, gunships {len(L['gunships'])}, "
                  f"beacons {len(L['beacons'])}, inside {L['inside']['w']}x{L['inside']['h']}")
-    lines.append("traffic clearance (>= 20 m from any cell or gun in y -8..+8):")
-    for name, n, mn, near in route_report:
-        lines.append(f"  {name:22s} {n:3d} points, min clearance {mn:5.1f} m" + (f"; passes moored {near}" if near else ""))
-    lines.append(f"  violations: {len(viol)}")
-    seen = set()
-    for v in viol:
-        key = (v[0], round(v[1] / 40), round(v[2] / 40))
-        if key in seen:
-            continue
-        seen.add(key)
-        lines.append(f"    {v[0]} at ({v[1]}, {v[2]}) {v[3]} m: {blame((v[1], v[2]))}")
+    lines.append(f"traffic clearance (sampled every 5 m; >= {ROUTE_CLEAR:.0f} m from rock / structure / gun cells in y -8..+8, "
+                 "gunship posts, moored hulls, boulders), as laid -> after the nudges:")
+    for r in L["traffic"]:
+        b0, b1 = before[r["name"]], final[r["name"]]
+        lines.append(f"  {r['name']:22s} {len(r['route']):3d} points, {b0[0]:5.1f} m ({b0[2]}) -> {b1[0]:5.1f} m ({b1[2]})"
+                     + ("" if b1[0] >= ROUTE_CLEAR else f" SHORT at ({b1[1][0]:.0f}, {b1[1][1]:.0f}): {fin.blame(b1[1])}"))
+    bt = E.berths
+    lines.append(f"moored: {bt['design']} in the design, {bt['kept']} kept in place, {bt['moved']} moved, {bt['dropped']} dropped: "
+                 f"{len(L['moored'])} berths")
+    lines.append(f"floor clutter: {F.cells} cells; " + ", ".join(f"{k} {v}" for k, v in sorted(F.count.items()))
+                 + f"; pipes along the walls {F.pipe_m:.0f} m (cells x 2 m); light strips {F.strip_runs}; lights +{len(F.lights)}, "
+                 f"neon +{len(F.neon)}; band cells changed {band_changed}")
+    lines.append("  clutter blocks per piece: " + ", ".join(f"{k[12:]} {v}" for k, v in sorted(added.items())))
+    big = [(p["id"], len(p["blocks"])) for p in pieces if len(p["blocks"]) > 25000]
+    lines.append("pieces over 25,000 blocks: " + (str(big) if big else "none"))
+    lines.append(f"natural tunnels: {len(E.tunnels)} tunnels meandering (the Maw's throat straight), {E.pockets} alcoves and side "
+                 f"pockets, {len(E.pillars)} pillars and rock spurs")
+    lines += way_lines
+    lines.append("signs: " + "; ".join(f"{s['text']} ({s['x']:.0f}, {s['y']:.1f}, {s['z']:.0f}) yaw {math.degrees(s['yaw']):.0f} size {s['size']:.0f}"
+                                        for s in L["signs"]))
     lines.append(f"guns on a ledge with a clear footprint: {len(L['guns']) - len(gun_bad)}/{len(L['guns'])}" +
                  ("" if not gun_bad else " FAILING " + str(gun_bad)))
     lines.append("stations, clearance at y = 0: " + ", ".join(f"{a} {b} m" for a, b in st_report))
@@ -1609,9 +2851,9 @@ def stage_compute(design_path, work):
     os.makedirs(OUT, exist_ok=True)
     doc = dict(version=1, cell=CELL, spawn=L["spawn"], bounds=L["bounds"], forts=L["forts"], guns=L["guns"], lights=L["lights"],
                neon=L["neon"], signs=L["signs"], stations=L["stations"],
-               moored=[{k: v for k, v in m.items() if k != "cls"} for m in L["moored"]],
+               moored=[{k: v for k, v in m.items() if k != "cls" and not k.startswith("_")} for m in L["moored"]],
                traffic=[{k: v for k, v in r.items() if k != "name"} for r in L["traffic"]], gunships=L["gunships"],
-               inside=L["inside"], beacons=L["beacons"], boulders=L["boulders"],
+               inside=L["inside"], beacons=L["beacons"], boulders=L["boulders"], waypoints=L["waypoints"], paths=L["paths"],
                pieces=[dict(id=p["id"], name=p["name"], layer=p["layer"], origin=[round(float(v), 2) for v in p["origin"]],
                             motion=p["motion"], fort=int(p["fort"]), blocks=p["blocks"].tolist()) for p in pieces])
     with open(OUT_JSON, "w") as f:
@@ -1693,7 +2935,7 @@ def stage_compute(design_path, work):
     with open(os.path.join(work, "top.rgb"), "wb") as f:
         f.write(img.tobytes())
     meta = dict(top=dict(w=int(2 * W + 12), h=int(H), pw=int(W), x0=float(gx0 * CELL), z0=float(gz0 * CELL)), secs=secs, lists={k: L[k] for k in
-                ("guns", "stations", "traffic", "moored", "signs", "gunships", "spawn", "forts")}, summary=lines,
+                ("guns", "stations", "traffic", "moored", "signs", "gunships", "spawn", "forts", "waypoints", "paths")}, summary=lines,
                 pieces=[dict(id=p["id"], layer=p["layer"], origin=p["origin"],
                              bbox=[int(p["blocks"][:, 0].min()), int(p["blocks"][:, 2].min()),
                                    int((p["blocks"][:, 0] + p["blocks"][:, 3]).max()), int((p["blocks"][:, 2] + p["blocks"][:, 3]).max())])
@@ -1730,27 +2972,36 @@ def stage_draw(work):
             d.line(pts, fill=cols[n % len(cols)] + (220,), width=2)
             for q in pts:
                 d.ellipse([q[0] - 2, q[1] - 2, q[0] + 2, q[1] + 2], fill=cols[n % len(cols)] + (255,))
-        for m in L["moored"]:
-            q = P(m["x"], m["z"]); d.rectangle([q[0] - 3, q[1] - 3, q[0] + 3, q[1] + 3], outline=(255, 226, 120, 255))
+        for m in L["moored"]:                                     # each berth its ship's size: length x a third of it
+            ln = {"ship_nocturne_wraith": 20.0, "ship_nocturne_vesper": 45.0}.get(m["blueprint"], 50.0)
+            u = (math.sin(m["yaw"]), math.cos(m["yaw"])); v = (u[1], -u[0])
+            d.polygon([P(m["x"] + u[0] * a * ln / 2 + v[0] * b * ln / 6, m["z"] + u[1] * a * ln / 2 + v[1] * b * ln / 6)
+                       for a, b in ((1, 1), (1, -1), (-1, -1), (-1, 1))], outline=(255, 226, 120, 255))
         for g in L["guns"]:
             q = P(g["x"], g["z"]); r = 6 if g["big"] else 4
             d.ellipse([q[0] - r, q[1] - r, q[0] + r, q[1] + r], fill=(255, 60, 40, 255), outline=(0, 0, 0, 255))
             e = (q[0] + math.sin(g["yaw"]) * 14, q[1] - math.cos(g["yaw"]) * 14)
             d.line([q, e], fill=(255, 60, 40, 255), width=2)
         for s in L["stations"]:
-            q = P(s["x"], s["z"]); d.ellipse([q[0] - 6, q[1] - 6, q[0] + 6, q[1] + 6], outline=(124, 255, 154, 255), width=3)
+            q = P(s["x"], s["z"]); d.ellipse([q[0] - 9, q[1] - 9, q[0] + 9, q[1] + 9], outline=(124, 255, 154, 255), width=2)   # 18 m
             d.text((q[0] + 8, q[1] - 8), s["title"], font=fnt, fill=(124, 255, 154, 255))
         for s in L["signs"]:
             q = P(s["x"], s["z"]); d.text((q[0], q[1] + 6), s["text"], font=fnt, fill=(255, 255, 255, 200), anchor="mt")
+            d.line([q, (q[0] + math.sin(s["yaw"]) * 10, q[1] - math.cos(s["yaw"]) * 10)], fill=(255, 255, 255, 220), width=2)
         for g in L["gunships"]:
             q = P(g["x"], g["z"]); r = g["radius"] / CELL
             d.ellipse([q[0] - r, q[1] - r, q[0] + r, q[1] + r], outline=(255, 122, 47, 160), width=1)
+        if panel == 1:                                            # the stations' paths from the Maw, the signposted junctions
+            for pts in L.get("paths", {}).values():
+                d.line([P(*p) for p in pts], fill=(255, 255, 255, 90), width=1)
+            for w_ in L.get("waypoints", []):
+                q = P(w_["x"], w_["z"]); d.rectangle([q[0] - 4, q[1] - 4, q[0] + 4, q[1] + 4], outline=(255, 255, 255, 255), width=1)
         sp = L["spawn"]; q = P(sp["x"], sp["z"])
         d.ellipse([q[0] - 10, q[1] - 10, q[0] + 10, q[1] + 10], outline=(255, 255, 255, 255), width=2)
         d.text((10 + dx_, 10), ("THE HOLLOW, all pieces" if panel == 0 else "CUTAWAY: the high pieces (y >= +24) hidden") +
                ": top view, 2 m/px, north up", font=fnt, fill=(255, 255, 255, 255))
         d.text((10 + dx_, 30), "rock in its tones, shaded by height; structures tinted per piece; guns red,", font=fnt, fill=(200, 200, 200, 255))
-        d.text((10 + dx_, 50), "stations green, routes coloured, moored ships yellow, gunship patrols orange", font=fnt, fill=(200, 200, 200, 255))
+        d.text((10 + dx_, 50), "stations green (18 m), routes coloured, berths yellow (ship size), signs white (tick: their yaw), gunship patrols orange", font=fnt, fill=(200, 200, 200, 255))
 
     img.save(os.path.join(OUT, "check_top.png"), optimize=True)
     # sections, vertical scale 1 px = 1 m (x 2 of the plan's scale)

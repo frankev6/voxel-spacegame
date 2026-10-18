@@ -33,7 +33,9 @@ namespace Game.Editor.Content
         public static void Build()
         {
             using var service = new ContentService(ContentDatabaseBuilder.Rebuild());
-            BuildShip(service, "ship_nocturne_wraith", "WRAITH", 0);
+            // Owner: "we have to improve the wraith's engines and controls ... a small ships thats is meant to be highly maneverable":
+            // a framed hull (bulkheads every 6 cells) instead of a solid one, and the refit's engines and pods (wraith_refit.py).
+            BuildShip(service, "ship_nocturne_wraith", "WRAITH", 0, hollowEvery: 6);
             // Owner: "lets design a ship that looks really good, and "borrows" slightly from the requiem instead of copying
             // outright, and feels good". Three cruiser options drawn on the kit (ArtSource/LookDev/ld_cruisers.py).
             // Owner, picking: "the C lance is good as the new requiem, but i also liked your other options so just add them all
@@ -86,7 +88,7 @@ namespace Game.Editor.Content
 
         // ---------------------------------------------------------------------------------------------------------- build
         /// <summary>Builds one blueprint from a look-book-format JSON in <paramref name="source"/> (RacerShipBuilder reuses it).</summary>
-        internal static void BuildShip(ContentService service, string id, string name, int reactors, string source = Source)
+        internal static void BuildShip(ContentService service, string id, string name, int reactors, string source = Source, int hollowEvery = 0)
         {
             var catalog = service.Catalog;
             var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
@@ -186,7 +188,8 @@ namespace Game.Editor.Content
                 modules += PlaceModule(structure, content, catalog, kind, boxMin, boxMax, ref failed, nozzle);
             }
             if (reactors > 0) failed += SeatCoreAndReactors(structure, content, Index("block_core_small"), Index("block_reactor_small"), reactors);
-            int hollowed = reactors > 0 ? Hollow(structure, content, cube, 10) : 0;
+            // a ship with reactors is framed with bulkheads every 10 cells; hollowEvery frames a smaller one without them
+            int hollowed = reactors > 0 || hollowEvery > 0 ? Hollow(structure, content, cube, hollowEvery > 0 ? hollowEvery : 10) : 0;
             var (bridges, loose) = Connect(structure, content, cube, Index("block_core_small"));
 
             string path = Ships + id + ".asset";

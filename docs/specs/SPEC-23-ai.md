@@ -57,7 +57,7 @@ namespace Game.Simulation.Spatial
 
     public enum ProxyKind : byte { Ship = 0, Station = 1, Asteroid = 2, Hulk = 3, Celestial = 4 }   // add at end only
 
-    [System.Flags] public enum ProxyFlags : byte { None = 0, PlayerShip = 1, Dormant = 2, Shielded = 4, HasAi = 8 }
+    [System.Flags] public enum ProxyFlags : byte { None = 0, PlayerShip = 1, Dormant = 2, Shielded = 4, HasAi = 8, Scenery = 16 }   // Scenery: static rock (SpatialScenery); only hit tests (QuerySegment/QuerySphere with scenery: true) see it (DEV-023)
 
     /// <summary>One broad-phase object (64 bytes). Implements SPEC-23 §4.1.</summary>
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Size = 64)]

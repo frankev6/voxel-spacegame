@@ -19,7 +19,7 @@ namespace Game.Editor.Art
         };
         const string PropMaterial = "Assets/Game/Art/_Placeholder/Materials/PropPlaceholder.mat";
         const string Plating = "Assets/Game/Art/Nocturne/Plating/Plating_";
-        public const int Hull = 0, Armour = 1, Engine = 2, Weapon = 3, Power = 4, Shield = 5, Cargo = 6, Utility = 7, XenoTissue = 8, XenoOrgan = 9;
+        public const int Hull = 0, Armour = 1, Engine = 2, Weapon = 3, Power = 4, Shield = 5, Cargo = 6, Utility = 7, XenoTissue = 8, XenoOrgan = 9, Rock = 10;
 
         struct Layer
         {
@@ -40,6 +40,9 @@ namespace Game.Editor.Art
             // ADR-0115 Xeno, colourway Obsidian & acid (§7): style 5 shades grown tissue; row 0 is the vein colour, Windows = organ glow.
             new Layer { Index = XenoTissue, Style = 5, Windows = 0, Metallic = .05f, Override = "121315", Emission = "B8FF2E", Glow = 1 },
             new Layer { Index = XenoOrgan, Style = 5, Windows = .45f, Metallic = .05f, Override = "121315", Emission = "B8FF2E", Glow = 1 },
+            // DEV-023 the Hollow's rock (owner: "the texture of the asteroid should be rock not the ship hull texture"): style 6 shades
+            // stone from the paint colour (RockSurface.hlsl); Relief = bump strength.
+            new Layer { Index = Rock, Style = 6, Relief = 1, Metallic = 0 },
         };
 
         [MenuItem("Game/Art/Bake NOCTURNE Brick Look")]
@@ -54,15 +57,7 @@ namespace Game.Editor.Art
                 parameters.SetPixel(x, 0, rows01[x]); parameters.SetPixel(x, 1, rows01[x + 64]);
                 parameters.SetPixel(x, 2, Color.clear); parameters.SetPixel(x, 3, Color.clear);
             }
-            foreach (var layer in Layers)
-            {
-                Color glow = layer.Emission == null ? Color.clear : Hex(layer.Emission).linear * layer.Glow;
-                Color colour = layer.Override == null ? Color.black : Hex(layer.Override).linear;
-                parameters.SetPixel(layer.Index, 0, new Color(glow.r, glow.g, glow.b, 0));
-                parameters.SetPixel(layer.Index, 1, new Color(1, 1, 1, 0));
-                parameters.SetPixel(layer.Index, 2, new Color(layer.Style, layer.Windows, layer.Relief, layer.Override == null ? 0 : 1));
-                parameters.SetPixel(layer.Index, 3, new Color(colour.r, colour.g, colour.b, layer.Metallic));
-            }
+            foreach (var layer in Layers) Write(parameters, layer);
             parameters.Apply(false, false); EditorUtility.SetDirty(parameters);
             foreach (string path in Materials)
             {
@@ -89,6 +84,26 @@ namespace Game.Editor.Art
             AssetDatabase.SaveAssets();
             GameLog.Info("Art", "Baked NOCTURNE brick look: " + Layers.Length + " layers, " + changed + " block layer changes.");
         }
+        static void Write(Texture2D parameters, Layer layer)
+        {
+            Color glow = layer.Emission == null ? Color.clear : Hex(layer.Emission).linear * layer.Glow;
+            Color colour = layer.Override == null ? Color.black : Hex(layer.Override).linear;
+            parameters.SetPixel(layer.Index, 0, new Color(glow.r, glow.g, glow.b, 0));
+            parameters.SetPixel(layer.Index, 1, new Color(1, 1, 1, 0));
+            parameters.SetPixel(layer.Index, 2, new Color(layer.Style, layer.Windows, layer.Relief, layer.Override == null ? 0 : 1));
+            parameters.SetPixel(layer.Index, 3, new Color(colour.r, colour.g, colour.b, layer.Metallic));
+        }
+
+        /// <summary>DEV-023: writes only the rock layer's rows. The full Bake also re-derives every block's layer from its name, which
+        /// would undo layers set by hand since (engines, the canister, the track frame).</summary>
+        public static void BakeRock()
+        {
+            var parameters = AssetDatabase.LoadAssetAtPath<Texture2D>(LayerParams) ?? throw new InvalidOperationException("Missing " + LayerParams);
+            if (parameters.height < 4) throw new InvalidOperationException(LayerParams + " has no plating rows: run Game/Art/Bake NOCTURNE Brick Look");
+            Write(parameters, Array.Find(Layers, l => l.Index == Rock));
+            parameters.Apply(false, false); EditorUtility.SetDirty(parameters); AssetDatabase.SaveAssets();
+        }
+
         static void AssignPlating(Material material)
         {
             if (material == null) return;
@@ -101,6 +116,7 @@ namespace Game.Editor.Art
         {
             if (id == "block_missing") return -1;
             if (id.Contains("xeno")) return id == "block_xeno_tissue" || id == "block_xeno_sac" ? XenoTissue : XenoOrgan;
+            if (id.StartsWith("block_rock", StringComparison.Ordinal)) return Rock;
             if (id.StartsWith("block_hull", StringComparison.Ordinal)) return Hull;
             if (id.Contains("thruster")) return Engine;
             if (id.StartsWith("weapon_", StringComparison.Ordinal)) return Weapon;

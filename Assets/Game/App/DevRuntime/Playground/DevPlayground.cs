@@ -52,6 +52,7 @@ namespace Game.App.DevRuntime.Playground
         // DEV-023 option E: the Hollow, 9 km east of the ARK Proving Grounds, built the first time a pilot goes there
         PlaygroundHollow hollow;
         int hollowNearest = -2;
+        bool inHollow;
         PlaygroundHub.District here;
         string resumeAt;                    // a station to return to after a reset (the shipyard pad after a ship swap)
         int courseGate = -1;
@@ -184,7 +185,7 @@ namespace Game.App.DevRuntime.Playground
             DevPlaygroundStory.RefreshResetMarkers(ctx);
             world = new PlaygroundHubWorld(ctx, origin);
             world.Build();
-            hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin); hollowNearest = -2;
+            hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin); hollowNearest = -2; inHollow = false;
             if (world.Missing != null) { report = world.Missing; GameLog.Warn(LogCategories.Dev, world.Missing); }
             BuildPresentation();
             string resume = resumeAt; resumeAt = null;
@@ -487,6 +488,14 @@ namespace Game.App.DevRuntime.Playground
             {
                 if (located && !hollow.Built && HollowLayout.Near(at - HollowLayout.Offset, 1500)) hollow.Build();
                 hollow.Tick(located, ship3);
+                // the report greets the Hollow, not the Proving Grounds the pilot left behind
+                bool atHollow = located && HollowLayout.Near(at - HollowLayout.Offset, 600);
+                if (atHollow != inHollow)
+                {
+                    inHollow = atHollow; nearest = -2;   // and the heading names it
+                    SetReport(atHollow ? "The Hollow: the Khuchad Clan's haven. Each district has its colours; its emblem turns over its station, and F in a station's circle trades."
+                        : here == null ? "The plaza: fly out through a portal to visit a district." : world?.Intro(here) ?? here.Tagline);
+                }
                 int st = located && hollow.Built ? hollow.Nearest(at - HollowLayout.Offset) : -1;
                 if (st != hollowNearest)
                 {

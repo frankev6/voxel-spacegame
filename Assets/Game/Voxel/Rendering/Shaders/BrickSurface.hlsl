@@ -5,6 +5,7 @@
 #include "BrickMaterial.hlsl"
 #include "NocturnePlating.hlsl"
 #include "XenoSurface.hlsl"
+#include "RockSurface.hlsl"
 
 struct BrickSurfaceInput
 {
@@ -17,6 +18,21 @@ struct BrickSurfaceInput
     float xenoDepth;     // ADR-0115: cells below the grown surface at this smooth vertex (0 for block faces)
     float3 panel;        // ADR-0121: large hull block position on the face (cells) and side; z = 0 for ordinary cells
 };
+// DEV-023 shelter (owner: "inside the asteroid the source of light seems to still be the sun"): under a rock roof the sun does not
+// reach, the ambient is dim and dust hazes the depths. A mask in world x/z (1 = roofed) set as globals by whatever owns the roof
+// (the playground's Hollow); off (_ShelterParams.y = 0) everywhere else.
+TEXTURE2D(_ShelterMask); SAMPLER(sampler_ShelterMask);
+float4 _ShelterRect;    // xy: the mask's world x/z minimum; zw: 1 / its world size
+float4 _ShelterParams;  // x: roof height (world y); y: on; z: ambient kept under the roof (0..1); w: haze strength (0..1)
+float4 _ShelterHaze;    // rgb: haze colour (linear)
+float4 _ShelterFill;    // rgb: warm fill light under the roof (linear), so nothing there is black (owner: "atmosphere so it doesn't feel dark")
+half BrickShelter(float3 positionWS)
+{
+    if (_ShelterParams.y < .5) return 0;
+    float2 uv = (positionWS.xz - _ShelterRect.xy) * _ShelterRect.zw;
+    if (any(uv < 0) || any(uv > 1)) return 0;
+    return SAMPLE_TEXTURE2D_LOD(_ShelterMask, sampler_ShelterMask, uv, 0).r * saturate((_ShelterParams.x - positionWS.y) / 8);
+}
 float BrickHash(float2 p)
 {
     float3 q = frac(p.xyx * .1031); q += dot(q, q.yzx + 33.33);
@@ -63,6 +79,13 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
         XenoResult xeno = XenoShade(i.positionCells, (half)i.xenoDepth, p2.g, p3.rgb, p3.rgb * 2.2h, p0.rgb, half3(.66, 1, .144));
         albedo = xeno.albedo; mask.r = xeno.metallic; mask.g = xeno.smoothness; xenoEmission = xeno.emission;
     }
+    else if (style == 6)
+    {
+        RockResult rock = RockShade(i.positionCells, normalize(i.faceNormal), normalize(i.normalWS), paint, p2.b);
+        albedo = rock.albedo; mask = half4(0, rock.smoothness, 0, 0);
+        // back into the face's tangent frame, where the lighting below expects the normal
+        s.normalTS = half3(dot(rock.normalWS, i.tangentWS), dot(rock.normalWS, i.bitangentWS), dot(rock.normalWS, i.normalWS));
+    }
     else if (style > 0)
     {
         // QA-001 NOCTURNE plating: the look book's baked plate maps replace the legacy layer albedo entirely.
@@ -83,13 +106,13 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     // ADR-0121: a large hull block wears at its own edges, not at every cell inside it, and its edges show as a panel seam, so a
     // wall of them reads as one plate per block.
     half panelSeam = 0;
-    if (i.panel.z > .5)
+    if (i.panel.z > .5 && style != 6)
     {
         edgeDistance = min(min(i.panel.x, i.panel.z - i.panel.x), min(i.panel.y, i.panel.z - i.panel.y));
         float seamAA = max(fwidth(edgeDistance), 1e-4);
         panelSeam = 1 - smoothstep(.035 - seamAA, .035 + seamAA, edgeDistance);
     }
-    half wearWidth = .05h * p1.a * (stage > 0 ? 1.4h : 1);
+    half wearWidth = style == 6 ? 0 : .05h * p1.a * (stage > 0 ? 1.4h : 1);
     half wear = wearWidth > 0 ? 1 - smoothstep(wearWidth * .4h, wearWidth, edgeDistance) : 0;
     albedo = lerp(albedo, half3(.42, .43, .45), wear * .8h);
     albedo *= 1 - panelSeam * .55h;
@@ -119,7 +142,7 @@ void BrickSurface(BrickSurfaceInput i, inout SurfaceData s)
     half powered = Brick_GridPowered();
     half3 layerEmission = p0.a > .5 ? Brick_TeamAccent().rgb * max(p0.r, max(p0.g, p0.b)) : p0.rgb;
     s.emission = layerEmission * (mask.a + plating.glow) * _EmissiveIntensity * powered + xenoEmission * _EmissiveIntensity;
-    if (_SeamEmission > 0 && i.layer < 16)
+    if (_SeamEmission > 0 && i.layer < 16 && style != 6)
     {
         float2 panel = frac(uv); float d = min(min(panel.x, 1 - panel.x), min(panel.y, 1 - panel.y));
         half aa = max(fwidth(d), 1e-4), seam = 1 - smoothstep(2.0 / 256 - aa, 2.0 / 256 + aa, d);
@@ -148,8 +171,26 @@ half4 BrickLighting(BrickSurfaceInput i, SurfaceData s)
     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(i.positionWS);
     inputData.shadowCoord = TransformWorldToShadowCoord(i.positionWS); inputData.shadowMask = half4(1, 1, 1, 1);
     inputData.bakedGI = SampleSH(inputData.normalWS); inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(i.positionCS);
-    if (_ShadingMode < .5) return UniversalFragmentPBR(inputData, s);
-    half3 lit = BrickToonLight(GetMainLight(inputData.shadowCoord, inputData.positionWS, inputData.shadowMask), inputData.normalWS, s.albedo, true) + inputData.bakedGI * s.albedo;
+    half shelter = BrickShelter(i.positionWS);
+    inputData.bakedGI = lerp(inputData.bakedGI, inputData.bakedGI * _ShelterParams.z + _ShelterFill.rgb, shelter);
+    if (_ShadingMode < .5)
+    {
+        // emission goes on after the haze: lamps and lit trim glow through the dust
+        half3 emission = s.emission; s.emission = 0;
+        half4 pbr = UniversalFragmentPBR(inputData, s);
+        if (shelter > 0)
+        {
+            // take the sun back out under the roof, then let the dust haze the depths (deeper is hazier)
+            BRDFData brdf; InitializeBRDFData(s, brdf);
+            Light sun = GetMainLight(inputData.shadowCoord, inputData.positionWS, inputData.shadowMask);
+            pbr.rgb = max(0, pbr.rgb - shelter * LightingPhysicallyBased(brdf, sun, inputData.normalWS, inputData.viewDirectionWS));
+            half depth = saturate((_ShelterParams.x - i.positionWS.y) / 48);
+            pbr.rgb = lerp(pbr.rgb, _ShelterHaze.rgb, shelter * _ShelterParams.w * (.35h + .65h * depth));
+        }
+        pbr.rgb += emission;
+        return pbr;
+    }
+    half3 lit = BrickToonLight(GetMainLight(inputData.shadowCoord, inputData.positionWS, inputData.shadowMask), inputData.normalWS, s.albedo, true) * (1 - shelter) + inputData.bakedGI * s.albedo;
 #if defined(_ADDITIONAL_LIGHTS)
     uint count = GetAdditionalLightsCount();
 #if USE_CLUSTER_LIGHT_LOOP

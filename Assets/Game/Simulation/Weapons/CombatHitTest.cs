@@ -58,7 +58,7 @@ namespace Game.Simulation.Weapons
         public CombatHit Segment(float3 p0, float3 p1, float inflate, Entity ignore, in SpatialHashQueryData hash, int maxCandidates)
         {
             var indices = new FixedList512Bytes<int>();
-            int total = hash.QuerySegment(p0, p1, inflate, ref indices);
+            int total = hash.QuerySegment(p0, p1, inflate, ref indices, scenery: true);   // shots stop at the rock
             int limit = math.min(indices.Capacity, math.max(0, maxCandidates));
             if (total > limit && Interlocked.Exchange(ref candidateWarning.Data, 1) == 0)
             {

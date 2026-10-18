@@ -30,6 +30,7 @@ namespace Game.Simulation.Spatial
         [ReadOnly] public ComponentLookup<Dormant> Dormancy;
         [ReadOnly] public ComponentLookup<PlayerShip> Players;
         [ReadOnly] public ComponentLookup<AiBrain> Brains;
+        [ReadOnly] public ComponentLookup<SpatialScenery> Scenery;
         public NativeStream.Writer Output;
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
         {
@@ -55,6 +56,7 @@ namespace Game.Simulation.Spatial
                 ProxyFlags flags = ProxyFlags.None;
                 if (Players.HasComponent(entity)) flags |= ProxyFlags.PlayerShip;
                 if (Brains.HasComponent(entity)) flags |= ProxyFlags.HasAi;
+                if (Scenery.HasComponent(entity)) flags |= ProxyFlags.Scenery;
                 if (Dormancy.HasComponent(entity) && Dormancy.IsComponentEnabled(entity)) flags |= ProxyFlags.Dormant;
                 if (Shields.HasComponent(entity))
                 {

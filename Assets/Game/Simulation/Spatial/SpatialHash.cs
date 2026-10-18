@@ -52,10 +52,10 @@ namespace Game.Simulation.Spatial
         public void CompleteAccess() => Access.CompleteAccess();   // never inside FixedStepSimulationSystemGroup
 
         // Queries (Burst, usable inside jobs; read-only)
-        public int QuerySegment(float3 p0, float3 p1, float inflate, ref FixedList512Bytes<int> output)
-            => AsReadOnly().QuerySegment(p0, p1, inflate, ref output);
-        public int QuerySphere(float3 center, float radius, ref FixedList512Bytes<int> output)
-            => AsReadOnly().QuerySphere(center, radius, ref output);
+        public int QuerySegment(float3 p0, float3 p1, float inflate, ref FixedList512Bytes<int> output, bool scenery = false)
+            => AsReadOnly().QuerySegment(p0, p1, inflate, ref output, scenery);
+        public int QuerySphere(float3 center, float radius, ref FixedList512Bytes<int> output, bool scenery = false)
+            => AsReadOnly().QuerySphere(center, radius, ref output, scenery);
         public SpatialProxy Get(int index) => Proxies[index];
         public int FindIndex(Entity e) => AsReadOnly().FindIndex(e);
         /// <summary>Job-safe data view. Handle bookkeeping stays exclusively on the main thread (ADR-0064).</summary>

@@ -24,7 +24,7 @@ MonoBehaviour:
   throttle: 0.85
   fleeHullFraction: 0.25
   leashRadius: 3000
-  patrolRadius: 160
+  patrolRadius: 60
   playerBias: 0.3
   stickiness: 0.25
   orbitFlipThinks: 12

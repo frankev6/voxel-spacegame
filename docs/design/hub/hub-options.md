@@ -152,6 +152,13 @@ You said: "Lets build this latest version into the game", then "so that the game
   - The interaction query now does a broadphase pass before measuring exact distances. It had been measuring the distance to every child box of the rock within 600 m, which cost 6–9 ms a frame under the rock. It now costs under 0.5 ms.
   - Main-thread time in the Editor is 4–9 ms anywhere in the Hollow, against about 4 ms in open space, with 3.2 M solid cells loaded.
 
+- **After your playtests** (rock, light, holograms, tunnels, ships):
+  - *Rock, not hull.* A rock layer of its own, decided per 2 m voxel: slate, pale stone, ochre seams, rust strata and basalt; crater fields stepped into blocky terraces, each step lit on one side and shadowed on the other.
+  - *Lit like a station.* Under the roof there is no sun: a cool fill, a faint haze, and 600 lamps in the districts' colours (pink and amber at the Market, ember at the Gunsmith, teal at Parts, violet at the Smuggler, cyan and lime at the Docks, blue and aqua in the tunnels), with halos of lit dust, drifting motes, pulsing beacons and flickering welders. The lights on the outer rock are hidden while you are inside.
+  - *Holograms that guide.* Each station has its district's emblem turning beyond it (a crate, a shield, a turret, a gear, a wreck, a gem, a ship) over a projector ring on the floor. Holo boards name each place with its trade ("GUNS AMMO MODS", "ASK NOTHING"); they lean back and turn to face the camera. From the Maw, a lane in each station's colour runs along the tunnel floors to it, its dashes flowing toward it; where routes share a tunnel the lanes run side by side and peel off at the junctions, where chevrons point each way.
+  - *Natural tunnels.* The Ring and the side tunnels meander, vary in width, and have rough stepped walls, alcoves, pillars and three floor levels. Every side tunnel runs on into its cavern (the one toward the Market stopped short), and the exporter checks that every station, den and berth is reachable from the Maw.
+  - *Ships that behave.* Traffic starts spaced along its routes, steers 60 m ahead so it never arrives and circles mid-route, and is put back on its route out of sight when stuck. The WRAITH has sprint engines and six manoeuvring pods: it now accelerates 60 % harder, strafes over twice as hard and turns three times as fast.
+
 ![The Hollow in the game](img/hollow_ingame_sheet.jpg)
 
 - **Playtest.** `playground goto=hollow@x,z[,yaw]` puts you anywhere in the Hollow, in its own metres (the Maw is near 0,−330; the forts are at ±800).
