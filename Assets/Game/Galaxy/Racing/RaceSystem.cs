@@ -181,9 +181,14 @@ namespace Game.Galaxy.Racing
             // HAZ-014: the leader's lap for RaceLap mechanism triggers (ADR-0119 decision 9: places change by lap).
             if (SystemAPI.TryGetSingletonRW<Game.Simulation.Mechanisms.RaceLapSignal>(out var signal))
             {
-                int leader = 0;
-                if (rs.Phase == RacePhase.Racing) for (int i = 0; i < racers.Length; i++) leader = math.max(leader, racers[i].Lap);
-                signal.ValueRW.LeaderLap = leader;
+                int leader = 0; Entity first = Entity.Null;
+                if (rs.Phase == RacePhase.Racing)
+                    for (int i = 0; i < racers.Length; i++)
+                    {
+                        leader = math.max(leader, racers[i].Lap);
+                        if (racers[i].Place == 1 && (racers[i].Flags & RacerFlags.Finished) == 0) first = racers[i].Ship;
+                    }
+                signal.ValueRW.LeaderLap = leader; signal.ValueRW.Leader = first;   // HAZ-020: the leader gauntlet turrets shoot
             }
         }
     }

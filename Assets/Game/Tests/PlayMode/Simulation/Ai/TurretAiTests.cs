@@ -98,7 +98,7 @@ namespace Game.Tests.PlayMode.Simulation.Ai
             Assert.Greater(f.Projectiles.Stats.Value.Fired, 0, "Station pose stability must be exercised while its real turret fires.");
         }
 
-        sealed class Fixture : IDisposable
+        internal sealed class Fixture : IDisposable
         {
             public const ulong StationId = 100;
             readonly ContentService content;
@@ -134,7 +134,8 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                         typeof(AiAnchorShiftSystem), typeof(AiDecisionSystem), typeof(AiSteeringSystem), typeof(SpatialHashBuildSystem),
                         typeof(PowerRegistrationSystem), typeof(PowerInitSystem), typeof(WeaponPowerDemandSystem), typeof(PowerAllocationSystem),
                         typeof(ShipStatsAggregateSystem), typeof(WeaponInitSystem), typeof(WeaponStatsSystem), typeof(WeaponAimSystem), typeof(WeaponFireSystem),
-                        typeof(ProjectileShotHandlerSystem), typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SimClockAdvanceSystem)
+                        typeof(ProjectileShotHandlerSystem), typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem), typeof(SimClockAdvanceSystem),
+                        typeof(Game.Simulation.Mechanisms.TargetOverrideSystem)
                     };
                     foreach (var type in DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default))
                         if (type.Namespace != null && (type.Namespace.StartsWith("Unity.Physics") || type.Namespace == "Unity.Transforms")) systems.Add(type);
@@ -204,6 +205,20 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 Assert.Fail("Small station/intruder fixtures did not finish spawn, body and owner initialization within 30 updates.");
             }
             public void Approach() => Em.SetComponentData(Intruder, new PhysicsVelocity { Linear = approach });
+            /// <summary>HAZ-020: another hostile hull (faction 1) at a pose, spawned and ticked until it has its body.</summary>
+            public Entity AddShip(float3 at, ulong id)
+            {
+                var e = Spawn(BuildIntruder(), new RigidTransform(quaternion.identity, at), GridProfile.Dummy, GridMotion.Dynamic, GridKind.Ship, id);
+                Em.AddComponentData(e, new Allegiance { Faction = 1 });
+                for (int i = 0; i < 30 && (!Em.HasComponent<PhysicsVelocity>(e) || Em.HasComponent<GridSpawning>(e) && Em.IsComponentEnabled<GridSpawning>(e)); i++) Tick();
+                return e;
+            }
+            /// <summary>Holds a ship still at a point.</summary>
+            public void Park(Entity e, float3 at)
+            {
+                Em.SetComponentData(e, LocalTransform.FromPosition(at));
+                Em.SetComponentData(e, new PhysicsVelocity());
+            }
             public bool InSensor()
             {
                 var hash = World.GetSingleton<SpatialHash>(); hash.CompleteAccess();
@@ -211,13 +226,82 @@ namespace Game.Tests.PlayMode.Simulation.Ai
                 Assert.GreaterOrEqual(own, 0); Assert.GreaterOrEqual(other, 0);
                 return math.distance(hash.Get(own).Center, hash.Get(other).Center) <= Profile.SensorRange;
             }
-            public void Tick() => World.StepTicks(1);
+            public void Tick(int count = 1) => World.StepTicks(count);
             public void Dispose()
             {
                 World?.Dispose(); World = null; if (projectiles.Rows.IsCreated) projectiles.Dispose();
                 if (profiles.IsCreated) profiles.Dispose(); if (weapons.IsCreated) weapons.Dispose(); if (factions.Stance.IsCreated) factions.Dispose();
                 if (registry != null) Object.DestroyImmediate(registry);
                 foreach (var source in sources) source.Dispose(); sources.Clear(); library?.Dispose(); content?.Dispose();
+            }
+        }
+    }
+
+    /// <summary>HAZ-020: gauntlet turrets (ADR-0119 decision 6): a TargetOverride on a station turret wins over its own target choice.</summary>
+    [Category("Scenario")]
+    public sealed class TargetOverrideTests : GameTestBase
+    {
+        static void Log(string line) => System.IO.File.AppendAllText("Logs/target-override-tests.log", line + "\n");
+
+        /// <summary>The station at the origin; the near ship 300 m out, the far one 500 m out: both inside sensor and weapon range.</summary>
+        static (TurretAiTests.Fixture f, Entity near, Entity far) Setup()
+        {
+            var f = new TurretAiTests.Fixture();
+            try
+            {
+                f.Ready();
+                var near = f.Intruder; f.Park(near, new float3(0, 0, 300));
+                var far = f.AddShip(new float3(60, 0, 500), 102); f.Park(far, new float3(60, 0, 500));
+                return (f, near, far);
+            }
+            catch { f.Dispose(); throw; }
+        }
+
+        static int TicksUntil(TurretAiTests.Fixture f, Entity target, int limit)
+        {
+            for (int i = 0; i < limit; i++)
+            {
+                f.Tick();
+                if (f.Em.GetComponentData<ShipTarget>(f.Station).Value == target) return i + 1;
+            }
+            return -1;
+        }
+
+        [Test] public void Leader_Targeted()
+        {
+            var (f, near, far) = Setup();
+            using (f)
+            {
+                var signal = f.Em.CreateEntity(typeof(Game.Simulation.Mechanisms.RaceLapSignal));
+                f.Em.SetComponentData(signal, new Game.Simulation.Mechanisms.RaceLapSignal { LeaderLap = 1, Leader = far });
+                f.Em.AddComponentData(f.Station, new Game.Simulation.Mechanisms.TargetOverride { Policy = Game.Simulation.Mechanisms.TargetOverrideSystem.Leader });
+                int first = TicksUntil(f, far, 60);
+                f.Tick(30);
+                var control = f.Em.GetComponentData<WeaponControl>(f.Station);
+                // The lead changes: the near ship takes first place.
+                f.Em.SetComponentData(signal, new Game.Simulation.Mechanisms.RaceLapSignal { LeaderLap = 1, Leader = near });
+                int switched = TicksUntil(f, near, 120);
+                Log($"Leader: far acquired after {first} ticks (autofire {control.Autofire}), switched to the new leader after {switched} ticks");
+                Assert.GreaterOrEqual(first, 1, "the turret targets the leader, not the nearer ship");
+                Assert.AreEqual(1, control.Autofire, "and fires at it");
+                Assert.That(switched, Is.InRange(1, 60), "it switches within one second when the lead changes");
+            }
+        }
+
+        [Test] public void None_Unchanged()
+        {
+            var (f, near, far) = Setup();
+            using (f)
+            {
+                int acquired = TicksUntil(f, near, 60);
+                f.Tick(60);
+                Log($"None: near acquired after {acquired} ticks; target after 1 s {(f.Em.GetComponentData<ShipTarget>(f.Station).Value == near ? "near" : "other")}");
+                Assert.GreaterOrEqual(acquired, 1, "without an override the turret takes the nearest hostile");
+                Assert.AreEqual(near, f.Em.GetComponentData<ShipTarget>(f.Station).Value);
+                // An override that is cleared (Policy 0) leaves it as it was.
+                f.Em.AddComponentData(f.Station, new Game.Simulation.Mechanisms.TargetOverride { Policy = 0, Target = far });
+                f.Tick(60);
+                Assert.AreEqual(near, f.Em.GetComponentData<ShipTarget>(f.Station).Value, "a cleared override changes nothing");
             }
         }
     }

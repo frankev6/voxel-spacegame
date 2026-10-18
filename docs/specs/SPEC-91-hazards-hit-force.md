@@ -707,9 +707,10 @@ Why the rows sit below the first targets:
   - `RaceSystem` writes the leader (SPEC-92).
 - **Files:** `Assets/Game/Simulation/Ai/*Turret*`; tests.
 - **Acceptance criteria:**
-  - [ ] Turrets with a leader override fire at the leader and switch within one second when the lead changes.
-  - [ ] With no override they behave as before.
-- **Tests:** `TargetOverrideTests.Leader_Targeted`, `.None_Unchanged`.
+  - [x] Turrets with a leader override fire at the leader and switch within one second when the lead changes.
+  - [x] With no override they behave as before.
+- **Tests:** `TargetOverrideTests.Leader_Targeted`, `.None_Unchanged` (in `TurretAiTests.cs`, on its station fixture).
+- **Done (2026-10-17):** `RaceSystem` writes the leader's ship (place 1, not finished, while racing) to `RaceLapSignal.Leader`. `TargetOverrideSystem` (authority, before `AiDecisionSystem`) owns `TargetOverride`: it applies `TargetPolicy` actions to the AI roots of the action's group (Value 0 clears, 1 follows the leader) and points leader overrides at `RaceLapSignal.Leader`. In `AiThinkJob` a valid override (a live ship or station in the hash, inside the sensor) wins over the normal choice, hostile or not. A station turret took a leader 500 m out over a hostile at 300 m, fired, and switched 6 ticks after the lead changed; with no override, or a cleared one, it kept the nearest hostile. No gauntlet is placed on a track yet.
 
 ### HAZ-021 — Lane-gate portals
 - **Milestone:** M4

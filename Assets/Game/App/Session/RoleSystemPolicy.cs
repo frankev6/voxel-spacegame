@@ -48,6 +48,7 @@ namespace Game.App.Session
             ["RemotePilotApplySystem"] = SystemAuthority.HostOnly,
             ["AiAnchorShiftSystem"] = SystemAuthority.AuthorityOnly,
             ["AiDecisionSystem"] = SystemAuthority.AuthorityOnly,
+            ["TargetOverrideSystem"] = SystemAuthority.AuthorityOnly,    // HAZ-020: TargetPolicy actions and the race leader for turrets
             ["AiSteeringSystem"] = SystemAuthority.AuthorityOnly,
             ["RacerPilotSystem"] = SystemAuthority.AuthorityOnly,        // RACE-017: AI racers; their ships replicate
             ["FleetSystem"] = SystemAuthority.AuthorityOnly,
@@ -143,6 +144,7 @@ namespace Game.App.Session
             ["FactionStandingSystem"] = "standing and stance changes (provocation, requests); the Factions stance table",
             ["AiAnchorShiftSystem"] = "AI anchors and goals through rebases; AI state stays on the authority",
             ["AiDecisionSystem"] = "what each AI ship does; its target and command in snapshots",
+            ["TargetOverrideSystem"] = "whom gauntlet turrets are told to shoot; their targets in snapshots",
             ["AiSteeringSystem"] = "how each AI ship steers; its command and pose in snapshots",
             ["FleetSystem"] = "fleet orders for escorts; through AI decisions",
             ["PlayerCombatStatusSystem"] = "how many hostiles engage each pilot, and its last hit; PilotStatus",

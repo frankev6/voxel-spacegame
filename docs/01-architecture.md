@@ -419,7 +419,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `Mover`, mover `PhysicsVelocity` (kinematic roots only) | `MoverSystem` (SPEC-91 §4.6, ADR-0119) | Mechanism actions request changes; `OriginRebaseSystem` shifts `Origin` and points |
 | `ZoneSchedule` | `ZoneSystem` (the clock and zone actions) | Read |
 | `MechanismAction` records | `MechanismSystem` (authority, ADR-0119) | Each action's owner applies it: `MoverSystem`, `ZoneSystem`, `MineSystem`, AI targeting, the portal applier |
-| `TargetOverride` | AI targeting, from `TargetPolicy` actions | Read by turret targeting |
+| `TargetOverride` | `TargetOverrideSystem` (authority, HAZ-020: `TargetPolicy` actions; leader overrides follow `RaceLapSignal.Leader`) | Read by `AiThinkJob`: a valid override wins |
 | Ship energy from `EnergyGrantRequest` | `PowerAllocationSystem` (HAZ-019: adds each grant to `ShipPower.Stored`, capped, before allocating) | `PickupSystem` (authority) posts requests |
 | `ShipStatModifier`, `Inhibited` | `StatusSystem` (SPEC-22) from the `StatModifierRequest` / `InhibitRequest` channels (ADR-0016) | Post requests |
 | `PropulsionStats` / `WeaponStats` | `PropulsionStatsSystem` (SPEC-20) / `WeaponStatsSystem` (SPEC-21) | Read |
