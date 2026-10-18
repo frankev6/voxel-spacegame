@@ -655,7 +655,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
   - [x] Neutral forward motion decays gently, bounded by reverse thrusters; X brakes harder. No synthetic lateral engine or velocity overwrite.
   - [x] Real Fighter demonstrates reverse, both strafe directions and thrust along its rotated forward axis. Removing directional thrusters removes that capability. Report mass/force and measured motion rather than inflating all thrust values.
   - [x] Live flight verified and captured; existing flight/determinism checks and full suites remain functionally passing.
-- **Tests:** update `InputAssetTests`, `PlayerInputSampleSystemTests.Analog_Mapping`, `FlightMathTests.Targets_Coast`, existing propulsion coast expectations and config validation; add `FlightControlCorrectionTests.Fighter_DirectionalThrust`, `.Fighter_TurnAndStrafe`, `.Fighter_CoastAndBrake`.
+- **Tests:** update `InputAssetTests`, `PlayerInputSampleSystemTests.Analog_Mapping`, `FlightMathTests.Targets_Coast`, existing propulsion coast expectations and config validation; add `FlightControlCorrectionTests.Starter_DirectionalThrust`, `.Starter_TurnAndStrafe`, `.Starter_CoastAndBrake`.
 
 ### FLT-014 — Engine spool and per-engine boost ceiling (ADR-0120)
 - **Milestone:** M4

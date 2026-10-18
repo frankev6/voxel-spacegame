@@ -100,8 +100,8 @@ namespace Game.Tests.PlayMode.Narrative
                     }
                     if (ticks != null)
                     {
-                        // The starter frigate's primary group is fixed forward guns. Align the
-                        // fixture ship with the next probe; real Space input still fires all shots.
+                        // The WRAITH's primary group is three ±5° plasma turrets, the side pair 7 m off the centreline. Hold the fixture ship 25 m off, facing
+                        // the next probe so their 2° spread drills it; real Space input still fires all shots.
                         int stage = Array.FindLastIndex(aimLines, line => runner.Run.CurrentLine >= line);
                         if (stage != aimStage)
                         {
@@ -109,12 +109,14 @@ namespace Game.Tests.PlayMode.Narrative
                             var remaining = Members(new ContentId("encounter_xeno_probe_tutorial").Hash).Where(root => !Em.HasComponent<Game.Voxel.Damage.Hulk>(root)).ToList();
                             if (remaining.Count > 0) aimedProbe = remaining.OrderBy(root => math.distancesq(Center(root), Center(PlayerRoot))).First();
                         }
-                        if (aimedProbe != Entity.Null && Em.Exists(aimedProbe))
+                        if (aimedProbe != Entity.Null && Em.Exists(aimedProbe) && !Em.HasComponent<Game.Voxel.Damage.Hulk>(aimedProbe) && runner.Run.CurrentLine < combatEndLine)
                         {
                             var pose = Em.GetComponentData<LocalTransform>(PlayerRoot);
                             float3 target = CoreCenter(aimedProbe);
                             float3 direction = target - pose.Position;
-                            Place(PlayerRoot, pose.Position, math.atan2(direction.x, direction.z));
+                            direction.y = 0;
+                            float3 standoff = target - math.normalizesafe(direction) * 25f;
+                            Place(PlayerRoot, new float3(standoff.x, pose.Position.y, standoff.z), math.atan2(direction.x, direction.z));
                             Vector3 screen = host.Context.GameplayCamera.WorldToScreenPoint(target);
                             host.Input.MoveMouse(new Vector2(screen.x, screen.y));
                         }
@@ -124,7 +126,7 @@ namespace Game.Tests.PlayMode.Narrative
                         {
                             // A finite tick budget covers the script's 15 + 3*60 tick waits
                             // and actual director defeat readback.
-                            Assert.Less(fightTicks, 900, "Opening fight exceeded bounded ticks; shots=" + Shots(PlayerRoot) + "; line=" + runner.Run.CurrentLine);
+                            Assert.Less(fightTicks, 1800, "Opening fight exceeded bounded ticks; shots=" + Shots(PlayerRoot) + "; line=" + runner.Run.CurrentLine);
                             for (int i = 0; i < 2; i++) { ticks.Step(); fightTicks++; }
                         }
                     }
@@ -209,7 +211,9 @@ namespace Game.Tests.PlayMode.Narrative
                 Place(probes[i], player + new float3((i - 1) * 35, 0, -100 - i * 40), 0);
                 Freeze(probes[i]); EmptyShield(probes[i]); // small, stable weak-target fixtures
             }
-            Modify(PlayerRoot, StatId.FireRate, 8);
+            // The WRAITH's primary group: three small plasma turrets (2/s, 2° spread), about a quarter of the retired fighter's
+            // eight fixed guns and two turrets. 30× is one shot per tick per gun.
+            Modify(PlayerRoot, StatId.FireRate, 30);
             Modify(PlayerRoot, StatId.WeaponDamage, 100);
         }
         void Modify(Entity root, StatId stat, float multiplier)

@@ -150,7 +150,7 @@ def blender_main(key, draft):
     import random
     rng = random.Random(7)
     from mathutils import Matrix, Vector
-    panel_bm = {k: bmesh.new() for k in ("collector", "radiator", "mirror", "mirror_petal")}
+    panel_bm = {k: bmesh.new() for k in ("collector", "radiator", "mirror", "mirror_petal", "coil", "coil_glow")}
 
     def torus(bm_, c, z, R, r, upright=False, heading=0.0, seg=64, tube=10):
         rows = []
@@ -231,6 +231,12 @@ def blender_main(key, draft):
             if b["shape"] in ("panel", "petal") and b["kind"] in panel_bm:
                 add_shape(panel_bm[b["kind"]], b)
                 continue
+            if b["kind"] == "coil":
+                p_ = b["p"]
+                add_shape(panel_bm["coil"], b)
+                torus(panel_bm["coil_glow"], b["c"], b["z"], p_["R"] - p_["r"] * 1.1, p_["r"] * 0.35, p_.get("upright", False),
+                      p_.get("heading", 0.0), tube=6)
+                continue
             faces = add_shape(bm, b)
             t = TONE.get(b["kind"], rng.choice(["#A6A6A0", "#B8B4A8", "#CFC8B8", "#8A8E86"]))
             tc = hexrgb(t); ac = hexrgb(DISTRICT.get(b.get("district") or "", "#FFE2B0"))
@@ -274,7 +280,8 @@ def blender_main(key, draft):
         b_.inputs["Emission Color"].default_value = hexrgb("#FFE6C0"); b_.inputs["Emission Strength"].default_value = 0.25
         return m
     pmat = {"collector": mat_flat("collector", "#1A2238", 0.15, 0.9), "radiator": mat_emit("radiator", "#C2461E", 2.2),
-            "mirror": mat_flat("mirror", "#C8D0DA", 0.05, 1.0), "mirror_petal": petal_mat()}
+            "mirror": mat_flat("mirror", "#C8D0DA", 0.05, 1.0), "mirror_petal": petal_mat(),
+            "coil": mat_flat("coil", "#D8DCE0", 0.25, 1.0), "coil_glow": mat_emit("coil_glow", "#9FE4FF", 40.0)}
     for k_, pb in panel_bm.items():
         pm = bpy.data.meshes.new("panels_" + k_); pb.to_mesh(pm); pb.free()
         po = bpy.data.objects.new("panels_" + k_, pm); scene.collection.objects.link(po); pm.materials.append(pmat[k_])
@@ -376,7 +383,7 @@ def blender_main(key, draft):
         elif t == "black_hole":
             c = fx["c"]
             bpy.ops.mesh.primitive_uv_sphere_add(radius=fx["horizon"] * 2.2, location=(c[0], c[1], 0), segments=48, ring_count=24)
-            bh = mat_flat("horizon", "#000000", 1.0, 0.0); bh.node_tree.nodes["Principled BSDF"].inputs["Specular IOR Level"].default_value = 0.0
+            bh = mat_emit("horizon", "#000000", 0.0)
             bpy.context.active_object.data.materials.append(bh)
 
             def disk(name, r0, r1, rot, strength, faces_cam=False):
@@ -433,6 +440,16 @@ def blender_main(key, draft):
             for a, b in zip(pts, pts[1:]):
                 c = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); hd = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
                 add_box("conduit", c, hd, math.dist(a, b), 3, 3, 8, mc)
+        elif t == "plasma":
+            for name_, k_, col, st in (("plasma_core", 0.45, "#FFF6E4", 60.0), ("plasma_sheath", 1.0, "#FF9A40", 6.0)):
+                cu = bpy.data.curves.new(name_, "CURVE"); cu.dimensions = "3D"
+                cu.bevel_depth = 1.0; cu.bevel_resolution = 4; cu.use_fill_caps = False
+                sp_ = cu.splines.new("NURBS"); sp_.points.add(len(fx["pts"]) - 1)
+                for q, (xy, zz, rr) in zip(sp_.points, zip(fx["pts"], fx["z"], fx["r"])):
+                    q.co = (xy[0], xy[1], zz, 1.0); q.radius = rr * k_
+                sp_.order_u = 3; sp_.use_endpoint_u = True
+                o = bpy.data.objects.new(name_, cu); scene.collection.objects.link(o)
+                o.data.materials.append(mat_emit(name_, col, st))
         elif t == "beam":
             a, b = fx["a"], fx["b"]
             from mathutils import Vector
@@ -469,7 +486,8 @@ def blender_main(key, draft):
     scene.collection.objects.link(fo)
 
     # a gas giant far below the plane fills the gaps between the towers
-    ld_world.planet(S, "planet", 26000.0, (14000, 52000, -52000), S["planet"], ld_world.sun_dir(S))
+    if key != "D":
+        ld_world.planet(S, "planet", 26000.0, (14000, 52000, -52000), S["planet"], ld_world.sun_dir(S))
     cam = ld_scenes.make_camera(scene)
     cam.data.clip_end = 200000
     sp = opt["spawn"]["c"]
@@ -496,6 +514,8 @@ def blender_main(key, draft):
     entry = {"A": ((70, -1750), 900), "B": ((600, -1700), 1300), "C": ((0, 300), 1300), "D": ((0, -250), 1500)}
     shot("hub_arrival", *arrive[key])
     shot("hub_entry", *entry[key])
+    for name_, tgt, dist in opt.get("play_shots", []):
+        shot("hub_play_" + name_, tuple(tgt), dist)
     print("HUB done")
 
 

@@ -23,11 +23,11 @@ namespace Game.Tests.EditMode.Editor.Migration
             Assert.AreEqual(4, first.Writer.Outcomes.Count); Assert.AreEqual(4, first.Writer.Outcomes.Select(o => o.AssetPath).Distinct().Count());
             Assert.IsTrue(first.Writer.Outcomes.All(o => o.Outcome == WriteOutcome.Created));
             Assert.AreEqual(4, first.Report.Entries.Count(e => e.Code == "ENC-I001"));
-            Assert.AreEqual(3, first.Report.Entries.Count(e => e.Code == "ENC-I002"));
-            Check("encounter_raiders", "faction_raiders", EncounterKind.Ambush, "ship_fighter", 2, 3);
-            Check("encounter_xeno_probe_tutorial", "faction_xeno", EncounterKind.Story, "ship_frigate", 3, 3);
-            Check("encounter_whisper_hunter", "faction_raiders", EncounterKind.Story, "ship_red_elite", 1, 1);
-            Check("encounter_traveling_merchant", "faction_vestari", EncounterKind.Merchant, "ship_freighter", 1, 1);
+            Assert.AreEqual(4, first.Report.Entries.Count(e => e.Code == "ENC-I002")); // every authored roster now differs from its retired legacy hulls
+            Check("encounter_raiders", "faction_raiders", EncounterKind.Ambush, "ship_nocturne_wraith", 2, 3);
+            Check("encounter_xeno_probe_tutorial", "faction_xeno", EncounterKind.Story, "ship_xeno_husk", 3, 3);
+            Check("encounter_whisper_hunter", "faction_raiders", EncounterKind.Story, "ship_nocturne_vesper", 1, 1);
+            Check("encounter_traveling_merchant", "faction_vestari", EncounterKind.Merchant, "ship_nocturne_vesper", 1, 1);
             var raiders = EncounterContentTestFixture.Encounter("encounter_raiders");
             Assert.AreEqual(1, raiders.DirectorWeight); Assert.AreEqual(1, raiders.MinDanger); Assert.AreEqual(3, raiders.MaxDanger);
             Assert.AreEqual(1600, raiders.SpawnDistanceMinM); Assert.AreEqual(2200, raiders.SpawnDistanceMaxM);

@@ -32,10 +32,10 @@ MonoBehaviour:
   - other: {fileID: 11400000, guid: e3dac7edc6d274253b285865e485684d, type: 2}
     stance: 2
   doctrine:
-  - blueprint: {fileID: 11400000, guid: 29c3046b7a70146029f523cf0d57fee2, type: 2}
+  - blueprint: {fileID: 11400000, guid: f2a8c13b403454123b7105a849149abf, type: 2}
     weight: 1
     aiProfile: {fileID: 0}
-  - blueprint: {fileID: 11400000, guid: 7c3178c4cec8049a3a03d42498ef7ba9, type: 2}
+  - blueprint: {fileID: 11400000, guid: d303be7d48fb24838aa9abb8085795fd, type: 2}
     weight: 0.6
     aiProfile: {fileID: 0}
   defaultAiProfile: {fileID: 11400000, guid: 1f6ee70d73ab47f8b1ec22b58dc3f096, type: 2}

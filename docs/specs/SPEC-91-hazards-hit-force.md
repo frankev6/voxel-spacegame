@@ -342,6 +342,8 @@ With `carryDecel = 8 m/s²`, a 5 m/s shove plays out over about 0.6 s, and a 40 
 | Recoil, small plasma round (shooter) | 0.06 m/s | — | — |
 | Recoil, railgun (shooter) | 0.41 m/s | — | — |
 
+**2026-10-18:** the Fighter was retired with the other legacy hulls and the WRAITH is the start ship (SPEC-01 §4.2), so the test now measures the WRAITH and REQUIEM columns only. On the WRAITH no single hit reaches the 1.5 m/s Impact floor, so hits on the start ship no longer shake the camera; that is an open feel question for the owner.
+
 Why the rows sit below the first targets:
 - The targets assumed a light ship of about 10 t; the starter fighter is 24.6 t. A centre hit carries exactly the shot's momentum (the plasma row is 9,000 N·s ÷ the mass to within 1%).
 - "Siege blast at 10 m" cannot happen: the siege blast radius is 4 m. A direct hit is shell momentum alone (95 × 420 = 39,900 N·s): `ExplosionJob` scales a root's blast push by `(1 − d / radius)²`, where `d` is the distance from the blast to the centre of the root's **grid bounds**, not to the cells it hits. A shell bursting on the hull of any ship wider than its blast radius is too far from that centre to push it. Mines (`Knockback` set, larger radii) still push as designed. Pushing from the hit cells instead is a follow-up, not part of this baseline.

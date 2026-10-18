@@ -42,7 +42,7 @@ namespace Game.Editor.Migration
             var players = catalog.All<FactionDefinition>().Where(f => f.IsPlayerFaction).ToArray();
             if (players.Length != 1 || players[0].IdString != "faction_ark" || !players[0].RelationLocked)
                 preflight.Error("ENC-E001", "ContentDatabase", "Factions", "Integrate the existing locked faction_ark first; this job never creates or changes a player faction.");
-            foreach (string id in new[] { "ship_fighter", "ship_shuttle" })
+            foreach (string id in new[] { "ship_nocturne_dirge", "ship_nocturne_wraith" }) // the retired fighter/shuttle replacements
                 if (!catalog.TryGet<ShipBlueprintDefinition>(new ContentId(id), out _))
                     preflight.Error("MIG-E004", "ContentDatabase", "doctrine", "Missing required blueprint: " + id);
             var files = index.OfType("FactionData");

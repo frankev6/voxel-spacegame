@@ -33,6 +33,8 @@ After the first three options:
 > "also buildings can be connected into large dense clusters, i want megastructures"
 >
 > "and large mirror structures around the black hole syphoning its energy"
+>
+> "the moon or satelite in the top right corner is unnecessary because the black hole itself should have a strong gravity well. regarding the weird big panels idk what you think those are meant to represent? i asked for contraptions syphoning the black hole's energy"
 
 ## What went wrong with the Proving Grounds
 
@@ -48,13 +50,30 @@ It was a test menu laid out on the floor: a 1 km plaza with nine circles round i
 
 Option A's Meridian, rebuilt round a black hole. The hole is why the city exists, and everything in it follows from that:
 
-- **Power.** Eight mirror petals, 420 m long, ring the accretion disk. They tilt out of the plane like an iris, alternately rising above it and dipping below, and focus the disk's light onto eight receivers. Conduits carry the power out to every quarter; energy canisters (cells) float at their nodes.
+- **Power: the Siphons.** Eight harvester arms, 450 m long, reach in from the Harbour Ring to the edge of the accretion disk. Each ends in a magnetic nozzle, a funnel of four coil rings that pulls a tongue of plasma off the disk and drives it up the boom into a converter on the ring, with coolant tanks and radiators beside it. The arms alternate a little above and below the plane, so each stream arcs up off the disk into its nozzle. Conduits carry the power out to every quarter; energy canisters (cells) float at their nodes.
 - **The first lesson is the gravity well.** Its pull falls off as 1/r²: 0.7 m/s² at the wall, 2.4 m/s² on the Current, 11.4 m/s² (the WRAITH's full thrust) at the **Horizon Line**, a ring of red buoys 600 m out. Inside it a starter ship cannot climb out. You feel the pull from the outer markers.
 - **The Current** is the circular orbit 1300 m out (about 56 m/s). It is the city's ring road: the inbound lane bends into it, and if you cut your engines on it you orbit for free.
-- **Flares.** The Breakers feed scrap down **the Drain**, a decaying-orbit spiral; every wreck that reaches the disk makes it flare (the reactor-pulse mechanic at city scale). The mirrors' shadows are the shelter.
-- **The Slingshot.** The Circuit's warm-up trial dives round the hole and out again: a gravity assist you learn by doing. The quarry moon outside the Forge is a second well to slingshot between.
+- **Flares.** The Breakers feed scrap down **the Drain**, a decaying-orbit spiral; every wreck that reaches the disk makes it flare (the reactor-pulse mechanic at city scale). The converters' lee is the shelter.
+- **The Slingshot.** The Circuit's warm-up trial dives round the hole and out again: a gravity assist you learn by doing. The hole is the only well: there is no moon.
 - **Megastructures.** Each quarter is a few huge connected slabs, cut by narrow flight streets, stepped in tiers above and below the plane, with the city's deep decks hanging hundreds of metres beneath. Tanks, radiator fins, masts and docking arms cover them, and ships dock along every street. Open space is left only where something happens: the firing lanes, the arena, the drydocks, the slipways.
-- **Space forms, not skyscrapers.** Nothing stands on a floor. Habitat rings spin for weight, drums point their axis at the hole, radiators stand edge-on to it and the mirrors face it. Every form is centred on its own level.
+- **Space forms, not skyscrapers.** Nothing stands on a floor. Habitat rings spin for weight, drums point their axis at the hole, radiators stand edge-on to it and the Siphons reach into it. Every form is centred on its own level.
+
+### At play zoom, and what to polish before building
+
+![D at play zoom](img/hub_play_sheet_d.jpg)
+
+The renders above are taken from 3 km up; the player sees about 200 m. At that zoom (left to right, top to bottom: a Siphon nozzle, the Current by Harbour Control, an Exchange street zoomed out and at the normal zoom, the gate from inside, the core):
+
+1. **The city stands up into the camera.** The slabs rise hundreds of metres above the flight plane, so at a 55° camera they lean into the lens and hide the streets and your ship. Recommended: hang the city's mass below the flight plane and fly over its roofs, docks and machinery; only masts, coils and docked ships rise above. (Owner decision.)
+2. **Walls are one glittering window grid.** Use hull plating, a few broad lit bands, docking lights and a material per quarter.
+3. **Too few ships on screen.** A street needs five to ten in view; this waits on the civilian ship classes.
+4. **Too many dotted light lines.** One subtle lane style; one strong ring for the Horizon Line.
+5. **Radiators read as orange stickers.** Rows of thin fins glowing at the root, fewer of them.
+6. **The black hole is a glow, not a disk.** A thin banded disk brighter on one side, a photon ring, lensing of the stars behind: a VFX budget item.
+7. **Converters are too small to read as the power stations.** Bigger converters, flickering streams, the conduits visible in 3D.
+8. **Streets are about 52 m wide.** Widen the main streets to 80–100 m.
+9. **Traffic cost.** About 200 ships at full physics is heavy: every ship within about 600 m of a player flies with real physics, distant ones are simulated cheaply and switch over as you approach.
+10. **The Siphon nozzles sit inside the Horizon Line.** They must read as a no-go, or a stunt for strong ships.
 
 ## The first three options
 
@@ -110,7 +129,7 @@ A's walled harbour city, which you liked, keeps its nine quarters and its arriva
 | **The Pit** | The Khuchad arena | Pick a bout at one of four gates (raider duel, raider wing, xeno swarm, cruiser bout) and fight it in a 600 m bowl ringed by a field wall, in front of a crowd whose lights flash on every kill. |
 | **The Institute** | The engineering gallery | Every special block and mechanism, working, in its own bay along a flyway: prismatic mirror, salvage magnet, portal blocks, shield emitter, reactor, switch and blast door, sweeper arm, rails, repulsor, EMP, seeker, gravity and proximity mines, energy canisters, impact driver. |
 | **Breakers' Yard** | Shipbreakers | Hulks on slipways being cut apart by rigs; the debris drifts free for anyone with a magnet. Tugs tow a fresh wreck in every few minutes. Sell what you salvage at the Swap. |
-| **The Foundry** (the Forge) | Power and industry | The city's reactor pulses behind blast bulkheads (hide in their shadows). Ore barges come in from the quarry moon outside the wall (its gravity well, the refinery's slow field). The old defence minefield lies beyond: proximity and seeker mines. |
+| **The Foundry** (the Forge) | Power and industry | The city's reactor pulses behind blast bulkheads (hide in their shadows). Ore barges come in from the quarry moon outside the wall (its gravity well, the refinery's slow field; D has no moon, the barges use the outbound lanes). The old defence minefield lies beyond: proximity and seeker mines. |
 | **The Circuit** | The racing quarter | Racers line up in the pit lane under the grandstand; the start portal outside the wall opens onto Track 01. |
 
 Habitation towers fill the blocks between the quarters (Old Town round the harbour is the tallest): no gameplay, just the skyline and the people who live there.
@@ -150,7 +169,7 @@ The world tells you what things are; text is the last resort.
 ## How it gets built
 
 - **The city fabric** (the thousands of buildings) is static, instanced meshes with box colliders, under the city's hard-light shields (hits flash and bounce): a 1.6 M-cell voxel city would blow the budgets. Everything you play with is voxel and destructible: the merchant houses, drydocks, targets, exhibits, hulks, the arena stands, every ship.
-- **The hole (D):** the existing gravity-well system with a 1/r² pull and a kill radius at the horizon (you respawn at Harbour Control); the flares are the pulse system with the mirrors as shadow casters; the new work is the black hole's look (a lensing shader, the disk, the flares).
+- **The hole (D):** the existing gravity-well system with a 1/r² pull and a kill radius at the horizon (you respawn at Harbour Control); the flares are the pulse system with the converters as shadow casters; the new work is the black hole's look (a lensing shader, the disk, the flares).
 - **Occlusion:** a building between the camera and your ship fades to a hologram outline.
 - **Lower levels:** the city runs on down below the plane, lit, out of reach.
 - **Streaming:** fabric and traffic within 2.5 km of you are live; the rest of the skyline is a few draw calls.

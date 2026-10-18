@@ -649,6 +649,18 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [x] Lights, lanes, traffic, floor and wall text in the race track's hologram language.
 - **Tests:** `PlaygroundTests.Enter_Interact_Reset` (extended: off-pad spawn, the slalom station, console-only screens, a real F press on the TRADE pad).
 
+### DEV-023 — The capital hub: a vertical slice of a bustling space city
+- **Milestone:** M4
+- **Tier:** frontier — world design, traffic AI, composition over many owners
+- **Depends on:** `DEV-022`
+- **Do:** Owner (2026-10-18), on DEV-022: "you're thinking too much that this is a minimal testing ground, but i was actually asking for a vertical slice spacehub to showcase what a finished bustling capital hub would look like. you should feel like one small player in a big economic bustling city in space." and "i want to spawn outside the hub and the first impression as one enters this space hub should be grand, a city with traffic and multiple buildings, sections etc." (full brief in `docs/design/hub/hub-options.md`). Design first, as RACE-002 did: three true-scale city layouts with arrival renders, for the owner to choose. Then build the chosen city: dense city fabric (static instanced meshes and colliders), nine purposeful quarters with voxel set pieces, traffic of real AI ships that dock and leave, merchants with distinct stock, diegetic UI with a minimal text budget, one central reset plus `hub reset`, and an arrival from outside the wall.
+- **Files:** `ArtSource/Hub/{hub_layouts,hub_arrival}.py`, `docs/design/hub/`; build files once a layout is chosen.
+- **Acceptance criteria:**
+  - [x] Four layout options at true scale (D, built on A round a black hole, added on the owner's request), each with an arrival render from the game camera (`docs/design/hub/hub-options.md`).
+  - [ ] The owner chooses a layout and approves the civilian ship classes.
+  - [ ] Built: the spawn outside the wall, the nine quarters, real AI traffic, the one reset.
+- **Tests:** to be named with the build.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

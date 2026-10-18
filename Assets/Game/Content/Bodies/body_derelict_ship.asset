@@ -28,7 +28,7 @@ MonoBehaviour:
   interactPrompt: Inspect
   storyTag: derelict
   structureSource: 1
-  blueprint: {fileID: 11400000, guid: 6861f1006d5e848e2bc8d0cf43c520bb, type: 2}
+  blueprint: {fileID: 11400000, guid: f2a8c13b403454123b7105a849149abf, type: 2}
   shape:
     kind: 0
     sizeCells: {x: 0, y: 0, z: 0}

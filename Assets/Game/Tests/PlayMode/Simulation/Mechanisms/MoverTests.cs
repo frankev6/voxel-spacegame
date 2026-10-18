@@ -130,8 +130,10 @@ namespace Game.Tests.PlayMode.Simulation.Mechanisms
         {
             using var f = New();
             var arm = Bar(f, new float3(0, 0, 0));
-            // The starter fighter (24.6 t): a light synthetic hull is shoved over several ticks, each below the ram-energy floor.
-            var ship = f.Flight.SpawnBlueprint(f.Flight.Catalog.Get<Game.Data.Definitions.ShipBlueprintDefinition>(new ContentId("ship_fighter")), new float3(0, 0, -10));
+            // The starter WRAITH: a light synthetic hull is shoved over several ticks, each below the ram-energy floor.
+            // TODO(batch-5): re-measure on WRAITH. Its bow reaches 11.5 m ahead of its origin (the retired 24.6 t Fighter's 7.5 m),
+            // so it sits at z = -13 to spawn clear of the arm; the batted speed and ram damage were measured on the Fighter.
+            var ship = f.Flight.SpawnBlueprint(f.Flight.Catalog.Get<Game.Data.Definitions.ShipBlueprintDefinition>(new ContentId("ship_nocturne_wraith")), new float3(0, 0, -13));
             WaitBody(f, arm); f.Ready(ship);
             HazardSpawn.AddMover(f.Em, arm, new Mover { Path = MoverPath.Rotate, Origin = f.Flight.Transform(arm).Position, Rate = 1.5f, StartTick = Tick(f), Playing = 1 });
             int before = f.Cells(ship);
@@ -145,7 +147,7 @@ namespace Game.Tests.PlayMode.Simulation.Mechanisms
             var o = Bat();
             TestContext.WriteLine($"Batted ship: at {o.Position}, moving {o.Velocity} ({math.length(o.Velocity.xz):F2} m/s), cells {o.CellsBefore} -> {o.Cells}");
             Assert.Greater(math.length(o.Velocity.xz), 2, "the sweeping arm bats the ship aside");
-            Assert.Greater(math.distance(o.Position, new float3(0, 0, -10)), 1);
+            Assert.Greater(math.distance(o.Position, new float3(0, 0, -13)), 1);
             Assert.Less(o.Cells, o.CellsBefore, "the hit raises ram damage");
         }
 

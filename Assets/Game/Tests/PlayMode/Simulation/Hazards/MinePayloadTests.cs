@@ -14,7 +14,7 @@ using CombatFixture = Game.Tests.PlayMode.Simulation.Weapons.CombatScenarioTests
 
 namespace Game.Tests.PlayMode.Simulation.Hazards
 {
-    /// <summary>HAZ-018: the mine family (ADR-0119 decision 6) on real mine content and the starter fighter.</summary>
+    /// <summary>HAZ-018: the mine family (ADR-0119 decision 6) on real mine content and the starter WRAITH.</summary>
     [Category("Scenario")]
     public sealed class MinePayloadTests
     {
@@ -24,7 +24,9 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
 
         static (Entity ship, Entity mine) Setup(CombatFixture f, string mineId, float2 mineAt, float3 shipAt = default)
         {
-            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_fighter"), shipAt);
+            // TODO(batch-5): re-measure on WRAITH. Mine distances and push floors were set on the retired 15 m Fighter; the WRAITH's
+            // bow reaches 11.5 m ahead of its origin, so a mine 16 m ahead sits closer to the hull.
+            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_nocturne_wraith"), shipAt);
             var mine = HazardSpawn.Mine(f.Em, Def<MineDefinition>(f, mineId), mineAt, 0, 0, 900, 0);
             f.Ready(ship);
             return (ship, mine);
@@ -78,18 +80,24 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
             f.Tick(2);
             var thrusters = f.Em.GetBuffer<FlightThruster>(ship).ToNativeArray(Allocator.Temp);
             Assert.Greater(thrusters.Length, 0);
+            uint until = 0; float forward = 0;
             foreach (var t in thrusters)
+            {
                 Assert.GreaterOrEqual(f.Em.GetComponentData<Inhibited>(t.Thruster).UntilTick, at + 170, "every thruster is off for 3 s");
+                until = math.max(until, f.Em.GetComponentData<Inhibited>(t.Thruster).UntilTick);
+                if (t.ForceDirLocal.z > .5f) forward += t.MaxForce;
+            }
             thrusters.Dispose();
             // Full thrust is commanded through the blackout: the ship only drifts (carry keeps what it had), then answers again.
             float before = math.length(f.Flight.Velocity(ship).Linear.xz);
-            for (int i = 0; i < 120; i++) { f.Flight.Command(ship, thrust: new float2(0, 1)); f.Tick(); }
+            for (int i = 0; i < 600 && Tick(f) < until; i++) { f.Flight.Command(ship, thrust: new float2(0, 1)); f.Tick(); }
             float drifting = math.length(f.Flight.Velocity(ship).Linear.xz);
-            for (int i = 0; i < 120; i++) { f.Flight.Command(ship, thrust: new float2(0, 1)); f.Tick(); }
+            for (int i = 0; i < 60; i++) { f.Flight.Command(ship, thrust: new float2(0, 1)); f.Tick(); }
             float after = math.length(f.Flight.Velocity(ship).Linear.xz);
-            TestContext.WriteLine($"EMP: {before:F2} m/s at the blast, {drifting:F2} after 2 s of full thrust, {after:F2} once it ends");
+            TestContext.WriteLine($"EMP: {before:F2} m/s at the blast, {drifting:F2} at the end of the blackout, {after:F2} once it ends");
             Assert.Less(drifting, before + 1, "no thrust while inhibited");
-            Assert.Greater(after, drifting + 5, "thrust returns after its seconds");
+            // One second of full thrust after the blackout (0.25 s spool-up) recovers most of forward thrust over mass.
+            Assert.Greater(after - drifting, .6f * forward * f.Flight.Mass(ship).InverseMass, "thrust returns after its seconds");
             Assert.AreEqual(cells, f.Cells(ship), "no damage");
         }
 

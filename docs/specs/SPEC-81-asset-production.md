@@ -388,6 +388,7 @@ All budgets come from DESIGN-SYSTEM §10.10–§10.11 and [06-performance-budget
 - **Milestone:** A1
 - **Tier:** standard — paint and cosmetic swaps only, with invariants tested
 - **Depends on:** `AST-009`, `AST-010`, `AST-011`, `AST-012`, `AST-013`, `SPEC-10`, `SPEC-51`, `SPEC-72`
+- **Note (2026-10-18):** the 13 converted legacy ships were removed from the game (owner: "please remove all the legacy ships still in the game. lets please use the new ones only going forward"); this task now applies to the new ship lines and the station blueprints.
 - **Do:** In the Blueprint Lab, restyle the 13 converted ships (`ship_base`, `ship_bastion`, `ship_beetle`, `ship_butterfly`, `ship_crescent`, `ship_fighter`, `ship_freighter`, `ship_frigate`, `ship_icarus`, `ship_red_elite`, `ship_shuttle`, `ship_striker`, `ship_vestari`) and every station blueprint that exists at A1, following the approved §x.5 silhouette guidance: change only palette colours and swap structural blocks for cosmetic variants; add Prop-kind blocks (navigation lights, antennas) on structures longer than 100 m (one light set per 20–40 m).
 - **Files:** `Assets/Game/Content/Ships/ship_*.asset` (and station blueprints); `docs/design/captures/ships/*.png`
 - **Acceptance criteria:**

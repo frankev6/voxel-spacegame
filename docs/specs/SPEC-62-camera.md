@@ -501,7 +501,7 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
   - [ ] With the existing Fighter, a close zoom that fits the stationary ship continues to show its bounds during sustained 53 m/s flight and heading/orbit changes at 16:9 and 4:3.
   - [ ] When the player deliberately zooms closer than the hull fits, its center remains in view; no silent reset of the requested zoom or orbit.
   - [ ] Existing camera/flight tests pass; an actual game capture demonstrates the corrected fast-flight framing.
-- **Tests:** `FlightFramingTests.Fighter_FastFlight_KeepsFittingHullInViewport`, `FlightFramingTests.CloseInspection_KeepsCenterWithoutResettingInput`.
+- **Tests:** `FlightFramingTests.Starter_FastFlight_KeepsFittingHullInViewport`, `FlightFramingTests.CloseInspection_KeepsCenterWithoutResettingInput`.
 
 ## 10. Open questions
 

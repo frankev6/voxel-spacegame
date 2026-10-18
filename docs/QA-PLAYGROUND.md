@@ -12,7 +12,7 @@ The playground is the ARK Proving Grounds: spawn on the plaza, fly out through a
 - `playground status` lists the available areas and last result.
 - `playground run=<id>` closes the console, moves to the area and activates it. Close any other screen first.
 - `playground goto=<station>` moves onto a station's pad without activating it (`goto=district:<id>` to a district's entrance, `goto=hub` to the plaza); close Console and press F. Menu-only screens (cargo, settings, fleet, story, survey, map, power) are `run=` only.
-- `playground ship=<blueprint>` resets the playground flying that ship, for example `ship_nocturne_wraith`, `ship_nocturne_requiem`, `ship_nocturne_vesper`, `ship_nocturne_dirge`, `ship_xeno_husk` or `ship_fighter`. `playground ship=starter` restores the start ship; a wrong id lists every ship. The choice lasts across resets until the Editor restarts and never touches a campaign fleet (QA-001).
+- `playground ship=<blueprint>` resets the playground flying that ship, for example `ship_nocturne_wraith`, `ship_nocturne_requiem`, `ship_nocturne_vesper`, `ship_nocturne_dirge`, `ship_xeno_husk` or `ship_racer_needle`. `playground ship=starter` restores the start ship (the WRAITH); a wrong id lists every ship. The choice lasts across resets until the Editor restarts and never touches a campaign fleet (QA-001).
 - `playground reset` discards the current practice session and recreates the quiet sandbox, including from its Blueprint Lab or practice campaign. Saved blueprints/settings and already-written profile saves are not deleted. It never resets another profile's saved campaign.
 
 ## Playable systems
@@ -21,11 +21,11 @@ The playground is the ARK Proving Grounds: spawn on the plaza, fly out through a
 |---|---|
 | `playground run=flight` | Six-gate slalom in the flight school. W/S forward/reverse; A/D turn; Q/E (or Shift+A/D) strafe; Ctrl boost; X brake; wheel zoom. |
 | `playground run=range` | Space fires at the enlarged procedural station. Cut narrow bridges; observe detached sections, damage, colliders, debris, VFX/audio. |
-| `playground run=combat` | One hostile fighter per reset. AI pursuit, firing, incoming damage and defeat flow. Reset before trying quiet features. |
+| `playground run=combat` | One hostile raider WRAITH per reset. AI pursuit, firing, incoming damage and defeat flow. Reset before trying quiet features. |
 | `playground run=power` | Live energy supply/demand, shield HP and ability charges/cooldowns. Use shield/boost buttons and normal equipped ability keys. |
 | `playground run=shield` | Toggle the real shield; reports the fixed-step result. Cooldown/HP restrictions remain real. |
 | `playground run=boost` | Request Speed Boost; hold W to feel the increased thrust. Charges, energy and cooldown remain real. |
-| `playground run=salvage` | Prepare an approved fighter wreck. Recover its actual salvage with F at the HUD prompt, or repeat the command once ready; inspect transferred cargo. Three wrecks maximum per reset. |
+| `playground run=salvage` | Prepare a WRAITH wreck. Recover its actual salvage with F at the HUD prompt, or repeat the command once ready; inspect transferred cargo. Three wrecks maximum per reset. |
 | `playground run=cargo` | Actual inventory, test fuel/credits, sorting/stacking and item inspection. |
 | `playground run=merchant` | Actual market, stock, prices, buying and selling. |
 | `playground run=fleet` | Fleet roster and committed ship statistics. |

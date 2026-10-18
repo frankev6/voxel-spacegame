@@ -120,7 +120,9 @@ class City:
         torus (R, r, spokes): a rotating habitat ring lying in the plane; drum (heading, length, radius): a habitat
         cylinder, axis along heading; sphere (r): a tank or pod; panel (heading, length, thick, height): a collector
         vane or radiator fin; truss (heading, length, width): an open lattice beam."""
-        if shape == "torus":
+        if shape == "torus" and p.get("upright"):      # standing across the plane: a bar in plan, axis along heading
+            pts = box(c, p.get("heading", 0.0), 2 * p["r"], 2 * (p["R"] + p["r"]))
+        elif shape == "torus":
             pts = ngon(c, p["R"] + p["r"], 24)
         elif shape == "drum":
             pts = box(c, p["heading"], p["length"], 2 * p["radius"])
@@ -132,7 +134,7 @@ class City:
             pts = box(c, p["heading"], p["length"], p.get("thick", p.get("width", 4)))
         else:
             raise ValueError(shape)
-        half = {"torus": p.get("r", 10), "drum": p.get("radius", 20), "sphere": p.get("r", 10),
+        half = {"torus": (p["R"] + p["r"]) if p.get("upright") else p.get("r", 10), "drum": p.get("radius", 20), "sphere": p.get("r", 10),
                 "panel": p.get("height", 20) / 2, "truss": p.get("width", 6) / 2,
                 "petal": abs(p.get("z1", 0)) if shape == "petal" else 0}[shape]
         self.buildings.append(dict(pts=[(round(x, 1), round(y, 1)) for x, y in pts], h=round(z + half, 1), d=round(z - half, 1),
@@ -914,7 +916,13 @@ def draw_shape(v, b, rng):
     s, c, p = b["shape"], b["c"], b["p"]
     dim = 1.0 if b["z"] > -120 else 0.3            # the lower orbits, under the plane, drawn dim
     acc = DISTRICT_COL.get(b.get("district") or "", (226, 228, 220))
-    if s == "torus":
+    if s == "torus" and p.get("upright"):
+        # a ring standing across the plane: seen from above it is a bar; a coil's inner face glows
+        v.poly(b["pts"], fill=shade((170, 172, 166), dim) + (255,), outline=shade(acc, dim) + (160,), width=v.px(1))
+        if b["kind"] == "coil":
+            pts = b["pts"]
+            v.line([lerp(pts[0], pts[1], 0.5), lerp(pts[3], pts[2], 0.5)], (190, 236, 255, int(230 * dim)), v.px(2))
+    elif s == "torus":
         R, r = p["R"], p["r"]
         v.circle(c, R, outline=shade((150, 152, 144), dim) + (255,), width=max(v.px(2), v.m(2 * r)))
         v.circle(c, R + r, outline=shade(acc, dim) + (120,), width=v.px(1))
@@ -1110,6 +1118,13 @@ def draw_fx(v, fx, fonts):
     elif t == "conduit":
         for w_, al in ((14, 30), (6, 90), (2, 255)):
             v.line(fx["pts"], (159, 216, 255, al), v.px(w_))
+    elif t == "plasma":
+        # plasma drawn off the disk: a hot stream, thick where it leaves the disk, thinning up the boom
+        pts, rad = fx["pts"], fx["r"]
+        for (a, b), (ra, rb) in zip(zip(pts, pts[1:]), zip(rad, rad[1:])):
+            w = (ra + rb) / 2
+            for k_, al, col in ((3.0, 40, (255, 150, 60)), (1.6, 110, (255, 190, 110)), (0.6, 255, (255, 246, 228))):
+                v.line([a, b], col + (al,), max(v.px(1), v.m(w * k_)))
     elif t == "beam":
         for w_, al in ((10, 40), (3, 255)):
             v.line([fx["a"], fx["b"]], (255, 236, 200, al), v.px(w_))

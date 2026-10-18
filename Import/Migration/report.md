@@ -70,10 +70,10 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Bodies/body_station_abandoned.asset|SkippedHandEdited|
 |Assets/Game/Content/Bodies/body_station_ark.asset|SkippedHandEdited|
 |Assets/Game/Content/Encounters/encounter_raiders.asset|SkippedHandEdited|
-|Assets/Game/Content/Encounters/encounter_traveling_merchant.asset|Unchanged|
-|Assets/Game/Content/Encounters/encounter_whisper_hunter.asset|Unchanged|
+|Assets/Game/Content/Encounters/encounter_traveling_merchant.asset|SkippedHandEdited|
+|Assets/Game/Content/Encounters/encounter_whisper_hunter.asset|SkippedHandEdited|
 |Assets/Game/Content/Encounters/encounter_xeno_probe_tutorial.asset|SkippedHandEdited|
-|Assets/Game/Content/Factions/faction_khuchad_clan.asset|Unchanged|
+|Assets/Game/Content/Factions/faction_khuchad_clan.asset|SkippedHandEdited|
 |Assets/Game/Content/Factions/faction_tlaxcala.asset|Unchanged|
 |Assets/Game/Content/Factions/faction_vestari.asset|Unchanged|
 |Assets/Game/Content/Items/item_regeneration_serum.asset|Unchanged|
@@ -113,19 +113,6 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 |Assets/Game/Content/Items/resource_palladium.asset|Unchanged|
 |Assets/Game/Content/Loot/loot_base.asset|Unchanged|
 |Assets/Game/Content/Loot/loot_creative.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_base.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_bastion.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_beetle.asset|Unchanged|
-|Assets/Game/Content/Ships/ship_butterfly.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_crescent.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_fighter.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_freighter.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_frigate.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_icarus.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_red_elite.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_shuttle.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_striker.asset|SkippedHandEdited|
-|Assets/Game/Content/Ships/ship_vestari.asset|Unchanged|
 |Assets/Game/Content/Weapons/wpn_ark_lance_medium.asset|SkippedHandEdited|
 |Assets/Game/Content/Weapons/wpn_fixed_beam_turret_small.asset|SkippedHandEdited|
 |Assets/Game/Content/Weapons/wpn_flak_cannon_medium.asset|Unchanged|
@@ -221,7 +208,10 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] MIG-I011 Assets/Game/Content/Bodies/body_station_abandoned.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Bodies/body_station_ark.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Encounters/encounter_raiders.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Encounters/encounter_traveling_merchant.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Encounters/encounter_whisper_hunter.asset: Kept hand-edited asset.
 [I] MIG-I011 Assets/Game/Content/Encounters/encounter_xeno_probe_tutorial.asset: Kept hand-edited asset.
+[I] MIG-I011 Assets/Game/Content/Factions/faction_khuchad_clan.asset: Kept hand-edited asset.
 [W] ECO-W001 Assets/Game/Content/Items/item_strange_matter.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
 [W] ECO-W001 Assets/Game/Content/Items/item_strange_matter_container_empty.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
 [W] ECO-W001 Assets/Game/Content/Items/item_strange_matter_container_full.asset tradeable: Quest item is marked tradeable; the flag is ignored and it cannot be traded.
@@ -246,17 +236,19 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] NAR-V002 Assets/Game/Content/Narrative/Facts/facts_legacy.asset facts[5]: Fact 'intro_awake' is written but never read.
 [W] NAR-V002 Assets/Game/Content/Narrative/Facts/facts_legacy.asset facts[6]: Fact 'intro_ship_chosen' is written but never read.
 [W] QST-V005 Assets/Game/Content/Narrative/Quests/quest_territory_recon.asset: Quest is never named by start_quest.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_bastion.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_butterfly.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_crescent.asset: Kept hand-edited asset.
+[W] PWR-W002 Assets/Game/Content/Ships/ship_device_canister.asset payload: ship_device_canister: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_device_mine_emp.asset payload: ship_device_mine_emp: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_device_mine_gravity.asset payload: ship_device_mine_gravity: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_device_mine_proximity.asset payload: ship_device_mine_proximity: recharge infinite s > 10 s (rule R2)
-[I] MIG-I011 Assets/Game/Content/Ships/ship_fighter.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_freighter.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_frigate.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_icarus.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_red_elite.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_shuttle.asset: Kept hand-edited asset.
-[I] MIG-I011 Assets/Game/Content/Ships/ship_striker.asset: Kept hand-edited asset.
+[W] PWR-W002 Assets/Game/Content/Ships/ship_device_mine_repulsor.asset payload: ship_device_mine_repulsor: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_device_mine_seeker.asset payload: ship_device_mine_seeker: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_hub_core.asset payload: ship_hub_core: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_hub_kiosk.asset payload: ship_hub_kiosk: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_hub_pier.asset payload: ship_hub_pier: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_hub_plinth.asset payload: ship_hub_plinth: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_hub_pylon.asset payload: ship_hub_pylon: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_hub_wall.asset payload: ship_hub_wall: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_arm.asset payload: ship_track_arm: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_0.asset payload: ship_track_debris_0: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_1.asset payload: ship_track_debris_1: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_2.asset payload: ship_track_debris_2: recharge infinite s > 10 s (rule R2)
@@ -265,9 +257,12 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_5.asset payload: ship_track_debris_5: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_6.asset payload: ship_track_debris_6: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_debris_7.asset payload: ship_track_debris_7: recharge infinite s > 10 s (rule R2)
-[W] PWR-W002 Assets/Game/Content/Ships/ship_track_gantry.asset payload: ship_track_gantry: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_door.asset payload: ship_track_door: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_door_hangar.asset payload: ship_track_door_hangar: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_post.asset payload: ship_track_post: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_track_pylon.asset payload: ship_track_pylon: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_rig.asset payload: ship_track_rig: recharge infinite s > 10 s (rule R2)
+[W] PWR-W002 Assets/Game/Content/Ships/ship_track_switch.asset payload: ship_track_switch: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_battleship.asset payload: ship_wreck_battleship: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_carrier.asset payload: ship_wreck_carrier: recharge infinite s > 10 s (rule R2)
 [W] PWR-W002 Assets/Game/Content/Ships/ship_wreck_cruiser.asset payload: ship_wreck_cruiser: recharge infinite s > 10 s (rule R2)
@@ -290,6 +285,7 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [I] ENC-I001 Import/Legacy npc_enemy_1.Formations[1]: Dropped additional formation: ship_fighter.
 [I] ENC-I001 Import/Legacy npc_enemy_1.Formations[2]: Dropped additional formation: ship_shuttle, ship_frigate.
 [I] MIG-I091 Import/Legacy npc_probe_tutorial: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
+[I] ENC-I002 Import/Legacy npc_probe_tutorial.Formations[0]: First-formation groups [ship_frigate x3] replaced by ENC-010's authored final ships/counts; source retained in the hand-off.
 [I] MIG-I091 Import/Legacy npc_story_hunter: Dropped legacy detection/patrol radius, movement speed, chase, automatic contact, faction-doctrine toggle/range and pool tuning; ENC-010 authors explicit fleets.
 [I] ENC-I002 Import/Legacy npc_story_hunter.Formations[0]: First-formation groups [ship_shuttle x1] replaced by ENC-010's authored final ships/counts; source retained in the hand-off.
 [I] ENC-I001 Import/Legacy npc_story_hunter.Formations[1]: Dropped additional formation: ship_fighter.
@@ -498,15 +494,15 @@ Converters: Items (100), Blocks (110), Audio (200), Abilities (210), Weapons (22
 [W] MIG-W070 content/Loot Tables/BaseLootTable.json lootItems[18].item: Ship loot entry dropped: SPEC-50 LootEntry holds only ItemDefinition: ship_fighter
 [W] MIG-W071 content/Loot Tables/CreativeModeLootTable.json lootItems[11].item: Null legacy loot item dropped; no replacement item is inferred.
 [I] MIG-I091 content/Loot Tables/StartShipsTable.json ships: Ship table intentionally not converted: StartShipsTable (5 legacy ship references). SPEC-01/50 own new-game loadouts.
-0 errors, 118 warnings, 223 infos
+0 errors, 133 warnings, 217 infos
 ```
 
 ## Summary
 
-0 errors, 118 warnings, 223 infos
+0 errors, 133 warnings, 217 infos
 
 Created: 0
 Updated: 0
-Unchanged: 51
-SkippedHandEdited: 78
+Unchanged: 45
+SkippedHandEdited: 71
 Failed: 0

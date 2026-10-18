@@ -115,15 +115,25 @@ namespace Game.App.DevRuntime.Playground
         }
 
         // ---------------------------------------------------------------------------------------------------- the ships
-        /// <summary>The shipyard's display bays: blueprint, the name on its floor.</summary>
+        /// <summary>The shipyard's display bays: blueprint, the name on its floor. Only the new ship lines: the four Nocturne
+        /// warships, the five racers and the two xeno ships (owner, 2026-10-18: "lets please use the new ones only going forward").</summary>
         [Game.Core.StaticStateOk("constant hub layout")]
         internal static readonly (string blueprint, string name)[] Bays =
         {
-            ("ship_fighter", "STARTER FIGHTER"), ("ship_striker", "STRIKER"), ("ship_frigate", "FRIGATE"), ("ship_racer_needle", "NEEDLE RACER"),
-            ("ship_racer_kite", "KITE RACER"), ("ship_racer_hammerhead", "HAMMERHEAD RAM"), ("ship_nocturne_wraith", "NOCTURNE WRAITH"),
-            ("ship_nocturne_requiem", "NOCTURNE REQUIEM"), ("ship_nocturne_vesper", "NOCTURNE VESPER"), ("ship_nocturne_dirge", "NOCTURNE DIRGE"),
+            (StarterBlueprint, "STARTER WRAITH"), ("ship_nocturne_vesper", "NOCTURNE VESPER"), ("ship_nocturne_dirge", "NOCTURNE DIRGE"),
+            ("ship_nocturne_requiem", "NOCTURNE REQUIEM"), ("ship_xeno_husk", "XENO HUSK"), ("ship_xeno_broodmother", "XENO BROODMOTHER"),
+            ("ship_racer_needle", "NEEDLE RACER"), ("ship_racer_kite", "KITE RACER"), ("ship_racer_hammerhead", "HAMMERHEAD RAM"),
+            ("ship_racer_gimbal", "GIMBAL RACER"), ("ship_racer_battering_ram", "BATTERING RAM"),
         };
-        internal static float2 BayAt(int i) => Shipyard.At(-200 + (i % 5) * 100, i < 5 ? -40 : 140);
+        /// <summary>The start ship (config_game's start blueprint); its bay flies "starter", which clears the playground override.</summary>
+        internal const string StarterBlueprint = "ship_nocturne_wraith";
+        /// <summary>Two rows, 100 m apart across: six bays in the front row, the rest behind it.</summary>
+        internal static float2 BayAt(int i)
+        {
+            const int Front = 6;
+            int row = i < Front ? 0 : 1, column = row == 0 ? i : i - Front, count = row == 0 ? math.min(Bays.Length, Front) : Bays.Length - Front;
+            return Shipyard.At((column - (count - 1) * .5f) * 100, row == 0 ? -40 : 140);
+        }
 
         // ---------------------------------------------------------------------------------------------------- stations
         [Game.Core.StaticStateOk("constant hub layout")]
@@ -153,7 +163,7 @@ namespace Game.App.DevRuntime.Playground
                 "Tests tracers, impacts, sparks, explosions, smoke, debris, sound and collider updates.");
             Reset(Weapons, 120, -150);
 
-            Add("combat", Combat, -80, -140, "DUEL · RAIDER FIGHTER", "F launches one hostile raider fighter across the arena: real AI, weapons, damage, power and the player-death flow.");
+            Add("combat", Combat, -80, -140, "DUEL · RAIDER WRAITH", "F launches one hostile raider WRAITH across the arena: real AI, weapons, damage, power and the player-death flow.");
             Add("xeno", Combat, 80, -140, "XENO WAVE", "F wakes two HUSK skimmers and a BROODMOTHER: grown ships of obsidian tissue that hunt you with acid. Wounds open into glowing flesh; kill the heart for a hulk.");
             Reset(Combat, 180, -190);
 
@@ -170,7 +180,7 @@ namespace Game.App.DevRuntime.Playground
                 var local = math.mul(math.transpose(new float2x2(Shipyard.Right, Shipyard.Forward)), at - Shipyard.Centre);
                 Add("ship_" + Bays[i].blueprint, Shipyard, local.x, local.y - 52, "FLY " + Bays[i].name, "F swaps you into the " + Bays[i].name +
                     " and rebuilds the playground around it (you come back here). The choice holds until you pick another.", StationKind.FlyShip,
-                    Bays[i].blueprint == "ship_fighter" ? "starter" : Bays[i].blueprint);
+                    Bays[i].blueprint == StarterBlueprint ? "starter" : Bays[i].blueprint);
             }
             Add("editor", Shipyard, 190, -200, "BLUEPRINT LAB", "F opens the creative Blueprint Lab: place and remove blocks, rotate, mirror, undo, inspect overlays and save a blueprint. RESET EVERYTHING returns here.");
 

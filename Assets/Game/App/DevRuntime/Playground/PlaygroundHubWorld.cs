@@ -103,8 +103,8 @@ namespace Game.App.DevRuntime.Playground
                         session.Allocate(), session.Allocate());
                 }
             else missing.Add("zone_gate");
-            Traffic(catalog, session, frame, "ship_shuttle", InnerLoop, 4, 28, false);
-            Traffic(catalog, session, frame, "ship_freighter", OuterLoop, 3, 36, true);
+            Traffic(catalog, session, frame, "ship_nocturne_wraith", InnerLoop, 4, 28, false);
+            Traffic(catalog, session, frame, "ship_nocturne_vesper", OuterLoop, 3, 36, true); // stand-in until the civilian line exists
         }
 
         /// <summary>`count` ships of `id` round a closed rail loop about the plaza, evenly spaced; clockwise unless `reverse`.</summary>
@@ -162,19 +162,19 @@ namespace Game.App.DevRuntime.Playground
                 case "weapons":
                     foreach (float range in GalleryRanges)
                         foreach (float side in new[] { -170f, 170f })
-                            Structure(catalog, session, frame, "ship_fighter", Weapons.At(side, RangePadZ + range), Weapons.Yaw + math.PI, default, GridKind.Station, GridMotion.Static, d);
-                    return "Weapons range: the target station ahead and six target fighters, 100 to 260 m from the pad.";
+                            Structure(catalog, session, frame, "ship_nocturne_wraith", Weapons.At(side, RangePadZ + range), Weapons.Yaw + math.PI, default, GridKind.Station, GridMotion.Static, d);
+                    return "Weapons range: the target station ahead and six target WRAITHs, 100 to 260 m from the pad.";
                 case "hazards": return Hazard(catalog, session, frame, group, tick);
                 case "mechanisms": return Mechanism(catalog, session, frame, group, tick);
                 case "shipyard":
                     for (int i = 0; i < Bays.Length; i++)
                         Structure(catalog, session, frame, Bays[i].blueprint, BayAt(i), Shipyard.Yaw + math.PI, default, GridKind.Station, GridMotion.Static, d);
-                    return "Shipyard: ten ships on display. Fly onto a pad in front of one and press F to fly it.";
+                    return "Shipyard: " + Bays.Length + " ships on display. Fly onto a pad in front of one and press F to fly it.";
                 case "market":
-                    Structure(catalog, session, frame, "ship_freighter", Market.At(95, -40), Market.Yaw, default, GridKind.Station, GridMotion.Static, d);
-                    Structure(catalog, session, frame, "ship_shuttle", Market.At(-150, 60), Market.Yaw + 2.4f, default, GridKind.Station, GridMotion.Static, d);
-                    Structure(catalog, session, frame, "ship_shuttle", Market.At(-110, 120), Market.Yaw + 2.1f, default, GridKind.Station, GridMotion.Static, d);
-                    return "Market docks: a merchant freighter at the pier. The TRADE pad hails it.";
+                    Structure(catalog, session, frame, "ship_nocturne_vesper", Market.At(95, -40), Market.Yaw, default, GridKind.Station, GridMotion.Static, d);
+                    Structure(catalog, session, frame, "ship_nocturne_wraith", Market.At(-150, 60), Market.Yaw + 2.4f, default, GridKind.Station, GridMotion.Static, d);
+                    Structure(catalog, session, frame, "ship_nocturne_wraith", Market.At(-110, 120), Market.Yaw + 2.1f, default, GridKind.Station, GridMotion.Static, d);
+                    return "Market docks: a merchant VESPER at the pier. The TRADE pad hails it.";
                 case "salvage":
                     // a scrapyard: drifting hull chunks and two gutted ships (the SALVAGE pad prepares the one you can pull in)
                     for (int i = 0; i < 9; i++)
@@ -182,8 +182,8 @@ namespace Game.App.DevRuntime.Playground
                         float a = i * 2.39996f, r = 90 + 18 * i;
                         Structure(catalog, session, frame, "ship_track_debris_" + (i % 8), Salvage.At(math.sin(a) * r, 60 + math.cos(a) * r * .7f), a * 3, default, GridKind.Hulk, GridMotion.Static, d);
                     }
-                    Structure(catalog, session, frame, "ship_frigate", Salvage.At(-170, 40), Salvage.Yaw + 1.2f, default, GridKind.Hulk, GridMotion.Static, d);
-                    Structure(catalog, session, frame, "ship_striker", Salvage.At(150, 150), Salvage.Yaw - 2.2f, default, GridKind.Hulk, GridMotion.Static, d);
+                    Structure(catalog, session, frame, "ship_nocturne_dirge", Salvage.At(-170, 40), Salvage.Yaw + 1.2f, default, GridKind.Hulk, GridMotion.Static, d);
+                    Structure(catalog, session, frame, "ship_nocturne_wraith", Salvage.At(150, 150), Salvage.Yaw - 2.2f, default, GridKind.Hulk, GridMotion.Static, d);
                     return "Salvage yard: hull chunks and gutted ships. The SALVAGE pad prepares a wreck you can pull into your hold.";
             }
             return null;

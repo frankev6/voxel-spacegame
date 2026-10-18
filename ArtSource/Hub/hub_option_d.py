@@ -14,10 +14,11 @@ Everything here is placed by what the hole does:
   cannot climb out.
 - The Current is the circular orbit at 1300 m: v = sqrt(g r) ≈ 56 m/s. Cut your engines on it and you orbit; it is
   the city's ring road, and the frame-dragged inner lane runs faster still.
-- The accretion disk powers the city. Eight mirror petals ring it, tilted out of the plane like an iris, focusing its
-  light onto receivers; conduits carry the power out to each quarter, and energy canisters (cells) float at the nodes.
+- The accretion disk powers the city. Eight Siphons reach in from the Harbour Ring: magnetic nozzles at the disk's
+  edge pull plasma off it and drive it up their booms into converters; conduits carry the power out to each quarter,
+  and energy canisters (cells) float at the nodes.
 - The disk flares when it is fed. The Breakers feed it scrap down the Drain, a decaying-orbit spiral, so a flare
-  follows every wreck; the mirrors' shadows are the only shelter (the reactor-pulse mechanic, at city scale).
+  follows every wreck; the converters' lee is the only shelter (the reactor-pulse mechanic, at city scale).
 - Structures orbit, so they line up with the hole: habitat drums point their axis at it (gravity-gradient stable),
   rings spin for their own gravity, radiators stand edge-on to it, collectors face it. Nothing stands on a floor:
   every form is centred on its own level, and the city carries on in lower orbits below the plane.
@@ -44,15 +45,12 @@ def hab_ring(C, c, rng, district, z=0.0, R=None):
 
 
 def hab_drum(C, c, rng, district, z=0.0, L=None):
-    """A habitat drum, its axis on the hole (gravity-gradient stable), mirrors along it, a dock at the outer end."""
+    """A habitat drum, its axis on the hole (gravity-gradient stable), a dock at the outer end."""
     L = L or rng.uniform(150, 420)
     rad = rng.uniform(24, 56)
     hd = bearing_of(c)
     C.shape("drum", c, district, "hab_drum", rng.uniform(0.6, 1.0), z, heading=hd, length=L, radius=rad)
     C.shape("sphere", polar(hd, L / 2 + rad * 0.6, c), district, "dock", 0.9, z, r=rad * 0.7)
-    for s in (1, -1):
-        C.shape("panel", polar(hd + 90, s * (rad + 12), c), district, "mirror", 0.0, z, heading=hd, length=L * 0.8, thick=2.5,
-                height=rad * 1.6)
     return L / 2 + rad
 
 
@@ -136,6 +134,42 @@ def fill_space(C, fab, style_at, tries, seed):
         fab.occupy(ngon(p, r, 12), rng.uniform(6, 14))
 
 
+def harvester(C, b, up, r_head=482, r_conv=930):
+    """A Siphon: a magnetic nozzle at the disk's edge, a lattice boom, a converter on the Harbour Ring.
+
+    The nozzle is four coil rings standing across the plane, their axis on the hole, narrowing outward so the
+    field funnels the plasma up the boom. The boom runs a little above (or below) the plane, so the stream arcs
+    up off the disk into the nozzle. Radiators beside the converter stand edge-on to the hole."""
+    z = 46 * up
+    # the nozzle: a funnel of coils, widest facing the disk, and its cowl
+    for i, (dr, R) in enumerate(((0, 52), (26, 42), (50, 32), (72, 24))):
+        C.shape("torus", polar(b, r_head + dr), "harbour", "coil", 1.0, z, R=R, r=6.5 - i, upright=True, heading=b)
+    C.shape("drum", polar(b, r_head + 100), "harbour", "nozzle", 0.9, z, heading=b, length=60, radius=20)
+    # the boom: twin rails with cross-bracing
+    r0, r1 = r_head + 130, r_conv - 40
+    mid = polar(b, (r0 + r1) / 2)
+    for s_ in (-1, 1):
+        C.shape("truss", polar(b + 90, s_ * 22, mid), "harbour", "truss", 0.0, z, heading=b, length=r1 - r0, width=10)
+    for j in range(int((r1 - r0) // 34) + 1):
+        C.shape("truss", polar(b, r0 + j * 34), "harbour", "truss", 0.0, z, heading=b + 90, length=46, width=4)
+    # the converter: a squat drum on the ring's inner edge, coolant tanks, radiators edge-on to the hole
+    conv = polar(b, r_conv)
+    C.shape("drum", conv, "harbour", "converter", 1.0, z * 0.5, heading=b, length=90, radius=44)
+    C.shape("torus", conv, "harbour", "coil", 1.0, z * 0.5, R=48, r=6, upright=True, heading=b)
+    for s_ in (-1, 1):
+        C.shape("sphere", polar(b + 90, s_ * 70, conv), "harbour", "tank", 0.4, 0, r=22)
+        for f in range(3):
+            C.shape("panel", polar(b + 90, s_ * (104 + f * 18), polar(b, 30, conv)), "harbour", "radiator", 0.0, 0,
+                    heading=b, length=120, thick=3, height=70)
+    # the stream: drawn off the disk with its swirl, rising into the nozzle, then straight up the boom
+    pts, zs, rs = [], [], []
+    for r_, db, zf, w in ((230, -26, 0.0, 1.5), (300, -16, 0.02, 9), (370, -9, 0.12, 18), (430, -4, 0.45, 17),
+                          (r_head - 10, 0, 1.0, 13), (r_head + 100, 0, 1.0, 9), (r_conv - 50, 0, 1.0, 7)):
+        pts.append(polar(b + db, r_)); zs.append(round(z * zf, 1)); rs.append(w)
+    C.fx.append(dict(type="plasma", pts=[(round(x, 1), round(y, 1)) for x, y in pts], z=zs, r=rs))
+    C.fx.append(dict(type="flare_shadow", pts=annulus(r_conv + 50, 1240, b - 5, b + 5)))
+
+
 # ---------------------------------------------------------------- the city
 def merchant_hub(C, c, name, livery, district, ship_cls, rng):
     """A trading house: a spinning hub with its own trader docked on a pier and its stock in a raft behind it."""
@@ -164,20 +198,13 @@ def option_d():
     for r, a in ((1800, 60), (2600, 40)):
         C.fx.append(dict(type="contour", c=(0, 0), r=r, a=a))
 
-    # ---- the Mirrors (owner: "large mirror structures around the black hole syphoning its energy"): eight petals
-    # 420 m long tilted out of the plane like an iris, alternately rising above it and dipping below, each focusing the
-    # disk's light onto a receiver that feeds a conduit out to its quarter. Their shadows are the shelter from flares.
+    # ---- the Siphons (owner: "contraptions syphoning the black hole's energy"): eight harvester arms reach in from the
+    # Harbour Ring to the edge of the disk. Each ends in a magnetic nozzle, a funnel of coil rings that pulls a tongue of
+    # plasma off the disk and drives it up the boom into a converter on the ring; the converters feed the conduits.
+    # The converters' lee is the shelter from flares.
     for k in range(8):
-        b = k * 45 + 22.5
-        up = 1 if k % 2 == 0 else -1
-        C.shape("petal", polar(b, 770), "harbour", "mirror_petal", 1.0, 0, bearing=b, r0=560, r1=990, width=30,
-                z0=-30 * up, z1=300 * up, sag=40)
-        C.fx.append(dict(type="flare_shadow", pts=annulus(600, R_HARB - 40, b - 11, b + 11)))
-        rc = polar(b, 640)
-        C.shape("sphere", rc, "harbour", "receiver", 1.0, 150 * up, r=26)
-        C.shape("truss", rc, "harbour", "truss", 0.0, 75 * up, heading=b, length=24, width=6)
-        C.fx.append(dict(type="beam", a=rc, za=150 * up, b=polar(b, 1100), zb=0))
-    # conduits: power out to each quarter from the receivers, canisters (energy cells) at the nodes
+        harvester(C, k * 45 + 22.5, 1 if k % 2 == 0 else -1)
+    # conduits: power out to each quarter from the converters, canisters (energy cells) at the nodes
     for b in AVENUES:
         cb = b + 22.5
         pts = [polar(cb, 1000), polar(cb, R_HARB + 120), polar(cb, 1750)]
@@ -286,13 +313,12 @@ def option_d():
                "BREAKERS")
     for k in range(3):
         tank_farm(C, polar(bF - 12 + k * 12, 1650 + (k % 2) * 260), rng, "foundry")
-    C.fx.append(dict(type="moon", c=polar(52, 3150), r=260, infl=820))
     C.fx.append(dict(type="slow_field", c=polar(50, 2620), r=200))
     C.fx.append(dict(type="minefield", c=polar(28, 2750), r=260, n=26, kind="seeker"))
     C.fx.append(dict(type="minefield", c=polar(16, 2620), r=160, n=14, kind="prox"))
     C.district("foundry", "THE FORGE", polar(bF, 1800),
-               "Smelters on the hole's power, radiators edge-on to it; ore barges come in from the quarry moon's well.",
-               ["Two wells: slingshot between the moon and the hole", "The refinery's slow field", "The old minefield outside"],
+               "Smelters on the hole's power, radiators edge-on to it; ore barges come in on the outbound lanes.",
+               ["The refinery's slow field", "The old minefield outside", "Tank farms on the hole's power"],
                "FORGE")
     for k, (cls, liv) in enumerate([("wraith", "noct"), ("cruiser", "noct"), ("cruiser", "noct"), ("liner", "noct"),
                                     ("courier", "noct"), ("shuttle", "noct")]):
@@ -431,7 +457,7 @@ def option_d():
                     C.b(box(q, bb + mrng.choice([0, 90]), L_, L_ * mrng.uniform(0.4, 0.9)), top, top - mrng.uniform(20, 50), "module", dist,
                         lit=mrng.uniform(0.4, 1.0))
                 elif roll < 0.82:
-                    C.shape("panel", q, dist, "radiator" if heavy else "mirror", 0.0, top, heading=bb, length=mrng.uniform(40, 110),
+                    C.shape("panel", q, dist, "radiator", 0.0, top, heading=bb, length=mrng.uniform(40, 110),
                             thick=2.5, height=mrng.uniform(30, 70))
                 else:
                     C.shape("panel", q, dist, "mast", 0.9, top + 30, heading=bb, length=4, thick=4, height=mrng.uniform(60, 140))
@@ -454,7 +480,7 @@ def option_d():
         ((150, -3500), "You spawn outside, in the inbound stream; you feel the pull from here"),
         ((0, -R_WALL - 60), "Harbour Mouth: the gate ring, customs scan, signals"),
         ((0, 0), "The black hole: its disk powers the city. Red buoys: the Horizon Line"),
-        (polar(157.5, 900), "The Mirrors: eight petals focus the disk on their receivers; their shadows shelter you from flares"),
+        (polar(157.5, 900), "The Siphons: eight arms draw plasma off the disk into converters; their lee shelters you from flares"),
         (polar(160, R_CUR), "The Current: the 1300 m orbit, the city's ring road; cut engines and you orbit"),
         (hc, "Harbour Control: the Harbour Master, the one reset"),
         (polar(bE, 1750), "The Exchange: four trading houses"),
@@ -463,18 +489,23 @@ def option_d():
         (pit, "The Pit: the arena in a stands ring"),
         (polar(bI, 1760), "The Institute: working blocks and mechanisms"),
         (polar(bB, 1800), "Breakers' Yard; the Drain feeds wrecks to the hole"),
-        (polar(bF, 1800), "The Forge: radiators, the quarry moon's second well"),
+        (polar(bF, 1800), "The Forge: smelters, tank farms, the old minefield"),
         (polar(bC, 2120), "The Circuit: the Slingshot trial; portal to Track 01"),
     ]
     return dict(key="D", title="OPTION D  ·  MERIDIAN ON THE HOLE", name="MERIDIAN",
                 subtitle="Option A rebuilt round a black hole: the city's power, its ring road and its first lesson.",
                 spawn=spawn, bounds=(-2950, -3700, 2950, 2700), wall=R_WALL, seed=14,
-                concept=("Meridian was built on a black hole for its power: eight mirror petals 420 m long ring it, focusing the "
-                         "disk's light onto receivers that feed every quarter.  The hole's pull is the city's first lesson: you feel it from "
+                # gameplay-zoom checks: a Siphon nozzle, the Current by Harbour Control, an Exchange street (zoomed out
+                # and at the normal zoom), the gate from inside
+                play_shots=[("siphon", polar(22.5, 600), 450), ("current", polar(205, 1300), 450),
+                            ("street", polar(bE, 1640), 450), ("street_near", polar(bE, 1640), 200),
+                            ("gate", (0, -2150), 450)],
+                concept=("Meridian was built on a black hole for its power: eight Siphons, 450 m arms, reach in to the disk's "
+                         "edge, pull plasma off it with magnetic nozzles and drive it into converters that feed every quarter.  The hole's pull is the city's first lesson: you feel it from "
                          "the outer markers, the inbound lane bends into the Current, the 1300 m orbit that is the city's ring "
                          "road (cut your engines and you circle for free), and red buoys mark the Horizon Line past which a "
                          "starter ship cannot climb out. The Breakers feed scrap down the Drain; every wreck makes the disk flare, "
-                         "and the mirrors' shadows are the shelter. Nothing here stands on a floor: rings spin for weight, drums "
+                         "and the converters' lee is the shelter. Nothing here stands on a floor: rings spin for weight, drums "
                          "point at the hole, radiators stand edge-on to it, and the city carries on in lower orbits beneath you."),
                 strengths=["One idea explains the whole city: power, traffic, hazards and layout all come from the hole",
                            "Teaches the gravity well by living with it: the pull, orbits, the Horizon Line, slingshots",

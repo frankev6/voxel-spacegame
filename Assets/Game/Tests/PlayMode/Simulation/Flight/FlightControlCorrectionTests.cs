@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Game.Tests.PlayMode.Simulation.Flight
 {
-    /// <summary>FLT-013: actual imported Fighter, production thrusters and Unity Physics; QA-001/ADR-0114 core manoeuvring assist.</summary>
+    /// <summary>FLT-013: the actual start WRAITH, production thrusters and Unity Physics; QA-001/ADR-0114 core manoeuvring assist.</summary>
     public sealed class FlightControlCorrectionTests
     {
         ContentService content;
@@ -26,7 +26,7 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             fixture = new FlightScenarioTests.Fixture();
             fixture.Em.SetComponentData(fixture.ConfigEntity,
                 FlightConfigFactory.Create(content.Catalog.Get<FlightConfigDefinition>(new ContentId("config_flight"))));
-            ship = fixture.SpawnBlueprint(content.Catalog.Get<ShipBlueprintDefinition>(new ContentId("ship_fighter")));
+            ship = fixture.SpawnBlueprint(content.Catalog.Get<ShipBlueprintDefinition>(new ContentId("ship_nocturne_wraith")));
             fixture.Ready(ship);
         }
         [TearDown] public void TearDown() { fixture?.Dispose(); content?.Dispose(); }
@@ -41,7 +41,21 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             var state = fixture.Em.GetComponentData<FlightState>(ship); state.Gyro = 0; fixture.Em.SetComponentData(ship, state);
         }
 
-        [Test] public void Fighter_DirectionalThrust()
+        /// <summary>Thrust the blueprint's own thruster blocks give along a body-frame direction (independent of FlightThruster).</summary>
+        float BlueprintThrust(float3 direction)
+        {
+            float sum = 0;
+            foreach (var instance in fixture.Em.GetBuffer<Game.Voxel.Model.BlockInstance>(ship))
+            {
+                var definition = instance.Block == 0 ? null : content.Catalog.GetBlock(instance.Block);
+                if (definition == null || !definition.TryGetModule<Game.Data.Blocks.ThrusterModule>(out var thruster)) continue;
+                float3 push = Game.Data.Blocks.OrientationTables.Rotate(new float3(0, 0, -1), instance.Orient); push.y = 0;
+                sum += thruster.Params.ThrustNewtons * math.max(0, math.dot(math.normalizesafe(push), direction));
+            }
+            return sum;
+        }
+
+        [Test] public void Starter_DirectionalThrust()
         {
             foreach (var direction in new[] { new float2(0, 1), new float2(0, -1), new float2(1, 0), new float2(-1, 0) })
             {
@@ -49,7 +63,9 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                 float available = 0;
                 foreach (var thruster in fixture.Em.GetBuffer<FlightThruster>(ship))
                     available += thruster.MaxForce * math.max(0, math.dot(thruster.ForceDirLocal, new float3(direction.x, 0, direction.y)));
-                Assert.That(available, Is.EqualTo(direction.y > 0 ? 180000 : 40000));
+                // The flight buffer carries exactly what the blueprint's thruster blocks give (the WRAITH: aft engines only, so
+                // reverse and strafe are the core assist alone, ADR-0114).
+                Assert.That(available, Is.EqualTo(BlueprintThrust(new float3(direction.x, 0, direction.y))).Within(1f));
                 fixture.Command(ship, direction); fixture.Tick(60);
                 // Compare in the original body frame: +Z became world +X at the 90-degree test rotation.
                 float2 velocity = FlightMath.ToLocalPlanar(fixture.Velocity(ship).Linear, quaternion.RotateY(math.PI / 2));
@@ -59,7 +75,7 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                 float bound = (available + core) * fixture.Mass(ship).InverseMass;
                 Assert.That(acceleration, Is.InRange(bound * .9f, bound * 1.01f), direction.ToString());
                 Assert.Less(math.abs(velocity.x * direction.y - velocity.y * direction.x), .05f);
-                TestContext.WriteLine($"Fighter {direction}: {acceleration:G8} m/s²; force/mass {bound:G8}, velocity {velocity}");
+                TestContext.WriteLine($"WRAITH {direction}: {acceleration:G8} m/s²; force/mass {bound:G8}, velocity {velocity}");
             }
             ResetMotion(quaternion.identity);
             var thrustersCopy = fixture.Em.GetBuffer<FlightThruster>(ship).ToNativeArray(Unity.Collections.Allocator.Temp);
@@ -69,10 +85,10 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             fixture.Command(ship, new float2(0, -1)); fixture.Tick(60);
             float coreOnly = FlightMath.CoreAssistForce(fixture.Em.GetComponentData<FlightConfig>(fixture.ConfigEntity), fixture.Mass(ship).InverseMass) * fixture.Mass(ship).InverseMass;
             Assert.That(-fixture.Velocity(ship).Linear.z, Is.InRange(coreOnly * .9f, coreOnly * 1.01f),
-                "After losing both reverse thrusters only the core assist reverses; no thruster force is invented.");
+                "After losing its reverse thrusters only the core assist reverses; no thruster force is invented.");
         }
 
-        [Test] public void Fighter_TurnAndStrafe()
+        [Test] public void Starter_TurnAndStrafe()
         {
             fixture.Command(ship, turn: 1); fixture.Tick(60);
             float heading = math.atan2(math.rotate(fixture.Transform(ship).Rotation, new float3(0, 0, 1)).x,
@@ -86,22 +102,30 @@ namespace Game.Tests.PlayMode.Simulation.Flight
             var delta = FlightMath.ToLocalPlanar(fixture.Velocity(ship).Linear - before, rotation);
             float angle = math.degrees(math.acos(math.clamp(math.abs(math.dot(rotation.value, fixture.Transform(ship).Rotation.value)), 0, 1))) * 2;
             Assert.Greater(delta.x, 2.5f);
-            Assert.Less(angle, 2, "Strafe should hold facing with the Fighter's available gyro/thrusters.");
+            Assert.Less(angle, 2, "Strafe should hold facing with the WRAITH's available gyro/thrusters.");
             TestContext.WriteLine($"Turn then strafe: lateral delta {delta.x:G8} m/s, facing drift {angle:G8} degrees");
         }
 
-        [Test] public void Fighter_CoastAndBrake()
+        [Test] public void Starter_CoastAndBrake()
         {
             ResetMotion(quaternion.identity);
             fixture.Em.SetComponentData(ship, new PhysicsVelocity { Linear = new float3(0, 0, 20) });
             fixture.Command(ship); fixture.Tick(120);
             float coast = fixture.Velocity(ship).Linear.z;
-            Assert.That(coast, Is.InRange(2f, 4f), "Owner 2026-10-14: releasing W/S must not drift indefinitely (coast 1/s).");
+            var config = fixture.Em.GetComponentData<FlightConfig>(fixture.ConfigEntity);
+            float inverseMass = fixture.Mass(ship).InverseMass;
+            float decel = (BlueprintThrust(new float3(0, 0, -1)) + FlightMath.CoreAssistForce(config, inverseMass)) * inverseMass;
+            // Coast asks v × CoastDeceleration; a ship that cannot brake that hard brakes at its limit until it can.
+            float knee = decel / config.CoastDeceleration, saturated = math.max(0, (20 - knee) / decel);
+            float expectedCoast = saturated >= 2 ? 20 - decel * 2 : math.min(20, knee) * math.exp(-config.CoastDeceleration * (2 - saturated));
+            Assert.That(coast, Is.InRange(expectedCoast * .85f, expectedCoast * 1.15f), "Owner 2026-10-14: releasing W/S must not drift indefinitely (coast 1/s).");
+            Assert.Less(coast, 10f, "still decaying, not drifting");
             ResetMotion(quaternion.identity);
             fixture.Em.SetComponentData(ship, new PhysicsVelocity { Linear = new float3(0, 0, 20) });
             fixture.Em.SetComponentData(ship, new ShipCommand { Flags = ShipCommandFlags.Brake }); fixture.Tick(120);
             float brake = fixture.Velocity(ship).Linear.z;
-            Assert.Less(brake, math.min(coast - .2f, .5f));
+            Assert.Less(brake, coast - .2f);
+            Assert.That(brake, Is.EqualTo(math.max(0, 20 - decel * 2)).Within(.6f), "Brake uses the full opposing force.");
             Assert.GreaterOrEqual(brake, -.05f, "Brake stops without reversing.");
             fixture.Tick(900); Assert.Less(math.length(fixture.Velocity(ship).Linear), .02f);
             TestContext.WriteLine($"From 20 m/s after 2 seconds: coast {coast:G8}, brake {brake:G8} m/s; final {fixture.Velocity(ship).Linear}");

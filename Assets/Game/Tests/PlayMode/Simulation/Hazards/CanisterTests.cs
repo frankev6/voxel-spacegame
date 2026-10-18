@@ -11,7 +11,8 @@ using CombatFixture = Game.Tests.PlayMode.Simulation.Weapons.CombatScenarioTests
 
 namespace Game.Tests.PlayMode.Simulation.Hazards
 {
-    /// <summary>HAZ-019: energy canisters (ADR-0119 decision 7) on real canister content and the starter fighter.</summary>
+    /// <summary>HAZ-019: energy canisters (ADR-0119 decision 7) on real canister content and the starter WRAITH.</summary>
+    // TODO(batch-5): re-measure on WRAITH (power capacity >= 70, recharge and fly-through reach were checked on the retired Fighter).
     [Category("Scenario")]
     public sealed class CanisterTests
     {
@@ -30,7 +31,7 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
         [Test] public void Pickup_GrantsOnce()
         {
             using var f = New();
-            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_fighter"), default);
+            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_nocturne_wraith"), default);
             f.Ready(ship);
             var canister = Canister(f, new float2(0, 60));
             var power = f.Em.GetComponentData<ShipPower>(ship);
@@ -38,7 +39,7 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
             int grants = 0; float jump = 0;
             for (int i = 0; i < 600; i++)
             {
-                // The fighter recharges fast: hold it 70 below full until the canister is collected, so the grant shows.
+                // The starter recharges fast: hold it 70 below full until the canister is collected, so the grant shows.
                 if (f.Em.Exists(canister) && f.Em.HasComponent<Canister>(canister))
                 { var p = f.Em.GetComponentData<ShipPower>(ship); p.Stored = p.Capacity - 70; f.Em.SetComponentData(ship, p); }
                 float before = f.Em.GetComponentData<ShipPower>(ship).Stored;
@@ -56,7 +57,7 @@ namespace Game.Tests.PlayMode.Simulation.Hazards
         [Test] public void FlyThrough_AtSpeed_Unhurt()
         {
             using var f = New();
-            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_fighter"), default);
+            var ship = f.Flight.SpawnBlueprint(Def<ShipBlueprintDefinition>(f, "ship_nocturne_wraith"), default);
             f.Ready(ship);
             var canister = Canister(f, new float2(0, 150));
             int cells = f.Cells(ship);

@@ -21,8 +21,9 @@ namespace Game.Tests.PlayMode.Presentation
             yield return Until(() => Game.Input.CurrentContext == InputContext.Flight && Game.Camera.HasTarget, "Player camera ready");
             // SPEC-62 applies impact shake after framing; this test measures the unshaken framing contract.
             Game.Camera.ApplySettings(new Game.Presentation.Data.CameraSettings { MouseSensitivity = 1, ShakeScale = 0 });
-            Assert.AreEqual("ship_fighter", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
-            Assert.AreEqual(1005, Game.Session.Fleet.Flagship.Structure.SolidCellCount);
+            Assert.AreEqual("ship_nocturne_wraith", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
+            Assert.AreEqual(Game.Content.Catalog.Get<global::Game.Data.Definitions.ShipBlueprintDefinition>(new ContentId("ship_nocturne_wraith")).CellCount,
+                Game.Session.Fleet.Flagship.Structure.SolidCellCount);
             // The starter now spawns beside a station; framing is measured in open space, away from camera occlusion.
             var moved = Host.Commands.Execute("teleport x=1000 z=-1000 yaw=0", Host.Context);
             Assert.AreEqual(global::Game.App.DevRuntime.DevResultKind.Ok, moved.Kind, moved.Text);
@@ -59,10 +60,12 @@ namespace Game.Tests.PlayMode.Presentation
             EM.SetComponentData(Root, pose);
             EM.SetComponentData(Root, new PhysicsVelocity { Linear = new float3(0, 0, 53) });
         }
-        [UnityTest] public IEnumerator Fighter_FastFlight_KeepsFittingHullInViewport()
+        [UnityTest] public IEnumerator Starter_FastFlight_KeepsFittingHullInViewport()
         {
-            float distance = 150 * math.pow(.88f, 1200 * .008333f);
-            yield return StartShip(1200, new Vector2(100, 20), distance);
+            // The WRAITH (26 m): 9 zoom steps (47.5 m) is the closest zoom whose framing still fits the hull (+1.7 m worst
+            // margin); at 10 steps (41.8 m) its aft-bottom corner cannot fit at pitch 50°, yaw 25°.
+            float distance = 150 * math.pow(.88f, 1080 * .008333f);
+            yield return StartShip(1080, new Vector2(100, 20), distance);
             foreach (float aspect in new[] { 16f / 9, 4f / 3 })
             {
                 Game.Camera.Camera.aspect = aspect; yield return null;
@@ -83,7 +86,7 @@ namespace Game.Tests.PlayMode.Presentation
                     Assert.AreEqual(distance, Game.Camera.CurrentDistance, .01f, "Framing must not change zoom");
                 }
             }
-            TestContext.WriteLine("Fighter: all eight solid-bounds corners framed at 53 m/s, 16:9 and 4:3, with changing heading and a 25-degree orbit offset.");
+            TestContext.WriteLine("WRAITH: all eight solid-bounds corners framed at 53 m/s, 16:9 and 4:3, with changing heading and a 25-degree orbit offset.");
         }
         [UnityTest] public IEnumerator CloseInspection_KeepsCenterWithoutResettingInput()
         {

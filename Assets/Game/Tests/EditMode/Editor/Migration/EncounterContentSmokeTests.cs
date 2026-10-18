@@ -25,19 +25,19 @@ namespace Game.Tests.EditMode.Editor.Migration
                 foreach (var ship in encounter.Ships) Assert.AreSame(catalog.Get<ShipBlueprintDefinition>(ship.blueprint.Id), ship.blueprint, "Use the actual imported blueprint.");
                 if (encounter.Kind == EncounterKind.Story) { Assert.AreEqual(0, encounter.DirectorWeight); Assert.IsTrue(encounter.PersistUntilDefeated); }
             }
-            Check("encounter_glass_worms", "faction_xeno", "ship_beetle:3");
-            Check("encounter_doppelganger", "faction_xeno", "ship_crescent:1");
-            Check("encounter_scavenger_king", "faction_raiders", "ship_bastion:1,ship_fighter:2");
-            Check("encounter_jungle_beasts", "faction_xeno", "ship_beetle:4");
-            Check("encounter_solar_parasite", "faction_xeno", "ship_butterfly:2");
-            Check("encounter_extraction_guardians", "faction_raiders", "ship_striker:2,ship_frigate:1");
+            Check("encounter_glass_worms", "faction_xeno", "ship_xeno_husk:3");
+            Check("encounter_doppelganger", "faction_xeno", "ship_nocturne_wraith:1");
+            Check("encounter_scavenger_king", "faction_raiders", "ship_nocturne_dirge:1,ship_nocturne_wraith:2");
+            Check("encounter_jungle_beasts", "faction_xeno", "ship_xeno_husk:4");
+            Check("encounter_solar_parasite", "faction_xeno", "ship_xeno_broodmother:1");
+            Check("encounter_extraction_guardians", "faction_raiders", "ship_nocturne_wraith:2,ship_nocturne_dirge:1");
             var ark = catalog.Get<FactionDefinition>(new ContentId("faction_ark")); var raiders = catalog.Get<FactionDefinition>(new ContentId("faction_raiders"));
             var xeno = catalog.Get<FactionDefinition>(new ContentId("faction_xeno")); var vestari = catalog.Get<FactionDefinition>(new ContentId("faction_vestari"));
             Assert.IsTrue(ark.IsPlayerFaction); Assert.IsTrue(ark.RelationLocked); Assert.AreEqual("starsys_ark_start", ark.OwnedStarSystems.Single().IdString);
             Assert.AreEqual("starsys_whisper", vestari.OwnedStarSystems.Single().IdString); Assert.AreEqual(6, catalog.All<FactionDefinition>().Count);
             foreach (var hostile in new[] { raiders, xeno }) { Assert.AreEqual(-100, hostile.BasePlayerRelation); Assert.IsTrue(hostile.RelationLocked); Assert.IsFalse(hostile.IsPlayerFaction); }
             Assert.AreEqual("--color-faction-xeno", xeno.MapColorToken); Assert.AreEqual("ai_default", raiders.DefaultAiProfile.IdString);
-            CollectionAssert.AreEqual(new[] { "ship_fighter", "ship_striker" }, raiders.Doctrine.Select(d => d.blueprint.IdString));
+            CollectionAssert.AreEqual(new[] { "ship_nocturne_wraith", "ship_nocturne_dirge" }, raiders.Doctrine.Select(d => d.blueprint.IdString));
             CollectionAssert.AreEqual(new[] { 1f, .6f }, raiders.Doctrine.Select(d => d.weight));
             CollectionAssert.AreEquivalent(catalog.All<FactionDefinition>().Where(f => !f.IsPlayerFaction && f != raiders), raiders.Stances.Select(s => s.other));
             Assert.IsTrue(raiders.Stances.All(s => s.stance == FactionStanceValue.Hostile));

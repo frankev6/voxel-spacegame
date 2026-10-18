@@ -20,7 +20,7 @@ using Object = UnityEngine.Object;
 
 namespace Game.Tests.EditMode.Simulation.Weapons
 {
-    /// <summary>WPN-018's five required checks use the real Fighter and production command, demand, binding and stats systems.</summary>
+    /// <summary>WPN-018's five required checks use the real start WRAITH and production command, demand, binding and stats systems.</summary>
     public sealed class WeaponPowerAndStatsTests : GameTestBase
     {
         EcsTestWorld world;
@@ -47,7 +47,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             world.AddSingleton(new VoxelConfig { SpawnBricksPerFrame = 1024, DefaultCellSize = .5f });
             var tuning = PowerTuning.Defaults; tuning.PriorityWeapon = Priority; world.AddSingleton(tuning);
             player = world.AddSingleton(default(PlayerCommand)); world.AddGameplayActive(); world.AddSimClock();
-            root = GridSpawnApi.RequestSpawnBlueprint(Em, new ContentId("ship_fighter").Hash, new GridSpawnParams
+            root = GridSpawnApi.RequestSpawnBlueprint(Em, new ContentId("ship_nocturne_wraith").Hash, new GridSpawnParams
             {
                 PersistentId = 1, Pose = RigidTransform.identity, Profile = GridProfile.PlayerShip,
                 Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.NoRender
@@ -78,7 +78,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Assert.AreEqual(expected ? 1 : 0, Request(instance.Functional).Requesting);
                 if (expected) expectedDraw += weapons.Value.Weapons[mount.WeaponIndex].PowerDraw;
             }
-            Assert.AreEqual(14, count);
+            Assert.AreEqual(3, count);
             Assert.AreEqual(expectedDraw, Em.GetComponentData<ShipPower>(root).DemandPerSecond, .001f, "The allocator must consume this tick's feature demand.");
             Assert.AreEqual(expectedDraw, Em.GetComponentData<ShipPower>(root).GrantedPerSecond, .001f);
         }
@@ -97,7 +97,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Assert.AreEqual(instance.Functional, consumer.Functional); Assert.AreEqual(BlockModuleId.WeaponMount, consumer.Module);
                 Assert.AreEqual(request.Draw, consumer.Draw); Assert.AreEqual(Priority, consumer.Priority);
             }
-            Assert.AreEqual(14, count); Tick();
+            Assert.AreEqual(3, count); Tick();
             foreach (var instance in Em.GetBuffer<BlockInstance>(root))
                 if (Em.HasComponent<WeaponMount>(instance.Functional)) Assert.AreEqual(Priority, Request(instance.Functional).Priority);
         }
@@ -125,11 +125,11 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         }
         [Test] public void Stats_Spawn()
         {
-            Assert.AreEqual(14, Stats.AliveWeaponCount); Assert.AreEqual(14, Stats.InitialWeaponCount);
-            // Real export: 8 fixed small plasma, 4 small beams, 2 medium plasma; independent SPEC-21 §4.9 oracle.
-            Assert.AreEqual(8 * 150 + 4 * 90 + 2 * 315, Stats.SustainedDps, .001f);
-            Assert.AreEqual(8 * 1.5f + 4 * 4 + 2 * 4, Stats.WeaponDraw, .001f);
-            Assert.AreEqual(450 * 1.6f, Stats.MaxWeaponRange, .001f);
+            Assert.AreEqual(3, Stats.AliveWeaponCount); Assert.AreEqual(3, Stats.InitialWeaponCount);
+            // Real export: the WRAITH's three small plasma turrets (60 damage at 2/s); independent SPEC-21 §4.9 oracle.
+            Assert.AreEqual(3 * 60 * 2, Stats.SustainedDps, .001f);
+            Assert.AreEqual(3 * 1.5f, Stats.WeaponDraw, .001f);
+            Assert.AreEqual(400 * 1.5f, Stats.MaxWeaponRange, .001f);   // 400 m/s for 1.5 s
             Assert.AreEqual(1u, Stats.SourceRevision); Assert.AreEqual(Em.GetComponentData<ShipStats>(root).FunctionalRevision, Stats.SourceRevision);
         }
         [Test] public void Stats_WeaponDestroyed()
@@ -144,7 +144,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 instance.Flags |= BlockInstanceFlags.Destroyed; instances[i] = instance; removed = true; break;
             }
             Assert.IsTrue(removed); Tick();
-            Assert.AreEqual(13, Stats.AliveWeaponCount); Assert.AreEqual(14, Stats.InitialWeaponCount);
+            Assert.AreEqual(2, Stats.AliveWeaponCount); Assert.AreEqual(3, Stats.InitialWeaponCount);
             Assert.AreEqual(before.SustainedDps - removedDps, Stats.SustainedDps, .001f);
             Assert.AreEqual(before.WeaponDraw - removedDraw, Stats.WeaponDraw, .001f);
             Assert.AreEqual(before.SourceRevision + 1, Stats.SourceRevision);
@@ -154,7 +154,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             // Sleeping, spawning and hulk roots retain their totals until their existing lifecycle permits a rebuild.
             if (!Em.HasComponent<Dormant>(root)) Em.AddComponent<Dormant>(root);
             Em.SetComponentEnabled<Dormant>(root, true); ForceRevision(); Tick(); Assert.AreEqual(sentinel, Stats);
-            Em.SetComponentEnabled<Dormant>(root, false); Tick(); Assert.AreEqual(13, Stats.AliveWeaponCount); Assert.AreEqual(14, Stats.InitialWeaponCount);
+            Em.SetComponentEnabled<Dormant>(root, false); Tick(); Assert.AreEqual(2, Stats.AliveWeaponCount); Assert.AreEqual(3, Stats.InitialWeaponCount);
             sentinel = Stats; Em.SetComponentEnabled<GridSpawning>(root, true); ForceRevision(); Tick(); Assert.AreEqual(sentinel, Stats);
             Em.SetComponentEnabled<GridSpawning>(root, false); Tick(); sentinel = Stats;
             Em.AddComponent<Hulk>(root); ForceRevision(); Tick(); Assert.AreEqual(sentinel, Stats);

@@ -333,7 +333,7 @@ namespace Game.App.DevRuntime.Playground
                         : DevCommandResult.Fail("The target station is gone: RESET WEAPONS RANGE brings a new one.");
                 case "combat":
                     if (enemyRequested) return DevCommandResult.Ok("The raider is already out. RESET COMBAT ARENA clears it.");
-                    var duel = Spawn(pad, "spawn blueprint=ship_fighter", 0, 330, "faction_raiders", "");
+                    var duel = Spawn(pad, "spawn blueprint=ship_nocturne_wraith", 0, 330, "faction_raiders", "");
                     if (duel.Kind != DevResultKind.Failed) enemyRequested = true;
                     return duel;
                 case "xeno":

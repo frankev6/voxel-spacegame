@@ -68,7 +68,7 @@ namespace Game.Tests.EditMode.Editor.Content
         }
             // QA-001 (owner: "when i ran "playground ship=ship_nocturne_requiem", it doesn't work, only worked with the wraith"):
         // the ship editor refuses a ship in several pieces (SPEC-51 §5.5), so every shipped blueprint is one face-connected
-        // piece. ship_red_elite is migrated as exported (eight loose cells; ShipConverterTests pins the export).
+        // piece.
         [Test]
         public void ShipBlueprints_AreOnePiece()
         {
@@ -77,7 +77,6 @@ namespace Game.Tests.EditMode.Editor.Content
             var failures = new System.Text.StringBuilder();
             foreach (var definition in service.Catalog.All<ShipBlueprintDefinition>())
             {
-                if (definition.IdString == "ship_red_elite") continue;
                 Assert.IsTrue(library.TryGet(definition.Id.Hash, out var ship), definition.IdString);
                 Assert.IsTrue(ship.TryGetCellBounds(out var min, out var max), definition.IdString);
                 var unvisited = new System.Collections.Generic.HashSet<int3>();

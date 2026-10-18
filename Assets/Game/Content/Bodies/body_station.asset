@@ -28,7 +28,7 @@ MonoBehaviour:
   interactPrompt: Dock
   storyTag: station
   structureSource: 1
-  blueprint: {fileID: 11400000, guid: b43838c726f3748989db74a2b44d5ac8, type: 2}
+  blueprint: {fileID: 11400000, guid: 15ba7823ac2704881ad8b74bba05dbe7, type: 2}
   shape:
     kind: 0
     sizeCells: {x: 0, y: 0, z: 0}

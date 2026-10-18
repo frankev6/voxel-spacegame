@@ -156,7 +156,7 @@ namespace Game.Tests.PlayMode.Galaxy
             Assert.AreEqual(1000, Definition<BodyTemplateDefinition>(catalog, "body_asteroid_belt").SectorSizeM);
             foreach (string station in new[] { "body_station_ark", "body_station" }) Assert.AreEqual(InteractionKind.Dock, Definition<BodyTemplateDefinition>(catalog, station).Interaction);
             var outpost = Definition<BodyTemplateDefinition>(catalog, "body_station"); Assert.AreEqual(StructureSource.Blueprint, outpost.StructureSource);
-            Assert.AreEqual("ship_vestari", outpost.Blueprint.IdString);
+            Assert.AreEqual("ship_nocturne_vesper", outpost.Blueprint.IdString); // the retired ship_vestari's armed stand-in
             Assert.IsTrue(VoxelStructureCodec.TryDecode(outpost.Blueprint.Payload, catalog, out var structure, out string error), error);
             using (structure)
             using (var blocks = new NativeList<StructureBlock>(Allocator.TempJob))

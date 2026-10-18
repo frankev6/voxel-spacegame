@@ -29,7 +29,8 @@ namespace Game.Tests.EditMode.Editor.Migration
             Assert.IsFalse(AssetDatabase.IsValidFolder(Root) || Directory.Exists(Root) || File.Exists(Root + ".meta"), "Never remove existing user content.");
             ownsRoot = true; manifest = new MigrationManifest(); prerequisites.Clear();
             inputs = Directory.GetFiles("Import/Legacy/content/Factions", "*.json").ToDictionary(p => p, File.ReadAllBytes);
-            foreach (string id in new[] { "ship_fighter", "ship_shuttle" })
+            // The Khuchad doctrine's legacy fighter and shuttle are retired; their replacements are the shipped DIRGE and WRAITH.
+            foreach (string id in new[] { "ship_nocturne_dirge", "ship_nocturne_wraith" })
             {
                 var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>("Assets/Game/Content/Ships/" + id + ".asset");
                 Assert.NotNull(blueprint); prerequisites.Add(blueprint);
@@ -75,8 +76,8 @@ namespace Game.Tests.EditMode.Editor.Migration
                 foreach (var entry in faction.Doctrine) Assert.IsNull(entry.aiProfile);
             }
             var doctrine = Faction(ids[0]).Doctrine;
-            Assert.AreSame(catalog.Get<ShipBlueprintDefinition>(new ContentId("ship_fighter")), doctrine[0].blueprint); Assert.AreEqual(.5f, doctrine[0].weight);
-            Assert.AreSame(catalog.Get<ShipBlueprintDefinition>(new ContentId("ship_shuttle")), doctrine[1].blueprint); Assert.AreEqual(1f, doctrine[1].weight);
+            Assert.AreSame(catalog.Get<ShipBlueprintDefinition>(new ContentId("ship_nocturne_dirge")), doctrine[0].blueprint); Assert.AreEqual(.5f, doctrine[0].weight);
+            Assert.AreSame(catalog.Get<ShipBlueprintDefinition>(new ContentId("ship_nocturne_wraith")), doctrine[1].blueprint); Assert.AreEqual(1f, doctrine[1].weight);
             var duplicate = context.Report.Entries.Single(); Assert.AreEqual("MIG-I091", duplicate.Code);
             Assert.AreEqual("content/Factions/faction_4.json", duplicate.AssetPath); Assert.AreEqual("id", duplicate.Field);
             Assert.IsTrue(duplicate.Message.Contains("faction_4")); Assert.IsNull(Faction("faction_4"));
@@ -130,9 +131,9 @@ namespace Game.Tests.EditMode.Editor.Migration
                     var context = Context(legacyRoot: temporary); converter.Convert(context); AssertSkipped(context, change.Code, original, hash);
                 }
                 CopyInputs(temporary); var missing = Context(legacyRoot: temporary);
-                missing.Catalog = BuildCatalog(prerequisites.Where(d => d.IdString != "ship_fighter"));
+                missing.Catalog = BuildCatalog(prerequisites.Where(d => d.IdString != "ship_nocturne_dirge"));
                 Assert.IsFalse(converter.Preflight(missing)); Assert.AreEqual(0, missing.Writer.Outcomes.Count, "Preflight never writes.");
-                missing = Context(legacyRoot: temporary); missing.Catalog = BuildCatalog(prerequisites.Where(d => d.IdString != "ship_fighter"));
+                missing = Context(legacyRoot: temporary); missing.Catalog = BuildCatalog(prerequisites.Where(d => d.IdString != "ship_nocturne_dirge"));
                 converter.Convert(missing); AssertSkipped(missing, "MIG-E004", original, hash);
                 CopyInputs(temporary); ReplaceFirst(sourcePath, "\"id\":\"faction_khuchad_clan\"", "\"id\":\"faction_tlaxcala\"");
                 byte[] alliance = File.ReadAllBytes(PathOf("faction_tlaxcala"));

@@ -22,7 +22,7 @@ using UnityEngine;
 
 namespace Game.Tests.EditMode.Simulation.Power
 {
-    /// <summary>Eight PWR-006 acceptance checks against the real Fighter spawn and shipped module blobs.</summary>
+    /// <summary>Eight PWR-006 acceptance checks against the real start WRAITH spawn and shipped module blobs.</summary>
     public sealed class ShipStatsAggregateSystemTests
     {
         EcsTestWorld world;
@@ -45,7 +45,7 @@ namespace Game.Tests.EditMode.Simulation.Power
             WeaponContent.CreateSingletons(Em, content.Catalog, new List<Entity>());
             using var w = Em.CreateEntityQuery(typeof(WeaponDefsRef)); weapons = w.GetSingleton<WeaponDefsRef>().Value;
             using var f = Em.CreateEntityQuery(typeof(FactionRelations)); factions = f.GetSingleton<FactionRelations>();
-            root = GridSpawnApi.RequestSpawnBlueprint(Em, new ContentId("ship_fighter").Hash, new GridSpawnParams {
+            root = GridSpawnApi.RequestSpawnBlueprint(Em, new ContentId("ship_nocturne_wraith").Hash, new GridSpawnParams {
                 PersistentId = 1, Pose = RigidTransform.identity, Profile = GridProfile.PlayerShip, Motion = GridMotion.Dynamic, Flags = GridSpawnFlags.NoRender });
             Frame();
         }

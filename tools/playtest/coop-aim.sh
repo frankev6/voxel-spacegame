@@ -1,7 +1,7 @@
 #!/bin/zsh
 # coop-aim.sh [rounds] [seconds]  SPEC-90 §10a: does a guest's manual fire hit on the host? Needs a running session with guest 1
 # (coop.sh start). Adds 120 ms of round trip, then alternates rounds with aim anchors off and on: each round spawns a fresh AI
-# fighter, guest 1 tracks it with the cursor (aim point mode, no autofire) and fires, and the host counts the fighter's lost cells.
+# raider WRAITH (the combat duel), guest 1 tracks it with the cursor (aim point mode, no autofire) and fires, and the host counts its lost cells.
 . "$(dirname "$0")/_env.sh"
 export UNITY_PROJECT_PATH="$PROJECT_ROOT"
 G="$PT_DIR/g.sh"

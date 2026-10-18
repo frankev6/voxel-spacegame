@@ -113,22 +113,23 @@ namespace Game.Tests.EditMode.Simulation.Power
         }
 
         [Test]
-        public void Fighter_NoWarning()
+        public void Starter_NoWarning()
         {
             var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>(ContentDatabaseBuilder.DatabasePath);
             Assert.IsNotNull(database);
-            var fighter = database.Definitions.OfType<ShipBlueprintDefinition>().Single(d => d.IdString == "ship_fighter");
-            var definitions = database.Definitions.Where(d => !(d is ShipBlueprintDefinition) || d == fighter).ToArray();
-            var buildReport = new ValidationReport("fighter");
+            var starter = database.Definitions.OfType<ShipBlueprintDefinition>().Single(d => d.IdString == "ship_nocturne_wraith");
+            var definitions = database.Definitions.Where(d => !(d is ShipBlueprintDefinition) || d == starter).ToArray();
+            var buildReport = new ValidationReport("starter");
             var catalog = ContentCatalog.Build(definitions, buildReport);
             Assert.IsFalse(buildReport.HasErrors, buildReport.ToText());
             var report = Run(catalog);
             Assert.IsEmpty(report.Entries, report.ToText());
             using var library = new BlueprintLibrary(catalog, default);
-            Assert.IsTrue(library.TryGet(fighter.Id.Hash, out var structure));
+            Assert.IsTrue(library.TryGet(starter.Id.Hash, out var structure));
             var budget = PowerBudgetValidation.Measure(structure, catalog);
+            // The WRAITH: three small plasma turrets draw 4.5 of its 40 generation (SPEC-22 §4.9).
             Assert.AreEqual(40, budget.Generation); Assert.AreEqual(200, budget.Capacity);
-            Assert.AreEqual(36, budget.WeaponDraw); Assert.AreEqual(0, budget.ShieldDraw); Assert.AreEqual(0, budget.ThrusterDraw);
+            Assert.AreEqual(4.5, budget.WeaponDraw, 1e-6); Assert.AreEqual(0, budget.ShieldDraw); Assert.AreEqual(0, budget.ThrusterDraw);
             Assert.IsTrue(double.IsPositiveInfinity(budget.SustainSeconds)); Assert.AreEqual(5, budget.RechargeSeconds);
         }
 

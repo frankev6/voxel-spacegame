@@ -20,7 +20,7 @@ using Object = UnityEngine.Object;
 
 namespace Game.Tests.EditMode.Simulation.Weapons
 {
-    /// <summary>WPN-004: real Fighter spawn, all-orientation geometry and reparented state (SPEC-21 §5.2).</summary>
+    /// <summary>WPN-004: real start WRAITH spawn, all-orientation geometry and reparented state (SPEC-21 §5.2).</summary>
     public sealed class WeaponInitTests
     {
         ContentService content;
@@ -60,7 +60,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         void Frame() => world.StepFrame(EcsTestWorld.TickSeconds);
         Entity SpawnFighter()
         {
-            var root = GridSpawnApi.RequestSpawnBlueprint(EM, new ContentId("ship_fighter").Hash,
+            var root = GridSpawnApi.RequestSpawnBlueprint(EM, new ContentId("ship_nocturne_wraith").Hash,
                 new GridSpawnParams { PersistentId = 1, Pose = RigidTransform.identity, Motion = GridMotion.Dynamic,
                     Profile = GridProfile.PlayerShip, Flags = GridSpawnFlags.NoRender });
             Frame();
@@ -99,7 +99,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Assert.That(beam.Active, Is.Zero); Assert.That(beam.TicksLeft, Is.Zero);
                 AssertGeometry(mount, instance, row, EM.GetComponentData<VoxelGrid>(root).CellSize);
             }
-            Assert.That(count, Is.EqualTo(14), "The shipped Fighter has fourteen canonical weapon mounts (SPEC-21 §5.12).");
+            Assert.That(count, Is.EqualTo(3), "The start ship's canonical weapon mounts (SPEC-21 §5.12).");
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             var root = SpawnFighter();
             using var query = EM.CreateEntityQuery(ComponentType.ReadOnly<WeaponMount>(), ComponentType.ReadOnly<FunctionalBlock>());
             using var entities = query.ToEntityArray(Allocator.Temp);
-            Assert.That(entities.Length, Is.EqualTo(14));
+            Assert.That(entities.Length, Is.EqualTo(3));
             var weapon = entities[0];
             var functional = EM.GetComponentData<FunctionalBlock>(weapon);
             var instance = EM.GetBuffer<BlockInstance>(root)[functional.InstanceIndex];

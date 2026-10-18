@@ -50,7 +50,8 @@ namespace Game.Editor.Migration.Encounters
                 var imported = FirstFormation(fleet);
                 if (imported.Count == 0 && !(row.Kind == EncounterKind.Merchant && fleet.LegacyNarrativeEncounterId == "event_merchant_shady"))
                 { context.Report.Error("MIG-E002", "Import/Legacy", fleet.LegacyEntityId + ".Formations", "Combat fleet requires a first formation."); continue; }
-                foreach (var ship in imported) EncounterContentAuthoring.Require<ShipBlueprintDefinition>(context, ship.Id);
+                // The imported first formation names legacy hulls, which are retired (owner, 2026-10-18); it is only compared
+                // with the authored row below, whose ships CheckRow requires.
                 EncounterContentAuthoring.CheckRow(context, row, pendingFactions);
                 for (int i = 1; i < fleet.Formations.Count; i++)
                     context.Report.Info("ENC-I001", "Import/Legacy", fleet.LegacyEntityId + ".Formations[" + i + "]", "Dropped additional formation: " + string.Join(", ", fleet.Formations[i]) + ".");

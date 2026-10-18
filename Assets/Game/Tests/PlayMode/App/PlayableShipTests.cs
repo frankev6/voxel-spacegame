@@ -22,15 +22,16 @@ using Object = UnityEngine.Object;
 
 namespace Game.Tests.PlayMode.App
 {
-    /// <summary>FND-017: the production boot, imported Fighter, input, physics, camera and save path in one running World.</summary>
+    /// <summary>FND-017: the production boot, the start WRAITH, input, physics, camera and save path in one running World.</summary>
     public sealed class PlayableShipTests : ProductionSessionFixture
     {
         IEnumerator StartShip()
         {
             yield return Run(Game.Session.NewGameAsync(new NewGameArgs("Harness", 42, false, ContentId.None)));
             yield return Until(() => Game.Input.CurrentContext == InputContext.Flight && Game.Camera.HasTarget, "Flight context and camera target");
-            Assert.AreEqual("ship_fighter", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
-            Assert.AreEqual(1005, Game.Session.Fleet.Flagship.Structure.SolidCellCount);
+            Assert.AreEqual("ship_nocturne_wraith", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
+            Assert.AreEqual(Game.Content.Catalog.Get<global::Game.Data.Definitions.ShipBlueprintDefinition>(new ContentId("ship_nocturne_wraith")).CellCount,
+                Game.Session.Fleet.Flagship.Structure.SolidCellCount);
             Assert.IsTrue(EM.HasComponent<PhysicsCollider>(Root));
             Assert.AreEqual(global::Game.Presentation.Data.CameraMode.Flight, Game.Camera.Mode);
         }
@@ -86,7 +87,7 @@ namespace Game.Tests.PlayMode.App
             yield return Run(Game.Session.LoadGameAsync("manual_017"));
             yield return Until(() => Game.Input.CurrentContext == InputContext.Flight && Game.Camera.HasTarget, "Loaded camera and input");
             Assert.AreEqual(id, Game.Session.Fleet.Flagship.PersistentId);
-            Assert.AreEqual("ship_fighter", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
+            Assert.AreEqual("ship_nocturne_wraith", Game.Session.Fleet.Flagship.SourceBlueprint.Value);
             Assert.AreEqual(hash, Game.Session.Fleet.Flagship.Structure.ComputeContentHash(names), "All voxel bytes survive");
             Assert.IsTrue(EM.HasComponent<PhysicsCollider>(Root));
             // FLET v1 restores ship data; canonical world-location persistence has not landed (ADR-0044).
