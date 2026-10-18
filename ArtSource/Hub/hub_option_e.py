@@ -22,7 +22,8 @@ market and its merchants, the pirates' docks, tunnels and highways, construction
 import math
 import random
 
-from hub_layouts import City, CLASSES, polar, bearing_of, box
+from hub_layouts import City, CLASSES, polar, bearing_of, box, ngon
+from hub_quarters_d import gun_turret
 
 CELL = 12.0
 LOBES = [((-260.0, 90.0), 560.0, 470.0, 1.0), ((430.0, -110.0), 400.0, 330.0, 0.85)]   # centre, rx, ry, height
@@ -103,6 +104,66 @@ def edge_point(b, c, step=6.0):
     return polar(b, r, c), r
 
 
+def defences(C, rng, mouth, A, B):
+    """Owner (2026-10-18): "needs more defenses and strong ones, I'm planning in the future to have an alien attack the
+    station and you have to help". Five layers, all round the rock, their fields of fire overlapping, so an attack from
+    any side meets guns at every range and the player always has a battery to fight beside:
+      1. four forts on outlying rocks, 1.1 km out, the first to fire;
+      2. heavy batteries in casemates cut into the cliffs, all the way round;
+      3. gun towers on the high ground, firing over the rock;
+      4. flak turrets on the spars and the girder belt, against swarms;
+      5. missile silos on the high ground, and the Maw's blast doors, inner guns and field gate.
+    The Clan's gunships launch from the Den; the Docks rearm and repair."""
+    d = "defence"
+    centre = (100.0, -10.0)
+    # 1. the outlying forts
+    for b in (45, 135, 225, 315):
+        c = polar(b, 1150, centre)
+        C.fx.append(dict(type="boulder", c=(round(c[0], 1), round(c[1], 1)), r=70))
+        C.b(ngon(polar(b, -10, c), 56, 6, 30), 34, -40, "bastion", d, lit=0.6)
+        for s_ in (-1, 1):
+            gun_turret(C, polar(b + 90, s_ * 30, c), b, d, z=40, big=True)
+        gun_turret(C, polar(b, -40, c), b + 180, d, z=40)
+        C.fx.append(dict(type="flash", c=c, z=60, r=4, col="#FF3C28"))
+    # 2. heavy batteries in casemates round the cliffs
+    for c0, bs in ((A, (200, 236, 272, 308, 344, 20)), (B, (60, 100, 140))):
+        for b in bs:
+            p, r = edge_point(b, c0)
+            if abs(p[0]) < 140 and p[1] < -250:                      # leave the Maw to its own guns
+                continue
+            C.b(box(polar(b, -10, p), b, 70, 120), 40, -90, "bastion", d, lit=0.4)
+            C.b(box(polar(b, 18, p), b, 16, 120), 14, -20, "bastion", d, lit=0.7)     # the casemate's lip
+            for s_ in (-1, 1):
+                gun_turret(C, polar(b + 90, s_ * 32, polar(b, 8, p)), b, d, z=44, big=True)
+    # 3. gun towers on the high ground
+    for c0, br in ((A, ((200, 260), (320, 300), (80, 250), (20, 330))), (B, ((90, 200), (200, 180)))):
+        for b, r in br:
+            p = polar(b, r, c0)
+            top = surface(*p)
+            C.b(ngon(p, 26, 6, 0), top + 30, top - 40, "bastion", d, lit=0.5)
+            gun_turret(C, p, bearing_of((p[0] - centre[0], p[1] - centre[1])), d, z=top + 40, big=True)
+    # 4. flak on the spars' ends and round the girder belt
+    for b in range(0, 360, 30):
+        c0 = A if (b > 200 or b < 20) else B
+        p, r = edge_point(b, c0)
+        q = polar(b, 30, p)
+        if abs(q[0]) < 140 and q[1] < -250:
+            continue
+        gun_turret(C, q, b, d, z=60)
+    # 5. missile silos on the high ground, and the Maw shut tight
+    for c0, b0, r0 in ((A, 150, 200), (B, 300, 150)):
+        for i in range(6):
+            q = polar(b0 + (i % 3 - 1) * 9, r0 + (i // 3) * 30, c0)
+            top = surface(*q)
+            C.b(box(q, b0, 16, 16), top + 3, top - 30, "silo", d, lit=0.1)
+            C.fx.append(dict(type="flash", c=q, z=round(top + 4, 1), r=3, col="#FF3C28"))
+    for s_ in (1, -1):                                              # the blast doors, run back into the rock
+        C.b(box((s_ * 90, mouth[1] + 16), 90, 70, 26), 130, -130, "bastion", d, lit=0.3)
+        gun_turret(C, (s_ * 34, mouth[1] + 170), 180, d, z=0)       # the guns inside the throat
+    C.fx.append(dict(type="field_wall", a=(-46, mouth[1] + 120), b=(46, mouth[1] + 120)))
+    C.holos.append(dict(text="BLAST DOORS", at=(0, mouth[1] + 60), district="maw", small=True))
+
+
 def den(C, c, r, district, name, liv, cls, rng):
     """A merchant's den: a small cavern off a tunnel, its stock stacked round the wall, the merchant's ship moored in it,
     one lit sign over the door."""
@@ -180,6 +241,7 @@ def option_e():
             C.fx.append(dict(type="flash", c=(s_ * 44, mouth[1] - 120 + k * 60), z=0, r=3, col="#FFF0D0" if k % 2 else "#FFB347"))
     C.fx.append(dict(type="neon", c=(0, mouth[1] - 6), heading=90, length=60, height=10, z=70, col="#FF5530"))
     C.holos.append(dict(text="THE MAW", at=(0, mouth[1] - 70), district="maw", small=True))
+    defences(C, rng, mouth, A, B)
 
     # ---- the approach: an ordinary rock field round the asteroid, a few navigation beacons on the way in
     for k in range(44):
@@ -285,6 +347,8 @@ def option_e():
         if k % 3 == 0:
             C.fx.append(dict(type="flash", c=q, z=10, r=2.5, col="#BFE8FF"))
     C.holos.append(dict(text="THE DOCKS", at=docks, district="chop", small=True))
+    for k in range(6):
+        C.fx.append(dict(type="canister", c=polar(k * 60 + 30, 70, docks)))
     C.district("chop", "THE DOCKS", docks, "The pirates' berths inside the rock; crews' ships along the cavern wall.",
                ["Pirate crews and their ships"], None)
 
@@ -296,6 +360,10 @@ def option_e():
     for k in range(6):
         C.fx.append(dict(type="flash", c=polar(55, -150 + k * 50, polar(145, 62, den_c)), z=30, r=3, col="#FFC070"))
     C.holos.append(dict(text="THE DEN", at=den_c, district="den", small=True))
+    launch = [polar(55, 160, den_c), polar(55, 700, den_c)]
+    C.lane(launch, "launch")
+    for k in range(3):
+        C.ship(polar(55, 260 + k * 120, den_c), 55, "wraith", "khu", "cruise")
     C.district("den", "THE DEN", den_c, "A warship rammed into the rock long ago; its hangar is the Clan's own.", [], None)
     C.district("outer", "THE OUTER WORKS", polar(300, 300, A), "Spars, modules on the cliffs, scaffolding, the girder belt.", [], None)
     C.district("maw", "THE MAW", mouth, "The front door.", [], None)
@@ -309,11 +377,14 @@ def option_e():
         (docks, "The Docks: the pirates' berths inside the rock"),
         (den_c, "The Den: the Clan's hangar in a rammed warship"),
         ((960, -230), "The back door: a second way out"),
+        (polar(225, 1150, (100, -10)), "Outlying forts: four, 1.1 km out, the first to fire"),
+        (polar(272, 520, A), "Heavy batteries in casemates all round the cliffs; gun towers on the high ground"),
+        (polar(150, 220, A), "Missile silos on the high ground; flak on the spars and the belt"),
         (polar(300, 400, A), "Outside: spars, modules on the cliffs, scaffolding, the girder belt, the mass driver"),
     ]
     return dict(key="E", title="OPTION E  ·  THE HOLLOW", name="THE HOLLOW",
                 subtitle="A pirate haven built into an asteroid: tunnels and caverns inside, construction built onto the rock.",
-                spawn=spawn, bounds=(-1250, -1800, 1300, 900), wall=0, seed=21, rock=dict(cell=CELL, cols=rock),
+                spawn=spawn, bounds=(-1350, -1800, 1500, 1250), wall=0, seed=21, rock=dict(cell=CELL, cols=rock),
                 concept=("The Khuchad Clan's haven, built into a two-lobed asteroid 1.7 km long. You come in through the rock "
                          "field along a few beacons to the Maw. Inside, the Ring highway runs round both lobes at the flight "
                          "plane, two ways, lit by working lamps. Off it are the Market (the black market, in the largest "
@@ -325,7 +396,9 @@ def option_e():
                            "Tunnels and caverns are a new kind of flying: tight, two-way, lit",
                            "A different feel from Meridian: rough, hidden, one clan's rock"],
                 costs=["Tunnels need the roof cutaway round the player (the camera looks down)",
+                       "Defended for the coming alien attack: about 60 guns to run as AI turrets",
                        "The rock is voxels at 12 m: about 8,000 columns to build and to collide with"],
                 play_shots=[("market", market, 650), ("ring", (-480, 120), 650), ("docks", docks, 520), ("maw", (0, mouth[1] - 60), 700),
-                            ("den", den_c, 800), ("dens", (115, 120), 520)],
+                            ("den", den_c, 800), ("dens", (115, 120), 520),
+                            ("guns", edge_point(236, A)[0], 600, "out"), ("fort", polar(225, 1150, (100, -10)), 500, "out")],
                 callouts=callouts, **C.data())

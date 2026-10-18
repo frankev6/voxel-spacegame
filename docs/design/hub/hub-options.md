@@ -119,9 +119,19 @@ The Khuchad Clan's haven, built into a two-lobed asteroid 1.7 km long: about a t
 - **The Den.** A warship rammed into the rock long ago; its hangar is the Clan's own.
 - **Outside.** The station is built onto and round the rock: docking spars with ships moored, modules bolted to the cliffs, scaffolding over the flanks, a girder belt round its waist, radiators, masts and an ore mass driver.
 
+**Defences, for the alien attack to come.** You said: "needs more defenses and strong ones, I'm planning in the future to have an alien attack the station and you have to help". The rock is defended in five layers, all the way round, their fields of fire overlapping (the red arcs on the map), so an attack from any side meets guns at every range and you always have a battery to fight beside:
+
+1. **The outlying forts.** Four fortified rocks 1.1 km out, one on each diagonal, each with two heavy guns facing out and one covering the gap behind. They fire first.
+2. **The heavy batteries.** Big guns in casemates cut into the cliffs, all round both lobes.
+3. **The gun towers.** Heavy turrets on armoured plinths on the high ground, firing out over the rock.
+4. **The flak.** Light quick turrets round the rock's edge and on the girder belt, against swarms.
+5. **The last line.** Two fields of missile silos on the high ground, and the Maw sealed by blast doors that run out of the rock, with guns inside the throat and a field gate behind them.
+
+The Clan's gunships launch from the Den up their own lane; the Docks rearm and repair (energy canisters). About sixty guns in all, run as AI turrets. The attack itself is a later design: which layers fall in what order, where you are needed, and what you can rebuild.
+
 ![E at play zoom](img/hub_play_sheet_e.jpg)
 
-Left to right, top to bottom: the arrival, the Maw, the cutaway, the Market, the Ring by the Market, the Docks, the Maw at play zoom, the Den, the dens.
+Left to right, top to bottom: the arrival, the Maw, the cutaway, the Market, the Ring by the Market, the Docks, the Maw at play zoom, the Den, the dens, a heavy battery on the cliffs, an outlying fort.
 
 **How it is built.** The rock is voxels: a grid of 12 m columns, each one or two solid spans; a tunnel or cavern is the gap between them, cut at the flight plane (about 7,900 columns). Because the camera looks down, the rock above the flight plane hides round the player inside the rock and near its cliffs (the cutaway render shows what you see), so the tunnels fly like streets. It needs the cutaway as new camera work; the traffic, merchants and docking already exist.
 
