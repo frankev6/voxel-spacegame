@@ -95,6 +95,8 @@ namespace Game.App.Session
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
             ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
             ["MoverSystem"] = SystemAuthority.AuthorityOnly,
+            ["PortalDecideSystem"] = SystemAuthority.AuthorityOnly,      // HAZ-021: who transits a portal, and its jam
+            ["PortalTransitSystem"] = SystemAuthority.Both,              // HAZ-021: every machine moves the transiting root
             ["MechanismSystem"] = SystemAuthority.AuthorityOnly,         // HAZ-014 decider: triggers to action records (ADR-0119)             // HAZ-013 decider: moving structures (ADR-0119)
             ["ImpulseApplySystem"] = SystemAuthority.Both,               // ADR-0117 applier: damage and requested impulses
             ["ExternalPushFeedbackSystem"] = SystemAuthority.Both,       // HAZ-005: camera-shake events from this machine's applied pushes
@@ -157,6 +159,7 @@ namespace Game.App.Session
             ["PulseSystem"] = "which ships a pulse reaches and what it does to them; cells in GridDelta, shields in snapshots",
             ["PickupSystem"] = "which ship collects each energy canister; its despawn (stored energy is the ship's own)",
             ["MoverSystem"] = "where each moving structure is; its pose in snapshots",
+            ["PortalDecideSystem"] = "which ship goes through a lane-gate portal and when the portal jams; PortalTransit records and PortalLink",
             ["MechanismSystem"] = "which mechanism rules fire and when their actions fall due; the owners' state in snapshots",
             ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
             ["IntegritySystem"] = "which islands lost their connection; SplitSystem's plans",

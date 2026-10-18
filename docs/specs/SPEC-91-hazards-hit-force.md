@@ -721,10 +721,11 @@ Why the rows sit below the first targets:
   - Visual: a jammed portal shows it.
 - **Files:** `Assets/Game/Simulation/Mechanisms/PortalDecideSystem.cs`, `PortalTransitSystem.cs`; visuals.
 - **Acceptance criteria:**
-  - [ ] A ship at 150 m/s exits at the paired gate with its speed kept, rotated to the exit frame.
-  - [ ] A second ship within the jam time passes straight through the gate.
-  - [ ] Debris never transits.
+  - [x] A ship at 150 m/s exits at the paired gate with its speed kept, rotated to the exit frame.
+  - [x] A second ship within the jam time passes straight through the gate.
+  - [x] Debris never transits.
 - **Tests:** `PortalTests.Transit_KeepsSpeed`, `.Jam_Blocks`, `.Debris_Ignored`.
+- **Done (2026-10-17):** `PortalDecideSystem` (authority, after `ZoneSystem`): a ship crossing an open entry gate along its forward gets a `PortalTransit` and the portal jams for `JamSeconds`; `PortalJam` actions jam a group's portals. `PortalTransitSystem` (every machine, first in `GameplayPrePhysicsGroup`) maps the root pose from the entry frame to the exit frame, turns its linear velocity and restarts graphical smoothing; `ZoneSystem`'s jump rule skips the crossings. Portals are one way: only the entry carries `PortalLink`. Both gates carry `HazardSpawn.PortalGateId`, which no race gate has. `PortalVisualSystem`: blue bars when open; red dashes shrinking toward the posts while jammed. Track 01's GATE IN / GATE OUT (`TrackDefinition.Portals`, set piece 2, 6 s jam). Co-op replication of transits and jams stays with HAZ-022.
 
 ### HAZ-022 — The mechanism set in co-op
 - **Milestone:** M4

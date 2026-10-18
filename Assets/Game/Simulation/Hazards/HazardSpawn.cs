@@ -170,6 +170,26 @@ namespace Game.Simulation.Hazards
             return e;
         }
 
+        /// <summary>The gate effect id a portal's gates carry: no race gate has it, so RaceRules ignores their crossings.</summary>
+        public const ushort PortalGateId = 0xFFFF;
+
+        /// <summary>HAZ-021: a one-way lane-gate portal. `def` is a Box zone with a Gate effect (zone_gate); both ends get `width` and
+        /// PortalGateId, and the entry gets the PortalLink to the exit. Returns the entry zone.</summary>
+        public static Entity Portal(EntityManager em, ZoneDefinition def, float2 entry, float entryYaw, float2 exit, float exitYaw, float width,
+                                    float jamSeconds, ushort group, ulong entryId, ulong exitId)
+        {
+            var a = Zone(em, def, entry, entryYaw, group, entryId);
+            var b = Zone(em, def, exit, exitYaw, group, exitId);
+            foreach (var z in new[] { a, b })
+            {
+                var w = em.GetComponentData<WorldZone>(z); w.HalfExtents = new float2(width / 2, 2); em.SetComponentData(z, w);
+                SetEffectId(em, z, PortalGateId);
+            }
+            em.SetName(a, "portal_entry"); em.SetName(b, "portal_exit");
+            em.AddComponentData(a, new Game.Simulation.Mechanisms.PortalLink { Other = exitId, JamSeconds = jamSeconds });
+            return a;
+        }
+
         public static void SetEffectId(EntityManager em, Entity zone, ushort id)
         {
             var effects = em.GetBuffer<ZoneEffect>(zone);
