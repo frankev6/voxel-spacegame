@@ -1300,6 +1300,10 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - Ram blame (SPEC-13 §5.2, SPEC-33 §7 amended): ram damage is blamed on the body that drove into the other, both when head-on; being rammed never provokes. Test `ImpactEventSystemTests.Rammer_TakesTheBlame`.
   - Shots through rock: `SpatialHidden` (which left the rock tiles out of the spatial hash, so projectile hit tests missed them) is now `SpatialScenery`: the tiles are in the hash with `ProxyFlags.Scenery`; hit tests (`CombatHitTest`, `ExplosionJob`) see them and the AI's and the player's queries skip them. Test `SpatialHashQueryTests.Scenery_OnlyHitTestsSeeIt`.
   - Traffic dodging: the Hollow's route steering overwrote the AI's sideways dodge every update; it now carries the dodge onto the next goal and lets it fade.
+- Owner, on the floor lanes: "a bunch of rainbows everywhere, small unnecessary line holograms on the floor going back and forth ... less confusing and less overlapping, and I would prefer if they ran along the walls", "in the minimap the dots should be colored correspondly to their meaning", "the holograms that face the player look really wrong". So:
+  - The floor lanes and junction chevrons are gone. The light strips at the walls' feet along the routes take the colour of the next station that way, with a flowing line on the floor beside them toward it; the trunk from the Maw and the caverns stay white (`HollowHolograms.Plan`).
+  - Holo boards stay put facing their approach; only the face toward the camera shows its letters.
+  - Radar (SPEC-61 §4.5 amended): scenery is no contact; stations are accent, points of interest objective, wrecks (new Kind 4) faint; ships keep their relation colours. Test `HudSnapshotSystemTests.Radar_SceneryHidden_WrecksMarked`.
 - Main thread in the Editor at the Market: about 10–12 ms, of which physics is about 2.5 ms and the Editor's own loop about 2 ms.
 
 ### 2026-10-18 — DEV-023 option E built into the game: the Hollow in the playground (lead, claude-opus-5-5)

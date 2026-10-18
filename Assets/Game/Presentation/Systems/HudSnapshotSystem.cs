@@ -42,6 +42,7 @@ namespace Game.Presentation.Systems
         ComponentTypeHandle<LocalToWorld> transformHandle;
         EntityTypeHandle entityHandle;
         ComponentLookup<VoxelGrid> gridLookup;
+        ComponentLookup<Hulk> hulkLookup;
         ComponentLookup<Allegiance> allegianceLookup;
         ComponentLookup<HudSnapshot> snapshotLookup;
         BufferLookup<HudRadarBlip> radarLookup;
@@ -60,7 +61,8 @@ namespace Game.Presentation.Systems
             state.RequireForUpdate<GameplayActive>();
             players = SystemAPI.QueryBuilder().WithAll<PlayerShip>().Build();
             weapons = SystemAPI.QueryBuilder().WithAll<FunctionalBlock, WeaponState>().Build();
-            grids = SystemAPI.QueryBuilder().WithAll<VoxelGrid, Allegiance, LocalToWorld>().WithNone<PlayerShip>().Build();
+            // scenery (the Hollow's rock tiles) is no contact: a dot per rock tile meant nothing (owner: the dots should mean something)
+            grids = SystemAPI.QueryBuilder().WithAll<VoxelGrid, Allegiance, LocalToWorld>().WithNone<PlayerShip, SpatialScenery>().Build();
             bodies = SystemAPI.QueryBuilder().WithAll<StarSystemBody, SpatialBody, LocalToWorld>().WithNone<VoxelGrid, PlayerShip>().Build();
             points = SystemAPI.QueryBuilder().WithAll<Interactable, LocalToWorld>().WithNone<VoxelGrid, StarSystemBody, PlayerShip>().Build();
             bodyPoints = SystemAPI.QueryBuilder().WithAll<Interactable, StarSystemBody, LocalToWorld>().WithNone<VoxelGrid, SpatialBody, PlayerShip>().Build();
@@ -68,7 +70,7 @@ namespace Game.Presentation.Systems
             weaponHandle = state.GetComponentTypeHandle<WeaponState>(true);
             transformHandle = state.GetComponentTypeHandle<LocalToWorld>(true);
             entityHandle = state.GetEntityTypeHandle();
-            gridLookup = state.GetComponentLookup<VoxelGrid>(true);
+            gridLookup = state.GetComponentLookup<VoxelGrid>(true); hulkLookup = state.GetComponentLookup<Hulk>(true);
             allegianceLookup = state.GetComponentLookup<Allegiance>(true);
             snapshotLookup = state.GetComponentLookup<HudSnapshot>();
             radarLookup = state.GetBufferLookup<HudRadarBlip>();
@@ -165,7 +167,7 @@ namespace Game.Presentation.Systems
                 value.ShieldStatus = lastLiveMeters.ShieldStatus; value.Energy = lastLiveMeters.Energy; value.EnergyMax = lastLiveMeters.EnergyMax;
             }
             blockHandle.Update(ref state); weaponHandle.Update(ref state); transformHandle.Update(ref state); entityHandle.Update(ref state);
-            gridLookup.Update(ref state); allegianceLookup.Update(ref state); snapshotLookup.Update(ref state); radarLookup.Update(ref state);
+            gridLookup.Update(ref state); hulkLookup.Update(ref state); allegianceLookup.Update(ref state); snapshotLookup.Update(ref state); radarLookup.Update(ref state);
             using (WeaponsMarker.Auto())
             {
                 var groups = new NativeArray<HudWeaponGroupState>(3, Allocator.TempJob);
@@ -181,7 +183,7 @@ namespace Game.Presentation.Systems
                         var heap = new NativeArray<HudRadarCandidate>(64, Allocator.TempJob);
                         var count = new NativeReference<int>(Allocator.TempJob);
                         if (!SystemAPI.TryGetSingleton<FactionRelations>(out var relations)) relations = neutralRelations;
-                        var gather = new HudRadarGatherJob { Entities = entityHandle, Transforms = transformHandle, Grids = gridLookup,
+                        var gather = new HudRadarGatherJob { Entities = entityHandle, Transforms = transformHandle, Grids = gridLookup, Hulks = hulkLookup,
                             Allegiances = allegianceLookup, Relations = relations, PlayerPosition = position, PlayerFaction = faction,
                             Target = target, Range = 2000, Heap = heap, Count = count };
                         // TODO(HUD-009): resolve the current route gate into gather.Waypoint through the travel service bridge.

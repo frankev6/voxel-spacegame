@@ -188,7 +188,7 @@ namespace Game.UI.Views
                 float x = (offset.x * cos - offset.y * sin) * 120 / range, y = (offset.x * sin + offset.y * cos) * 120 / range;
                 blip.style.translate = new Translate(x, -y, 0);
                 blip.EnableInClassList("marker--ally", contact.Relation == 1); blip.EnableInClassList("marker--enemy", contact.Relation == 2); blip.EnableInClassList("marker--neutral", contact.Relation != 1 && contact.Relation != 2);
-                blip.EnableInClassList("hud-blip--ship", contact.Kind == 0); blip.EnableInClassList("hud-blip--station", contact.Kind == 1); blip.EnableInClassList("hud-blip--body", contact.Kind == 2); blip.EnableInClassList("hud-blip--poi", contact.Kind == 3);
+                blip.EnableInClassList("hud-blip--ship", contact.Kind == 0); blip.EnableInClassList("hud-blip--station", contact.Kind == 1); blip.EnableInClassList("hud-blip--body", contact.Kind == 2); blip.EnableInClassList("hud-blip--poi", contact.Kind == 3); blip.EnableInClassList("hud-blip--wreck", contact.Kind == 4);
                 blip.EnableInClassList("hud-blip--beyond", beyond); blip.EnableInClassList("hud-blip--waypoint", (contact.Flags & 4) != 0);
             }
         }

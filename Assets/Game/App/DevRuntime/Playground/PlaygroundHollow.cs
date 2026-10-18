@@ -390,7 +390,13 @@ namespace Game.App.DevRuntime.Playground
             foreach (var l in Lights)
                 if (l.Kind != "lamp") (l.Position.y > RoofY ? glowRoof : glow).Glow(new Vector3(l.Position.x, l.Position.y, l.Position.z), l.Kind == "beacon" ? 4.5f : l.Kind == "flash" ? 3.5f : 2.4f, l.Kind == "lamp" ? LedWhite : l.Colour,
                     l.Kind == "beacon" ? 1 : l.Kind == "flash" ? 2 : 0, (l.Position.x + l.Position.z) * .001f);
-            foreach (var n in Neons) (n.Y > RoofY ? solidRoof : solid).Beam(new Vector3(n.A.x, n.Y, n.A.y), new Vector3(n.B.x, n.Y, n.B.y), 1.2f, .6f, n.Colour);
+            holograms.Plan();   // the wall strips along the routes are drawn as wayfinding guides, in their stations' colours
+            for (int i = 0; i < Neons.Length; i++)
+            {
+                if (holograms.Guided(i)) continue;
+                var n = Neons[i];
+                (n.Y > RoofY ? solidRoof : solid).Beam(new Vector3(n.A.x, n.Y, n.A.y), new Vector3(n.B.x, n.Y, n.B.y), 1.2f, .6f, n.Colour);
+            }
             foreach (var b in Beacons) glow.Glow(new Vector3(b.Position.x, 6, b.Position.y), 5, b.Colour, 1, (b.Position.x + b.Position.y) * .001f);
             // the flight camera turns with the ship, so a sign reads upright to a ship heading along its Yaw (its approach): text runs
             // to the ship's right, its lines toward the ship (owner: the text was floating, one read mirrored)

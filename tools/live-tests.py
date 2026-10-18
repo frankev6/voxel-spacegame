@@ -73,6 +73,18 @@ def run(root, mode, name_filter, category, output):
     exclusions = category.startswith('!')
     if category and name_filter and not exclusions:
         raise RuntimeError('The installed live test API supports one filter. Close the Editor for a combined name/category run.')
+    # An EditMode run cannot set up its scene while the Editor plays: it waited forever (a playtest had left Play on). Stop Play first.
+    if mode.casefold() == 'editmode':
+        editor = call('editor_status')
+        if isinstance(editor, dict) and editor.get('playMode') not in (None, 'stopped'):
+            call('editor_stop')
+            for _ in range(150):
+                editor = call('editor_status')
+                if isinstance(editor, dict) and editor.get('playMode') == 'stopped' and not editor.get('domainReloadInProgress'):
+                    break
+                time.sleep(.2)
+            else:
+                raise RuntimeError('The Editor did not leave Play mode; no tests dispatched.')
     status = call('test_status')
     if isinstance(status, dict) and status.get('status') == 'running':
         raise RuntimeError('Unity already has an active test request. No replacement request dispatched.')
@@ -93,6 +105,7 @@ def run(root, mode, name_filter, category, output):
     if receipt.get('Mode', '').casefold() != mode.casefold():
         raise RuntimeError('Test dispatch receipt mode does not match request.')
     deadline = time.monotonic() + 1800
+    checked = time.monotonic()
     while time.monotonic() < deadline:
         result = call('test_status')
         status = result.get('status')
@@ -100,6 +113,12 @@ def run(root, mode, name_filter, category, output):
             break
         if status in ('error', 'cancelled', 'no_tests'):
             raise RuntimeError(str(result))
+        if mode.casefold() == 'editmode' and time.monotonic() - checked > 10:
+            checked = time.monotonic()
+            editor = call('editor_status')
+            if isinstance(editor, dict) and editor.get('playMode') not in (None, 'stopped'):
+                call('cancel_tests')
+                raise RuntimeError('The Editor entered Play mode during an EditMode run, which cannot finish under it: cancelled. Stop Play and run again.')
         time.sleep(.2)
     else:
         # No server run ID exists: do not cancel a possibly replaced external request.

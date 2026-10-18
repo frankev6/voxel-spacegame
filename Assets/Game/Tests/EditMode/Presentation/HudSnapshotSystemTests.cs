@@ -128,6 +128,14 @@ namespace Game.Tests.EditMode.Presentation
             Tick(); Assert.AreEqual(2, Radar().Length); Assert.AreEqual(3, Radar()[1].Kind);
             var b = Radar()[0]; Assert.AreEqual(2000, math.length(b.OffsetXZ), .001f); Assert.AreEqual(2, b.Flags & 2);
         }
+        [Test] public void Radar_SceneryHidden_WrecksMarked()
+        {
+            // DEV-023: the Hollow's rock tiles are no contacts; a wreck is its own kind (4)
+            Player(); var rock = Contact(10); em.AddComponent<Game.Simulation.Spatial.SpatialScenery>(rock);
+            var wreck = Contact(20); em.AddComponent<Game.Voxel.Damage.Hulk>(wreck); Contact(30);
+            Tick(); var radar = Radar(); Assert.AreEqual(2, radar.Length);
+            Assert.AreEqual(20, radar[0].OffsetXZ.x); Assert.AreEqual(4, radar[0].Kind); Assert.AreEqual(0, radar[1].Kind);
+        }
         [Test] public void Radar_RefreshRate10Hz()
         {
             Player(); uint initial = Tick().RadarVersion; uint final = initial;

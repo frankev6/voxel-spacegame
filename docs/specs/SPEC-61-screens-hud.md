@@ -242,7 +242,7 @@ public struct HudAbilityState { public Game.Core.ContentHash Ability; public flo
 public struct HudRadarBlip : Unity.Entities.IBufferElementData
 {
     public Unity.Mathematics.float2 OffsetXZ;          // metres relative to the player ship, world axes
-    public byte Kind;                                  // 0 ship (grid root, Kind Ship/Hulk), 1 station (Kind Station), 2 celestial body (SPEC-31 StarSystemBody with SpatialBody), 3 interactable point (Interactable without a grid)
+    public byte Kind;                                  // 0 ship (grid root, Kind Ship), 1 station (Kind Station), 2 celestial body (SPEC-31 StarSystemBody with SpatialBody), 3 interactable point (Interactable without a grid), 4 wreck (a grid with Hulk); scenery (SpatialScenery) is no contact (DEV-023)
     public byte Relation;                              // 0 neutral, 1 ally, 2 enemy: FactionRelations.Get(player.Faction, other.Faction) (SPEC-21; 255 → Neutral)
     public byte Flags;                                 // 1 = targeted, 2 = beyond range (clamped to edge), 4 = route waypoint (next gate)
     public byte Pad;
