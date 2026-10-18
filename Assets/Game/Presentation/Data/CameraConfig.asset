@@ -72,3 +72,6 @@ MonoBehaviour:
   - Kind: 3
     Strength: 0.04
     RadiusMeters: 60
+  - Kind: 14
+    Strength: 0.12
+    RadiusMeters: 40

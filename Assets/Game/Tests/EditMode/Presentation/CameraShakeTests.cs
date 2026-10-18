@@ -35,14 +35,16 @@ namespace Game.Tests.EditMode.Presentation
 
             var config = AssetDatabase.LoadAssetAtPath<CameraConfig>("Assets/Game/Presentation/Data/CameraConfig.asset");
             Assert.NotNull(config);
-            Assert.AreEqual(5, config.ShakeRules.Length);
+            Assert.AreEqual(6, config.ShakeRules.Length);
             var expected = new[]
             {
                 new ShakeRule { Kind = FxKind.ExplosionSmall, Strength = .35f, RadiusMeters = 150 },
                 new ShakeRule { Kind = FxKind.ExplosionLarge, Strength = .6f, RadiusMeters = 400 },
                 new ShakeRule { Kind = FxKind.RamImpact, Strength = .2f, RadiusMeters = 120 },
                 new ShakeRule { Kind = FxKind.HitKinetic, Strength = .04f, RadiusMeters = 60 },
-                new ShakeRule { Kind = FxKind.HitEnergy, Strength = .04f, RadiusMeters = 60 }
+                new ShakeRule { Kind = FxKind.HitEnergy, Strength = .04f, RadiusMeters = 60 },
+                // HAZ-005: a hard shove on the player's own ship (Scale = |Δv|); 40 m keeps it to that ship.
+                new ShakeRule { Kind = FxKind.Impact, Strength = .12f, RadiusMeters = 40 }
             };
             CollectionAssert.AreEquivalent(expected, config.ShakeRules);
         }

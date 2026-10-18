@@ -32,18 +32,24 @@ namespace Game.Tests.PlayMode.Simulation.Weapons
             readonly FactionRelations factions;
             public EntityManager Em => Flight.Em;
             public EcsTestWorld World => Flight.Test;
-            public Fixture(bool exactAim = false)
+            static readonly Type[] CombatSystems =
             {
-                Flight = new FlightFixture(typeof(WeaponInitSystem), typeof(PowerRegistrationSystem),
-                    typeof(PowerInitSystem), typeof(WeaponPowerDemandSystem), typeof(ShieldPowerDemandSystem),
-                    typeof(PowerAllocationSystem), typeof(ShipStatsAggregateSystem), typeof(WeaponStatsSystem),
-                    typeof(WeaponAimSystem), typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem),
-                    typeof(BeamShotHandlerSystem), typeof(ProjectileStepSystem), typeof(BeamStepSystem),
-                    typeof(ExplosionSystem), typeof(ShieldSystem), typeof(SpatialHashBuildSystem),
-                    typeof(DamageStreamsSystem), typeof(ImpulseApplySystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
-                    typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(HulkTransitionSystem), typeof(StructuralDestroySystem),
-                    typeof(ChunkColliderCleanupSystem), typeof(SplitGraceContactSystem),
-                    typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem));
+                typeof(WeaponInitSystem), typeof(PowerRegistrationSystem),
+                typeof(PowerInitSystem), typeof(WeaponPowerDemandSystem), typeof(ShieldPowerDemandSystem),
+                typeof(PowerAllocationSystem), typeof(ShipStatsAggregateSystem), typeof(WeaponStatsSystem),
+                typeof(WeaponAimSystem), typeof(WeaponFireSystem), typeof(ProjectileShotHandlerSystem),
+                typeof(BeamShotHandlerSystem), typeof(ProjectileStepSystem), typeof(BeamStepSystem),
+                typeof(ExplosionSystem), typeof(ShieldSystem), typeof(SpatialHashBuildSystem),
+                typeof(DamageStreamsSystem), typeof(ImpulseApplySystem), typeof(ImpactEventSystem), typeof(DamageResolveSystem),
+                typeof(IntegritySystem), typeof(DebrisEmitSystem), typeof(SplitSystem), typeof(ShipDeathSystem), typeof(HulkTransitionSystem), typeof(StructuralDestroySystem),
+                typeof(ChunkColliderCleanupSystem), typeof(SplitGraceContactSystem),
+                typeof(FxEventQueueCreateSystem), typeof(SfxEventQueueCreateSystem)
+            };
+            /// <param name="extra">Further production systems for a scenario (HAZ-005 adds RecoilSystem).</param>
+            public Fixture(bool exactAim = false, params Type[] extra)
+            {
+                var systems = new System.Collections.Generic.List<Type>(CombatSystems); systems.AddRange(extra);
+                Flight = new FlightFixture(systems.ToArray());
                 using (var authored = WeaponContent.BuildBlob(Flight.Catalog))
                 using (var builder = new BlobBuilder(Allocator.Temp))
                 {
