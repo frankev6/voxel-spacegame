@@ -213,7 +213,11 @@ public enum MinePayload : byte { Blast = 0, Repulse = 1, Emp = 2, Gravity = 3, N
 // Game.Simulation.Mechanisms (new folder and namespace)
 public enum MoverPath : byte { Rotate = 0, Rail = 1, Drift = 2, Toggle = 3 }
 public struct Mover : IComponentData        // on kinematic roots only; writer of its PhysicsVelocity: MoverSystem
-{ public MoverPath Path; public float3 Origin; public float Rate; public float Speed; public uint StartTick; public byte Playing, Reverse; public ushort Group; }
+{ public MoverPath Path; public float3 Origin; public float Rate; public float Speed; public uint StartTick; public byte Playing, Reverse; public ushort Group;
+  public float Yaw; public float3 Velocity; public byte PingPong; }   // HAZ-013: Rotate/Drift start yaw, Drift velocity, Rail back-and-forth
+// MoverMath.Pose(mover, points, tick): Rotate = Origin at Yaw + Rate·t; Drift = Origin + Velocity·t at Yaw + Rate·t;
+// Rail = Speed·t along the points (a closed loop, or back and forth with PingPong; Reverse runs backwards);
+// Toggle = points[0] → points[1] over 1 / Rate s (Reverse travels back). A mover that is not playing holds its StartTick pose.
 [InternalBufferCapacity(0)] public struct MoverPoint : IBufferElementData { public float3 Pose; public float Yaw; }   // Rail and Toggle points
 public struct MechanismAction { public MechanismActionKind Kind; public ushort Group; public float Value; }        // record written by MechanismSystem
 public enum MechanismActionKind : byte { MoverPlay, MoverReverse, MoverSpeed, ZoneEnable, ZoneDisable, ZonePeriod, MinesArm, MinesDisarm,
@@ -560,8 +564,8 @@ Why the rows sit below the first targets:
   - Add the `EnergyGrantRequest` channel to SPEC-22's power streams, with no consumer yet.
 - **Files:** `Assets/Game/Simulation/Mechanisms/*.cs`; `Assets/Game/Data/Hazards/*.cs`; `Assets/Game/Data/Blocks/*`; `Assets/Game/Data/Definitions/Hazards/MechanismDefinition.cs`; `Assets/Game/Simulation/Power/*Streams*.cs`; `docs/01-architecture.md`.
 - **Acceptance criteria:**
-  - [ ] Compiles; existing tests pass.
-  - [ ] Enum appends keep every existing value.
+  - [x] Compiles; existing tests pass.
+  - [x] Enum appends keep every existing value.
 - **Tests:** `MechanismContractTests.EnumValues_Appended`, `.Modules_Registered`.
 
 ### HAZ-013 — Moving structures
@@ -574,11 +578,12 @@ Why the rows sit below the first targets:
   - Add a playground rotating arm and a door to try them.
 - **Files:** `Assets/Game/Simulation/Mechanisms/MoverSystem.cs`, `MoverMath.cs`; `Assets/Game/Galaxy/Systems/OriginRebaseSystem.cs`; tests.
 - **Acceptance criteria:**
-  - [ ] A rotating arm sweeps at its rate with no drift over 10 minutes.
-  - [ ] A ship in its path is batted aside and takes ram damage.
-  - [ ] A toggle door opens and closes in its duration.
-  - [ ] Two runs are identical.
+  - [x] A rotating arm sweeps at its rate with no drift over 10 minutes.
+  - [x] A ship in its path is batted aside and takes ram damage.
+  - [x] A toggle door opens and closes in its duration.
+  - [x] Two runs are identical.
 - **Tests:** `MoverTests.Rotate_TickExact`, `.Rail_PingPong`, `.Toggle_Duration`, `.BatsShip`, `.Deterministic`.
+- **Done (2026-10-17):** `MoverMath.Pose` is a pure function of path and tick; `MoverSystem` sets the kinematic velocity that lands each mover on it. Measured: yaw error under 1e-3 rad over 10 minutes; the starter fighter is batted to 23 m/s and loses 4 cells. A 1.9 t synthetic hull is shoved without ram damage, because each tick of a sweep is under the 20 kJ ram floor. Playground pad 17: sweeper arm and blast door.
 
 ### HAZ-014 — Mechanisms: switches and actions
 - **Milestone:** M4
@@ -627,10 +632,11 @@ Why the rows sit below the first targets:
 - **Do:** Implement `EngineWashSystem` (ADR-0119 decision 5): a cone behind each firing thruster, with strength from `MaxForce × Intensity`, never pushing its own ship. Heat damage is authority only.
 - **Files:** `Assets/Game/Simulation/Hazards/EngineWashSystem.cs`.
 - **Acceptance criteria:**
-  - [ ] A tailgating fighter 30 m behind a boosting ship is pushed back measurably.
-  - [ ] The owner ship feels nothing extra.
+  - [x] A tailgating fighter 30 m behind a boosting ship is pushed back measurably.
+  - [x] The owner ship feels nothing extra.
   - [ ] A dead engine section set to fire (by a mechanism) pushes across a straight.
 - **Tests:** `EngineWashTests.Tailgater_Pushed`, `.Owner_Unaffected`.
+- **Done except the mechanism criterion (2026-10-17):** reach `12 m × √(MaxForce × Intensity / 10 kN)` (Sprint M 37 m, Torch L 93 m), a 15° cone, a push of `0.3 × MaxForce × Intensity` falling off linearly to the reach, and heat inside the first 30 % (authority). A dead engine section fired by a mechanism waits for HAZ-014.
 
 ### HAZ-018 — Mine payloads and seekers
 - **Milestone:** M4

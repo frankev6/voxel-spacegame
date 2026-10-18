@@ -114,7 +114,12 @@ namespace Game.Editor.Content
         {
             string path = Meshes + mesh.name + ".asset";
             var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            if (existing != null) { EditorUtility.CopySerialized(mesh, existing); UnityEngine.Object.DestroyImmediate(mesh); EditorUtility.SetDirty(existing); return existing; }
+            if (existing != null)
+            {
+                // CopySerialized leaves a loaded mesh's GPU buffers as they were: re-upload, or open views keep the old shape.
+                EditorUtility.CopySerialized(mesh, existing); UnityEngine.Object.DestroyImmediate(mesh);
+                existing.MarkModified(); existing.UploadMeshData(false); EditorUtility.SetDirty(existing); return existing;
+            }
             AssetDatabase.CreateAsset(mesh, path); return mesh;
         }
 
@@ -122,9 +127,12 @@ namespace Game.Editor.Content
         sealed class Builder
         {
             readonly List<CombineInstance> parts = new();
+            // uv1.y tags a surface for PropInstanced (above any lightmap range, below the chunk flag 8): 2 = bare nozzle metal,
+            // 3 = a nozzle's inner face, which also glows with throttle. Plated parts carry 0.
+            public const float Plated = 0, Nozzle = 2, HotFace = 3;
             // Revolves a (radius, z) profile about the engine axis. Smooth parts share seam vertices; flat parts (8-sided
             // housings) give each face its own, so the faceting reads.
-            public void Lathe(float2 axis, IList<float2> profile, int segments, bool flat = false, float phase = 0, bool inside = false)
+            public void Lathe(float2 axis, IList<float2> profile, int segments, bool flat = false, float phase = 0, bool inside = false, float surface = Plated)
             {
                 var v = new List<Vector3>(); var t = new List<int>();
                 Vector3 P(float r, float z, int s) { float a = phase + 2 * math.PI * s / segments; return new Vector3(axis.x + r * math.cos(a), axis.y + r * math.sin(a), z); }
@@ -138,8 +146,14 @@ namespace Game.Editor.Content
                     }
                 var mesh = new Mesh(); mesh.SetVertices(v); mesh.SetTriangles(t, 0);
                 if (!flat) { mesh.Optimize(); Weld(mesh); }
-                mesh.RecalculateNormals();
+                mesh.RecalculateNormals(); Tag(mesh, surface);
                 parts.Add(new CombineInstance { mesh = mesh, transform = Matrix4x4.identity });
+            }
+            static void Tag(Mesh mesh, float surface)
+            {
+                var uv = new Vector2[mesh.vertexCount];
+                for (int i = 0; i < uv.Length; i++) uv[i] = new Vector2(0, surface);
+                mesh.uv2 = uv;
             }
             // Merges coincident vertices so RecalculateNormals smooths across a smooth part's quads.
             static void Weld(Mesh mesh)
@@ -153,11 +167,11 @@ namespace Game.Editor.Content
                 }
                 mesh.Clear(); mesh.SetVertices(outV); mesh.SetTriangles(t, 0);
             }
-            public void Box(Vector3 min, Vector3 max)
+            public void Box(Vector3 min, Vector3 max) => Box((min + max) * .5f, max - min, Quaternion.identity);
+            public void Box(Vector3 centre, Vector3 size, Quaternion rotation)
             {
-                var c = (min + max) * .5f; var e = (max - min) * .5f;
-                var cube = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
-                parts.Add(new CombineInstance { mesh = cube, transform = Matrix4x4.TRS(c, Quaternion.identity, e * 2) });
+                var cube = UnityEngine.Object.Instantiate(Resources.GetBuiltinResource<Mesh>("Cube.fbx")); Tag(cube, Plated);
+                parts.Add(new CombineInstance { mesh = cube, transform = Matrix4x4.TRS(centre, rotation, size) });
             }
             public Mesh Done(string name)
             {
@@ -179,45 +193,79 @@ namespace Game.Editor.Content
             {
                 // Vernier: an eight-sided collar with a short cone nozzle.
                 b.Lathe(axis, P(0, z0, .44f, z0, .44f, .05f, .3f, .12f, 0, .12f), 8, flat: true, phase: math.PI / 8);
-                b.Lathe(axis, P(.12f, .12f, .2f, .3f, .3f, .5f), 16);
-                b.Lathe(axis, P(.28f, .5f, .18f, .3f, .1f, .14f, 0, .14f), 16);   // reversed profile: faces the axis
+                b.Lathe(axis, P(.12f, .12f, .2f, .3f, .3f, .5f, .28f, .5f), 16, surface: Builder.Nozzle);
+                b.Lathe(axis, P(.28f, .5f, .18f, .3f, .1f, .14f, 0, .14f), 16, surface: Builder.HotFace);   // reversed profile: faces the axis
                 return b.Done(name);
             }
             if (e.Boost >= 2f)
             {
                 // Sprint (Vestari, high tech): a smooth slim body, two collar rings, a long narrow bell.
                 float throat = z0 + L * .62f;
-                b.Lathe(axis, P(0, z0, half * .62f, z0, half * .86f, z0 + .25f, half * .86f, throat - .3f, half * .56f, throat), 20);
+                b.Lathe(axis, P(0, z0, half * .62f, z0, half * .86f, z0 + .25f, half * .86f, throat - .3f, half * .56f, throat, 0, throat), 20);   // closed: no see-through seam at the bell
                 foreach (float f in new[] { .18f, .42f })
                 {
                     float zc = z0 + L * f;
                     b.Lathe(axis, P(half * .86f, zc - .08f, half * .97f, zc - .05f, half * .97f, zc + .05f, half * .86f, zc + .08f), 20);
                 }
-                b.Lathe(axis, P(half * .5f, throat, half * .58f, throat + (z1 - throat) * .5f, half * .9f, z1), 24);
-                b.Lathe(axis, P(half * .84f, z1, half * .52f, throat + (z1 - throat) * .5f, half * .42f, throat + .05f, 0, throat + .05f), 24);   // reversed profile: faces the axis
+                b.Lathe(axis, P(half * .56f, throat, half * .6f, throat + (z1 - throat) * .5f, half * .9f, z1, half * .84f, z1), 24, surface: Builder.Nozzle);   // the lip closes onto the inner face
+                b.Lathe(axis, P(half * .84f, z1, half * .54f, throat + (z1 - throat) * .5f, half * .5f, throat + .02f, 0, throat + .02f), 24, surface: Builder.HotFace);   // reversed profile: faces the axis
                 return b.Done(name);
             }
             {
                 // Torch (Khuchad, heavy): an eight-sided armoured housing, a ribbed combustion chamber, struts and a wide bell.
-                float chamber = z0 + L * .45f, throat = z0 + L * .62f;
-                b.Lathe(axis, P(0, z0, half * .9f, z0, half, z0 + .2f, half, chamber - .15f, half * .8f, chamber), 8, flat: true, phase: math.PI / 8);
-                b.Lathe(axis, P(half * .62f, chamber, half * .62f, throat, half * .4f, throat + .1f), 16);
-                for (int r = 0; r < 3; r++)
+                // The capital torch (XL) is its own design: a longer housing finned with radiators, six chamber ribs and
+                // eight struts, and a banded bell.
+                bool capital = e.Width >= 5;
+                float chamber = z0 + L * (capital ? .4f : .45f), throat = z0 + L * .62f, d = z1 - throat;
+                b.Lathe(axis, P(0, z0, half * .9f, z0, half, z0 + .2f, half, chamber - .15f, half * .8f, chamber, 0, chamber), 8, flat: true, phase: math.PI / 8);
+                b.Lathe(axis, P(half * .62f, chamber, half * .62f, throat, half * .4f, throat + .1f, 0, throat + .1f), 16, surface: Builder.Nozzle);
+                int ribs = capital ? 6 : 3;
+                for (int r = 0; r < ribs; r++)
                 {
-                    float zc = chamber + (throat - chamber) * (r + .5f) / 3;
-                    b.Lathe(axis, P(half * .62f, zc - .06f, half * .74f, zc - .03f, half * .74f, zc + .03f, half * .62f, zc + .06f), 16);
+                    float zc = chamber + (throat - chamber) * (r + .5f) / ribs, rib = capital && r % 3 == 1 ? .82f : .74f;
+                    b.Lathe(axis, P(half * .62f, zc - .06f, half * rib, zc - .03f, half * rib, zc + .03f, half * .62f, zc + .06f), 16);
                 }
-                for (int s = 0; s < 4; s++)
+                int struts = capital ? 8 : 4;
+                for (int s = 0; s < struts; s++)
                 {
-                    float a = math.PI / 4 + s * math.PI / 2, r = half * .78f;
+                    float a = math.PI / 4 + s * 2 * math.PI / struts, r = half * .78f;
                     var c = new Vector3(axis.x + r * math.cos(a), axis.y + r * math.sin(a), (chamber + throat) * .5f + .1f);
-                    float t = .08f * w;
+                    float t = (capital ? .05f : .08f) * w;
                     b.Box(c - new Vector3(t, t, (throat - chamber) * .55f), c + new Vector3(t, t, (throat - chamber) * .55f));
                 }
-                b.Lathe(axis, P(half * .4f, throat + .1f, half * .5f, throat + (z1 - throat) * .4f, half * .76f, throat + (z1 - throat) * .8f, half * .98f, z1), 24);
-                b.Lathe(axis, P(half * .92f, z1, half * .7f, throat + (z1 - throat) * .8f, half * .44f, throat + (z1 - throat) * .4f, half * .3f, throat + .2f, 0, throat + .2f), 24);   // reversed profile: faces the axis
+                if (capital)
+                {
+                    // Radiator fins on the four diagonal faces of the housing, three per face, inside the square footprint.
+                    for (int s = 0; s < 4; s++)
+                    {
+                        float a = math.PI / 4 + s * math.PI / 2;
+                        var radial = new Vector3(math.cos(a), math.sin(a), 0); var across = new Vector3(-radial.y, radial.x, 0);
+                        var rotation = Quaternion.Euler(0, 0, math.degrees(a));
+                        for (int f = -1; f <= 1; f++)
+                        {
+                            var c = new Vector3(axis.x, axis.y, (z0 + .2f + chamber - .15f) * .5f) + radial * half * 1.0f + across * f * half * .16f;
+                            b.Box(c, new Vector3(half * .24f, .05f * w, chamber - z0 - .7f), rotation);
+                        }
+                    }
+                }
+                var bell = P(half * .4f, throat + .1f, half * .5f, throat + d * .4f, half * .76f, throat + d * .8f, half * .98f, z1, half * .92f, z1);   // the lip closes onto the inner face
+                b.Lathe(axis, bell, 24, surface: Builder.Nozzle);
+                b.Lathe(axis, P(half * .92f, z1, half * .7f, throat + d * .8f, half * .44f, throat + d * .4f, half * .3f, throat + .2f, 0, throat + .2f), 24, surface: Builder.HotFace);   // reversed profile: faces the axis
+                if (capital)
+                    foreach (float f in new[] { .45f, .78f })
+                    {
+                        // Stiffening bands round the bell.
+                        float zb = throat + d * f, rb = BellRadius(bell, zb) + .04f * w;
+                        b.Lathe(axis, P(rb - .05f * w, zb - .12f, rb, zb - .08f, rb, zb + .08f, rb - .05f * w, zb + .12f), 24);
+                    }
                 return b.Done(name);
             }
+        }
+        static float BellRadius(List<float2> profile, float z)
+        {
+            for (int i = 0; i + 1 < profile.Count; i++)
+                if (z <= profile[i + 1].y) return math.lerp(profile[i].x, profile[i + 1].x, math.unlerp(profile[i].y, profile[i + 1].y, z));
+            return profile[^1].x;
         }
     }
 }

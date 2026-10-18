@@ -328,6 +328,11 @@ These types cross module boundaries. **Their names and owning module are binding
 | `WorldZone` + buffers `ZoneEffect`, `ZonePathPoint` | analytic planar zone: shape, pose, `PersistentId`, group; effects `Accelerate`, `Drag`, `Repel`, `Gate`, `Bounds` (enums in `Game.Data.Hazards`) | SPEC-91, ADR-0118. Spawned only through `HazardSpawn` |
 | `ZoneContacts` | singleton: this tick's gate and bounds contacts | Read by authority deciders (race progress) |
 | `MineState`, `MineAnchor` | on mine device roots: phase and phase tick; optional capped anchor spring | SPEC-91 |
+| `ZoneSchedule` | on any zone: period, on ticks, phase, enabled | SPEC-91 §4.6, ADR-0119: zones switch on and off; `ZoneEffectKind` gains `Attract` and `Pulse` |
+| `Mover` + buffer `MoverPoint` (`Game.Simulation.Mechanisms`) | moving structure on a kinematic root: `Rotate`, `Rail`, `Drift`, `Toggle`, tick-exact from `StartTick` | SPEC-91 §4.6, ADR-0119 |
+| `MechanismAction` | record `{Kind, Group, Value}` written by `MechanismSystem`, applied by the owner of the state it changes | ADR-0119 decision 2. Authoring: `MechanismDefinition` (`mechanism_`) |
+| `PortalLink`, `PortalTransit`, `TargetOverride` | lane-gate portal ends and transits; turret group target policy | SPEC-91 §4.6, ADR-0119 |
+| `EnergyGrantRequest` | SPEC-22 power stream in `StatusChannels.EnergyGrants`: `{Ship, Energy, Producer, Sequence}` | ADR-0119 decision 7 (energy canisters, block module `Pickup`); `Switch` module for shootable switches |
 | `FlightState.Carry`, `CarryYaw` | ship-local carried velocity added to assist targets | SPEC-20 decision 15 (HAZ-002), ADR-0118 |
 
 ### 6.5 Galaxy (`Game.Galaxy`, specs SPEC-30 … SPEC-33)
@@ -400,7 +405,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `ChunkContactState.Armed` | `SplitGraceContactSystem`; SplitSystem initializes/reset on pooled chunk creation/reuse (ADR-0063) | Read |
 | `PhysicsMass` | `GridMassUpdateSystem` | — |
 | `VoxelGrid.Kind` | `GridSpawnSystem` (initial), `ShipDeathSystem` (Ship → Hulk) | Read |
-| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only: collisions, damage knockback and the `ImpulseRequest` channel, ADR-0016; **every new mechanic that pushes bodies posts to that channel**) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridSpawnBodyInitSystem`, `GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
+| `PhysicsVelocity` | Unity Physics + `PropulsionSystem` (impulses only) + `ImpactEventSystem` (impulses only: collisions, damage knockback and the `ImpulseRequest` channel, ADR-0016; **every new mechanic that pushes bodies posts to that channel**) + `PlanarConstraintSystem` (vertical impulses only) + `GridMassUpdateSystem` (exact re-expression about the new centre of mass only) + `OriginRebaseSystem` (placement re-expression only: rotates the player's linear velocity by the placement yaw change) + `MoverSystem` (kinematic movers only: the velocity that lands them on their path pose, ADR-0119). **Nobody else assigns velocity.** Creating `PhysicsCollider`/`PhysicsMass`/`PhysicsVelocity` on a new body (`GridSpawnBodyInitSystem`, `GridBodyInitSystem`, `SplitSystem` through `GridBodyFactory`), and re-enabling a stowed grid with its pose and velocities (`GridStowApi.Unstow`, ADR-0015), is initialisation, not a write | Read |
 | `ShipCommand` (player ship) | `PlayerCommandApplySystem` | Read |
 | `ShipCommand` (AI ship) | `AiSteeringSystem` | Read |
 | `PlayerControlLock` | `TravelService` | Read by `PlayerCommandApplySystem` |
@@ -411,6 +416,11 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `FlightState.Carry`, `CarryYaw` | `PropulsionSystem` | Read |
 | `ZoneContacts`, `ZoneTracking` | `ZoneSystem` (SPEC-91) | Read by deciders |
 | `MineState` | `MineSystem` (authority, SPEC-91) | Read; replicated to guests |
+| `Mover`, mover `PhysicsVelocity` (kinematic roots only) | `MoverSystem` (SPEC-91 §4.6, ADR-0119) | Mechanism actions request changes; `OriginRebaseSystem` shifts `Origin` and points |
+| `ZoneSchedule` | `ZoneSystem` (the clock and zone actions) | Read |
+| `MechanismAction` records | `MechanismSystem` (authority, ADR-0119) | Each action's owner applies it: `MoverSystem`, `ZoneSystem`, `MineSystem`, AI targeting, the portal applier |
+| `TargetOverride` | AI targeting, from `TargetPolicy` actions | Read by turret targeting |
+| Ship energy from `EnergyGrantRequest` | `StatusChannels.EnergyGrants` consumer (none until HAZ-019; `StatusSystem` discards) | Post requests |
 | `ShipStatModifier`, `Inhibited` | `StatusSystem` (SPEC-22) from the `StatModifierRequest` / `InhibitRequest` channels (ADR-0016) | Post requests |
 | `PropulsionStats` / `WeaponStats` | `PropulsionStatsSystem` (SPEC-20) / `WeaponStatsSystem` (SPEC-21) | Read |
 | `PowerRequest` element of module m | The feature that owns m (`Draw`/`Priority` at init, `Requesting` in `PowerDemandGroup`); `ConsumerIndex`: `PowerInitSystem` | Read by `PowerAllocationSystem` |

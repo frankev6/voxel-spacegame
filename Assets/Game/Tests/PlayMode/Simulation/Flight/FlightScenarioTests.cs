@@ -108,12 +108,13 @@ namespace Game.Tests.PlayMode.Simulation.Flight
                 var source = Build(aftThrusters, cellSize);
                 return SpawnSource(source, position, velocity, profile);
             }
-            public Entity SpawnSource(VoxelStructure source, float3 position = default, float3 velocity = default, GridProfile profile = GridProfile.Dummy)
+            public Entity SpawnSource(VoxelStructure source, float3 position = default, float3 velocity = default, GridProfile profile = GridProfile.Dummy,
+                GridMotion motion = GridMotion.Dynamic)
             {
                 sources.Add(source);
                 return GridSpawnApi.RequestSpawn(Em, registry, registry.Register(source), new GridSpawnParams
                 {
-                    Pose = new RigidTransform(quaternion.identity, position), Motion = GridMotion.Dynamic,
+                    Pose = new RigidTransform(quaternion.identity, position), Motion = motion,
                     Flags = GridSpawnFlags.NoRender | GridSpawnFlags.Transient, Profile = profile, LinearVelocity = velocity
                 });
             }

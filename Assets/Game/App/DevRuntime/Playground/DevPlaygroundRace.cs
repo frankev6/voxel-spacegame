@@ -38,8 +38,8 @@ namespace Game.App.DevRuntime.Playground
         readonly Dictionary<byte, ContentHash> blueprints = new();   // each racer's ship, for respawns
         // RACE-017: AI racers take the grid slots no pilot fills. Their race slots start here, clear of co-op pilot slots.
         internal const byte AiSlotBase = 16;
-        static readonly string[] AiShips = { "ship_racer_needle", "ship_racer_kite", "ship_racer_gimbal", "ship_racer_hammerhead", "ship_racer_battering_ram" };
-        static readonly string[] AiNames = { "VEGA", "ORION", "LYRA", "CASSIA", "RIGEL", "NOVA", "ATLAS", "SIRIUS" };
+        [StaticStateOk("constant roster, never written")] static readonly string[] AiShips = { "ship_racer_needle", "ship_racer_kite", "ship_racer_gimbal", "ship_racer_hammerhead", "ship_racer_battering_ram" };
+        [StaticStateOk("constant roster, never written")] static readonly string[] AiNames = { "VEGA", "ORION", "LYRA", "CASSIA", "RIGEL", "NOVA", "ATLAS", "SIRIUS" };
         readonly Dictionary<byte, string> aiNames = new();
         bool autopilot;
         System.IO.StreamWriter trace; string tracePath; long tracedTick = -100;

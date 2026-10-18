@@ -177,6 +177,14 @@ Shader "Game/Voxel/PropInstanced"
                 s.normalTS=normalize(half3(s.normalTS.xy*.3h+pl.normalTS.xy,s.normalTS.z*pl.normalTS.z));
                 glowSlot=pl.glow;
             }
+            // ADR-0120 engine meshes tag their nozzles in uv1.y (2 bare metal, 3 the inner face): heat-dark metal with no
+            // plating or grille lights, the inner face warming with throttle.
+            half nozzle=v.blink.y>1.5&&v.blink.y<4.5 ? 1 : 0, hotFace=v.blink.y>2.5&&v.blink.y<4.5 ? 1 : 0;
+            if(nozzle>0)
+            {
+                s.albedo=lerp(half3(.11,.105,.1),half3(.05,.045,.042),hotFace); s.metallic=.9h; s.smoothness=lerp(.62h,.4h,hotFace);
+                glowSlot=0;
+            }
             half chunk=v.blink.y>4 ? 1 : 0;
             if(chunk>0)
             {
@@ -194,6 +202,7 @@ Shader "Game/Voxel/PropInstanced"
             s.emission=Brick_TeamAccent().rgb*mask.a*(1-chunk)*_EmissiveIntensity*powered*blink*(1+Brick_Throttle());
             s.emission+=LOAD_TEXTURE2D(_BrickLayerParams,int2(layer,0)).rgb*glowSlot*_EmissiveIntensity*powered*(.6+Brick_Throttle());
             s.emission+=xenoGlow*_EmissiveIntensity*(1+Brick_Throttle());
+            s.emission+=half3(1,.32,.08)*hotFace*Brick_Throttle()*Brick_Powered()*.6h;
             half fade=_EmberFadeSeconds>0 ? saturate(1-(_Time.y-Brick_LastHitTime())/_EmberFadeSeconds) : 0;
             s.emission+=_EmberColor.rgb*_EmberIntensity*(fade*crack*(stage==3 ? 1 : .35)+dissolve);
             float3 n=normalize(s.normalTS.x*v.tangentWS+s.normalTS.y*v.bitangentWS+s.normalTS.z*v.normalWS);
