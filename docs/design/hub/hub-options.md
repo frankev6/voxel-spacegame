@@ -106,24 +106,24 @@ You agreed all ten. Applied in the block-out: the city's mass hangs below the fl
 |---|---|
 | ![E arrival](img/hub_arrival_e.jpg) | ![E cutaway](img/hub_cutaway_e.jpg) |
 
-The Khuchad Clan's haven, cut into a two-lobed asteroid 1.7 km long: about a third of Meridian's width and a few dozen ships rather than hundreds. Raiders are hostile everywhere else (SPEC-33 locks their relation); here they are only customers, and what they take is fenced, chopped and sold.
+> On the first version: "no need for the sun you have at the center, its just an asteroid, doesn't have a core like that. also you borrowed too much of the design things we talked about for #4 into here which i didn't ask for, also whats the with the rotating thing at the top and also all the holes at the top of the asteroid? why would the bazaar be open to the top?"
 
-- **The approach.** No picket. You spawn outside and follow a channel of red lamps through a maze of boulders and mine belts. Captured prizes hang chained outside the rock, a warning and an advertisement.
-- **The Maw.** The one front door: a gun-lined throat, a field gate across it, the Clan's scan, a cluster of neon over it.
-- **The Ring.** The highway inside the rock, at the flight plane, two ways round both lobes, lit along both walls. Spurs lead off it to the caverns; the Smugglers' Run leaves out the back to a lane gate nobody admits to, and a vent runs out the north.
-- **The Black Bazaar.** An old crater open to space, its walls terraced with stalls at the flight plane: stolen blocks, unregistered weapons, salvage with the serials ground off. Stolen cargo is stacked on the crater floor. The **Quartermaster**'s console is the one reset.
-- **The Chop Shop.** A cavern where stolen ships are stripped under gantries, and the refit cradle where you edit your own ship, no questions.
-- **The Fence.** Brokers for anything taken off someone else's ship, their haulers alongside.
-- **The Drop.** A pit in the rock where crews settle things, ledges of spectators round it.
-- **The Furnace.** The haven's reactor, in a shaft through the rock's waist open to space. Its pulse sweeps the tunnels beside it; the bulkheads are the shelter.
-- **The Den.** A warship rammed into the rock long ago. Its hangar is the Clan's own.
-- **The Outer Works.** The station has grown over the rock: docking spars with the Clan's and its customers' ships, habitat blocks bolted to the cliffs with their neon, a hab ring on the high ground, radiators, masts and the ore mass driver.
+The Khuchad Clan's haven, built into a two-lobed asteroid 1.7 km long: about a third of Meridian's width, and about forty ships rather than hundreds. Raiders are hostile everywhere else (SPEC-33 locks their relation); here they are only customers, and what they take is sold in the black market. After your review it is a plain rock: no core, no pits or open craters, no spinning ring, and nothing carried over from Meridian. Every space inside is enclosed, lit by working lamps rather than neon.
+
+- **The approach.** An ordinary rock field round the asteroid, a few navigation beacons on the way in.
+- **The Maw.** The front door: two gun emplacements on its lip and docking lights down its throat.
+- **The Ring.** The highway inside the rock, at the flight plane, two ways round both lobes, a sodium strip along its walls. Side tunnels lead off it, lamps at intervals; a back door leaves out the east.
+- **The Market.** The black market, in the rock's largest cavern: stalls on ledges round its wall, stolen cargo stacked on the floor, traders moored at the stalls. The **Quartermaster**'s console is the one reset.
+- **The dens.** Single dealers in small caverns off the tunnels: a gunsmith, a parts broker (blocks and engines), a salvage broker and a smuggler, each with their stock round the wall and their ship moored inside.
+- **The Docks.** The pirates' berths inside the rock, crews' ships along the cavern wall.
+- **The Den.** A warship rammed into the rock long ago; its hangar is the Clan's own.
+- **Outside.** The station is built onto and round the rock: docking spars with ships moored, modules bolted to the cliffs, scaffolding over the flanks, a girder belt round its waist, radiators, masts and an ore mass driver.
 
 ![E at play zoom](img/hub_play_sheet_e.jpg)
 
-Left to right, top to bottom: the arrival, the Maw, the cutaway, the Black Bazaar, the Ring by the Bazaar, the Chop Shop, the Maw at play zoom, the Den, the Furnace.
+Left to right, top to bottom: the arrival, the Maw, the cutaway, the Market, the Ring by the Market, the Docks, the Maw at play zoom, the Den, the dens.
 
-**How it is built.** The rock is voxels: a grid of 12 m columns, each one or two solid spans; a tunnel or cavern is the gap between them, cut at the flight plane (about 7,900 columns). Because the camera looks down, the rock above the flight plane hides round the player inside the rock and near its cliffs (the cutaway render shows what you see), so the tunnels fly like streets. It needs the cutaway as new camera work; everything else (traffic, the reactor pulse, mines, the lane gate, the refit cradle) exists.
+**How it is built.** The rock is voxels: a grid of 12 m columns, each one or two solid spans; a tunnel or cavern is the gap between them, cut at the flight plane (about 7,900 columns). Because the camera looks down, the rock above the flight plane hides round the player inside the rock and near its cliffs (the cutaway render shows what you see), so the tunnels fly like streets. It needs the cutaway as new camera work; the traffic, merchants and docking already exist.
 
 ## The first three options
 
