@@ -18,8 +18,32 @@ namespace Game.Editor.Content
                     Flags = ZoneEffectFlags.AffectsShips | ZoneEffectFlags.AffectsDevices | ZoneEffectFlags.AffectsDebris });
             Switch();
             BlastDoorMechanism();
+            // HAZ-018 (ADR-0119 decision 6): the mine family on the proximity mine's body. Payload values: MinePayload.
+            // Gravity: GM 18 000 pulls 80 m/s² at its 15 m softening radius, 20 m/s² at 30 m and 1.3 m/s² at its 120 m edge.
+            Mine("mine_repulsor", true, ("Payload", 1), ("PayloadStrength", 1200000), ("BlastRadius", 32), ("BlastDamage", 0), ("BlastImpulse", 0));
+            Mine("mine_emp", true, ("Payload", 2), ("PayloadSeconds", 3), ("BlastRadius", 30), ("BlastDamage", 0), ("BlastImpulse", 0));
+            Mine("mine_seeker", false, ("SeekSpeed", 22), ("TriggerRadius", 8), ("BlastDamage", 1800), ("BlastRadius", 22), ("BlastImpulse", 600000));
+            Mine("mine_gravity", true, ("Payload", 3), ("PayloadStrength", 18000), ("PayloadSeconds", 6), ("BlastRadius", 120), ("BlastDamage", 0), ("BlastImpulse", 0));
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built the hazard content (ADR-0119).");
+        }
+
+        /// <summary>A copy of mine_proximity with the given fuse fields changed (field name, value; enums by index).</summary>
+        static void Mine(string id, bool anchored, params (string field, float value)[] changes)
+        {
+            const string Hazards = "Assets/Game/Content/Hazards/";
+            string path = Hazards + id + ".asset";
+            if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset(Hazards + "mine_proximity.asset", path))
+                throw new System.InvalidOperationException("copy mine_proximity");
+            var asset = AssetDatabase.LoadMainAssetAtPath(path); var so = new SerializedObject(asset);
+            so.FindProperty("id").stringValue = id; so.FindProperty("anchored").boolValue = anchored;
+            var fuse = so.FindProperty("fuse");
+            foreach (var (field, value) in changes)
+            {
+                var prop = fuse.FindPropertyRelative(field);
+                if (prop.propertyType == SerializedPropertyType.Enum) prop.enumValueIndex = (int)value; else prop.floatValue = value;
+            }
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(asset);
         }
 
         /// <summary>HAZ-014: shooting a switch of the group slams its door (a Toggle mover of the group) shut; 5 s later it reopens.</summary>

@@ -40,12 +40,12 @@ MonoBehaviour:
   propMesh: {fileID: 8210001044619210013, guid: 63a3bcd06c5b4114096dfe9e982274e0, type: 3}
   blockCategory: 7
   modules:
-  - rid: 6548929156867162235
+  - rid: 6548929156867162237
   grantedAbilities: []
   references:
     version: 2
     RefIds:
-    - rid: 6548929156867162235
+    - rid: 6548929156867162237
       type: {class: SwitchModule, ns: Game.Data.Blocks, asm: Game.Data}
       data:
         Params:

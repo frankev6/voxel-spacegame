@@ -663,10 +663,17 @@ Why the rows sit below the first targets:
   - Add three mine contents: `mine_repulsor`, `mine_emp` and `mine_seeker`.
 - **Files:** `Assets/Game/Simulation/Hazards/MineSystem.cs`; `Assets/Game/Content/Hazards/*`.
 - **Acceptance criteria:**
-  - [ ] A repulsor shoves without damage.
-  - [ ] An EMP stops thrust for its seconds while carry keeps the ship drifting.
-  - [ ] A seeker reaches a slow ship and not a fast one.
+  - [x] A repulsor shoves without damage.
+  - [x] An EMP stops thrust for its seconds while carry keeps the ship drifting.
+  - [x] A seeker reaches a slow ship and not a fast one.
 - **Tests:** `MinePayloadTests.Repulse_NoDamage`, `.Emp_InhibitsThrusters`, `.Gravity_TemporaryWell`, `.Seeker_ChasesSlowShip`.
+- **Done (2026-10-17):** every payload except None shows as a blast. Only Blast deals damage.
+  - **Repulse:** throws directly, `PayloadStrength × (1 − d/r)²` to each body's centre of mass. A blast without damage carries no push.
+  - **Emp:** inhibits every thruster of each ship in reach for `PayloadSeconds`.
+  - **Gravity:** leaves an `Attract` zone (`MineWell`, softened inside 15 m) for `PayloadSeconds`.
+  - **Seeker:** an armed seeker drifts toward the nearest ship within 8 trigger radii, at most `SeekSpeed`.
+  - Content: `mine_repulsor` (1.2 MN·s over 32 m), `mine_emp` (3 s over 30 m), `mine_seeker` (22 m/s, unanchored) and `mine_gravity` (GM 18 000 over 120 m for 6 s).
+  - `MinePayloadTests` 4/4.
 
 ### HAZ-019 — Energy canisters
 - **Milestone:** M4
