@@ -45,6 +45,9 @@ DISTRICT_COL = {
     "harbour": (255, 226, 176), "exchange": (91, 227, 161), "yards": (242, 183, 5), "range": (255, 85, 48),
     "pit": (255, 122, 47), "institute": (159, 216, 255), "breakers": (255, 179, 71), "foundry": (255, 106, 42),
     "circuit": (124, 255, 154), "old_town": (190, 186, 172), "gate": (255, 241, 214), "relic": (255, 200, 107),
+    # option E, the Hollow
+    "maw": (255, 85, 48), "bazaar": (255, 46, 136), "chop": (34, 230, 255), "fence": (255, 176, 0), "drop": (255, 122, 47),
+    "furnace": (255, 138, 42), "den": (255, 85, 48), "outer": (190, 186, 172), "run": (157, 255, 60),
 }
 
 
@@ -1023,6 +1026,7 @@ LANE_STYLE = {
     "boulevard": ((159, 224, 200), 3), "avenue_in": ((124, 255, 154), 2), "avenue_out": ((255, 179, 71), 2),
     "district": ((159, 224, 200), 2), "launch": ((242, 183, 5), 3), "gate_in": ((255, 200, 107), 4), "gate_out": ((255, 200, 107), 3),
     "current": ((120, 220, 255), 5), "drain": ((255, 106, 42), 3), "slingshot": ((124, 255, 154), 3), "street": ((255, 226, 176), 1),
+    "tunnel": ((255, 179, 71), 3),
 }
 
 
@@ -1123,6 +1127,9 @@ def draw_fx(v, fx, fonts):
     elif t == "conduit":
         for w_, al in ((14, 30), (6, 90), (2, 255)):
             v.line(fx["pts"], (159, 216, 255, al), v.px(w_))
+    elif t == "boulder":
+        v.circle(fx["c"], fx["r"], fill=(84, 78, 70, 255), outline=(120, 112, 100, 255), width=v.px(1))
+        v.circle((fx["c"][0] - fx["r"] * 0.3, fx["c"][1] + fx["r"] * 0.3), fx["r"] * 0.4, fill=(255, 255, 255, 18))
     elif t == "neon":
         a = polar(fx["heading"], -fx["length"] / 2, fx["c"]); b = polar(fx["heading"], fx["length"] / 2, fx["c"])
         col = tuple(int(fx["col"][i:i + 2], 16) for i in (1, 3, 5))
@@ -1160,6 +1167,23 @@ UNDER_FX = ("moon", "reactor", "minefield", "slow_field", "debris", "arena", "en
             "flare_shadow", "conduit")
 
 
+def draw_rock(v, rock):
+    """Option E's asteroid in x-ray: solid rock shaded by its height, tunnels and caverns cut through it lit from inside."""
+    h = rock["cell"] / 2 + 0.6
+    for x, y, spans, kind in rock["cols"]:
+        top = spans[-1][1]
+        if kind == "rock":
+            k = max(0.0, min(1.0, top / 320))
+            col = (int(52 + 60 * k), int(48 + 52 * k), int(44 + 44 * k), 255)
+        elif kind == "tunnel":
+            col = (40, 30, 24, 255)
+        elif kind == "cavern":
+            col = (56, 40, 34, 255)
+        else:
+            col = (64, 50, 42, 255)
+        v.poly([(x - h, y - h), (x + h, y - h), (x + h, y + h), (x - h, y + h)], fill=col)
+
+
 def draw_option(opt):
     img = Image.new("RGB", (W * SS, H * SS), BG)
     starfield(img, (0, 0, (W - PANEL_W) * SS, H * SS), opt["seed"], 0.8)
@@ -1169,7 +1193,7 @@ def draw_option(opt):
     f_lab, f_small, f_holo = font(F_TITLE, 15), font(F_BOLD, 12), font(F_TITLE, 22)
     rng = random.Random(opt["seed"])
     # district tint, under everything
-    for dd in opt["districts"]:
+    for dd in ([] if opt.get("rock") else opt["districts"]):
         col = DISTRICT_COL.get(dd["key"], (200, 200, 200))
         v.circle(dd["centre"], 380 if dd["key"] not in ("harbour", "gate", "old_town") else 0, fill=col + (10,))
     # lower levels: a dim glow below the city (it goes on down past the plane)
@@ -1185,6 +1209,8 @@ def draw_option(opt):
     for fx in opt["fx"]:
         if fx["type"] in UNDER_FX:
             draw_fx(v, fx, None)
+    if opt.get("rock"):
+        draw_rock(v, opt["rock"])
     for ln in opt["lanes"]:
         draw_lane(v, ln)
     for b in sorted(opt["buildings"], key=lambda b: b["h"]):
@@ -1278,7 +1304,8 @@ def draw_option(opt):
 
 def main():
     import hub_option_d
-    opts = [option_a(), option_b(), option_c(), hub_option_d.option_d()]
+    import hub_option_e
+    opts = [option_a(), option_b(), option_c(), hub_option_d.option_d(), hub_option_e.option_e()]
     for o in opts:
         print(draw_option(o), len(o["buildings"]), "buildings", len(o["ships"]), "ships")
     os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)

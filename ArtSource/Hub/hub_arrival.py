@@ -26,13 +26,14 @@ LIVERY = {"tlax": ("#1F7A4D", "#5BE3A1"), "vest": ("#E4E9EE", "#9FD8FF"), "khu":
           "civ": ("#A6A6A0", "#FFE2B0")}
 CLASSES = {"shuttle": (14, 6), "courier": (22, 8), "wraith": (28, 12), "tug": (32, 14), "cruiser": (52, 24),
            "hauler": (64, 20), "freighter": (140, 34), "barge": (190, 52), "liner": (240, 46)}
-DISTRICT = {"harbour": "#FFE2B0", "exchange": "#5BE3A1", "yards": "#F2B705", "range": "#FF5530", "pit": "#FF7A2F",
+DISTRICT = {"maw": "#FF5530", "bazaar": "#FF2E88", "chop": "#22E6FF", "fence": "#FFB000", "drop": "#FF7A2F",
+            "furnace": "#FF8A2A", "den": "#FF5530", "outer": "#BEBAAC", "run": "#9DFF3C", "harbour": "#FFE2B0", "exchange": "#5BE3A1", "yards": "#F2B705", "range": "#FF5530", "pit": "#FF7A2F",
             "institute": "#9FD8FF", "breakers": "#FFB347", "foundry": "#FF6A2A", "circuit": "#7CFF9A", "old_town": "#BEBAAC",
             "gate": "#FFF1D6", "relic": "#FFC86B"}
 LANE = {"approach_in": "#7CFF9A", "approach_out": "#FFB347", "harbour": "#FFE2B0", "boulevard": "#9FE0C8",
         "avenue_in": "#7CFF9A", "avenue_out": "#FFB347", "district": "#9FE0C8", "launch": "#F2B705", "gate_in": "#FFC86B",
         "gate_out": "#FFC86B", "street": "#FFE2B0", "current": "#78DCFF",
-        "drain": "#FF6A2A", "slingshot": "#7CFF9A"}
+        "drain": "#FF6A2A", "slingshot": "#7CFF9A", "tunnel": "#FFB347"}
 
 
 def hexrgb(h, a=1.0):
@@ -276,6 +277,59 @@ def blender_main(key, draft):
     bm.to_mesh(me); bm.free()
     city = bpy.data.objects.new("city", me); scene.collection.objects.link(city)
     me.materials.append(city_mat)
+    rock_high = None
+    if opt.get("rock"):
+        CUT = 24.0
+        h = opt["rock"]["cell"] / 2
+        meshes = {k: bmesh.new() for k in ("rock_low", "rock_high", "rock_section")}
+        rtone = {k: m.faces.layers.float_color.new("tone") for k, m in meshes.items()}
+
+        def cube(bm_, x, y, z0, z1, tone, top_only=False):
+            if top_only:
+                vs = [bm_.verts.new((x + dx, y + dy, z1)) for dx, dy in ((-h, -h), (h, -h), (h, h), (-h, h))]
+                bm_.faces.new(vs)[rtone_now[0]] = tone
+                return
+            M = Matrix.Translation((x, y, (z0 + z1) / 2)) @ Matrix.Diagonal((2 * h, 2 * h, z1 - z0, 1))
+            for f in faces_of(bmesh.ops.create_cube(bm_, size=1, matrix=M)["verts"]):
+                f[rtone_now[0]] = tone
+        rtone_now = [None]
+        rr = random.Random(5)
+        for x, y, spans, kind in opt["rock"]["cols"]:
+            k_ = 0.75 + rr.random() * 0.35
+            tone = (0.055 * k_, 0.048 * k_, 0.042 * k_, 1)
+            for z0, z1 in spans:
+                if z0 < CUT:
+                    rtone_now[0] = rtone["rock_low"]; cube(meshes["rock_low"], x, y, z0, min(z1, CUT), tone)
+                    if z1 > CUT:
+                        rtone_now[0] = rtone["rock_section"]; cube(meshes["rock_section"], x, y, CUT, CUT + 0.3, tone, top_only=True)
+                if z1 > CUT:
+                    rtone_now[0] = rtone["rock_high"]; cube(meshes["rock_high"], x, y, max(z0, CUT), z1, tone)
+        for k_, bm_ in meshes.items():
+            me_ = bpy.data.meshes.new(k_); bm_.to_mesh(me_); bm_.free()
+            ob_ = bpy.data.objects.new(k_, me_); scene.collection.objects.link(ob_)
+            rm = bpy.data.materials.new(k_); rm.use_nodes = True
+            bs = rm.node_tree.nodes["Principled BSDF"]
+            at_ = rm.node_tree.nodes.new("ShaderNodeAttribute"); at_.attribute_name = "tone"; at_.attribute_type = "GEOMETRY"
+            if k_ == "rock_section":
+                # the cut face of the rock in a cutaway: a dark section, warm-edged, so the tunnels read as cut into it
+                bs.inputs["Base Color"].default_value = hexrgb("#1A1512"); bs.inputs["Emission Color"].default_value = hexrgb("#3A2418")
+                bs.inputs["Emission Strength"].default_value = 0.6
+            else:
+                nz = rm.node_tree.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 0.02
+                mx = rm.node_tree.nodes.new("ShaderNodeMix"); mx.data_type = "RGBA"; mx.inputs["Factor"].default_value = 0.35
+                rm.node_tree.links.new(at_.outputs["Color"], mx.inputs["A"]); rm.node_tree.links.new(nz.outputs["Color"], mx.inputs["B"])
+                gm = rm.node_tree.nodes.new("ShaderNodeMix"); gm.data_type = "RGBA"; gm.inputs["Factor"].default_value = 0.8
+                gm.inputs["A"].default_value = hexrgb("#3A3632")
+                rm.node_tree.links.new(mx.outputs["Result"], gm.inputs["B"])
+                rm.node_tree.links.new(gm.outputs["Result"], bs.inputs["Base Color"])
+                bs.inputs["Roughness"].default_value = 0.95
+            me_.materials.append(rm)
+            if k_ == "rock_high":
+                rock_high = ob_
+            if k_ == "rock_section":
+                ob_.hide_render = True
+        rock_section = bpy.data.objects["rock_section"]
+
     # collector vanes face the disk (dark glass, gold edge light), radiators glow with waste heat, mirrors reflect
     def petal_mat():
         # polished mirror catching the disk: bright metal, a warm sheen, and a lit focusing grid
@@ -359,7 +413,7 @@ def blender_main(key, draft):
         elif t == "reactor":
             bpy.ops.mesh.primitive_uv_sphere_add(radius=40, location=(fx["c"][0], fx["c"][1], 0))
             bpy.context.active_object.data.materials.append(mat_emit("reactor", "#FF8A2A", 40.0))
-            pl = bpy.data.lights.new("reactor_l", "POINT"); pl.energy = 4e8; pl.color = hexrgb("#FF8A2A")[:3]
+            pl = bpy.data.lights.new("reactor_l", "POINT"); pl.energy = fx.get("light", 4e8); pl.color = hexrgb("#FF8A2A")[:3]
             lo_ = bpy.data.objects.new("reactor_l", pl); lo_.location = (fx["c"][0], fx["c"][1], 60); scene.collection.objects.link(lo_)
         elif t == "relic_gate":
             a, b = fx["a"], fx["b"]
@@ -498,6 +552,13 @@ def blender_main(key, draft):
             bpy.ops.mesh.primitive_uv_sphere_add(radius=fx["r"], location=(fx["c"][0], fx["c"][1], fx["z"]), segments=12, ring_count=6)
             bpy.context.active_object.data.materials.append(mat_emit("flash" + fx["col"] + str(fx["r"] > 10), fx["col"],
                                                                      25.0 if fx["r"] <= 3 else 60.0 if fx["r"] <= 10 else 12.0))
+        elif t == "boulder":
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=fx["r"], location=(fx["c"][0], fx["c"][1], 0))
+            o = bpy.context.active_object
+            br = random.Random(int(fx["c"][0] * 5 + fx["c"][1]))
+            o.scale = (br.uniform(0.7, 1.3), br.uniform(0.7, 1.3), br.uniform(0.5, 1.0))
+            o.rotation_euler = (br.uniform(0, 3), br.uniform(0, 3), br.uniform(0, 3))
+            o.data.materials.append(mat_flat("boulder", "#4A4440", 0.95, 0.0))
         elif t == "debris":
             dm_ = mat_flat("debris", "#5A5246", 0.9, 0.2)
             rr = random.Random(int(fx["c"][0] * 3 + fx["c"][1]))
@@ -560,8 +621,10 @@ def blender_main(key, draft):
     cam.data.clip_end = 200000
     sp = opt["spawn"]["c"]
 
-    def shot(name, target, dist, pitch=55.0, yaw=0.0):
-        # the game camera: behind and above the target, pitched down
+    def shot(name, target, dist, pitch=55.0, yaw=0.0, cut=False):
+        # the game camera: behind and above the target, pitched down; a cut shot hides the rock above the flight plane
+        if rock_high is not None:
+            rock_high.hide_render = cut; rock_section.hide_render = not cut
         p = math.radians(pitch)
         back = polar(yaw + 180, dist * math.cos(p), target)
         cam.location = (back[0], back[1], dist * math.sin(p))
@@ -578,12 +641,16 @@ def blender_main(key, draft):
     add_box("player_eng", polar(0, -14, sp), 0, 2, 9, 3, 0, glow_mats["vest"])
     add_box("player_plume", polar(0, -30, sp), 0, 28, 4, 2, 0, plume)
     arrive = {"A": ((sp[0], sp[1] + 2050), 3300), "B": ((sp[0] - 500, sp[1] + 1900), 2900), "C": ((sp[0], sp[1] + 1700), 2700),
-              "D": ((sp[0], sp[1] + 2050), 3300)}
-    entry = {"A": ((70, -1750), 900), "B": ((600, -1700), 1300), "C": ((0, 300), 1300), "D": ((0, -250), 1500)}
+              "D": ((sp[0], sp[1] + 2050), 3300), "E": ((sp[0], sp[1] + 1550), 1900)}
+    entry = {"A": ((70, -1750), 900), "B": ((600, -1700), 1300), "C": ((0, 300), 1300), "D": ((0, -250), 1500),
+             "E": ((0, -380), 900)}
     shot("hub_arrival", *arrive[key])
     shot("hub_entry", *entry[key])
-    for name_, tgt, dist in opt.get("play_shots", []):
-        shot("hub_play_" + name_, tuple(tgt), dist)
+    if key == "E":
+        shot("hub_cutaway", (60, -40), 2300, cut=True)
+    for ps in opt.get("play_shots", []):
+        name_, tgt, dist = ps[:3]
+        shot("hub_play_" + name_, tuple(tgt), dist, cut=key == "E" and name_ not in ("maw",))
     print("HUB done")
 
 
