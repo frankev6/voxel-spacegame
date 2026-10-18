@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 26 | 10 | 0 | 0 | 39 | 0 | 75 | 8 |
+| M4 | 23 | 10 | 0 | 0 | 42 | 0 | 75 | 12 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -500,7 +500,7 @@
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
 | FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
-| FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play Owner 2026-10-17: not flown yet. Renders of the five engine blocks (docs/design/racing/img/engine_line.jpg) shown; owner: "engines look good". Still waiting for owner play. |
+| FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play Owner 2026-10-17: not flown yet. Renders of the five engine blocks (docs/design/racing/img/engine_line.jpg) shown; owner: "engines look good". Still waiting for owner play. Render fixes from the review (332ae4d9): Sprint bodies closed (no see-through seam), nozzles bare heat-dark metal with no plating lights and a throttle glow inside, Torch XL its own design (radiator fins, six ribs, eight struts, banded bell); sheet revised. |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | todo |  |  |  |  |
@@ -538,19 +538,19 @@
 | HAZ-006 | Zones: shapes, query and push effects | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-002 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 5fd20ccc | ZoneSystem (Burst, one job): boost, drag, gates, bounds; zone pose is LocalTransform (rebase-safe); jump > 50 m skips crossings; ZoneTests |
 | HAZ-007 | Field walls | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 5fd20ccc | Repel walls: two-sided, side from last tick, pushes at the hull end (glancing hits turn); ram damage on the authority |
 | HAZ-008 | Mines | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-003 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 537c809b | Proximity mines: device grids, MineSystem arm/trigger/cook-off/detonate, anchor spring, seeded fields; fuse on MineDefinition; blueprint options not sketched for the owner |
-| HAZ-009 | Hazard playground pad and dev commands | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-005, HAZ-007, HAZ-008 | no | todo |  |  |  |  |
+| HAZ-009 | Hazard playground pad and dev commands | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-005, HAZ-007, HAZ-008 | yes | todo |  |  |  |  |
 | HAZ-010 | Hazards and hit force in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-009, NET-018 | no | todo |  |  |  |  |
 | HAZ-011 | Hazard scenarios and determinism gate | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-009 | no | todo |  |  |  |  |
-| HAZ-012 | Contract types for the mechanism set | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | yes | todo |  |  |  |  |
-| HAZ-013 | Moving structures | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-012 | no | todo |  |  |  |  |
-| HAZ-014 | Mechanisms: switches and actions | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-013, HAZ-006 | no | todo |  |  |  |  |
-| HAZ-015 | Gravity wells and zone schedules | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006, HAZ-012 | no | todo |  |  |  |  |
+| HAZ-012 | Contract types for the mechanism set | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-001 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | e13caecf | Every §4.6 type: Attract and Pulse zone kinds, ZoneSchedule, Switch and Pickup modules, mine payloads, Game.Simulation.Mechanisms (Mover, MoverPoint, MechanismAction, PortalLink, PortalTransit, TargetOverride), MechanismDefinition, the EnergyGrantRequest stream (discarded until HAZ-019). MechanismContractTests 2/2 |
+| HAZ-013 | Moving structures | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-012 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | c7ec8770 | MoverSystem (authority) lands each kinematic mover on MoverMath.Pose for the next tick: Rotate, Rail (loop or ping-pong), Drift, Toggle; follows origin rebases. MoverTests 5/5: 10 minutes of rotation within 1e-3 rad, door in its duration, a sweeping arm bats the 24.6 t fighter to 23 m/s with ram damage (4 cells), deterministic. Playground pad 17 (0f5c1ca0): a 45 m sweeper arm and a sliding blast door, checked in Play Mode. A light 1.9 t hull is shoved without ram damage: each tick of a sweep is under the 20 kJ ram floor |
+| HAZ-014 | Mechanisms: switches and actions | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-013, HAZ-006 | yes | todo |  |  |  |  |
+| HAZ-015 | Gravity wells and zone schedules | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-006, HAZ-012 | yes | todo |  |  |  |  |
 | HAZ-016 | Pulses with shadows (flares and reactors) | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-015 | no | todo |  |  |  |  |
-| HAZ-017 | Engine wash | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002 | yes | todo |  |  |  |  |
+| HAZ-017 | Engine wash | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-002 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 131c9156 | EngineWashSystem: cone behind each firing thruster (reach 12 m × √(F × I / 10 kN): Sprint M 37 m, Torch L 93 m), push 0.3 × F × I falling off to the reach, never the owner, heat near the nozzle on the authority. EngineWashTests 2/2: a fighter 30 m behind the Needle pushed back 0.21 m/s in 0.5 s; owner bit-identical. Open: a dead engine section fired by a mechanism (needs HAZ-014). Racers now wash each other: not yet raced with it |
 | HAZ-018 | Mine payloads and seekers | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-008, HAZ-015 | no | todo |  |  |  |  |
-| HAZ-019 | Energy canisters | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012, HAZ-008 | no | todo |  |  |  |  |
-| HAZ-020 | Gauntlet turrets | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012 | no | todo |  |  |  |  |
-| HAZ-021 | Lane-gate portals | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-012 | no | todo |  |  |  |  |
+| HAZ-019 | Energy canisters | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012, HAZ-008 | yes | todo |  |  |  |  |
+| HAZ-020 | Gauntlet turrets | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | standard | HAZ-012 | yes | todo |  |  |  |  |
+| HAZ-021 | Lane-gate portals | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-006, HAZ-012 | yes | todo |  |  |  |  |
 | HAZ-022 | The mechanism set in co-op | [SPEC-91](specs/SPEC-91-hazards-hit-force.md) | M4 | frontier | HAZ-010, HAZ-014, HAZ-016, HAZ-018, HAZ-019, HAZ-020, HAZ-021 | no | todo |  |  |  |  |
 | RACE-001 | Public contract types | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | HAZ-001 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | a1d152d8 | TrackDefinition, gates, pieces, zones, mines, slots, validator; RaceState, RacerProgress, RaceGate; RaceHold in Simulation.Commands |
 | RACE-002 | Track layout for owner approval | [SPEC-92](specs/SPEC-92-racing.md) | M4 | standard | — | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 9767f965 | Owner chose A as a fleet of wrecks: Track 01 Battle Graveyard (track-01-options.md, track_01_battle_graveyard.json); grapple cut |
@@ -1285,6 +1285,23 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-17 — Batch: engine renders fixed, mechanism contracts, moving structures, engine wash (lead, claude-opus-5-5)
+- **Owner (process):** "lets work in batches, tell me your best next batch ... my input should be review and higher level decisions only, not permission to work". From now on the lead picks and starts each batch.
+- **Engine renders (FLT-015, 332ae4d9):** the three problems seen on the review sheet are fixed:
+  - Sprint bodies close at the throat (no see-through seam);
+  - nozzle surfaces are tagged in uv1 and shade as bare heat-dark metal (no plating or grille lights), with the inner face warming with throttle;
+  - Torch XL is its own design (radiator fins, six chamber ribs, eight struts, banded bell).
+  - `docs/design/racing/img/engine_line.jpg` is revision 2. Also: `SaveMesh` now re-uploads a loaded mesh (open views kept the old shape).
+- **Not done on purpose:** blast push from the hit cells instead of the grid-bounds centre. It would roughly double siege kicks, which are part of the hit-force table the owner approved ("feels right"). It stays parked, as SPEC-91 §8 already says.
+- **HAZ-012 (e13caecf):** the ADR-0119 contract types; architecture §6 and §8 rows; SPEC-22 energy grant stream.
+- **HAZ-013 (c7ec8770, 0f5c1ca0):** `MoverSystem` and `MoverMath`. Results: 10 minutes of rotation within 1e-3 rad; a sweeping arm bats the starter fighter to 23 m/s with ram damage. Playground pad 17 has a sweeper arm and a sliding blast door, checked in Play Mode.
+- **HAZ-017 (131c9156):** engine wash. A fighter 30 m behind a Needle at full thrust is pushed back 0.21 m/s in half a second; the owner ship is bit-identical. The mechanism-fired engine section waits for HAZ-014.
+- **Also fixed in passing:**
+  - `ExternalPushFeedbackSystem` (HAZ-005) was not in the role table;
+  - two static rosters from the racer AI were unmarked.
+  - Both made RoleSystemPolicyTests and StaticStateAuditTests fail on main.
+- **Pre-existing, unchanged:** FlightScenarioTests.OffCentreThruster_Yaws; AbilityScenarioTests.Boost_RaisesTopSpeed (braking bound).
 
 ### 2026-10-17 — Owner review page: answers recorded, Windows build, engine renders, hit force measured (lead, claude-opus-5-5)
 - **Owner review** (a private review page with visuals for every item that was waiting on the owner):
