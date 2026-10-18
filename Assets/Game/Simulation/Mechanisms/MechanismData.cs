@@ -40,6 +40,7 @@ namespace Game.Simulation.Mechanisms
         public uint Tick;               // the tick Current was written on
     }
 
-    /// <summary>Written by the race (RaceSystem) when one runs: the leader's lap, read by RaceLap triggers.</summary>
-    public struct RaceLapSignal : IComponentData { public int LeaderLap; }
+    /// <summary>Written by the race (RaceSystem) when one runs: the lap the leader is flying (1 from the start; 0 outside racing), read by RaceLap triggers, and the leader's ship
+    /// (place 1 while racing, else Entity.Null), read by TargetOverrideSystem for leader-targeting turrets (HAZ-020).</summary>
+    public struct RaceLapSignal : IComponentData { public int LeaderLap; public Entity Leader; }
 }

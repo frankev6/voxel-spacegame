@@ -17,6 +17,9 @@ namespace Game.Data.Definitions
         public TrackPiece[] Pieces = Array.Empty<TrackPiece>();       // voxel walls, pylons, barricades, obstacles, wrecks
         public TrackZone[] Zones = Array.Empty<TrackZone>();          // boost strips, slow fields, field walls (SPEC-91 ZoneDefinition)
         public TrackMines[] MineFields = Array.Empty<TrackMines>();   // SPEC-91 MineFieldDefinition
+        public TrackMechanism[] Mechanisms = Array.Empty<TrackMechanism>();   // RACE-015: lap events and switches (ADR-0119 decision 2)
+        public ShipBlueprintDefinition Canister;                      // RACE-015: the energy canister device (HAZ-019)
+        public Vector2[] Canisters = Array.Empty<Vector2>();
         public Vector2[] Bounds = Array.Empty<Vector2>();             // closed polyline; becomes a Bounds zone (empty = none)
         public TrackSlot[] StartGrid = Array.Empty<TrackSlot>();      // ≥ 4
         public ZoneDefinition GateZone;                               // the gate zone every gate spawns (its effect Id is set per gate)
@@ -49,10 +52,14 @@ namespace Game.Data.Definitions
         public ZoneDefinition Zone; public Vector2[] Path; public Vector2 Position; public float Yaw;
         public Vector2 HalfExtents;   // box or circle size for this placement; zero = the definition's
         public float PathRadius;      // path capsule radius for this placement; zero = the definition's
+        public float PeriodSeconds, PhaseSeconds;   // RACE-015: a schedule (a pulse fires once per period); zero = none
+        public byte SetPiece;         // RACE-015: 1..15 puts the zone in its own set-piece group, which mechanisms can act on; 0 = the track's
         // RACE-016: a field-wall span held up by two voxel emitter posts (track space). While either post's emitter head is shot
         // away the span is down (WallEmitterSystem). No emitters = always up.
         public bool Emitters; public Vector2 EmitterA, EmitterB;
     }
+    /// <summary>RACE-015: a mechanism placed with the track, acting on set piece SetPiece (1..15) or, with 0, on the track's own group.</summary>
+    [Serializable] public struct TrackMechanism { public MechanismDefinition Mechanism; public byte SetPiece; }
     [Serializable] public struct TrackMines { public MineFieldDefinition Field; public Vector2 Position; public float Yaw; public uint Seed; }
     [Serializable] public struct TrackSlot { public Vector2 Position; public float Yaw; }
     [Serializable] public struct TrackPath { public string Name; public Vector2[] Points; public float Width; public bool Closed; public bool Interior; }

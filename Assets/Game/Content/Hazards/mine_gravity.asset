@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MineDefinition
   id: mine_gravity
   formerIds: []
-  blueprint: {fileID: 11400000, guid: 24935e697e1ca4b4299363fd8395e907, type: 2}
+  blueprint: {fileID: 11400000, guid: ad7938ef6e0a443ff93123e588e51603, type: 2}
   anchored: 1
   anchorStiffness: 0.4
   anchorDamping: 0.8

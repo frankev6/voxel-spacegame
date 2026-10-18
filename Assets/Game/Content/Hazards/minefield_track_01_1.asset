@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.MineFieldDefinition
   id: minefield_track_01_1
   formerIds: []
-  mine: {fileID: 11400000, guid: c71d5daf2fb8f43e0baccc858535e9ca, type: 2}
+  mine: {fileID: 11400000, guid: 9f1a1fed1a72846b1939a3be118ae038, type: 2}
   count: 6
   area: 1
   halfExtents: {x: 100, y: 100}

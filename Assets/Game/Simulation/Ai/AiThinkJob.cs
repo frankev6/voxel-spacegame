@@ -36,6 +36,7 @@ namespace Game.Simulation.Ai
         [ReadOnly] public ComponentLookup<ShieldControl> ShieldControls;
         [ReadOnly] public BufferLookup<AbilitySlot> Abilities;
         [ReadOnly] public ComponentLookup<FleetMember> Members;
+        [ReadOnly] public ComponentLookup<Game.Simulation.Mechanisms.TargetOverride> Overrides;
         [ReadOnly] internal NativeHashMap<Entity, FleetLeaderDecision> Leaders;
         public byte MemberPass;
         // Only atomic telemetry writes cross roots. Neither counter nor warning order affects decisions.
@@ -102,6 +103,19 @@ namespace Game.Simulation.Ai
                     - ((proxy.Flags & ProxyFlags.PlayerShip) != 0 ? profile.PlayerBias : 0)
                     - (index == current ? profile.Stickiness : 0);
                 if (role != AiRole.Civilian && score < bestScore) { selected = index; bestScore = score; }
+            }
+            // HAZ-020 (ADR-0119 decision 6): a valid target override (a live ship or station in the hash, inside the sensor) wins over
+            // the choice above, hostile or not: gauntlet turrets shoot the race leader whatever its faction.
+            if (role != AiRole.Civilian && Overrides.HasComponent(entity) && Overrides[entity].Policy != 0)
+            {
+                int forced = Hash.FindIndex(Overrides[entity].Target);
+                if (forced >= 0)
+                {
+                    var proxy = Hash.Get(forced);
+                    if (proxy.Entity != entity && Entities.Exists(proxy.Entity) && !Hulks.HasComponent(proxy.Entity)
+                        && (proxy.Kind == ProxyKind.Ship || proxy.Kind == ProxyKind.Station) && math.distance(center, proxy.Center) <= profile.SensorRange)
+                    { selected = forced; if (nearest < 0) nearest = forced; }
+                }
             }
             float anchorDistance = math.distance(Planar.FlattenY(pose.Position), Planar.FlattenY(brain.Anchor));
             bool returning = brain.PreviousState == AiState.Return && anchorDistance >= Config.ArrivalRadius * 2;

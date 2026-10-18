@@ -89,7 +89,29 @@ namespace Game.Simulation.Hazards
             return root;
         }
 
-        /// <summary>Destroys the zones and devices of a group.</summary>
+        /// <summary>HAZ-015/016: puts a spawned zone on a schedule: on for onSeconds of every periodSeconds, starting phaseSeconds into
+        /// the period. A Pulse zone fires on the first tick of each on window.</summary>
+        public static void Schedule(EntityManager em, Entity zone, float periodSeconds, float onSeconds, float phaseSeconds = 0)
+        {
+            uint period = (uint)math.max(1, math.round(periodSeconds * 60));
+            var s = new ZoneSchedule { PeriodTicks = period, OnTicks = (uint)math.clamp(math.round(onSeconds * 60), 1, period),
+                PhaseTicks = (uint)math.round(math.max(0, phaseSeconds) * 60) % period, Enabled = 1 };
+            if (em.HasComponent<ZoneSchedule>(zone)) em.SetComponentData(zone, s); else em.AddComponentData(zone, s);
+        }
+
+        /// <summary>HAZ-019: requests one energy canister (a kinematic device of one Pickup + Explosive block) at p.</summary>
+        public static Entity Canister(EntityManager em, ShipBlueprintDefinition blueprint, float2 p, float yaw, ushort group, ulong persistentId)
+        {
+            var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
+            {
+                PersistentId = persistentId, Pose = new RigidTransform(quaternion.RotateY(yaw), new float3(p.x, 0, p.y)),
+                Kind = Game.Voxel.Model.GridKind.Device, Motion = Game.Voxel.Model.GridMotion.Kinematic, Profile = Game.Voxel.Model.GridProfile.Dummy
+            });
+            em.AddComponentData(root, new Canister { Group = group, Instance = -1 });
+            return root;
+        }
+
+        /// <summary>Destroys the zones, devices and mechanisms of a group.</summary>
         public static void DespawnGroup(EntityManager em, ushort group)
         {
             using (var query = em.CreateEntityQuery(typeof(WorldZone)))
@@ -100,6 +122,16 @@ namespace Game.Simulation.Hazards
                 foreach (var e in mines)
                 {
                     if (em.GetComponentData<MineFuse>(e).Group != group) continue;
+                    if (em.HasComponent<Game.Voxel.Model.GridDespawnRequest>(e)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, e); else em.DestroyEntity(e);
+                }
+            using (var query = em.CreateEntityQuery(typeof(Game.Simulation.Mechanisms.Mechanism)))
+            using (var mechanisms = query.ToEntityArray(Unity.Collections.Allocator.Temp))
+                foreach (var e in mechanisms) if (em.GetComponentData<Game.Simulation.Mechanisms.Mechanism>(e).Group == group) em.DestroyEntity(e);
+            using (var query = em.CreateEntityQuery(typeof(Canister)))
+            using (var canisters = query.ToEntityArray(Unity.Collections.Allocator.Temp))
+                foreach (var e in canisters)
+                {
+                    if (em.GetComponentData<Canister>(e).Group != group) continue;
                     if (em.HasComponent<Game.Voxel.Model.GridDespawnRequest>(e)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, e); else em.DestroyEntity(e);
                 }
         }

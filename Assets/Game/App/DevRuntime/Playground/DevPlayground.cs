@@ -57,6 +57,7 @@ namespace Game.App.DevRuntime.Playground
             new Pad("salvage", "14  SALVAGE / RECOVER CARGO", 0, -540, DevPlaygroundSalvage.PadDetail),
             new Pad("xeno", "15  XENO / ALIENS", 160, -540, "F wakes two HUSK skimmers and a BROODMOTHER, grown ships of smooth obsidian tissue (ADR-0115).\nThey hunt you with acid. Shoot them to see wounds open into glowing flesh; kill the heart for a hulk. One wave per reset."),
             new Pad("movers", "17  MOVING STRUCTURES", 320, -180, DevPlaygroundMovers.PadDetail),
+            new Pad("hazards", "19  HAZARDS  ·  PULSE / CANISTERS / MINES", 760, -360, DevPlaygroundHazards.PadDetail),
             new Pad("race", "18  RACE  ·  BATTLE GRAVEYARD", 320, 0, "F opens Track 01 south of the pads and puts every pilot on the start grid. F again starts the countdown.\nThree laps through a fleet graveyard: field walls, boost strips and shortcut branches. Console: race start | race end | race info | race laps=<n> | race respawn."),
             new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the NOCTURNE line: a WRAITH frigate (26 m) beside you and the three NOCTURNE cruisers (~52 m) broadside ahead: REQUIEM (lance), VESPER (nave), DIRGE (broadside).\nNo AI: fly around them, compare, shoot them. Fly one with playground ship=ship_nocturne_requiem (vesper, dirge). One set per reset.")
         };
@@ -78,7 +79,7 @@ namespace Game.App.DevRuntime.Playground
         readonly float3[] courseOffsets = { new float3(-160, 0, 90), new float3(-240, 0, 150), new float3(-320, 0, 70), new float3(-160, 0, 0) };
         int courseGate = -1;
         double3 origin;
-        bool active, entering, enemyRequested, tradeGranted, xenoRequested, nocturneRequested, moversRequested;
+        bool active, entering, enemyRequested, tradeGranted, xenoRequested, nocturneRequested, moversRequested, hazardsRequested;
         bool autoEnter;
         // Co-op: a guest shows the host's beacons (rings, labels, radar markers and zoom) without running pads; the host sends
         // its origin to every guest once it is in the world.
@@ -197,10 +198,10 @@ namespace Game.App.DevRuntime.Playground
             var ctx = host.Context;
             var player = ctx.PlayerShipRoot;
             if (!DevEcs.TryGetUniversePosition(ctx, player, out origin)) throw new InvalidOperationException("player position unavailable");
-            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; nocturneRequested = false; moversRequested = false; pending = 0; nearest = -1;
+            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; nocturneRequested = false; moversRequested = false; hazardsRequested = false; pending = 0; nearest = -1;
             courseGate = -1;
             report = "Quiet sandbox ready. No hostile ships spawn until you activate COMBAT.";
-            salvage?.Reset(); Race?.End();
+            salvage?.Reset(); Race?.End(); DevPlaygroundHazards.Clear(ctx);
             DevPlaygroundStory.RefreshResetMarkers(ctx);
             BuildPresentation();
             GoTo("flight");
@@ -367,6 +368,9 @@ namespace Game.App.DevRuntime.Playground
                     break;
                 case "movers":
                     result = DevPlaygroundMovers.Activate(host.Context, origin + pad.Offset, ref moversRequested);
+                    break;
+                case "hazards":
+                    result = DevPlaygroundHazards.Activate(host.Context, origin + pad.Offset, ref hazardsRequested);
                     break;
                 case "race":
                     result = Race.Open(origin);

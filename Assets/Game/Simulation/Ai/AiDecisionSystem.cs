@@ -31,6 +31,7 @@ namespace Game.Simulation.Ai
         BufferLookup<AbilitySlot> abilities;
         NativeArray<int> overflow;
         ComponentLookup<FleetMember> members;
+        ComponentLookup<Game.Simulation.Mechanisms.TargetOverride> overrides;
         NativeHashMap<Entity, FleetLeaderDecision> leaders;
         internal int SphereQueryCount => overflow[2];
 
@@ -53,6 +54,7 @@ namespace Game.Simulation.Ai
             abilities = state.GetBufferLookup<AbilitySlot>(true);
             overflow = new NativeArray<int>(3, Allocator.Persistent);
             members = state.GetComponentLookup<FleetMember>(true);
+            overrides = state.GetComponentLookup<Game.Simulation.Mechanisms.TargetOverride>(true);
             leaders = new NativeHashMap<Entity, FleetLeaderDecision>(128, Allocator.Persistent);
         }
 
@@ -70,7 +72,7 @@ namespace Game.Simulation.Ai
             entities.Update(ref state); hulks.Update(ref state); spawning.Update(ref state);
             dormant.Update(ref state); shipStats.Update(ref state); weaponStats.Update(ref state);
             shields.Update(ref state); shieldControls.Update(ref state); abilities.Update(ref state);
-            members.Update(ref state);
+            members.Update(ref state); overrides.Update(ref state);
             var hash = SystemAPI.GetSingleton<SpatialHash>();
             var think = new AiThinkJob
             {
@@ -79,7 +81,7 @@ namespace Game.Simulation.Ai
                 Entities = entities, Hulks = hulks, Spawning = spawning, Dormant = dormant,
                 ShipStats = shipStats, WeaponStats = weaponStats, Shields = shields,
                 ShieldControls = shieldControls, Abilities = abilities, Overflow = overflow,
-                Members = members, Leaders = leaders, MemberPass = 0,
+                Members = members, Leaders = leaders, MemberPass = 0, Overrides = overrides,
             };
             var handle = think.ScheduleParallel(hash.BeginRead(state.Dependency));
             handle = new ClearFleetLeaders { Leaders = leaders }.Schedule(handle);

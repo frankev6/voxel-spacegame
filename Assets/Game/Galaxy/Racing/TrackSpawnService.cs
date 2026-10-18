@@ -26,20 +26,21 @@ namespace Game.Galaxy.Racing
             {
                 var z = track.Zones[i];
                 if (z.Zone == null) continue;
-                Entity e;
+                Entity e; ushort zoneGroup = z.SetPiece != 0 ? SetPieceGroup(group, z.SetPiece) : group;
                 if (z.Zone.Shape == Game.Data.Hazards.ZoneShape.Path)
                 {
                     var pts = new float2[z.Path.Length];
                     for (int k = 0; k < pts.Length; k++) pts[k] = origin + (float2)z.Path[k];
-                    e = HazardSpawn.PathZone(em, z.Zone, pts, group, Id(), z.PathRadius > 0 ? z.PathRadius : z.Zone.PathRadius);
+                    e = HazardSpawn.PathZone(em, z.Zone, pts, zoneGroup, Id(), z.PathRadius > 0 ? z.PathRadius : z.Zone.PathRadius);
                     if (z.Emitters)
                         em.AddComponentData(e, new WallSpan { A = origin + (float2)z.EmitterA - pts[0], B = origin + (float2)z.EmitterB - pts[0], Index = (ushort)i });
                 }
                 else
                 {
-                    e = HazardSpawn.Zone(em, z.Zone, origin + (float2)z.Position, z.Yaw, group, Id());
+                    e = HazardSpawn.Zone(em, z.Zone, origin + (float2)z.Position, z.Yaw, zoneGroup, Id());
                     if (z.HalfExtents.x > 0) { var w = em.GetComponentData<WorldZone>(e); w.HalfExtents = z.HalfExtents; em.SetComponentData(e, w); }
                 }
+                if (z.PeriodSeconds > 0) HazardSpawn.Schedule(em, e, z.PeriodSeconds, 1f / 60, z.PhaseSeconds);
             }
             var race = em.CreateEntity(typeof(RaceState), typeof(LocalTransform));
             em.SetName(race, "Race " + track.IdString);
@@ -76,7 +77,13 @@ namespace Game.Galaxy.Racing
                 legs.Add(new RaceLeg { From = (byte)leg.From, To = (byte)leg.To, Start = legPoints.Length, Count = leg.Points.Count, Length = leg.Length });
                 foreach (var point in RaceLines.Points(track, leg)) legPoints.Add(point);
             }
-            // Mines are grids: the authority spawns them and guests receive them by replication (spawnMines only there).
+            // RACE-015: the track's mechanisms (lap events, switches), on the track's group or a set piece's.
+            if (track.Mechanisms != null)
+                foreach (var m in track.Mechanisms)
+                    if (m.Mechanism != null) HazardSpawn.Mechanism(em, m.Mechanism, m.SetPiece != 0 ? SetPieceGroup(group, m.SetPiece) : group);
+            // Mines and canisters are grids: the authority spawns them and guests receive them by replication (spawnMines only there).
+            if (spawnMines && track.Canister != null && track.Canisters != null)
+                foreach (var c in track.Canisters) HazardSpawn.Canister(em, track.Canister, origin + (float2)c, 0, group, Id());
             if (spawnMines && track.MineFields != null)
                 foreach (var m in track.MineFields)
                 {
@@ -93,6 +100,11 @@ namespace Game.Galaxy.Racing
                 }
             return race;
         }
+
+        /// <summary>RACE-015: set piece k (1..15) of the track spawned under `group` has its own hazard group, so a mechanism can act on it
+        /// (a reactor's period, a door) without touching the track's walls, boosts and gates. Tracks use groups below 1024.</summary>
+        public const byte MaxSetPieces = 15;
+        public static ushort SetPieceGroup(ushort group, byte setPiece) => (ushort)(0x4000 | (group & 0x3FF) << 4 | (setPiece & 15));
 
         /// <summary>RACE-016: no mine within this of a field-wall line: anchored on a post it scrapes, cooks off and blows the fence.</summary>
         public const float MineWallClearance = 12;
@@ -115,6 +127,7 @@ namespace Game.Galaxy.Racing
         public static void Despawn(EntityManager em, ushort group)
         {
             HazardSpawn.DespawnGroup(em, group);
+            for (byte k = 1; k <= MaxSetPieces; k++) HazardSpawn.DespawnGroup(em, SetPieceGroup(group, k));
             using (var q = em.CreateEntityQuery(typeof(RaceState)))
             using (var races = q.ToEntityArray(Allocator.Temp))
                 foreach (var e in races) if (em.GetComponentData<RaceState>(e).TrackGroup == group) em.DestroyEntity(e);

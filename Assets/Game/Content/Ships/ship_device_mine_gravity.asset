@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_device_mine_gravity
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_device_mine_gravity
+  formerIds: []
+  displayName: GRAVITY MINE
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f585301000100ad525b4ec330109cb55311e42412ea4fab1c86a34410a12a6a291f9c832bb4176a4fd0120e8020174009f6ba364e1a1048e4633dfbc87867bd00ae3bfdd1d5edeaa15c16f7d5faae286f1eabf5620280a00844b82064884923a0cd8dc53b3b48b51506d4033fb18083e05c933bff8d1c4a83aae36834b1c0b9ca9c86aec9a56773289521db58349143368bba6964606b45f8439a642a828b445f59e2c0b3ce696e35e876ac744f3c10f17f133123012e2303c479592021637747412e94e35f2f3b75fa4da2a6c079993bb22d455fe193b523b483e3111d7e23ea75b4e8c3479f66bc579a4f6aed7c6bec0bb937752ed192f9cef8afcd5fdeede7e7efaf4a7f91ec764db5f904y
+  cellCount: 189
+  boundsMin: {x: -6, y: -6, z: -6}
+  boundsMax: {x: 6, y: 6, z: 6}

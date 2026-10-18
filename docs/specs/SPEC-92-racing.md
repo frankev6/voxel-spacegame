@@ -397,6 +397,13 @@ Advisory (ADR-0042):
   - [ ] A scripted three-lap run sees every set piece act at its lap.
   - [ ] Top-down screenshots per lap are in the ledger log.
 - **Tests:** `Track01Tests.LapEvents_Fire`, `.Break_Narrows`.
+- **In progress (2026-10-17): the reactor, the minefield payloads and the canisters are on the track.**
+  - `TrackDefinition` gains `Mechanisms` (each on a set piece or the track's own group), `Canister` and `Canisters`. `TrackZone` gains a schedule (`PeriodSeconds`, `PhaseSeconds`) and `SetPiece`.
+  - A set piece k (1–15) spawns under its own hazard group, `TrackSpawnService.SetPieceGroup(group, k)`, so a mechanism can act on it without touching the track's walls, boosts and gates. `Despawn` clears the set-piece groups and the mechanisms too.
+  - The reactor (set piece 1, 420 m reach) pulses every 8 s. `mechanism_track01_reactor` makes it every 4 s when the leader starts lap 3. `RaceLapSignal.LeaderLap` is now the lap being flown (it was the laps completed, one behind the trigger's "starts lap Value").
+  - The five minefields use their layout kinds: one proximity, one seeker, two EMP and one repulsor field. The eight canisters lie on the north-east bend, the start straight and the south hall.
+  - `Track01Tests.LapEvents_Fire` covers this.
+  - Still to come: the drifting bow (`.Break_Narrows`), the rig's sweeping arms, the flight-deck door and its switch, the battleship turrets waking on lap 2, the engine section, and the portal pair (HAZ-021).
 
 ### RACE-016 — Track look and destructible track structures
 - **Milestone:** M4

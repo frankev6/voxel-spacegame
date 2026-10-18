@@ -69,8 +69,7 @@ namespace Game.Simulation.Power
         {
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             owned.Inhibits.BeginTick(tick); owned.StatModifiers.BeginTick(tick); owned.EnergyGrants.BeginTick(tick);
-            // Energy grants have no consumer until HAZ-019: discard them so the stream never grows.
-            owned.EnergyGrants.BeginRead(ref state); owned.EnergyGrants.EndRead(state.Dependency);
+            // Energy grants are read by PowerAllocationSystem (HAZ-019).
             inhibited.Update(ref state); instances.Update(ref state); modifierBuffers.Update(ref state);
             var inhibitSet = owned.Inhibits.BeginRead(ref state);
             var modifierSet = owned.StatModifiers.BeginRead(ref state);

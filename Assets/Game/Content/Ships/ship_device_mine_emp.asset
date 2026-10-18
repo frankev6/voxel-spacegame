@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_device_mine_emp
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_device_mine_emp
+  formerIds: []
+  displayName: EMP MINE
+  cellSize: 0.5
+  payloadVersion: 1
+  payload: 564f585301000100ad525b6ec230109cb58344958784f801e5303d4ad4228410af0fcec115e885da13b4a50740940b2060bdc6c6090181443ed6b38f8c77d60be0f5c01fb5dec7b3dea8980ca7fda2f7361f4e070d0084984084262163c308d8e7c6e25f1ca46c9501ab8a9f582041486e9b3b7f430ea541d54f6d34b1c0b9b1390ddd36d79ecda154876c75d14457d92c3ab42303f756843fb449a62ab8489595250efc728eb9e34ab775a55f240351cf9b881909f01219a02ecb020999b89f14e44239fef5b253a757122b0a9cbfae23fba0e81c3e593b423b3819d1f73da2d6b5453b1f5d7464af984fb376b9b5e90ba5b7f852a225f39dc95fcb47deedf6f39757a5bc4876bbda6c8ey
+  cellCount: 189
+  boundsMin: {x: -6, y: -6, z: -6}
+  boundsMax: {x: 6, y: 6, z: 6}

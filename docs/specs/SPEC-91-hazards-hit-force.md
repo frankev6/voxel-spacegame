@@ -636,10 +636,18 @@ Why the rows sit below the first targets:
   - Visual: a pulse ring or a flare sweep, with the shadows shown.
 - **Files:** `Assets/Game/Simulation/Hazards/PulseJob.cs`; `Assets/Game/Presentation/Hazards/ZoneVisualSystem.cs`.
 - **Acceptance criteria:**
-  - [ ] A ship in the open takes the pulse; a ship behind a wreck does not.
-  - [ ] Shield drain applies before hull damage.
-  - [ ] It is deterministic.
-- **Tests:** `PulseTests.Open_TakesPulse`, `.Shadowed_Safe`, `.Deterministic`.
+  - [x] A ship in the open takes the pulse; a ship behind a wreck does not.
+  - [x] Shield drain applies before hull damage.
+  - [x] It is deterministic.
+- **Tests:** `PulseTests.Open_TakesPulse`, `.Shadowed_Safe`, `.Shield_DrainsFirst`, `.Deterministic`.
+- **Done (2026-10-17):**
+  - `PulseSystem` (authority) fires a Pulse zone on the first tick of each window of its `ZoneSchedule` (`PulseMath.Fires`; a pulse zone with no schedule never fires; `HazardSpawn.Schedule` sets one).
+  - Each live ship with its centre of mass inside is hit unless a physics ray from the source to that centre hits another grid or chunk first. The source is the zone centre for C = 0 (a reactor), or a point far back along the zone's forward for C = 1 (a flare).
+  - A raised shield takes A + B as one shield hit, so it drains first and `ShieldSystem` passes any overflow to the hull. A ship without a shield takes A as energy damage on the face toward the source.
+  - Content: `zone_pulse_reactor` (A 260, B 240 over 140 m) and `zone_solar_flare` (A 180, B 320 over a 600 m square).
+  - Tests: three pulses take ~1050 off a ship in the open, 0 behind a wreck slab; a 2500-HP shield loses 500 per pulse with the hull untouched; two runs match exactly.
+  - Visual (`ZoneVisualSystem`, every machine): the reach rim and the lit ground brighten over the 0.75 s before a pulse, then a ring sweeps out in 0.3 s. Shadows show as dark wedges, cut by the same rays. See [pulse_reactor.jpg](../design/racing/img/pulse_reactor.jpg): the warning above, the pulse below.
+  - Playground pad 19 HAZARDS puts the reactor, a slab to hide behind, five canisters and one mine of each payload in one place. Each payload mine now has its own body and name: a band of blue (repulsor), cyan (EMP), orange (seeker) or purple (gravity).
 
 ### HAZ-017 — Engine wash
 - **Milestone:** M4
@@ -684,9 +692,10 @@ Why the rows sit below the first targets:
   - Add `device_canister`, carrying an `Explosive` block so a shot sets it off.
 - **Files:** `Assets/Game/Simulation/Hazards/PickupSystem.cs`; `Assets/Game/Simulation/Power/PowerAllocationSystem.cs`; content.
 - **Acceptance criteria:**
-  - [ ] Flying through a canister raises stored energy by its amount, once.
-  - [ ] Shooting one explodes it.
+  - [x] Flying through a canister raises stored energy by its amount, once.
+  - [x] Shooting one explodes it.
 - **Tests:** `CanisterTests.Pickup_GrantsOnce`, `.Shot_Explodes`.
+- **Done (2026-10-17):** `PickupSystem` (authority) grants a canister to the nearest ship whose bounding sphere comes within its reach (ties by `Entity.Index`) and despawns it; `PowerAllocationSystem` adds the grant to `ShipPower.Stored`, capped, before allocating. `block_canister` (from the small capacitor: `Pickup` 60 energy over 5 m, `Explosive` 500 over 6 cells) in `ship_device_canister`, spawned kinematic by `HazardSpawn.Canister`. A fighter flying through gains 60.7 (with a tick of generation) once; two plasma bolts break one and its blast takes cells off a slab 3 m away. The look is the capacitor's for now.
 
 ### HAZ-020 — Gauntlet turrets
 - **Milestone:** M4
@@ -698,9 +707,10 @@ Why the rows sit below the first targets:
   - `RaceSystem` writes the leader (SPEC-92).
 - **Files:** `Assets/Game/Simulation/Ai/*Turret*`; tests.
 - **Acceptance criteria:**
-  - [ ] Turrets with a leader override fire at the leader and switch within one second when the lead changes.
-  - [ ] With no override they behave as before.
-- **Tests:** `TargetOverrideTests.Leader_Targeted`, `.None_Unchanged`.
+  - [x] Turrets with a leader override fire at the leader and switch within one second when the lead changes.
+  - [x] With no override they behave as before.
+- **Tests:** `TargetOverrideTests.Leader_Targeted`, `.None_Unchanged` (in `TurretAiTests.cs`, on its station fixture).
+- **Done (2026-10-17):** `RaceSystem` writes the leader's ship (place 1, not finished, while racing) to `RaceLapSignal.Leader`. `TargetOverrideSystem` (authority, before `AiDecisionSystem`) owns `TargetOverride`: it applies `TargetPolicy` actions to the AI roots of the action's group (Value 0 clears, 1 follows the leader) and points leader overrides at `RaceLapSignal.Leader`. In `AiThinkJob` a valid override (a live ship or station in the hash, inside the sensor) wins over the normal choice, hostile or not. A station turret took a leader 500 m out over a hostile at 300 m, fired, and switched 6 ticks after the lead changed; with no override, or a cleared one, it kept the nearest hostile. No gauntlet is placed on a track yet.
 
 ### HAZ-021 — Lane-gate portals
 - **Milestone:** M4
