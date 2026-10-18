@@ -117,7 +117,7 @@ namespace Game.Editor.Content
             return result;
         }
 
-        public const string Arm = "ship_track_arm", Door = "ship_track_door";
+        public const string Arm = "ship_track_arm", Door = "ship_track_door", SwitchPost = "ship_track_switch";
 
         /// <summary>HAZ-013: the moving structures (ADR-0119 decision 1) at 1 m cells, for the playground and later tracks.
         /// Arm: a 5 m hub column and a 40 m striped beam along +x, swept about the hub (the grid origin). Door: a 24 m × 12 m blast door
@@ -142,6 +142,14 @@ namespace Game.Editor.Content
                         byte c = x >= 39 ? Light : outer && ((x / 3) & 1) == 0 ? Gold : outer ? Soot : Graphite;
                         put(frame, x, y, z, c);
                     }
+                });
+                // HAZ-014: a 6 m post with a gold-ringed Switch cell on its face (−z) at the flight plane.
+                ushort switchBlock = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_switch")));
+                Make(service, content, SwitchPost, "Switch Post", 1, (put) =>
+                {
+                    for (int y = -3; y <= 3; y++) for (int x = -1; x <= 1; x++) for (int z = 0; z <= 1; z++) put(frame, x, y, z, y == 3 ? Bare : Graphite);
+                    foreach (var (x, y) in new[] { (-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1) }) put(frame, x, y, -1, Gold);
+                    put(switchBlock, 0, 0, -1, Gold);
                 });
                 Make(service, content, Door, "Blast Door", 1, (put) =>
                 {

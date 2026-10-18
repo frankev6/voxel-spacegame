@@ -8,13 +8,18 @@ namespace Game.Simulation.Mechanisms
     /// drifts from its path however long it runs, and every machine computes the same pose.</summary>
     public static class MoverMath
     {
-        /// <summary>Seconds since the mover started, at the start of <paramref name="tick"/> (0 before StartTick).</summary>
-        public static double Seconds(in Mover m, uint tick) => tick > m.StartTick ? (tick - m.StartTick) * SimTime.FixedTimestepD : 0;
+        /// <summary>Seconds along the path at the start of <paramref name="tick"/>, signed (a reversed rail can start "before" its
+        /// StartTick). A paused mover holds the time it was paused at; one that never played holds its StartTick pose.</summary>
+        public static double Seconds(in Mover m, uint tick)
+        {
+            long at = m.Playing != 0 ? tick : m.PausedTick != 0 ? m.PausedTick : m.StartTick;
+            return (at - (long)m.StartTick) * SimTime.FixedTimestepD;
+        }
 
-        /// <summary>The pose at <paramref name="tick"/>. A mover that is not playing holds the pose of its StartTick.</summary>
+        /// <summary>The pose at <paramref name="tick"/>.</summary>
         public static void Pose(in Mover m, NativeArray<MoverPoint> points, uint tick, out float3 position, out float yaw)
         {
-            double t = m.Playing != 0 ? Seconds(m, tick) : 0;
+            double t = Seconds(m, tick);
             switch (m.Path)
             {
                 case MoverPath.Rotate:

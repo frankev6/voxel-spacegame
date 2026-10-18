@@ -114,6 +114,30 @@ namespace Game.Simulation.Hazards
             foreach (var p in points) buffer.Add(p);
         }
 
+        /// <summary>HAZ-014: places a mechanism's rules with its group (ADR-0119 decision 2). Roots whose switches or instances
+        /// should fire it carry MechanismGroup; movers and zones it drives carry the same group (Mover.Group, WorldZone.Group).</summary>
+        public static Entity Mechanism(EntityManager em, MechanismDefinition def, ushort group)
+        {
+            if (def == null) throw new ArgumentException("HazardSpawn.Mechanism: no definition");
+            var e = em.CreateEntity(typeof(Game.Simulation.Mechanisms.Mechanism));
+            em.SetComponentData(e, new Game.Simulation.Mechanisms.Mechanism { Group = group });
+            var rules = em.AddBuffer<Game.Simulation.Mechanisms.MechanismRule>(e);
+            var actions = em.AddBuffer<Game.Simulation.Mechanisms.MechanismRuleAction>(e);
+            foreach (var rule in def.Rules)
+            {
+                var row = new Game.Simulation.Mechanisms.MechanismRule { Kind = (Game.Simulation.Mechanisms.MechanismTriggerKind)(byte)rule.When.Kind,
+                    Group = rule.When.Group, Value = rule.When.Value, Offset = rule.When.Offset, ActionStart = (ushort)actions.Length };
+                if (rule.Do != null)
+                    foreach (var a in rule.Do)
+                        actions.Add(new Game.Simulation.Mechanisms.MechanismRuleAction { Kind = (Game.Simulation.Mechanisms.MechanismActionKind)(byte)a.Kind,
+                            Group = a.Group, Value = a.Value, DelayTicks = (uint)math.max(0, math.round(a.DelaySeconds * 60)) });
+                row.ActionCount = (ushort)(actions.Length - row.ActionStart);
+                rules = em.GetBuffer<Game.Simulation.Mechanisms.MechanismRule>(e); rules.Add(row);
+                actions = em.GetBuffer<Game.Simulation.Mechanisms.MechanismRuleAction>(e);
+            }
+            return e;
+        }
+
         public static void SetEffectId(EntityManager em, Entity zone, ushort id)
         {
             var effects = em.GetBuffer<ZoneEffect>(zone);

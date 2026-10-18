@@ -16,7 +16,7 @@ using UnityEngine;
 
 namespace Game.Tests.EditMode.Simulation.Hazards
 {
-    /// <summary>HAZ-015 fixture: ZoneSystem with bodies moved by hand each tick and the clock advanced, so only zone impulses act.</summary>
+    /// <summary>HAZ-015 fixture: ZoneSystem with bodies moved by hand each tick (StepTicks advances the clock), so only zone impulses act.</summary>
     public abstract class ZoneFixtureBase : GameTestBase
     {
         protected EcsTestWorld world;
@@ -24,9 +24,11 @@ namespace Game.Tests.EditMode.Simulation.Hazards
         protected EntityManager EM => world.EntityManager;
         protected const float Dt = 1f / 60f;
 
-        [SetUp] public void SetUp() { world = CreateWorld(typeof(DamageStreamsSystem), typeof(ZoneSystem), typeof(ImpulseApplySystem)); world.AddGameplayActive(); world.AddSimClock(1); }
+        protected virtual System.Type[] Systems => new[] { typeof(DamageStreamsSystem), typeof(ZoneSystem), typeof(ImpulseApplySystem) };
+        [SetUp] public void SetUp() { world = CreateWorld(Systems); world.AddGameplayActive(); world.AddSimClock(1); }
         [TearDown] public void TearDown() { DisposeTrackedWorlds(); foreach (var a in assets) Object.DestroyImmediate(a); assets.Clear(); }
 
+        protected T Asset<T>() where T : ScriptableObject { var a = ScriptableObject.CreateInstance<T>(); assets.Add(a); return a; }
         protected ZoneDefinition Def(ZoneShape shape, Vector2 half, params ZoneDefinition.Effect[] effects)
         {
             var def = ScriptableObject.CreateInstance<ZoneDefinition>(); assets.Add(def);
@@ -65,9 +67,7 @@ namespace Game.Tests.EditMode.Simulation.Hazards
                 using (var es = q.ToEntityArray(Allocator.Temp))
                     foreach (var e in es)
                     { var t = EM.GetComponentData<LocalTransform>(e); t.Position += EM.GetComponentData<PhysicsVelocity>(e).Linear * Dt; EM.SetComponentData(e, t); }
-                world.StepTicks(1); EM.CompleteAllTrackedJobs();
-                using var clocks = EM.CreateEntityQuery(typeof(SimClock));
-                var clock = clocks.GetSingleton<SimClock>(); clock.Tick++; clocks.SetSingleton(clock);
+                world.StepTicks(1); EM.CompleteAllTrackedJobs();   // StepTicks advances SimClock
             }
         }
     }
@@ -120,8 +120,6 @@ namespace Game.Tests.EditMode.Simulation.Hazards
                 world.StepTicks(1); EM.CompleteAllTrackedJobs();
                 bool on = Velocity(ship).y < 10 - 1e-4f; if (on) slowed++;
                 if (on != ((tick + 10) % 90 < 30)) mismatched++;
-                using var clocks = EM.CreateEntityQuery(typeof(SimClock));
-                var clock = clocks.GetSingleton<SimClock>(); clock.Tick++; clocks.SetSingleton(clock);
             }
             Assert.AreEqual(90, slowed, "on for exactly 30 ticks in each of three periods");
             Assert.AreEqual(0, mismatched, "on exactly on its scheduled ticks");

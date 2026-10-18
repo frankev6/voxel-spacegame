@@ -229,6 +229,16 @@ public struct PortalTransit { public Entity Body; public ulong From, To; public 
 public struct TargetOverride : IComponentData { public Entity Target; public byte Policy; }   // on a turret group root (0 none, 1 leader, 2 fixed)
 public struct EnergyGrantRequest { public Entity Ship; public float Energy; public ProducerKind Producer; public uint Sequence; }  // SPEC-22 channel
 
+// HAZ-014: placed mechanisms and the action channel (Game.Simulation.Mechanisms)
+public struct Mechanism : IComponentData { public ushort Group; }   // + buffers MechanismRule { Kind, Group, Value, Offset, ActionStart, ActionCount }
+                                                                    //   and MechanismRuleAction { Kind, Group, Value, DelayTicks } (HazardSpawn.Mechanism)
+public struct MechanismGroup : IComponentData { public ushort Group; }   // on roots whose Switch blocks and instances fire this group's triggers
+public struct MechanismActions : IComponentData { public NativeList<MechanismAction> Current; public uint Tick; }   // writer: MechanismSystem
+public struct RaceLapSignal : IComponentData { public int LeaderLap; }   // writer: RaceSystem; read by RaceLap triggers
+// Action values (MechanismActionMath, poses stay continuous): MoverPlay Value < 0 pauses, else plays; MoverReverse Value > 0 runs backwards
+// (Toggle: to the first point), < 0 forwards (to the second), 0 flips; MoverSpeed Rotate/Drift rad/s, Rail m/s, Toggle travel s;
+// ZonePeriod Value = period s, keeping the on share. Mover gains PausedTick.
+
 // Content
 // MechanismDefinition: rules { trigger (kind, group or zone or block, value), actions[] }; placed with a group id by HazardSpawn
 ```
@@ -595,10 +605,15 @@ Why the rows sit below the first targets:
   - Implement `HazardSpawn` support for mechanism groups.
 - **Files:** `Assets/Game/Simulation/Mechanisms/MechanismSystem.cs`, `MechanismActions.cs`; `Assets/Game/Content/Blocks/block_switch.asset`; `Assets/Game/Content/Hazards/*`.
 - **Acceptance criteria:**
-  - [ ] Shooting a switch slams its door for its time, then the door reopens.
-  - [ ] A timer toggles a zone.
-  - [ ] Each action changes only state its owner writes (the role-policy test passes).
+  - [x] Shooting a switch slams its door for its time, then the door reopens.
+  - [x] A timer toggles a zone.
+  - [x] Each action changes only state its owner writes (the role-policy test passes).
 - **Tests:** `MechanismTests.Switch_SlamsDoor`, `.Timer_TogglesZone`, `.Actions_RouteToOwners`.
+- **Done (2026-10-17):**
+  - `MechanismSystem` (authority, post-physics after damage, zones and mines) reads switch hits (function HP drop ≥ `TriggerDamage`), destroyed instances, gate crossings and bounds entries from `ZoneContacts`, timers and `RaceLapSignal`. It writes due actions into `MechanismActions.Current`. `MoverSystem` and `ZoneSystem` apply them on their next update.
+  - Content: `block_switch`, `mechanism_blast_door` and `ship_track_switch`; playground pad 17 has a switch door.
+  - Tests: `MechanismTests.Switch_SlamsDoor` (PlayMode, a real plasma shot), `.Timer_TogglesZone`, `MechanismRoutingTests.Actions_RouteToOwners`, and `MechanismActionMathTests` (continuity).
+  - **Open:** the narrative `ICondition` trigger needs a managed bridge. Mine, turret, portal, spawn and narrative actions are written but have no owner yet (HAZ-018 to HAZ-022).
 
 ### HAZ-015 — Gravity wells and zone schedules
 - **Milestone:** M4
