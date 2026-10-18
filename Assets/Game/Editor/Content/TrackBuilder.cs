@@ -33,6 +33,7 @@ namespace Game.Editor.Content
             var bounds = Zone("zone_track_bounds", ZoneShape.Path, default, 1,
                 new ZoneDefinition.Effect { Kind = ZoneEffectKind.Bounds, Flags = ZoneEffectFlags.AffectsShips });
             WreckBuilder.EnsureBlock(); TrackStructureBuilder.EnsureBlock(); EnsureMineCasing();
+            TrackStructureBuilder.BuildTrack01Props();   // RACE-015: the rig and the flight-deck door
             AssetDatabase.SaveAssets();
             var mine = Mine();
             Track("track_01", boost, gate, wall, bounds, mine);
@@ -136,7 +137,10 @@ namespace Game.Editor.Content
             return mine;
         }
 
-        const byte ReactorSetPiece = 1;
+        const byte ReactorSetPiece = 1, PortalSetPiece = 2;
+        const byte DoorSetPiece = 3;
+        const float RigRate = 2 * Mathf.PI / 50;   // rad/s: one turn in 50 s, an arm over any point every 25 s, tips at 65 m/s
+        const float PortalJamSeconds = 6;   // track plan: "it jams 6 s after each use"
 
         /// <summary>RACE-015 (SPEC-92 decision 11, lap 3: "the reactor pulses every 4 s"): when the leader starts lap 3, the reactor's
         /// period drops from 8 s to 4 s.</summary>
@@ -451,6 +455,54 @@ namespace Game.Editor.Content
             var canisters = new List<Vector2>();
             if (json["canisters"] is JArray cans) foreach (var c in cans) canisters.Add(V(c));
             track.Canisters = canisters.ToArray();
+            // RACE-015 / HAZ-021: the ancient lane-gate: GATE IN to GATE OUT across the main route, jammed 6 s after each use (track plan).
+            var portals = new List<TrackPortal>();
+            if (json["portals"] is JArray gatesJson && gatesJson.Count >= 2)
+            {
+                var main = (JArray)json["paths"]["main"]["points"];
+                float width = (float)json["paths"]["main"]["width"];
+                (Vector2, float) OnMain(Vector2 q)
+                {
+                    int best = 0;
+                    for (int i = 1; i < main.Count; i++) if ((V(main[i]) - q).sqrMagnitude < (V(main[best]) - q).sqrMagnitude) best = i;
+                    Vector2 t = V(main[(best + 1) % main.Count]) - V(main[(best + main.Count - 1) % main.Count]);
+                    return (V(main[best]), Mathf.Atan2(t.x, t.y));   // on the centreline: the plan's marks sit up to 60 m off it
+                }
+                var (entry, entryYaw) = OnMain(V(gatesJson[0]["at_p"])); var (exit, exitYaw) = OnMain(V(gatesJson[1]["at_p"]));
+                portals.Add(new TrackPortal { Entry = entry, EntryYaw = entryYaw, Exit = exit, ExitYaw = exitYaw, Width = width, JamSeconds = PortalJamSeconds, SetPiece = PortalSetPiece });
+            }
+            track.Portals = portals.ToArray();
+            // RACE-015: the salvage rig sweeping the outer corner (HAZ-013), and the flight-deck blast door, slammed for 5 s from the
+            // switch that faces the outer line (HAZ-014, mechanism_blast_door): a racer outside can shut it on the ones inside.
+            var rig = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>("Assets/Game/Content/Ships/" + TrackStructureBuilder.Rig + ".asset");
+            var hangarDoor = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>("Assets/Game/Content/Ships/" + TrackStructureBuilder.HangarDoor + ".asset");
+            var switchPost = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>("Assets/Game/Content/Ships/" + TrackStructureBuilder.SwitchPost + ".asset");
+            var movers = new List<TrackMover>(); var switches = new List<TrackSwitch>(); var mechanisms = new List<TrackMechanism>(track.Mechanisms);
+            if (rig != null && json["sweepers"] is JArray sweepers)
+                foreach (JObject s in sweepers)
+                    movers.Add(new TrackMover { Blueprint = rig, Kind = TrackMoverKind.Rotate, Position = V(s["hub"]), Yaw = (float)s["phase"] * Mathf.Deg2Rad, Rate = RigRate });
+            var blastDoor = AssetDatabase.LoadAssetAtPath<MechanismDefinition>(Hazards + "mechanism_blast_door.asset");
+            if (hangarDoor != null && switchPost != null && blastDoor != null && json["doors"] is JArray doorsJson)
+            {
+                var hangarPts = (JArray)json["paths"]["hangar"]["points"];
+                foreach (JObject d in doorsJson)
+                {
+                    Vector2 at = V(d["at_p"]);
+                    int best = 0;
+                    for (int i = 1; i < hangarPts.Count; i++) if ((V(hangarPts[i]) - at).sqrMagnitude < (V(hangarPts[best]) - at).sqrMagnitude) best = i;
+                    Vector2 t = V(hangarPts[Mathf.Min(best + 1, hangarPts.Count - 1)]) - V(hangarPts[Mathf.Max(best - 1, 0)]);
+                    float yaw = Mathf.Atan2(t.x, t.y);
+                    var across = new Vector2(Mathf.Cos(yaw), -Mathf.Sin(yaw));   // the door's local +x
+                    // open: slid 64 m into the carrier's side; shut: across the deck. The mechanism's −1 drives it to the second point.
+                    movers.Add(new TrackMover { Blueprint = hangarDoor, Kind = TrackMoverKind.Toggle, Position = at + across * 64, To = at, Yaw = yaw, Rate = 1, SetPiece = DoorSetPiece });
+                    Vector2 sw = V(d["switch"]);
+                    // the switch cell is on the post's −z face: turn it to face the outer line, away from the deck
+                    Vector2 away = (sw - at).normalized;
+                    switches.Add(new TrackSwitch { Blueprint = switchPost, Position = TrackStructureBuilder.Place(sw, Mathf.Atan2(-away.x, -away.y)), Yaw = Mathf.Atan2(-away.x, -away.y), SetPiece = DoorSetPiece });
+                }
+                mechanisms.Add(new TrackMechanism { Mechanism = blastDoor, SetPiece = DoorSetPiece });
+            }
+            track.Movers = movers.ToArray(); track.Switches = switches.ToArray(); track.Mechanisms = mechanisms.ToArray();
             Debug.Log($"{id}: {pieces.Count} pieces, {total} wreck cells");
             EditorUtility.SetDirty(track);
             var errors = TrackValidator.Check(track);

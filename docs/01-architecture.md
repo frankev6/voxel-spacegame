@@ -427,6 +427,7 @@ Interact at a lane gate → `TravelService.RequestJump` (SPEC-32) → Spooling (
 | `Powered` bits, `ShipPower` | `PowerAllocationSystem` | Read |
 | `ShieldState` HP | `ShieldSystem` (resolves shield hits before grid damage) | Read |
 | Root `LocalTransform` and pending root `GridSpawnRequest.Pose` shift for floating origin (ADR-0113) | `OriginRebaseSystem` | — |
+| Root `LocalTransform` and `PhysicsVelocity.Linear` of a ship passing a lane-gate portal (ADR-0119 decision 3) | `PortalTransitSystem` (every machine, from `PortalTransits`; `PortalDecideSystem` decides on the authority) | — |
 | `FrameOrigin`, `UniversePosition` sync | `OriginRebaseSystem` | Read |
 | Loaded star system set | `StarSystemLoader` (the "StarSystemStreamingSystem" of §5) | Read |
 | Travel state (phase, destination, route) | `TravelService` | Read |

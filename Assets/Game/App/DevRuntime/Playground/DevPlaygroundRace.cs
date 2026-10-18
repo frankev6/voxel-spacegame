@@ -89,7 +89,17 @@ namespace Game.App.DevRuntime.Playground
                 });
                 em.AddComponentData(root, new Game.Galaxy.Components.UniversePosition { Value = frameOrigin + new double3(at.x, 0, at.y) });
                 return root;
-            }, spawnMines: true);
+            }, spawnMines: true, spawnMover: (blueprint, at, yaw, id) =>
+            {
+                var root = Game.Voxel.Grid.GridSpawnApi.RequestSpawnBlueprint(em, blueprint.Id.Hash, new Game.Voxel.Grid.GridSpawnParams
+                {
+                    PersistentId = id, Pose = new RigidTransform(quaternion.RotateY(yaw), new float3(at.x, 0, at.y)),
+                    Kind = Game.Voxel.Model.GridKind.Station, Motion = Game.Voxel.Model.GridMotion.Kinematic, Profile = Game.Voxel.Model.GridProfile.Station,
+                    Flags = Game.Voxel.Model.GridSpawnFlags.Transient
+                });
+                em.AddComponentData(root, new Game.Galaxy.Components.UniversePosition { Value = frameOrigin + new double3(at.x, 0, at.y) });
+                return root;
+            });
             var rs = em.GetComponentData<RaceState>(race);
             if (laps > 0) { rs.Laps = (byte)math.clamp(laps, 1, 20); em.SetComponentData(race, rs); }
 

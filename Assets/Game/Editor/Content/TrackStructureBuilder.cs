@@ -118,6 +118,7 @@ namespace Game.Editor.Content
         }
 
         public const string Arm = "ship_track_arm", Door = "ship_track_door", SwitchPost = "ship_track_switch";
+        public const string Rig = "ship_track_rig", HangarDoor = "ship_track_door_hangar";
 
         /// <summary>HAZ-013: the moving structures (ADR-0119 decision 1) at 1 m cells, for the playground and later tracks.
         /// Arm: a 5 m hub column and a 40 m striped beam along +x, swept about the hub (the grid origin). Door: a 24 m × 12 m blast door
@@ -161,8 +162,54 @@ namespace Game.Editor.Content
                     }
                 });
             }
+            BuildTrack01Props();
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built the mechanism props (HAZ-013).");
+        }
+
+        /// <summary>RACE-015: Track 01's moving set pieces. Rig (2 m cells): the salvage rig's 48 m hub and a ring at its 70 m reach, with two
+        /// arms out to 520 m either side, 4 m wide and 8 m tall, gold-striped with lit tips; it turns about the grid origin, which is the hub's
+        /// centre. Hangar door (1 m cells): a 64 m × 12 m blast door, 2 m thick, centred on the grid origin across x, for the carrier's flight deck.</summary>
+        public static void BuildTrack01Props()
+        {
+            EnsureBlock(); AssetDatabase.SaveAssets();
+            using (var service = new ContentService(ContentDatabaseBuilder.Rebuild()))
+            {
+                var catalog = service.Catalog;
+                var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
+                ushort frame = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_track_frame")));
+                ushort hull = catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId("block_hull")));
+                Make(service, content, Rig, "Salvage Rig", 2, (put) =>
+                {
+                    // cell centres at (i + .5) so the hub is centred on the grid origin, the pivot
+                    for (int x = -36; x < 36; x++) for (int z = -36; z < 36; z++)
+                    {
+                        float r = math.length(new float2(x + .5f, z + .5f));
+                        if (r <= 12) for (int y = -3; y < 3; y++) put(hull, x, y, z, y == 2 ? Bare : ((x ^ z) & 4) == 0 ? Steel : Graphite);
+                        else if (r >= 33 && r <= 35) for (int y = -1; y < 1; y++) put(frame, x, y, z, ((int)(math.atan2(z, x) * 12) & 1) == 0 ? Gold : Soot);
+                    }
+                    foreach (int side in new[] { -1, 1 })
+                        for (int k = 12; k < 260; k++)
+                        {
+                            int x = side > 0 ? k : -k - 1;
+                            for (int y = -2; y < 2; y++) for (int z = -1; z < 1; z++)
+                            {
+                                bool outer = y == -2 || y == 1;
+                                byte c = k >= 254 ? Light : outer && ((k / 4) & 1) == 0 ? Gold : outer ? Soot : Graphite;
+                                put(frame, x, y, z, c);
+                            }
+                        }
+                });
+                Make(service, content, HangarDoor, "Flight Deck Blast Door", 1, (put) =>
+                {
+                    for (int x = -32; x < 32; x++) for (int y = -6; y <= 5; y++) for (int z = 0; z <= 1; z++)
+                    {
+                        bool edge = x <= -31 || x >= 30 || y <= -5 || y >= 4;
+                        byte c = edge ? (((x + y) & 2) == 0 ? Gold : Soot) : (x & 3) == 0 ? Bare : Graphite;
+                        put(hull, x, y, z, c);
+                    }
+                });
+            }
         }
 
         /// <summary>Track-space position for a 1 m-cell structure whose centre column should stand at `centre`, spawned at `yaw`.</summary>

@@ -20,6 +20,9 @@ namespace Game.Data.Definitions
         public TrackMechanism[] Mechanisms = Array.Empty<TrackMechanism>();   // RACE-015: lap events and switches (ADR-0119 decision 2)
         public ShipBlueprintDefinition Canister;                      // RACE-015: the energy canister device (HAZ-019)
         public Vector2[] Canisters = Array.Empty<Vector2>();
+        public TrackPortal[] Portals = Array.Empty<TrackPortal>();    // RACE-015: lane-gate portals (HAZ-021), spawned on GateZone
+        public TrackMover[] Movers = Array.Empty<TrackMover>();       // RACE-015: moving structures (HAZ-013): the rig's arms, the flight-deck door
+        public TrackSwitch[] Switches = Array.Empty<TrackSwitch>();   // RACE-015: shootable switch posts (HAZ-014), each driving its set piece
         public Vector2[] Bounds = Array.Empty<Vector2>();             // closed polyline; becomes a Bounds zone (empty = none)
         public TrackSlot[] StartGrid = Array.Empty<TrackSlot>();      // ≥ 4
         public ZoneDefinition GateZone;                               // the gate zone every gate spawns (its effect Id is set per gate)
@@ -60,6 +63,15 @@ namespace Game.Data.Definitions
     }
     /// <summary>RACE-015: a mechanism placed with the track, acting on set piece SetPiece (1..15) or, with 0, on the track's own group.</summary>
     [Serializable] public struct TrackMechanism { public MechanismDefinition Mechanism; public byte SetPiece; }
+    /// <summary>RACE-015 / HAZ-021: a one-way lane-gate portal across the route. Crossing Entry along EntryYaw lands at Exit facing ExitYaw;
+    /// it then jams for JamSeconds. It is set piece SetPiece (a PortalJam mechanism can close it).</summary>
+    [Serializable] public struct TrackPortal { public Vector2 Entry; public float EntryYaw; public Vector2 Exit; public float ExitYaw; public float Width, JamSeconds; public byte SetPiece; }
+    public enum TrackMoverKind : byte { Rotate = 0, Toggle = 1 }
+    /// <summary>RACE-015: a kinematic structure on a Mover (ADR-0119 decision 1). Rotate turns about Position (the grid origin) at Rate rad/s from
+    /// Yaw; Toggle rests at Position (StartAtTo: at To) and travels between the two in 1 / Rate s when its set piece's mechanism reverses it.</summary>
+    [Serializable] public struct TrackMover { public ShipBlueprintDefinition Blueprint; public TrackMoverKind Kind; public Vector2 Position, To; public float Yaw, Rate; public bool StartAtTo; public byte SetPiece; }
+    /// <summary>RACE-015: a static switch post in set piece SetPiece; shooting its Switch block fires that set piece's mechanism (HAZ-014).</summary>
+    [Serializable] public struct TrackSwitch { public ShipBlueprintDefinition Blueprint; public Vector2 Position; public float Yaw; public byte SetPiece; }
     [Serializable] public struct TrackMines { public MineFieldDefinition Field; public Vector2 Position; public float Yaw; public uint Seed; }
     [Serializable] public struct TrackSlot { public Vector2 Position; public float Yaw; }
     [Serializable] public struct TrackPath { public string Name; public Vector2[] Points; public float Width; public bool Closed; public bool Interior; }

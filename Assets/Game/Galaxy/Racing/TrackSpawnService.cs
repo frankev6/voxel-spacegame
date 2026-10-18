@@ -1,3 +1,4 @@
+using Game.Simulation.Mechanisms;
 using System;
 using Game.Core;
 using Game.Data.Definitions;
@@ -15,7 +16,8 @@ namespace Game.Galaxy.Racing
     {
         /// <summary>Returns the race entity. Gate zone persistent ids are derived from the group so every machine agrees.</summary>
         public static Entity Spawn(EntityManager em, TrackDefinition track, float2 origin, ushort group, IPersistentIdAllocator ids,
-            Func<ShipBlueprintDefinition, float2, float, ulong, Entity> spawnPiece = null, bool spawnMines = false)
+            Func<ShipBlueprintDefinition, float2, float, ulong, Entity> spawnPiece = null, bool spawnMines = false,
+            Func<ShipBlueprintDefinition, float2, float, ulong, Entity> spawnMover = null)
         {
             if (track == null) throw new ArgumentException("TrackSpawnService.Spawn: no track");
             var errors = TrackValidator.Check(track);
@@ -77,6 +79,14 @@ namespace Game.Galaxy.Racing
                 legs.Add(new RaceLeg { From = (byte)leg.From, To = (byte)leg.To, Start = legPoints.Length, Count = leg.Points.Count, Length = leg.Length });
                 foreach (var point in RaceLines.Points(track, leg)) legPoints.Add(point);
             }
+            // RACE-015 / HAZ-021: the lane-gate portals, on the gate zone (their effect id keeps them out of the race's gate count).
+            if (track.Portals != null && track.GateZone != null)
+                foreach (var p in track.Portals)
+                {
+                    ulong entry = Id(), exit = Id();
+                    HazardSpawn.Portal(em, track.GateZone, origin + (float2)p.Entry, p.EntryYaw, origin + (float2)p.Exit, p.ExitYaw, p.Width, p.JamSeconds,
+                        p.SetPiece != 0 ? SetPieceGroup(group, p.SetPiece) : group, entry, exit);
+                }
             // RACE-015: the track's mechanisms (lap events, switches), on the track's group or a set piece's.
             if (track.Mechanisms != null)
                 foreach (var m in track.Mechanisms)
@@ -90,6 +100,31 @@ namespace Game.Galaxy.Racing
                     if (m.Field == null) continue;
                     var requests = new Entity[m.Field.Count];
                     HazardSpawn.MineField(em, m.Field, origin + (float2)m.Position, m.Yaw, m.Seed, group, ids, requests, p => NearWall(track, p - origin, MineWallClearance));
+                }
+            // RACE-015: moving set pieces (kinematic grids, spawned by spawnMover) and the switch posts that drive them.
+            if (spawnMover != null && track.Movers != null)
+                foreach (var m in track.Movers)
+                {
+                    if (m.Blueprint == null) continue;
+                    ushort moverGroup = m.SetPiece != 0 ? SetPieceGroup(group, m.SetPiece) : group;
+                    float2 from = origin + (float2)m.Position, to = origin + (float2)m.To;
+                    var root = spawnMover(m.Blueprint, m.StartAtTo ? to : from, m.Yaw, Id());
+                    if (root == Entity.Null) continue;
+                    em.AddComponentData(root, new TrackPieceOf { Group = group });
+                    if (m.Kind == TrackMoverKind.Rotate)
+                        HazardSpawn.AddMover(em, root, new Mover { Path = MoverPath.Rotate, Origin = new float3(from.x, 0, from.y), Yaw = m.Yaw, Rate = m.Rate, Playing = 1, Group = moverGroup });
+                    else
+                        HazardSpawn.AddMover(em, root, new Mover { Path = MoverPath.Toggle, Rate = m.Rate, Playing = 1, Reverse = (byte)(m.StartAtTo ? 0 : 1), Group = moverGroup },
+                            new[] { new MoverPoint { Pose = new float3(from.x, 0, from.y), Yaw = m.Yaw }, new MoverPoint { Pose = new float3(to.x, 0, to.y), Yaw = m.Yaw } });
+                }
+            if (spawnPiece != null && track.Switches != null)
+                foreach (var s in track.Switches)
+                {
+                    if (s.Blueprint == null) continue;
+                    var root = spawnPiece(s.Blueprint, origin + (float2)s.Position, s.Yaw, Id());
+                    if (root == Entity.Null) continue;
+                    em.AddComponentData(root, new TrackPieceOf { Group = group });
+                    em.AddComponentData(root, new MechanismGroup { Group = s.SetPiece != 0 ? SetPieceGroup(group, s.SetPiece) : group });
                 }
             if (spawnPiece != null)
                 foreach (var piece in track.Pieces)
