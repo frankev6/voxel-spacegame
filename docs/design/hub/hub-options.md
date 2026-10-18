@@ -35,6 +35,10 @@ After the first three options:
 > "and large mirror structures around the black hole syphoning its energy"
 >
 > "the moon or satelite in the top right corner is unnecessary because the black hole itself should have a strong gravity well. regarding the weird big panels idk what you think those are meant to represent? i asked for contraptions syphoning the black hole's energy"
+>
+> On D's quarters: "theres no defenses on the entrance of the hub" / "no differentiation between each section, just a gap in the city, the pit should be like a coliseum arena where ships fight" / "markets should be busier and have a bunch of ships trading in and out. imagine, this is where anything for new ships, experimental technology, black markets, etc gets done." / "there is no point to the breakers section 12, we already have a scrapyard (8)." / "the scrapyard should be much more akin to a place where large junk ships gets sliced with lasers or explosives into smaller chunks that are salvagable. im not asking us to simulate that but its what it should look like." / "the forge is meant to be a factory for NEW ships, it should look intricate machinery and ships halfway through building process, this is where the player can also edit their ship" / "the institute is where we trial experimental blocks, weapons, mechanics, etc. a combined range/institute should be a larger sector with different parts for each thing being tested"
+>
+> "also i do agree with all your points you mentioned above btw ... add to that, that buildings should have a cyberpunk feel to them with neon signage etc"
 
 ## What went wrong with the Proving Grounds
 
@@ -58,11 +62,26 @@ Option A's Meridian, rebuilt round a black hole. The hole is why the city exists
 - **Megastructures.** Each quarter is a few huge connected slabs, cut by narrow flight streets, stepped in tiers above and below the plane, with the city's deep decks hanging hundreds of metres beneath. Tanks, radiator fins, masts and docking arms cover them, and ships dock along every street. Open space is left only where something happens: the firing lanes, the arena, the drydocks, the slipways.
 - **Space forms, not skyscrapers.** Nothing stands on a floor. Habitat rings spin for weight, drums point their axis at the hole, radiators stand edge-on to it and the Siphons reach into it. Every form is centred on its own level.
 
+### D's quarters, after your review
+
+Clockwise from the north. Each quarter fills its arc with the machinery of its job, built in its own material, so none of them is a gap in the city.
+
+| Quarter | Arc | What it looks like, and what you do there |
+|---|---|---|
+| **The Forge** | 340°–60° | The shipworks. Three assembly lines run from the Current to the wall (small craft two abreast, cruisers, liners), each hull moving through its stations: a keel and ribs, half plated, plated in scaffold, finished and launched up the launch lane. Gantries straddle every hull, arms work it, welds flash; factory halls stand between the lines. The **Refit Dock** on the avenue is where you edit your ship (the Blueprint Lab beside it). The engine test stand blows its wash across the yard. |
+| **The Salvage Yard** | 60°–112° | The one scrapyard (the Breakers are merged into it). Three junk ships of 300–520 m lie in cradles, being cut across: the bow still whole, the cut-off sections drifting apart, red cutting lasers down onto the current seam from a gantry, charges flashing along the next. Tugs haul the chunks away, magnet cranes sort them onto rafts, and what nobody buys goes down the Drain into the hole. |
+| **The Exchange** | 112°–170° | The busiest place in the city: four trading houses (Tlaxcala, Khuchad, Vestari, the Swap), the **Tech Bazaar**'s prototype labs under field domes, the **Engine Mart**'s racks of engines for anyone building or refitting, four piers of berths all full, and a market canal crowded both ways. Under the wall, below the plane, the **Undermarket**: old hulks lashed together, red lamps, black-market goods, no questions. |
+| **The Bazaar** | the Grand Avenue | Neon-lit stalls line both sides of the avenue from the gate to the Current, each with a trader moored at it. It is the first street every arrival flies down. |
+| **Harbour Mouth** | 180° | Defended: two gun keeps with heavy turrets flank the gate ring, a shield curtain closes the gap to the gatehouses, four batteries stand off outside, a militia picket of cruisers and a heavy hull holds the approach, mine belts flank it, and every arrival passes under the customs gantries. The wall's platforms all carry guns. |
+| **The Pit** | 190°–240° | A coliseum. A bowl of five lit tiers steps down round a fighting floor bounded by a field wall, an outer wall of arches, floodlight masts, and the crowd's ships moored round the rim. A bout is under way: two raiders duelling, tracers crossing. Four gates start the four bouts. |
+| **The Circuit** | 247° | The racing quarter: the pit lane, the Slingshot trial round the hole, the start portal to Track 01. |
+| **Proving Grounds** | 255°–340° | The Range and the Institute in one large sector, with a part for each kind of trial: **the Line**, a hangar bay for every ship in every fit; **the Weapons Range**, firing lanes out to 800 m between field walls, with Turret Alley; **the Block Lab**, a grid of twelve test cells, one experimental block working in each; **the Mechanics trials**, an artificial gravity well, a live minefield, a pulse chamber behind blast walls and a portal pair. Trials Control's ring watches over it. |
+
 ### At play zoom, and what to polish before building
 
 ![D at play zoom](img/hub_play_sheet_d.jpg)
 
-The renders above are taken from 3 km up; the player sees about 200 m. At that zoom (left to right, top to bottom: a Siphon nozzle, the Current by Harbour Control, an Exchange street zoomed out and at the normal zoom, the gate from inside, the core):
+Left to right, top to bottom: the arrival, the core, the Forge, the Salvage Yard, the Exchange, an Exchange street at the normal zoom, the Pit, the Proving Grounds, the Harbour Mouth, a Siphon nozzle. What the first play-zoom renders showed:
 
 1. **The city stands up into the camera.** The slabs rise hundreds of metres above the flight plane, so at a 55° camera they lean into the lens and hide the streets and your ship. Recommended: hang the city's mass below the flight plane and fly over its roofs, docks and machinery; only masts, coils and docked ships rise above. (Owner decision.)
 2. **Walls are one glittering window grid.** Use hull plating, a few broad lit bands, docking lights and a material per quarter.
@@ -74,6 +93,8 @@ The renders above are taken from 3 km up; the player sees about 200 m. At that z
 8. **Streets are about 52 m wide.** Widen the main streets to 80–100 m.
 9. **Traffic cost.** About 200 ships at full physics is heavy: every ship within about 600 m of a player flies with real physics, distant ones are simulated cheaply and switch over as you approach.
 10. **The Siphon nozzles sit inside the Horizon Line.** They must read as a no-go, or a stunt for strong ships.
+
+You agreed all ten. Applied in the block-out: the city's mass hangs below the flight plane (roofs at 14–44 m below it; masts, coils, guns, signs and ships rise above); walls carry lit floor strips and neon trim bands instead of the window grid; every quarter has its own material; roofs carry neon sign boards and blades, and street edges neon trim (cyberpunk, as you asked); streets are 80 m wide and carry twice the traffic; lane lights are sparse and quiet, the Horizon Line is the one strong ring; radiators are rows of thin fins; the converters are power stations with field coils and visible conduits; hazard beacons ring each nozzle; the disk is brighter on its approaching side. Still for the build: the black hole's lensing and the physics hand-over for distant traffic.
 
 ## The first three options
 
@@ -118,7 +139,7 @@ A's walled harbour city, which you liked, keeps its nine quarters and its arriva
 - The hazards sit where a city would have them: the reactor in the power quarter, turrets on the wall, the old minefield outside it, the quarry moon's gravity.
 - C's gate could still stand outside A's wall as the Circuit's start gate, if you want the landmark too.
 
-## The quarters (every option has the same nine; D's names in brackets)
+## The quarters (options A–C; D's are above)
 
 | Quarter | Why it is there | What you can do |
 |---|---|---|
@@ -176,5 +197,5 @@ The world tells you what things are; text is the last resort.
 
 ## Decisions
 
-1. **Which city:** D (recommended), A, B or C, or a mix.
+1. **Which city:** D (recommended), A, B or C, or a mix. (Your review of D's quarters and the polish list are applied above.)
 2. **The civilian ship line:** approve the class list above, then silhouettes come for approval before any 3D.

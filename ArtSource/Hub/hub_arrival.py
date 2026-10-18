@@ -106,14 +106,14 @@ def blender_main(key, draft):
             return n.outputs[0]
         u = math_("ADD", sep.outputs["X"], sep.outputs["Y"])
         z = sep.outputs["Z"]
-        cu = math_("FLOOR", math_("DIVIDE", u, 4.5)); cv = math_("FLOOR", math_("DIVIDE", z, 3.6))
-        fu = math_("FRACT", math_("DIVIDE", u, 4.5)); fv = math_("FRACT", math_("DIVIDE", z, 3.6))
+        cu = math_("FLOOR", math_("DIVIDE", u, 36.0)); cv = math_("FLOOR", math_("DIVIDE", z, 7.0))
+        fu = math_("FRACT", math_("DIVIDE", u, 6.0)); fv = math_("FRACT", math_("DIVIDE", z, 7.0))
         comb = N.new("ShaderNodeCombineXYZ"); L.new(cu, comb.inputs[0]); L.new(cv, comb.inputs[1])
         L.new(math_("MULTIPLY", lit.outputs["Fac"], 97.0), comb.inputs[2])
         wn = N.new("ShaderNodeTexWhiteNoise"); wn.noise_dimensions = "3D"; L.new(comb.outputs[0], wn.inputs["Vector"])
-        on = math_("LESS_THAN", wn.outputs["Value"], math_("MULTIPLY", lit.outputs["Fac"], 0.5))
-        shape = math_("MULTIPLY", math_("MULTIPLY", math_("GREATER_THAN", fu, 0.18), math_("LESS_THAN", fu, 0.82)),
-                      math_("MULTIPLY", math_("GREATER_THAN", fv, 0.25), math_("LESS_THAN", fv, 0.7)))
+        on = math_("LESS_THAN", wn.outputs["Value"], math_("MULTIPLY", lit.outputs["Fac"], 0.32))
+        shape = math_("MULTIPLY", math_("MULTIPLY", math_("GREATER_THAN", fu, 0.08), math_("LESS_THAN", fu, 0.92)),
+                      math_("MULTIPLY", math_("GREATER_THAN", fv, 0.42), math_("LESS_THAN", fv, 0.62)))
         side = math_("LESS_THAN", math_("ABSOLUTE", sepn.outputs["Z"]), 0.5)
         win = math_("MULTIPLY", math_("MULTIPLY", on, shape), side)
         # warm and a few cool windows
@@ -125,11 +125,12 @@ def blender_main(key, draft):
         L.new(math_("MULTIPLY", win, 6.0), emc.inputs["Factor"])
         L.new(hue.outputs["Result"], emc.inputs["B"])
         # district accent bands: a lit line every 40 m of height
-        band = math_("MULTIPLY", math_("LESS_THAN", math_("FRACT", math_("DIVIDE", z, 40.0)), 0.04), side)
+        band = math_("MULTIPLY", math_("LESS_THAN", math_("FRACT", math_("DIVIDE", math_("SUBTRACT", 0.0, z), 48.0)), 0.035), side)
         emc2 = N.new("ShaderNodeMix"); emc2.data_type = "RGBA"
-        L.new(math_("MULTIPLY", band, 0.6), emc2.inputs["Factor"])
+        L.new(math_("MULTIPLY", band, 0.9), emc2.inputs["Factor"])
         L.new(emc.outputs["Result"], emc2.inputs["A"]); L.new(acc.outputs["Color"], emc2.inputs["B"])
         L.new(emc2.outputs["Result"], bsdf.inputs["Emission Color"])
+        bsdf.inputs["Emission Strength"].default_value = 2.2
         # depth: the lower city fades into dark haze
         dk = math_("EXPONENT", math_("DIVIDE", math_("MINIMUM", z, 0.0), 700.0))
         base = N.new("ShaderNodeMix"); base.data_type = "RGBA"; base.inputs["A"].default_value = hexrgb("#0B0D10")
@@ -144,9 +145,12 @@ def blender_main(key, draft):
     tone_l = bm.faces.layers.float_color.new("tone")
     lit_l = bm.faces.layers.float.new("lit")
     acc_l = bm.faces.layers.float_color.new("accent")
-    TONE = {"spire": "#CFC8B8", "spire_top": "#E0DACB", "gatehouse": "#CFC8B8", "relic_foot": "#ECE7DC", "sanctum": "#E4E9EE",
+    TONE = {"keel": "#E2D6B8", "rib": "#E2D6B8", "hull_new": "#7FA0B4", "spire": "#CFC8B8", "spire_top": "#E0DACB", "gatehouse": "#CFC8B8", "relic_foot": "#ECE7DC", "sanctum": "#E4E9EE",
             "warehouse": "#6C7075", "industrial": "#5E625E", "hangar": "#545A60", "cargo": "#7A6A4A", "market": "#A6A6A0",
             "wall": "#4A4E52", "bastion": "#5A5E62", "keel": "#8A8478", "rib": "#6C7075", "rib_tip": "#A6A6A0"}
+    DTONE = {"exchange": ["#B8AE98", "#C9BFA6", "#A89E8A"], "foundry": ["#4E5258", "#5A5E64", "#444A50"],
+             "breakers": ["#6E5A48", "#7A644E", "#5E5048"], "range": ["#D8DCE0", "#E6E8EA", "#C8CED4"],
+             "pit": ["#A8846A", "#B8927A", "#96745E"], "gate": ["#5A5E62", "#4A4E52"]}
     import random
     rng = random.Random(7)
     from mathutils import Matrix, Vector
@@ -257,7 +261,7 @@ def blender_main(key, draft):
         for i in range(n):
             j = (i + 1) % n
             faces.append(bm.faces.new((vb[i], vb[j], vt[j], vt[i])))
-        t = TONE.get(b["kind"], rng.choice(["#A6A6A0", "#9A9A92", "#B8B4A8", "#8A8E86", "#CFC8B8"]))
+        t = TONE.get(b["kind"]) or rng.choice(DTONE.get(b.get("district"), ["#A6A6A0", "#9A9A92", "#B8B4A8", "#8A8E86", "#CFC8B8"]))
         tc = hexrgb(t)
         k = 0.8 + rng.random() * 0.3
         ac = hexrgb(DISTRICT.get(b.get("district") or "", "#FFE2B0"))
@@ -279,7 +283,7 @@ def blender_main(key, draft):
         b_ = m.node_tree.nodes["Principled BSDF"]
         b_.inputs["Emission Color"].default_value = hexrgb("#FFE6C0"); b_.inputs["Emission Strength"].default_value = 0.25
         return m
-    pmat = {"collector": mat_flat("collector", "#1A2238", 0.15, 0.9), "radiator": mat_emit("radiator", "#C2461E", 2.2),
+    pmat = {"collector": mat_flat("collector", "#1A2238", 0.15, 0.9), "radiator": mat_emit("radiator", "#8A2A10", 0.9),
             "mirror": mat_flat("mirror", "#C8D0DA", 0.05, 1.0), "mirror_petal": petal_mat(),
             "coil": mat_flat("coil", "#D8DCE0", 0.25, 1.0), "coil_glow": mat_emit("coil_glow", "#9FE4FF", 40.0)}
     for k_, pb in panel_bm.items():
@@ -313,7 +317,8 @@ def blender_main(key, draft):
     lane_cols = bm.faces.layers.float_color.new("col")
     for ln in opt["lanes"]:
         pts = ln["pts"] + ([ln["pts"][0]] if ln["closed"] else [])
-        step = 26.0 if ln["kind"] != "street" else 40.0
+        # one quiet lane language (owner review: too many dotted lines): sparse cool dots, the approaches green/amber
+        step = 70.0 if ln["kind"] != "street" else 110.0
         acc_ = 0.0
         for i in range(len(pts) - 1):
             a, b = pts[i], pts[i + 1]
@@ -323,9 +328,10 @@ def blender_main(key, draft):
             t = (step - acc_) / d
             while t <= 1.0:
                 p = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
-                r = 1.6 if ln["kind"] != "street" else 1.0
+                r = 1.2 if ln["kind"] != "street" else 0.8
                 vs = [bm.verts.new((p[0] + dx, p[1] + dy, 0.5)) for dx, dy in ((-r, -r), (r, -r), (r, r), (-r, r))]
-                f = bm.faces.new(vs); f[lane_cols] = hexrgb(LANE.get(ln["kind"], "#9FE0C8"))
+                f = bm.faces.new(vs)
+                f[lane_cols] = hexrgb(LANE[ln["kind"]] if ln["kind"] in ("approach_in", "approach_out", "slingshot", "drain") else "#9FB4C8")
                 t += step / d
             acc_ = (acc_ + d) % step
     bm.to_mesh(lm); bm.free()
@@ -333,7 +339,7 @@ def blender_main(key, draft):
     m = bpy.data.materials.new("lanelights"); m.use_nodes = True
     nt = m.node_tree; nt.nodes.clear()
     at = nt.nodes.new("ShaderNodeAttribute"); at.attribute_name = "col"; at.attribute_type = "GEOMETRY"
-    em = nt.nodes.new("ShaderNodeEmission"); em.inputs["Strength"].default_value = 30.0
+    em = nt.nodes.new("ShaderNodeEmission"); em.inputs["Strength"].default_value = 14.0
     nt.links.new(at.outputs["Color"], em.inputs["Color"])
     out = nt.nodes.new("ShaderNodeOutputMaterial"); nt.links.new(em.outputs[0], out.inputs[0])
     lm.materials.append(m)
@@ -371,9 +377,31 @@ def blender_main(key, draft):
         elif t == "field_wall":
             a, b = fx["a"], fx["b"]
             c = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); hd = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
-            add_box("field", c, hd, math.dist(a, b), 1.5, 40, 0, mat_emit("field", "#9FE0C8", 3.0))
+            add_box("field", c, hd, math.dist(a, b), 0.8, 14, 0, mat_emit("field", "#9FE0C8", 1.2))
         elif t == "hulk":
-            add_box("hulk", fx["c"], fx["heading"], fx["length"], fx["width"], fx["width"] * 0.5, 0, mat_flat("hulk", "#4E4C46", 0.8, 0.2))
+            # a dead ship, not a box: a scarred hull, its bow tapering, deckhouses on its back, cut faces still molten
+            L_, W_, hd = fx["length"], fx["width"], fx["heading"]
+            hm = mat_flat("hulk", "#4E4C46", 0.85, 0.25); rust = mat_flat("hulk_rust", "#6E4A34", 0.9, 0.1)
+            hr = random.Random(int(fx["c"][0] * 13 + fx["c"][1] * 7))
+            body = L_ * (0.78 if fx.get("bow") else 1.0)
+            bc = polar(hd, -(L_ - body) / 2, fx["c"])
+            add_box("hulk", bc, hd, body, W_, W_ * 0.5, 0, hm)
+            for k in range(hr.randint(2, 5)):
+                add_box("hulk_deck", polar(hd + 90, hr.uniform(-0.3, 0.3) * W_, polar(hd, hr.uniform(-0.4, 0.4) * body, bc)), hd,
+                        hr.uniform(0.08, 0.2) * L_, hr.uniform(0.2, 0.5) * W_, W_ * 0.25, W_ * 0.3, hr.choice([hm, rust]))
+            for k in range(hr.randint(2, 4)):
+                add_box("hulk_plate", polar(hd + 90, hr.choice([-1, 1]) * W_ * 0.5, polar(hd, hr.uniform(-0.45, 0.45) * body, bc)), hd,
+                        hr.uniform(0.1, 0.25) * L_, 3, W_ * 0.4, 0, rust)
+            if fx.get("bow"):
+                bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=W_ * 0.7, radius2=W_ * 0.12, depth=L_ - body,
+                                                location=(*polar(hd, L_ / 2 - (L_ - body) / 2, fx["c"]), 0))
+                o = bpy.context.active_object
+                o.rotation_euler = (math.radians(-90), 0, -math.radians(hd))      # its +z (the point) along the heading
+                o.scale = (1.0, 0.5, 1.0); o.data.materials.append(hm)
+            molten = mat_emit("molten", "#FF7A2F", 18.0)
+            for end, flag in ((1, "cut_front"), (-1, "cut_back")):
+                if fx.get(flag):
+                    add_box("cut", polar(hd, end * (body / 2 + 0.6), bc), hd, 1.2, W_ * 0.94, W_ * 0.46, 0, molten)
         elif t in ("target_station",):
             bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=60, depth=40, location=(fx["c"][0], fx["c"][1], 0))
             bpy.context.active_object.data.materials.append(mat_flat("tgt", "#8A8478"))
@@ -408,8 +436,13 @@ def blender_main(key, draft):
                 Lk.new(tc.outputs["Object"], wv.inputs["Vector"])
                 mix = N.new("ShaderNodeMath"); mix.operation = "MULTIPLY_ADD"; mix.inputs[1].default_value = 0.5; mix.inputs[2].default_value = 0.6
                 Lk.new(wv.outputs["Fac"], mix.inputs[0])
+                sx = N.new("ShaderNodeSeparateXYZ"); Lk.new(tc.outputs["Object"], sx.inputs[0])
+                dx = N.new("ShaderNodeMath"); dx.operation = "DIVIDE"; Lk.new(sx.outputs["X"], dx.inputs[0]); Lk.new(vl.outputs["Value"], dx.inputs[1])
+                dp = N.new("ShaderNodeMath"); dp.operation = "MULTIPLY_ADD"; dp.inputs[1].default_value = 0.75; dp.inputs[2].default_value = 1.0
+                Lk.new(dx.outputs[0], dp.inputs[0])
+                dop = N.new("ShaderNodeMath"); dop.operation = "MULTIPLY"; Lk.new(mix.outputs[0], dop.inputs[0]); Lk.new(dp.outputs[0], dop.inputs[1])
                 st = N.new("ShaderNodeMath"); st.operation = "MULTIPLY"; st.inputs[1].default_value = strength
-                Lk.new(mix.outputs[0], st.inputs[0])
+                Lk.new(dop.outputs[0], st.inputs[0])
                 em = N.new("ShaderNodeEmission"); Lk.new(ramp.outputs["Color"], em.inputs["Color"]); Lk.new(st.outputs[0], em.inputs["Strength"])
                 tr = N.new("ShaderNodeBsdfTransparent"); ms = N.new("ShaderNodeMixShader")
                 al = N.new("ShaderNodeMath"); al.operation = "SUBTRACT"; al.inputs[0].default_value = 1.0
@@ -429,17 +462,17 @@ def blender_main(key, draft):
         elif t == "buoys":
             n = int(2 * math.pi * fx["r"] / fx.get("every", 60))
             col = "#FF3C28" if fx["col"][1] < 100 else "#FFB347"
-            mb = mat_emit("buoy" + col, col, 60.0)
+            mb = mat_emit("buoy" + col, col, 50.0 if col == "#FF3C28" else 20.0)
             for k in range(n):
                 q = polar(k * 360 / n, fx["r"], fx["c"])
-                bpy.ops.mesh.primitive_uv_sphere_add(radius=3.5, location=(q[0], q[1], 0), segments=8, ring_count=4)
+                bpy.ops.mesh.primitive_uv_sphere_add(radius=4.5 if col == "#FF3C28" else 2.5, location=(q[0], q[1], 0), segments=8, ring_count=4)
                 bpy.context.active_object.data.materials.append(mb)
         elif t == "conduit":
-            mc = mat_emit("conduit", "#9FD8FF", 18.0)
+            mc = mat_emit("conduit", "#9FD8FF", 30.0)
             pts = fx["pts"]
             for a, b in zip(pts, pts[1:]):
                 c = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); hd = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
-                add_box("conduit", c, hd, math.dist(a, b), 3, 3, 8, mc)
+                add_box("conduit", c, hd, math.dist(a, b), 7, 7, fx.get("z", 8), mc)
         elif t == "plasma":
             for name_, k_, col, st in (("plasma_core", 0.45, "#FFF6E4", 60.0), ("plasma_sheath", 1.0, "#FF9A40", 6.0)):
                 cu = bpy.data.curves.new(name_, "CURVE"); cu.dimensions = "3D"
@@ -450,6 +483,39 @@ def blender_main(key, draft):
                 sp_.order_u = 3; sp_.use_endpoint_u = True
                 o = bpy.data.objects.new(name_, cu); scene.collection.objects.link(o)
                 o.data.materials.append(mat_emit(name_, col, st))
+        elif t == "neon":
+            hd = fx["heading"]
+            o = add_box("neon", fx["c"], hd, fx["length"], 0.8, fx["height"], fx["z"], mat_emit("neon" + fx["col"], fx["col"], 30.0))
+            # a sign is a lit board, not a bar: tilt it to the camera
+            o.rotation_euler = (math.radians(-35) * math.cos(math.radians(hd)), 0, -math.radians(hd))
+        elif t == "neon_line":
+            mn = mat_emit("neon" + fx["col"], fx["col"], 30.0)
+            pts = fx["pts"]
+            for a, b in zip(pts, pts[1:]):
+                c = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); hd = math.degrees(math.atan2(b[0] - a[0], b[1] - a[1]))
+                add_box("neon_l", c, hd, math.dist(a, b), 1.2, 1.2, fx["z"], mn)
+        elif t == "flash":
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=fx["r"], location=(fx["c"][0], fx["c"][1], fx["z"]), segments=12, ring_count=6)
+            bpy.context.active_object.data.materials.append(mat_emit("flash" + fx["col"] + str(fx["r"] > 10), fx["col"],
+                                                                     25.0 if fx["r"] <= 3 else 60.0 if fx["r"] <= 10 else 12.0))
+        elif t == "debris":
+            dm_ = mat_flat("debris", "#5A5246", 0.9, 0.2)
+            rr = random.Random(int(fx["c"][0] * 3 + fx["c"][1]))
+            for k in range(fx["n"]):
+                q = polar(rr.uniform(0, 360), fx["r"] * math.sqrt(rr.random()), fx["c"])
+                o = add_box("debris", q, rr.uniform(0, 360), rr.uniform(4, 16), rr.uniform(3, 9), rr.uniform(2, 6), rr.uniform(-12, 12), dm_)
+                o.rotation_euler = (rr.uniform(0, 3), rr.uniform(0, 3), rr.uniform(0, 6))
+        elif t == "minefield":
+            mm = mat_emit("mine", "#FF3C28", 40.0)
+            rr = random.Random(int(fx["c"][0] * 7 + fx["c"][1]))
+            for k in range(fx["n"]):
+                q = polar(rr.uniform(0, 360), fx["r"] * math.sqrt(rr.random()), fx["c"])
+                bpy.ops.mesh.primitive_uv_sphere_add(radius=3, location=(q[0], q[1], 0), segments=8, ring_count=4)
+                bpy.context.active_object.data.materials.append(mm)
+        elif t == "target":
+            bpy.ops.mesh.primitive_torus_add(major_radius=20, minor_radius=2, location=(fx["c"][0], fx["c"][1], 0),
+                                             rotation=(math.radians(55), 0, 0))
+            bpy.context.active_object.data.materials.append(mat_emit("target", "#FF5530", 20.0))
         elif t == "beam":
             a, b = fx["a"], fx["b"]
             from mathutils import Vector
@@ -458,7 +524,9 @@ def blender_main(key, draft):
             bpy.ops.mesh.primitive_cylinder_add(radius=3.0, depth=d_.length, location=(p0 + p1) / 2, vertices=8)
             o = bpy.context.active_object
             o.rotation_euler = d_.to_track_quat("Z", "Y").to_euler()
-            o.data.materials.append(mat_emit("beam", "#FFF0D0", 25.0))
+            o.data.materials.append(mat_emit("beam" + fx.get("col", "#FFF0D0"), fx.get("col", "#FFF0D0"), 25.0))
+            if fx.get("col"):
+                o.scale = (0.5, 0.5, 1.0)
         elif t == "canister":
             bpy.ops.mesh.primitive_uv_sphere_add(radius=5, location=(fx["c"][0], fx["c"][1], 0), segments=8, ring_count=4)
             bpy.context.active_object.data.materials.append(mat_emit("cell", "#FFB347", 40.0))
@@ -471,7 +539,7 @@ def blender_main(key, draft):
         if h.get("small"):
             continue
         cu = bpy.data.curves.new("holo", "FONT"); cu.body = h["text"]; cu.font = font
-        cu.size = 150 if h.get("grand") else 46; cu.align_x = "CENTER"; cu.align_y = "CENTER"
+        cu.size = 110 if h.get("grand") else 46; cu.align_x = "CENTER"; cu.align_y = "CENTER"
         o = bpy.data.objects.new("holo", cu); scene.collection.objects.link(o)
         o.location = (h["at"][0], h["at"][1] - (200 if h.get("grand") else 0), 330 if h.get("grand") else 170)
         o.rotation_euler = (math.radians(35), 0, 0)

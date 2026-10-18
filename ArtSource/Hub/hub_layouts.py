@@ -963,11 +963,16 @@ def draw_shape(v, b, rng):
         v.line([lerp(pts[0], pts[3], 0.5), lerp(pts[1], pts[2], 0.5)], shade((150, 150, 140), dim) + (220,), max(v.px(1.5), v.m(p.get("width", 6))))
 
 
+# each quarter builds in its own material (owner: "no differentiation between each section")
+DISTRICT_BASE = {"exchange": (86, 80, 70), "foundry": (58, 62, 68), "breakers": (78, 64, 52), "range": (104, 108, 112),
+                 "pit": (96, 74, 60), "gate": (62, 66, 70)}
+
+
 def draw_building(v, b, rng):
     if b.get("shape"):
         return draw_shape(v, b, rng)
     pts = b["pts"]
-    base = (70, 72, 68)
+    base = DISTRICT_BASE.get(b.get("district"), (70, 72, 68))
     tone = KIND_TONE.get(b["kind"], 1.0) * (0.75 + min(b["h"], 600) / 1400)
     if b["kind"].startswith("relic"):
         base = (150, 128, 84)
@@ -1118,6 +1123,19 @@ def draw_fx(v, fx, fonts):
     elif t == "conduit":
         for w_, al in ((14, 30), (6, 90), (2, 255)):
             v.line(fx["pts"], (159, 216, 255, al), v.px(w_))
+    elif t == "neon":
+        a = polar(fx["heading"], -fx["length"] / 2, fx["c"]); b = polar(fx["heading"], fx["length"] / 2, fx["c"])
+        col = tuple(int(fx["col"][i:i + 2], 16) for i in (1, 3, 5))
+        for w_, al in ((7, 50), (3, 140), (1.2, 255)):
+            v.line([a, b], col + (al,), max(v.px(w_), v.m(fx["height"] * 0.25)))
+    elif t == "neon_line":
+        col = tuple(int(fx["col"][i:i + 2], 16) for i in (1, 3, 5))
+        for w_, al in ((4, 40), (1.2, 220)):
+            v.line(fx["pts"], col + (al,), v.px(w_))
+    elif t == "flash":
+        col = tuple(int(fx["col"][i:i + 2], 16) for i in (1, 3, 5))
+        for k_, al in ((3.0, 40), (1.6, 110), (0.7, 255)):
+            v.circle(fx["c"], fx["r"] * k_, fill=col + (al,))
     elif t == "plasma":
         # plasma drawn off the disk: a hot stream, thick where it leaves the disk, thinning up the boom
         pts, rad = fx["pts"], fx["r"]
@@ -1126,8 +1144,9 @@ def draw_fx(v, fx, fonts):
             for k_, al, col in ((3.0, 40, (255, 150, 60)), (1.6, 110, (255, 190, 110)), (0.6, 255, (255, 246, 228))):
                 v.line([a, b], col + (al,), max(v.px(1), v.m(w * k_)))
     elif t == "beam":
+        col = tuple(int(fx["col"][i:i + 2], 16) for i in (1, 3, 5)) if fx.get("col") else (255, 236, 200)
         for w_, al in ((10, 40), (3, 255)):
-            v.line([fx["a"], fx["b"]], (255, 236, 200, al), v.px(w_))
+            v.line([fx["a"], fx["b"]], col + (al,), v.px(w_))
     elif t == "flare_shadow":
         v.poly(fx["pts"], fill=(0, 0, 0, 90))
     elif t == "canister":
