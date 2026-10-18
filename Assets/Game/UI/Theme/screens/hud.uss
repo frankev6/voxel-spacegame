@@ -11,6 +11,12 @@
 .hud-blip--station { width: 10px; height: 10px; }
 .hud-blip--body { border-radius: 50%; }
 .hud-blip--poi, .hud-blip--waypoint { border-color: var(--color-objective); }
+/* each kind its own colour (owner: "the dots should be colored correspondly to their meaning"): ships by relation (the marker
+   colours), stations accent, points of interest objective, wrecks a faint small dot */
+.hud-blip--station.marker--neutral { background-color: var(--color-accent); border-color: var(--color-accent); }
+.hud-blip--poi.marker--neutral { background-color: var(--color-objective); border-color: var(--color-objective); border-radius: 50%; }
+.hud-blip--wreck { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; opacity: 0.55; }
+.hud-blip--wreck.marker--neutral, .hud-blip--wreck.marker--enemy, .hud-blip--wreck.marker--ally { background-color: var(--color-text-muted); border-color: var(--color-text-muted); }
 .hud-blip--beyond { opacity: 0.65; }
 .hud-target { width: 306px; top: 55%; }
 .hud-target-heading, .hud-number-line, .hud-prompt-main { flex-direction: row; align-items: center; }

@@ -26,6 +26,7 @@ namespace Game.Presentation.Jobs
         [ReadOnly] public EntityTypeHandle Entities;
         [ReadOnly] public ComponentTypeHandle<LocalToWorld> Transforms;
         [ReadOnly] public ComponentLookup<VoxelGrid> Grids;
+        [ReadOnly] public ComponentLookup<Game.Voxel.Damage.Hulk> Hulks;
         [ReadOnly] public ComponentLookup<Allegiance> Allegiances;
         [ReadOnly] public FactionRelations Relations;
         public float3 PlayerPosition;
@@ -50,6 +51,7 @@ namespace Game.Presentation.Jobs
                 byte faction = Allegiances.HasComponent(entity) ? Allegiances[entity].Faction : (byte)255;
                 byte kind = Kind;
                 if (kind == 0 && Grids.HasComponent(entity) && Grids[entity].Kind == GridKind.Station) kind = 1;
+                if (kind <= 1 && Hulks.HasComponent(entity)) kind = 4;   // a wreck
                 byte flags = (byte)(entity == Target ? 1 : 0);
                 if (entity == Waypoint && Waypoint != Entity.Null) flags |= 4;
                 if (distanceSq > Range * Range) { offset *= Range * math.rsqrt(distanceSq); flags |= 2; }
