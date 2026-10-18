@@ -635,6 +635,20 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [ ] Direct Editor Play from World automatically enters the playground once ready. A visible Console control and tools/playtest/playground.sh provide entry without function keys. Temporary presentation cleans up on session exit; release builds exclude the playground.
 - **Tests:** `PlaygroundTests.Enter_Interact_Reset` (one owner-feature functional test; direct operations, no combat soak).
 
+### DEV-022 — The ARK Proving Grounds: a mechanics hub
+- **Milestone:** M4
+- **Tier:** frontier — world layout, presentation and composition over many owners
+- **Depends on:** `DEV-021`, `HAZ-013`, `HAZ-021`, `RACE-016`
+- **Do:** Owner (2026-10-18): "the dev playground doesn't work well as a playground at all right now, its hard to find which circle does what, i'd rather have an easy so access portal for each thing, and mechanics playground, easy reset button so I can test easily. things like "menu X" are not playground worthy. but like a "merchant ship" I can interact with to trade is good. the placeground should be in a bustling spacehub that I can explore organicaly and see how everything works. it should get the same amount of love we've given to the racetrack, lights, polish, text on walls/ground, signs, etc, separate section for each group of related things we are testing." Replace DEV-021's beacon circles with a space hub: a plaza with a hub station, the spawn and a ring of real lane-gate portals, one per district; nine districts (flight, weapons, combat, hazards, mechanisms, shipyard, market, salvage, race), each with an entrance, its title and tagline on the floor, its exhibits labelled, F stations and a red reset pad; a return portal in each district; lanes and two traffic loops of moving ships. Signs are an original 5 × 7 dot-matrix font drawn in the race hologram shader (one dot per glyph pixel). Exhibits spawn when a pilot first comes near a district; its reset pad despawns and respawns them. Menu-only screens leave the world and stay `playground run=` shortcuts. Ship swaps come from parked display ships and return the pilot to their pad.
+- **Files:** `Assets/Game/App/DevRuntime/Playground/PlaygroundHub*.cs`, `DevPlayground.cs`, `Assets/Game/Presentation/Racing/{PixelFont,HoloMesh}.cs`, `Assets/Game/Editor/Content/HubStructureBuilder.cs`, `FiringRangeService.Restore`, `PlaygroundTests`, `tools/playtest/README.md`
+- **Acceptance criteria:**
+  - [x] Every district is reachable by a portal from the plaza and back, and by flying.
+  - [x] Every F station names itself on the floor; menu-only screens are console shortcuts, not places.
+  - [x] Each district has a reset pad that restores only that district; RESET EVERYTHING rebuilds the session.
+  - [x] The market's merchant is a moored ship whose TRADE pad opens the real merchant screen; the shipyard swaps ships from parked display ships.
+  - [x] Lights, lanes, traffic, floor and wall text in the race track's hologram language.
+- **Tests:** `PlaygroundTests.Enter_Interact_Reset` (extended: off-pad spawn, the slalom station, console-only screens, a real F press on the TRADE pad).
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

@@ -30,37 +30,11 @@ namespace Game.App.DevRuntime.Playground
     /// <summary>DEV-021: development-only presentation and command composition. Simulation remains with its owners.</summary>
     internal sealed class DevPlayground : IDisposable
     {
-        sealed class Pad
-        {
-            internal readonly string Id, Title, Detail;
-            internal readonly float3 Offset;
-            internal Label Label;
-            internal LineRenderer Ring;
-            internal Pad(string id, string title, float x, float z, string detail)
-            { Id = id; Title = title; Offset = new float3(x, 0, z); Detail = detail; }
-        }
+        // DEV-022: the F pads are the hub's stations (PlaygroundHub). Screens that are only menus (cargo, settings, fleet, story log,
+        // survey, map, power instruments) have no place in the world; they stay console shortcuts: playground run=<id>.
+        [Game.Core.StaticStateOk("constant id list")] static readonly string[] ConsoleOnly = { "cargo", "settings", "fleet", "story", "survey", "map", "power" };
         readonly DevRuntimeHost host;
-        readonly Pad[] pads = {
-            new Pad("flight", "01  FLIGHT / THRUSTERS", -160, 0, "W/S forward/reverse · A/D turn · Shift+A/D strafe · Q/E strafe\nCtrl boost · X brake · Mouse wheel camera zoom. F starts a four-gate course. Fly through the highlighted rings to complete it."),
-            new Pad("range", "02  DESTRUCTION / VFX", 0, 0, "Space fires. Aim at the narrow pod bridges to detach pieces; destroy the core for a drifting hulk.\nAlso tests tracers, impacts, sparks, explosions, smoke, debris, sound and collider updates. Reset restores all targets."),
-            new Pad("combat", "03  OPT-IN ENEMY", 560, 0, "F starts one hostile fighter facing you. Real AI, weapons, damage, power and player-death flow.\nOne enemy per reset. It can pursue you: finish the trial or use playground reset before another trial."),
-            new Pad("cargo", "04  CARGO / CREDITS", -160, -180, "F grants fuel and 1000 credits through the real inventory/wallet owners. Repeat to exercise stacking/capacity.\nOpens your inventory: drag items, inspect, sort and stack cargo."),
-            new Pad("settings", "05  SETTINGS", 0, -180, "F opens real settings. Change audio, display, accessibility and control settings; close to return to flight."),
-            new Pad("merchant", "06  TRADE", 160, -180, "F opens ARK Station Market with real stock, prices, Buy and Sell. First visit grants 2000 test credits; trades change your actual cargo and wallet."),
-            new Pad("fleet", "07  FLEET", -320, -180, "F opens your actual fleet. Select a ship to inspect hull condition, blocks, thrust, power, shields and cargo capacity. Docked fleet editing is separate from the creative Lab beacon."),
-            new Pad("editor", "08  BLUEPRINT LAB", -320, 0, "F opens the real creative Blueprint Lab. Place/remove blocks, rotate, mirror, undo/redo, inspect overlays and save a blueprint.\nThis leaves the sandbox. Use playground reset directly to return. Saved blueprints survive reset."),
-            new Pad("story", "09  STORY / SHIP LOG", -160, -360, "F accepts the authored Survey Local Materials quest and reveals Fragmented Warning plus a targeted research-station rumor.\nInspect the real log: track the quest, read the clue, or select Rumors → Show on map. No campaign intro starts."),
-            new Pad("survey", "10  SURVEY SUPPLIES", 0, -360, "F collects one actual palladium (up to three) and opens the survey log. Repeat to see real objective progress and completion of the collection step.\nThe ARK delivery step stays unfinished here; use the campaign for its station dialogue."),
-            new Pad("map", "11  GALAXY / RUMOR", 160, -360, "F opens the real galaxy map at the research-station rumor. Pan, zoom, inspect systems and the quest/rumor markers.\nThis previews the generated galaxy without loading its bodies or starting travel; your sandbox ship stays here."),
-            new Pad("power", "12  POWER / ABILITIES", -320, -360, "F opens live power and shield instruments. Toggle shield or trigger Speed Boost using the buttons or equipped ability keys. Console: playground run=shield or run=boost."),
-            new Pad("campaign", "13  PRACTICE CAMPAIGN", -160, -540, "F starts the real opening campaign in the isolated playground profile: dialogue, combat, station docking, trade and travel. Console: playground reset returns here."),
-            new Pad("salvage", "14  SALVAGE / RECOVER CARGO", 0, -540, DevPlaygroundSalvage.PadDetail),
-            new Pad("xeno", "15  XENO / ALIENS", 160, -540, "F wakes two HUSK skimmers and a BROODMOTHER, grown ships of smooth obsidian tissue (ADR-0115).\nThey hunt you with acid. Shoot them to see wounds open into glowing flesh; kill the heart for a hulk. One wave per reset."),
-            new Pad("movers", "17  MOVING STRUCTURES", 320, -180, DevPlaygroundMovers.PadDetail),
-            new Pad("hazards", "19  HAZARDS  ·  PULSE / CANISTERS / MINES", 760, -360, DevPlaygroundHazards.PadDetail),
-            new Pad("race", "18  RACE  ·  BATTLE GRAVEYARD", 320, 0, "F opens Track 01 south of the pads and puts every pilot on the start grid. F again starts the countdown.\nThree laps through a fleet graveyard: field walls, boost strips and shortcut branches. Console: race start | race end | race info | race laps=<n> | race respawn."),
-            new Pad("nocturne", "16  NOCTURNE SHIPS", 320, -540, "F parks the NOCTURNE line: a WRAITH frigate (26 m) beside you and the three NOCTURNE cruisers (~52 m) broadside ahead: REQUIEM (lance), VESPER (nave), DIRGE (broadside).\nNo AI: fly around them, compare, shoot them. Fly one with playground ship=ship_nocturne_requiem (vesper, dirge). One set per reset.")
-        };
+        readonly PlaygroundHub.Station[] pads = PlaygroundHub.Stations;
         DevPlaygroundPower power;
         DevPlaygroundShip ship;
         DevPlaygroundSalvage salvage;
@@ -68,18 +42,20 @@ namespace Game.App.DevRuntime.Playground
         readonly DevPlaygroundCampaign campaign = new();
         InputService input;
         UIRoot ui;
-        VisualElement panel, markers, launcher;
+        VisualElement panel, launcher;
         Label heading, detail, outcome;
         Button enterButton;
-        // QA-001: beacons appear on the game's own HUD radar as point-of-interest blips, not on a second map.
+        // QA-001: districts appear on the game's own HUD radar as point-of-interest blips, not on a second map.
         double3[] beaconPositions;
-        GameObject visuals;
-        Material material;
-        LineRenderer courseRing;
-        readonly float3[] courseOffsets = { new float3(-160, 0, 90), new float3(-240, 0, 150), new float3(-320, 0, 70), new float3(-160, 0, 0) };
+        PlaygroundHubDressing dressing;
+        PlaygroundHubWorld world;
+        PlaygroundHub.District here;
+        string resumeAt;                    // a station to return to after a reset (the shipyard pad after a ship swap)
         int courseGate = -1;
+        // the brake box: 0 idle, 1 armed (waiting for a fast entry), 2 timing a stop
+        int brakeState; double brakeStart; float brakeSpeed;
         double3 origin;
-        bool active, entering, enemyRequested, tradeGranted, xenoRequested, nocturneRequested, moversRequested, hazardsRequested;
+        bool active, entering, enemyRequested, tradeGranted, xenoRequested;
         bool autoEnter;
         // Co-op: a guest shows the host's beacons (rings, labels, radar markers and zoom) without running pads; the host sends
         // its origin to every guest once it is in the world.
@@ -198,29 +174,48 @@ namespace Game.App.DevRuntime.Playground
             var ctx = host.Context;
             var player = ctx.PlayerShipRoot;
             if (!DevEcs.TryGetUniversePosition(ctx, player, out origin)) throw new InvalidOperationException("player position unavailable");
-            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; nocturneRequested = false; moversRequested = false; hazardsRequested = false; pending = 0; nearest = -1;
-            courseGate = -1;
-            report = "Quiet sandbox ready. No hostile ships spawn until you activate COMBAT.";
-            salvage?.Reset(); Race?.End(); DevPlaygroundHazards.Clear(ctx);
+            active = true; enemyRequested = false; tradeGranted = false; xenoRequested = false; pending = 0; nearest = -1; here = null;
+            courseGate = -1; brakeState = 0;
+            report = "Welcome to the ARK Proving Grounds. Fly out through a portal to visit a district.";
+            salvage?.Reset(); Race?.End();
             DevPlaygroundStory.RefreshResetMarkers(ctx);
+            world = new PlaygroundHubWorld(ctx, origin);
+            world.Build();
+            if (world.Missing != null) { report = world.Missing; GameLog.Warn(LogCategories.Dev, world.Missing); }
             BuildPresentation();
-            GoTo("flight");
+            string resume = resumeAt; resumeAt = null;
+            if (resume == null || GoTo(resume).Kind == DevResultKind.Failed) Place(PlaygroundHub.Spawn, PlaygroundHub.SpawnYaw);
         }
         internal bool Active => active;
         internal double3 Origin => origin;
+        DevCommandResult Place(float2 at, float yaw)
+        {
+            if (!host.Context.TryGetFrame(out var frame) || host.Context.PlayerShipRoot == Entity.Null)
+                return DevCommandResult.Fail("player unavailable; playground reset restores it");
+            DevEcs.TeleportRoot(host.Context.EntityManager, host.Context.PlayerShipRoot,
+                (float3)(origin + new double3(at.x, 0, at.y) - frame.OriginInStarSystem), quaternion.RotateY(yaw));
+            return DevCommandResult.Ok("");
+        }
+        /// <summary>Moves the player to a station (in front of it, facing it), a district's entrance, or the plaza ("hub").</summary>
         internal DevCommandResult GoTo(string id)
         {
             if (!active || entering) return DevCommandResult.Fail("enter with playground first");
+            if (id == "hub" || id == "plaza") { var moved = Place(PlaygroundHub.Spawn, PlaygroundHub.SpawnYaw); return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At the plaza."); }
+            // a station first (several share their district's id); district:<id> is the district's entrance
             foreach (var pad in pads)
                 if (pad.Id == id)
                 {
-                    if (!host.Context.TryGetFrame(out var frame) || host.Context.PlayerShipRoot == Entity.Null)
-                        return DevCommandResult.Fail("player unavailable; playground reset restores it");
-                    DevEcs.TeleportRoot(host.Context.EntityManager, host.Context.PlayerShipRoot,
-                        (float3)(origin + pad.Offset - frame.OriginInStarSystem), quaternion.identity);
-                    return DevCommandResult.Ok("At " + pad.Title + ". Press F to activate.");
+                    var moved = Place(pad.Position, pad.Yaw);
+                    return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + pad.Title + ". Press F to activate.");
                 }
-            return DevCommandResult.Fail("Unknown pad. " + Directory());
+            foreach (var d in PlaygroundHub.Districts)
+                if (d.Id == id || "district:" + d.Id == id)
+                {
+                    var moved = Place(d.Arrival, d.Yaw);
+                    return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + d.Title + ".");
+                }
+            if (Array.IndexOf(ConsoleOnly, id) >= 0) return DevCommandResult.Fail(id + " is a screen, not a place: playground run=" + id + " opens it.");
+            return DevCommandResult.Fail("Unknown place. " + Directory());
         }
         internal DevCommandResult Run(string id)
         {
@@ -233,28 +228,36 @@ namespace Game.App.DevRuntime.Playground
                     return DevCommandResult.Fail("Start playground run=campaign first, then finish the opening dialogue.");
                 return host.Commands.Execute("interact body=ark_station", host.Context);
             }
-            var moved = GoTo(id == "shield" || id == "boost" ? "power" : id);
-            if (moved.Kind == DevResultKind.Failed) return moved;
+            if (!active || entering) return DevCommandResult.Fail("enter with playground first");
             if (id == "shield" || id == "boost")
             {
                 var result = power.Activate(host.Context, ui, id);
                 pending = result.Kind == DevResultKind.Pending ? result.OperationId : 0;
                 SetReport(result.Text); return result;
             }
+            if (Array.IndexOf(ConsoleOnly, id) >= 0) return Report(Execute(id, null));
+            var moved = GoTo(id);
+            if (moved.Kind == DevResultKind.Failed) return moved;
             var activation = Activate();
             if (id == "salvage" && activation.Kind == DevResultKind.Ok && salvage.Target != Entity.Null)
                 return host.Commands.Execute("interact", host.Context);
             return activation;
         }
-        /// <summary>Co-op guest: show the host's playground beacons around <paramref name="hostOrigin"/>. Pads still run on the host.</summary>
+        DevCommandResult Report(DevCommandResult result)
+        {
+            pending = result.Kind == DevResultKind.Pending ? result.OperationId : 0;
+            SetReport(result.Text);
+            return result;
+        }
+        /// <summary>Co-op guest: show the host's playground around <paramref name="hostOrigin"/>. Stations still run on the host.</summary>
         internal DevCommandResult View(double3 hostOrigin)
         {
             if (!host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coop) || coop.Role != Game.Core.Net.SimRoleKind.Guest)
                 return DevCommandResult.Fail("playground view is sent to co-op guests by the host's playground");
             ClearPresentation(); origin = hostOrigin; guestView = true; nearest = -1;
-            report = "The host's playground. Pads run on the host; salvage works from here.";
+            report = "The host's playground. Stations run on the host; salvage works from here.";
             BuildPresentation();
-            return DevCommandResult.Ok("showing the host's playground beacons");
+            return DevCommandResult.Ok("showing the host's playground");
         }
         void ShowToGuests(Game.App.Session.CoopSession coop)
         {
@@ -275,137 +278,126 @@ namespace Game.App.DevRuntime.Playground
         }
         string Directory()
         {
-            var text = new System.Text.StringBuilder("Console: playground reset | playground run=<id> | playground goto=<id>\n");
-            foreach (var pad in pads) text.Append(pad.Id).Append(" — ").Append(pad.Title).Append('\n');
-            text.Append("shield / boost — trigger equipped abilities\nstation — ARK interaction in practice campaign\n");
+            var text = new System.Text.StringBuilder("Console: playground reset | playground run=<station> | playground goto=<station> or goto=district:<id>\nDistricts: hub");
+            foreach (var d in PlaygroundHub.Districts) text.Append(", ").Append(d.Id);
+            text.Append("\nStations:");
+            foreach (var pad in pads) if (pad.Kind != PlaygroundHub.StationKind.FlyShip) text.Append(' ').Append(pad.Id);
+            text.Append("\nScreens (run only): ").Append(string.Join(", ", ConsoleOnly)).Append("; shield / boost trigger equipped abilities; station: ARK in the practice campaign\n");
             return text.ToString();
         }
         void OnInteract(InputAction.CallbackContext _) { Activate(); }
         internal DevCommandResult Activate()
         {
             if (!active || entering || input == null || input.CurrentContext != InputContext.Flight)
-                return DevCommandResult.Fail("Activate a playground pad in Flight context");
+                return DevCommandResult.Fail("Activate a playground station in Flight context");
             // On the race grid F starts the countdown (or the next race after the results).
             if (Race != null && Race.IsOpen && (Race.InLobby || Race.IsFinished)) { var started = Race.Start(); SetReport(started.Text); return started; }
             int index = Nearest();
-            if (index < 0) return DevCommandResult.Fail("Fly inside a beacon ring first");
+            if (index < 0) return DevCommandResult.Fail("Fly onto a station's F pad first");
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status == DevOperationStatus.Running)
-                return DevCommandResult.Fail("Previous pad operation is still running");
+                return DevCommandResult.Fail("Previous station operation is still running");
             var pad = pads[index];
-            DevCommandResult result;
-            switch (pad.Id)
+            switch (pad.Kind)
+            {
+                case PlaygroundHub.StationKind.ResetAll: return Enter();
+                case PlaygroundHub.StationKind.ResetDistrict:
+                    if (pad.District == PlaygroundHub.Salvage) salvage?.Reset();
+                    if (pad.District == PlaygroundHub.Combat) { enemyRequested = false; xenoRequested = false; }
+                    if (pad.District == PlaygroundHub.Flight) { courseGate = -1; brakeState = 0; dressing?.SetCourseGate(-1); }
+                    world.Reset(pad.District);
+                    return Report(DevCommandResult.Ok(pad.District.Title + " is back as it started."));
+                case PlaygroundHub.StationKind.FlyShip:
+                    resumeAt = pad.Id;
+                    var swapped = SwitchShip(pad.Ship);
+                    if (swapped.Kind == DevResultKind.Failed) resumeAt = null;
+                    return Report(swapped);
+            }
+            return Report(Execute(pad.Id, pad));
+        }
+        /// <summary>What a station (or a console-only screen) does.</summary>
+        DevCommandResult Execute(string id, PlaygroundHub.Station pad)
+        {
+            var ctx = host.Context;
+            switch (id)
             {
                 case "flight":
-                    courseGate = 0;
-                    ShowCourseGate();
-                    result = DevCommandResult.Ok("Flight course: gate 1 / 4. Fly through the highlighted ring; reverse, strafe and brake through the turns.");
-                    break;
+                    courseGate = 0; dressing?.SetCourseGate(0);
+                    return DevCommandResult.Ok("Slalom: gate 1 / " + PlaygroundHub.Course.Length + ". Fly through the lit ring; reverse, strafe and brake through the turns.");
+                case "boost_strip": return DevCommandResult.Ok("Fly up the green strip ahead on the right for a speed kick. Ctrl fires your boost ability.");
+                case "brake":
+                    brakeState = 1;
+                    return DevCommandResult.Ok("Brake test armed: fly out, come back into the box faster than 40 m/s and stop inside it (X brakes).");
                 case "range":
-                    GoTo("range");
-                    result = host.Commands.Execute("range", host.Context);
-                    if (result.Kind != DevResultKind.Failed) result = DevCommandResult.Ok("Station ready ahead. Space to fire. Aim at a bridge to break a pod off. F1: playground reset restores it.");
-                    break;
+                    return ctx.TryGetService<FiringRangeService>(out var range) && ctx.EntityManager.Exists(range.Target)
+                        ? DevCommandResult.Ok("Target station ahead. Space to fire; aim at a bridge to cut a pod off. RESET WEAPONS RANGE restores it.")
+                        : DevCommandResult.Fail("The target station is gone: RESET WEAPONS RANGE brings a new one.");
                 case "combat":
-                    if (enemyRequested) result = DevCommandResult.Ok("Enemy trial already started. playground reset restores the quiet sandbox.");
-                    else
-                    {
-                        result = host.Commands.Execute("spawn blueprint=ship_fighter dx=0 dz=90 face=player faction=faction_raiders team=2 ai=true", host.Context);
-                        if (result.Kind != DevResultKind.Failed) enemyRequested = true;
-                    }
-                    break;
+                    if (enemyRequested) return DevCommandResult.Ok("The raider is already out. RESET COMBAT ARENA clears it.");
+                    var duel = Spawn(pad, "spawn blueprint=ship_fighter", 0, 330, "faction_raiders", "");
+                    if (duel.Kind != DevResultKind.Failed) enemyRequested = true;
+                    return duel;
+                case "xeno":
+                    if (xenoRequested) return DevCommandResult.Ok("The xeno wave is already awake. RESET COMBAT ARENA clears it.");
+                    var wave = Spawn(pad, "spawn blueprint=ship_xeno_husk", -80, 330, "faction_xeno", " count=2 spacing=70");
+                    if (wave.Kind != DevResultKind.Failed) wave = Spawn(pad, "spawn blueprint=ship_xeno_broodmother", 0, 460, "faction_xeno", "");
+                    if (wave.Kind != DevResultKind.Failed) xenoRequested = true;
+                    return wave;
+                case "hazards": return DevCommandResult.Ok(pad.Detail);
+                case "movers": return DevCommandResult.Ok(pad.Detail);
                 case "cargo":
-                    result = host.Commands.Execute("give item=resource_fuel count=5", host.Context);
+                    var result = host.Commands.Execute("give item=resource_fuel count=5", ctx);
                     if (result.Kind != DevResultKind.Failed)
                     {
-                        result = host.Commands.Execute("give credits=1000", host.Context);
-                        if (result.Kind != DevResultKind.Failed && host.Context.TryGetService<UiComposition>(out var cargoUi)) cargoUi.ShowInventory();
+                        result = host.Commands.Execute("give credits=1000", ctx);
+                        if (result.Kind != DevResultKind.Failed && ctx.TryGetService<UiComposition>(out var cargoUi)) cargoUi.ShowInventory();
                     }
-                    break;
+                    return result;
                 case "merchant":
-                    if (host.Context.TryGetService<EconomyService>(out var economy)
-                        && host.Context.TryGetService<ContentService>(out var content)
-                        && host.Context.TryGetService<MerchantPresenter>(out var merchant)
+                    if (ctx.TryGetService<EconomyService>(out var economy) && ctx.TryGetService<ContentService>(out var content)
+                        && ctx.TryGetService<MerchantPresenter>(out var merchant)
                         && content.Catalog.TryGet<MerchantDefinition>(new ContentId("merchant_station_market"), out var market))
                     {
                         if (!tradeGranted) { economy.Wallet.Add(2000); tradeGranted = true; }
                         merchant.Show(economy.Merchants.OpenSession(market, 0, false, null), null);
-                        result = DevCommandResult.Ok("ARK Station Market opened. Buy and sell against real stock and cargo.");
+                        return DevCommandResult.Ok("The merchant answers: ARK Station Market. Buy and sell against real stock and cargo.");
                     }
-                    else result = DevCommandResult.Fail("Merchant services unavailable");
-                    break;
+                    return DevCommandResult.Fail("Merchant services unavailable");
                 case "story":
                 case "survey":
                 case "map":
-                    result = DevPlaygroundStory.Activate(host.Context, ui, pad.Id);
-                    break;
-                case "power":
-                    result = power.Activate(host.Context, ui, "power");
-                    break;
-                case "xeno":
-                    if (xenoRequested) result = DevCommandResult.Ok("The xeno wave is already awake. playground reset restores the quiet sandbox.");
-                    else
-                    {
-                        result = host.Commands.Execute("spawn blueprint=ship_xeno_husk dx=0 dz=220 face=player faction=faction_xeno team=2 count=2 spacing=70 ai=true", host.Context);
-                        if (result.Kind != DevResultKind.Failed)
-                            result = host.Commands.Execute("spawn blueprint=ship_xeno_broodmother dx=0 dz=420 face=player faction=faction_xeno team=2 ai=true", host.Context);
-                        if (result.Kind != DevResultKind.Failed) xenoRequested = true;
-                    }
-                    break;
-                case "nocturne":
-                    if (nocturneRequested) result = DevCommandResult.Ok("The NOCTURNE ships are already parked. playground reset clears them.");
-                    else
-                    {
-                        result = host.Commands.Execute("spawn blueprint=ship_nocturne_wraith dx=-45 dz=40 face=player ai=false", host.Context);
-                        if (result.Kind != DevResultKind.Failed)
-                            foreach (var (option, dz) in new[] { ("requiem", 150), ("vesper", 230), ("dirge", 310) })
-                                if (result.Kind != DevResultKind.Failed)
-                                    result = host.Commands.Execute("spawn blueprint=ship_nocturne_" + option + " dx=0 dz=" + dz + " yaw=90 ai=false", host.Context);
-                        if (result.Kind != DevResultKind.Failed) nocturneRequested = true;
-                    }
-                    break;
-                case "salvage":
-                    result = salvage.Activate(host.Context, ui, origin + pad.Offset);
-                    break;
-                case "movers":
-                    result = DevPlaygroundMovers.Activate(host.Context, origin + pad.Offset, ref moversRequested);
-                    break;
-                case "hazards":
-                    result = DevPlaygroundHazards.Activate(host.Context, origin + pad.Offset, ref hazardsRequested);
-                    break;
-                case "race":
-                    result = Race.Open(origin);
-                    break;
-                case "campaign":
-                    result = campaign.Activate(host.Context, ui);
-                    break;
+                    return DevPlaygroundStory.Activate(ctx, ui, id);
+                case "power": return power.Activate(ctx, ui, "power");
+                case "salvage": return salvage.Activate(ctx, ui, origin + new double3(pad.Position.x, 0, pad.Position.y));
+                case "race": return Race.Open(origin);
+                case "campaign": return campaign.Activate(ctx, ui);
                 case "editor":
-                    if (host.Context.TryGetService<GameSession>(out var editorSession) && editorSession.IsSandbox)
-                        result = DevCommandResult.Pending(host.AddOperation(new LabEntryOperation(editorSession)), "Opening creative Blueprint Lab");
-                    else result = DevCommandResult.Fail("Editor trial requires the isolated playground");
-                    break;
+                    return ctx.TryGetService<GameSession>(out var editorSession) && editorSession.IsSandbox
+                        ? DevCommandResult.Pending(host.AddOperation(new LabEntryOperation(editorSession)), "Opening creative Blueprint Lab")
+                        : DevCommandResult.Fail("Editor trial requires the isolated playground");
                 case "fleet":
-                    if (host.Context.TryGetService<UiComposition>(out var fleetUi))
-                    { fleetUi.ShowFleet(); result = DevCommandResult.Ok("Fleet opened. Select a ship to inspect its committed design and condition."); }
-                    else result = DevCommandResult.Fail("UI unavailable");
-                    break;
+                    if (!ctx.TryGetService<UiComposition>(out var fleetUi)) return DevCommandResult.Fail("UI unavailable");
+                    fleetUi.ShowFleet(); return DevCommandResult.Ok("Fleet opened. Select a ship to inspect its committed design and condition.");
                 case "settings":
-                    if (host.Context.TryGetService<UiComposition>(out var screens))
-                    { screens.ShowSettings(); result = DevCommandResult.Ok("Settings opened."); }
-                    else result = DevCommandResult.Fail("UI unavailable");
-                    break;
-                default: result = DevCommandResult.Ok(pad.Detail); break;
+                    if (!ctx.TryGetService<UiComposition>(out var screens)) return DevCommandResult.Fail("UI unavailable");
+                    screens.ShowSettings(); return DevCommandResult.Ok("Settings opened.");
             }
-            pending = result.Kind == DevResultKind.Pending ? result.OperationId : 0;
-            SetReport(result.Text);
-            return result;
+            return DevCommandResult.Ok(pad?.Detail ?? "");
+        }
+        /// <summary>A hostile ship from the spawn command at a point in the station's district (x right, z forward of its entrance pad).</summary>
+        DevCommandResult Spawn(PlaygroundHub.Station pad, string command, float x, float z, string faction, string extra)
+        {
+            if (!host.Context.TryGetFrame(out var frame)) return DevCommandResult.Fail("frame unavailable");
+            var at = pad.Position + pad.District.Right * x + pad.District.Forward * z;
+            var local = (float3)(origin + new double3(at.x, 0, at.y) - frame.OriginInStarSystem);
+            return host.Commands.Execute(FormattableString.Invariant($"{command} x={local.x:0.##} z={local.z:0.##} face=player faction={faction} team=2 ai=true{extra}"), host.Context);
         }
         int Nearest()
         {
             if (!DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var position)) return -1;
-            int found = -1; double best = 28 * 28;
+            int found = -1; double best = PlaygroundHub.StationRadius * PlaygroundHub.StationRadius;
             for (int i = 0; i < pads.Length; i++)
             {
-                double distance = math.lengthsq(position - (origin + pads[i].Offset));
+                double distance = math.lengthsq(position.xz - (origin.xz + (double2)pads[i].Position));
                 if (distance <= best) { best = distance; found = i; }
             }
             return found;
@@ -431,64 +423,68 @@ namespace Game.App.DevRuntime.Playground
                 { active = false; ClearPresentation(); return; }
                 if (coopSession is Game.App.Session.CoopSession hosting && hosting.Role == Game.Core.Net.SimRoleKind.Host) ShowToGuests(hosting);
             }
-            if (courseGate >= 0 && ctx.TryGetFrame(out var courseFrame))
+            if (!ctx.TryGetFrame(out var frame)) return;
+            if (dressing != null) dressing.Root.transform.position = (float3)(origin - frame.OriginInStarSystem);
+            bool located = DevEcs.TryGetUniversePosition(ctx, ctx.PlayerShipRoot, out var ship3);
+            float2 at = located ? (float2)(ship3.xz - origin.xz) : new float2(float.MaxValue, float.MaxValue);
+            // a district fills with its exhibits the first time a pilot comes near it
+            var district = located ? PlaygroundHub.DistrictAt(at, 160) : null;
+            if (district != null && !guestView && world != null && !world.IsPopulated(district)) world.Populate(district);
+            if (located)
             {
-                if (courseRing != null) courseRing.transform.position = (float3)(origin + courseOffsets[courseGate] - courseFrame.OriginInStarSystem);
-                if (DevEcs.TryGetUniversePosition(ctx, ctx.PlayerShipRoot, out var shipPosition)
-                    && math.lengthsq(shipPosition - (origin + courseOffsets[courseGate])) < 18 * 18)
+                var inside = PlaygroundHub.DistrictAt(at);
+                if (inside != here)
                 {
-                    courseGate++;
-                    if (courseGate == courseOffsets.Length)
-                    { courseGate = -1; if (courseRing != null) courseRing.gameObject.SetActive(false); SetReport("Flight course complete: all four gates reached. Return to FLIGHT and press F to repeat."); }
-                    else { ShowCourseGate(); SetReport("Flight course: gate " + (courseGate + 1) + " / 4."); }
+                    here = inside; nearest = -2;
+                    SetReport(inside == null ? "The plaza: fly out through a portal to visit a district." : world?.Intro(inside) ?? inside.Tagline);
                 }
             }
+            if (courseGate >= 0 && located && math.distancesq(at, PlaygroundHub.Course[courseGate]) < 18 * 18)
+            {
+                courseGate++;
+                if (courseGate == PlaygroundHub.Course.Length) { courseGate = -1; SetReport("Slalom complete: all six gates. Back on the SLALOM pad, F runs it again."); }
+                else SetReport("Slalom: gate " + (courseGate + 1) + " / " + PlaygroundHub.Course.Length + ".");
+                dressing?.SetCourseGate(courseGate);
+            }
+            if (brakeState > 0 && located) BrakeTest(ctx, at);
             int next = Nearest();
             if (next != nearest)
             {
                 nearest = next;
-                if (heading != null) heading.text = next < 0 ? "DEV PLAYGROUND  ·  FLY TO A BEACON"
-                    : guestView ? pads[next].Title + "  ·  THE HOST ACTIVATES PADS" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
-                // Details only inside a ring; the beacon chart and world labels do the wayfinding (QA-001 clutter).
+                string where = here == null ? "ARK PROVING GROUNDS" : here.Title;
+                if (heading != null) heading.text = next < 0 ? where + (here == null ? "  ·  FLY THROUGH A PORTAL" : "  ·  " + here.Tagline)
+                    : guestView ? pads[next].Title + "  ·  THE HOST ACTIVATES STATIONS" : pads[next].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE";
+                // Details only on a pad; the floor signs do the wayfinding (QA-001 clutter).
                 if (detail != null) { detail.text = next < 0 ? "" : pads[next].Detail; detail.style.display = next < 0 ? DisplayStyle.None : DisplayStyle.Flex; }
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
             if (beaconPositions != null && ctx.World != null && ctx.World.IsCreated)
             {
-                for (int i = 0; i < pads.Length; i++) beaconPositions[i] = origin + pads[i].Offset;
+                beaconPositions[0] = origin + new double3(PlaygroundHub.Plaza.x, 0, PlaygroundHub.Plaza.y);
+                for (int i = 0; i < PlaygroundHub.Districts.Length; i++)
+                    beaconPositions[i + 1] = origin + new double3(PlaygroundHub.Districts[i].Centre.x, 0, PlaygroundHub.Districts[i].Centre.y);
                 var hud = ctx.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
-                if (hud != null) { hud.SetMarkers(beaconPositions); hud.DisplayRangeM = 800; } // beacons lie within ±600 m
-            }
-            var camera = ctx.GameplayCamera;
-            if (markers == null || camera == null || !ctx.TryGetFrame(out var frame)) return;
-            for (int i = 0; i < pads.Length; i++)
-            {
-                Vector3 position = (float3)(origin + pads[i].Offset - frame.OriginInStarSystem);
-                if (pads[i].Ring != null) pads[i].Ring.transform.position = position;
-                var label = pads[i].Label;
-                var viewport = camera.WorldToViewportPoint(position);
-                bool visible = viewport.z > 0 && viewport.x > 0 && viewport.x < 1 && viewport.y > 0 && viewport.y < 1;
-                label.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-                if (!visible || ui.Panel == null) continue;
-                var point = RuntimePanelUtils.CameraTransformWorldToPanel(ui.Panel, position, camera);
-                label.style.left = point.x + 28; label.style.top = point.y + 28;
-                if (pads[i].Ring != null) pads[i].Ring.startColor = pads[i].Ring.endColor = label.resolvedStyle.color;
+                if (hud != null) { hud.SetMarkers(beaconPositions); hud.DisplayRangeM = 2200; }
             }
         }
-        void ShowCourseGate()
+        /// The brake box: armed by its pad; a pilot entering faster than 40 m/s starts the clock, which stops when the ship is
+        /// still (under 1 m/s) inside the box, or fails when it leaves.
+        void BrakeTest(DevContext ctx, float2 at)
         {
-            if (courseRing == null && material != null && visuals != null)
+            var em = ctx.EntityManager;
+            if (!em.HasComponent<Unity.Physics.PhysicsVelocity>(ctx.PlayerShipRoot)) return;
+            float speed = math.length(em.GetComponentData<Unity.Physics.PhysicsVelocity>(ctx.PlayerShipRoot).Linear.xz);
+            var d = PlaygroundHub.Flight;
+            float2 rel = at - d.At(-175, 120);
+            bool inside = math.abs(math.dot(rel, d.Right)) < 22 && math.abs(math.dot(rel, d.Forward)) < 22;
+            if (brakeState == 1 && inside && speed > 40) { brakeState = 2; brakeStart = UnityEngine.Time.timeAsDouble; brakeSpeed = speed; SetReport(FormattableString.Invariant($"Into the box at {speed:0} m/s: stop!")); }
+            else if (brakeState == 2 && !inside) { brakeState = 1; SetReport("Overshot the box. Come round and try again."); }
+            else if (brakeState == 2 && speed < 1)
             {
-                var go = new GameObject("Flight course gate"); go.transform.SetParent(visuals.transform, false);
-                courseRing = go.AddComponent<LineRenderer>(); courseRing.sharedMaterial = material;
-                courseRing.useWorldSpace = false; courseRing.loop = true; courseRing.widthMultiplier = 2;
-                courseRing.positionCount = 48; courseRing.startColor = courseRing.endColor = heading.resolvedStyle.color;
-                courseRing.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                for (int i = 0; i < 48; i++)
-                { float a = i * math.PI * 2 / 48; courseRing.SetPosition(i, new Vector3(math.cos(a) * 18, -1, math.sin(a) * 18)); }
+                brakeState = 1;
+                SetReport(FormattableString.Invariant($"Stopped from {brakeSpeed:0} m/s in {UnityEngine.Time.timeAsDouble - brakeStart:0.00} s inside the box. Again?"));
             }
-            if (courseRing != null) courseRing.gameObject.SetActive(true);
         }
         void SetReport(string value)
         {
@@ -505,34 +501,15 @@ namespace Game.App.DevRuntime.Playground
             panel.AddToClassList("panel"); panel.style.position = Position.Absolute; panel.style.left = 24; panel.style.top = 96;
             panel.style.maxWidth = 420; panel.style.paddingLeft = 12; panel.style.paddingRight = 12;
             panel.style.paddingTop = 8; panel.style.paddingBottom = 8;
-            heading = AddLabel(panel, "DEV PLAYGROUND", "text-s");
+            heading = AddLabel(panel, "ARK PROVING GROUNDS", "text-s");
             detail = AddLabel(panel, "", "text-xs"); detail.AddToClassList("text-muted");
             detail.style.whiteSpace = WhiteSpace.Normal; detail.style.display = DisplayStyle.None;
             outcome = AddLabel(panel, report, "text-xs"); outcome.style.whiteSpace = WhiteSpace.Normal;
             ui.GetLayer(UILayer.Hud).Add(panel);
-            beaconPositions = new double3[pads.Length];
-            markers = new VisualElement { name = "dev-playground-beacons", pickingMode = PickingMode.Ignore };
-            markers.style.position = Position.Absolute; markers.style.left = 0; markers.style.top = 0;
-            ui.GetLayer(UILayer.World).Add(markers);
-            visuals = new GameObject("Development playground beacons"); visuals.transform.SetParent(host.transform, false);
-            var shader = Shader.Find("Hidden/Internal-Colored");
-            if (shader != null) material = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
-            foreach (var pad in pads)
-            {
-                pad.Label = AddLabel(markers, pad.Title, "text-xs");
-                pad.Label.style.position = Position.Absolute;
-                if (material == null) continue;
-                var ringObject = new GameObject(pad.Id); ringObject.transform.SetParent(visuals.transform, false);
-                var ring = ringObject.AddComponent<LineRenderer>(); pad.Ring = ring;
-                ring.sharedMaterial = material; ring.useWorldSpace = false; ring.loop = true;
-                ring.widthMultiplier = .6f; ring.positionCount = 48;
-                ring.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; ring.receiveShadows = false;
-                for (int i = 0; i < 48; i++)
-                {
-                    float a = i * math.PI * 2 / 48;
-                    ring.SetPosition(i, new Vector3(math.cos(a) * 28, -1, math.sin(a) * 28));
-                }
-            }
+            beaconPositions = new double3[PlaygroundHub.Districts.Length + 1];
+            if (host.Context.TryGetService<ContentService>(out var content) && content.Catalog.TryGet<TrackDefinition>(new ContentId("track_01"), out var track))
+                dressing = new PlaygroundHubDressing(track.Look, host.transform);
+            nearest = -2;
         }
         static Label AddLabel(VisualElement parent, string text, string style)
         {
@@ -540,18 +517,15 @@ namespace Game.App.DevRuntime.Playground
         }
         void ClearPresentation()
         {
-            panel?.RemoveFromHierarchy(); markers?.RemoveFromHierarchy();
+            panel?.RemoveFromHierarchy();
             if (beaconPositions != null && host.Context.World != null && host.Context.World.IsCreated)
             {
                 var hud = host.Context.World.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
                 if (hud != null) { hud.SetMarkers(default); hud.DisplayRangeM = 2000; }
             }
             beaconPositions = null; shownTo.Clear();
-            panel = markers = null; heading = detail = outcome = null;
-            if (visuals != null) UnityEngine.Object.Destroy(visuals);
-            if (material != null) UnityEngine.Object.Destroy(material);
-            visuals = null; material = null; courseRing = null; courseGate = -1;
-            foreach (var pad in pads) { pad.Ring = null; pad.Label = null; }
+            panel = null; heading = detail = outcome = null;
+            dressing?.Dispose(); dressing = null; courseGate = -1;
         }
         public void Dispose()
         {

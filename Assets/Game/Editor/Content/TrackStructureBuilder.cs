@@ -222,7 +222,7 @@ namespace Game.Editor.Content
 
         static uint Hash(int x, int y, uint seed) { uint h = (uint)x * 73856093u ^ (uint)y * 19349663u ^ seed * 83492791u; h ^= h >> 13; h *= 0x5bd1e995; h ^= h >> 15; return h; }
 
-        static ShipBlueprintDefinition Make(ContentService service, VoxelContent content, string id, string name, float cell, Action<Action<ushort, int, int, int, byte>> build)
+        internal static ShipBlueprintDefinition Make(ContentService service, VoxelContent content, string id, string name, float cell, Action<Action<ushort, int, int, int, byte>> build)
         {
             using var structure = new VoxelStructure(cell);
             build((block, x, y, z, colour) => structure.TryPlaceBlock(new BlockPlacement { Block = block, Origin = new int3(x, y, z), Orient = 0, Color = colour }, content));

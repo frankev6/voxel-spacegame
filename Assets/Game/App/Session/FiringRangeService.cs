@@ -57,6 +57,17 @@ namespace Game.App.Session
             }
             catch { Release(); throw; }
         }
+        /// <summary>DEV-022: the playground's weapons-range reset. The station (or the hulk it became) despawns and a fresh one spawns
+        /// at `pose` (local frame).</summary>
+        public Entity Restore(RigidTransform pose)
+        {
+            if (source == null) return Entity.Null;
+            var em = world.EntityManager;
+            if (em.Exists(Target) && em.HasComponent<GridDespawnRequest>(Target)) GridSpawnApi.RequestDespawn(em, Target);
+            Target = GridSpawnApi.RequestSpawn(em, registry, handle, new GridSpawnParams { PersistentId = ids.Allocate(),
+                Pose = pose, Kind = GridKind.Station, Motion = GridMotion.Static, Profile = GridProfile.None });
+            return Target;
+        }
         // QA-001 (owner: "its literally overlapping the station wtf??"): the offset was tuned for a fighter's ~8 m bow; a longer
         // ship pushes the station out by the rest of its bow so a cruiser never spawns inside it.
         const float TunedBowMeters = 10;

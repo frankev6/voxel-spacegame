@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_hub_pier
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_hub_pier
+  formerIds: []
+  displayName: Dock Pier
+  cellSize: 1
+  payloadVersion: 1
+  payload: 564f585301000100cd53c14ac340107db349d3441a6ca022e8c78452c48bff50aa288211a1e85de8c9af0821947e87dfe0a9872252c48b7e439dd9468894958d14dd1c26b3bbb3cbbc79ef01f7e98a3fb5739add9c5d0d2fefb22c59a7b7e311c78bf1e8fabc0580102bb408a4d0458f080ac8f70943fe51f553d8f5a452fd7d044af238415b47af962f4d0729aaababbdef38fe0b04cfef87768d0739c96d9d45bce1332c74be9277dadc4a6caa4e24c874064dfb59f203b2d0d1abe5f9217749ca35e5ccd640621d3fea8b235188724d216fc67ea75441c243b7b61debe92f6863eb29ae38c6c4aa7e1e0b81be6b04168d2dd317627dd7887d698ca3d084fbbf9a81d1a68f07a20a79b4bfb5370b6dfdc035e54c8d563a168504ae29e4d5d8ef4c2b2110eb77acac9f08c9523fb1aa9f274260e81a817963d90f84d8d035629f1be32835e121a3896cf85b2456aa884415329d746bd62fd9faf804y
+  cellCount: 3200
+  boundsMin: {x: -6, y: -5, z: 0}
+  boundsMax: {x: 5, y: 2, z: 79}

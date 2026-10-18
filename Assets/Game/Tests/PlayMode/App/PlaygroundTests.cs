@@ -41,29 +41,32 @@ namespace Game.Tests.PlayMode.App
             var ui = Services.Get<UIRoot>();
             Assert.NotNull(ui.RootElement.Q<Button>("btn-open-console"), "Console access cannot require F1");
             Assert.NotNull(ui.RootElement.Q<Button>("btn-enter-playground"));
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
-            StringAssert.Contains("gate 1 / 4", Host.Commands.Execute("playground status", Host.Context).Text);
+            // DEV-022: the hub spawns you on the plaza, off every pad; the flight school's slalom is a station in its district
+            Assert.AreEqual(DevResultKind.Failed, Host.Commands.Execute("playground activate", Host.Context).Kind, "No station under the spawn");
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=flight", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=flight", Host.Context).Kind);
+            StringAssert.Contains("gate 1 / 6", Host.Commands.Execute("playground status", Host.Context).Text);
             var originalPlayer = Root;
             Assert.IsTrue(Services.TryGet<FiringRangeService>(out var range));
             var originalStation = range.Target;
             Assert.IsTrue(EM.Exists(originalStation));
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=cargo", Host.Context).Kind);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F hold=0.02", Host.Context).Kind);
-            yield return Until(() => Host.Commands.Execute("inv", Host.Context).Text.Contains("credits 1000"), "F activates real cargo/wallet pad", 5);
+            // menus are console shortcuts, not places (DEV-022)
+            Assert.AreEqual(DevResultKind.Failed, Host.Commands.Execute("playground goto=cargo", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=cargo", Host.Context).Kind);
+            yield return Until(() => Host.Commands.Execute("inv", Host.Context).Text.Contains("credits 1000"), "run=cargo grants through the real cargo/wallet owners", 5);
             Assert.IsTrue(ui.Navigator.Get<InventoryView>().IsOpen, "Cargo must open the real inventory screen");
             ui.Navigator.Pop(ui.Navigator.Get<InventoryView>());
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=settings", Host.Context).Kind);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=settings", Host.Context).Kind);
             Assert.IsTrue(ui.Navigator.Get<SettingsView>().IsOpen);
             ui.Navigator.Pop(ui.Navigator.Get<SettingsView>());
+            // a real F press on the market's TRADE pad hails the merchant
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=merchant", Host.Context).Kind);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
-            Assert.IsTrue(ui.Navigator.Get<MerchantView>().IsOpen, "Trade must open the real merchant screen");
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F hold=0.02", Host.Context).Kind);
+            yield return Until(() => ui.Navigator.Get<MerchantView>().IsOpen, "F on the TRADE pad opens the real merchant screen", 5);
             Assert.NotNull(Services.Get<EconomyService>().Merchants.Current);
             ui.Navigator.Pop(ui.Navigator.Get<MerchantView>());
             Assert.IsNull(Services.Get<EconomyService>().Merchants.Current);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=fleet", Host.Context).Kind);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=fleet", Host.Context).Kind);
             Assert.IsTrue(ui.Navigator.Get<FleetView>().IsOpen, "Fleet trial must open the real fleet screen");
             Assert.Greater(Services.Get<Game.App.Session.GameSession>().Fleet.Ships.Count, 0);
             ui.Navigator.Pop(ui.Navigator.Get<FleetView>());
@@ -83,9 +86,8 @@ namespace Game.Tests.PlayMode.App
             // Release the earlier cargo injection before another actual F press; screen changes can finish in one frame.
             Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F release=true", Host.Context).Kind);
             yield return null;
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=story", Host.Context).Kind);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("key keys=F hold=0.02", Host.Context).Kind);
-            yield return Until(() => ui.Navigator.IsOpen<ShipLogView>(), "F opens the canonical story log", 5);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=story", Host.Context).Kind);
+            yield return Until(() => ui.Navigator.IsOpen<ShipLogView>(), "run=story opens the canonical story log", 5);
             var log = ui.Navigator.Get<ShipLogView>(); Assert.AreSame(log, ui.Navigator.Top);
             Assert.AreEqual(QuestStatus.Active, quests.GetStatus(questIndex)); Assert.AreEqual(questIndex, quests.TrackedQuestIndex);
             Assert.AreEqual(1, quests.GetInstanceCount(questIndex)); Assert.IsTrue(clues.IsKnown(clueIndex)); Assert.IsTrue(clues.IsKnown(rumorIndex));
@@ -108,9 +110,8 @@ namespace Game.Tests.PlayMode.App
             DialogTestContext.Activate(log.Root.Q<Button>("ship-log-close")); Assert.IsFalse(log.IsOpen);
             for (int collected = 1; collected <= 3; collected++)
             {
-                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=survey", Host.Context).Kind);
                 var logic = Services.Get<ILogicContext>(); var callerScope = logic.Scope;
-                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=survey", Host.Context).Kind);
                 Assert.AreEqual(callerScope, logic.Scope, "Quest and rumor owners restore the caller scope after evaluating the authored quest_completed condition.");
                 Assert.AreSame(log, ui.Navigator.Top); Assert.AreEqual(collected, economy.Inventory.CountOf(palladium));
                 quests.GetObjectives(questIndex, objectives); Assert.AreEqual(collected, objectives[0].Progress);
@@ -119,7 +120,7 @@ namespace Game.Tests.PlayMode.App
                 Assert.AreEqual(collected == 3, screens.ShipLogModel.Objectives[0].IsDone);
                 DialogTestContext.Activate(log.Root.Q<Button>("ship-log-close"));
             }
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=survey", Host.Context).Kind);
             Assert.AreEqual(3, economy.Inventory.CountOf(palladium), "Completed collection cannot farm more survey grants.");
             Assert.AreEqual(1, quests.GetInstanceCount(questIndex)); Assert.AreEqual(clueOrdinal, clues.OrdinalOf(clueIndex)); Assert.AreEqual(rumorOrdinal, clues.OrdinalOf(rumorIndex));
             DialogTestContext.Activate(log.Root.Q<Button>("ship-log-tab-rumors"));
@@ -138,9 +139,8 @@ namespace Game.Tests.PlayMode.App
             Assert.IsTrue(renderedRumor, "The actual map data contains the revealed rumor marker.");
             DialogTestContext.Activate(map.Root.Q<Button>("galaxy-map-close")); Assert.AreSame(log, ui.Navigator.Top);
             DialogTestContext.Activate(log.Root.Q<Button>("ship-log-close"));
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=map", Host.Context).Kind);
             var poseBeforeMap = EM.GetComponentData<LocalTransform>(Root);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground activate", Host.Context).Kind);
+            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground run=map", Host.Context).Kind);
             Assert.AreEqual(poseBeforeMap.Position, EM.GetComponentData<LocalTransform>(Root).Position);
             Assert.AreEqual(generationsBeforeStory + 1, galaxy.GenerationCount, "Repeated beacons reuse the generated metadata, including a valid seed-zero galaxy.");
             Assert.AreSame(map, ui.Navigator.Top); Assert.GreaterOrEqual(screens.GalaxyMapModel.SelectedIndex, 0);

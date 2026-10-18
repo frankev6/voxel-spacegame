@@ -52,7 +52,8 @@ namespace Game.Presentation.Presenters
         public bool IsTrackPart(ContentHash blueprint)
         {
             if (trackParts.TryGetValue(blueprint.Value, out var part)) return part;
-            part = content.TryGet<ShipBlueprintDefinition>(blueprint, out var definition) && definition.IdString.StartsWith("ship_track_", System.StringComparison.Ordinal);
+            part = content.TryGet<ShipBlueprintDefinition>(blueprint, out var definition) && (definition.IdString.StartsWith("ship_track_", System.StringComparison.Ordinal)
+                || definition.IdString.StartsWith("ship_hub_", System.StringComparison.Ordinal));   // DEV-022: the playground hub's structures
             trackParts.Add(blueprint.Value, part); return part;
         }
         public string TargetName(ContentHash blueprint, byte faction)
