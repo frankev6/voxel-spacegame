@@ -4,7 +4,7 @@ namespace Game.App.DevRuntime.Scenarios
     /// <summary>One parsed, location-preserving scenario instruction (SPEC-70 §6.2).</summary>
     public sealed class ScenarioStatement
     {
-        public enum StatementKind : byte { Command, WaitCondition, WaitTicks, WaitFrames, Assert, Let, ExpectErrors }
+        public enum StatementKind : byte { Command, WaitCondition, WaitTicks, WaitFrames, Assert, Let, ExpectErrors, Report }
         public StatementKind Kind { get; internal set; }
         public int Line { get; internal set; }
         public string Text { get; internal set; }

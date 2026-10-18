@@ -132,8 +132,9 @@ namespace Game.App.DevRuntime.Scenarios
                         if (assertion.Current.Kind == Kind.String) statement.Message = assertion.Next().Text;
                         assertion.End(); break;
                     case "let":
-                        statement.Kind = StatementKind.Let;
-                        int at = rest.IndexOf('='); if (at <= 0) throw Error(line, restColumn, "let expects name = expression");
+                    case "report":   // DEV-027: a let whose value is also a result metric
+                        statement.Kind = word == "let" ? StatementKind.Let : StatementKind.Report;
+                        int at = rest.IndexOf('='); if (at <= 0) throw Error(line, restColumn, word + " expects name = expression");
                         statement.Name = rest.Substring(0, at).Trim(); if (!Name(statement.Name) || char.IsDigit(statement.Name[0])) throw Error(line, restColumn, "invalid variable name");
                         statement.ExpressionText = rest.Substring(at + 1); statement.Expression = ParseExpression(statement.ExpressionText, probes, line, restColumn + at + 1); break;
                     case "expect_errors": statement.Kind = StatementKind.ExpectErrors; statement.Count = Count(rest, line, restColumn); break;

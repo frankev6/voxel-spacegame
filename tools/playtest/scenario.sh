@@ -30,5 +30,10 @@ while result['outcome'] == 'running':
     result = call('scenario_status', '--run', str(run))
 print(f"{result.get('name', file.stem)} {result['outcome']} {result.get('seconds', 0):.3f}s: {result.get('message', '')}")
 print(result.get('jsonPath', ''))
+try:   # report statements (DEV-027): one line each
+    metrics = json.loads(pathlib.Path(result.get('jsonPath', '')).read_text(encoding='utf-8')).get('metrics', {})
+    for name, value in metrics.items(): print(f'  {name} = {value}')
+except (OSError, ValueError):
+    pass
 sys.exit(result['exitCode'])
 PYTHON

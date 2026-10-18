@@ -26,6 +26,7 @@ namespace Game.App.DevRuntime.Scenarios
         readonly DateTime startedUtc;
         readonly double started;
         readonly Dictionary<string, ScenarioValue> variables = new Dictionary<string, ScenarioValue>(StringComparer.Ordinal);
+        readonly List<(string name, ScenarioValue value)> metrics = new();   // report statements, in order (DEV-027)
         readonly List<StepResult> results;
         int position, pendingOperation;
         long calls, startCall, errorAllowance;
@@ -108,6 +109,13 @@ namespace Game.App.DevRuntime.Scenarios
                             }
                             break;
                         case StatementKind.Let: variables[step.Name] = step.Expression.Evaluate(context, variables); break;
+                        case StatementKind.Report:
+                        {
+                            var value = step.Expression.Evaluate(context, variables);
+                            variables[step.Name] = value; metrics.Add((step.Name, value));
+                            output = step.Name + " = " + (value.Kind == ScenarioValueKind.Number ? DevJsonWriter.Number(value.Number) : value.Kind == ScenarioValueKind.Bool ? (value.Bool ? "true" : "false") : value.String);
+                            break;
+                        }
                         case StatementKind.ExpectErrors: errorAllowance = step.Count; break;
                     }
                     results.Add(new StepResult(step, "ok", Time.realtimeSinceStartupAsDouble - stepStarted, output));
@@ -142,7 +150,15 @@ namespace Game.App.DevRuntime.Scenarios
                         .Append(",\"outcome\":").Append(DevJsonWriter.Quote(result.Outcome)).Append(",\"seconds\":").Append(DevJsonWriter.Number(result.Seconds))
                         .Append(",\"output\":").Append(DevJsonWriter.Quote(result.Output)).Append('}');
                 }
-                json.Append("],\"logs\":{\"errors\":").Append(context.LogErrors).Append(",\"exceptions\":").Append(context.LogExceptions).Append(",\"warnings\":").Append(context.LogWarnings).Append("}}");
+                json.Append("],\"metrics\":{");
+                for (int i = 0; i < metrics.Count; i++)
+                {
+                    var (name, value) = metrics[i];
+                    if (i > 0) json.Append(',');
+                    json.Append(DevJsonWriter.Quote(name)).Append(':').Append(value.Kind == ScenarioValueKind.Number ? DevJsonWriter.Number(value.Number)
+                        : value.Kind == ScenarioValueKind.Bool ? (value.Bool ? "true" : "false") : DevJsonWriter.Quote(value.String));
+                }
+                json.Append("},\"logs\":{\"errors\":").Append(context.LogErrors).Append(",\"exceptions\":").Append(context.LogExceptions).Append(",\"warnings\":").Append(context.LogWarnings).Append("}}");
                 SaveJson(Run, json.ToString(), startedUtc, outputDirectory);
             }
             catch (Exception e) { Run.Outcome = ScenarioOutcome.Error; Run.ExitCode = 2; Run.Message += "; result write failed: " + e.Message; }
