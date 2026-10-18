@@ -30,7 +30,8 @@ namespace Game.Simulation.Mechanisms
             shifts = state.GetComponentLookup<OriginShiftRecord>(true);
             state.RequireForUpdate<GameplayActive>();
             state.RequireForUpdate<SimClock>();
-            state.RequireForUpdate<Mover>();
+            // no RequireForUpdate<Mover>: the system follows every rebase from the start, so movers spawned just before one (a race
+            // opening moves the player 2.2 km to the grid) get its shift; starting with the first mover took that rebase as the baseline
         }
 
         [BurstCompile] public void OnDestroy(ref SystemState state)
@@ -70,7 +71,7 @@ namespace Game.Simulation.Mechanisms
             {
                 Delta.Value = float3.zero;
                 var record = Shifts.HasComponent(ShiftEntity) ? Shifts[ShiftEntity] : default;
-                if (Applied.Value == uint.MaxValue) { Applied.Value = record.Sequence; return; }   // movers were authored in the frame we found
+                if (Applied.Value == uint.MaxValue) { Applied.Value = record.Sequence; return; }   // the world's first update: nothing to shift yet
                 if (record.Sequence == Applied.Value) return;
                 Applied.Value = record.Sequence;
                 if (record.StarSystemChanged == 0) Delta.Value = record.Delta;
