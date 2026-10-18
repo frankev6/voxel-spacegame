@@ -1,0 +1,29 @@
+scenario hollow_hostile_entrance
+desc "The Clan, made hostile at the Hollow's entrance, kills a WRAITH fast and shoots none of its own rock loose (owner 2026-10-18: they took at least 10 mins to kill me, and structures were breaking off on their own)"
+status active
+tags hollow combat
+timeout 300
+# from Boot: the menu first, so the flow is free
+wait scene == "MainMenu" timeout=30
+wait ticks=30
+playground
+wait player.ready timeout=60
+# the Hollow builds round the entrance and its guns arm
+wait ticks=600
+let rock0 = damage.taken("Station")
+let splits0 = ecs.count("SplitOrigin")
+let ships0 = damage.taken("Ship")
+relation faction=faction_khuchad_clan set=-60
+let t0 = sim.seconds
+wait player.dead timeout=120
+report kill_seconds = sim.seconds - $t0
+# a while longer: do the guns keep hitting their own after the kill? (frames: the sim clock may stop once the player is dead)
+wait frames=900
+report station_damage = damage.taken("Station") - $rock0
+report station_cells_loose = damage.detached("Station")
+report clan_ship_damage = damage.taken("Ship") - $ships0
+report splits = ecs.count("SplitOrigin") - $splits0
+relation faction=faction_khuchad_clan set=0
+assert $kill_seconds < 60 "the Clan kills a WRAITH within a minute"
+assert $splits == 0 "nothing of theirs breaks off"
+assert logs.exceptions == 0 "no exceptions"

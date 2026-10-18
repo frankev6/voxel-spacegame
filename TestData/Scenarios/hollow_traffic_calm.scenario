@@ -1,0 +1,25 @@
+scenario hollow_traffic_calm
+desc "A minute parked at the Hollow's Market with the Clan neutral: traffic flies round the player, nobody provokes anybody (owner 2026-10-18: a cruiser rammed you instead of avoiding you, and the entire hollow became your enemy)"
+status active
+tags hollow traffic
+timeout 240
+# from Boot: the menu first, so the flow is free
+wait scene == "MainMenu" timeout=30
+wait ticks=30
+playground
+wait player.ready timeout=60
+playground goto=market
+wait ticks=300
+let hull0 = player.hull
+let ships0 = damage.taken("Ship")
+let splits0 = ecs.count("SplitOrigin")
+wait ticks=3600
+report player_hull = player.hull
+report ship_damage = damage.taken("Ship") - $ships0
+report ships_damaged = damage.grids("Ship")
+report clan_relation = relation("faction_khuchad_clan")
+report splits = ecs.count("SplitOrigin") - $splits0
+assert player.hull >= $hull0 - 0.001 "nothing hurt the parked player"
+assert relation("faction_khuchad_clan") > -50 "the Clan is not provoked"
+assert $splits == 0 "nothing breaks off"
+assert logs.exceptions == 0 "no exceptions"

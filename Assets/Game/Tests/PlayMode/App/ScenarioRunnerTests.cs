@@ -46,6 +46,13 @@ namespace Game.Tests.PlayMode.App
             yield return Finish(error); Assert.AreEqual(ScenarioOutcome.Error, error.Run.Outcome); Assert.AreEqual(2, error.Run.ExitCode);
             Assert.AreNotEqual(pass.Run.ResultJsonPath, fail.Run.ResultJsonPath, "same-second runs cannot overwrite each other");
         }
+        // DEV-027: report is a let whose value also goes into the result JSON's metrics, in order
+        [UnityTest] public IEnumerator Report_RecordsMetrics()
+        {
+            using var runner = Runner("report n = 2 + 3\nreport label = \"x\"\nassert $n == 5");
+            yield return Finish(runner); Assert.AreEqual(ScenarioOutcome.Passed, runner.Run.Outcome, runner.Run.Message);
+            StringAssert.Contains("\"metrics\":{\"n\":5,\"label\":\"x\"}", File.ReadAllText(runner.Run.ResultJsonPath));
+        }
         [UnityTest] public IEnumerator WaitTimeout_Message()
         {
             using var runner = Runner("wait 1 == 2 timeout=0.02");
