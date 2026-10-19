@@ -59,7 +59,7 @@ namespace Game.Presentation.Presenters
             switch (value.Kind)
             {
                 case EconomyNoticeKind.CargoFull: case EconomyNoticeKind.Jettisoned: case EconomyNoticeKind.SalvageRefused: case EconomyNoticeKind.TradeRefused: Post(NotificationKind.Warning, value.Text); break;
-                case EconomyNoticeKind.SalvageDone: case EconomyNoticeKind.SalvagePartial: Post(NotificationKind.Positive, value.Text); break;
+                case EconomyNoticeKind.SalvageDone: case EconomyNoticeKind.SalvagePartial: case EconomyNoticeKind.RepairDone: Post(NotificationKind.Positive, value.Text); break;
             }
         }
         void Unhandled(InteractionUnhandled _) { if (bound) Post(NotificationKind.Info, "Nothing of interest"); }

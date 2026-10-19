@@ -12,6 +12,9 @@ namespace Game.App.Session
         public ContentId SourceBlueprint;
         public string Name;
         public VoxelStructure Structure;
+        /// <summary>ABL-006: the committed design emergency repairs rebuild towards; Structure takes the damage (write-back), this does
+        /// not. Set when the ship joins the fleet or its structure is replaced by a commit; owned and disposed with the record.</summary>
+        public VoxelStructure Design;
         public int StructureHandle = -1;
         VoxelStructureRegistry registry;
 
@@ -31,7 +34,7 @@ namespace Game.App.Session
         {
             // A pinned source still belongs to a live spawn request; its caller must cancel/finish that request first.
             if (Structure != null && Structure.IsPinned) throw new InvalidOperationException("Cannot dispose a spawning ship");
-            Release(); Structure?.Dispose(); Structure = null;
+            Release(); Structure?.Dispose(); Structure = null; Design?.Dispose(); Design = null;
         }
     }
 }

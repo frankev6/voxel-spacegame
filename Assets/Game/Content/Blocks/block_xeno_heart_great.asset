@@ -43,7 +43,8 @@ MonoBehaviour:
   - rid: 1
   - rid: 2
   - rid: 3
-  grantedAbilities: []
+  grantedAbilities:
+  - {fileID: 11400000, guid: da634049f56bc4576ad77c9bc2c65db8, type: 2}
   references:
     version: 2
     RefIds:

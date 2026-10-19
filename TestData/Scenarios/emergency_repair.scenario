@@ -1,0 +1,35 @@
+scenario emergency_repair
+desc "ABL-006: blow the WRAITH's engines off, press Emergency Repairs, and the engines come back first, paid for with hull plating from the hold (owner 2026-10-18: fix a percentage of your lost ship at a heavy cost of energy and random hulls from your inventory; prioritise missing engines)"
+status active
+tags repair
+timeout 240
+# from Boot: the menu first, so the flow is free
+wait scene == "MainMenu" timeout=30
+wait ticks=30
+playground
+wait player.ready timeout=60
+wait ticks=120
+give item=block_hull count=200
+let cells0 = player.cells
+let thrust0 = player.thrust
+let engines0 = player.engines
+report repair_key = player.ability("ability_emergency_repair")
+damage player=true at=rear radius=4 amount=60000
+wait ticks=60
+report cells_after_blast = player.cells
+report engines_blast = player.engines
+report thrust_blast = player.thrust
+let hull0 = inv("block_hull")
+let lost = $cells0 - player.cells
+key keys=Digit3
+wait ticks=180
+report cells_after_repair = player.cells
+report engines_after_repair = player.engines
+report thrust_after_repair = player.thrust
+report hull_used = $hull0 - inv("block_hull")
+report rebuilt_share = (player.cells - $cells0 + $lost) / $lost
+report engines_before = $engines0
+assert player.engines > $engines_blast "engines come back"
+assert player.thrust > $thrust_blast "thrust comes back"
+assert player.cells > $cells0 - $lost "cells were rebuilt"
+assert logs.exceptions == 0 "no exceptions"

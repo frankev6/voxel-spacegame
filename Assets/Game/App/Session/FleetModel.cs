@@ -27,6 +27,7 @@ namespace Game.App.Session
                 string.IsNullOrWhiteSpace(record.Name) || record.Name.Length > 32)
                 throw new ArgumentException("Ship requires a valid id, name and live structure", nameof(record));
             if (Find(record.PersistentId) != null) throw new InvalidOperationException("Duplicate ship id");
+            if (record.Design == null || !record.Design.Data.IsCreated) record.Design = record.Structure.Clone();   // ABL-006: as committed
             int at = 0; while (at < ships.Count && ships[at].PersistentId < record.PersistentId) at++;
             ships.Insert(at, record);
             if (makeFlagship || Flagship == null) Flagship = record;
@@ -45,6 +46,7 @@ namespace Game.App.Session
             if (structure == null || !structure.Data.IsCreated || structure.IsPinned || structure.IsReadOnly)
                 throw new ArgumentException("Replacement must be a live, mutable, unpinned structure", nameof(structure));
             if (!ReferenceEquals(ship.Structure, structure)) { ship.Structure.Dispose(); ship.Structure = structure; }
+            ship.Design?.Dispose(); ship.Design = structure.Clone();   // ABL-006: a commit is the new design
             Notify();
         }
         public void ResetToEmpty()

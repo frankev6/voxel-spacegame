@@ -61,11 +61,20 @@ namespace Game.App.DevRuntime.Scenarios
                 }
                 var player = ctx.PlayerShipRoot;
                 bool alive = player != Entity.Null && em.Exists(player);
+                if (Name == "player.ability")
+                {   // the 1-based slot (its key) of the ability with this id on the player's ship; 0 when it has none
+                    if (!alive || !em.HasBuffer<Game.Simulation.Abilities.AbilitySlot>(player)) return Number(0);
+                    var hash = new ContentId(RequireString(args[0])).Hash; var slots = em.GetBuffer<Game.Simulation.Abilities.AbilitySlot>(player);
+                    for (int i = 0; i < slots.Length; i++) if (slots[i].Ability.Equals(hash)) return Number(i + 1);
+                    return Number(0);
+                }
                 switch (Name)
                 {
                     case "player.dead": return Boolean(alive && em.HasComponent<Hulk>(player));
                     case "player.hull": return Number(alive && em.HasComponent<ShipStats>(player) ? em.GetComponentData<ShipStats>(player).MassFraction : 0);
                     case "player.shield": return Number(alive && em.HasComponent<ShieldState>(player) ? em.GetComponentData<ShieldState>(player).Hp : 0);
+                    case "player.thrust": return Number(alive && em.HasComponent<Game.Simulation.Flight.PropulsionStats>(player) ? em.GetComponentData<Game.Simulation.Flight.PropulsionStats>(player).ForwardThrust : 0);
+                    case "player.engines": return Number(alive && em.HasComponent<Game.Simulation.Flight.PropulsionStats>(player) ? em.GetComponentData<Game.Simulation.Flight.PropulsionStats>(player).AliveThrusterCount : 0);
                 }
                 throw new InvalidOperationException("unknown probe " + Name);
             }
@@ -73,8 +82,8 @@ namespace Game.App.DevRuntime.Scenarios
 
         internal static void Register(ScenarioProbeRegistry registry)
         {
-            foreach (string name in new[] { "player.dead", "player.hull", "player.shield", "sim.seconds" }) registry.Register(new Probe(name));
-            foreach (string name in new[] { "damage.taken", "damage.detached", "damage.grids", "ships.alive" }) registry.Register(new Probe(name, 1));
+            foreach (string name in new[] { "player.dead", "player.hull", "player.shield", "player.thrust", "player.engines", "sim.seconds" }) registry.Register(new Probe(name));
+            foreach (string name in new[] { "damage.taken", "damage.detached", "damage.grids", "ships.alive", "player.ability" }) registry.Register(new Probe(name, 1));
         }
     }
 }

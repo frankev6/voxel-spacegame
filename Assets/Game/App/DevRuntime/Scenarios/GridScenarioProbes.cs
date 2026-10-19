@@ -32,6 +32,12 @@ namespace Game.App.DevRuntime.Scenarios
                 if (Name == "grid.exists") return Boolean(root != Entity.Null);
                 if (Name == "grid.kind") return Text(root == Entity.Null ? "" : ctx.EntityManager.GetComponentData<VoxelGrid>(root).Kind.ToString());
                 if (Name == "grid.cells" || Name == "player.cells") return Number(root == Entity.Null ? 0 : DevEcs.SolidCells(ctx.EntityManager, root));
+                if (Name == "player.bricks")
+                {   // live bricks of the player's grid (ABL-006: a repair recreates lost ones)
+                    int bricks = 0; var em = ctx.EntityManager;
+                    if (root != Entity.Null && em.HasBuffer<BrickSlot>(root)) foreach (var slot in em.GetBuffer<BrickSlot>(root, true)) if (em.Exists(slot.Brick)) bricks++;
+                    return Number(bricks);
+                }
                 if (Name == "player.id") return Number(root != Entity.Null && ctx.EntityManager.HasComponent<PersistentId>(root) ? ctx.EntityManager.GetComponentData<PersistentId>(root).Value : 0);
                 if (Name == "player.speed") return Number(root != Entity.Null && ctx.EntityManager.HasComponent<PhysicsVelocity>(root) ? Unity.Mathematics.math.length(ctx.EntityManager.GetComponentData<PhysicsVelocity>(root).Linear) : 0);
                 if (root == Entity.Null) throw new InvalidOperationException("player coordinates unavailable");
@@ -54,7 +60,7 @@ namespace Game.App.DevRuntime.Scenarios
         }
         internal static void Register(ScenarioProbeRegistry registry)
         {
-            foreach (string name in new[] { "player.pos.x", "player.pos.y", "player.pos.z", "player.upos.x", "player.upos.z", "player.speed", "player.id", "player.cells" }) registry.Register(new Probe(name));
+            foreach (string name in new[] { "player.pos.x", "player.pos.y", "player.pos.z", "player.upos.x", "player.upos.z", "player.speed", "player.id", "player.cells", "player.bricks" }) registry.Register(new Probe(name));
             foreach (string name in new[] { "grid.exists", "grid.cells", "grid.kind", "grids.count" }) registry.Register(new Probe(name, 1));
         }
     }

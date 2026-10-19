@@ -25,7 +25,7 @@ namespace Game.Voxel.Grid
     public partial struct GridSpawnSystem : ISystem
     {
         Entity singletons;
-        EntityQuery requests, spawning, registryQuery, despawns, rebuilds, edits;
+        EntityQuery requests, spawning, registryQuery, despawns, rebuilds, edits, fills;
         EntityArchetype brickBase;
         int rendererWait;
         byte brickRendered;
@@ -57,6 +57,7 @@ namespace Game.Voxel.Grid
             });
             rebuilds = state.GetEntityQuery(ComponentType.ReadOnly<GridRebuildRequest>(), ComponentType.ReadOnly<VoxelGrid>());
             edits = state.GetEntityQuery(ComponentType.ReadOnly<GridEditRequest>(), ComponentType.ReadOnly<VoxelGrid>());
+            fills = state.GetEntityQuery(ComponentType.ReadOnly<GridBrickFillRequest>());
             registryQuery = state.GetEntityQuery(ComponentType.ReadOnly<VoxelStructureRegistryRef>());
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<VoxelConfig>();
             state.RequireForUpdate<BlockDefsRef>(); state.RequireForUpdate<OrientationTablesRef>(); state.RequireForUpdate(registryQuery);
@@ -105,6 +106,7 @@ namespace Game.Voxel.Grid
             }
             using (ConvertMarker.Auto()) Convert(ref state, registry, content, runtime, ref prototypes, ref queue, ref budget, ref serials.Next);
             Edit(ref state, registry, content, runtime, ref prototypes, ref queue);
+            Fill(ref state, registry, content, runtime, ref prototypes, ref queue);
             em.SetComponentData(singletons, serials);
             em.SetComponentData(singletons, prototypes);
         }
@@ -529,12 +531,18 @@ namespace Game.Voxel.Grid
 
         void CreateFunctional(ref SystemState state, VoxelStructureRegistry registry, VoxelStructure source, Entity root,
             VoxelContent content, VoxelRenderRuntime runtime, ref GridPrototypes prototypes)
+            => CreateFunctional(ref state, registry, source.Data.Instances.AsArray(), source.Data.Bricks.AsArray(), source.Data.Header.Value.CellSize,
+                root, content, runtime, ref prototypes);
+        /// <summary>Creates the functional entity of every live Functional instance in `instances` (the source's, or the root's own when
+        /// a repair revived some, ABL-006) that the root does not have yet.</summary>
+        void CreateFunctional(ref SystemState state, VoxelStructureRegistry registry, NativeArray<BlockInstance> sourceInstances, NativeArray<BrickRecord> records,
+            float cellSize, Entity root, VoxelContent content, VoxelRenderRuntime runtime, ref GridPrototypes prototypes)
         {
             using var marker = FunctionalMarker.Auto(); var em = state.EntityManager;
             var groups = new SortedDictionary<ulong, List<int>>();
-            for (int i = 0; i < source.Data.Instances.Length; i++)
+            for (int i = 0; i < sourceInstances.Length; i++)
             {
-                var instance = source.Data.Instances[i];
+                var instance = sourceInstances[i];
                 if (instance.Block == 0 || instance.CellsAlive == 0 || (instance.Flags & BlockInstanceFlags.Destroyed) != 0) continue;
                 if (em.Exists(em.GetBuffer<BlockInstance>(root)[i].Functional)) continue;
                 ref var def = ref content.Blocks.Value.Blocks[instance.Block]; if (def.Kind != BlockKind.Functional) continue;
@@ -560,8 +568,8 @@ namespace Game.Voxel.Grid
                 using var emptyBounds = new NativeArray<AABB>(0, Allocator.TempJob);
                 new FunctionalFillJob
                 {
-                    Entities = entities, Indices = indices, Instances = source.Data.Instances.AsArray(), Root = root,
-                    CellSize = source.Data.Header.Value.CellSize, Blocks = content.Blocks, Orientations = content.Orientations,
+                    Entities = entities, Indices = indices, Instances = sourceInstances, Root = root,
+                    CellSize = cellSize, Blocks = content.Blocks, Orientations = content.Orientations,
                     Render = (byte)(render ? 1 : 0), Material = runtime.PropMaterial,
                     Meshes = render ? runtime.PropMeshIds : emptyMeshes, Bounds = render ? runtime.PropMeshBounds : emptyBounds,
                     Functional = SystemAPI.GetComponentLookup<FunctionalBlock>(), Transforms = SystemAPI.GetComponentLookup<LocalTransform>(), Parents = SystemAPI.GetComponentLookup<Parent>(),
@@ -570,7 +578,7 @@ namespace Game.Voxel.Grid
                 }.Schedule(entities.Length, 8).Complete();
                 new LinkCreatedJob
                 {
-                    Entities = entities, Records = source.Data.Bricks.AsArray(), InstanceIndices = indices, Root = root, Functional = 1,
+                    Entities = entities, Records = records, InstanceIndices = indices, Root = root, Functional = 1,
                     Groups = SystemAPI.GetBufferLookup<LinkedEntityGroup>(), Slots = SystemAPI.GetBufferLookup<BrickSlot>(), Instances = SystemAPI.GetBufferLookup<BlockInstance>(),
                     Spawning = SystemAPI.GetComponentLookup<GridSpawning>()
                 }.Run();

@@ -2,7 +2,7 @@
 
 Owner, 2026-10-18: "plan out what it would take to have a "emergency repairs" ability where you fix a percentage of your lost/weakened ship at the heavy cost of energy and random hulls from your inventory if you're a player. it should prioritize fixing missing engines first."
 
-Status: planned, not started. Defaults below are proposals; the open questions at the end are the owner's.
+Status: built 2026-10-18 with the recommended defaults (owner: "Build emergency repairs with the plan's recommended defaults"); see SPEC-24 §5.4. What shipped differs from this plan in three places: the repair runs on the main thread on the authority (repairs are rare); cells go through the existing exact-write channel and a new brick-fill request instead of a new restore mode; and co-op needed no new records, because guests already receive state diffs.
 
 ## What already exists
 

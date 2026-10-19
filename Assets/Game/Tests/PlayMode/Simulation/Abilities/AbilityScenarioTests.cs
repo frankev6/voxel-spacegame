@@ -61,7 +61,7 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
                 foreach (int x in new[] { -1, 1 }) Place(source, "block_thruster_small", new int3(x, 1, 2), forward);
                 foreach (int x in new[] { -3, 3 }) Place(source, "block_thruster_small", new int3(x, 1, 2));
                 Root = combat.Flight.SpawnSource(source, profile: GridProfile.PlayerShip); combat.Ready(Root);
-                Assert.AreEqual(2, Slots.Length); Assert.AreEqual(6, Em.GetComponentData<PropulsionStats>(Root).AliveThrusterCount);
+                Assert.AreEqual(3, Slots.Length, "boost, shield and the core's emergency repair (ABL-006), in that order"); Assert.AreEqual(6, Em.GetComponentData<PropulsionStats>(Root).AliveThrusterCount);
                 Assert.AreEqual(1, Em.GetComponentData<ShieldState>(Root).Active); Assert.Greater(Em.GetComponentData<ShipPower>(Root).Stored, 15);
             }
             void Place(VoxelStructure source, string id, int3 origin, byte orientation = 0)
@@ -209,7 +209,7 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
                 else Assert.IsFalse(lost, "Targeted damage must preserve every non-thruster block, including core and shield.");
             }
             Assert.AreEqual(6, destroyed); Assert.IsFalse(f.Em.HasComponent<Hulk>(f.Root), "The core and shield survive targeted thruster loss.");
-            f.Tick(2); Assert.AreEqual(-1, f.Slot(AbilityKind.StatBoost)); Assert.AreEqual(1, f.Slots.Length);
+            f.Tick(2); Assert.AreEqual(-1, f.Slot(AbilityKind.StatBoost)); Assert.AreEqual(2, f.Slots.Length, "shield and repair");
             Assert.AreEqual(0, f.Em.GetBuffer<ShipStatModifier>(f.Root).Length); Assert.AreEqual(0, f.Em.GetComponentData<PropulsionStats>(f.Root).AliveThrusterCount);
             Assert.AreEqual(0, f.Em.GetBuffer<FlightThruster>(f.Root).Length); Assert.AreEqual(1, f.Em.GetComponentData<ShieldState>(f.Root).Active);
         }
@@ -276,7 +276,7 @@ namespace Game.Tests.PlayMode.Simulation.Abilities
             {
                 foreach (var (script, ability, slots, records, entity) in SystemAPI.Query<RefRO<Script>, RefRO<AbilityState>, DynamicBuffer<AbilitySlot>, DynamicBuffer<History>>().WithEntityAccess())
                 {
-                    Assert.AreEqual(2, slots.Length);
+                    Assert.AreEqual(3, slots.Length);
                     var record = new History { Tick = script.ValueRO.Tick - 1, Ability = ability.ValueRO,
                         Boost = slots[script.ValueRO.BoostSlot], Shield = slots[script.ValueRO.ShieldSlot] };
                     foreach (var slot in slots)

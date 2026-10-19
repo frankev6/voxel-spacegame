@@ -42,6 +42,7 @@ namespace Game.Net.Replication
         readonly NetReader reader = new();
         NativeArray<Cell> cells;
         NativeList<ExactCellWrite> exact, instanceWrites;   // this frame's decoded writes, queued to DamageStreams after the apply loop
+        NativeList<GridBrickFillCell> fills;                // ABL-006: cells of bricks this guest does not have
         EntityQuery streamsQuery;
         double clockOffset; bool clockValid;
         public uint NewestHostTick { get; private set; }
@@ -66,6 +67,7 @@ namespace Game.Net.Replication
             this.transport = transport;
             cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Persistent);
             exact = new NativeList<ExactCellWrite>(BrickMath.CellsPerBrick, Allocator.Persistent);
+            fills = new NativeList<GridBrickFillCell>(BrickMath.CellsPerBrick, Allocator.Persistent);
             instanceWrites = new NativeList<ExactCellWrite>(64, Allocator.Persistent);
             foreach (var kind in new[] { NetMessage.JoinBegin, NetMessage.JoinEnd, NetMessage.GridSpawn, NetMessage.GridDespawn, NetMessage.GridDelta,
                          NetMessage.GridState, NetMessage.AbilityState, NetMessage.GridSalvage, NetMessage.PilotStatus, NetMessage.Factions, NetMessage.ChunkSpawn, NetMessage.ChunkDespawn, NetMessage.HashReport })
@@ -389,11 +391,17 @@ namespace Game.Net.Replication
                 for (int i = 0; i < paletteCount; i++) e[i] = GridCodec.ReadPaletteEntry(r);
                 ReplicaVoxelApi.SetPalette(em, root, paletteStart, entries);   // replicated state with no consequences; cells refer to it later
             }
-            instanceWrites.Clear();
+            instanceWrites.Clear(); fills.Clear(); bool revive = false;
             int instanceCount = r.U16();
             for (int i = 0; i < instanceCount; i++)
             {
                 int index = r.U16(); float hp = r.F32(); ushort alive = r.U16(); var flags = (BlockInstanceFlags)r.U8();
+                // ABL-006: a block the host rebuilt comes back to life here; its functional entity is recreated once the write lands
+                if (alive > 0 && (flags & BlockInstanceFlags.Destroyed) == 0 && em.HasBuffer<BlockInstance>(root))
+                {
+                    var current = em.GetBuffer<BlockInstance>(root, true);
+                    if (index < current.Length && ((current[index].Flags & BlockInstanceFlags.Destroyed) != 0 || current[index].CellsAlive == 0)) revive = true;
+                }
                 instanceWrites.Add(new ExactCellWrite { Grid = root, Kind = ExactWriteKind.Instance, Instance = index, FunctionHp = hp, CellsAlive = alive, Flags = flags });
             }
             uint ops = r.U32();
@@ -409,6 +417,12 @@ namespace Game.Net.Replication
                 else if (op == 1)
                 {
                     coord = GridCodec.ReadBrickCells(r, cells);
+                    if (!GridBrickFillApi.HasBrick(em, root, BrickMath.CellOf(coord, 0)))
+                    {   // ABL-006: a brick the host recreated (a repair); a brick the host has and this guest lost is created whole
+                        for (int i = 0; i < BrickMath.CellsPerBrick; i++)
+                            if (!cells[i].IsAir) fills.Add(new GridBrickFillCell { Cell = BrickMath.CellOf(coord, i), Value = cells[i] });
+                        continue;
+                    }
                     for (int i = 0; i < BrickMath.CellsPerBrick; i++) Add(root, BrickMath.CellOf(coord, i), cells[i], reason);
                 }
                 else
@@ -418,6 +432,7 @@ namespace Game.Net.Replication
                 }
             }
             exact.AddRange(instanceWrites.AsArray());
+            if (fills.Length > 0 || revive) GridBrickFillApi.Request(em, root, fills.AsArray(), revive);
         }
 
         void Add(Entity root, int3 cell, Cell value, CellRemovedReason reason)
@@ -482,6 +497,7 @@ namespace Game.Net.Replication
         {
             if (cells.IsCreated) cells.Dispose();
             if (exact.IsCreated) exact.Dispose();
+            if (fills.IsCreated) fills.Dispose();
             if (instanceWrites.IsCreated) instanceWrites.Dispose();
         }
     }

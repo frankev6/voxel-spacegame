@@ -1,0 +1,33 @@
+scenario emergency_repair_brick
+desc "ABL-006: a blast big enough to delete whole bricks (8 m) from the WRAITH's tail; the repair recreates the lost bricks with their cells"
+status active
+tags repair
+timeout 240
+wait scene == "MainMenu" timeout=30
+wait ticks=30
+playground
+wait player.ready timeout=60
+wait ticks=120
+give item=block_hull count=400
+let cells0 = player.cells
+let bricks0 = player.bricks
+damage player=true at=rear radius=9 amount=400000
+wait ticks=60
+report bricks_after_blast = player.bricks
+report cells_after_blast = player.cells
+report engines_blast = player.engines
+let bricks_blast = player.bricks
+let cells_blast = player.cells
+let engines_blast = player.engines
+# the blast takes the shield emitter, so the bar closes up and the repair moves from key 3 to key 2
+report repair_key = player.ability("ability_emergency_repair")
+assert $repair_key == 2 "the repair is on key 2 once the shield is gone"
+key keys=Digit2
+wait ticks=240
+report bricks_after_repair = player.bricks
+report cells_after_repair = player.cells
+report engines_after_repair = player.engines
+report bricks_before = $bricks0
+assert player.cells > $cells_blast "cells were rebuilt"
+assert player.engines > $engines_blast "engines come back"
+assert logs.exceptions == 0 "no exceptions"

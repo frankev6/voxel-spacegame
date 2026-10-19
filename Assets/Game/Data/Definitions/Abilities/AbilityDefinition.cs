@@ -18,6 +18,11 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float durationSeconds; // StatBoost effect length
         [UnityEngine.SerializeField] private AbilityStatMod[] statModifiers;            // StatBoost: 1..4 entries
         [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float shieldEnableThreshold; // ShieldToggle: min Hp/MaxHp to switch on
+        // EmergencyRepair (ABL-006): the share of the missing design cells rebuilt per use, the share of each damaged cell's and live
+        // block's health restored, and how many rebuilt cells one hull item pays for (0 = no items; AI ships never pay).
+        [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float repairFraction = .35f;
+        [UnityEngine.SerializeField, UnityEngine.Range(0, 1)] private float healFraction = .5f;
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private int hullCellsPerItem = 4;
         [UnityEngine.SerializeField] private AudioCueDefinition activationCue;
         [UnityEngine.SerializeField] private FxDefinition activationFx;
 
@@ -32,6 +37,9 @@ namespace Game.Data.Definitions
         public float DurationSeconds => durationSeconds;
         public System.Collections.Generic.IReadOnlyList<AbilityStatMod> StatModifiers => statModifiers;
         public float ShieldEnableThreshold => shieldEnableThreshold;
+        public float RepairFraction => repairFraction;
+        public float HealFraction => healFraction;
+        public int HullCellsPerItem => hullCellsPerItem;
         public AudioCueDefinition ActivationCue => activationCue;
         public FxDefinition ActivationFx => activationFx;
 
@@ -59,6 +67,14 @@ namespace Game.Data.Definitions
             }
             if (maxCharges < 1 || maxCharges > 9 || (maxCharges > 1 && (!float.IsFinite(chargeRechargeSeconds) || chargeRechargeSeconds <= 0)))
                 scope.Error("ABL-E003", nameof(chargeRechargeSeconds), "Charges must be 1..9; multiple charges need a finite positive recharge time.");
+            if (kind == AbilityKind.EmergencyRepair)
+            {
+                if (!float.IsFinite(repairFraction) || repairFraction <= 0 || repairFraction > 1 || !float.IsFinite(healFraction) || healFraction < 0 || healFraction > 1)
+                    scope.Error("ABL-E007", nameof(repairFraction), "EmergencyRepair needs a repair fraction in (0,1] and a heal fraction in [0,1].");
+                if (hullCellsPerItem < 0) scope.Error("ABL-E007", nameof(hullCellsPerItem), "Hull cells per item must not be negative.");
+                if (!float.IsFinite(durationSeconds) || durationSeconds <= 0 || Game.Core.SimTime.SecondsToTicks(durationSeconds) == 0)
+                    scope.Error("ABL-E007", nameof(durationSeconds), "EmergencyRepair needs a channel of at least one tick.");
+            }
             if (kind == AbilityKind.ShieldToggle && durationSeconds > 0)
                 scope.Error("ABL-E005", nameof(durationSeconds), "ShieldToggle must not have a duration; the effect owns its active state.");
             if (!System.Enum.IsDefined(typeof(AbilityKind), kind))

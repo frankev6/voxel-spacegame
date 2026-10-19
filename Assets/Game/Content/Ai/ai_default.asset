@@ -37,3 +37,6 @@ MonoBehaviour:
   - ability: {fileID: 11400000, guid: 35ab7995a9ebc44388dc90283da496f5, type: 2}
     trigger: 1
     threshold: 0
+  - ability: {fileID: 11400000, guid: da634049f56bc4576ad77c9bc2c65db8, type: 2}
+    trigger: 2
+    threshold: 0.5
