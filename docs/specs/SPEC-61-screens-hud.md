@@ -236,7 +236,7 @@ public struct HudSnapshot : Unity.Entities.IComponentData
 }
 [System.Flags] public enum HudFlags : byte { None = 0, HasShip = 1, IsHulk = 2, HasTarget = 4, HasInteraction = 8, Boosting = 16 }
 public struct HudWeaponGroupState { public byte Group; public byte WeaponCount; public byte Firing; public byte Pad; public float Ready01; }   // 8 bytes; Group = bit index 0..2
-public struct HudAbilityState { public Game.Core.ContentHash Ability; public float Cooldown01; public byte Charges; public byte Ready; public byte Active; public byte Pad; } // 16 bytes
+public struct HudAbilityState { public Game.Core.ContentHash Ability; public half Cooldown01; public half Channel01; public byte Charges; public byte Ready; public byte Active; public byte Blocked; } // 16 bytes; Channel01 and Blocked: ABL-006
 
 /// Buffer on the snapshot entity. [InternalBufferCapacity(0)]; at most 64 elements.
 public struct HudRadarBlip : Unity.Entities.IBufferElementData
@@ -262,7 +262,13 @@ Per frame:
 1. Find the single `PlayerShip` entity with `SystemAPI.TryGetSingletonEntity<PlayerShip>`. None → write `Flags = None`, keep the radar buffer empty, increment nothing else, return.
 2. Fill ship fields from components (§4.5 comments). `SpeedMps = length(PhysicsVelocity.Linear)`. `Boosting` from `ShipCommand.Flags` (SPEC-20 boost bit). `IsHulk` when the ship has `Hulk`.
 3. Weapon groups: schedule `HudWeaponGatherJob` (`IJobChunk`, single-threaded `Schedule`, Burst) over entities with `FunctionalBlock` and `WeaponState`, filter `FunctionalBlock.Grid == player`; for each set bit `g` (0..2) of `WeaponState.Group`: `WeaponCount++`, `Ready01 = min(Ready01, 1 − CooldownRemainingTicks / max(1, CooldownTicks))`, `Firing |= WeaponState.Firing`. Bits above 2 are ignored. Cost: O(weapon entities in the world) in Burst; no main-thread loop.
-4. Abilities: copy up to 4 entries of `AbilitySlot` (`Ability`, `Cooldown01 = CooldownRemainingTicks / max(1, CooldownTicks)`, `Charges`, `Ready = CooldownRemainingTicks <= 0 && Charges > 0`, `Active`).
+4. Abilities: copy up to 4 entries of `AbilitySlot`:
+   - `Ability`, `Charges`, `Active`, and `Blocked` (the `AbilityBlockReason`);
+   - `Cooldown01 = CooldownRemainingTicks / max(1, CooldownTicks)`;
+   - `Channel01 = (ActiveUntilTick − tick) / DurationTicks` while a duration ability runs, else 0;
+   - `Ready = CooldownRemainingTicks <= 0 && Charges > 0 && Blocked == 0`.
+
+   The flight HUD draws `Channel01` as a ring round the tile and dims a blocked tile. The tile's tooltip gives the name, description, cost, cooldown and block reason. A `NoHullPlating` tile shows "NO HULL" (ABL-006).
 5. Target: if `ShipTarget.Value` exists: `TargetFaction = Allegiance.Faction` (255 if absent), relation = `FactionRelations.Get(player.Faction, TargetFaction)` mapped Friendly → 1, Hostile → 2, else 0; hull from `ShipStats.MassFraction`, shield from `ShieldState`; distance between `LocalToWorld` positions; `TargetNameHash = GridSource.Blueprint`; else clear `HasTarget`.
 6. Interaction: copy `InteractionTarget` (`Target != Entity.Null` → `HasInteraction`; `Kind`, `DistanceM`, `InRange`, `Body.LocalKey`, `GridPersistentId`).
 7. Current star system: `StarSystemIdValue = CurrentStarSystemInfo.Changing == 1 ? 0 : Id.Value`.

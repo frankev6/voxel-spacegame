@@ -135,7 +135,7 @@ namespace Game.Simulation.Abilities
         public AbilitySlotFlags Flags;              // this tick only
         public byte Charges;                        // SPEC-61
         public byte Active;                         // SPEC-61: 1 while a boost runs or the toggled shield is requested on
-        public byte Blocked;                        // 1 = activation not allowed now; written only by the effect system of this slot's kind (§5.2)
+        public byte Blocked;                        // AbilityBlockReason; non-zero = activation not allowed now; written only by the effect system of this slot's kind (§5.2)
         public byte Reserved;
         public float CooldownRemainingTicks;        // SPEC-61
         public float CooldownTicks;                 // SPEC-61
@@ -213,10 +213,15 @@ StatBoost slots are never `Blocked` (the system writes 0). `StatusSystem` (SPEC-
 
 Owner, 2026-10-18: "an "emergency repairs" ability where you fix a percentage of your lost/weakened ship at the heavy cost of energy and random hulls from your inventory if you're a player. it should prioritize fixing missing engines first"; defaults approved. Authority only, main thread (repairs are rare), after `AbilitySystem`. `ability_emergency_repair`: 150 E, cooldown 90 s, 1 charge, 2 s channel (`durationSeconds`), `repairFraction` 0.35, `healFraction` 0.5, `hullCellsPerItem` 4; granted by every core block. Combat AI profiles press it below half hull.
 1. **Design** of a ship: its fleet record's committed `Design` (players; FLET v2), else the immutable blueprint or registered source it spawned from (`GridSource`, never a `WriteBack` source). None → `Blocked`.
-2. **Blocked** each tick: no design; a pilot (`Pilot`) with no `block_hull*` item in the hold; or nothing to rebuild (live cells ≥ the design's, and no instance `Destroyed`) and no channel running.
+2. **Blocked** each tick, with its reason (`AbilityBlockReason`): no design (`NoDesign`); a pilot (`Pilot`) with no `block_hull*` item in the hold (`NoHullPlating`); or nothing to rebuild (live cells ≥ the design's, and no instance `Destroyed`) and no channel running (`NothingToRepair`). Other kinds write `Unavailable` (1).
 3. **Activation** (energy granted by §5.1): `RepairPlanner` compares the design with the live grid. Missing = design cells that are air, plus the cells of functional blocks destroyed in place; budget = ceil(0.35 × missing), capped for a pilot by its hull items × 4. Order: missing engines (direction with the fewest live engines first; the first one may exceed the fraction), then power, shields, weapons, other functional and multi-cell blocks, then hull breadth-first from what is attached. A block cut off from the ship brings the shortest path of missing hull cells to it; nothing is rebuilt floating; the core never. A pilot pays ceil(cells ÷ 4) hull items drawn at random from the hull stacks, weighted by count, seeded by tick and ship. Every cell and live block heals by 50% (`CellRestoreRequest` Heal over the grid's cell bounds). The pilot gets a `RepairDone` notice ("Repairs: 11 engines, 83 cells, used 21 Hull 1x1.").
 4. **Channel**: the plan's steps are poured evenly over the duration. A cell into a surviving brick is an `ExactCellWrite`; cells of a lost brick go in a `GridBrickFillRequest`, which `GridSpawnSystem` turns into a new brick holding them (SPEC-10). A rebuilt block's function returns (exact instance write: full `FunctionHp`, all cells alive, not destroyed; then its functional entity is recreated) once all its cells are present, waiting up to 60 ticks past the channel. A hulk or a despawned grid ends the channel.
 5. **Co-op**: guests receive the cells and blocks as ordinary `GridDelta` state; a guest given a whole brick it does not have creates it the same way, and recreates a revived block's functional entity.
+6. **Feedback** (every machine):
+   - **Icon:** the wrench chip.
+   - **Sound:** `cue_repair_weld` is the activation cue, a 2.2 s weld crackle (`AbilityFeedbackSystem`).
+   - **Weld sparks** (`RepairWeld`): kinetic hit sparks tinted hot, on one rebuilt cell per ship per tick. The host sparks the cells it writes; a guest sparks the cells a delta adds while the ship's repair slot is active.
+   - **HUD (SPEC-61):** `HudAbilityState.Channel01` draws the time left of any running duration ability as an amber ring just inside its tile's border, clockwise from the top. A blocked slot is dimmed, and stays hoverable for its tooltip (name, description, cost, cooldown, reason). `NoHullPlating` also shows "NO HULL" across the tile.
 
 ## 6. Public API
 

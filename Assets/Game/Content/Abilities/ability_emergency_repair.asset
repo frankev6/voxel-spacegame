@@ -16,7 +16,7 @@ MonoBehaviour:
   formerIds: []
   displayName: Emergency Repairs
   description: Rebuilds 35% of the ship's missing structure over 2 s, engines first, and heals damage. Costs 150 energy and, for a pilot, hull plating from the hold (one per 4 cells).
-  icon: {fileID: -1957485405, guid: f8a50dec0611c624ca8569633b602306, type: 3}
+  icon: {fileID: -2127548129, guid: f8a50dec0611c624ca8569633b602306, type: 3}
   kind: 2
   energyCost: 150
   cooldownSeconds: 90
@@ -28,5 +28,5 @@ MonoBehaviour:
   repairFraction: 0.35
   healFraction: 0.5
   hullCellsPerItem: 4
-  activationCue: {fileID: 0}
+  activationCue: {fileID: 11400000, guid: a1414f410fa44484eb6d6d300dbeb54a, type: 2}
   activationFx: {fileID: 0}

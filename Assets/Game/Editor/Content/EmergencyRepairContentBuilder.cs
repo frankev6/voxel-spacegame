@@ -14,6 +14,8 @@ namespace Game.Editor.Content
     public static class EmergencyRepairContentBuilder
     {
         const string Abilities = "Assets/Game/Content/Abilities/", Blocks = "Assets/Game/Content/Blocks/", Ai = "Assets/Game/Content/Ai/";
+        const string Audio = "Assets/Game/Content/Audio/", WeldClip = "Assets/Game/Audio/Sfx/repair_weld.wav", WeldCue = "cue_repair_weld";
+        const string IconSheet = "Assets/Game/Art/_Placeholder/Icons/item_icons_sheet.png", IconSprite = "spritetest2_transparent_59";   // the wrench chip
         internal const string Id = "ability_emergency_repair";
         static readonly string[] CombatProfiles = { "ai_default", "ai_hollow_guard", "ai_skittish" };
 
@@ -34,6 +36,8 @@ namespace Game.Editor.Content
             so.FindProperty("shieldEnableThreshold").floatValue = 0;
             so.FindProperty("repairFraction").floatValue = .35f; so.FindProperty("healFraction").floatValue = .5f;
             so.FindProperty("hullCellsPerItem").intValue = 4;
+            so.FindProperty("icon").objectReferenceValue = Icon();
+            so.FindProperty("activationCue").objectReferenceValue = Cue();
             so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(ability);
 
             int granted = 0;
@@ -62,6 +66,32 @@ namespace Game.Editor.Content
             }
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", "Built " + Id + "; granted on " + granted + " more core blocks.");
+        }
+
+        static Sprite Icon()
+        {
+            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(IconSheet))
+                if (asset is Sprite sprite && sprite.name == IconSprite) return sprite;
+            throw new System.InvalidOperationException("no sprite " + IconSprite + " in " + IconSheet);
+        }
+
+        /// <summary>The channel's sound: a 2.2 s weld crackle played once on activation, on every machine (AbilityFeedbackSystem).</summary>
+        static AudioCueDefinition Cue()
+        {
+            string path = Audio + WeldCue + ".asset";
+            if (AssetDatabase.LoadMainAssetAtPath(path) == null && !AssetDatabase.CopyAsset(Audio + "cue_impact_hull.asset", path))
+                throw new System.InvalidOperationException("copy cue_impact_hull");
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(WeldClip) ?? throw new System.InvalidOperationException("no clip " + WeldClip);
+            var cue = AssetDatabase.LoadAssetAtPath<AudioCueDefinition>(path); var so = new SerializedObject(cue);
+            so.FindProperty("id").stringValue = WeldCue; so.FindProperty("formerIds").arraySize = 0;
+            var clips = so.FindProperty("clips"); clips.arraySize = 1; clips.GetArrayElementAtIndex(0).objectReferenceValue = clip;
+            so.FindProperty("volume").floatValue = .55f; so.FindProperty("volumeRandom").floatValue = 0; so.FindProperty("pitchRandom").floatValue = .04f;
+            so.FindProperty("maxVoices").intValue = 4; so.FindProperty("priority").intValue = 100;
+            so.FindProperty("spatialBlend").floatValue = .5f; so.FindProperty("minDistance").floatValue = 40; so.FindProperty("maxDistance").floatValue = 800;
+            so.FindProperty("cooldown").floatValue = 0; so.FindProperty("loop").boolValue = false;
+            so.FindProperty("coalesce").enumValueIndex = (int)CoalesceMode.None; so.FindProperty("combatSignal").boolValue = false;
+            so.ApplyModifiedPropertiesWithoutUndo(); EditorUtility.SetDirty(cue);
+            return cue;
         }
     }
 }

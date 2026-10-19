@@ -14,7 +14,7 @@ namespace Game.Simulation.Abilities
         public AbilitySlotFlags Flags;              // this tick only
         public byte Charges;                        // SPEC-61
         public byte Active;                         // SPEC-61: 1 while a boost runs or the toggled shield is requested on
-        public byte Blocked;                        // 1 = activation not allowed now; written only by the effect system of this slot's kind (§5.2)
+        public byte Blocked;                        // AbilityBlockReason; non-zero = activation not allowed now; written only by the effect system of this slot's kind (§5.2)
         public byte ActivationCount;                // ADR-0117: +1 per activation (wraps), so replication delivers each one exactly once
         public float CooldownRemainingTicks;        // SPEC-61
         public float CooldownTicks;                 // SPEC-61

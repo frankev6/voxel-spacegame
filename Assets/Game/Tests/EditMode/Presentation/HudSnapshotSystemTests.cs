@@ -86,7 +86,7 @@ namespace Game.Tests.EditMode.Presentation
             var v = Tick(); Assert.AreEqual(.75f, v.Hull01); Assert.AreEqual(30, v.ShieldHp); Assert.AreEqual(60, v.ShieldMax);
             Assert.AreEqual(1, v.ShieldStatus); Assert.AreEqual(20, v.Energy); Assert.AreEqual(100, v.EnergyMax); Assert.AreEqual(5, v.SpeedMps);
             Assert.IsTrue((v.Flags & HudFlags.Boosting) != 0); Assert.AreEqual(2, v.Abilities.Length);
-            Assert.AreEqual(.25f, v.Abilities[0].Cooldown01); Assert.AreEqual(0, v.Abilities[0].Ready); Assert.AreEqual(1, v.Abilities[1].Ready);
+            Assert.AreEqual(.25f, (float)v.Abilities[0].Cooldown01); Assert.AreEqual(0, v.Abilities[0].Ready); Assert.AreEqual(1, v.Abilities[1].Ready);
             Assert.AreEqual(7, v.StarSystemIdValue); Assert.AreEqual(99, v.InteractionGridPersistentId); Assert.AreEqual(30, v.InteractionDistanceM);
             Assert.IsTrue((v.Flags & HudFlags.HasInteraction) != 0);
         }

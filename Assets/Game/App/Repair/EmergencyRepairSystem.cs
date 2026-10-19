@@ -72,7 +72,8 @@ namespace Game.App.Repair
                     bool pays = def.HullCellsPerItem > 0 && em.HasComponent<Pilot>(root);
                     var design = DesignOf(root);
                     bool activated = (slot.Flags & AbilitySlotFlags.ActivatedThisTick) != 0;
-                    slot.Blocked = (byte)(design == null || pays && hull == 0 || !channels.ContainsKey(root) && !activated && !Damaged(root, design) ? 1 : 0);
+                    slot.Blocked = design == null ? AbilityBlockReason.NoDesign : pays && hull == 0 ? AbilityBlockReason.NoHullPlating
+                        : !channels.ContainsKey(root) && !activated && !Damaged(root, design) ? AbilityBlockReason.NothingToRepair : AbilityBlockReason.None;
                     slots = em.GetBuffer<AbilitySlot>(root); slots[i] = slot;
                     if (activated && design != null && !channels.ContainsKey(root))
                         Begin(root, design, ref def, pays ? hull * def.HullCellsPerItem : int.MaxValue, pays ? cargo : null, tick);
@@ -166,7 +167,7 @@ namespace Game.App.Repair
             var live = new LiveGrid(em, root);
             var palette = em.GetBuffer<PaletteEntry>(root);
             using var fill = new NativeList<GridBrickFillCell>(64, Allocator.Temp);
-            bool revive = false;
+            bool revive = false; int sparks = 0;
             var blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value; var orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value;
             while (channel.Next < due)
             {
@@ -212,6 +213,7 @@ namespace Game.App.Repair
                 if (GridBrickFillApi.HasBrick(em, root, step.Cell))
                     exact.Add(new ExactCellWrite { Grid = root, Kind = ExactWriteKind.Cell, Cell = step.Cell, Value = value, Reason = CellRemovedReason.Destroyed });
                 else fill.Add(new GridBrickFillCell { Cell = step.Cell, Value = value });
+                if (sparks < RepairWeld.SparksPerTick) { RepairWeld.Spark(em, root, step.Cell); sparks++; }
             }
             if (fill.Length > 0 || revive) GridBrickFillApi.Request(em, root, fill.AsArray(), revive);
             return channel.Next >= steps.Count;
