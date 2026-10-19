@@ -286,7 +286,7 @@
 | ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | astra (gpt-6) | 2026-10-13 | e2b9bda3 | Slot sync, charges/duration, one-tick power handshake and guarded feedback; ADR-0069 empty resync; 9 required tests; effects remain ABL-004 |
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | fe02469 | Shield toggle and guarded boost effects including empty resync; two required checks; full regression green |
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 0f12d55f | Four integrated ability scenarios pass; charge preservation cad09f48; scoped closeout ADR-0070 |
-| ABL-006 | Emergency repairs ability (planned) | [plan](design/emergency-repairs-plan.md) | M4 | frontier | DMG-019, DMG-020, ABL-005 | no | todo | — | — | — | Planned 2026-10-18; about 9–12 agent-days; owner decisions open in the plan. |
+| ABL-006 | Emergency repairs ability | [SPEC-24](specs/SPEC-24-abilities.md) | M4 | frontier | DMG-019, DMG-020, ABL-005 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Engines first, 35% of what is missing, 150 E, 90 s, hull items for pilots; lost bricks and blocks rebuilt; scenarios `emergency_repair`, `emergency_repair_brick`. |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 9d59a62 | Impact shake and borrowed frame reader; Boot binding e265f13; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | done | astra (gpt-6) | 2026-10-12 | f24d8c1 | Guarded drain even unbound, bounded batching/submission, lifetime accounting and stats; 12 required tests; visible content and boot binding next in VFX-004 |
@@ -1293,6 +1293,27 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-18 — ABL-006 emergency repairs (lead, claude-opus-5-5)
+- Owner: "Build emergency repairs with the plan's recommended defaults: granted by core blocks, 2 s channel, 35% of missing cells, 150 energy, 90 s cooldown, 4 cells per hull item, engines first."
+- `ability_emergency_repair` (`AbilityKind.EmergencyRepair`) is granted by all seven core blocks (`EmergencyRepairContentBuilder`). AI profiles fire it below 50% hull. Repair resolves last in `AbilityJob`'s resync, so other abilities keep their keys. Keys still shift when blocks are lost, which is existing behaviour.
+- `RepairPlanner` (pure, deterministic):
+  - Rebuild order: thrusters first, starting with the direction that has the fewest live engines, then power, shield, weapon, other functional blocks, multi-cell blocks, and finally hull breadth-first.
+  - It rebuilds 35% of the missing cells. The first engine may go over budget, and bridging cells join that engine's wave. The core is never planned.
+- `EmergencyRepairSystem` (authority only):
+  - On the press it pays 150 E, draws the hull items at random weighted by stack (players only, 1 item per 4 cells), and heals surviving damage by 50%.
+  - It then pours the plan over 2 s through exact writes. Missing bricks are recreated (`GridBrickFill`, which also re-creates functional entities), and destroyed blocks are revived once their whole footprint is back.
+- Design record: `FleetShipRecord.Design`. FLET save v2 stores it, and a v1 save takes its current structure as the design. AI ships use their blueprint as the design.
+- Co-op: guests turn a brick-create diff into fill cells and revive instances from the instance diff.
+- Dev tools: the `damage` command and the probes `player.thrust`, `player.engines`, `player.ability(id)` and `player.bricks`.
+- Scenario results:
+  - `emergency_repair`: engines 40 → 51 of 52, thrust 128k → 512k, 83 of 236 missing cells (35.2%), 21 hull items used.
+  - `emergency_repair_brick`: bricks 10 → 12, cells 1,976 → 2,180, engines 32 → 52.
+- EditMode tests pass: RepairPlanner 7, Fleet 13, GridSpawnSystem 11, GridEdit 3, LoadPipeline 20, RoundTrip 3, abilities 16, Blueprint Lab 122, damage 89, net 21, validation 7. PlayMode AbilityScenario passes 4 of 5; the slot counts now include repair.
+- Failures that also occur on main (960ed0be):
+  - `AbilityScenarioTests.Boost_RaisesTopSpeed`: braking bound, ADR-0117 note 5.
+  - `SavePipelineTests.PendingThumbnails_FinishOrDropBeforeWorker`, and intermittently `Queue_Rules`. Not investigated.
+- Not built yet: the channel ring, weld sparks and sound, and a repair icon (it borrows the boost's). The new cores still share Core 1x1's model.
 
 ### 2026-10-18 — DMG-020 core floor and the core ladder; ABL-006 emergency repairs planned (lead, claude-opus-5-5)
 - Owner, after a "1 block enemy going so fast" in the Xeno swarm: "cores should have a minimum and a maximum threshold of voxels they can hold. so a bigger core allows for a bigger ship and so on. but the minimum threshold of voxels should generally be 20% of the max threshold. if it gets into that critical area it malfunctions and becomes a wreck." No acceleration cap.

@@ -11,7 +11,8 @@ using Unity.Collections;
 
 namespace Game.App.Session
 {
-    /// <summary>FLET v1: ordered ship records with deferred VOXS snapshots and blueprint recovery (SPEC-01 §5.10).</summary>
+    /// <summary>FLET v2: ordered ship records with deferred VOXS snapshots of the structure and of the committed design (ABL-006), and
+    /// blueprint recovery (SPEC-01 §5.10). v1 records have no design; the restored structure becomes it, accepting earlier losses.</summary>
     public sealed class FleetSaveParticipant : ISaveParticipant
     {
         readonly FleetModel fleet;
@@ -33,7 +34,7 @@ namespace Game.App.Session
             this.warning = warning; this.reserveRestoredIds = reserveRestoredIds; names = VoxsBlockNames.FromCatalog(catalog);
         }
         public string Key => "FLET";
-        public int Version => 1;
+        public int Version => 2;
         public void Capture(SaveWriter writer)
         {
             writer.WriteVarUInt32((uint)fleet.Ships.Count);
@@ -41,15 +42,20 @@ namespace Game.App.Session
             {
                 writer.WriteUInt64(ship.PersistentId); writer.WriteContentId(ship.SourceBlueprint);
                 writer.WriteString(ship.Name); writer.WriteBool(ReferenceEquals(ship, fleet.Flagship));
-                using var source = VoxelStructureCodec.ToSource(ship.Structure, Allocator.TempJob);
-                var snapshot = VoxsSnapshotBlock.Capture(source.Source, names);
-                try { writer.WriteDeferred(snapshot); }
-                catch { snapshot.Dispose(); throw; }
+                Snapshot(writer, ship.Structure);
+                Snapshot(writer, ship.Design != null && ship.Design.Data.IsCreated ? ship.Design : ship.Structure);
             }
+        }
+        void Snapshot(SaveWriter writer, VoxelStructure structure)
+        {
+            using var source = VoxelStructureCodec.ToSource(structure, Allocator.TempJob);
+            var snapshot = VoxsSnapshotBlock.Capture(source.Source, names);
+            try { writer.WriteDeferred(snapshot); }
+            catch { snapshot.Dispose(); throw; }
         }
         public void Restore(SaveReader reader, int fromVersion)
         {
-            if (fromVersion != 0 && fromVersion != Version) throw new SaveFormatException("Unsupported FLET version", reader.Position);
+            if (fromVersion != 0 && fromVersion != 1 && fromVersion != Version) throw new SaveFormatException("Unsupported FLET version", reader.Position);
             fleet.ResetToEmpty();
             if (fromVersion == 0) { fleet.Add(CreateStartShip(), true); return; }
             uint count = reader.ReadVarUInt32();
@@ -65,6 +71,7 @@ namespace Game.App.Session
                     ulong id = reader.ReadUInt64(); var blueprint = reader.ReadContentId();
                     string name = reader.ReadString(); bool isFlagship = reader.ReadBool();
                     byte[] payload = reader.ReadByteArray();
+                    byte[] designPayload = fromVersion >= 2 ? reader.ReadByteArray() : null;
                     if (id == 0 || id == ulong.MaxValue || !seen.Add(id) || string.IsNullOrWhiteSpace(name) || name.Length > 32)
                         throw new SaveFormatException("Invalid FLET identity or name", reader.Position);
                     highestId = Math.Max(highestId, id);
@@ -84,7 +91,10 @@ namespace Game.App.Session
                         }
                         else { Warn("Ship " + id + " has no usable source blueprint and was dropped."); continue; }
                     }
-                    staged.Add(new FleetShipRecord { PersistentId = id, SourceBlueprint = blueprint, Name = name, Structure = structure });
+                    VoxelStructure design = null;
+                    if (designPayload != null && !VoxelStructureCodec.TryDecode(designPayload, catalog, out design, out string designError))
+                    { Warn("Ship " + id + " design could not be decoded: " + designError + "; its structure becomes the design."); design = null; }
+                    staged.Add(new FleetShipRecord { PersistentId = id, SourceBlueprint = blueprint, Name = name, Structure = structure, Design = design });
                 }
                 // SESS can be missing/damaged independently of this chunk. Preserve the restored identity range before allocating defaults.
                 reserveRestoredIds?.Invoke(highestId);

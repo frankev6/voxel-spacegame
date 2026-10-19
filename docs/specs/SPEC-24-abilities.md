@@ -47,7 +47,7 @@ Abilities are what blocks let a ship *do* besides fly and shoot: a speed boost f
 ```csharp
 namespace Game.Data.Definitions
 {
-    public enum AbilityKind : byte { ShieldToggle = 0, StatBoost = 1 }                 // add at end only
+    public enum AbilityKind : byte { ShieldToggle = 0, StatBoost = 1, EmergencyRepair = 2 }   // add at end only; EmergencyRepair: ABL-006 (§5.4)
     // Stat ids are SPEC-22's StatId, defined in Game.Data.Combat (architecture §3.2); no mirror enum.
     [System.Serializable] public struct AbilityStatMod { public Game.Data.Combat.StatId Stat; [UnityEngine.Min(0.01f)] public float Multiplier; }
 
@@ -186,7 +186,7 @@ Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommand
 2. **Hulk:** if the root has `Hulk` and any slot is not `Unavailable` → every slot `State = Unavailable`, `Active = 0`, `Flags |= Resynced`; return.
 3. **Sync** (only if `ShipStats` exists with `Initialized` and `FunctionalRevision != SyncedRevision`):
    1. Walk `BlockInstance` in index order; for each alive instance, for each `a` in `BlockDefs[Block].AbilityIndices`: record `(a, instanceIndex)` the first time `a` is seen (≤ 8 distinct; further ones ignored with `GameLog.Burst.Warn` once).
-   2. New slot list in that order: reuse the old slot with the same `AbilityIndex` (keep timers, charges, state; update `FirstInstanceIndex`), else a fresh slot `{ Ability = def.IdHash, AbilityIndex = a, State = Ready, Charges = MaxCharges, CooldownTicks = def.CooldownTicks }`.
+   2. New slot list in that order, EmergencyRepair abilities after every other kind (ABL-006: granted by every core, so it never takes another ability's key): reuse the old slot with the same `AbilityIndex` (keep timers, charges, state; update `FirstInstanceIndex`), else a fresh slot `{ Ability = def.IdHash, AbilityIndex = a, State = Ready, Charges = MaxCharges, CooldownTicks = def.CooldownTicks }`.
    3. Every slot of the new list gets `Flags |= Resynced` (effect systems reconcile their effects, §5.3).
    4. `SlotCount`, `SyncedRevision = FunctionalRevision`. Without `ShipStats` (tests, M1 worlds) sync once when `SyncedRevision == 0` using `1` as the revision.
 4. **Timers**, per slot `s`, `d = AbilityDefs[s.AbilityIndex]`:
@@ -208,6 +208,15 @@ Tick timeline for a costed ability pressed during frame f: tick N `PlayerCommand
 1. If `AbilityState.Resynced != 0` or any slot has `Resynced`: post a cancel (`Multiplier = 1`) for every `(SourceId = s, Stat)` with `s` in 0..7 and every `StatId` value (`Sequence = s × 16 + stat`), then re-post `{ Root, Stat, Ability, SourceId = s, Multiplier, UntilTick = ActiveUntilTick, Sequence = 1000 + s × 8 + mod }` for every StatBoost slot `s` with `Active == 1`.
 2. Else for every StatBoost slot `s` with `ActivatedThisTick`: post one request per mod (`Sequence = 1000 + s × 8 + mod`).
 StatBoost slots are never `Blocked` (the system writes 0). `StatusSystem` (SPEC-22) applies the requests the next tick.
+
+### 5.4 `EmergencyRepairSystem` (kind EmergencyRepair; ABL-006, `Game.App.Repair`)
+
+Owner, 2026-10-18: "an "emergency repairs" ability where you fix a percentage of your lost/weakened ship at the heavy cost of energy and random hulls from your inventory if you're a player. it should prioritize fixing missing engines first"; defaults approved. Authority only, main thread (repairs are rare), after `AbilitySystem`. `ability_emergency_repair`: 150 E, cooldown 90 s, 1 charge, 2 s channel (`durationSeconds`), `repairFraction` 0.35, `healFraction` 0.5, `hullCellsPerItem` 4; granted by every core block. Combat AI profiles press it below half hull.
+1. **Design** of a ship: its fleet record's committed `Design` (players; FLET v2), else the immutable blueprint or registered source it spawned from (`GridSource`, never a `WriteBack` source). None → `Blocked`.
+2. **Blocked** each tick: no design; a pilot (`Pilot`) with no `block_hull*` item in the hold; or nothing to rebuild (live cells ≥ the design's, and no instance `Destroyed`) and no channel running.
+3. **Activation** (energy granted by §5.1): `RepairPlanner` compares the design with the live grid. Missing = design cells that are air, plus the cells of functional blocks destroyed in place; budget = ceil(0.35 × missing), capped for a pilot by its hull items × 4. Order: missing engines (direction with the fewest live engines first; the first one may exceed the fraction), then power, shields, weapons, other functional and multi-cell blocks, then hull breadth-first from what is attached. A block cut off from the ship brings the shortest path of missing hull cells to it; nothing is rebuilt floating; the core never. A pilot pays ceil(cells ÷ 4) hull items drawn at random from the hull stacks, weighted by count, seeded by tick and ship. Every cell and live block heals by 50% (`CellRestoreRequest` Heal over the grid's cell bounds). The pilot gets a `RepairDone` notice ("Repairs: 11 engines, 83 cells, used 21 Hull 1x1.").
+4. **Channel**: the plan's steps are poured evenly over the duration. A cell into a surviving brick is an `ExactCellWrite`; cells of a lost brick go in a `GridBrickFillRequest`, which `GridSpawnSystem` turns into a new brick holding them (SPEC-10). A rebuilt block's function returns (exact instance write: full `FunctionHp`, all cells alive, not destroyed; then its functional entity is recreated) once all its cells are present, waiting up to 60 ticks past the channel. A hulk or a despawned grid ends the channel.
+5. **Co-op**: guests receive the cells and blocks as ordinary `GridDelta` state; a guest given a whole brick it does not have creates it the same way, and recreates a revived block's functional entity.
 
 ## 6. Public API
 
@@ -297,6 +306,17 @@ Scale notes: per ship per tick O(slots ≤ 8); the instance walk happens only on
 - **Acceptance criteria:**
   - [ ] As stated.
 - **Tests:** `AbilityScenarioTests.Boost_RaisesTopSpeed`, `.Shield_Toggle`, `.ThrustersLost_RemovesBoost`, `.FrameRateIndependent`.
+
+### ABL-006 — Emergency repairs
+- **Milestone:** M4
+- **Tier:** frontier — runtime rebuild of cells, bricks and blocks
+- **Depends on:** `ABL-005`, `DMG-019`, `DMG-020`
+- **Do:** §5.4; plan in `docs/design/emergency-repairs-plan.md`.
+- **Files:** `Game.App/Repair/RepairPlanner.cs`, `EmergencyRepairSystem.cs`; `Game.Voxel/Grid/GridBrickFill.cs`, `GridSpawnSystem.Fill.cs`; `FleetShipRecord.Design`, FLET v2; `GuestReplicator`; `EmergencyRepairContentBuilder`; dev command `damage`; probes `player.thrust`, `player.engines`, `player.ability(id)`, `player.bricks`.
+- **Acceptance criteria:**
+  - [x] Engines first, 35% of what is missing, hull items paid by pilots, heal, over 2 s.
+  - [x] Lost bricks are recreated.
+- **Tests:** `RepairPlannerTests` (7); scenarios `emergency_repair`, `emergency_repair_brick`.
 
 ## 10. Open questions
 

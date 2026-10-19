@@ -15,6 +15,8 @@ namespace Game.Simulation.Abilities
         public float ChargeRechargeTicks;    // chargeRechargeSeconds × 60
         public uint DurationTicks;           // SimTime.SecondsToTicks(durationSeconds)
         public float ShieldEnableThreshold;
+        public float RepairFraction, HealFraction;   // EmergencyRepair (ABL-006)
+        public int HullCellsPerItem;
         public BlobArray<AbilityStatModDef> Mods;
         public ContentHash IdHash, ActivationCue, ActivationFx;
     }

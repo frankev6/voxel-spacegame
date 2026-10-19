@@ -73,6 +73,7 @@ namespace Game.App.Session
             ["AbilityTimerSystem"] = SystemAuthority.Both,               // ADR-0117 derivation: cooldowns, charges, boost expiry
             ["AbilitySlotApplySystem"] = SystemAuthority.Both,           // ADR-0117 applier: guests feed it the host's slot decisions
             ["AbilitySystem"] = SystemAuthority.AuthorityOnly,           // ADR-0117 decider: slot resync, power grants, presses
+            ["EmergencyRepairSystem"] = SystemAuthority.AuthorityOnly,   // ABL-006 decider: what a repair rebuilds and what it costs
             ["ShieldToggleEffectSystem"] = SystemAuthority.Both,         // ADR-0117 applier
             ["StatBoostEffectSystem"] = SystemAuthority.Both,            // ADR-0117 applier: a guest's own prediction includes its boosts
             ["AbilityFeedbackSystem"] = SystemAuthority.Both,            // ADR-0117 applier: activation cue and effect
@@ -151,6 +152,7 @@ namespace Game.App.Session
             ["FleetSystem"] = "fleet orders for escorts; through AI decisions",
             ["PlayerCombatStatusSystem"] = "how many hostiles engage each pilot, and its last hit; PilotStatus",
             ["AbilitySystem"] = "slot resync, power grants and ability presses; AbilityState with activation counts",
+            ["EmergencyRepairSystem"] = "what an emergency repair rebuilds and the hull items it takes; its cells and blocks in GridDelta",
             ["SplitGraceContactSystem"] = "which split pieces may still touch their parent; poses in snapshots",
             ["ImpactEventSystem"] = "ram damage from contacts; its cells in GridDelta",
             ["RaceSystem"] = "race phase, laps, gates, places and respawns; RaceState",

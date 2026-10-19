@@ -74,6 +74,8 @@ namespace Game.Simulation.Abilities
         void Resync(Entity root, uint revision, ref AbilityState state, DynamicBuffer<AbilitySlot> slots, in FixedList512Bytes<AbilitySlot> previous)
         {
             slots.Clear(); var instances = Instances[root]; bool overflow = false;
+            // ABL-006: emergency repair (granted by every core) goes after the other kinds, so it never takes another ability's key.
+            for (int pass = 0; pass < 2; pass++)
             for (int i = 0; i < instances.Length; i++)
             {
                 var instance = instances[i];
@@ -86,6 +88,7 @@ namespace Game.Simulation.Abilities
                     if (exists) continue;
                     if (slots.Length == 8) { overflow = true; continue; }
                     ref var def = ref Definitions.Value.Abilities[index];
+                    if ((def.Kind == AbilityKind.EmergencyRepair) != (pass == 1)) continue;
                     var slot = new AbilitySlot { Ability = def.IdHash, AbilityIndex = index, Charges = def.MaxCharges, CooldownTicks = def.CooldownTicks, State = AbilitySlotState.Ready };
                     for (int j = 0; j < previous.Length; j++) if (previous[j].AbilityIndex == index) { slot = previous[j]; break; }
                     slot.FirstInstanceIndex = i; slot.Flags |= AbilitySlotFlags.Resynced; slots.Add(slot);

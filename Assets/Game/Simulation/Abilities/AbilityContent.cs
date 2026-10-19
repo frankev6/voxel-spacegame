@@ -49,6 +49,7 @@ namespace Game.Simulation.Abilities
                 target.ChargeRechargeTicks = source.ChargeRechargeSeconds * SimTime.TicksPerSecond;
                 target.DurationTicks = SimTime.SecondsToTicks(source.DurationSeconds);
                 target.ShieldEnableThreshold = source.ShieldEnableThreshold;
+                target.RepairFraction = source.RepairFraction; target.HealFraction = source.HealFraction; target.HullCellsPerItem = source.HullCellsPerItem;
                 target.IdHash = source.Id.Hash;
                 target.ActivationCue = source.ActivationCue != null ? source.ActivationCue.Id.Hash : default;
                 target.ActivationFx = source.ActivationFx != null ? source.ActivationFx.Id.Hash : default;

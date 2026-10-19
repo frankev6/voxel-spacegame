@@ -88,10 +88,27 @@ namespace Game.Tests.EditMode.App
         {
             using var f = new Fixture(); f.Fleet.Add(f.Ship(20), true); f.Fleet.Add(f.Ship(10), false);
             byte[] first = f.Capture(); var sameModel = f.Fleet;
-            f.Save.Restore(new SaveReader(first), 1);
+            f.Save.Restore(new SaveReader(first), f.Save.Version);
             Assert.AreSame(sameModel, f.Fleet); Assert.AreEqual(20ul, f.Fleet.Flagship.PersistentId);
             Assert.AreEqual(10ul, f.Fleet.Ships[0].PersistentId);
             CollectionAssert.AreEqual(first, f.Capture()); Assert.AreEqual(0, f.Warnings.Count);
+        }
+
+        [Test]
+        public void FLET_DesignSurvivesDamage_AndV1BecomesItsOwnDesign()
+        {   // ABL-006: the committed design is saved apart from the damaged structure; a v1 record takes its structure as design
+            using var f = new Fixture(); f.Fleet.Add(f.Ship(20), true);
+            var ship = f.Fleet.Find(20); int designCells = ship.Design.SolidCellCount;
+            Assert.AreEqual(ship.Structure.SolidCellCount, designCells, "a new ship's design is its structure");
+            ship.Structure.TryGetCellBounds(out var min, out _); ship.Structure.SetCell(min, default);   // damage
+            f.Save.Restore(new SaveReader(f.Capture()), f.Save.Version);
+            ship = f.Fleet.Find(20);
+            Assert.AreEqual(designCells, ship.Design.SolidCellCount); Assert.AreEqual(designCells - 1, ship.Structure.SolidCellCount);
+            using var v1 = new SaveWriter(); v1.WriteVarUInt32(1); v1.WriteUInt64(20); v1.WriteContentId(ship.SourceBlueprint);
+            v1.WriteString("Flagship"); v1.WriteBool(true);
+            v1.WriteByteArray(Game.Voxel.Model.VoxelStructureCodec.Encode(ship.Structure, Game.Voxel.Data.VoxsBlockNames.FromCatalog(f.Content.Catalog), Game.Voxel.Data.VoxsEncodeOptions.ForAsset));
+            f.Save.Restore(new SaveReader(v1.ToArray()), 1);
+            Assert.AreEqual(designCells - 1, f.Fleet.Find(20).Design.SolidCellCount, "a v1 ship's design is what it had left");
         }
 
         [Test]
@@ -128,7 +145,7 @@ namespace Game.Tests.EditMode.App
         {
             using var f = new Fixture(); f.Fleet.Add(f.Ship(10), true);
             byte[] valid = f.Capture(); Array.Resize(ref valid, valid.Length - 1);
-            Assert.Throws<SaveFormatException>(() => f.Save.Restore(new SaveReader(valid), 1));
+            Assert.Throws<SaveFormatException>(() => f.Save.Restore(new SaveReader(valid), f.Save.Version));
             Assert.AreEqual(0, f.Fleet.Ships.Count);
             using var invalidCount = new SaveWriter(); invalidCount.WriteVarUInt32(uint.MaxValue);
             Assert.Throws<SaveFormatException>(() => f.Save.Restore(new SaveReader(invalidCount.ToArray()), 1));
