@@ -126,12 +126,20 @@ namespace Game.Presentation.Systems
                 if (SystemAPI.HasBuffer<AbilitySlot>(player))
                 {
                     var slots = SystemAPI.GetBuffer<AbilitySlot>(player);
+                    bool hasDefs = SystemAPI.TryGetSingleton<AbilityDefsRef>(out var defs) && defs.Value.IsCreated;
+                    uint tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
                     for (int i = 0; i < math.min(4, slots.Length); i++)
                     {
                         var slot = slots[i];
-                        value.Abilities.Add(new HudAbilityState { Ability = slot.Ability, Charges = slot.Charges, Active = slot.Active,
-                            Cooldown01 = slot.CooldownRemainingTicks / math.max(1, slot.CooldownTicks),
-                            Ready = (byte)(slot.CooldownRemainingTicks <= 0 && slot.Charges > 0 ? 1 : 0) });
+                        float channel = 0;   // ABL-006: a running duration ability's time left, for the channel ring
+                        if (slot.Active != 0 && hasDefs && slot.AbilityIndex < defs.Value.Value.Abilities.Length && slot.ActiveUntilTick > tick)
+                        {
+                            uint duration = defs.Value.Value.Abilities[slot.AbilityIndex].DurationTicks;
+                            if (duration > 0) channel = math.saturate((slot.ActiveUntilTick - tick) / (float)duration);
+                        }
+                        value.Abilities.Add(new HudAbilityState { Ability = slot.Ability, Charges = slot.Charges, Active = slot.Active, Blocked = slot.Blocked,
+                            Cooldown01 = (half)(slot.CooldownRemainingTicks / math.max(1, slot.CooldownTicks)), Channel01 = (half)channel,
+                            Ready = (byte)(slot.CooldownRemainingTicks <= 0 && slot.Charges > 0 && slot.Blocked == 0 ? 1 : 0) });
                     }
                 }
                 if (SystemAPI.HasComponent<ShipTarget>(player)) target = SystemAPI.GetComponent<ShipTarget>(player).Value;

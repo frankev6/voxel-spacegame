@@ -24,6 +24,8 @@ namespace Game.Presentation.Systems
     {
         readonly HudRadarBlipView[] radar = new HudRadarBlipView[64];
         readonly string[] weaponKeys = new string[3], abilityKeys = new string[4];
+        readonly Game.Data.Definitions.AbilityDefinition[] tooltipFor = new Game.Data.Definitions.AbilityDefinition[4];
+        readonly byte[] tooltipBlocked = new byte[4];
         readonly ProfilerMarker marker = new("HudSyncSystem.Apply");
         EntityQuery snapshots, players, origins, cameras;
         HudViewModel model;
@@ -132,7 +134,13 @@ namespace Game.Presentation.Systems
                 var definition = names.Ability(slot.Ability);
                 row.HasAbility = ship && definition != null; row.Name = definition?.DisplayName ?? ""; row.Icon = definition?.Icon;
                 row.CooldownFraction = Fraction(slot.Cooldown01, 100); row.Charges = slot.Charges; row.Ready = slot.Ready != 0; row.Active = slot.Active != 0;
+                row.ChannelFraction = Fraction(slot.Channel01, 200); row.Blocked = slot.Blocked != 0;
+                row.Note = slot.Blocked == Game.Simulation.Abilities.AbilityBlockReason.NoHullPlating ? "NO HULL" : "";
                 row.KeyText = i < abilityKeys.Length ? abilityKeys[i] : "";
+                if (i < tooltipFor.Length && (!ReferenceEquals(tooltipFor[i], definition) || tooltipBlocked[i] != slot.Blocked))
+                {   // rebuilt only when the ability or its reason changes
+                    tooltipFor[i] = definition; tooltipBlocked[i] = slot.Blocked; row.Tooltip = Tooltip(definition, slot.Blocked);
+                }
             }
             model.RadarRangeM = displayRange;
             bool changed = !radarInitialized || lastSourceRadar != value.RadarVersion;
@@ -185,6 +193,18 @@ namespace Game.Presentation.Systems
         }
         static bool Same(HudRadarBlipView a, HudRadarBlipView b) => a.OffsetXZ == b.OffsetXZ && a.Kind == b.Kind && a.Relation == b.Relation && a.Flags == b.Flags;
         static int Rounded(float value) => math.isfinite(value) ? (int)math.clamp(math.round(value), int.MinValue, int.MaxValue) : 0;
+        /// <summary>Name, description, cost and the blocked reason, for the ability slot's hover tooltip.</summary>
+        static string Tooltip(Game.Data.Definitions.AbilityDefinition definition, byte blocked)
+        {
+            if (definition == null) return "";
+            var text = new System.Text.StringBuilder(definition.DisplayName);
+            if (!string.IsNullOrEmpty(definition.Description)) text.Append('\n').Append(definition.Description);
+            text.Append('\n');
+            if (definition.EnergyCost > 0) text.Append(definition.EnergyCost.ToString("0")).Append(" energy");
+            if (definition.CooldownSeconds >= 1) text.Append(definition.EnergyCost > 0 ? " · " : "").Append(definition.CooldownSeconds.ToString("0")).Append(" s cooldown");
+            if (blocked != 0) text.Append('\n').Append(Game.Simulation.Abilities.AbilityBlockReason.Text(blocked));
+            return text.ToString();
+        }
         static float Fraction(float value, int steps) => math.isfinite(value) ? math.round(math.saturate(value) * steps) / steps : 0;
         protected override void OnDestroy() => Unbind();
     }

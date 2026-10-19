@@ -391,7 +391,7 @@ namespace Game.Net.Replication
                 for (int i = 0; i < paletteCount; i++) e[i] = GridCodec.ReadPaletteEntry(r);
                 ReplicaVoxelApi.SetPalette(em, root, paletteStart, entries);   // replicated state with no consequences; cells refer to it later
             }
-            instanceWrites.Clear(); fills.Clear(); bool revive = false;
+            instanceWrites.Clear(); fills.Clear(); bool revive = false; int firstWrite = exact.Length;
             int instanceCount = r.U16();
             for (int i = 0; i < instanceCount; i++)
             {
@@ -431,8 +431,21 @@ namespace Game.Net.Replication
                     for (int i = 0; i < n; i++) { int local = r.U16(); Add(root, BrickMath.CellOf(coord, local), GridCodec.ReadCell(r), reason); }
                 }
             }
+            if (exact.Length > firstWrite || fills.Length > 0) Weld(em, root, firstWrite);
             exact.AddRange(instanceWrites.AsArray());
             if (fills.Length > 0 || revive) GridBrickFillApi.Request(em, root, fills.AsArray(), revive);
+        }
+
+        /// <summary>ABL-006: weld sparks on the first few cells this delta adds while the ship's repair channel runs (the host sparks its own).</summary>
+        void Weld(EntityManager em, Entity root, int firstWrite)
+        {
+            if (!Game.Simulation.Abilities.RepairWeld.Channelling(em, root)) return;
+            int sparks = 0;
+            for (int i = 0; i < fills.Length && sparks < Game.Simulation.Abilities.RepairWeld.SparksPerTick; i++, sparks++)
+                Game.Simulation.Abilities.RepairWeld.Spark(em, root, fills[i].Cell);
+            for (int i = firstWrite; i < exact.Length && sparks < Game.Simulation.Abilities.RepairWeld.SparksPerTick; i++)
+                if (exact[i].Kind == ExactWriteKind.Cell && !exact[i].Value.IsAir)
+                { Game.Simulation.Abilities.RepairWeld.Spark(em, root, exact[i].Cell); sparks++; }
         }
 
         void Add(Entity root, int3 cell, Cell value, CellRemovedReason reason)

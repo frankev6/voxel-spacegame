@@ -1,4 +1,5 @@
 using Game.Core;
+using Unity.Mathematics;
 
 namespace Game.Presentation.Components
 {
@@ -6,10 +7,11 @@ namespace Game.Presentation.Components
     public struct HudAbilityState
     {
         public ContentHash Ability;
-        public float Cooldown01;
+        public half Cooldown01;
+        public half Channel01;   // ABL-006: share of a running duration ability's time left (the channel ring); 0 = not running
         public byte Charges;
         public byte Ready;
         public byte Active;
-        public byte Pad;
+        public byte Blocked;     // AbilityBlockReason
     }
 }

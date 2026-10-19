@@ -168,7 +168,9 @@ namespace Game.UI.Views
         {
             var model = abilityModels[index]; var slot = abilities[index]; Show(slot, model?.HasAbility == true); if (model == null) return;
             slot.SetIcon(model.Icon); slot.SetCount(model.Charges); slot.SetKeyHint(model.KeyText ?? abilityKeys[index]); slot.SetCooldown(model.CooldownFraction);
+            slot.SetChannel(model.ChannelFraction); slot.SetNote(model.Note); slot.tooltip = model.Tooltip ?? "";
             slot.SetState(model.Active, false, false); slot.EnableInClassList(UIStyleClasses.IsReady, model.Ready);
+            slot.EnableInClassList(UIStyleClasses.IsDisabled, model.Blocked && !model.Active);   // dimmed, still hoverable for its reason
         }
         void Radar()
         {

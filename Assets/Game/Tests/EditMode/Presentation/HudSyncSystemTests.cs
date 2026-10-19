@@ -112,7 +112,7 @@ namespace Game.Tests.EditMode.Presentation
             value.TargetRelation = (byte)(i % 3); value.Flags = HudFlags.HasShip | HudFlags.HasTarget | (i % 2 == 0 ? HudFlags.Boosting : 0);
             value.WeaponGroups.Clear(); value.Abilities.Clear();
             for (byte n = 0; n < 3; n++) value.WeaponGroups.Add(new HudWeaponGroupState { Group = n, WeaponCount = (byte)(i % 255), Ready01 = fraction, Firing = (byte)(i % 2) });
-            for (int n = 0; n < 4; n++) value.Abilities.Add(new HudAbilityState { Cooldown01 = fraction, Charges = (byte)(i % 255), Ready = (byte)(i % 2), Active = (byte)(i % 2) });
+            for (int n = 0; n < 4; n++) value.Abilities.Add(new HudAbilityState { Cooldown01 = (Unity.Mathematics.half)fraction, Charges = (byte)(i % 255), Ready = (byte)(i % 2), Active = (byte)(i % 2) });
         }
         [Test] public void AllChanging_ZeroAlloc()
         {

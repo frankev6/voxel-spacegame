@@ -1294,6 +1294,27 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-18 — ABL-006 emergency repairs: icon, channel ring, sparks, sound (lead, claude-opus-5-5)
+- Owner: "Do this task here: Emergency repair feedback: icon, channel ring, sparks".
+- **Icon:** the sheet's unused wrench chip (sprite 59) replaces the borrowed boost icon.
+- **Sound:** `cue_repair_weld`, a 2.2 s weld crackle synthesized for this (`Audio/Sfx/repair_weld.wav`), is the activation cue, so every machine plays it.
+- **Sparks:** `RepairWeld` emits kinetic hit sparks, tinted hot, on one rebuilt cell per ship per tick.
+  - The host sparks the cells it writes. A guest sparks the cells a delta adds while the ship's repair slot is active.
+  - The sparks never carry `PlayerSource`, so `HitMarkerSystem` doesn't mark them as hits.
+  - Three sparks per tick merged into a single glow at flight-camera range, so it is now one smaller burst.
+- **Block reasons:** `AbilitySlot.Blocked` now holds an `AbilityBlockReason`: `NoDesign`, `NoHullPlating`, `NothingToRepair`, or `Unavailable` (1) for the other kinds. It is replicated as before.
+- **HUD:**
+  - `HudAbilityState` stays 16 bytes, now with `half Cooldown01`, `half Channel01` and `Blocked`.
+  - Any running duration ability draws an amber ring just inside its tile's border.
+  - A blocked tile is dimmed and stays hoverable; its tooltip gives the name, description, cost, cooldown and reason.
+  - A tile blocked by `NoHullPlating` shows "NO HULL".
+  - `Ready` now also requires the slot not to be blocked.
+- **First ring attempt:** the ring was drawn in the selected border's cyan, on top of that border, so it was invisible. A live UI read showed `Channel01` = 0.98 and the element visible.
+- Proof: `Logs/playtest/live_{nohull,channel}.png`, captured unpaused when a probe sees the slot's state.
+  - The first shots were captured with the Editor paused, and they render without bricks. That made the whole map flicker for the owner, who was watching ("the whole map is refreshing and blocks dissapearing"). A harness artifact, not a game bug; noted in `tools/playtest/README.md`.
+- Tests: HUD snapshot layout, system and sync tests; ability content; validation; net 21; PlayMode flight HUD 5, UI composition 4, audio UI 3 all pass. AbilityScenario 4/5 (`Boost_RaisesTopSpeed`, known).
+- Scenarios: `emergency_repair` passes. `emergency_repair_brick` timed out once at its first line, waiting for the main menu right after the previous run; the same steps then passed twice inside the shot runs.
+
 ### 2026-10-18 — ABL-006 emergency repairs (lead, claude-opus-5-5)
 - Owner: "Build emergency repairs with the plan's recommended defaults: granted by core blocks, 2 s channel, 35% of missing cells, 150 energy, 90 s cooldown, 4 cells per hull item, engines first."
 - `ability_emergency_repair` (`AbilityKind.EmergencyRepair`) is granted by all seven core blocks (`EmergencyRepairContentBuilder`). AI profiles fire it below 50% hull. Repair resolves last in `AbilityJob`'s resync, so other abilities keep their keys. Keys still shift when blocks are lost, which is existing behaviour.
@@ -1313,7 +1334,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 - Failures that also occur on main (960ed0be):
   - `AbilityScenarioTests.Boost_RaisesTopSpeed`: braking bound, ADR-0117 note 5.
   - `SavePipelineTests.PendingThumbnails_FinishOrDropBeforeWorker`, and intermittently `Queue_Rules`. Not investigated.
-- Not built yet: the channel ring, weld sparks and sound, and a repair icon (it borrows the boost's). The new cores still share Core 1x1's model.
+- Feedback (icon, ring, sparks, sound) followed the same day, in the entry above. The new cores still share Core 1x1's model.
 
 ### 2026-10-18 — DMG-020 core floor and the core ladder; ABL-006 emergency repairs planned (lead, claude-opus-5-5)
 - Owner, after a "1 block enemy going so fast" in the Xeno swarm: "cores should have a minimum and a maximum threshold of voxels they can hold. so a bigger core allows for a bigger ship and so on. but the minimum threshold of voxels should generally be 20% of the max threshold. if it gets into that critical area it malfunctions and becomes a wreck." No acceleration cap.

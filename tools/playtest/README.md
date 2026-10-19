@@ -114,6 +114,7 @@ Interaction probes are `interaction.target` (current body display name or empty)
 ## Gotchas learned the hard way
 
 - `capture_game_view --save_path` always writes under `Assets/` (creating `.meta` files). `shot.sh` fetches the image inline instead.
+- **Don't capture while the Editor is paused.** `shot.sh` with `EditorApplication.isPaused` set renders the frame without the voxel bricks: hulls, rock and stations are all missing, and only props and FX remain. Repeated pause, capture, resume cycles make the whole map flicker for anyone watching the Editor (seen 2026-10-18 during the ABL-006 HUD shots). Capture unpaused, triggered by a probe.
 - The official `simulate_key` does not reach `Keyboard.current`; use `g.sh key`.
 - Unfocused Editors drop keyboard/mouse unless input settings are relaxed; the harness does that during play only.
 - A modal dialog in the Editor blocks its main thread and the CLI times out. Close the dialog.

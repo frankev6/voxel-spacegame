@@ -54,6 +54,8 @@ namespace Game.UI.Data
         public const string SlotCount = "slot__count";
         public const string SlotKey = "slot__key";
         public const string SlotCooldown = "slot__cooldown";
+        public const string SlotChannel = "slot__channel";   // ABL-006: the running ability's time left, round the edge
+        public const string SlotNote = "slot__note";         // a short reason across the foot of the tile
         public const string Tooltip = "tooltip";
         public const string TooltipTitle = "tooltip__title";
         public const string TooltipSubtitle = "tooltip__subtitle";
