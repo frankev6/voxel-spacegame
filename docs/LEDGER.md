@@ -286,6 +286,7 @@
 | ABL-003 | AbilitySystem | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | frontier | ABL-002, SPEC-20, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | astra (gpt-6) | 2026-10-13 | e2b9bda3 | Slot sync, charges/duration, one-tick power handshake and guarded feedback; ADR-0069 empty resync; 9 required tests; effects remain ABL-004 |
 | ABL-004 | Effect systems | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-003, PWR-001, PWR-002, PWR-003, PWR-004, PWR-005, PWR-006, PWR-007, PWR-010, PWR-008 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | fe02469 | Shield toggle and guarded boost effects including empty resync; two required checks; full regression green |
 | ABL-005 | Ability scenarios and frame-rate independence | [SPEC-24](specs/SPEC-24-abilities.md) | M2 | standard | ABL-004, WPN-001, WPN-002, WPN-003, WPN-004, WPN-005, WPN-006, WPN-007, WPN-008, WPN-009, WPN-010, WPN-011, WPN-012, WPN-015, WPN-017, WPN-018 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 0f12d55f | Four integrated ability scenarios pass; charge preservation cad09f48; scoped closeout ADR-0070 |
+| ABL-006 | Emergency repairs ability (planned) | [plan](design/emergency-repairs-plan.md) | M4 | frontier | DMG-019, DMG-020, ABL-005 | no | todo | — | — | — | Planned 2026-10-18; about 9–12 agent-days; owner decisions open in the plan. |
 | CAM-008 | Screen shake from FxEvents | [SPEC-62](specs/SPEC-62-camera.md) | M2 | standard | CAM-005, SPEC-63 | yes | done | content (gpt-6.1-sol) | 2026-10-13 | 9d59a62 | Impact shake and borrowed frame reader; Boot binding e265f13; 7 required tests; full batch 901 EM / 128 PM, zero failures |
 | VFX-002 | FxRig: slots, effects, buffers and binding | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-001, TST-001 | yes | done | astra (gpt-6) | 2026-10-12 | f2b8118 | Session rig, graph validation, pooled/batched/instanced resources and binding; 5 GPU tests pass; final content budget advisory follow-up in VFX-004 |
 | VFX-003 | FxUploadSystem: drain, batch, submit, stats | [SPEC-63](specs/SPEC-63-vfx.md) | M2 | frontier | VFX-002 | yes | done | astra (gpt-6) | 2026-10-12 | f24d8c1 | Guarded drain even unbound, bounded batching/submission, lifetime accounting and stats; 12 required tests; visible content and boot binding next in VFX-004 |
@@ -321,6 +322,7 @@
 | VOX-020 | Incremental grid edits for the editor preview | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M3 | frontier | VOX-014 | yes | done | astra (gpt-6) | 2026-10-13 | a2e9b77e | Three functional checks pass; preview median0.2135ms against2ms; zero tuning; scoped closeout ADR-0070 |
 | PHY-022 | Mass of restored cells (ADR-0016) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M3 | standard | PHY-013, DMG-001 | yes | done | power (gpt-6.1-sol) | 2026-10-13 | a606bfc | Restored-cell mass accumulator; ownership fixture repair; 1 required test; full batch 901 EM / 128 PM, zero failures |
 | DMG-019 | Impulse and restore channels (ADR-0016) | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M3 | frontier | DMG-006, DMG-007, SPEC-02 | yes | done | astra (gpt-6) | 2026-10-13 | 0b93d402 | Nine request-channel checks pass; ordered impulse and bounded heal/place |
+| DMG-020 | Core floor: ships wreck below 20% of their core's capacity; the core ladder | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | standard | DMG-013, SPEC-51 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | `CoreFloorJob`, `HulkCause.CoreMalfunction`, `OverCoreCapacity`/`UnderCoreFloor`, four new 1×1 cores, five blueprints refitted. |
 | AI-013 | Fleet data and formations | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | bf5e81f | Formation validation and boot-owned blob/catalog; 2 required tests. AI-014 steering remains open. Full 1027 EM / 145 PM passed. |
 | AI-014 | FleetSystem and member thinking | [SPEC-23](specs/SPEC-23-ai.md) | M3 | frontier | AI-013, AI-007 | yes | done | astra (gpt-6) | 2026-10-13 | 70eb3dc3 | Scheduled fleet goals/promotion and shared leader decisions; 3 required checks pass; grouped25/0/0 |
 | AI-015 | Fleet and swarm scenario and performance | [SPEC-23](specs/SPEC-23-ai.md) | M3 | standard | AI-014 | yes | in-progress | sol (gpt-6.1-sol high) | 2026-10-13 |  | Recycled combat worker; fleet/swarm scenarios; measurements opt-in advisory |
@@ -1291,6 +1293,20 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-10-18 — DMG-020 core floor and the core ladder; ABL-006 emergency repairs planned (lead, claude-opus-5-5)
+- Owner, after a "1 block enemy going so fast" in the Xeno swarm: "cores should have a minimum and a maximum threshold of voxels they can hold. so a bigger core allows for a bigger ship and so on. but the minimum threshold of voxels should generally be 20% of the max threshold. if it gets into that critical area it malfunctions and becomes a wreck." No acceleration cap.
+- Cause found in the paused game: a HUSK shot down to 59 kg (0.1%) kept its heart and two fins, so 3,018 m/s² and the 120 m/s cap. A ship died only with its core.
+- `CoreParams.MinCells` (0 = 20% of `MaxCells`). `CoreFloorJob` in `ShipDeathSystem` (authority) wrecks an armed ship below its floor as `HulkCause.CoreMalfunction`: same transition, blast and kill record as core loss.
+  - Only ships that have once reached their floor are armed, so undersized test rigs and devices are exempt.
+  - The Blueprint Lab refuses `OverCoreCapacity` and `UnderCoreFloor` designs.
+- `MaxCells` had never been enforced: VESPER, DIRGE, REQUIEM (14.8–16.2k cells) and the BROODMOTHER (16.3k) sat on 4,000-cell cores.
+  - New 1×1 rungs from `CoreCapacityBuilder`: Courier (1,000), Frigate (10,000), Capital (25,000), Xeno great heart (25,000).
+  - Five blueprints refitted; the builders now fit the core themselves.
+  - `CoreFitContentTests` keeps every shipped ship in range. The new cores share Core 1x1's model for now.
+- Tests: EditMode Blueprint Lab 122, damage 89, physics 82, validation, content, net. PlayMode ship death, determinism, Blueprint Lab host, playground, Hollow, encounters, salvage, streaming all pass.
+- Live: the parked Hollow defence. After 3.5 min no live Xeno was under 1,158 cells; 3 wrecked by malfunction; stations unaffected.
+- Emergency repairs: plan in `docs/design/emergency-repairs-plan.md` (ABL-006), about 9–12 agent-days, owner questions open.
 
 ### 2026-10-18 — Xeno swarm on the Hollow, a scenario to play (lead, claude-opus-5-5)
 - Owner: "can we run the combat scenario in a way i can watch and participate, the enemies should be a BUNCH of xeno ships", then "the scenario should be the aliens attack the hollow and im helping to defend it".

@@ -112,7 +112,7 @@ namespace Game.ShipEditor.Data
     public enum PlacementError : byte { None = 0, NotFound, NotAvailable, OrientationNotAllowed, OutOfBounds, Occupied, InOtherClearance,
                                         ClearanceBlocked, NoAttachment, CoreLimit, OverBudget, SymmetryOverlap, SymmetryUnsupported, MultiCellNotAllowed }
     public enum CommitStatus : byte { Committed = 0, NothingToCommit, Invalid, MissingItems, CargoFull, TargetRejected }
-    public enum EditIssueKind : byte { NoCore = 0, MultipleCores, Disconnected, OutOfBounds, OverCellBudget, DamageInvariant, UnbuildableBlock, // errors
+    public enum EditIssueKind : byte { NoCore = 0, MultipleCores, Disconnected, OutOfBounds, OverCellBudget, DamageInvariant, UnbuildableBlock, OverCoreCapacity, UnderCoreFloor, // errors
                                        PowerDeficit = 100, NoThrust, NoWeapons }                                                               // warnings (≥ 100)
     public enum EditChangeKind : byte { Applied = 0, Undone, Redone, Committed, Discarded, Opened }
 
@@ -433,7 +433,7 @@ State per §4.3. `Find` uses iterative path halving. `IslandCount` = roots with 
 
 ### 5.6 Full validation (`FullValidator`, commit time)
 
-1. Complete relabel. 2. Core count: 0 → `NoCore`, > 1 → `MultipleCores`. 3. `IslandCount > 1` → `Disconnected` (Count = disconnected blocks, FocusCell = first cell of the largest non-core island). 4. Exact AABB > `MaxExtentCells` → `OutOfBounds`. 5. Solid cells > `MaxCells` → `OverCellBudget`. 6. Any block type with `draftDamaged > originalDamaged` → `DamageInvariant` (bug guard). 7. Non-creative: any BOM line with `Required > 0` and no item → `UnbuildableBlock`. Warnings: power use > generation → `PowerDeficit`; forward thrust 0 → `NoThrust`; no weapon blocks → `NoWeapons`. Commit is allowed only with zero errors. The issues list (errors first, then warnings) is also refreshed after edits, at most every 0.25 s.
+1. Complete relabel. 2. Core count: 0 → `NoCore`, > 1 → `MultipleCores`. 3. `IslandCount > 1` → `Disconnected` (Count = disconnected blocks, FocusCell = first cell of the largest non-core island). 4. Exact AABB > `MaxExtentCells` → `OutOfBounds`. 5. Solid cells > `MaxCells` → `OverCellBudget`. 5a. With one core (DMG-020): solid cells > the core's `MaxCells` → `OverCoreCapacity`; below its floor (`CoreParams.Floor`) → `UnderCoreFloor`. 6. Any block type with `draftDamaged > originalDamaged` → `DamageInvariant` (bug guard). 7. Non-creative: any BOM line with `Required > 0` and no item → `UnbuildableBlock`. Warnings: power use > generation → `PowerDeficit`; forward thrust 0 → `NoThrust`; no weapon blocks → `NoWeapons`. Commit is allowed only with zero errors. The issues list (errors first, then warnings) is also refreshed after edits, at most every 0.25 s.
 
 `RemoveFloatingParts()`: one `AllOrNothing` batch removing every block whose origin cell is disconnected (normal BOM rules apply), label "Remove floating parts".
 

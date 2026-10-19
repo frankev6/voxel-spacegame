@@ -361,7 +361,7 @@ namespace Game.Data.Blocks
     }
 
     // ---- Rows (unmanaged; Burst reads them) ----
-    [System.Serializable] public struct CoreParams { public int MaxCells; public int MaxExtentCells; }   // ≥ 1 each: build budget and max AABB edge (SPEC-51 enforces)
+    [System.Serializable] public struct CoreParams { public int MaxCells; public int MaxExtentCells; public int MinCells; }   // ≥ 1 each: build budget and max AABB edge (SPEC-51 enforces); MinCells 0 = 20% of MaxCells, the floor below which the core malfunctions (SPEC-13 §5.6 step 1a)
     [System.Serializable] public struct PowerSourceParams { public float Generation; }                  // E/s, > 0
     [System.Serializable] public struct PowerStorageParams { public float Storage; }                    // E, > 0
     [System.Serializable] public struct ThrusterParams { public float ThrustNewtons; public float PowerDraw;   // > 0 along block-local −Z; E/s at full throttle, ≥ 0
@@ -691,6 +691,7 @@ SPEC-72 writes exactly these values (MIG-006). Footprints and clearance are bloc
 | `block_hull` | Structural | Cube | 1 | — | All | All | 100 | 0 | 25 | Structure: — | — |
 | `block_hull_angled` | Structural | Wedge | 1 | — | All | All | 50 | 0 | 15 | Structure: — | — |
 | `block_core_small` | Functional | Cube | 1 | — | All | All | 300 | 300 | 60 | Core: Core (MaxCells 4000, MaxExtent 100), PowerSource (gen 40), PowerStorage (200) | shipVoxels : `hull_1x1_Cube.008` |
+| `block_core_micro`, `block_core_frigate`, `block_core_capital` | Functional | Cube | 1 | — | All | All | 300 | 300 | 60 | Copies of `block_core_small` (DMG-020 core ladder, `CoreCapacityBuilder`): MaxCells 1000 / 10000 / 25000, MaxExtent 60 / 150 / 300 | as `block_core_small` |
 | `block_core_cross` | Functional | Cube | 7: (0,0,0),(0,1,0),(0,2,0),(1,1,0),(−1,1,0),(0,1,1),(0,1,−1) | — | All | All | 500 | 3500 | 60 | Core: Core (MaxCells 8000, MaxExtent 150), PowerSource (gen 40), PowerStorage (200) | hulls : `cross_3x3_hull_cross_3x3_hull` |
 | `block_capacitor_small` | Functional | Cube | box 2×2×1 | — | All | All | 100 | 400 | 35 | Power: PowerStorage (40) | shipVoxels : `capacitor_2x1_base_1x1_hull.002` |
 | `block_shield_small` | Functional | Cube | 1 | — | All | All | 100 | 100 | 40 | Shield: ShieldEmitter (capacity 3000, regen 120, delay 4, draw 8) | hulls : `base_1x1_hull_base_1x1_hull` |

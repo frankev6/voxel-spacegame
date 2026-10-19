@@ -49,7 +49,8 @@ namespace Game.Tests.EditMode.ShipEditor
         {
             Assert.AreEqual(typeof(byte), Enum.GetUnderlyingType(typeof(EditIssueKind)));
             var errors = new[] { EditIssueKind.NoCore, EditIssueKind.MultipleCores, EditIssueKind.Disconnected,
-                EditIssueKind.OutOfBounds, EditIssueKind.OverCellBudget, EditIssueKind.DamageInvariant, EditIssueKind.UnbuildableBlock };
+                EditIssueKind.OutOfBounds, EditIssueKind.OverCellBudget, EditIssueKind.DamageInvariant, EditIssueKind.UnbuildableBlock,
+                EditIssueKind.OverCoreCapacity, EditIssueKind.UnderCoreFloor };
             var warnings = new[] { EditIssueKind.PowerDeficit, EditIssueKind.NoThrust, EditIssueKind.NoWeapons };
             Assert.AreEqual(errors.Length + warnings.Length, Enum.GetValues(typeof(EditIssueKind)).Length);
             for (int i = 0; i < errors.Length; i++)

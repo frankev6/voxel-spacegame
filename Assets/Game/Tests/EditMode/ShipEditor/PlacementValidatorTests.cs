@@ -20,7 +20,7 @@ namespace Game.Tests.EditMode.ShipEditor
             defs.Add(Block("block_reservation", BlockKind.Functional, edit: so => Set(so, "clearance", new[] { new Vector3Int(1, 0, 0) })));
             defs.Add(Block("block_no_attach", BlockKind.Structural, edit: so => Set(so, "attachFaces", 0)));
             defs.Add(Block("block_upright", BlockKind.Structural, edit: so => Set(so, "allowedOrientations.Bits", 1u)));
-            defs.Add(Block("block_core", BlockKind.Functional, modules: new BlockModule[] { new CoreModule { Params = new CoreParams { MaxCells = 100, MaxExtentCells = 100 } } }));
+            defs.Add(Block("block_core", BlockKind.Functional, modules: new BlockModule[] { new CoreModule { Params = new CoreParams { MaxCells = 100, MaxExtentCells = 100, MinCells = 1 } } }));
         });
         static ushort Id(DraftAdapterTests.Fixture f, string id) => f.Catalog.GetBlockIndex(f.Catalog.Get<BlockDefinition>(new ContentId(id)));
         static BlockRecord Record(ushort block, int x = 0, byte orient = 0)

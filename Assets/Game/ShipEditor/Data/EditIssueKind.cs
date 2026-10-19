@@ -4,7 +4,7 @@ namespace Game.ShipEditor.Data
     public enum EditIssueKind : byte
     {
         NoCore = 0, MultipleCores = 1, Disconnected = 2, OutOfBounds = 3, OverCellBudget = 4,
-        DamageInvariant = 5, UnbuildableBlock = 6, // errors
+        DamageInvariant = 5, UnbuildableBlock = 6, OverCoreCapacity = 7, UnderCoreFloor = 8, // errors (7, 8: the core's MaxCells and floor, CoreParams)
         PowerDeficit = 100, NoThrust = 101, NoWeapons = 102 // warnings (≥ 100)
     }
 }

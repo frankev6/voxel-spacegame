@@ -35,7 +35,7 @@ namespace Game.Tests.EditMode.ShipEditor
                 var hull = TestContentFactory.Block("block_stats_hull", BlockKind.Structural, edit: so =>
                 { TestContentFactory.Set(so, "cellMass", 1.0004f); TestContentFactory.Set(so, "basePrice", 17); });
                 var core = TestContentFactory.Block("block_stats_core", BlockKind.Functional, modules: new BlockModule[]
-                    { new CoreModule { Params = new CoreParams { MaxCells = 100, MaxExtentCells = 16 } } }, edit: so =>
+                    { new CoreModule { Params = new CoreParams { MaxCells = 100, MaxExtentCells = 16, MinCells = 1 } } }, edit: so =>
                 { TestContentFactory.Set(so, "cellMass", 10.0004f); TestContentFactory.Set(so, "basePrice", 101); });
                 var utility = TestContentFactory.Block("block_stats_utility", BlockKind.Functional,
                     new[] { Vector3Int.zero, Vector3Int.right }, new BlockModule[]

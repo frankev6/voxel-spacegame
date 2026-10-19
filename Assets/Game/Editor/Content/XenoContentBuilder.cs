@@ -201,6 +201,7 @@ namespace Game.Editor.Content
             // QA-001: the smooth-min field leaves specks a cell or two wide off the body (BROODMOTHER had 29); a ship is one
             // face-connected piece (SPEC-51 §5.5), so they are removed rather than flown as floating cells.
             int loose = NocturneShipBuilder.RemoveLoose(structure, content, Index("block_xeno_heart"));
+            CoreCapacityBuilder.FitCore(structure, content, catalog);   // the BROODMOTHER needs a great heart
             string path = Ships + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(path);
             if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, path); }
