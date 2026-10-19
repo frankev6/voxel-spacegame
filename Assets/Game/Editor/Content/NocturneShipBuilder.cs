@@ -191,6 +191,8 @@ namespace Game.Editor.Content
             // a ship with reactors is framed with bulkheads every 10 cells; hollowEvery frames a smaller one without them
             int hollowed = reactors > 0 || hollowEvery > 0 ? Hollow(structure, content, cube, hollowEvery > 0 ? hollowEvery : 10) : 0;
             var (bridges, loose) = Connect(structure, content, cube, Index("block_core_small"));
+            // the core whose range holds the finished hull (owner: a bigger core allows for a bigger ship)
+            CoreCapacityBuilder.FitCore(structure, content, catalog);
 
             string path = Ships + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(path);

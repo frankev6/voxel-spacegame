@@ -304,7 +304,9 @@ namespace Game.ShipEditor.Services
             EditIssueKind.NoCore => "Ship needs a core", EditIssueKind.MultipleCores => "Ship has multiple cores",
             EditIssueKind.Disconnected => "Ship contains disconnected blocks", EditIssueKind.OutOfBounds => "Ship exceeds the size limit",
             EditIssueKind.OverCellBudget => "Ship exceeds the cell budget", EditIssueKind.DamageInvariant => "Damaged block count increased",
-            EditIssueKind.UnbuildableBlock => "Ship requires an unavailable block", _ => "Ship is invalid"
+            EditIssueKind.UnbuildableBlock => "Ship requires an unavailable block",
+            EditIssueKind.OverCoreCapacity => "Ship is too big for its core: fit a bigger core or remove blocks",
+            EditIssueKind.UnderCoreFloor => "Ship is too small for its core (it would malfunction): fit a smaller core or add blocks", _ => "Ship is invalid"
         };
         public void Discard()
         {

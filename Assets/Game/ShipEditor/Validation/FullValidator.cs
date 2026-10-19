@@ -36,6 +36,12 @@ namespace Game.ShipEditor.Validation
             if(indexes.TryGetBounds(out int3 min,out int3 max) && math.any((double3)max-(double3)min+1 > (double3)(int3)context.Config.MaxExtentCells))
                 Add(result,EditIssueKind.OutOfBounds,1,min);
             if(indexes.SolidCells>context.Config.MaxCells) Add(result,EditIssueKind.OverCellBudget,indexes.SolidCells);
+            // The core holds MaxCells at most and malfunctions below its floor (CoreParams.Floor, 20% of MaxCells by default).
+            if(indexes.Cores==1 && indexes.Core is BlockRecord core && context.Catalog?.GetBlock(core.Block) is {} coreBlock && coreBlock.TryGetModule<CoreModule>(out var coreModule))
+            {
+                if(indexes.SolidCells>coreModule.Params.MaxCells) Add(result,EditIssueKind.OverCoreCapacity,indexes.SolidCells);
+                else if(indexes.SolidCells<coreModule.Params.Floor) Add(result,EditIssueKind.UnderCoreFloor,indexes.SolidCells);
+            }
             int damage=0;
             for(int i=0;i<session.DraftCounts.TypeCount;i++) damage+=math.max(0,session.DraftCounts.Damaged(i)-session.OriginalCounts.Damaged(i));
             if(damage>0) Add(result,EditIssueKind.DamageInvariant,damage);

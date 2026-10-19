@@ -30,7 +30,7 @@ namespace Game.Tests.EditMode.ShipEditor
             internal Fixture(int hulls=11,bool damage=false)
             {
                 Content=new DraftAdapterTests.Fixture(defs=>defs.Add(TestContentFactory.Block("block_core",BlockKind.Functional,
-                    modules:new BlockModule[]{new CoreModule{Params=new CoreParams{MaxCells=100,MaxExtentCells=100}}})));
+                    modules:new BlockModule[]{new CoreModule{Params=new CoreParams{MaxCells=100,MaxExtentCells=100, MinCells = 1}}})));
                 ushort core=Content.Catalog.GetBlockIndex(Content.Catalog.Get<BlockDefinition>(new ContentId("block_core")));
                 Content.Edits(new VoxelEdit{Kind=VoxelEditKind.PlaceBlock,Block=core});
                 for(int x=1;x<=hulls;x++)

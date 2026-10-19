@@ -176,6 +176,8 @@ namespace Game.Tests.EditMode.Data
             {
                 (new CoreModule { Params = new CoreParams { MaxCells = 0, MaxExtentCells = 1 } }, "Params.MaxCells"),
                 (new CoreModule { Params = new CoreParams { MaxCells = 1, MaxExtentCells = 0 } }, "Params.MaxExtentCells"),
+                (new CoreModule { Params = new CoreParams { MaxCells = 10, MaxExtentCells = 1, MinCells = 11 } }, "Params.MinCells"),
+                (new CoreModule { Params = new CoreParams { MaxCells = 10, MaxExtentCells = 1, MinCells = -1 } }, "Params.MinCells"),
                 (new PowerSourceModule(), "Params.Generation"),
                 (new PowerStorageModule { Params = new PowerStorageParams { Storage = float.NaN } }, "Params.Storage"),
                 (new ThrusterModule { Params = new ThrusterParams { ThrustNewtons = 0, PowerDraw = 1 } }, "Params.ThrustNewtons"),

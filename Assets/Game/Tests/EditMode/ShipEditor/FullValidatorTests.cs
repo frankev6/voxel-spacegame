@@ -16,7 +16,9 @@ namespace Game.Tests.EditMode.ShipEditor
     {
         [TearDown] public void Cleanup()=>TestContentFactory.DestroyAll();
         static DraftAdapterTests.Fixture Fixture()=>new(defs=> {
-            defs.Add(TestContentFactory.Block("block_core",BlockKind.Functional,modules:new BlockModule[]{new CoreModule{Params=new CoreParams{MaxCells=100,MaxExtentCells=100}}}));
+            defs.Add(TestContentFactory.Block("block_core",BlockKind.Functional,modules:new BlockModule[]{new CoreModule{Params=new CoreParams{MaxCells=100,MaxExtentCells=100,MinCells=1}}}));
+            defs.Add(TestContentFactory.Block("block_core_floor",BlockKind.Functional,modules:new BlockModule[]{new CoreModule{Params=new CoreParams{MaxCells=100,MaxExtentCells=100}}}));   // floor 20
+            defs.Add(TestContentFactory.Block("block_core_one",BlockKind.Functional,modules:new BlockModule[]{new CoreModule{Params=new CoreParams{MaxCells=1,MaxExtentCells=100}}}));
             defs.Add(TestContentFactory.Block("block_drain",BlockKind.Functional,modules:new BlockModule[]{new ThrusterModule{Params=new ThrusterParams{ThrustNewtons=10,PowerDraw=7}}}));
         });
         static ushort Id(DraftAdapterTests.Fixture f,string name)=>f.Catalog.GetBlockIndex(f.Catalog.Get<BlockDefinition>(new ContentId(name)));
@@ -36,6 +38,8 @@ namespace Game.Tests.EditMode.ShipEditor
         [Test] public void NoWeapons_Warning(){using var f=Fixture();Place(f,f.Hull);using var s=Session(f);Assert.IsFalse(Has(s,f.Context,EditIssueKind.NoWeapons).IsError);}
         [Test] public void OutOfBounds_Error(){using var f=Fixture();Place(f,f.Hull);Place(f,f.Hull,300);using var s=Session(f);Assert.IsTrue(Has(s,f.Context,EditIssueKind.OutOfBounds).IsError);}
         [Test] public void OverCellBudget_Error(){using var f=Fixture();Place(f,f.Hull);Place(f,f.Hull,1);f.Context.Config.MaxCells=1;using var s=Session(f);Assert.AreEqual(2,Has(s,f.Context,EditIssueKind.OverCellBudget).Count);}
+        [Test] public void UnderCoreFloor_Error(){using var f=Fixture();Place(f,Id(f,"block_core_floor"));Place(f,f.Hull,1);using var s=Session(f);Assert.AreEqual(2,Has(s,f.Context,EditIssueKind.UnderCoreFloor).Count);}
+        [Test] public void OverCoreCapacity_Error(){using var f=Fixture();Place(f,Id(f,"block_core_one"));Place(f,f.Hull,1);using var s=Session(f);Assert.AreEqual(2,Has(s,f.Context,EditIssueKind.OverCoreCapacity).Count);}
         [Test] public void DamageInvariant_Error()
         {
             using var f=Fixture();using var s=Session(f);using var command=new DiffCommand(ToolId.Place,"corrupt damage",0);

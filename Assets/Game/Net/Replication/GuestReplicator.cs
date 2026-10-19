@@ -225,7 +225,7 @@ namespace Game.Net.Replication
                     if (Ready(id, out var g) && em.Exists(g.Entity))
                     {
                         // A hulk transition is applied by HulkTransitionSystem as on the host: components, kind, breach blast and sound.
-                        if (hulk) { if (!em.HasComponent<Hulk>(g.Entity)) QueueHulk(em, g.Entity, info, info.Cause == HulkCause.CoreLost); }
+                        if (hulk) { if (!em.HasComponent<Hulk>(g.Entity)) QueueHulk(em, g.Entity, info, info.Cause != HulkCause.Split); }
                         else { var grid = em.GetComponentData<VoxelGrid>(g.Entity); grid.Kind = gridKind; em.SetComponentData(g.Entity, grid); }
                     }
                     return true;

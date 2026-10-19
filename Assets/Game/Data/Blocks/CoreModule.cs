@@ -7,6 +7,10 @@ namespace Game.Data.Blocks
         public override BlockModuleId Id => BlockModuleId.Core;
         protected override CoreParams Bake(in BlockModuleBakeContext ctx) => Params;
         public override void Validate(Game.Data.Definitions.BlockDefinition owner, Game.Data.Validation.ValidationReport report)
-        { ModuleChecks.AtLeastOne(report, "Params.MaxCells", Params.MaxCells); ModuleChecks.AtLeastOne(report, "Params.MaxExtentCells", Params.MaxExtentCells); }
+        {
+            ModuleChecks.AtLeastOne(report, "Params.MaxCells", Params.MaxCells); ModuleChecks.AtLeastOne(report, "Params.MaxExtentCells", Params.MaxExtentCells);
+            if (Params.MinCells < 0 || Params.MinCells > Params.MaxCells)
+                report.Error("DATA-E041", "", "Params.MinCells", $"Params.MinCells is {Params.MinCells}; it must be 0 (20% of MaxCells) or 1..MaxCells.");
+        }
     }
 }

@@ -87,6 +87,36 @@ namespace Game.Tests.EditMode.Voxel.Damage
             using (var q = f.Em.CreateEntityQuery(typeof(SfxEventQueue))) Assert.AreEqual(1, q.GetSingleton<SfxEventQueue>().Queue.Count);
             f.Step(); Assert.AreEqual(0, f.Streams.Data->CoreLost.Length); Assert.AreEqual(0, f.DrainExplosions());
         }
+        // Core floor (owner, 2026-10-18): the test core (block_core_cross) holds 8000 cells, so its floor is 1600. Live cells are
+        // GridMass's; the test writes them directly, as GridMassUpdateSystem would.
+        static void SetCells(Fixture f, Entity root, uint cells)
+        { var mass = f.Em.GetComponentData<Game.Voxel.PhysicsBody.GridMass>(root); mass.Data.CellCount = cells; f.Em.SetComponentData(root, mass); }
+        [Test] public void CoreFloor_ArmedShipBelowFloor_Malfunctions()
+        {
+            using var f = new Fixture(); var root = f.F.Spawn(f.F.CoreAndReactor());
+            Assert.AreEqual(GridKind.Ship, f.Em.GetComponentData<VoxelGrid>(root).Kind);
+            SetCells(f, root, 1600); f.Step();
+            Assert.IsTrue(f.Em.HasComponent<CoreFloorArmed>(root), "a ship at its floor is armed"); Assert.IsFalse(f.Em.HasComponent<Hulk>(root));
+            SetCells(f, root, 1599); f.Step();
+            Assert.IsTrue(f.Em.HasComponent<Hulk>(root)); Assert.AreEqual(GridKind.Hulk, f.Em.GetComponentData<VoxelGrid>(root).Kind);
+            Assert.AreEqual(HulkCause.CoreMalfunction, f.Em.GetComponentData<HulkInfo>(root).Cause);
+            Assert.AreEqual(1, f.Streams.Data->CoreLost.Length, "a malfunction is a kill like core loss");
+            Assert.AreEqual(1, f.DrainExplosions(), "the breach blast at the core");
+        }
+        [Test] public void CoreFloor_UndersizedShipNeverArms()
+        {
+            using var f = new Fixture(); var root = f.F.Spawn(f.F.CoreAndReactor());   // about 90 cells under a 1600-cell floor
+            for (int i = 0; i < 3; i++) f.Step();
+            Assert.IsFalse(f.Em.HasComponent<CoreFloorArmed>(root)); Assert.IsFalse(f.Em.HasComponent<Hulk>(root));
+        }
+        [Test] public void CoreFloor_CoreLostSameTick_QueuedOnce()
+        {
+            using var f = new Fixture(); var root = f.F.Spawn(f.F.CoreAndReactor());
+            SetCells(f, root, 2000); f.Step(); SetCells(f, root, 10);
+            f.Streams.Data->GridResults.Add(new DamageGridResult { Grid = root, CoreLost = 1, CoreWorldPos = new float3(1,2,3) });
+            f.Step();
+            Assert.AreEqual(HulkCause.CoreLost, f.Em.GetComponentData<HulkInfo>(root).Cause); Assert.AreEqual(1, f.Streams.Data->CoreLost.Length);
+        }
         [Test] public void Dissolve_EmitsThenDestroys()
         {
             using var f = new Fixture();
