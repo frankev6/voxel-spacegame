@@ -106,6 +106,15 @@ namespace Game.Presentation.Systems
                     rig.SetBoost(EntityManager.HasComponent<ShipCommand>(target) &&
                         (EntityManager.GetComponentData<ShipCommand>(target).Flags & ShipCommandFlags.Boost) != 0);
                     if (hasBounds) rig.SetTargetBounds(boundsMin, boundsMax, ltw.Value);
+                    // Feel prototype: the `cursor` camera preset turns towards the player's aim.
+                    if (SystemAPI.TryGetSingleton<PlayerCommand>(out var aim)) rig.SetAimPoint(aim.AimWorld, aim.AimValid != 0);
+                    var mouse = UnityEngine.InputSystem.Mouse.current; var cam = rig.Camera;
+                    if (mouse != null && cam.pixelWidth > 0 && cam.pixelHeight > 0)
+                    {
+                        var at = mouse.position.ReadValue();
+                        rig.SetPointer(new float2(at.x / cam.pixelWidth, at.y / cam.pixelHeight), true);
+                    }
+                    else rig.SetPointer(default, false);
                     lastTarget = target; lastTargetPos = pos;
                 }
             }

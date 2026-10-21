@@ -93,6 +93,37 @@ namespace Game.Presentation.Systems
                 yaw = math.degrees(math.atan2(forward.x, forward.z));
             }
             Apply(snapshot, contacts, position, hasPosition, yaw);
+            Reticle();
+        }
+
+        /// <summary>Feel prototype (2026-10-21): places the mouse-look reticle and the bracket on the ship auto-aim is locked onto.</summary>
+        void Reticle()
+        {
+            var preset = Game.Presentation.Services.FlightCameraPreset.Current;
+            bool showReticle = preset.MouseLook, showLock = false;
+            UnityEngine.Vector2 reticlePoint = new(.5f, 1 - preset.ReticleHeight), lockPoint = model.LockPoint; float lockSize = model.LockSizeFraction;
+            var sampler = World.GetExistingSystemManaged<Game.Presentation.Input.PlayerInputSampleSystem>();
+            Entity target = sampler != null ? sampler.AssistTarget : Entity.Null;
+            if (target != Entity.Null && !cameras.IsEmptyIgnoreFilter && EntityManager.Exists(target)
+                && EntityManager.HasComponent<LocalToWorld>(target) && EntityManager.HasComponent<Game.Voxel.Model.VoxelGrid>(target))
+            {
+                var camera = cameras.GetSingleton<MainCameraState>();
+                var grid = EntityManager.GetComponentData<Game.Voxel.Model.VoxelGrid>(target);
+                float3 center = math.transform(EntityManager.GetComponentData<LocalToWorld>(target).Value, ((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
+                float radius = math.length((float3)(grid.CellMax + 1 - grid.CellMin)) * grid.CellSize * .5f;
+                float4 clip = math.mul(camera.ViewProjection, new float4(center, 1));
+                if (clip.w > camera.NearClip && math.all(camera.ScreenSizePx > 0))
+                {
+                    float2 ndc = clip.xy / clip.w;
+                    lockPoint = new UnityEngine.Vector2(ndc.x * .5f + .5f, .5f - ndc.y * .5f);
+                    lockSize = math.min(.8f, radius * 1.4f / (clip.w * math.tan(math.radians(camera.VerticalFovDeg) * .5f)) * .5f);
+                    showLock = true;
+                }
+            }
+            if (showReticle == model.ShowReticle && showLock == model.ShowLock && (reticlePoint - model.ReticlePoint).sqrMagnitude < 1e-8f
+                && (lockPoint - model.LockPoint).sqrMagnitude < 1e-7f && math.abs(lockSize - model.LockSizeFraction) < 1e-4f) return;
+            model.ShowReticle = showReticle; model.ShowLock = showLock; model.ReticlePoint = reticlePoint; model.LockPoint = lockPoint; model.LockSizeFraction = lockSize;
+            model.ReticleVersion++;
         }
         internal void Apply(in HudSnapshot value, NativeArray<HudRadarBlip> contacts, double3 playerPosition, bool hasPosition, float yaw)
         {

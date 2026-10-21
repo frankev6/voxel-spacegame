@@ -4,6 +4,7 @@ using Game.Input;
 using Game.Presentation.Components;
 using Game.Simulation.Commands;
 using Game.Voxel.Grid;
+using Game.Voxel.Model;
 using Game.Voxel.PhysicsBody;
 using Unity.Collections;
 using Unity.Entities;
@@ -22,7 +23,16 @@ namespace Game.Presentation.Input
     public partial class PlayerInputSampleSystem : SystemBase
     {
         Entity commandEntity;
-        EntityQuery players, cameras, physics;
+        EntityQuery players, cameras, physics, assistGrids, relations;
+        Entity assistTarget;
+        /// <summary>Auto-aim (owner, 2026-10-21: "auto-aiming for players enabled by default"): a cursor within
+        /// <see cref="AssistRadius"/> of a hostile ship aims at that ship, and the weapons lead it. Dev switch until Settings has it.</summary>
+        [Game.Core.StaticStateOk("dev switch for auto-aim, main thread")]
+        public static bool AimAssist = true;
+        /// <summary>Snap and release distances as fractions of the screen height (about 50 and 75 px at 1080p; Retina-safe).</summary>
+        public const float AssistRadius = .045f, AssistRelease = .07f;
+        /// <summary>The ship auto-aim is on this frame, or Entity.Null (for the HUD reticle).</summary>
+        public Entity AssistTarget => assistTarget;
         InputService input;
         IWorldPointerGate pointerGate;
         InputAction thrust, strafe, turn, strafeModifier, boost, brake, firePrimary, fireSecondary, fireTertiary;
@@ -37,6 +47,12 @@ namespace Game.Presentation.Input
             players = GetEntityQuery(new EntityQueryDesc { All = new[] { ComponentType.ReadOnly<PlayerShip>() }, None = new[] { ComponentType.ReadOnly<Parent>() } });
             cameras = GetEntityQuery(ComponentType.ReadOnly<MainCameraState>());
             physics = GetEntityQuery(ComponentType.ReadOnly<PhysicsWorldSingleton>());
+            assistGrids = GetEntityQuery(new EntityQueryDesc
+            {
+                All = new[] { ComponentType.ReadOnly<VoxelGrid>(), ComponentType.ReadOnly<LocalToWorld>(), ComponentType.ReadOnly<Game.Simulation.Allegiance>() },
+                None = new[] { ComponentType.ReadOnly<Game.Voxel.Damage.Hulk>(), ComponentType.ReadOnly<Parent>() }
+            });
+            relations = GetEntityQuery(ComponentType.ReadOnly<Game.Simulation.FactionRelations>());
             RequireForUpdate<PlayerCommand>();
         }
         public void Bind(InputService service, IWorldPointerGate gate)
@@ -75,7 +91,13 @@ namespace Game.Presentation.Input
                 if (input.CurrentControlScheme == "Gamepad") AimGamepad(ref command);
                 else if (Mouse.current != null)
                 {
-                    var pointer = Mouse.current.position.ReadValue();
+                    float2 pointer = Mouse.current.position.ReadValue();
+                    // Feel prototype `orbit` preset: the cursor is locked, and the fixed reticle aims.
+                    if (Game.Presentation.Services.FlightCameraPreset.Current.MouseLook && !cameras.IsEmptyIgnoreFilter)
+                    {
+                        cameras.CompleteDependency(); var size = cameras.GetSingleton<MainCameraState>().ScreenSizePx;
+                        pointer = new float2(.5f, Game.Presentation.Services.FlightCameraPreset.Current.ReticleHeight) * size;
+                    }
                     allowed = pointerGate == null || pointerGate.IsWorldPointerAllowed(pointer);
                     Aim(pointer, ref command);
                 }
@@ -138,9 +160,76 @@ namespace Game.Presentation.Input
                 else if (count > 1) { using var entities = players.ToEntityArray(Allocator.Temp); ignore = entities[0]; }
                 var collector = new IgnoreBodyClosestHitCollector(ignore, 1);
                 if (world.CastRay(new RaycastInput { Start = near, End = near + direction * 5000, Filter = PhysicsLayers.PickingQuery }, ref collector))
-                { command.AimWorld = collector.ClosestHit.Position; command.AimValid = 1; return; }
+                {
+                    Entity hitEntity = collector.ClosestHit.Entity;
+                    // A ray straight onto a hostile hull keeps the exact cell the player points at; anything else may snap.
+                    if (AimAssist && IsAssistCandidate(hitEntity, out _)) { assistTarget = hitEntity; SetAim(ref command, collector.ClosestHit.Position); return; }
+                    if (Snap(pointer, camera, ref command)) return;
+                    assistTarget = Entity.Null; SetAim(ref command, collector.ClosestHit.Position); return;
+                }
             }
-            if (Planar.RayPlaneY(near, direction, 0, out var hit, out _)) { command.AimWorld = hit; command.AimValid = 1; }
+            if (Snap(pointer, camera, ref command)) return;
+            assistTarget = Entity.Null;
+            if (Planar.RayPlaneY(near, direction, 0, out var hit, out _)) SetAim(ref command, hit);
+        }
+
+        static void SetAim(ref PlayerCommand command, float3 point)
+        {
+            command.AimWorld = point; command.AimValid = 1;
+            if (AimAssist) command.Flags |= ShipCommandFlags.AimAssist;
+        }
+
+        /// <summary>Snaps a near miss onto the hostile ship closest to the cursor on screen, measured from the edge of its projected
+        /// hull sphere. The current target holds until the cursor is <see cref="AssistRelease"/> away, so it does not flicker.</summary>
+        bool Snap(float2 pointer, in MainCameraState camera, ref PlayerCommand command)
+        {
+            if (!AimAssist) return false;
+            Entity best = Entity.Null; float bestPx = float.MaxValue; float3 bestPoint = default;
+            assistGrids.CompleteDependency();
+            using var entities = assistGrids.ToEntityArray(Allocator.Temp);
+            foreach (var entity in entities)
+            {
+                if (!IsAssistCandidate(entity, out float3 center) || !Project(camera, center, out float2 screen, out float depth)) continue;
+                var grid = EntityManager.GetComponentData<VoxelGrid>(entity);
+                float radius = math.length((float3)(grid.CellMax + 1 - grid.CellMin)) * grid.CellSize * .5f;
+                float radiusPx = radius * .7f * camera.ScreenSizePx.y / (2 * depth * math.tan(math.radians(camera.VerticalFovDeg) * .5f));
+                float px = math.max(0, math.distance(screen, pointer) - radiusPx);
+                float limit = (entity == assistTarget ? AssistRelease : AssistRadius) * camera.ScreenSizePx.y;
+                if (px > limit || px >= bestPx) continue;
+                best = entity; bestPx = px; bestPoint = center;
+            }
+            assistTarget = best;
+            if (best == Entity.Null) return false;
+            SetAim(ref command, bestPoint);
+            return true;
+        }
+
+        bool IsAssistCandidate(Entity entity, out float3 center)
+        {
+            center = default;
+            if (entity == Entity.Null || !assistGrids.Matches(entity) || players.Matches(entity)) return false;
+            if (relations.IsEmptyIgnoreFilter || players.CalculateEntityCount() != 1) return false;
+            Entity player = players.GetSingletonEntity();
+            if (!EntityManager.HasComponent<Game.Simulation.Allegiance>(player)) return false;
+            var own = EntityManager.GetComponentData<Game.Simulation.Allegiance>(player);
+            if (!relations.GetSingleton<Game.Simulation.FactionRelations>().IsHostile(own, EntityManager.GetComponentData<Game.Simulation.Allegiance>(entity))) return false;
+            var ltw = EntityManager.GetComponentData<LocalToWorld>(entity);
+            if (EntityManager.HasComponent<PhysicsMass>(entity)) center = math.transform(ltw.Value, EntityManager.GetComponentData<PhysicsMass>(entity).CenterOfMass);
+            else
+            {
+                var grid = EntityManager.GetComponentData<VoxelGrid>(entity);
+                center = math.transform(ltw.Value, ((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
+            }
+            return math.all(math.isfinite(center));
+        }
+
+        static bool Project(in MainCameraState camera, float3 point, out float2 screen, out float depth)
+        {
+            float4 clip = math.mul(camera.ViewProjection, new float4(point, 1));
+            screen = default; depth = clip.w;
+            if (!(clip.w > camera.NearClip)) return false;
+            screen = (clip.xy / clip.w * .5f + .5f) * camera.ScreenSizePx;
+            return math.all(math.isfinite(screen));
         }
     }
 }
