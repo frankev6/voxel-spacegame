@@ -65,16 +65,22 @@ namespace Game.Editor.Content
                 using var reader = new BinaryReader(File.OpenRead(Source));
                 if (Encoding.ASCII.GetString(reader.ReadBytes(4)) != "HOLW" || reader.ReadInt32() != 1) throw new InvalidDataException(Source);
                 int count = reader.ReadInt32();
+                var all = new List<(string id, string name, List<(short i, short j, short k, byte s, byte c, byte m)> list, (short i, short j, short k, byte big, byte orient)[] mounts)>();
                 for (int p = 0; p < count; p++)
                 {
                     string id = Read(reader), name = Read(reader);
                     int blocks = reader.ReadInt32();
-                    var list = new (short i, short j, short k, byte s, byte c, byte m)[blocks];
+                    var list = new List<(short i, short j, short k, byte s, byte c, byte m)>(blocks);
                     for (int b = 0; b < blocks; b++)
-                        list[b] = (reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+                        list.Add((reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte()));
                     int guns = reader.ReadInt32();
                     var mounts = new (short i, short j, short k, byte big, byte orient)[guns];
                     for (int g = 0; g < guns; g++) mounts[g] = (reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadByte(), reader.ReadByte());
+                    all.Add((id, name, list, mounts));
+                }
+                RaiseWalls(all);
+                foreach (var (id, name, list, mounts) in all)
+                {
                     var made = Make(service, content, id, name, 2, put =>
                     {
                         // gun kits first, so the rock never takes their cells
@@ -115,6 +121,49 @@ namespace Game.Editor.Content
         }
 
         static string Read(BinaryReader r) => Encoding.UTF8.GetString(r.ReadBytes(r.ReadInt16()));
+
+        const int TileCells = 128, SplitCell = 12;   // a rock tile is 256 m of 2 m cells; the low and high pieces split at +24 m
+        /// <summary>Owner, 2026-10-21, inside the Hollow under the chase camera: "walls need to run up all the way in the asteroid, not get
+        /// cut off half way. its like a cavern system". Where a low wall reaches the split and rock hangs above it, the exported design left
+        /// open air between them (over the Market the vault begins at +80 m). Each such wall column that faces the cavern or open sky is
+        /// carried up in its own colour, as rock in the high piece, to meet the rock above. Interior wall columns are left as they are:
+        /// nothing sees them.</summary>
+        static void RaiseWalls(List<(string id, string name, List<(short i, short j, short k, byte s, byte c, byte m)> list, (short i, short j, short k, byte big, byte orient)[] mounts)> all)
+        {
+            var lowTop = new Dictionary<int2, (int top, byte colour)>(); var highBottom = new Dictionary<int2, int>();
+            var highPieces = new Dictionary<int2, List<(short i, short j, short k, byte s, byte c, byte m)>>();
+            foreach (var (id, _, list, _) in all)
+            {
+                if (!TryTile(id, out bool high, out int2 tile)) continue;
+                if (high) highPieces[tile] = list;
+                foreach (var b in list)
+                    for (int a = b.i; a < b.i + b.s; a++)
+                        for (int k = b.k; k < b.k + b.s; k++)
+                        {
+                            var column = tile * TileCells + new int2(a, k);
+                            if (high) highBottom[column] = highBottom.TryGetValue(column, out int bottom) ? math.min(bottom, b.j) : b.j;
+                            else if (!lowTop.TryGetValue(column, out var top) || b.j + b.s > top.top) lowTop[column] = (b.j + b.s, b.c);
+                        }
+            }
+            bool Open(int2 column) => !lowTop.TryGetValue(column, out var top) || top.top < SplitCell || !highBottom.ContainsKey(column);
+            foreach (var (column, top) in lowTop)
+            {
+                if (top.top < SplitCell || !highBottom.TryGetValue(column, out int bottom) || bottom <= SplitCell) continue;
+                if (!Open(column + new int2(1, 0)) && !Open(column - new int2(1, 0)) && !Open(column + new int2(0, 1)) && !Open(column - new int2(0, 1))) continue;
+                var tile = new int2((int)math.floor(column.x / (float)TileCells), (int)math.floor(column.y / (float)TileCells));
+                if (!highPieces.TryGetValue(tile, out var into)) continue;
+                var local = column - tile * TileCells;
+                for (int j = SplitCell; j < bottom; j++) into.Add(((short)local.x, (short)j, (short)local.y, 1, top.colour, 0));
+            }
+        }
+        static bool TryTile(string id, out bool high, out int2 tile)
+        {
+            const string Low = "ship_hollow_rock_low_", High = "ship_hollow_rock_high_";
+            high = id.StartsWith(High, StringComparison.Ordinal); tile = default;
+            if (!high && !id.StartsWith(Low, StringComparison.Ordinal)) return false;
+            var parts = id.Substring(high ? High.Length : Low.Length).Split('_');
+            return parts.Length == 2 && int.TryParse(parts[0], out tile.x) && int.TryParse(parts[1], out tile.y);
+        }
 
         delegate void Put(ushort block, int3 origin, byte colour, byte orient);
 

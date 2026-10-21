@@ -1321,6 +1321,10 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - The cutaway now runs only under `topdown`. Under the low cameras the vault stays overhead.
   - The vault is there: 99.6 % of the cavity has rock above it, 80–120 m up. It was lit as open ground, though, so its undersides were black and only the sides of its steps caught light, which read as broken speckles.
   - While the player is inside under a low camera, the brick shader's shelter now covers the vault's downward and side faces too: no sun, with the fill light and the haze (`_ShelterHaze.a`).
+  - Owner, on the next look: "walls need to run up all the way in the asteroid, not get cut off half way. its like a cavern system".
+    - The exported design ended the low walls at the +24 m split, and over some tiles the vault only begins higher up (+80 m over the Market), so open air ran round the cavern between them.
+    - `HollowBuilder.RaiseWalls` carries each wall column that faces the cavern or open sky up to the rock above it, in its own colour, as part of the high piece: 6,522 columns and 144k cells (2.58 M cells in the whole Hollow).
+    - The high pieces are rebuilt (Game/Content/Build Hollow), and the top-down cutaway still hides them.
 - Proof: `Logs/playtest/cruise_view_sheet.png`. `hollow_system_cruise` passes with no exceptions (2.66 km/s over VESHA, 800 m/s in the Scatter, 4 km/s past it, 96 m/s on arrival 9.8 km from CINDER). Probes:
   - At about 5 km/s the ship holds 44 m from the camera and its screen spot to 0.1 px.
   - CINDER's depth falls smoothly.
