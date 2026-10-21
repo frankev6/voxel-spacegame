@@ -17,14 +17,18 @@ namespace Game.Tests.EditMode.Presentation
             internal readonly GameObject Prefab = new GameObject("Camera test prefab", typeof(Camera));
             internal readonly CameraConfig Config = ScriptableObject.CreateInstance<CameraConfig>();
             internal CameraRigService Rig;
+            // SPEC-62 numbers: the `topdown` preset, whatever the last game boot left (domain reload is off)
+            readonly string preset = FlightCameraPreset.Current.Name;
             internal Fixture(bool construct = true, ICameraInput input = null)
             {
+                FlightCameraPreset.TrySet("topdown");
                 Config.CameraPrefab = Prefab;
                 if (construct) Rig = new CameraRigService(Config, Parent.transform, input);
             }
             public void Dispose()
             {
                 Rig?.Dispose(); Object.DestroyImmediate(Parent); Object.DestroyImmediate(Prefab); Object.DestroyImmediate(Config);
+                FlightCameraPreset.TrySet(preset);
             }
         }
         [Test] public void Construct_CreatesOneCamera()

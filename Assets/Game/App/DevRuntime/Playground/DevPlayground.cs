@@ -422,7 +422,8 @@ namespace Game.App.DevRuntime.Playground
                 heading.text = st >= 0 ? HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE"
                     : st == -2 ? HollowOrbit.Name + "  ·  LOW ORBIT  ·  THE CLAN TETHER"
                     : st <= -10 ? HollowSystem.Place(-10 - st)
-                    : atHollow ? "THE HOLLOW  ·  KHUCHAD CLAN HAVEN" : Race != null && Race.IsOpen ? "TRACK 01  ·  BATTLE GRAVEYARD" : "THE HOLLOW";
+                    : atHollow ? "THE HOLLOW  ·  KHUCHAD CLAN HAVEN" : Race != null && Race.IsOpen ? "TRACK 01  ·  BATTLE GRAVEYARD"
+                    : located && HollowLayout.Near(at, 2500) ? "THE HOLLOW" : "OPEN SPACE";   // owner: "wrongly saying the hollow when im not near"
                 // the place name is the HUD's title card now (4 s on arrival), not a plate that stays
                 if (ctx.TryGetService<UiComposition>(out var hudScreens)) hudScreens.HudModel.ZoneName = heading.text;
             }

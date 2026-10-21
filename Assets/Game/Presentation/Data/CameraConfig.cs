@@ -9,7 +9,14 @@ namespace Game.Presentation.Data
         public float BoostFovKickDeg = 7f;      // QA-001: added to the flight FOV while boost is held
         public float BoostFovHalfLife = .18f;
         public float NearClip = 0.3f;
-        public float FarClip = 50000f;
+        public float FarClip = 1000000f;     // 1000 km: a star system's planets, rings and air at true scale (reversed-Z float depth)
+        // cruise (ADR-0122; owner, 2026-10-21: "increase FOV and have a shader effect to make it feel like you're going really really fast")
+        public float CruiseFovKickDeg = 14f, CruiseFovFullSpeed = 5000f;   // the kick grows with √(speed / full speed)
+        public float CruiseSpoolFovDipDeg = 4f;                          // the view narrows while the drive spools, then opens
+        public float CruiseHalfLife = .35f;
+        public float CruiseRumbleDeg = .15f, CruiseRumbleHz = 31f;           // a fine shake at full speed: the hull straining
+        public float CruiseSpeedHalfLife = .5f;   // the view eases through speed changes (the drive drops 5 km/s to a belt's 800 m/s in a tick)
+        public float CruisePunchFovDeg = 9f, CruisePunchHalfLife = .3f;      // the kick as the drive engages
         // flight
         public float DefaultPitchDeg = 55f, MinPitchDeg = 35f, MaxPitchDeg = 80f;
         public float DefaultDistance = 150f, MinDistance = 25f, MaxDistance = 400f;

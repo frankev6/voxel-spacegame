@@ -51,6 +51,10 @@ Shader "Game/Orbit/Atmosphere"
                 float3 closest = eye + ray * along;
                 float altitude = (length(closest) - _Radius * _WorldScale) / max(1e-4, _WorldScale);   // true metres in scaled space
                 float glow = altitude >= 0 ? exp(-altitude / _ScaleHeight) : exp(altitude / (_ScaleHeight * 12));
+                // and to nothing at the shell (unit sphere mesh: its scale is the shell's radius), so it never ends in an edge
+                float shellRadius = length(float3(UNITY_MATRIX_M._m00, UNITY_MATRIX_M._m10, UNITY_MATRIX_M._m20));
+                float shell = (shellRadius - _Radius * _WorldScale) / max(1e-4, _WorldScale);
+                glow *= saturate((shell - altitude) / max(1, shell * 0.35));
                 Light sun = GetMainLight();
                 float3 L = dot(sun.direction, sun.direction) > 0.5 ? normalize(sun.direction) : normalize(_SunFallback.xyz);
                 float sunUp = dot(normalize(closest), L);

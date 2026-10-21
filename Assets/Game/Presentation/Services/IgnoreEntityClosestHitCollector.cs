@@ -9,20 +9,24 @@ namespace Game.Presentation.Services
         // DEV-023: grids the camera sees through (CameraSeeThrough, GridRenderHidden); unset lookups ignore nothing more
         readonly ComponentLookup<Game.Voxel.Rendering.CameraSeeThrough> seeThrough;
         readonly ComponentLookup<Game.Voxel.Rendering.GridRenderHidden> hidden;
-        readonly bool filter;
+        readonly bool filter, seeThroughOn;
         public bool EarlyOutOnFirstHit => false;
         public float MaxFraction { get; private set; }
         public int NumHits { get; private set; }
         internal RaycastHit ClosestHit { get; private set; }
         internal IgnoreEntityClosestHitCollector(Entity ignored)
-        { this.ignored = ignored; MaxFraction = 1; NumHits = 0; ClosestHit = default; seeThrough = default; hidden = default; filter = false; }
+        { this.ignored = ignored; MaxFraction = 1; NumHits = 0; ClosestHit = default; seeThrough = default; hidden = default; filter = seeThroughOn = false; }
+        /// <param name="honourSeeThrough">false: CameraSeeThrough grids block the camera like any other (the low cameras); hidden ones never do.</param>
         internal IgnoreEntityClosestHitCollector(Entity ignored, ComponentLookup<Game.Voxel.Rendering.CameraSeeThrough> seeThrough,
-            ComponentLookup<Game.Voxel.Rendering.GridRenderHidden> hidden)
-        { this.ignored = ignored; MaxFraction = 1; NumHits = 0; ClosestHit = default; this.seeThrough = seeThrough; this.hidden = hidden; filter = true; }
+            ComponentLookup<Game.Voxel.Rendering.GridRenderHidden> hidden, bool honourSeeThrough = true)
+        {
+            this.ignored = ignored; MaxFraction = 1; NumHits = 0; ClosestHit = default; this.seeThrough = seeThrough; this.hidden = hidden;
+            filter = true; seeThroughOn = honourSeeThrough;
+        }
         public bool AddHit(RaycastHit hit)
         {
             if (hit.Entity == ignored || hit.Fraction > MaxFraction) return false;
-            if (filter && (seeThrough.HasComponent(hit.Entity) || hidden.HasComponent(hit.Entity))) return false;
+            if (filter && ((seeThroughOn && seeThrough.HasComponent(hit.Entity)) || hidden.HasComponent(hit.Entity))) return false;
             ClosestHit = hit; MaxFraction = hit.Fraction; NumHits = 1; return true;
         }
     }

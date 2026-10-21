@@ -17,7 +17,7 @@ namespace Game.Tests.EditMode.Presentation
             try
             {
                 Assert.IsNull(c.CameraPrefab);
-                Assert.AreEqual(40, c.VerticalFovDeg); Assert.AreEqual(.3f, c.NearClip); Assert.AreEqual(50000, c.FarClip);
+                Assert.AreEqual(40, c.VerticalFovDeg); Assert.AreEqual(.3f, c.NearClip); Assert.AreEqual(1000000, c.FarClip);
                 Assert.AreEqual(55, c.DefaultPitchDeg); Assert.AreEqual(35, c.MinPitchDeg); Assert.AreEqual(80, c.MaxPitchDeg);
                 Assert.AreEqual(150, c.DefaultDistance); Assert.AreEqual(25, c.MinDistance); Assert.AreEqual(400, c.MaxDistance);
                 Assert.AreEqual(.88f, c.ZoomStepFactor); Assert.AreEqual(.25f, c.OrbitDegPerPixel);

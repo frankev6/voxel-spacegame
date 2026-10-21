@@ -31,7 +31,8 @@ namespace Game.Tests.PlayMode.App
             Assert.AreEqual(DevResultKind.Ok, go.Kind, go.Text);
             var hollow = Host.Playground.Hollow;
             Assert.IsTrue(hollow.Built);
-            Assert.AreEqual(HollowLayout.Pieces.Length + HollowLayout.Guns.Length + HollowLayout.Moorings.Length + HollowLayout.Boulders.Length, hollow.GridCount, hollow.Missing);
+            Assert.AreEqual(HollowLayout.Pieces.Length + HollowLayout.Guns.Length + HollowLayout.Moorings.Length + HollowLayout.Boulders.Length
+                + PlaygroundHollow.CoastWrecks.Length, hollow.GridCount, hollow.Missing);
             yield return Until(() => Count<CameraSeeThrough>() >= HollowLayout.Pieces.Length, "every piece of the rock spawns", 60);
 
             // the player arrives whole: no traffic spawns on the arrival point (two routes begin there)
@@ -77,16 +78,26 @@ namespace Game.Tests.PlayMode.App
                 Assert.GreaterOrEqual(turrets, HollowLayout.Guns.Length + HollowLayout.Forts.Length);
             }
 
-            // inside the rock, the rock above the flight plane is hidden; outside, it shows again
+            // inside the rock with the top-down camera, the rock above the flight plane is hidden; under a low camera the vault stays
+            // (owner: "why would i want to see the stars if im inside an asteroid?"); outside, the whole rock shows
             int highPieces = 0;
             foreach (var p in HollowLayout.Pieces) if (p.Layer == HollowLayout.Layer.High) highPieces++;
             string inside = null;
             foreach (var st in HollowLayout.Stations) if (HollowLayout.Inside(st.Position)) { inside = st.Id; break; }
             Assume.That(inside, Is.Not.Null, "a station under the rock");
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=" + inside, Host.Context).Kind);
-            yield return Until(() => Count<GridRenderHidden>() == highPieces, "the cutaway hides the rock above the plane inside", 5);
-            Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=hollow", Host.Context).Kind);
-            yield return Until(() => Count<GridRenderHidden>() == 0, "outside, the whole rock shows", 5);
+            string camera = global::Game.Presentation.Services.FlightCameraPreset.Current.Name;
+            global::Game.Presentation.Services.FlightCameraPreset.TrySet("topdown");
+            try
+            {
+                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=" + inside, Host.Context).Kind);
+                yield return Until(() => Count<GridRenderHidden>() == highPieces, "the top-down cutaway hides the rock above the plane inside", 5);
+                global::Game.Presentation.Services.FlightCameraPreset.TrySet("chase");
+                yield return Until(() => Count<GridRenderHidden>() == 0, "under the chase camera the vault stays", 5);
+                global::Game.Presentation.Services.FlightCameraPreset.TrySet("topdown");
+                Assert.AreEqual(DevResultKind.Ok, Host.Commands.Execute("playground goto=hollow", Host.Context).Kind);
+                yield return Until(() => Count<GridRenderHidden>() == 0, "outside, the whole rock shows", 5);
+            }
+            finally { global::Game.Presentation.Services.FlightCameraPreset.TrySet(camera); }
 
             // traffic flies on its own AI along its routes
             using (var q = EM.CreateEntityQuery(ComponentType.ReadOnly<AiBrain>(), ComponentType.ReadOnly<LocalTransform>(), ComponentType.ReadOnly<VoxelGrid>()))

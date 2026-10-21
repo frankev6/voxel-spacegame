@@ -24,14 +24,18 @@ struct BrickSurfaceInput
 TEXTURE2D(_ShelterMask); SAMPLER(sampler_ShelterMask);
 float4 _ShelterRect;    // xy: the mask's world x/z minimum; zw: 1 / its world size
 float4 _ShelterParams;  // x: roof height (world y); y: on; z: ambient kept under the roof (0..1); w: haze strength (0..1)
-float4 _ShelterHaze;    // rgb: haze colour (linear)
+float4 _ShelterHaze;    // rgb: haze colour (linear); a: 1 while the vault is in view (the player inside, the rock not cut away)
 float4 _ShelterFill;    // rgb: warm fill light under the roof (linear), so nothing there is black (owner: "atmosphere so it doesn't feel dark")
-half BrickShelter(float3 positionWS)
+// The vault (owner, 2026-10-21: "why would i want to see the stars if im inside an asteroid?"): rock above the roof height that faces
+// down or sideways is the cavern's ceiling. It took the open-sky lighting, so its undersides were black; while it is in view it is
+// sheltered too: no sun, the fill light and the haze.
+half BrickShelter(float3 positionWS, float3 normalWS)
 {
     if (_ShelterParams.y < .5) return 0;
     float2 uv = (positionWS.xz - _ShelterRect.xy) * _ShelterRect.zw;
     if (any(uv < 0) || any(uv > 1)) return 0;
-    return SAMPLE_TEXTURE2D_LOD(_ShelterMask, sampler_ShelterMask, uv, 0).r * saturate((_ShelterParams.x - positionWS.y) / 8);
+    half below = saturate((_ShelterParams.x - positionWS.y) / 8), vault = _ShelterHaze.a * saturate((.55h - normalWS.y) * 2.5h);
+    return SAMPLE_TEXTURE2D_LOD(_ShelterMask, sampler_ShelterMask, uv, 0).r * max(below, vault);
 }
 float BrickHash(float2 p)
 {
@@ -171,7 +175,7 @@ half4 BrickLighting(BrickSurfaceInput i, SurfaceData s)
     inputData.viewDirectionWS = GetWorldSpaceNormalizeViewDir(i.positionWS);
     inputData.shadowCoord = TransformWorldToShadowCoord(i.positionWS); inputData.shadowMask = half4(1, 1, 1, 1);
     inputData.bakedGI = SampleSH(inputData.normalWS); inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(i.positionCS);
-    half shelter = BrickShelter(i.positionWS);
+    half shelter = BrickShelter(i.positionWS, i.normalWS);
     inputData.bakedGI = lerp(inputData.bakedGI, inputData.bakedGI * _ShelterParams.z + _ShelterFill.rgb, shelter);
     if (_ShadingMode < .5)
     {

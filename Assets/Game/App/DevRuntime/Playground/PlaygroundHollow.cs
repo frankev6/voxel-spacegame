@@ -95,7 +95,7 @@ namespace Game.App.DevRuntime.Playground
             return root;
         }
 
-        static readonly (string Id, float2 Offset, float Yaw)[] CoastWrecks =
+        internal static readonly (string Id, float2 Offset, float Yaw)[] CoastWrecks =
         {
             ("ship_wreck_cruiser_burned", new float2(-420, 180), 1.1f), ("ship_wreck_frigate_a", new float2(260, 340), 2.6f),
             ("ship_wreck_engine_section", new float2(380, -220), .4f), ("ship_wreck_frigate_c", new float2(-210, -360), 4.0f),
@@ -264,18 +264,22 @@ namespace Game.App.DevRuntime.Playground
             var em = ctx.EntityManager;
             float2 at = located ? (float2)(player.xz - origin.xz) : new float2(float.MaxValue, float.MaxValue);
             bool inside = located && Inside(at);
-            if (inside != hidden)
+            // only the top-down camera cuts the rock away; under the low cameras the vault stays (owner, 2026-10-21: "when you're in
+            // first person inside the hollow man that cutaway looks awful why would i want to see the stars if im inside an asteroid?")
+            bool cut = inside && Game.Presentation.Services.FlightCameraPreset.Current.UseConfig;
+            if (cut != hidden)
             {
-                hidden = inside;
+                hidden = cut;
                 foreach (var e in high)
                 {
                     if (!em.Exists(e)) continue;
-                    if (inside) { if (!em.HasComponent<GridRenderHidden>(e)) em.AddComponent<GridRenderHidden>(e); }
+                    if (cut) { if (!em.HasComponent<GridRenderHidden>(e)) em.AddComponent<GridRenderHidden>(e); }
                     else if (em.HasComponent<GridRenderHidden>(e)) em.RemoveComponent<GridRenderHidden>(e);
                 }
-                if (roof != null) roof.SetActive(!inside);
+                if (roof != null) roof.SetActive(!cut);
             }
-            using (AirMarker.Auto()) { air.Tick(Time.time, hidden, new Vector3(at.x, 0, at.y)); holograms.Tick(Time.time, Camera.main != null ? Camera.main.transform.forward : Vector3.forward); }
+            if (shelter != null) Shader.SetGlobalVector(ShelterHaze, new Vector4(.32f, .36f, .42f, inside && !cut ? 1 : 0));
+            using (AirMarker.Auto()) { air.Tick(Time.time, inside, new Vector3(at.x, 0, at.y)); holograms.Tick(Time.time, Camera.main != null ? Camera.main.transform.forward : Vector3.forward); }
             if (!ctx.TryGetService<ShipSpawnService>(out var spawner)) return;
             // the AI steers to a goal 60 m ahead, so four updates a second are plenty; each reads and writes ECS components on the main
             // thread, which waits on the jobs that write them (about 1 ms a frame when it ran every frame)

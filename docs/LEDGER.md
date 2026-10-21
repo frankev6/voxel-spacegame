@@ -1296,6 +1296,39 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-21 — Playing the slice: cruise view, planets at true scale, anti-aliasing, a camera that follows (lead, claude-opus-5-5)
+- Owner, after flying the slice: "when cruising the ship moves ahead of the camera and becomes a dot, instead we should increase FOV and have a shader effect to make it feel like you're going really really fast"; "camera jitter back and forth flickering"; the rings and atmospheres "clipping", and "wrongly saying the hollow when im not near the hollow"; "lines flickering, like lack of antialiasing"; inside the Hollow, "camera should follow ship rotation by default and C should toggle on/off so you can look around. also ship is getting lost behind the walls. also lets try not cutting the hollow in half when inside".
+- **Cruise view** (ADR-0122 §9):
+  - The follow filter trails by speed × 0.087 s: 430 m at 5 km/s, which is why the ship became a dot. While cruising the focus rides with the ship.
+  - The FOV opens by up to 14° with speed, and the camera moves in to match. At +26° and +18° the planets near the edges stretched into eggs. The spool narrows the view 4°, and the drive engaging kicks it +9°.
+  - Owner, on the first pass of streaks: "the lines get too strong, and it doesn't really feel like you're going fast". On a muted second pass: "i didn't mean just make them all dull, i meant lets make it feel like you're actually going really fast".
+  - `CruiseEffects` now draws:
+    - speed lines racing out to the edges of the view (`Game/Vfx/CruiseSpeedLines`), faster and brighter with speed and flaring as the drive engages;
+    - bright dust dashes running past at a felt speed the eye can follow (920 m/s at 6 km/s; `Game/Vfx/CruiseStreak`). Both shaders are in Always Included Shaders;
+    - a rumble and a vignette.
+  - Lens distortion and chromatic aberration were tried and removed: they squashed the planets and fringed ORRO's ring.
+  - Owner: "when we hit an asteroid belt and the ship in cruise slows ... there is now a distinct camera snap". The drive drops to the belt's cap in one tick, and the FOV and framing followed it. The view now follows an eased speed (half-life 0.5 s).
+- **Jitter:** the system's bodies were placed in `LateUpdate` from the camera's pose a frame old. At 5 km/s CINDER's depth wobbled 20–30 m every frame with the frame time. They are now placed at `beginContextRendering`. Probe after the fix: the ship holds its screen position to 0.1 px, and CINDER's depth falls smoothly.
+- **Clipping:**
+  - The camera's far clip was 50 km, and ORRO's ring (192 km) and the backs of the air shells reach past it. It is now 1000 km (SPEC-62), so the system draws at true scale; scaled space starts at 750 km.
+  - The air shell reaches nine scale heights, stays under the flight plane, and its glow fades to nothing before the shell ends.
+- **Place plate:** away from the Hollow and any named place it reads "OPEN SPACE", not "THE HOLLOW". A body is named whenever the ship is over it (was within 80 % of its radius).
+- **Anti-aliasing:** there was none (MSAA off, no post AA). It is now 4× MSAA (URP asset and quality level).
+- **Camera:**
+  - The game starts on `chase`, which follows the ship's heading. C toggles free look (`orbit`: the mouse orbits, the reticle aims) and back; in `cursor` and `topdown` it still recentres.
+  - The low cameras pull in when the Hollow's walls stand between them and the ship. `CameraSeeThrough` now applies only to `topdown`.
+- **Inside the Hollow** (owner: "when you're in first person inside the hollow man that cutaway looks awful why would i want to see the stars if im inside an asteroid?"):
+  - The cutaway now runs only under `topdown`. Under the low cameras the vault stays overhead.
+  - The vault is there: 99.6 % of the cavity has rock above it, 80–120 m up. It was lit as open ground, though, so its undersides were black and only the sides of its steps caught light, which read as broken speckles.
+  - While the player is inside under a low camera, the brick shader's shelter now covers the vault's downward and side faces too: no sun, with the fill light and the haze (`_ShelterHaze.a`).
+- Proof: `Logs/playtest/cruise_view_sheet.png`. `hollow_system_cruise` passes with no exceptions (2.66 km/s over VESHA, 800 m/s in the Scatter, 4 km/s past it, 96 m/s on arrival 9.8 km from CINDER). Probes:
+  - At about 5 km/s the ship holds 44 m from the camera and its screen spot to 0.1 px.
+  - CINDER's depth falls smoothly.
+  - Entering the Scatter, the FOV eases 68° → 57° over 2 s, at most 0.16° a frame.
+- Tests: EditMode FlightCameraMode 10 (3 new: cruise follow and FOV, spool, C toggle), CameraRigService 6, CameraContract 2, CameraShake 7, Cruise 9. PlayMode CameraOcclusion 4, Hollow 1. All pass.
+- Seen in the log, not looked into: "SceneFlow transition failed ... No participant restore is active" (it was in the owner's first screenshot).
+- Test fixes: the rig and occlusion fixtures pin `topdown` (domain reload is off, so a game boot's preset leaked in and four occlusion tests saw 75 m). `HollowTests` counts VESHA's five coast wrecks.
+
 ### 2026-10-21 — Exploration slice phase 1: in-world cruise and the Hollow system (lead, claude-opus-5-5)
 - Owner, on exploration: "do you recall my initial gripes with this was the exploration? i feel like i never got an answer for this". On the first map: "theres suposed to be multiple planets in one solar system, and you got even the gate here in just 1 planet?" On the redrawn system map: "Approved. Write up the exploration slice plan (cruise ADR, ? contacts and the loud ping, away-team scene, crew, fuel/supplies, the new planets and sites) and start building it."
 - Plan: `docs/design/exploration/exploration-slice.md` (seven phases, the 15-minute loop, the approved map in `img/hollow_system_slice.png`).

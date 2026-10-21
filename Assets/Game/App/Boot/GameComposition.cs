@@ -258,8 +258,9 @@ namespace Game.App.Boot
             world.GetExistingSystemManaged<PlayerInputSampleSystem>().Bind(Input, UI);
 
             // 11. Camera (CAM-004/005), with context-gated input.
-            // Feel prototype (2026-10-21): the game starts on the low `cursor` camera; tests that build a rig keep SPEC-62 `topdown`.
-            Game.Presentation.Services.FlightCameraPreset.TrySet("cursor");
+            // Feel prototype (2026-10-21): the game starts on the low `chase` camera, which follows the ship; C toggles free look (`orbit`).
+            // Tests that build a rig keep SPEC-62 `topdown`.
+            Game.Presentation.Services.FlightCameraPreset.TrySet("chase");
             Camera = Push(new CameraRigService(config.CameraConfig, root.Find("CameraRoot") ?? root, new InputCameraInput(Input)));
             Register(Camera);
             world.GetExistingSystemManaged<CameraTargetSyncSystem>().Bind(Camera,

@@ -60,5 +60,14 @@ namespace Game.Presentation.Services
                 if (All[i].Name == name) { active = i; Version++; return true; }
             return false;
         }
+
+        /// <summary>Owner (2026-10-21): "camera should follow ship rotation by default and C should toggle on/off so you can look around".
+        /// C swaps `chase` (follows the heading) and `orbit` (free look: the mouse orbits, the reticle aims); false in the other presets,
+        /// where C recentres.</summary>
+        public static bool ToggleFreeLook()
+        {
+            string name = Current.Name;
+            return name == "chase" ? TrySet("orbit") : name == "orbit" && TrySet("chase");
+        }
     }
 }

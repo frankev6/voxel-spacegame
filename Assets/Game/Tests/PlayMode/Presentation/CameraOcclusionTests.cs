@@ -29,8 +29,11 @@ namespace Game.Tests.PlayMode.Presentation
             PhysicsWorld physics;
             BlobAssetReference<Unity.Physics.Collider> collider;
             bool hasPhysics;
+            // SPEC-62 numbers: the `topdown` preset, whatever the last game boot left (domain reload is off)
+            readonly string preset = FlightCameraPreset.Current.Name;
             internal Fixture()
             {
+                FlightCameraPreset.TrySet("topdown");
                 prefab.GetComponent<Camera>().enabled = false; config.CameraPrefab = prefab;
                 Rig = new CameraRigService(config, null, null); Rig.SetMode(CameraMode.Flight, true);
                 Player = Test.EntityManager.CreateEntity(typeof(PlayerShip), typeof(LocalToWorld));
@@ -54,6 +57,7 @@ namespace Game.Tests.PlayMode.Presentation
             {
                 RemoveBox(); Test.Dispose(); if (hasPhysics) physics.Dispose(); if (collider.IsCreated) collider.Dispose();
                 Rig.Dispose(); Object.DestroyImmediate(prefab); Object.DestroyImmediate(config);
+                FlightCameraPreset.TrySet(preset);
             }
         }
         [Test] public void BoxBetween_PullsIn()
