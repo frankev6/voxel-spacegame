@@ -71,6 +71,14 @@ namespace Game.UI.Services
             => parent.Q<T>(name) ?? throw new InvalidOperationException("Toast UXML missing '" + name + "'");
         void CheckAlive() { if (disposed) throw new ObjectDisposedException(nameof(NotificationService)); }
         public int VisibleCount => visible.Count;
+        /// <summary>HUD redesign (2026-10-21): in flight, pickups and repair results rise from the player's ship instead of stacking as
+        /// cards in a corner. <paramref name="point"/> is the ship's position as a fraction of the panel; off restores the column.</summary>
+        public void SetAnchor(bool atShip, UnityEngine.Vector2 point)
+        {
+            if (column.ClassListContains(UIStyleClasses.ToastColumnAtShip) != atShip) column.EnableInClassList(UIStyleClasses.ToastColumnAtShip, atShip);
+            if (atShip) { column.style.left = Length.Percent(point.x * 100); column.style.top = Length.Percent(point.y * 100); }
+            else { column.style.left = StyleKeyword.Null; column.style.top = StyleKeyword.Null; }
+        }
         public int QueuedCount => queue.Count;
         public void Post(in Notification notification)
         {

@@ -70,7 +70,7 @@ namespace Game.Tests.EditMode.Presentation
             foreach (EconomyNoticeKind kind in Enum.GetValues(typeof(EconomyNoticeKind)))
             {
                 service.ClearAll(); EventBus<EconomyNotice>.Publish(new EconomyNotice(kind, "Economy message")); EventBus<EconomyNotice>.Drain();
-                Expect("Economy message", kind == EconomyNoticeKind.SalvageDone || kind == EconomyNoticeKind.SalvagePartial ? UIStyleClasses.ToastPositive : UIStyleClasses.ToastWarning);
+                Expect("Economy message", kind == EconomyNoticeKind.SalvageDone || kind == EconomyNoticeKind.SalvagePartial || kind == EconomyNoticeKind.RepairDone ? UIStyleClasses.ToastPositive : UIStyleClasses.ToastWarning);
             }
             service.ClearAll(); EventBus<GameSaved>.Publish(new GameSaved("p001", "manual_001", SaveReason.Manual)); EventBus<GameSaved>.Drain(); Expect("Game saved", UIStyleClasses.ToastInfo);
         }

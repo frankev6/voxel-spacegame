@@ -187,13 +187,17 @@ namespace Game.UI.ViewModels
         [CreateProperty] public List<HudAbilityViewModel> Abilities { get; } = new List<HudAbilityViewModel>(4);
         public void NotifyAbilities() => Notify(AbilitiesChanged);
 
-        // Feel prototype (2026-10-21): the mouse-look reticle and the auto-aim lock bracket. Positions are fractions of the panel from
-        // its top-left; ReticleVersion changes whenever any of them does, so the view moves the elements once per change.
-        public bool ShowReticle, ShowLock; public UnityEngine.Vector2 ReticlePoint, LockPoint; public float LockSizeFraction;
+        // HUD redesign (2026-10-21): marks on the world instead of plates in the corners: the reticle (the cursor) with its lock state, the
+        // lead pip, and the hull, shield and energy arcs around the player's ship with each arc's opacity (0 = hidden; a full bar is never
+        // shown). Points are fractions of the panel from its top-left, the ship radius a fraction of its height; MarksVersion changes
+        // whenever any of them does, so the view repaints once per change.
+        public bool ShowReticle, Locked, ShowLead, ShowShip;
+        public UnityEngine.Vector2 ReticlePoint, LeadPoint, ShipPoint;
+        public float ShipRadiusFraction, HullArc, ShieldArc, EnergyArc;
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
-        static readonly BindablePropertyChangedEventArgs ReticleVersionChanged = new BindablePropertyChangedEventArgs(nameof(ReticleVersion));
-        int reticleVersion;
-        [CreateProperty] public int ReticleVersion { get => reticleVersion; set => Set(ref reticleVersion, value, ReticleVersionChanged); }
+        static readonly BindablePropertyChangedEventArgs MarksVersionChanged = new BindablePropertyChangedEventArgs(nameof(MarksVersion));
+        int marksVersion;
+        [CreateProperty] public int MarksVersion { get => marksVersion; set => Set(ref marksVersion, value, MarksVersionChanged); }
 
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
         static readonly BindablePropertyChangedEventArgs RadarVersionChanged = new BindablePropertyChangedEventArgs(nameof(RadarVersion));

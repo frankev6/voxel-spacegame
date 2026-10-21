@@ -5,16 +5,19 @@ Shader "Game/Orbit/Planet"
 {
     Properties
     {
-        _Ocean ("Ocean", Color) = (0.03, 0.10, 0.20, 1)
-        _Shallow ("Shallows", Color) = (0.05, 0.28, 0.36, 1)
-        _Lowland ("Lowland", Color) = (0.23, 0.30, 0.14, 1)
-        _Highland ("Highland", Color) = (0.42, 0.33, 0.22, 1)
-        _Peak ("Peaks", Color) = (0.82, 0.80, 0.76, 1)
-        _Haze ("Haze", Color) = (0.30, 0.48, 0.80, 1)
+        _Ocean ("Ocean", Color) = (0.010, 0.040, 0.105, 1)
+        _Shallow ("Shallows", Color) = (0.030, 0.185, 0.270, 1)
+        _Beach ("Coast", Color) = (0.420, 0.390, 0.300, 1)
+        _Lowland ("Lowland", Color) = (0.060, 0.120, 0.050, 1)
+        _Dry ("Dry land", Color) = (0.300, 0.230, 0.130, 1)
+        _Highland ("Highland", Color) = (0.250, 0.220, 0.190, 1)
+        _Peak ("Peaks", Color) = (0.850, 0.860, 0.880, 1)
+        _Haze ("Haze", Color) = (0.180, 0.360, 0.780, 1)
         [HDR] _City ("City lights", Color) = (2.4, 1.5, 0.6, 1)
-        _Sea ("Sea level", Range(0, 1)) = 0.47
-        _Scale ("Feature scale", Float) = 9
-        _Clouds ("Cloud cover", Range(0, 1)) = 0.40
+        _Sea ("Sea level", Range(0, 1)) = 0.5
+        _Scale ("Feature scale", Float) = 30
+        _Clouds ("Cloud cover", Range(0, 1)) = 0.42
+        _HazeDistance ("Haze distance (m)", Float) = 26000
         _Seed ("Seed", Float) = 3.7
         _SunFallback ("Sun direction if no light", Vector) = (0.4, 0.6, 0.3, 0)
     }
@@ -34,8 +37,8 @@ Shader "Game/Orbit/Planet"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _Ocean, _Shallow, _Lowland, _Highland, _Peak, _Haze, _City, _SunFallback;
-                float _Sea, _Scale, _Clouds, _Seed;
+                float4 _Ocean, _Shallow, _Beach, _Lowland, _Dry, _Highland, _Peak, _Haze, _City, _SunFallback;
+                float _Sea, _Scale, _Clouds, _HazeDistance, _Seed;
             CBUFFER_END
 
             struct Attributes { float3 positionOS : POSITION; };
@@ -68,48 +71,59 @@ Shader "Game/Orbit/Planet"
             {
                 float3 n = normalize(input.dirOS);
                 float3 p = n * _Scale + _Seed;
-                // the visible cap is tiny on the unit sphere; domain-warp so coasts read as coasts at any zoom
-                float3 warp = float3(Fbm(p * 1.3 + 11.0, 4), Fbm(p * 1.3 + 23.0, 4), Fbm(p * 1.3 + 37.0, 4)) - 0.5;
-                float h = Fbm(p + warp * 1.6, 9);
+                float distanceM = distance(_WorldSpaceCameraPos, input.positionWS);
+                // fewer octaves far away: detail below a pixel only shimmers
+                int octaves = distanceM < 6000 ? 9 : distanceM < 14000 ? 7 : 5;
+                // domain-warp so coasts read as coasts, with archipelagos and long inlets
+                float3 warp = float3(Fbm(p * 0.9 + 11.0, 4), Fbm(p * 0.9 + 23.0, 4), Fbm(p * 0.9 + 37.0, 4)) - 0.5;
+                float h = Fbm(p + warp * 2.2, octaves);
                 float3 nWS = normalize(TransformObjectToWorldDir(n));
                 Light sun = GetMainLight();
                 float3 L = dot(sun.direction, sun.direction) > 0.5 ? normalize(sun.direction) : normalize(_SunFallback.xyz);
                 float3 V = normalize(_WorldSpaceCameraPos - input.positionWS);
+                float sunUp = dot(nWS, L);
 
                 bool water = h < _Sea;
                 float3 albedo;
-                if (water) albedo = lerp(_Ocean.rgb, _Shallow.rgb, smoothstep(_Sea - 0.06, _Sea, h));
+                if (water) albedo = lerp(_Ocean.rgb, _Shallow.rgb, pow(smoothstep(_Sea - 0.09, _Sea, h), 2));
                 else
                 {
                     float t = saturate((h - _Sea) / (1 - _Sea));
-                    float moisture = Fbm(p * 2.1 + 51.0, 5);
-                    albedo = lerp(_Lowland.rgb, _Highland.rgb, smoothstep(0.05, 0.45, t) * (0.6 + moisture * 0.6));
-                    albedo = lerp(albedo, _Peak.rgb, smoothstep(0.55, 0.75, t));
+                    float moisture = Fbm(p * 1.7 + 51.0, 5);
+                    float3 low = lerp(_Dry.rgb, _Lowland.rgb, smoothstep(0.38, 0.62, moisture));
+                    albedo = lerp(_Beach.rgb, low, smoothstep(0.0, 0.05, t));
+                    albedo = lerp(albedo, _Highland.rgb, smoothstep(0.25, 0.5, t));
+                    albedo = lerp(albedo, _Peak.rgb, smoothstep(0.62, 0.78, t));
+                    albedo *= 0.8 + 0.4 * Noise(p * 40);   // fields, forest and scree
                 }
                 // clouds drift slowly; their shadow sits a little sunward
-                float3 cp = n * _Scale * 2.2 + float3(_Time.y * 0.004, 0, _Time.y * 0.0025) + _Seed * 3;
-                float cloud = smoothstep(1 - _Clouds, 1 - _Clouds + 0.22, Fbm(cp, 7));
-                float shadow = smoothstep(1 - _Clouds, 1 - _Clouds + 0.22, Fbm(cp + mul((float3x3)UNITY_MATRIX_I_M, L) * 0.02, 5));
+                float3 cp = n * _Scale * 1.6 + float3(_Time.y * 0.004, 0, _Time.y * 0.0025) + _Seed * 3;
+                float cloudField = Fbm(cp + warp * 0.6, octaves - 2);
+                float cloud = smoothstep(1 - _Clouds, 1 - _Clouds + 0.18, cloudField);
+                float shadow = smoothstep(1 - _Clouds, 1 - _Clouds + 0.18, Fbm(cp + warp * 0.6 + mul((float3x3)UNITY_MATRIX_I_M, L) * 0.03, 4));
 
-                float diffuse = saturate(dot(nWS, L) * 1.1 + 0.08);
-                float3 lit = albedo * (diffuse * (1 - shadow * 0.45) * sun.color + 0.015);
+                float diffuse = saturate(sunUp * 1.05 + 0.05);
+                float3 lit = albedo * (diffuse * (1 - shadow * 0.55) * sun.color + 0.012);
                 if (water)
                 {
                     float3 hlf = normalize(L + V);
-                    lit += pow(saturate(dot(nWS, hlf)), 180) * 1.6 * sun.color * diffuse;
+                    float glint = pow(saturate(dot(nWS, hlf)), 220) * 2.4 + pow(saturate(dot(nWS, hlf)), 24) * 0.08;
+                    lit += glint * sun.color * diffuse * (1 - cloud);
                 }
                 // night side: city lights on low land, in clusters
-                float night = saturate(1 - diffuse * 4);
+                float night = saturate(1 - diffuse * 5);
                 if (!water)
                 {
-                    float cities = smoothstep(0.62, 0.8, Fbm(p * 14 + 77.0, 4)) * (1 - smoothstep(0.1, 0.4, (h - _Sea) / (1 - _Sea)));
+                    float cities = smoothstep(0.62, 0.8, Fbm(p * 14 + 77.0, 4)) * (1 - smoothstep(0.08, 0.3, (h - _Sea) / (1 - _Sea)));
                     lit += _City.rgb * cities * night * (1 - cloud);
                 }
-                lit = lerp(lit, float3(0.92, 0.94, 0.97) * (diffuse * sun.color + 0.02), cloud);
-                // haze thickens towards the horizon, lit by the sun
-                float grazing = 1 - saturate(dot(nWS, V));
-                float haze = pow(grazing, 6) * 0.75;
-                lit = lerp(lit, _Haze.rgb * (saturate(dot(nWS, L) + 0.25) * sun.color), haze);
+                float3 cloudLit = float3(0.95, 0.96, 0.98) * (saturate(sunUp * 1.2 + 0.15) * sun.color + 0.015);
+                lit = lerp(lit, cloudLit, cloud * 0.92);
+                // aerial perspective: distance buries the ground in blue, sunlit air; the terminator warms it
+                float3 air = _Haze.rgb * (saturate(sunUp + 0.3) * sun.color) + float3(0.9, 0.35, 0.12) * saturate(1 - abs(sunUp) * 4) * 0.25;
+                float fog = 1 - exp(-distanceM / max(1, _HazeDistance));
+                float limb = pow(1 - saturate(dot(nWS, V)), 10) * 0.35;
+                lit = lerp(lit, air, saturate(fog * 0.85 + limb));
                 return half4(lit, 1);
             }
             ENDHLSL

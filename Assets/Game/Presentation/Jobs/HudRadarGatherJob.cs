@@ -54,7 +54,7 @@ namespace Game.Presentation.Jobs
                 if (kind <= 1 && Hulks.HasComponent(entity)) kind = 4;   // a wreck
                 byte flags = (byte)(entity == Target ? 1 : 0);
                 if (entity == Waypoint && Waypoint != Entity.Null) flags |= 4;
-                if (distanceSq > Range * Range) { offset *= Range * math.rsqrt(distanceSq); flags |= 2; }
+                if (distanceSq > Range * Range) flags |= 2;   // beyond range: true offset kept, the edge markers label the distance
                 var candidate = new HudRadarCandidate
                 {
                     EntityIndex = entity.Index, DistanceSq = distanceSq,

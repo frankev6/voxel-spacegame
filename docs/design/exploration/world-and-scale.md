@@ -37,7 +37,7 @@ So the open world stays continuous, and a planet is a *place you arrive at*, not
 ### What the prototype shows (2026-10-21)
 
 VESHA is in the playground (`playground goto=orbit`).
-- It is a 150 km planet whose surface lies 2.5 km below the plane, south of the Hollow.
+- It is an 80 km planet whose surface lies 2.5 km below the plane, south of the Hollow (first built at 150 km; at 80 km the horizon dips 14°, a curve the chase camera frames, where 150 km read almost flat).
 - The Clan's tether rises from its surface to an anchor in the plane, with five wrecks drifting round the anchor.
 - The status plate reads "LOW ORBIT · VESHA" within 1.6 km of the anchor.
 
@@ -53,7 +53,7 @@ Planar movement stays. Free 3D makes the camera, aiming and reading destruction 
 |---|---|---|
 | Combat bubble | ~2 km | What the current weapons, AI and streaming are tuned for |
 | Station / capital ship | 100 m – 1 km | Already true (the Hollow, the REQUIEM) |
-| Planet radius (below the plane) | ~150 km, top ~2.5 km under the plane | Measured in the prototype: from a 15–20° camera the horizon must sit just under the view. A 15 km planet 2.5 km down drops its limb 45° below the horizon, out of view. A huge, shallow planet reads as a world below you, and its surface scrolls by as you fly: a sense of speed that space otherwise lacks. Smaller bodies (moons, rocks) can still sit in the plane as obstacles |
+| Planet radius (below the plane) | ~80 km, top ~2.5 km under the plane | Measured in the prototype: from a 15–20° camera the horizon must sit just under the view. 150 km read almost flat; 80 km dips the horizon 14° and shows the curve. A 15 km planet 2.5 km down drops its limb 45° below the horizon, out of view. A huge, shallow planet reads as a world below you, and its surface scrolls by as you fly: a sense of speed that space otherwise lacks. Smaller bodies (moons, rocks) can still sit in the plane as obstacles |
 | Star system | 40–80 km across, not to scale | Crossed in 1–2 min of cruise |
 | Cruise speed | 1–2 km/s, out of combat only | Dropped by gravity wells, hostiles and hazards (mass lock) |
 

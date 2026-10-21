@@ -43,13 +43,6 @@
 .slot:hover, .slot:focus { border-color: var(--color-line-accent); }
 
 /* Radar: ringed scope with a faint crosshair. */
-.hud-radar { background-color: var(--color-glass-scope); border-color: var(--color-line-accent-soft); }
-.hud-radar-ring { position: absolute; border-width: 1px; border-color: var(--color-line-faint); border-radius: 50%; }
-.hud-radar-ring--inner { left: 33%; top: 33%; right: 33%; bottom: 33%; }
-.hud-radar-ring--mid { left: 16.5%; top: 16.5%; right: 16.5%; bottom: 16.5%; }
-.hud-radar-axis { position: absolute; background-color: var(--color-line-faint); }
-.hud-radar-axis--h { left: 0; right: 0; top: 50%; height: 1px; }
-.hud-radar-axis--v { top: 0; bottom: 0; left: 50%; width: 1px; }
 
 /* Buttons: hairline frames that light up rather than filled blocks. */
 .btn { border-color: var(--color-line); }

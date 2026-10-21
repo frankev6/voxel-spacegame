@@ -9,12 +9,18 @@ namespace Game.App.DevRuntime.Commands
     public sealed class CameraDevCommand : IDevCommand
     {
         public string Name => "camera";
-        public string Usage => "camera [<topdown|chase|cursor|orbit>] [assist=on|off]";
-        public string Summary => "Switch the flight camera preset; assist= turns auto-aim on or off";
+        public string Usage => "camera [<topdown|chase|cursor|orbit>|ping] [assist=on|off]";
+        public string Summary => "Switch the flight camera preset; ping sends a sensor ping (V); assist= turns auto-aim on or off";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
             string error = DevCommandRegistry.UnknownArgument(args, Name, "assist");
             if (error != null || args.Positional.Count > 1) return DevCommandResult.Fail(error ?? Usage);
+            if (args.Positional.Count == 1 && args.Positional[0] == "ping")
+            {
+                var overlay = Unity.Entities.World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<Game.Presentation.Systems.WorldOverlaySystem>();
+                if (overlay == null) return DevCommandResult.Fail("no world overlay");
+                overlay.Ping(); return DevCommandResult.Ok("ping");
+            }
             if (args.Positional.Count == 1 && !FlightCameraPreset.TrySet(args.Positional[0])) return DevCommandResult.Fail(Usage);
             if (args.TryGetString("assist", out string assist))
             {

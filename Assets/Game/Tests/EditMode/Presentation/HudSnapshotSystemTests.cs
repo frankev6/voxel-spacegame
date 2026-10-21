@@ -120,13 +120,13 @@ namespace Game.Tests.EditMode.Presentation
             Tick(); var radar = Radar(); Assert.AreEqual(64, radar.Length);
             for (int i = 0; i < 64; i++) Assert.AreEqual((i + 1) * 10, radar[i].OffsetXZ.x);
         }
-        [Test] public void Radar_BeyondRange_Clamped()
+        [Test] public void Radar_BeyondRange_Flagged()
         {
             Player(); Contact(3000);
             var anchor = em.CreateEntity(typeof(Interactable), typeof(StarSystemBody), typeof(LocalToWorld));
             em.SetComponentData(anchor, new LocalToWorld { Value = float4x4.Translate(new float3(4000, 0, 0)) });
             Tick(); Assert.AreEqual(2, Radar().Length); Assert.AreEqual(3, Radar()[1].Kind);
-            var b = Radar()[0]; Assert.AreEqual(2000, math.length(b.OffsetXZ), .001f); Assert.AreEqual(2, b.Flags & 2);
+            var b = Radar()[0]; Assert.AreEqual(3000, math.length(b.OffsetXZ), .001f); Assert.AreEqual(2, b.Flags & 2);
         }
         [Test] public void Radar_SceneryHidden_WrecksMarked()
         {

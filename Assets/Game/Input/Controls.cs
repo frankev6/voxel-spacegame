@@ -421,6 +421,16 @@ namespace Game.Input
                     ""priority"": 0
                 },
                 {
+                    ""name"": ""SensorPing"",
+                    ""type"": ""Button"",
+                    ""id"": ""84e5183f-2fe9-5177-8e6e-7d8827c4b983"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
                     ""name"": ""CameraOrbitHold"",
                     ""type"": ""Button"",
                     ""id"": ""5aa2db5e-f99d-5c3b-9ddb-2ed1beece169"",
@@ -1499,6 +1509,17 @@ namespace Game.Input
                     ""action"": ""OpenFleet"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""26dfd0c9-b571-580f-8ad4-9b03068cdc1a"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""SensorPing"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -4148,6 +4169,7 @@ namespace Game.Input
             m_Flight_TargetClear = m_Flight.FindAction("TargetClear", throwIfNotFound: true);
             m_Flight_AutofireToggle = m_Flight.FindAction("AutofireToggle", throwIfNotFound: true);
             m_Flight_Cruise = m_Flight.FindAction("Cruise", throwIfNotFound: true);
+            m_Flight_SensorPing = m_Flight.FindAction("SensorPing", throwIfNotFound: true);
             m_Flight_CameraOrbitHold = m_Flight.FindAction("CameraOrbitHold", throwIfNotFound: true);
             m_Flight_CameraLook = m_Flight.FindAction("CameraLook", throwIfNotFound: true);
             m_Flight_CameraZoom = m_Flight.FindAction("CameraZoom", throwIfNotFound: true);
@@ -4483,6 +4505,7 @@ namespace Game.Input
         private readonly InputAction m_Flight_TargetClear;
         private readonly InputAction m_Flight_AutofireToggle;
         private readonly InputAction m_Flight_Cruise;
+        private readonly InputAction m_Flight_SensorPing;
         private readonly InputAction m_Flight_CameraOrbitHold;
         private readonly InputAction m_Flight_CameraLook;
         private readonly InputAction m_Flight_CameraZoom;
@@ -4577,6 +4600,10 @@ namespace Game.Input
             /// Provides access to the underlying input action "Flight/Cruise".
             /// </summary>
             public InputAction @Cruise => m_Wrapper.m_Flight_Cruise;
+            /// <summary>
+            /// Provides access to the underlying input action "Flight/SensorPing".
+            /// </summary>
+            public InputAction @SensorPing => m_Wrapper.m_Flight_SensorPing;
             /// <summary>
             /// Provides access to the underlying input action "Flight/CameraOrbitHold".
             /// </summary>
@@ -4701,6 +4728,9 @@ namespace Game.Input
                 @Cruise.started += instance.OnCruise;
                 @Cruise.performed += instance.OnCruise;
                 @Cruise.canceled += instance.OnCruise;
+                @SensorPing.started += instance.OnSensorPing;
+                @SensorPing.performed += instance.OnSensorPing;
+                @SensorPing.canceled += instance.OnSensorPing;
                 @CameraOrbitHold.started += instance.OnCameraOrbitHold;
                 @CameraOrbitHold.performed += instance.OnCameraOrbitHold;
                 @CameraOrbitHold.canceled += instance.OnCameraOrbitHold;
@@ -4799,6 +4829,9 @@ namespace Game.Input
                 @Cruise.started -= instance.OnCruise;
                 @Cruise.performed -= instance.OnCruise;
                 @Cruise.canceled -= instance.OnCruise;
+                @SensorPing.started -= instance.OnSensorPing;
+                @SensorPing.performed -= instance.OnSensorPing;
+                @SensorPing.canceled -= instance.OnSensorPing;
                 @CameraOrbitHold.started -= instance.OnCameraOrbitHold;
                 @CameraOrbitHold.performed -= instance.OnCameraOrbitHold;
                 @CameraOrbitHold.canceled -= instance.OnCameraOrbitHold;
@@ -6158,6 +6191,13 @@ namespace Game.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnCruise(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "SensorPing" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnSensorPing(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "CameraOrbitHold" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

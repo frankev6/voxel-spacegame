@@ -51,6 +51,7 @@ namespace Game.Presentation.Systems
             players = GetEntityQuery(ComponentType.ReadOnly<PlayerShip>(), ComponentType.ReadOnly<LocalTransform>());
             origins = GetEntityQuery(ComponentType.ReadOnly<FrameOrigin>());
             cameras = GetEntityQuery(ComponentType.ReadOnly<MainCameraState>());
+            weaponBlocks = GetEntityQuery(ComponentType.ReadOnly<Game.Voxel.Model.FunctionalBlock>(), ComponentType.ReadOnly<Game.Simulation.Weapons.WeaponMount>());
             RequireForUpdate(snapshots); RequireForUpdate<GameplayActive>();
         }
         public void Bind(HudViewModel vm, IHudNames names, Func<string, string> bindingDisplay)
@@ -93,37 +94,125 @@ namespace Game.Presentation.Systems
                 yaw = math.degrees(math.atan2(forward.x, forward.z));
             }
             Apply(snapshot, contacts, position, hasPosition, yaw);
-            Reticle();
+            Marks(snapshot);
         }
 
-        /// <summary>Feel prototype (2026-10-21): places the mouse-look reticle and the bracket on the ship auto-aim is locked onto.</summary>
-        void Reticle()
+        // HUD redesign (2026-10-21): the reticle, the lead pip and the arcs at the player's ship (HudMarks).
+        float hullSeen = -1, shieldSeen = -1, hullAlpha, shieldAlpha, energyAlpha, leadSpeed;
+        double hullHitAt = double.NegativeInfinity, leadSpeedAt = double.NegativeInfinity;
+        EntityQuery weaponBlocks;
+        /// <summary>Seconds an arc stays after the last hit; a full bar never shows (Frank, 2026-10-21).</summary>
+        const float HitHoldSeconds = 3, FadeSeconds = .4f;
+        void Marks(in HudSnapshot value)
         {
+            double now = UnityEngine.Time.unscaledTimeAsDouble;
+            float dt = math.clamp(UnityEngine.Time.unscaledDeltaTime, 0, .1f);
             var preset = Game.Presentation.Services.FlightCameraPreset.Current;
-            bool showReticle = preset.MouseLook, showLock = false;
-            UnityEngine.Vector2 reticlePoint = new(.5f, 1 - preset.ReticleHeight), lockPoint = model.LockPoint; float lockSize = model.LockSizeFraction;
+            bool ship = model.HasShip && !model.IsHulk, hasCamera = !cameras.IsEmptyIgnoreFilter;
+            var camera = hasCamera ? cameras.GetSingleton<MainCameraState>() : default;
+            float hull = math.saturate(value.Hull01), shield = value.ShieldMax > 0 ? math.saturate(value.ShieldHp / value.ShieldMax) : 1;
+            float energy = value.EnergyMax > 0 ? math.saturate(value.Energy / value.EnergyMax) : 1;
+            if (ship)
+            {
+                if (hullSeen >= 0 && hull < hullSeen - 1e-4f) hullHitAt = now;
+                hullSeen = hull; shieldSeen = shield;
+            }
+            else hullSeen = shieldSeen = -1;
+            // Hull: on a hit or below 30 %. Shield: below full it is either just hit, recharging or low, so it shows until full again.
+            // Energy: while boosting or below 25 %.
+            // a scratch (above 97 %) reads as full: the arc would only draw a full bar
+            bool hullOn = ship && hull < .97f && (now - hullHitAt < HitHoldSeconds || hull < .3f);
+            bool shieldOn = ship && value.ShieldMax > 0 && shield < .995f;
+            bool energyOn = ship && value.EnergyMax > 0 && energy < .995f && ((value.Flags & HudFlags.Boosting) != 0 || energy < .25f);
+            hullAlpha = Fade(hullAlpha, hullOn, dt); shieldAlpha = Fade(shieldAlpha, shieldOn, dt); energyAlpha = Fade(energyAlpha, energyOn, dt);
+
+            UnityEngine.Vector2 shipPoint = model.ShipPoint; float shipRadius = model.ShipRadiusFraction; bool showShip = false;
+            Entity player = players.CalculateEntityCount() == 1 ? players.GetSingletonEntity() : Entity.Null;
+            if (ship && hasCamera && player != Entity.Null && Bounds(player, out float3 centre, out float radius) && Project(camera, centre, out var point, out float depth))
+            {
+                shipPoint = point; showShip = true;
+                shipRadius = radius / (depth * math.tan(math.radians(camera.VerticalFovDeg) * .5f)) * .5f;
+            }
+            // The reticle is the cursor: the system cursor hides in flight. Mouse look puts it at the preset's reticle height.
+            UnityEngine.Vector2 reticle = new(.5f, .5f);
+            if (preset.MouseLook) reticle = new UnityEngine.Vector2(.5f, 1 - preset.ReticleHeight);
+            else if (UnityEngine.InputSystem.Mouse.current != null && hasCamera && math.all(camera.ScreenSizePx > 0))
+            {
+                var mouse = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+                reticle = new UnityEngine.Vector2(math.saturate(mouse.x / camera.ScreenSizePx.x), math.saturate(1 - mouse.y / camera.ScreenSizePx.y));
+            }
             var sampler = World.GetExistingSystemManaged<Game.Presentation.Input.PlayerInputSampleSystem>();
             Entity target = sampler != null ? sampler.AssistTarget : Entity.Null;
-            if (target != Entity.Null && !cameras.IsEmptyIgnoreFilter && EntityManager.Exists(target)
-                && EntityManager.HasComponent<LocalToWorld>(target) && EntityManager.HasComponent<Game.Voxel.Model.VoxelGrid>(target))
+            bool locked = ship && target != Entity.Null && EntityManager.Exists(target);
+            if (!locked && ship && player != Entity.Null && EntityManager.HasComponent<Game.Simulation.Weapons.ShipTarget>(player))
             {
-                var camera = cameras.GetSingleton<MainCameraState>();
-                var grid = EntityManager.GetComponentData<Game.Voxel.Model.VoxelGrid>(target);
-                float3 center = math.transform(EntityManager.GetComponentData<LocalToWorld>(target).Value, ((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
-                float radius = math.length((float3)(grid.CellMax + 1 - grid.CellMin)) * grid.CellSize * .5f;
-                float4 clip = math.mul(camera.ViewProjection, new float4(center, 1));
-                if (clip.w > camera.NearClip && math.all(camera.ScreenSizePx > 0))
-                {
-                    float2 ndc = clip.xy / clip.w;
-                    lockPoint = new UnityEngine.Vector2(ndc.x * .5f + .5f, .5f - ndc.y * .5f);
-                    lockSize = math.min(.8f, radius * 1.4f / (clip.w * math.tan(math.radians(camera.VerticalFovDeg) * .5f)) * .5f);
-                    showLock = true;
-                }
+                var held = EntityManager.GetComponentData<Game.Simulation.Weapons.ShipTarget>(player).Value;
+                if (held != Entity.Null && EntityManager.Exists(held) && value.TargetRelation == (byte)Game.Simulation.FactionStance.Hostile) target = held;
             }
-            if (showReticle == model.ShowReticle && showLock == model.ShowLock && (reticlePoint - model.ReticlePoint).sqrMagnitude < 1e-8f
-                && (lockPoint - model.LockPoint).sqrMagnitude < 1e-7f && math.abs(lockSize - model.LockSizeFraction) < 1e-4f) return;
-            model.ShowReticle = showReticle; model.ShowLock = showLock; model.ReticlePoint = reticlePoint; model.LockPoint = lockPoint; model.LockSizeFraction = lockSize;
-            model.ReticleVersion++;
+            UnityEngine.Vector2 leadPoint = model.LeadPoint; bool showLead = false;
+            if (ship && hasCamera && target != Entity.Null && EntityManager.Exists(target) && Lead(player, target, now, out float3 intercept) && Project(camera, intercept, out var leadScreen, out _))
+            { leadPoint = leadScreen; showLead = true; }
+            bool showReticle = ship;
+            if (showReticle == model.ShowReticle && locked == model.Locked && showLead == model.ShowLead && showShip == model.ShowShip
+                && (reticle - model.ReticlePoint).sqrMagnitude < 1e-8f && (!showLead || (leadPoint - model.LeadPoint).sqrMagnitude < 1e-8f)
+                && (!showShip || (shipPoint - model.ShipPoint).sqrMagnitude < 1e-8f && math.abs(shipRadius - model.ShipRadiusFraction) < 1e-4f)
+                && hullAlpha == model.HullArc && shieldAlpha == model.ShieldArc && energyAlpha == model.EnergyArc) return;
+            model.ShowReticle = showReticle; model.Locked = locked; model.ReticlePoint = reticle; model.ShowLead = showLead; model.LeadPoint = leadPoint;
+            model.ShowShip = showShip; model.ShipPoint = shipPoint; model.ShipRadiusFraction = shipRadius;
+            model.HullArc = hullAlpha; model.ShieldArc = shieldAlpha; model.EnergyArc = energyAlpha;
+            model.MarksVersion++;
+        }
+        static float Fade(float alpha, bool on, float dt) => math.saturate(alpha + (on ? 1 : -1) * dt / FadeSeconds);
+        bool Bounds(Entity entity, out float3 centre, out float radius)
+        {
+            centre = default; radius = 0;
+            if (!EntityManager.HasComponent<LocalToWorld>(entity) || !EntityManager.HasComponent<Game.Voxel.Model.VoxelGrid>(entity)) return false;
+            var grid = EntityManager.GetComponentData<Game.Voxel.Model.VoxelGrid>(entity);
+            centre = math.transform(EntityManager.GetComponentData<LocalToWorld>(entity).Value, ((float3)grid.CellMin + (float3)(grid.CellMax + 1)) * (.5f * grid.CellSize));
+            // the longer horizontal half-extent: a hull seen from behind and above, not the bounding sphere of a tall or long box
+            var extent = (float3)(grid.CellMax + 1 - grid.CellMin) * grid.CellSize;
+            radius = math.max(extent.x, extent.z) * .5f;
+            return true;
+        }
+        static bool Project(in MainCameraState camera, float3 world, out UnityEngine.Vector2 point, out float depth)
+        {
+            float4 clip = math.mul(camera.ViewProjection, new float4(world, 1));
+            point = default; depth = clip.w;
+            if (!(clip.w > camera.NearClip)) return false;
+            float2 ndc = clip.xy / clip.w;
+            point = new UnityEngine.Vector2(ndc.x * .5f + .5f, .5f - ndc.y * .5f);
+            return math.all(math.abs(ndc) < 1.2f);
+        }
+        /// <summary>B: where a primary-group round meets the target, from the player's first projectile weapon (its speed is re-read
+        /// every second); two fixed-point steps of the intercept time, as the weapons' own lead converges.</summary>
+        bool Lead(Entity player, Entity target, double now, out float3 intercept)
+        {
+            intercept = default;
+            if (player == Entity.Null || !Bounds(target, out float3 centre, out _) || !EntityManager.HasComponent<LocalToWorld>(player)) return false;
+            if (now - leadSpeedAt > 1) { leadSpeedAt = now; leadSpeed = ProjectileSpeed(player); }
+            if (!(leadSpeed > 1)) return false;
+            float3 shooter = EntityManager.GetComponentData<LocalToWorld>(player).Position;
+            float3 relative = Velocity(target) - Velocity(player);
+            float time = math.distance(centre, shooter) / leadSpeed;
+            for (int i = 0; i < 2; i++) time = math.distance(centre + relative * time, shooter) / leadSpeed;
+            if (!(time < 6)) return false;
+            intercept = centre + relative * time;
+            return math.distancesq(intercept, centre) > .25f;   // a still target needs no pip
+        }
+        float3 Velocity(Entity entity) => EntityManager.HasComponent<Unity.Physics.PhysicsVelocity>(entity) ? EntityManager.GetComponentData<Unity.Physics.PhysicsVelocity>(entity).Linear : float3.zero;
+        float ProjectileSpeed(Entity player)
+        {
+            if (!SystemAPI.TryGetSingleton<Game.Simulation.Weapons.WeaponDefsRef>(out var defs) || !defs.Value.IsCreated) return 0;
+            using var blocks = weaponBlocks.ToComponentDataArray<Game.Voxel.Model.FunctionalBlock>(Allocator.Temp);
+            using var mounts = weaponBlocks.ToComponentDataArray<Game.Simulation.Weapons.WeaponMount>(Allocator.Temp);
+            ref var weapons = ref defs.Value.Value.Weapons;
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                if (blocks[i].Grid != player || mounts[i].Initialized == 0 || mounts[i].WeaponIndex == 0 || mounts[i].WeaponIndex >= weapons.Length) continue;
+                ref var weapon = ref weapons[mounts[i].WeaponIndex];
+                if (weapon.Delivery == Game.Data.Definitions.WeaponDelivery.Projectile && weapon.ProjectileSpeed > 0) return weapon.ProjectileSpeed;
+            }
+            return 0;
         }
         internal void Apply(in HudSnapshot value, NativeArray<HudRadarBlip> contacts, double3 playerPosition, bool hasPosition, float yaw)
         {
@@ -183,7 +272,7 @@ namespace Game.Presentation.Systems
                 float2 offset = (float2)(hop.GatePositionM - playerPosition).xz;
                 float range = model.RadarRangeM > 0 ? model.RadarRangeM : 2000;
                 byte flags = 4;
-                if (math.lengthsq(offset) > range * range) { offset = math.normalizesafe(offset) * range; flags |= 2; }
+                if (math.lengthsq(offset) > range * range) flags |= 2;
                 waypointIndex = math.min(count, radar.Length - 1);
                 for (int i = 0; i < count; i++) if (math.distancesq(contacts[i].OffsetXZ, offset) < .01f) { waypointIndex = i; break; }
                 waypoint = new HudRadarBlipView { OffsetXZ = new UnityEngine.Vector2(offset.x, offset.y), Kind = 3, Flags = flags };
@@ -206,7 +295,7 @@ namespace Game.Presentation.Systems
                 for (int m = 0; m < markers.Count && count < radar.Length; m++)
                 {
                     float2 offset = (float2)(markers[m] - playerPosition).xz; byte flags = 0;
-                    if (math.lengthsq(offset) > range * range) { offset = math.normalizesafe(offset) * range; flags = 2; }
+                    if (math.lengthsq(offset) > range * range) flags = 2;
                     var next = new HudRadarBlipView { OffsetXZ = new UnityEngine.Vector2(offset.x, offset.y), Kind = 3, Flags = flags };
                     changed |= !Same(radar[count], next); radar[count++] = next;
                 }

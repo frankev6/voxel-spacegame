@@ -22,3 +22,14 @@
 /* QA-001 hit confirmation: a small cross at each of the player's hits, popped and faded by HitMarkerSystem. */
 .hit-marker { position: absolute; translate: -50% -50%; font-size: var(--text-m); -unity-font-style: bold; color: var(--color-text); padding: 0; margin: 0; }
 .hit-marker--energy { color: var(--color-shield); }
+/* HUD redesign (2026-10-21): the canvas draws the ping ring, the target arcs and the edge chevrons; tags appear only on what matters. */
+.world-overlay__canvas { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.world-tag__label { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }
+.world-tag__detail { margin-top: 20px; }
+.world-tag__detail.is-warning { color: var(--color-objective); }
+.world-tag--pinged { opacity: 0.55; }
+.world-tag--interaction .world-tag__corner { border-color: var(--color-accent); }
+.world-tag--interaction .world-tag__label { color: var(--color-accent-strong); -unity-font-style: bold; }
+.world-tag--dim { opacity: 0.45; }
+.world-edge { position: absolute; translate: -50% -50%; font-size: var(--text-xs); padding: 0; margin: 0; white-space: nowrap; -unity-text-align: middle-center;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }

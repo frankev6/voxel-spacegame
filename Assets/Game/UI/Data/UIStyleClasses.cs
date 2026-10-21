@@ -77,6 +77,7 @@ namespace Game.UI.Data
         public const string ToastExit = "toast--exit";
         public const string ToastBump = "toast--bump";
         public const string ToastColumn = "toast-column";
+        public const string ToastColumnAtShip = "toast-column--at-ship";
         public const string Modal = "modal";
         public const string ModalScrim = "modal__scrim";
         public const string ModalWindow = "modal__window";

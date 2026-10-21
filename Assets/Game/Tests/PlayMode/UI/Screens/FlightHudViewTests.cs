@@ -17,23 +17,17 @@ using Object = UnityEngine.Object;
 
 namespace Game.Tests.PlayMode.UI.Screens
 {
-    /// <summary>HUD-007: five required view-boundary cases; no fabricated production gameplay source.</summary>
+    /// <summary>HUD-007 view-boundary cases, reworked for the HUD redesign (2026-10-21): no corner plates; numbers beside the arcs only
+    /// below their thresholds; a full bar never shows; the title card and objective toast arrive and leave.</summary>
     public sealed class FlightHudViewTests
     {
         [SetUp] public void Setup() { Services.Reset(); EventHub.Reset(); }
         [TearDown] public void Cleanup() { Services.Reset(); EventHub.Reset(); }
-        sealed class RadarData : IHudRadarSource
-        {
-            internal readonly HudRadarBlipView[] Data = new HudRadarBlipView[64];
-            internal int Count;
-            public ReadOnlySpan<HudRadarBlipView> Blips => Data.AsSpan(0, Count);
-        }
         sealed class Window : IDisposable
         {
             internal readonly UITestPanel Panel;
             internal readonly UIRoot UI;
             internal readonly HudViewModel Model;
-            internal readonly RadarData Radar = new();
             internal readonly FlightHudView View;
             internal readonly Sprite[] Icons = new Sprite[2];
             readonly Texture2D iconTexture;
@@ -44,7 +38,7 @@ namespace Game.Tests.PlayMode.UI.Screens
                 iconTexture = new Texture2D(2, 2);
                 for (int i = 0; i < Icons.Length; i++) Icons[i] = Sprite.Create(iconTexture, new Rect(0, 0, 2, 2), Vector2.zero);
                 UI = new UIRoot(Panel.Document, config, new DialogTestContext.Pause(), new DialogTestContext.Context(), new NullUISoundSink(), new UnityFrameClock());
-                View = new FlightHudView(Model, Radar, path => path == "Flight/FirePrimary" ? "LMB" : path == "Flight/FireSecondary" ? "RMB" : path == "Flight/FireTertiary" ? "Space" : "F");
+                View = new FlightHudView(Model, path => path == "Flight/FirePrimary" ? "LMB" : path == "Flight/FireSecondary" ? "RMB" : path == "Flight/FireTertiary" ? "Space" : "F");
                 UI.Register(View); UI.Navigator.SetRoot(View);
             }
             public void Dispose() { UI.Dispose(); foreach (var icon in Icons) Object.DestroyImmediate(icon); Object.DestroyImmediate(iconTexture); Object.DestroyImmediate(config); Panel.Dispose(); }
@@ -65,24 +59,29 @@ namespace Game.Tests.PlayMode.UI.Screens
             { var ability = model.Abilities[i]; ability.HasAbility = true; ability.Name = name; ability.Charges = 9999; ability.Ready = true; ability.Active = true; ability.KeyText = "4"; }
             return model;
         }
+        /// <summary>Every reading at once: low hull, shield and energy, boosting, a title card and an objective.</summary>
+        static void Worst(HudViewModel model)
+        {
+            model.ShowShip = true; model.ShipPoint = new Vector2(.5f, .55f); model.ShipRadiusFraction = .05f; model.HullArc = model.ShieldArc = model.EnergyArc = 1;
+            model.HullFraction = .1f; model.ShieldFraction = .1f; model.EnergyFraction = .1f; model.MarksVersion++;
+        }
         [UnityTest] public IEnumerator Layout_MaxContent_AllLogicalSizes_NoOverlap()
         {
             var issues = new List<LayoutIssue>();
             foreach (var size in UITestPanel.LogicalSizes)
             {
-                using var w = new Window(Maximum(), size.x, size.y); yield return null;
-                var regions = w.View.Root.Query(className: UIStyleClasses.HudRegion).ToList(); Assert.AreEqual(7, regions.Count);
+                using var w = new Window(Maximum(), size.x, size.y); Worst(w.Model); yield return null;
+                var regions = w.View.Root.Query(className: UIStyleClasses.HudRegion).ToList(); Assert.AreEqual(3, regions.Count, "title card, objective toast, ability strip");
                 for (int i = 0; i < regions.Count; i++) for (int j = i + 1; j < regions.Count; j++)
                     Assert.IsFalse(regions[i].worldBound.Overlaps(regions[j].worldBound), size + " " + regions[i].name + "/" + regions[j].name);
                 UILayoutAudit.Run(w.View.Root, w.Panel.Viewport, issues); Assert.IsEmpty(issues, size + ": " + string.Join(", ", issues.ConvertAll(issue => issue.Kind + " " + issue.ElementPath)));
-                Assert.AreEqual(size.x < 1700, w.View.Root.ClassListContains("hud-narrow"));
-                Assert.AreEqual(new string('W', 40), w.View.Root.Q<Label>("hud-star-system").text, "Rare text uses the real binding pipeline.");
+                Assert.AreEqual(new string('W', 40).ToUpperInvariant(), w.View.Root.Q<Label>("hud-title").text, "The title card names the arrival.");
                 Assert.AreEqual("9999", w.View.Root.Q<Label>("hud-speed").text);
             }
         }
         [UnityTest] public IEnumerator Contrast_AllHudText_Passes()
         {
-            using var w = new Window(Maximum()); yield return null; var issues = new List<ContrastIssue>();
+            using var w = new Window(Maximum()); Worst(w.Model); yield return null; var issues = new List<ContrastIssue>();
             ContrastAudit.Run(w.View.Root, issues); Assert.IsEmpty(issues, string.Join(", ", issues.ConvertAll(issue => issue.ElementPath + " " + issue.Ratio)));
         }
         static void Change(HudViewModel model, int i, Sprite first, Sprite second)
@@ -95,7 +94,7 @@ namespace Game.Tests.PlayMode.UI.Screens
             model.InteractionVerbText = even ? "Dock" : "Inspect"; model.InteractionTargetName = even ? "A" : "B"; model.InteractionKeyText = even ? "F" : "E";
             model.InteractionInRange = even; model.InteractionDetailText = even ? "A" : "B"; model.InteractionBlocked = even;
             model.StarSystemName = even ? "A" : "B"; model.ZoneName = even ? "A" : "B"; model.ObjectiveTitle = even ? "A" : "B"; model.ObjectiveText = even ? "A" : "B";
-            model.RouteText = even ? "A" : "B"; model.RouteBlocked = even; model.RadarRangeM = number; model.RadarYawDeg = number; model.RadarVersion = i;
+            model.RouteText = even ? "A" : "B"; model.RouteBlocked = even; model.HullArc = model.ShieldArc = model.EnergyArc = fraction; model.MarksVersion = i;
             for (int j = 0; j < model.WeaponGroups.Count; j++)
             { var group = model.WeaponGroups[j]; group.GroupNumber = j + (even ? 1 : 2); group.WeaponCount = number; group.ReadyFraction = fraction; group.Firing = even; group.KeyText = even ? "1" : "2"; }
             for (int j = 0; j < model.Abilities.Count; j++)
@@ -104,7 +103,7 @@ namespace Game.Tests.PlayMode.UI.Screens
         }
         [Test] public void DirectUpdate_600Changes_ZeroAlloc()
         {
-            using var w = new Window(Maximum()); w.Radar.Count = 64;
+            using var w = new Window(Maximum()); Worst(w.Model);
             // Warm both class/value paths and the immutable number cache; no frames or gameplay are advanced.
             Change(w.Model, 0, w.Icons[0], w.Icons[1]); Change(w.Model, 1, w.Icons[0], w.Icons[1]); long before = GC.GetAllocatedBytesForCurrentThread();
             for (int i = 2; i < 602; i++) Change(w.Model, i, w.Icons[0], w.Icons[1]);
@@ -114,37 +113,45 @@ namespace Game.Tests.PlayMode.UI.Screens
         }
         [Test] public void NoShip_ShipZonesHidden()
         {
-            using var w = new Window(Maximum()); w.Model.HasShip = false;
-            foreach (string zone in new[] { "status", "weapons", "radar", "target", "prompt" }) Assert.IsTrue(w.View.Root.Q("hud-region-" + zone).ClassListContains(UIStyleClasses.IsHidden));
-            Assert.IsFalse(w.View.Root.Q("hud-region-location").ClassListContains(UIStyleClasses.IsHidden)); Assert.IsFalse(w.View.Root.Q("hud-region-objective").ClassListContains(UIStyleClasses.IsHidden));
-            w.Model.StarSystemName = ""; Assert.IsTrue(w.View.Root.Q("hud-region-location").ClassListContains(UIStyleClasses.IsHidden), "QA-001: no blank location plate");
-            w.Model.StarSystemName = "Drift"; Assert.IsFalse(w.View.Root.Q("hud-region-location").ClassListContains(UIStyleClasses.IsHidden));
-            w.Model.HasShip = true; Assert.IsFalse(w.View.Root.Q("hud-region-status").ClassListContains(UIStyleClasses.IsHidden));
-            float saved = w.View.Root.Q<Meter>("hud-hull-meter").Fraction; w.Model.IsHulk = true; w.Model.HullFraction = .1f;
-            Assert.AreEqual(saved, w.View.Root.Q<Meter>("hud-hull-meter").Fraction, "Hulk status meters keep the last values.");
+            using var w = new Window(Maximum()); Worst(w.Model); w.Model.HasShip = false;
+            Assert.IsTrue(w.View.Root.Q("hud-region-abilities").ClassListContains(UIStyleClasses.IsHidden));
+            foreach (string readout in new[] { "hull", "shield", "energy", "speed" }) Assert.IsTrue(w.View.Root.Q("hud-readout-" + readout).ClassListContains(UIStyleClasses.IsHidden), readout);
+            w.Model.HasShip = true; Assert.IsFalse(w.View.Root.Q("hud-region-abilities").ClassListContains(UIStyleClasses.IsHidden));
+            Assert.IsFalse(w.View.Root.Q("hud-readout-hull").ClassListContains(UIStyleClasses.IsHidden));
+        }
+        /// <summary>Frank (2026-10-21): a bar at its maximum is not shown; numbers appear only below the threshold.</summary>
+        [Test] public void Readouts_OnlyBelowThreshold_NeverAtFull()
+        {
+            using var w = new Window(Maximum()); Worst(w.Model);
+            bool Hidden(string readout) => w.View.Root.Q("hud-readout-" + readout).ClassListContains(UIStyleClasses.IsHidden);
+            Assert.IsFalse(Hidden("hull")); Assert.IsFalse(Hidden("shield")); Assert.IsFalse(Hidden("energy"));
+            Assert.AreEqual("10", w.View.Root.Q<Label>("hud-hull-value").text);
+            w.Model.HullFraction = .5f; w.Model.ShieldFraction = .3f; w.Model.EnergyFraction = .25f; w.Model.MarksVersion++;
+            Assert.IsTrue(Hidden("hull")); Assert.IsTrue(Hidden("shield")); Assert.IsTrue(Hidden("energy"));
+            w.Model.HullFraction = .1f; w.Model.HullArc = 0; w.Model.MarksVersion++;
+            Assert.IsTrue(Hidden("hull"), "no number without its arc (the sync system hides a full bar's arc)");
+            w.Model.Boosting = false; Assert.IsTrue(Hidden("speed")); w.Model.Boosting = true; Assert.IsFalse(Hidden("speed"));
+        }
+        [Test] public void TitleCard_ShowsOnArrival_ObjectiveToastOnChange()
+        {
+            using var w = new Window(Maximum());
+            var title = w.View.Root.Q("hud-region-title"); var objective = w.View.Root.Q("hud-region-objective");
+            Assert.IsTrue(title.ClassListContains("hud-title--shown")); Assert.IsTrue(objective.ClassListContains("hud-objective--shown"));
+            w.Model.ZoneName = "Low orbit"; Assert.AreEqual("LOW ORBIT", w.View.Root.Q<Label>("hud-title").text, "a new zone takes the card");
+            w.Model.HasObjective = false; Assert.IsFalse(objective.ClassListContains("hud-objective--shown"));
+            w.Model.StarSystemName = ""; w.Model.ZoneName = ""; Assert.IsFalse(title.ClassListContains("hud-title--shown"));
         }
         static HashSet<VisualElement> Elements(VisualElement root)
         {
             var values = new HashSet<VisualElement>(); Visit(root); return values;
             void Visit(VisualElement node) { values.Add(node); for (int i = 0; i < node.hierarchy.childCount; i++) Visit(node.hierarchy[i]); }
         }
-        [Test] public void Radar_64Blips_PooledNoNewElements()
+        [Test] public void Abilities_PooledNoNewElements()
         {
-            using var w = new Window(Maximum()); var original = Elements(w.View.Root); w.Radar.Count = 64;
-            for (int i = 0; i < 64; i++) w.Radar.Data[i] = new HudRadarBlipView { OffsetXZ = new Vector2(0, 100), Kind = (byte)(i % 4), Relation = (byte)(i % 3), Flags = i == 63 ? (byte)6 : (byte)0 };
-            w.Model.RadarRangeM = 100; w.Model.RadarVersion++;
-            Assert.AreEqual(64, w.View.Root.Query(className: "hud-blip").ToList().Count);
-            var blip = w.View.Root.Q("hud-radar-blip-0"); Assert.AreEqual(-120, blip.style.translate.value.y.value, .001f);
-            w.Model.RadarYawDeg = 90; Assert.AreEqual(-120, blip.style.translate.value.x.value, .001f, "Facing east, a contact due north is on the left");
-            w.Radar.Data[0].OffsetXZ = new Vector2(100, 0); w.Model.RadarVersion++;
-            Assert.AreEqual(0, blip.style.translate.value.x.value, .001f); Assert.AreEqual(-120, blip.style.translate.value.y.value, .001f, "Dead ahead is up");
-            w.Radar.Data[0].OffsetXZ = new Vector2(0, 100); w.Model.RadarYawDeg = 0; w.Model.RadarVersion++;
-            Assert.IsTrue(w.View.Root.Q("hud-radar-blip-63").ClassListContains("hud-blip--beyond"));
-            Assert.IsTrue(w.View.Root.Q("hud-radar-blip-63").ClassListContains("hud-blip--waypoint"));
-            w.Radar.Data[0].OffsetXZ = new Vector2(1000, 0); w.Model.RadarVersion++; Assert.IsTrue(blip.ClassListContains("hud-blip--beyond"));
-            w.Radar.Count = 1; w.Model.RadarVersion++; Assert.IsTrue(w.View.Root.Q("hud-radar-blip-1").ClassListContains(UIStyleClasses.IsHidden));
-            for (int i = 1; i <= 5; i++) Assert.IsNotNull(w.View.Root.Q<Slot>("hud-weapon-group-" + i));
+            using var w = new Window(Maximum()); var original = Elements(w.View.Root);
+            for (int i = 0; i < 20; i++) Change(w.Model, i, w.Icons[0], w.Icons[1]);
             for (int i = 1; i <= 4; i++) Assert.IsNotNull(w.View.Root.Q<Slot>("hud-ability-" + i));
+            Assert.IsNotNull(w.View.Root.Q<HudMarks>("hud-marks"));
             Assert.IsTrue(original.SetEquals(Elements(w.View.Root))); w.UI.Dispose(); w.Model.SpeedMps = 77;
             Assert.AreNotEqual("77", w.View.Root.Q<Label>("hud-speed").text, "Root detach releases direct handlers.");
         }

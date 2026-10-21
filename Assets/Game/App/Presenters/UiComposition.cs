@@ -135,6 +135,13 @@ namespace Game.App.Presenters
         }
 
         internal void ShowSettings() => settingsPresenter.Show();
+        // HUD redesign: while the flight HUD is on top, toasts rise from the player's ship (NotificationService.SetAnchor).
+        void AnchorToasts(object sender, UnityEngine.UIElements.BindablePropertyChangedEventArgs args)
+        {
+            if (!ReferenceEquals(args.propertyName, nameof(HudViewModel.MarksVersion))) return;
+            bool atShip = HudModel.HasShip && HudModel.ShowShip && ui.Navigator.Top is FlightHudView;
+            ui.Notifications.SetAnchor(atShip, HudModel.ShipPoint);
+        }
 
         internal void BindHudPresenters(Game.Input.InputService input, Game.Data.Services.ContentCatalog content)
         {
@@ -146,6 +153,7 @@ namespace Game.App.Presenters
             screenHotkeys = new Game.Presentation.Presenters.ScreenHotkeyRouter(ui.Navigator, input, ResolveHotkeyScreen,
                 text => ui.Notifications.Post(new Game.UI.Data.Notification { Kind = Game.UI.Data.NotificationKind.Info, Label = text }));
             hudNotifications.Bind(); screenHotkeys.Bind();
+            HudModel.propertyChanged += AnchorToasts;
             RebindHudObjective();
         }
         // QST-008 calls this if its canonical query is registered after BindHudPresenters.
@@ -223,15 +231,14 @@ namespace Game.App.Presenters
             menuPresenter = menu;
             menu.Bind();
         }
-        internal void BindSceneRoots(IHudRadarSource radar, Func<string, string> bindingDisplay, Game.App.EditorHost.EditorHostServices editorServices)
+        internal void BindSceneRoots(Func<string, string> bindingDisplay, Game.App.EditorHost.EditorHostServices editorServices)
         {
             CheckAlive();
             if (rootsBound) throw new InvalidOperationException("Scene roots are already installed.");
             if (menuPresenter == null) throw new InvalidOperationException("Install menu navigation before scene roots.");
-            if (radar == null) throw new ArgumentNullException(nameof(radar));
             if (bindingDisplay == null) throw new ArgumentNullException(nameof(bindingDisplay));
             if (editorServices == null) throw new ArgumentNullException(nameof(editorServices));
-            ui.Register(new FlightHudView(HudModel, radar, bindingDisplay));
+            ui.Register(new FlightHudView(HudModel, bindingDisplay));
             ShipEditorModel = editorServices.Model; // ADR-0097: already registered by the persistent editor owner.
             flow.SetRootScreens(this);
             rootsBound = true;
@@ -278,7 +285,7 @@ namespace Game.App.Presenters
             if (disposed) return;
             disposed = true;
             EventBus<SessionReset>.Unsubscribe(OnSessionReset);
-            screenHotkeys?.Dispose(); hudNotifications?.Dispose(); hudObjective?.Dispose();
+            HudModel.propertyChanged -= AnchorToasts; screenHotkeys?.Dispose(); hudNotifications?.Dispose(); hudObjective?.Dispose();
             if (galaxyMapPresenter != null) { Game.Core.Services.Unregister(galaxyMapPresenter); galaxyMapPresenter.Dispose(); }
             if (systemMapPresenter != null) { Game.Core.Services.Unregister(systemMapPresenter); systemMapPresenter.Dispose(); }
             shipLogPresenter?.Dispose(); rumorMapNavigation = null;

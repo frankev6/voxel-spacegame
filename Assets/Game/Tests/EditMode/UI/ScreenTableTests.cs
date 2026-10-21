@@ -40,7 +40,7 @@ namespace Game.Tests.EditMode.UI
                 new SaveSlotsView(new SaveSlotsViewModel(), Null<ISaveSlotsCommands>()),
                 new SettingsView(new SettingsViewModel(), Null<ISettingsCommands>()),
                 new PauseView(new PauseViewModel(), Null<IPauseCommands>()),
-                new FlightHudView(new HudViewModel(), null, null),
+                new FlightHudView(new HudViewModel(), null),
                 new InventoryView(new InventoryViewModel(), Null<IInventoryCommands>()),
                 new MerchantView(new MerchantViewModel(), Null<IMerchantCommands>()),
                 new DialogView(new DialogViewModel(), Null<IDialogCommands>()),

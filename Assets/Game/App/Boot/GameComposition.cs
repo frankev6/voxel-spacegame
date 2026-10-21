@@ -281,11 +281,12 @@ namespace Game.App.Boot
             var hudNames = new Game.Presentation.Presenters.HudNames(Content.Catalog,
                 Game.Core.Services.Get<Game.Simulation.Factions.FactionIndexMap>(), campaignGalaxy, travel, encounters);
             hudSync.Bind(Screens.HudModel, hudNames, Input.GetBindingDisplay);
-            world.GetOrCreateSystemManaged<WorldOverlaySystem>().Bind(UI.GetLayer(Game.UI.Data.UILayer.World), hudNames, Camera.Camera);
+            world.GetOrCreateSystemManaged<WorldOverlaySystem>().Bind(UI.GetLayer(Game.UI.Data.UILayer.World), hudNames, Camera.Camera,
+                Input.GetBindingDisplay, () => Input.Controls.Flight.enabled && Input.Controls.Flight.SensorPing.WasPerformedThisFrame());
             world.GetOrCreateSystemManaged<HitMarkerSystem>().Bind(UI.GetLayer(Game.UI.Data.UILayer.World), Camera.Camera,
                 new FxFrameReader(world.GetExistingSystemManaged<FxUploadSystem>()));
             Input.BindingsChanged += hudSync.RefreshBindings;
-            Screens.BindSceneRoots(hudSync, Input.GetBindingDisplay, editorServices);
+            Screens.BindSceneRoots(Input.GetBindingDisplay, editorServices);
             Screens.BindHudPresenters(Input, Content.Catalog);
             Screens.BindHudObjectiveQuery(story.ShipLog);
             world.GetExistingSystemManaged<SceneNavigationBridgeSystem>().Bind(Flow, Pause, UI);

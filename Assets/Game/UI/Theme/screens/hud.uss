@@ -1,40 +1,45 @@
-/* SPEC-61 HUD-007. Seven information plates leave the world centre and bottom-right open. */
+/* HUD redesign (2026-10-21, approved mockup): no plates in the corners. Marks sit on the ships, the objects and the cursor
+   (HudMarks, WorldOverlaySystem); text arrives as an event and leaves. In calm flight: the reticle, the ability strip, edge markers. */
 .flight-hud { flex-grow: 1; min-width: 0; min-height: 0; }
-.hud-location { width: 280px; }
-.hud-objective { width: 560px; max-width: 560px; }
-.hud-narrow .hud-objective { width: 480px; max-width: 480px; }
-.hud-objective-text { white-space: normal; max-height: 54px; overflow: hidden; text-overflow: ellipsis; }
-.hud-radar-plate { width: 268px; }
-.hud-radar { width: 240px; height: 240px; position: relative; overflow: hidden; background-color: var(--color-surface-2); border-color: var(--color-border); border-width: var(--border-thin); border-radius: 50%; }
-.hud-radar-self { position: absolute; left: 50%; top: 50%; translate: -50% -50%; color: var(--color-accent); -unity-text-align: middle-center; padding: 0; margin: 0; }
-.hud-blip { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; }
-.hud-blip--station { width: 10px; height: 10px; }
-.hud-blip--body { border-radius: 50%; }
-.hud-blip--poi, .hud-blip--waypoint { border-color: var(--color-objective); }
-/* each kind its own colour (owner: "the dots should be colored correspondly to their meaning"): ships by relation (the marker
-   colours), stations accent, points of interest objective, wrecks a faint small dot */
-.hud-blip--station.marker--neutral { background-color: var(--color-accent); border-color: var(--color-accent); }
-.hud-blip--poi.marker--neutral { background-color: var(--color-objective); border-color: var(--color-objective); border-radius: 50%; }
-.hud-blip--wreck { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; opacity: 0.55; }
-.hud-blip--wreck.marker--neutral, .hud-blip--wreck.marker--enemy, .hud-blip--wreck.marker--ally { background-color: var(--color-text-muted); border-color: var(--color-text-muted); }
-.hud-blip--beyond { opacity: 0.65; }
-.hud-target { width: 306px; top: 55%; }
-.hud-target-heading, .hud-number-line, .hud-prompt-main { flex-direction: row; align-items: center; }
-.hud-target-name { flex-grow: 1; min-width: 0; }
-.hud-target .meter { width: 280px; }
-.hud-target-distance { min-width: 0; }
-.hud-prompt { width: 480px; top: 68%; }
-.hud-interaction-verb { flex-shrink: 0; margin-left: var(--space-2); margin-right: var(--space-2); }
-.hud-interaction-target { flex-grow: 1; min-width: 0; }
-.hud-prompt--out-of-range .hud-interaction-verb { color: var(--color-text-muted); }
-.hud-status { width: 348px; }
-.hud-status .meter { width: 320px; }
-.hud-speed--boosting { color: var(--color-accent); }
-.hud-weapons { width: 320px; }
+
+/* G: location title card, 4 s on arrival */
+.flight-hud .hud-title { top: 18%; align-items: center; max-width: 80%; opacity: 0; transition-property: opacity, translate; transition-duration: var(--duration-slow); translate: -50% 6px; }
+.flight-hud .hud-title--shown { opacity: 1; translate: -50% 0; }
+.hud-title__name { font-size: var(--text-xl); letter-spacing: 6px; color: var(--color-text); -unity-text-align: middle-center; padding: 0; margin: 0; white-space: normal;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85); }
+.hud-title__detail { color: var(--color-accent-strong); letter-spacing: 3px; -unity-text-align: middle-center; margin-top: var(--space-1); padding: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85); }
+
+/* H: objective toast, one line for 6 s when the objective changes; the ship log keeps the rest */
+.flight-hud .hud-objective { top: var(--space-5); max-width: 640px; flex-direction: row; align-items: center; opacity: 0;
+    transition-property: opacity; transition-duration: var(--duration-slow); padding: var(--space-1) var(--space-3);
+    background-color: var(--color-glass); border-left-width: 2px; border-color: var(--color-objective); }
+.hud-objective--shown { opacity: 1; }
+.hud-objective__title { color: var(--color-objective); flex-shrink: 0; margin-right: var(--space-2); padding: 0; }
+.hud-objective__text { color: var(--color-text); flex-shrink: 1; min-width: 0; padding: 0; }
+
+/* D/E: numbers beside the arcs at the ship, only below the threshold (hull and shield 30 %, energy 25 %) or while boosting */
+.hud-readouts { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.hud-readout { position: absolute; flex-direction: row; align-items: baseline; }
+.hud-readout Label { padding: 0; margin: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); }
+.hud-readout .hud-readout__caption { font-size: var(--text-xs); letter-spacing: 1px; margin-right: 4px; color: var(--color-text-muted); }
+.hud-readout__value { font-size: var(--text-s); -unity-font-style: bold; }
+.hud-readout .hud-readout__unit { font-size: var(--text-xs); margin-left: 2px; color: var(--color-text-muted); }
+.hud-readout--hull { translate: -100% -50%; }
+.hud-readout--hull .hud-readout__value { color: var(--color-danger); }
+.hud-readout--shield { translate: 0 -50%; }
+.hud-readout--shield .hud-readout__value { color: var(--color-shield); }
+.hud-readout--energy, .hud-readout--speed { translate: -50% 0; }
+.hud-readout--energy .hud-readout__value { color: var(--color-energy); }
+.hud-readout--speed .hud-readout__value { color: var(--color-accent); }
+
+/* F: ability strip, small and quiet; a tile lights only while usable */
+.flight-hud .hud-abilities { bottom: var(--space-4); }
 .hud-slot-row { flex-direction: row; justify-content: center; }
-.hud-slot-row > .slot { width: 64px; height: 60px; margin: var(--space-1); }
-.hud-slot-number { position: absolute; left: 0; right: 0; top: 18px; -unity-text-align: middle-center; color: var(--color-text); font-size: var(--text-m); }
-/* QA-001: the weapon count sat on top of the group number; give it its own row along the bottom edge. */
-#hud-weapon-row .slot__count { left: 0; right: 0; bottom: 2px; -unity-text-align: middle-center; background-color: var(--color-transparent); color: var(--color-text-muted); }
+.hud-abilities .slot { width: 38px; height: 38px; margin: 0 3px; opacity: 0.55; background-color: var(--color-glass); border-color: var(--color-line); }
+.hud-abilities .slot.is-ready, .hud-abilities .slot.is-selected { opacity: 1; border-color: var(--color-accent); }
+.hud-abilities .slot__key { background-color: rgba(0, 0, 0, 0); font-size: 10px; left: 2px; top: 1px; color: var(--color-text-muted); }
+.hud-abilities .slot__count { background-color: rgba(0, 0, 0, 0); font-size: 10px; right: 2px; bottom: 1px; }
+.hud-abilities .slot__note { font-size: 9px; bottom: -14px; }
 
 .flight-hud .is-warning { color: var(--color-warning); }
