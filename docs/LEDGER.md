@@ -1294,6 +1294,42 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-21 — Feel prototype: auto-aim, camera presets, a planet below the plane (lead, claude-opus-5-5)
+- Owner: "the top down only view feels very restraining... can we implement a third person orbital camera that follows the cursor", "auto-aiming for players enabled by default so the weapons shoot at the target ship the player has their cursor on", then "build the feel prototype: auto-aim first, then the camera presets, then one planet with its orbit coast. Show me the HUD mockup before building it."
+- Design note: `docs/design/exploration/world-and-scale.md`. It covers:
+  - planets below the plane, with the orbit as the coast and landing as a scene;
+  - scale;
+  - space vs water.
+- **Auto-aim** (`PlayerInputSampleSystem`, on by default; `camera assist=off`):
+  - A ray straight onto a hostile hull keeps the exact cell.
+  - Otherwise the cursor snaps to the hostile ship nearest on screen, within 4.5% of the screen height (about 50 px at 1080p) of its projected hull sphere. The lock releases at 7%.
+  - The command carries `ShipCommandFlags.AimAssist`. `WeaponAimJob` then leads the ship or station whose hull sphere holds the aim point, using the spatial hash velocity, so an aimed engine is still hit.
+  - Co-op guests keep their aim anchor, because the snapped point sits on the target's grid.
+  - The radius was first in raw pixels, which halved it on Retina: the Game view is 3456×1874.
+- **Camera presets** (`FlightCameraPreset`, `camera <name>`):
+
+  | Preset | Pitch | Yaw | Notes |
+  |---|---|---|---|
+  | `topdown` | 55° | follows the heading | SPEC-62 as shipped |
+  | `chase` | 16°, down to 6° | follows the heading | 8° tilt-up, FOV 50 |
+  | `cursor` | 22° | turns while the cursor is in the outer quarter of the screen | the game's default |
+  | `orbit` | 14°, down to 3° | mouse look | locked cursor, reticle at 56% height; mouse up looks farther |
+
+  - Tests that build a rig keep `topdown`, because the game sets `cursor` in `GameComposition`.
+  - `cursor` first turned towards the aim's world direction. A cursor near the ship then spun the view, so it switched to screen space.
+  - A cut (spawn, teleport) faces the heading again.
+- **HUD placeholders:** a mouse-look reticle and an amber bracket on the auto-aim lock (`HudViewModel.ReticleVersion`, inline styles), until the HUD redesign is approved. The mockup was sent to the owner.
+- **VESHA** (`HollowOrbit`, `playground goto=orbit`):
+  - A 150 km planet whose surface lies 2.5 km below the plane, as a 17° cap mesh with procedural shaders (`Game/Orbit/Planet`, `Game/Orbit/Atmosphere`).
+  - The Clan's tether rises to an anchor 4.3 km south of the Hollow, with beacon and anchor sprites in the Hollow's glow mesh.
+  - Five coast wrecks (scenery, damage-immune).
+  - The plate reads "LOW ORBIT · VESHA" within 1.6 km of the anchor.
+  - The size was measured: a 15 km planet 2.5 km down drops its limb out of view of a low camera.
+  - The shaders are found with `Shader.Find`, so a player build still needs them included.
+- Proof: `Logs/playtest/feel_{topdown,chase,cursor,orbit}.png`, `orbit_*.png` and `assist_diag.png`. The diagnostic shows the snap onto a hostile with the cursor 110 px off, the aim at its centre of mass, and the bracket drawn.
+  - On/off damage, with the cursor 110 px beside a still shielded WRAITH and 10 s of fire in separate runs: 5,689 off, 6,453 on (+13%). Most of the fire went into its 3000 shield, so this measures little; the diagnostic above is the better evidence.
+- Tests: AimAssist 3 (new), WeaponAim 5, PlayerTargeting 6, camera rig/flight/sync/contract/origin/editor-orbit, HudSync 6, ScenarioDraft, CombatHitTest 7; PlayMode FlightHudView 5, UiComposition 4, DevInput 2, AimCommand 1, Playground 1. All pass. WeaponAim first failed (an unassigned hash container in hash-less worlds); `WeaponAimSystem` now passes an empty hash.
+
 ### 2026-10-18 — ABL-006 emergency repairs: icon, channel ring, sparks, sound (lead, claude-opus-5-5)
 - Owner: "Do this task here: Emergency repair feedback: icon, channel ring, sparks".
 - **Icon:** the sheet's unused wrench chip (sprite 59) replaces the borrowed boost icon.

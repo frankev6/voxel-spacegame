@@ -18,8 +18,16 @@ namespace Game.Simulation.Weapons
     public partial struct WeaponAimSystem : ISystem
     {
         WeaponAimJob job;
+        // Auto-aim reads the spatial hash; a world without one (unit tests) gets an empty one, since jobs need valid containers.
+        Game.Simulation.Spatial.SpatialHashQueryData empty;
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
+            empty = new Game.Simulation.Spatial.SpatialHashQueryData
+            {
+                Proxies = new NativeList<Game.Simulation.Spatial.SpatialProxy>(0, Allocator.Persistent), Large = new NativeList<int>(0, Allocator.Persistent),
+                Cells = new NativeHashMap<long, int2>(0, Allocator.Persistent), EntryIndices = new NativeList<int>(0, Allocator.Persistent),
+                State = new NativeReference<Game.Simulation.Spatial.SpatialHashState>(Allocator.Persistent)
+            };
             job.Grids = state.GetComponentLookup<VoxelGrid>(true);
             job.Transforms = state.GetComponentLookup<LocalTransform>(true); job.Commands = state.GetComponentLookup<ShipCommand>(true);
             job.Hulks = state.GetComponentLookup<Hulk>(true); job.Spawning = state.GetComponentLookup<GridSpawning>(true); job.Dormant = state.GetComponentLookup<Dormant>(true);
@@ -32,7 +40,18 @@ namespace Game.Simulation.Weapons
             job.Grids.Update(ref state); job.Transforms.Update(ref state); job.Commands.Update(ref state); job.Hulks.Update(ref state); job.Spawning.Update(ref state); job.Dormant.Update(ref state);
             job.Velocities.Update(ref state); job.Masses.Update(ref state); job.Controls.Update(ref state); job.Targets.Update(ref state);
             job.Weapons = SystemAPI.GetSingleton<WeaponDefsRef>().Value; job.Convergence = SystemAPI.GetSingleton<WeaponTuning>().FixedConvergenceRad;
-            state.Dependency = job.ScheduleParallel(state.Dependency);
+            if (SystemAPI.TryGetSingleton<Game.Simulation.Spatial.SpatialHash>(out var hash))
+            {
+                job.Hash = hash.AsReadOnly(); job.HasHash = 1;
+                state.Dependency = job.ScheduleParallel(hash.BeginRead(state.Dependency));
+                hash.EndRead(state.Dependency);
+            }
+            else { job.Hash = empty; job.HasHash = 0; state.Dependency = job.ScheduleParallel(state.Dependency); }
+        }
+        [BurstCompile] public void OnDestroy(ref SystemState state)
+        {
+            state.Dependency.Complete();
+            empty.Proxies.Dispose(); empty.Large.Dispose(); empty.Cells.Dispose(); empty.EntryIndices.Dispose(); empty.State.Dispose();
         }
     }
 }

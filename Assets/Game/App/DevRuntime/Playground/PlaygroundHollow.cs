@@ -47,6 +47,7 @@ namespace Game.App.DevRuntime.Playground
         GameObject dressing, roof;   // roof: the dressing above the rock's +24 m split, hidden with the high rock while the player is inside
         readonly List<Mesh> meshes = new();
         readonly HollowAtmosphere air = new();
+        internal readonly HollowOrbit Orbit = new();
         readonly HollowHolograms holograms = new();
         Texture2D shelter;   // the roofed area (InsideRows) for the brick shader's shelter: no sun, dim ambient, haze (BrickSurface.hlsl)
         static readonly int ShelterMask = Shader.PropertyToID("_ShelterMask"), ShelterRect = Shader.PropertyToID("_ShelterRect"),
@@ -94,6 +95,13 @@ namespace Game.App.DevRuntime.Playground
             return root;
         }
 
+        static readonly (string Id, float2 Offset, float Yaw)[] CoastWrecks =
+        {
+            ("ship_wreck_cruiser_burned", new float2(-420, 180), 1.1f), ("ship_wreck_frigate_a", new float2(260, 340), 2.6f),
+            ("ship_wreck_engine_section", new float2(380, -220), .4f), ("ship_wreck_frigate_c", new float2(-210, -360), 4.0f),
+            ("ship_wreck_frigate_b", new float2(-640, -120), 5.2f),
+        };
+
         /// <summary>Spawns the whole Hollow. Safe to call again after <see cref="Clear"/> (the Quartermaster's reset).</summary>
         internal void Build()
         {
@@ -120,6 +128,14 @@ namespace Game.App.DevRuntime.Playground
                     Yaw = 0, StartTick = tick, Playing = 1, Group = Group });
                 em.AddComponentData(root, clan);
                 em.AddComponentData(root, new AiBrain { ProfileIndex = turret });
+            }
+            // VESHA's coast (feel prototype): wrecks drifting in the plane round the tether's anchor, the graveyard of ships that
+            // fought over the lift
+            for (int i = 0; i < CoastWrecks.Length; i++)
+            {
+                var w = CoastWrecks[i];
+                var root = Grid(catalog, session, frame, w.Id, HollowOrbit.Tether + w.Offset, w.Yaw, GridKind.Hulk, GridMotion.Static);
+                if (root != Entity.Null) { em.AddComponent<SpatialScenery>(root); em.AddComponent<Game.Voxel.Damage.DamageImmune>(root); }
             }
             foreach (var gun in Guns)
             {
@@ -422,6 +438,7 @@ namespace Game.App.DevRuntime.Playground
             }
             // a station's circle is its floor projector (HollowHolograms): no dot rings at the flight plane over it, which read as loose
             // dots against the floor (owner: "wtf is all the dots"); a station no sign names gets a holo board there, not letters
+            HollowOrbit.Lights(glow);
             Add(dressing, "hollow lights", glow, look.Glow, Color.white * 2.4f);
             Add(roof, "hollow roof lights", glowRoof, look.Glow, Color.white * 2.4f);
             // real lamps: under the roof they are the only light (owner: "inside the asteroid the source of light seems to still be the sun")
@@ -448,6 +465,7 @@ namespace Game.App.DevRuntime.Playground
                 air.AddLamp(post, "beacon", side);
             }
             air.Build(dressing.transform, roof.transform);
+            Orbit.Build(dressing.transform);
             holograms.Build(dressing.transform, look, FloorY);
             BuildShelter();
             Add(dressing, "hollow neon and signs", solid, look.Solid, Color.white * 2f);
@@ -486,7 +504,7 @@ namespace Game.App.DevRuntime.Playground
         }
         void DisposeDressing()
         {
-            air.Dispose(); holograms.Dispose();
+            air.Dispose(); holograms.Dispose(); Orbit.Dispose();
             Shader.SetGlobalVector(ShelterParams, Vector4.zero);
             if (shelter != null) UnityEngine.Object.Destroy(shelter);
             shelter = null;

@@ -36,6 +36,17 @@ namespace Game.Presentation.Services
         float trauma, shakeTime;
         bool boosting;
         float fovKick;
+        // Feel prototype presets (FlightCameraPreset): aim feed for the `cursor` yaw and the last applied preset.
+        float3 aimPoint; bool hasAim, hasPointer; float2 pointer01; float aimYawBase; int presetVersion = -1;
+        static FlightCameraPreset Preset => FlightCameraPreset.Current;
+        float DefaultPitch => Preset.UseConfig ? config.DefaultPitchDeg : Preset.DefaultPitchDeg;
+        float MinPitch => Preset.UseConfig ? config.MinPitchDeg : Preset.MinPitchDeg;
+        float MaxPitch => Preset.UseConfig ? config.MaxPitchDeg : Preset.MaxPitchDeg;
+        float DefaultDistance => Preset.UseConfig ? config.DefaultDistance : Preset.DefaultDistance;
+        float MinDistance => Preset.UseConfig ? config.MinDistance : Preset.MinDistance;
+        float MaxDistance => Preset.UseConfig ? config.MaxDistance : Preset.MaxDistance;
+        float BaseFov => Preset.UseConfig || mode != CameraMode.Flight ? config.VerticalFovDeg : Preset.FovDeg;
+        float TiltUp => Preset.UseConfig ? 0 : Preset.TiltUpDeg;
         internal CameraConfig Config => config;
         internal bool HasTarget { get; private set; }
         internal float3 TargetPosition { get; private set; }
@@ -89,7 +100,8 @@ namespace Game.Presentation.Services
             blendT = 0; blendFromPos = outPos; blendFromRot = outRot;
             if (mode == CameraMode.Flight)
             {
-                pitchTargetDeg = config.DefaultPitchDeg; distanceTarget = config.DefaultDistance; yawOffsetDeg = 0;
+                pitchTargetDeg = DefaultPitch; distanceTarget = DefaultDistance; yawOffsetDeg = 0;
+                presetVersion = FlightCameraPreset.Version; aimYawBase = yawDeg;
                 if (cut || settings.ReduceMotion) CutRequested = true;
             }
             suppressZoom = suppressOrbit = false;
@@ -116,6 +128,10 @@ namespace Game.Presentation.Services
         public void ClearTarget() { HasTarget = false; CutRequested = false; }
         /// <summary>QA-001: flight boost widens the field of view; reduce motion and non-flight modes keep the base FOV.</summary>
         public void SetBoost(bool active) => boosting = active;
+        /// <summary>The player's aim point this frame, for the `cursor` preset's yaw.</summary>
+        public void SetAimPoint(float3 point, bool valid) { aimPoint = point; hasAim = valid && math.all(math.isfinite(point)); }
+        /// <summary>The cursor as a fraction of the screen (0..1 from bottom-left), for the `cursor` preset's yaw.</summary>
+        public void SetPointer(float2 fraction, bool valid) { pointer01 = fraction; hasPointer = valid && math.all(math.isfinite(fraction)); }
         internal float FovKick => fovKick;
         public void Warp(float3 delta)
         {
@@ -183,7 +199,7 @@ namespace Game.Presentation.Services
             input?.Sample();
             float kickTarget = mode == CameraMode.Flight && boosting && !settings.ReduceMotion ? config.BoostFovKickDeg : 0;
             fovKick = settings.ReduceMotion ? 0 : CameraMath.Damp(fovKick, kickTarget, config.BoostFovHalfLife, dt);
-            camera.fieldOfView = config.VerticalFovDeg + fovKick;
+            camera.fieldOfView = BaseFov + fovKick;
             float3 p = unshakenPos; quaternion r = unshakenRot;
             if (mode == CameraMode.Menu)
             {
@@ -251,13 +267,45 @@ namespace Game.Presentation.Services
 
         void FlightPose(float dt, out float3 position, out quaternion rotation)
         {
+            var preset = Preset;
+            if (presetVersion != FlightCameraPreset.Version)
+            {
+                presetVersion = FlightCameraPreset.Version;
+                pitchTargetDeg = DefaultPitch; distanceTarget = DefaultDistance; aimYawBase = yawDeg;
+                yawOffsetDeg = preset.Yaw == FlightCameraYaw.Free ? yawDeg : 0;
+            }
             Vector2 orbit = input?.OrbitDelta ?? Vector2.zero;
             float k = config.OrbitDegPerPixel * settings.MouseSensitivity;
             yawOffsetDeg += orbit.x * k;
-            pitchTargetDeg = math.clamp(pitchTargetDeg - orbit.y * k * (settings.InvertOrbitY ? -1 : 1), config.MinPitchDeg, config.MaxPitchDeg);
-            distanceTarget = math.clamp(distanceTarget * math.pow(config.ZoomStepFactor, input?.ZoomSteps ?? 0), config.MinDistance, config.MaxDistance);
-            if (input?.RecenterPressed == true) { yawOffsetDeg = 0; pitchTargetDeg = config.DefaultPitchDeg; }
-            float desiredYaw = (settings.YawMode == CameraYawMode.FollowHeading ? CameraMath.HeadingYawDeg(TargetRotation) : 0) + yawOffsetDeg;
+            pitchTargetDeg = math.clamp(pitchTargetDeg - orbit.y * k * (settings.InvertOrbitY ? -1 : 1), MinPitch, MaxPitch);
+            distanceTarget = math.clamp(distanceTarget * math.pow(config.ZoomStepFactor, input?.ZoomSteps ?? 0), MinDistance, MaxDistance);
+            if (input?.RecenterPressed == true)
+            {
+                yawOffsetDeg = preset.Yaw == FlightCameraYaw.Free ? CameraMath.HeadingYawDeg(TargetRotation) : 0;
+                pitchTargetDeg = DefaultPitch; aimYawBase = CameraMath.HeadingYawDeg(TargetRotation);
+            }
+            if (CutRequested)
+            {
+                // A spawn, teleport or jump faces the ship's heading again in the presets that do not follow it.
+                aimYawBase = CameraMath.HeadingYawDeg(TargetRotation);
+                if (preset.Yaw == FlightCameraYaw.Free && !preset.UseConfig) yawOffsetDeg = aimYawBase;
+            }
+            float desiredYaw;
+            switch (preset.UseConfig ? FlightCameraYaw.Config : preset.Yaw)
+            {
+                case FlightCameraYaw.Heading: desiredYaw = CameraMath.HeadingYawDeg(TargetRotation) + yawOffsetDeg; break;
+                case FlightCameraYaw.Free: desiredYaw = yawOffsetDeg; break;
+                case FlightCameraYaw.Aim:
+                    // Turn while the cursor is towards a side of the screen, faster the nearer the edge; the middle is calm. Screen space,
+                    // so a cursor near the ship never sets the view spinning.
+                    if (hasPointer)
+                    {
+                        float side = pointer01.x * 2 - 1, excess = math.abs(side) - preset.AimDeadZoneDeg / 100f;
+                        if (excess > 0) aimYawBase += math.sign(side) * math.min(excess * preset.AimTurnGain, 1) * preset.AimMaxTurnDegPerSecond * dt;
+                    }
+                    desiredYaw = aimYawBase + yawOffsetDeg; break;
+                default: desiredYaw = (settings.YawMode == CameraYawMode.FollowHeading ? CameraMath.HeadingYawDeg(TargetRotation) : 0) + yawOffsetDeg; break;
+            }
             if (CutRequested)
             {
                 yawDeg = desiredYaw; pitchDeg = pitchTargetDeg; distance = distanceTarget; effectiveDistance = distance; occlusionRecovering = false;
@@ -281,6 +329,7 @@ namespace Game.Presentation.Services
             if (math.abs(effectiveDistance - distance) < .0001f) { effectiveDistance = distance; occlusionRecovering = false; }
             framingOffset = FrameFlightFocus(rotation, effectiveDistance) - FocusState;
             position = CameraMath.OrbitPosition(Focus, rotation, effectiveDistance);
+            if (TiltUp != 0) rotation = CameraMath.OrbitRotation(pitchDeg - TiltUp, yawDeg);
         }
 
         // SPEC-62 §5.3/Q15: clip only the output translation, leaving the follow filter and player input intact.

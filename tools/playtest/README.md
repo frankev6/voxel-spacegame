@@ -148,9 +148,17 @@ From a terminal at the repository root, run `tools/playtest/playground.sh`. This
 
 **The Hollow (DEV-023 option E).** The playground is the Khuchad Clan's haven in an asteroid. You spawn at its entrance, outside the Maw. Inside, the Ring and the side tunnels lead to the stations: the Market, the Quartermaster (resets the Hollow), the Gunsmith, Parts, Salvage and Smuggler dens, and the Docks (energy canisters). F in a station's circle activates it. The light strips along the walls take the colour of the next station that way. The ARK Proving Grounds and their exhibit districts are retired (owner, 2026-10-18).
 
+**Feel prototype (2026-10-21).** `camera [topdown|chase|cursor|orbit] [assist=on|off]` switches the flight camera live and turns auto-aim on or off.
+- The game starts on `cursor`: a low camera that turns while the cursor is near a side of the screen.
+- `chase` sits behind the ship and turns with it.
+- `orbit` is mouse look: the cursor is locked, the reticle aims, and moving the mouse up looks farther.
+- `topdown` is the old 55° camera.
+
+Auto-aim is on by default. A cursor within about 50 px (at 1080p) of a hostile ship aims at it, and the guns lead it. An amber bracket marks the lock.
+
 **The race.** A portal inside the Hollow (TRACK 01 · RACE PORTAL, in an alcove off the Ring south-east of the Maw junction, at 80, −150) takes you to Track 01: the race opens and puts every pilot on the grid; F starts the countdown; `race end` brings you back beside the portal. `race open` also opens it from anywhere.
 
-Console: `playground goto=hollow` (the entrance), `goto=<station>` (market, quartermaster, den_gunsmith, den_parts, den_salvage, den_smuggler, docks) or `goto=hollow@x,z[,yaw]` (anywhere, in the Hollow's metres); `playground run=<station>` goes there and presses F. Screens and trials that are only menus stay console shortcuts: `playground run=cargo | settings | fleet | story | survey | map | power | campaign | editor | race`, and `run=shield` / `run=boost` trigger the equipped abilities. `playground status` lists every id. The Hollow's content comes from *Game/Content/Build Hollow*. For a hostile to fight, `spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true`; `range` spawns the breakable test station.
+Console: `playground goto=hollow` (the entrance), `goto=orbit` (VESHA's tether, the feel prototype's planet below the plane), `goto=<station>` (market, quartermaster, den_gunsmith, den_parts, den_salvage, den_smuggler, docks) or `goto=hollow@x,z[,yaw]` (anywhere, in the Hollow's metres); `playground run=<station>` goes there and presses F. Screens and trials that are only menus stay console shortcuts: `playground run=cargo | settings | fleet | story | survey | map | power | campaign | editor | race`, and `run=shield` / `run=boost` trigger the equipped abilities. `playground status` lists every id. The Hollow's content comes from *Game/Content/Build Hollow*. For a hostile to fight, `spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true`; `range` spawns the breakable test station.
 
 Story, survey and map use the registered quest/clue owners, log query and map presenters; the generated galaxy is metadata only, with no body load or player relocation, and reset clears them. `editor` opens the creative Blueprint Lab; `playground reset` returns directly from it and from the practice campaign. Full reviewer checklist: [QA-PLAYGROUND](../../docs/QA-PLAYGROUND.md).
 

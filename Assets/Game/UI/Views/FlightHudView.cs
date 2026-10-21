@@ -68,10 +68,57 @@ namespace Game.UI.Views
                 blip.AddToClassList("marker"); blip.AddToClassList("hud-blip"); blip.AddToClassList(UIStyleClasses.IsHidden); radarCanvas.Add(blip);
             }
             interactionKey.Refresh(bindingDisplay ?? (_ => ""));
+            BuildReticle();
             Root.RegisterCallback<GeometryChangedEvent>(Geometry);
             Root.RegisterCallback<DetachFromPanelEvent>(evt => { if (ReferenceEquals(evt.target, Root)) Stop(); });
             Root.RegisterCallback<AttachToPanelEvent>(evt => { if (ReferenceEquals(evt.target, Root) && IsOpen) Start(); });
             Start();
+        }
+        // Feel prototype (2026-10-21): a plain reticle for mouse look and a corner bracket on the auto-aim lock. Placeholder art until the
+        // HUD redesign is approved; inline styles keep it out of the theme.
+        VisualElement reticle, lockBracket;
+        void BuildReticle()
+        {
+            var amber = new Color(1f, .72f, .3f, .95f);
+            reticle = new VisualElement { name = "hud-reticle", pickingMode = PickingMode.Ignore };
+            reticle.style.position = Position.Absolute; reticle.style.width = 22; reticle.style.height = 22;
+            reticle.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
+            SetBorder(reticle, 1.5f, new Color(.8f, .95f, 1f, .85f)); SetRadius(reticle, 11);
+            var dot = new VisualElement { pickingMode = PickingMode.Ignore };
+            dot.style.position = Position.Absolute; dot.style.left = 9; dot.style.top = 9; dot.style.width = 4; dot.style.height = 4;
+            dot.style.backgroundColor = new Color(.8f, .95f, 1f, .95f); SetRadius(dot, 2); reticle.Add(dot);
+            lockBracket = new VisualElement { name = "hud-lock", pickingMode = PickingMode.Ignore };
+            lockBracket.style.position = Position.Absolute; lockBracket.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
+            for (int i = 0; i < 4; i++)
+            {
+                var corner = new VisualElement { pickingMode = PickingMode.Ignore };
+                corner.style.position = Position.Absolute; corner.style.width = Length.Percent(22); corner.style.height = Length.Percent(22);
+                if ((i & 1) == 0) { corner.style.left = 0; corner.style.borderLeftWidth = 2; corner.style.borderLeftColor = amber; }
+                else { corner.style.right = 0; corner.style.borderRightWidth = 2; corner.style.borderRightColor = amber; }
+                if (i < 2) { corner.style.top = 0; corner.style.borderTopWidth = 2; corner.style.borderTopColor = amber; }
+                else { corner.style.bottom = 0; corner.style.borderBottomWidth = 2; corner.style.borderBottomColor = amber; }
+                lockBracket.Add(corner);
+            }
+            Root.Add(lockBracket); Root.Add(reticle);
+            Reticle();
+        }
+        static void SetBorder(VisualElement e, float width, Color color)
+        {
+            e.style.borderLeftWidth = e.style.borderRightWidth = e.style.borderTopWidth = e.style.borderBottomWidth = width;
+            e.style.borderLeftColor = e.style.borderRightColor = e.style.borderTopColor = e.style.borderBottomColor = color;
+        }
+        static void SetRadius(VisualElement e, float r) =>
+            e.style.borderTopLeftRadius = e.style.borderTopRightRadius = e.style.borderBottomLeftRadius = e.style.borderBottomRightRadius = r;
+        void Reticle()
+        {
+            if (reticle == null) return;
+            reticle.style.display = viewModel.ShowReticle && viewModel.HasShip ? DisplayStyle.Flex : DisplayStyle.None;
+            reticle.style.left = Length.Percent(viewModel.ReticlePoint.x * 100); reticle.style.top = Length.Percent(viewModel.ReticlePoint.y * 100);
+            lockBracket.style.display = viewModel.ShowLock && viewModel.HasShip ? DisplayStyle.Flex : DisplayStyle.None;
+            lockBracket.style.left = Length.Percent(viewModel.LockPoint.x * 100); lockBracket.style.top = Length.Percent(viewModel.LockPoint.y * 100);
+            float size = Mathf.Max(28, viewModel.LockSizeFraction * Root.resolvedStyle.height);
+            if (!float.IsFinite(size)) size = 28;
+            lockBracket.style.width = size; lockBracket.style.height = size;
         }
         static Slot MakeSlot(string name) => new() { name = name, pickingMode = PickingMode.Ignore, focusable = false };
         public override void OnPush(object args) => Start();
@@ -127,6 +174,7 @@ namespace Game.UI.Views
             else if (ReferenceEquals(property, nameof(HudViewModel.WeaponGroups))) { ObservePools(); for (int i = 0; i < WeaponCount; i++) Weapon(i); }
             else if (ReferenceEquals(property, nameof(HudViewModel.Abilities))) { ObservePools(); for (int i = 0; i < AbilityCount; i++) Ability(i); }
             else if (ReferenceEquals(property, nameof(HudViewModel.RadarRangeM))) { radarRange.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.RadarRangeM)); Radar(); }
+            else if (ReferenceEquals(property, nameof(HudViewModel.ReticleVersion))) Reticle();
             else if (ReferenceEquals(property, nameof(HudViewModel.RadarYawDeg)) || ReferenceEquals(property, nameof(HudViewModel.RadarVersion))) { Radar(); }
         }
         static void Show(VisualElement element, bool visible) => element.EnableInClassList(UIStyleClasses.IsHidden, !visible);

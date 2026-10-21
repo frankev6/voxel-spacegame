@@ -200,6 +200,13 @@ namespace Game.App.DevRuntime.Playground
                 if (moved.Kind == DevResultKind.Failed) return moved;
                 return hollow.Missing != null ? DevCommandResult.Fail(hollow.Missing) : DevCommandResult.Ok("At the Hollow's entrance: the Maw is ahead. The Clan keeps the peace here.");
             }
+            // feel prototype: VESHA's coast, 700 m north of the tether's anchor, looking at it
+            if (id == "orbit")
+            {
+                hollow.Build();
+                var moved = Place(HollowLayout.Offset + HollowOrbit.Tether + new float2(0, 700), math.PI);
+                return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("Over " + HollowOrbit.Name + ": the Clan's tether is ahead, the planet below.");
+            }
             // hollow@x,z[,yaw°]: anywhere in the Hollow (its own metres), for playtests and shots
             if (id.StartsWith("hollow@", StringComparison.Ordinal))
             {
@@ -280,7 +287,7 @@ namespace Game.App.DevRuntime.Playground
         }
         string Directory()
         {
-            var text = new System.Text.StringBuilder("Console: playground reset | playground goto=hollow (the entrance), goto=<station> or goto=hollow@x,z[,yaw] | playground run=<station or screen>\nStations:");
+            var text = new System.Text.StringBuilder("Console: playground reset | playground goto=hollow (the entrance), goto=orbit (VESHA's tether), goto=<station> or goto=hollow@x,z[,yaw] | playground run=<station or screen>\nStations:");
             foreach (var st in HollowLayout.Stations) text.Append(' ').Append(st.Id);
             text.Append("\nScreens (run only): ").Append(string.Join(", ", ConsoleOnly)).Append("; shield / boost trigger equipped abilities; station: ARK in the practice campaign\n");
             return text.ToString();
@@ -377,11 +384,14 @@ namespace Game.App.DevRuntime.Playground
                 }
             }
             int st = located && hollow.Built ? hollow.Nearest(at) : -1;
+            // feel prototype: over VESHA's coast the plate names the orbit (-2 marks it, so crossing in and out updates the plate)
+            if (st < 0 && located && math.distance(at, HollowOrbit.Tether) < HollowOrbit.CoastRadius) st = -2;
             if (st != hollowNearest && heading != null)
             {
                 hollowNearest = st;
                 bool atHollow = located && HollowLayout.Near(at, 600);
                 heading.text = st >= 0 ? HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE"
+                    : st == -2 ? "LOW ORBIT  ·  " + HollowOrbit.Name + "  ·  THE CLAN TETHER"
                     : atHollow ? "THE HOLLOW  ·  KHUCHAD CLAN HAVEN" : Race != null && Race.IsOpen ? "TRACK 01  ·  BATTLE GRAVEYARD" : "THE HOLLOW";
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)

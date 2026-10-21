@@ -2,6 +2,7 @@ using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
 using Game.Simulation.Commands;
+using Game.Simulation.Spatial;
 using Game.Voxel.Damage;
 using Game.Voxel.Model;
 using Game.Voxel.Rendering;
@@ -26,6 +27,7 @@ namespace Game.Simulation.Weapons
             [ReadOnly] public ComponentLookup<Unity.Physics.PhysicsMass> Masses;
             [ReadOnly] public ComponentLookup<WeaponControl> Controls;
             [ReadOnly] public ComponentLookup<ShipTarget> Targets;
+            [ReadOnly] public SpatialHashQueryData Hash; public byte HasHash;
             public BlobAssetReference<WeaponDefsBlob> Weapons; public float Convergence;
             void Execute(in FunctionalBlock functional, in WeaponMount mount, in WeaponState state, ref WeaponAim aim)
             {
@@ -59,8 +61,15 @@ namespace Game.Simulation.Weapons
                 }
                 else if (Commands.HasComponent(root) && Commands[root].AimValid != 0)
                 {
-                    point = Commands[root].AimWorld;
+                    var command = Commands[root];
+                    point = command.AimWorld;
                     aim.InRange = 1;
+                    // Auto-aim: when the aim point is on a ship, lead that ship like a locked target (the input sampler snaps a
+                    // near miss onto the hull). The point stays where the player put it, so pointing at an engine still hits the engine.
+                    if ((command.Flags & ShipCommandFlags.AimAssist) != 0 && weapon.Delivery == Game.Data.Definitions.WeaponDelivery.Projectile
+                        && AssistVelocity(root, point, out float3 targetVelocity))
+                        point = LeadMath.Point(muzzleWorld, Velocities.HasComponent(root) ? Velocities[root].Linear : float3.zero,
+                            point, targetVelocity, weapon.ProjectileSpeed, weapon.LifetimeMaxTicks * SimTime.FixedTimestep);
                 }
                 else return;
                 float3 direction = math.normalizesafe(transform.InverseTransformPoint(point) - muzzle, mount.ForwardLocal);
@@ -81,5 +90,26 @@ namespace Game.Simulation.Weapons
                 aim.FireDirLocal = math.rotate(quaternion.AxisAngle(mount.UpLocal, aim.Yaw), mount.ForwardLocal) * math.cos(elevation) + mount.UpLocal * math.sin(elevation);
                 aim.HasAim = 1;
             }
+                    /// <summary>Velocity of the ship or station whose hull sphere holds the aim point (the smallest relative distance wins).</summary>
+            bool AssistVelocity(Entity self, float3 point, out float3 velocity)
+            {
+                velocity = default;
+                if (HasHash == 0) return false;
+                var candidates = new FixedList512Bytes<int>();
+                int total = Hash.QuerySphere(point, AssistMarginM, ref candidates);
+                bool overflow = total > candidates.Capacity;
+                int count = overflow ? Hash.Proxies.Length : candidates.Length;
+                float best = float.MaxValue; bool found = false;
+                for (int i = 0; i < count; i++)
+                {
+                    var proxy = Hash.Get(overflow ? i : candidates[i]);
+                    if (proxy.Entity == self || (proxy.Kind != ProxyKind.Ship && proxy.Kind != ProxyKind.Station) || Hulks.HasComponent(proxy.Entity)) continue;
+                    float reach = proxy.HullRadius + AssistMarginM, distance = math.distance(point, proxy.Center);
+                    if (!(distance <= reach) || distance / reach >= best) continue;
+                    best = distance / reach; velocity = proxy.Velocity; found = true;
+                }
+                return found;
+            }
+            const float AssistMarginM = 2f;
         }
 }

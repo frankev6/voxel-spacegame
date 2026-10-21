@@ -10,6 +10,7 @@ namespace Game.Presentation.Input
     public sealed class InputCameraInput : ICameraInput
     {
         readonly InputService input;
+        bool cursorLocked;
         public InputCameraInput(InputService input) { this.input = input ?? throw new ArgumentNullException(nameof(input)); }
         public Vector2 OrbitDelta { get; private set; }
         public Vector2 PanDelta { get; private set; }
@@ -38,9 +39,17 @@ namespace Game.Presentation.Input
                 ViewSidePressed = editor.ViewSide.WasPressedThisFrame();
                 return;
             }
-            if (input.CurrentContext != InputContext.Flight) return;
             var flight = input.Controls.Flight;
-            if (flight.CameraOrbitHold.IsPressed()) OrbitDelta = flight.CameraLook.ReadValue<Vector2>();
+            // Feel prototype `orbit` preset: mouse look locks the cursor while flying; any other context gets it back.
+            bool look = input.CurrentContext == InputContext.Flight && flight.enabled && FlightCameraPreset.Current.MouseLook;
+            if (look != cursorLocked)
+            {
+                cursorLocked = look;
+                Cursor.lockState = look ? CursorLockMode.Locked : CursorLockMode.None;
+                Cursor.visible = !look;
+            }
+            if (input.CurrentContext != InputContext.Flight) return;
+            if (look || flight.CameraOrbitHold.IsPressed()) OrbitDelta = flight.CameraLook.ReadValue<Vector2>();
             ZoomSteps = flight.CameraZoom.ReadValue<float>() * input.CameraZoomSensitivity;
             RecenterPressed = flight.CameraRecenter.enabled && flight.CameraRecenter.WasPressedThisFrame();
         }
