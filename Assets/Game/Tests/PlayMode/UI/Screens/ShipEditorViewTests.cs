@@ -74,7 +74,7 @@ namespace Game.Tests.PlayMode.UI.Screens
                     config.Screens = screens.ToArray();
                 }
                 UI = new UIRoot(Panel.Document, config, Pause, Context, new NullUISoundSink(), Clock);
-                Flight = new FlightHudView(new HudViewModel(), null, _ => ""); Editor = new ShipEditorView(EditorPanelsTests.WorstCase(), Commands);
+                Flight = new FlightHudView(new HudViewModel(), _ => ""); Editor = new ShipEditorView(EditorPanelsTests.WorstCase(), Commands);
                 UI.Register(Flight); UI.Register(Editor); UI.Navigator.SetRoot(Flight);
             }
             internal void ShowEditor() => UI.Navigator.SetRoot(Editor);

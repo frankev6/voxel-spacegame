@@ -156,6 +156,15 @@ From a terminal at the repository root, run `tools/playtest/playground.sh`. This
 
 Auto-aim is on by default. A cursor within about 50 px (at 1080p) of a hostile ship aims at it, and the guns lead it. An amber bracket marks the lock.
 
+**HUD (2026-10-21 redesign).** No plates in the corners:
+- The reticle is the cursor, with three fire-group ticks under it. It turns amber with spokes on an auto-aim lock.
+- The hovered or locked ship gets a bracket with shield and hull arcs, plus a lead pip when it moves.
+- Your own ship gets hull, shield and energy arcs only when they are not full.
+- Off-screen hostiles, the next gate and nearby stations show as chevrons at the screen edge.
+- V (or `camera ping`) sends a sensor ping that tags what it crosses for 4 s.
+- Arriving in a place shows a title card for 4 s.
+- The Console and Enter buttons show behind Esc. F1 still opens the console.
+
 **The race.** A portal inside the Hollow (TRACK 01 · RACE PORTAL, in an alcove off the Ring south-east of the Maw junction, at 80, −150) takes you to Track 01: the race opens and puts every pilot on the grid; F starts the countdown; `race end` brings you back beside the portal. `race open` also opens it from anywhere.
 
 Console: `playground goto=hollow` (the entrance), `goto=orbit` (VESHA's tether, the feel prototype's planet below the plane), `goto=<station>` (market, quartermaster, den_gunsmith, den_parts, den_salvage, den_smuggler, docks) or `goto=hollow@x,z[,yaw]` (anywhere, in the Hollow's metres); `playground run=<station>` goes there and presses F. Screens and trials that are only menus stay console shortcuts: `playground run=cargo | settings | fleet | story | survey | map | power | campaign | editor | race`, and `run=shield` / `run=boost` trigger the equipped abilities. `playground status` lists every id. The Hollow's content comes from *Game/Content/Build Hollow*. For a hostile to fight, `spawn blueprint=ship_nocturne_wraith dz=330 face=player faction=faction_raiders team=2 ai=true`; `range` spawns the breakable test station.

@@ -74,8 +74,13 @@ Shader "Game/NocturneSky"
                 float fine=Fbm(p*4.5 + warp*3 + float3(time*.12,0,0));
                 float dust=Fbm(p*.8+float3(8,2,time*.09));
                 float lower=1-smoothstep(.1,.65,d.y);
-                float green=smoothstep(-.4,.85,dot(d,normalize(float3(.5,-.65,.6))));
-                float violet=smoothstep(-.3,.85,dot(d,normalize(float3(-.7,-.45,.5))));
+                // HUD redesign / third-person camera (2026-10-21): a low camera sees the upper sky too, so a tilted galactic band
+                // carries smoke and denser stars across it; the top-down view keeps the lower field as before.
+                float bandPlane=dot(d,normalize(float3(.32,.78,-.54)));
+                float band=exp(-bandPlane*bandPlane*7.5);
+                float region=max(lower,band*(.65+.35*smoothstep(.3,.7,dust)));
+                float green=max(smoothstep(-.4,.85,dot(d,normalize(float3(.5,-.65,.6)))),band*.55);
+                float violet=max(smoothstep(-.3,.85,dot(d,normalize(float3(-.7,-.45,.5)))),band*.7*smoothstep(-.6,.6,d.x));
                 float amber=pow(saturate(dot(d,normalize(float3(.8,-.55,-.1)))),3);
                 float density=smoothstep(.28,.72,smoke)*( .35 + fine);
                 // Linear equivalents of DESIGN-GUIDE's green, violet and low amber palette.
@@ -84,8 +89,9 @@ Shader "Game/NocturneSky"
                 colour+=float3(.254,.048,.013)*amber*.24;
                 float ridges=pow(saturate(1-abs(fine-.49)*18),3)*smoothstep(.38,.65,smoke);
                 float lanes=1-smoothstep(.44,.66,dust)*.92;
-                float3 sky=float3(.0006,.0009,.0009) + lower*lanes*(colour*density + float3(.17,.22,.16)*ridges*.13);
-                float stars=Stars(d,170,.88)*.65+Stars(d,420,.94)*.3+Stars(d,800,.98)*.12;
+                float3 glowBand=float3(.020,.024,.034)*band*band*(.6+.8*smoke)*lanes;
+                float3 sky=float3(.0006,.0009,.0009) + region*lanes*(colour*density + float3(.17,.22,.16)*ridges*.13) + glowBand;
+                float stars=Stars(d,170,.88)*.65+Stars(d,420,.94)*.3+Stars(d,800,.98)*.12+Stars(d,1300,1-.05*band)*.1*band;
                 sky+=stars*lerp(float3(.65,.78,1),float3(1,.83,.64),Hash(floor(d*170)))*(.25+.75*lanes);
                 return half4(sky*_Brightness,1);
             }

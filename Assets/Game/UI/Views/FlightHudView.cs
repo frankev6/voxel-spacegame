@@ -3,34 +3,38 @@ using Game.Core;
 using Game.UI.Controls;
 using Game.UI.Data;
 using Game.UI.ViewModels;
-using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Game.UI.Views
 {
-    /// <summary>SPEC-61 §4.4/5.3: fixed HUD pools and direct numerical updates; gameplay is supplied by HUD-009.</summary>
+    /// <summary>The flight HUD after the redesign (2026-10-21, approved mockup): no plates in the corners. The reticle, the lead pip and
+    /// the arcs at the player's ship are drawn by <see cref="HudMarks"/>; the target bracket, interaction tag and edge markers live on
+    /// the world layer (WorldOverlaySystem). This view adds the numbers beside the arcs, the small ability strip, the location title
+    /// card and the one-line objective toast. Fixed pools and direct updates (SPEC-61 §4.4/5.3).</summary>
     public sealed class FlightHudView : UIScreen
     {
-        const int WeaponCount = 5, AbilityCount = 4, BlipCount = 64;
-        static readonly ProfilerMarker RadarMarker = new(ProfilerCategory.Scripts, "FlightHudView.Radar");
+        const int AbilityCount = 4;
+        const long TitleMs = 4000, ObjectiveMs = 6000;
         readonly HudViewModel viewModel;
-        readonly IHudRadarSource radar;
         readonly Func<string, string> bindingDisplay;
-        readonly Slot[] weapons = new Slot[WeaponCount], abilities = new Slot[AbilityCount];
-        readonly Label[] weaponNumbers = new Label[WeaponCount];
-        readonly VisualElement[] blips = new VisualElement[BlipCount];
-        readonly HudWeaponGroupViewModel[] weaponModels = new HudWeaponGroupViewModel[WeaponCount];
+        readonly Slot[] abilities = new Slot[AbilityCount];
+        readonly HudWeaponGroupViewModel[] weaponModels = new HudWeaponGroupViewModel[3];
         readonly HudAbilityViewModel[] abilityModels = new HudAbilityViewModel[AbilityCount];
-        readonly EventHandler<BindablePropertyChangedEventArgs>[] weaponChanged = new EventHandler<BindablePropertyChangedEventArgs>[WeaponCount], abilityChanged = new EventHandler<BindablePropertyChangedEventArgs>[AbilityCount];
-        readonly string[] weaponKeys = new string[WeaponCount], abilityKeys = new string[AbilityCount];
-        Meter hull, shield, energy, targetHull, targetShield;
-        Label speed, shieldStatus, targetDistance, radarRange, interactionDetail;
-        VisualElement locationRegion, objectiveRegion, statusRegion, weaponRegion, radarRegion, targetRegion, promptRegion, targetRelation, objectiveTitle, objectiveText, route;
-        KeyHint interactionKey;
+        readonly EventHandler<BindablePropertyChangedEventArgs>[] abilityChanged = new EventHandler<BindablePropertyChangedEventArgs>[AbilityCount];
+        readonly EventHandler<BindablePropertyChangedEventArgs> weaponChanged;
+        readonly string[] abilityKeys = new string[AbilityCount];
+        HudMarks marks;
+        Label hullValue, shieldValue, energyValue, speed, title, titleDetail;
+        VisualElement abilityRegion, titleRegion, objectiveRegion, hullReadout, shieldReadout, energyReadout, speedReadout;
+        IVisualElementScheduledItem titleHide, objectiveHide;
+        string shownSystem, shownZone, shownObjective;
         bool observing;
-        public FlightHudView(HudViewModel vm, IHudRadarSource radar, Func<string, string> bindingDisplay)
-        { viewModel = vm ?? throw new ArgumentNullException(nameof(vm)); this.radar = radar; this.bindingDisplay = bindingDisplay; }
+        public FlightHudView(HudViewModel vm, Func<string, string> bindingDisplay)
+        {
+            viewModel = vm ?? throw new ArgumentNullException(nameof(vm)); this.bindingDisplay = bindingDisplay;
+            weaponChanged = (_, _) => marks?.MarkDirtyRepaint();
+        }
         public override string Key => "hud";
         public override UILayer Layer => UILayer.Hud;
         public override InputContext Context => InputContext.Flight;
@@ -38,117 +42,54 @@ namespace Game.UI.Views
         public override bool BlocksWorldPointer => false;
         public override bool HidesHud => false;
         public override bool IsRoot => true;
+        /// <summary>The arcs and the reticle, for tests and for the screenshot tools.</summary>
+        public HudMarks Marks => marks;
         protected override void OnBuild()
         {
             Root.dataSource = viewModel; Root.pickingMode = PickingMode.Ignore;
-            hull = Q<Meter>("hud-hull-meter"); shield = Q<Meter>("hud-shield-meter"); energy = Q<Meter>("hud-energy-meter");
-            targetHull = Q<Meter>("hud-target-hull"); targetShield = Q<Meter>("hud-target-shield");
-            speed = Q<Label>("hud-speed"); shieldStatus = Q<Label>("hud-shield-status"); targetDistance = Q<Label>("hud-target-distance"); radarRange = Q<Label>("hud-radar-range");
-            locationRegion = Q<VisualElement>("hud-region-location"); objectiveRegion = Q<VisualElement>("hud-region-objective"); objectiveTitle = Q<Label>("hud-objective-title"); objectiveText = Q<Label>("hud-objective-text"); route = Q<Label>("hud-route");
-            statusRegion = Q<VisualElement>("hud-region-status"); weaponRegion = Q<VisualElement>("hud-region-weapons"); radarRegion = Q<VisualElement>("hud-region-radar");
-            targetRegion = Q<VisualElement>("hud-region-target"); promptRegion = Q<VisualElement>("hud-region-prompt"); targetRelation = Q<VisualElement>("hud-target-relation"); interactionKey = Q<KeyHint>("hud-interaction-key");
-            interactionDetail = Q<Label>("hud-interaction-detail");
-            var weaponRow = Q<VisualElement>("hud-weapon-row"); var abilityRow = Q<VisualElement>("hud-ability-row"); var radarCanvas = Q<VisualElement>("hud-radar");
-            for (int i = 0; i < WeaponCount; i++)
-            {
-                int index = i; weapons[i] = MakeSlot("hud-weapon-group-" + (i + 1)); weaponRow.Add(weapons[i]);
-                var number = weaponNumbers[i] = new Label { name = weapons[i].name + "-number", pickingMode = PickingMode.Ignore }; number.AddToClassList("hud-slot-number"); weapons[i].Add(number);
-                string path = i == 0 ? "Flight/FirePrimary" : i == 1 ? "Flight/FireSecondary" : i == 2 ? "Flight/FireTertiary" : "";
-                weaponKeys[i] = path.Length > 0 ? bindingDisplay?.Invoke(path) ?? "" : "";
-                weaponChanged[i] = (_, _) => Weapon(index);
-            }
+            var hud = Root.Q<VisualElement>(className: "flight-hud") ?? Root;
+            marks = new HudMarks(viewModel); hud.Insert(0, marks);
+            hullValue = Q<Label>("hud-hull-value"); shieldValue = Q<Label>("hud-shield-value"); energyValue = Q<Label>("hud-energy-value"); speed = Q<Label>("hud-speed");
+            hullReadout = Q<VisualElement>("hud-readout-hull"); shieldReadout = Q<VisualElement>("hud-readout-shield");
+            energyReadout = Q<VisualElement>("hud-readout-energy"); speedReadout = Q<VisualElement>("hud-readout-speed");
+            title = Q<Label>("hud-title"); titleDetail = Q<Label>("hud-title-detail"); titleRegion = Q<VisualElement>("hud-region-title");
+            objectiveRegion = Q<VisualElement>("hud-region-objective"); abilityRegion = Q<VisualElement>("hud-region-abilities");
+            var abilityRow = Q<VisualElement>("hud-ability-row");
             for (int i = 0; i < AbilityCount; i++)
             {
-                int index = i; abilities[i] = MakeSlot("hud-ability-" + (i + 1)); abilityRow.Add(abilities[i]);
+                int index = i; abilities[i] = new Slot { name = "hud-ability-" + (i + 1), pickingMode = PickingMode.Ignore, focusable = false }; abilityRow.Add(abilities[i]);
                 abilityKeys[i] = bindingDisplay?.Invoke("Flight/Ability" + (i + 1)) ?? ""; abilityChanged[i] = (_, _) => Ability(index);
             }
-            for (int i = 0; i < BlipCount; i++)
-            {
-                var blip = blips[i] = new VisualElement { name = "hud-radar-blip-" + i, pickingMode = PickingMode.Ignore };
-                blip.AddToClassList("marker"); blip.AddToClassList("hud-blip"); blip.AddToClassList(UIStyleClasses.IsHidden); radarCanvas.Add(blip);
-            }
-            interactionKey.Refresh(bindingDisplay ?? (_ => ""));
-            BuildReticle();
-            Root.RegisterCallback<GeometryChangedEvent>(Geometry);
+            titleHide = Root.schedule.Execute(() => titleRegion.RemoveFromClassList("hud-title--shown")); titleHide.Pause();
+            objectiveHide = Root.schedule.Execute(() => objectiveRegion.RemoveFromClassList("hud-objective--shown")); objectiveHide.Pause();
+            Root.RegisterCallback<GeometryChangedEvent>(evt => { if (ReferenceEquals(evt.target, Root)) Readouts(); });
             Root.RegisterCallback<DetachFromPanelEvent>(evt => { if (ReferenceEquals(evt.target, Root)) Stop(); });
             Root.RegisterCallback<AttachToPanelEvent>(evt => { if (ReferenceEquals(evt.target, Root) && IsOpen) Start(); });
             Start();
         }
-        // Feel prototype (2026-10-21): a plain reticle for mouse look and a corner bracket on the auto-aim lock. Placeholder art until the
-        // HUD redesign is approved; inline styles keep it out of the theme.
-        VisualElement reticle, lockBracket;
-        void BuildReticle()
-        {
-            var amber = new Color(1f, .72f, .3f, .95f);
-            reticle = new VisualElement { name = "hud-reticle", pickingMode = PickingMode.Ignore };
-            reticle.style.position = Position.Absolute; reticle.style.width = 22; reticle.style.height = 22;
-            reticle.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
-            SetBorder(reticle, 1.5f, new Color(.8f, .95f, 1f, .85f)); SetRadius(reticle, 11);
-            var dot = new VisualElement { pickingMode = PickingMode.Ignore };
-            dot.style.position = Position.Absolute; dot.style.left = 9; dot.style.top = 9; dot.style.width = 4; dot.style.height = 4;
-            dot.style.backgroundColor = new Color(.8f, .95f, 1f, .95f); SetRadius(dot, 2); reticle.Add(dot);
-            lockBracket = new VisualElement { name = "hud-lock", pickingMode = PickingMode.Ignore };
-            lockBracket.style.position = Position.Absolute; lockBracket.style.translate = new Translate(Length.Percent(-50), Length.Percent(-50));
-            for (int i = 0; i < 4; i++)
-            {
-                var corner = new VisualElement { pickingMode = PickingMode.Ignore };
-                corner.style.position = Position.Absolute; corner.style.width = Length.Percent(22); corner.style.height = Length.Percent(22);
-                if ((i & 1) == 0) { corner.style.left = 0; corner.style.borderLeftWidth = 2; corner.style.borderLeftColor = amber; }
-                else { corner.style.right = 0; corner.style.borderRightWidth = 2; corner.style.borderRightColor = amber; }
-                if (i < 2) { corner.style.top = 0; corner.style.borderTopWidth = 2; corner.style.borderTopColor = amber; }
-                else { corner.style.bottom = 0; corner.style.borderBottomWidth = 2; corner.style.borderBottomColor = amber; }
-                lockBracket.Add(corner);
-            }
-            Root.Add(lockBracket); Root.Add(reticle);
-            Reticle();
-        }
-        static void SetBorder(VisualElement e, float width, Color color)
-        {
-            e.style.borderLeftWidth = e.style.borderRightWidth = e.style.borderTopWidth = e.style.borderBottomWidth = width;
-            e.style.borderLeftColor = e.style.borderRightColor = e.style.borderTopColor = e.style.borderBottomColor = color;
-        }
-        static void SetRadius(VisualElement e, float r) =>
-            e.style.borderTopLeftRadius = e.style.borderTopRightRadius = e.style.borderBottomLeftRadius = e.style.borderBottomRightRadius = r;
-        void Reticle()
-        {
-            if (reticle == null) return;
-            reticle.style.display = viewModel.ShowReticle && viewModel.HasShip ? DisplayStyle.Flex : DisplayStyle.None;
-            reticle.style.left = Length.Percent(viewModel.ReticlePoint.x * 100); reticle.style.top = Length.Percent(viewModel.ReticlePoint.y * 100);
-            lockBracket.style.display = viewModel.ShowLock && viewModel.HasShip ? DisplayStyle.Flex : DisplayStyle.None;
-            lockBracket.style.left = Length.Percent(viewModel.LockPoint.x * 100); lockBracket.style.top = Length.Percent(viewModel.LockPoint.y * 100);
-            float size = Mathf.Max(28, viewModel.LockSizeFraction * Root.resolvedStyle.height);
-            if (!float.IsFinite(size)) size = 28;
-            lockBracket.style.width = size; lockBracket.style.height = size;
-        }
-        static Slot MakeSlot(string name) => new() { name = name, pickingMode = PickingMode.Ignore, focusable = false };
         public override void OnPush(object args) => Start();
         public override void OnPop() => Stop();
         public override bool OnBack() { Navigator.Push<PauseView>(); return true; }
-        void Geometry(GeometryChangedEvent evt)
-        { if (ReferenceEquals(evt.target, Root)) Root.EnableInClassList("hud-narrow", evt.newRect.width < 1700); }
         void Start()
         {
             if (observing) return; observing = true; viewModel.propertyChanged += Changed; ObservePools();
-            Visibility(); PlayerMeters(); speed.text = NumberStringCache.Get(viewModel.SpeedMps); ShieldStatus(); TargetMeters(); targetDistance.text = NumberStringCache.Get(viewModel.TargetDistanceM);
-            Relation(); Prompt(); route.EnableInClassList("is-warning", viewModel.RouteBlocked);
-            speed.EnableInClassList("hud-speed--boosting", viewModel.Boosting);
-            radarRange.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.RadarRangeM)); Radar();
-            for (int i = 0; i < WeaponCount; i++) Weapon(i); for (int i = 0; i < AbilityCount; i++) Ability(i);
+            Visibility(); Readouts(); Title(); Objective(); marks.MarkDirtyRepaint();
+            for (int i = 0; i < AbilityCount; i++) Ability(i);
         }
         void Stop()
         {
             if (!observing) return; observing = false; viewModel.propertyChanged -= Changed;
-            for (int i = 0; i < WeaponCount; i++) { if (weaponModels[i] != null) weaponModels[i].propertyChanged -= weaponChanged[i]; weaponModels[i] = null; }
+            for (int i = 0; i < weaponModels.Length; i++) { if (weaponModels[i] != null) weaponModels[i].propertyChanged -= weaponChanged; weaponModels[i] = null; }
             for (int i = 0; i < AbilityCount; i++) { if (abilityModels[i] != null) abilityModels[i].propertyChanged -= abilityChanged[i]; abilityModels[i] = null; }
         }
         void ObservePools()
         {
-            for (int i = 0; i < WeaponCount; i++)
+            for (int i = 0; i < weaponModels.Length; i++)
             {
                 var next = i < viewModel.WeaponGroups.Count ? viewModel.WeaponGroups[i] : null;
                 if (ReferenceEquals(next, weaponModels[i])) continue;
-                if (weaponModels[i] != null) weaponModels[i].propertyChanged -= weaponChanged[i]; weaponModels[i] = next;
-                if (next != null) next.propertyChanged += weaponChanged[i];
+                if (weaponModels[i] != null) weaponModels[i].propertyChanged -= weaponChanged; weaponModels[i] = next;
+                if (next != null) next.propertyChanged += weaponChanged;
             }
             for (int i = 0; i < AbilityCount; i++)
             {
@@ -161,56 +102,65 @@ namespace Game.UI.Views
         void Changed(object sender, BindablePropertyChangedEventArgs args)
         {
             string property = args.propertyName;
-            if (ReferenceEquals(property, nameof(HudViewModel.HasShip)) || ReferenceEquals(property, nameof(HudViewModel.HasTarget)) || ReferenceEquals(property, nameof(HudViewModel.HasInteraction)) || ReferenceEquals(property, nameof(HudViewModel.HasObjective)) || ReferenceEquals(property, nameof(HudViewModel.HasRoute)) || ReferenceEquals(property, nameof(HudViewModel.StarSystemName))) { Visibility(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.HullPercent)) || ReferenceEquals(property, nameof(HudViewModel.HullFraction)) || ReferenceEquals(property, nameof(HudViewModel.ShieldValue)) || ReferenceEquals(property, nameof(HudViewModel.ShieldMax)) || ReferenceEquals(property, nameof(HudViewModel.ShieldFraction)) || ReferenceEquals(property, nameof(HudViewModel.EnergyValue)) || ReferenceEquals(property, nameof(HudViewModel.EnergyMax)) || ReferenceEquals(property, nameof(HudViewModel.EnergyFraction)) || ReferenceEquals(property, nameof(HudViewModel.IsHulk))) { PlayerMeters(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.SpeedMps))) { speed.text = NumberStringCache.Get(viewModel.SpeedMps); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.Boosting))) { speed.EnableInClassList("hud-speed--boosting", viewModel.Boosting); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.ShieldStatus))) { ShieldStatus(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.TargetHullFraction)) || ReferenceEquals(property, nameof(HudViewModel.TargetShieldFraction))) { TargetMeters(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.TargetDistanceM))) { targetDistance.text = NumberStringCache.Get(viewModel.TargetDistanceM); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.TargetRelation))) { Relation(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.InteractionInRange)) || ReferenceEquals(property, nameof(HudViewModel.InteractionBlocked))) { Prompt(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.RouteBlocked))) { route.EnableInClassList("is-warning", viewModel.RouteBlocked); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.WeaponGroups))) { ObservePools(); for (int i = 0; i < WeaponCount; i++) Weapon(i); }
+            if (ReferenceEquals(property, nameof(HudViewModel.MarksVersion))) { marks.MarkDirtyRepaint(); Readouts(); }
+            else if (ReferenceEquals(property, nameof(HudViewModel.HasShip))) { Visibility(); Readouts(); marks.MarkDirtyRepaint(); }
+            else if (ReferenceEquals(property, nameof(HudViewModel.HullPercent)) || ReferenceEquals(property, nameof(HudViewModel.HullFraction)) || ReferenceEquals(property, nameof(HudViewModel.ShieldFraction))
+                || ReferenceEquals(property, nameof(HudViewModel.EnergyFraction)) || ReferenceEquals(property, nameof(HudViewModel.SpeedMps)) || ReferenceEquals(property, nameof(HudViewModel.Boosting))
+                || ReferenceEquals(property, nameof(HudViewModel.IsHulk))) { Readouts(); marks.MarkDirtyRepaint(); }
+            else if (ReferenceEquals(property, nameof(HudViewModel.StarSystemName)) || ReferenceEquals(property, nameof(HudViewModel.ZoneName))) Title();
+            else if (ReferenceEquals(property, nameof(HudViewModel.HasObjective)) || ReferenceEquals(property, nameof(HudViewModel.ObjectiveTitle)) || ReferenceEquals(property, nameof(HudViewModel.ObjectiveText))) Objective();
+            else if (ReferenceEquals(property, nameof(HudViewModel.WeaponGroups))) { ObservePools(); marks.MarkDirtyRepaint(); }
             else if (ReferenceEquals(property, nameof(HudViewModel.Abilities))) { ObservePools(); for (int i = 0; i < AbilityCount; i++) Ability(i); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.RadarRangeM))) { radarRange.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.RadarRangeM)); Radar(); }
-            else if (ReferenceEquals(property, nameof(HudViewModel.ReticleVersion))) Reticle();
-            else if (ReferenceEquals(property, nameof(HudViewModel.RadarYawDeg)) || ReferenceEquals(property, nameof(HudViewModel.RadarVersion))) { Radar(); }
         }
         static void Show(VisualElement element, bool visible) => element.EnableInClassList(UIStyleClasses.IsHidden, !visible);
-        void Visibility()
+        void Visibility() => Show(abilityRegion, viewModel.HasShip);
+        /// <summary>D/E: a number appears beside its arc only below the threshold (hull and shield 30 %, energy 25 %); the speed only while boosting.</summary>
+        void Readouts()
         {
-            // QA-001: an empty location plate drew as a blank black bar (sandbox/playground has no star-system name).
-            Show(locationRegion, !string.IsNullOrEmpty(viewModel.StarSystemName));
-            Show(objectiveRegion, viewModel.HasObjective || viewModel.HasRoute); Show(objectiveTitle, viewModel.HasObjective); Show(objectiveText, viewModel.HasObjective); Show(route, viewModel.HasRoute);
-            Show(statusRegion, viewModel.HasShip); Show(weaponRegion, viewModel.HasShip); Show(radarRegion, viewModel.HasShip);
-            Show(targetRegion, viewModel.HasShip && viewModel.HasTarget); Show(promptRegion, viewModel.HasShip && viewModel.HasInteraction);
+            bool ship = viewModel.HasShip && viewModel.ShowShip && !viewModel.IsHulk;
+            float height = Root.resolvedStyle.height, width = Root.resolvedStyle.width;
+            if (!(height > 0) || !(width > 0)) { height = 1080; width = 1920; }
+            float radius = HudMarks.ArcRadius(viewModel, height);
+            float x = viewModel.ShipPoint.x * width, y = viewModel.ShipPoint.y * height;
+            bool hull = ship && viewModel.HullArc > .5f && viewModel.HullFraction < .3f;
+            bool shield = ship && viewModel.ShieldArc > .5f && viewModel.ShieldFraction < .3f;
+            bool energy = ship && viewModel.EnergyArc > .5f && viewModel.EnergyFraction < .25f;
+            bool boost = ship && viewModel.Boosting;
+            Place(hullReadout, hull, x - radius - 8, y);
+            Place(shieldReadout, shield, x + radius + 8, y);
+            Place(energyReadout, energy, x, y + radius + 14);
+            Place(speedReadout, boost, x, y + radius + (energy ? 30 : 14));
+            if (hull) hullValue.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.HullFraction * 100));
+            if (shield) shieldValue.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.ShieldFraction * 100));
+            if (energy) energyValue.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.EnergyFraction * 100));
+            speed.text = NumberStringCache.Get(viewModel.SpeedMps);
         }
-        void PlayerMeters()
+        static void Place(VisualElement element, bool visible, float x, float y)
         {
-            if (viewModel.IsHulk) return;
-            hull.SetValue(viewModel.HullPercent, 100); hull.SetFraction(viewModel.HullFraction);
-            shield.SetValue(viewModel.ShieldValue, viewModel.ShieldMax); shield.SetFraction(viewModel.ShieldFraction);
-            energy.SetValue(viewModel.EnergyValue, viewModel.EnergyMax); energy.SetFraction(viewModel.EnergyFraction);
+            Show(element, visible);
+            if (!visible) return;
+            element.style.left = x; element.style.top = y;
         }
-        void ShieldStatus() => shieldStatus.text = viewModel.ShieldStatus switch { 1 => "Online", 2 => "Recharging", 3 => "Offline", _ => "No shields" };
-        void TargetMeters() { targetHull.SetFraction(viewModel.TargetHullFraction); targetShield.SetFraction(viewModel.TargetShieldFraction); }
-        void Relation()
+        /// <summary>G: the system or zone name, 4 s on arrival, then gone (the map and pause screen still name it).</summary>
+        void Title()
         {
-            targetRelation.EnableInClassList("marker--ally", viewModel.TargetRelation == 1); targetRelation.EnableInClassList("marker--enemy", viewModel.TargetRelation == 2);
-            targetRelation.EnableInClassList("marker--neutral", viewModel.TargetRelation != 1 && viewModel.TargetRelation != 2);
+            string system = viewModel.StarSystemName ?? "", zone = viewModel.ZoneName ?? "";
+            if (system == (shownSystem ?? "") && zone == (shownZone ?? "")) return;
+            bool zoneChanged = zone != (shownZone ?? "");
+            shownSystem = system; shownZone = zone;
+            string name = zoneChanged && zone.Length > 0 ? zone : system, detail = zoneChanged && zone.Length > 0 ? system : zone;
+            if (name.Length == 0) { titleRegion.RemoveFromClassList("hud-title--shown"); return; }
+            title.text = name.ToUpperInvariant(); titleDetail.text = detail.ToUpperInvariant(); Show(titleDetail, detail.Length > 0);
+            titleRegion.AddToClassList("hud-title--shown"); titleHide.ExecuteLater(TitleMs);
         }
-        void Prompt()
+        /// <summary>H: one line for 6 s when the objective changes.</summary>
+        void Objective()
         {
-            promptRegion.EnableInClassList("hud-prompt--out-of-range", !viewModel.InteractionInRange);
-            interactionDetail.EnableInClassList("is-warning", viewModel.InteractionBlocked);
-        }
-        void Weapon(int index)
-        {
-            var model = weaponModels[index]; var slot = weapons[index]; Show(slot, model != null); if (model == null) return;
-            weaponNumbers[index].text = NumberStringCache.Get(model.GroupNumber > 0 ? model.GroupNumber : index + 1);
-            slot.SetCount(model.WeaponCount); slot.SetKeyHint(model.KeyText ?? weaponKeys[index]); slot.SetCooldown(1 - model.ReadyFraction);
-            slot.SetState(model.Firing, false, false); slot.EnableInClassList(UIStyleClasses.IsEmpty, model.WeaponCount == 0); slot.EnableInClassList(UIStyleClasses.IsReady, model.WeaponCount > 0 && model.ReadyFraction >= 1);
+            string key = viewModel.HasObjective ? (viewModel.ObjectiveTitle ?? "") + "\n" + (viewModel.ObjectiveText ?? "") : "";
+            if (key == (shownObjective ?? "")) return;
+            shownObjective = key;
+            if (key.Length == 0) { objectiveRegion.RemoveFromClassList("hud-objective--shown"); return; }
+            objectiveRegion.AddToClassList("hud-objective--shown"); objectiveHide.ExecuteLater(ObjectiveMs);
         }
         void Ability(int index)
         {
@@ -219,28 +169,6 @@ namespace Game.UI.Views
             slot.SetChannel(model.ChannelFraction); slot.SetNote(model.Note); slot.tooltip = model.Tooltip ?? "";
             slot.SetState(model.Active, false, false); slot.EnableInClassList(UIStyleClasses.IsReady, model.Ready);
             slot.EnableInClassList(UIStyleClasses.IsDisabled, model.Blocked && !model.Active);   // dimmed, still hoverable for its reason
-        }
-        void Radar()
-        {
-            using var scope = RadarMarker.Auto();
-            ReadOnlySpan<HudRadarBlipView> contacts = radar != null ? radar.Blips : ReadOnlySpan<HudRadarBlipView>.Empty;
-            float range = viewModel.RadarRangeM; if (!float.IsFinite(range) || range <= 0) range = 2000;
-            float yaw = viewModel.RadarYawDeg; if (!float.IsFinite(yaw)) yaw = 0;
-            float radians = yaw * Mathf.Deg2Rad, cos = Mathf.Cos(radians), sin = Mathf.Sin(radians);
-            for (int i = 0; i < BlipCount; i++)
-            {
-                var blip = blips[i]; Show(blip, i < contacts.Length); if (i >= contacts.Length) continue;
-                var contact = contacts[i]; var offset = contact.OffsetXZ; if (!float.IsFinite(offset.x) || !float.IsFinite(offset.y)) offset = Vector2.zero;
-                bool beyond = (contact.Flags & 2) != 0 || offset.sqrMagnitude > range * range;
-                if (offset.sqrMagnitude > range * range) offset = offset.normalized * range;
-                // Heading-up: yaw = atan2(forward.x, forward.z), so rotating by −yaw maps the ship's nose to +y (QA-001: the
-                // previous signs mirrored the sides, showing a contact dead ahead behind the ship at a 90° heading).
-                float x = (offset.x * cos - offset.y * sin) * 120 / range, y = (offset.x * sin + offset.y * cos) * 120 / range;
-                blip.style.translate = new Translate(x, -y, 0);
-                blip.EnableInClassList("marker--ally", contact.Relation == 1); blip.EnableInClassList("marker--enemy", contact.Relation == 2); blip.EnableInClassList("marker--neutral", contact.Relation != 1 && contact.Relation != 2);
-                blip.EnableInClassList("hud-blip--ship", contact.Kind == 0); blip.EnableInClassList("hud-blip--station", contact.Kind == 1); blip.EnableInClassList("hud-blip--body", contact.Kind == 2); blip.EnableInClassList("hud-blip--poi", contact.Kind == 3); blip.EnableInClassList("hud-blip--wreck", contact.Kind == 4);
-                blip.EnableInClassList("hud-blip--beyond", beyond); blip.EnableInClassList("hud-blip--waypoint", (contact.Flags & 4) != 0);
-            }
         }
     }
 }

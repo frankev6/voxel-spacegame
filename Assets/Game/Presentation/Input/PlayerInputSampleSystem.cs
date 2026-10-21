@@ -33,6 +33,8 @@ namespace Game.Presentation.Input
         public const float AssistRadius = .045f, AssistRelease = .07f;
         /// <summary>The ship auto-aim is on this frame, or Entity.Null (for the HUD reticle).</summary>
         public Entity AssistTarget => assistTarget;
+        /// <summary>The grid under the cursor ray this frame (any relation), or the auto-aim target; the HUD tags what the player points at.</summary>
+        public Entity HoverEntity { get; private set; }
         InputService input;
         IWorldPointerGate pointerGate;
         InputAction thrust, strafe, turn, strafeModifier, boost, brake, firePrimary, fireSecondary, fireTertiary;
@@ -142,6 +144,7 @@ namespace Game.Presentation.Input
         }
         void Aim(float2 pointer, ref PlayerCommand command)
         {
+            HoverEntity = Entity.Null;
             if (cameras.IsEmptyIgnoreFilter) return;
             cameras.CompleteDependency(); var camera = cameras.GetSingleton<MainCameraState>();
             if (math.any(camera.ScreenSizePx <= 0)) return;
@@ -162,13 +165,14 @@ namespace Game.Presentation.Input
                 if (world.CastRay(new RaycastInput { Start = near, End = near + direction * 5000, Filter = PhysicsLayers.PickingQuery }, ref collector))
                 {
                     Entity hitEntity = collector.ClosestHit.Entity;
+                    HoverEntity = hitEntity;
                     // A ray straight onto a hostile hull keeps the exact cell the player points at; anything else may snap.
                     if (AimAssist && IsAssistCandidate(hitEntity, out _)) { assistTarget = hitEntity; SetAim(ref command, collector.ClosestHit.Position); return; }
-                    if (Snap(pointer, camera, ref command)) return;
+                    if (Snap(pointer, camera, ref command)) { HoverEntity = assistTarget; return; }
                     assistTarget = Entity.Null; SetAim(ref command, collector.ClosestHit.Position); return;
                 }
             }
-            if (Snap(pointer, camera, ref command)) return;
+            if (Snap(pointer, camera, ref command)) { HoverEntity = assistTarget; return; }
             assistTarget = Entity.Null;
             if (Planar.RayPlaneY(near, direction, 0, out var hit, out _)) SetAim(ref command, hit);
         }

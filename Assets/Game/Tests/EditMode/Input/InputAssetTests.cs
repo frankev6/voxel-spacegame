@@ -33,7 +33,7 @@ namespace Game.Tests.EditMode.Input
             B("Flight", "FireSecondary", M + "rightButton"); B("Flight", "FireTertiary", K + "g"); B("Flight", "Interact", K + "f");
             for (int i = 1; i <= 4; i++) B("Flight", $"Ability{i}", K + i);
             B("Flight", "TargetNext", K + "tab"); B("Flight", "TargetUnderCursor", K + "r"); B("Flight", "TargetClear", K + "t");
-            B("Flight", "AutofireToggle", K + "z"); B("Flight", "Cruise", K + "j"); B("Flight", "CameraOrbitHold", M + "middleButton");
+            B("Flight", "AutofireToggle", K + "z"); B("Flight", "Cruise", K + "j"); B("Flight", "SensorPing", K + "v"); B("Flight", "CameraOrbitHold", M + "middleButton");
             V("Flight", "CameraLook", "Vector2", M + "delta"); V("Flight", "CameraZoom", "Axis", M + "scroll/y"); B("Flight", "CameraRecenter", K + "c");
             foreach (var map in new[] { "Flight", "Menu" })
             { B(map, "OpenInventory", K + "i"); B(map, "OpenShipLog", K + "l"); B(map, "OpenGalaxyMap", K + "m"); B(map, "OpenSystemMap", K + "n"); B(map, "OpenFleet", K + "k"); }

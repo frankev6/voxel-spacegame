@@ -309,6 +309,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "SensorPing",
+                    "type": "Button",
+                    "id": "84e5183f-2fe9-5177-8e6e-7d8827c4b983",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "CameraOrbitHold",
                     "type": "Button",
                     "id": "5aa2db5e-f99d-5c3b-9ddb-2ed1beece169",
@@ -1377,6 +1386,17 @@
                     "action": "OpenFleet",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "26dfd0c9-b571-580f-8ad4-9b03068cdc1a",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "SensorPing",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },

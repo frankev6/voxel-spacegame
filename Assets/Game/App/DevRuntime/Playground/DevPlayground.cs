@@ -200,11 +200,12 @@ namespace Game.App.DevRuntime.Playground
                 if (moved.Kind == DevResultKind.Failed) return moved;
                 return hollow.Missing != null ? DevCommandResult.Fail(hollow.Missing) : DevCommandResult.Ok("At the Hollow's entrance: the Maw is ahead. The Clan keeps the peace here.");
             }
-            // feel prototype: VESHA's coast, 700 m north of the tether's anchor, looking at it
+            // feel prototype: VESHA's coast, off the tether's anchor to the north-east, the tether ahead and to the right
             if (id == "orbit")
             {
                 hollow.Build();
-                var moved = Place(HollowLayout.Offset + HollowOrbit.Tether + new float2(0, 700), math.PI);
+                var from = new float2(420, 560);
+                var moved = Place(HollowLayout.Offset + HollowOrbit.Tether + from, math.atan2(-from.x, -from.y) - .32f);
                 return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("Over " + HollowOrbit.Name + ": the Clan's tether is ahead, the planet below.");
             }
             // hollow@x,z[,yaw°]: anywhere in the Hollow (its own metres), for playtests and shots
@@ -344,7 +345,9 @@ namespace Game.App.DevRuntime.Playground
         }
         internal void Tick()
         {
-            if (launcher != null) launcher.style.display = host.Console.Screen.IsOpen ? DisplayStyle.None : DisplayStyle.Flex;
+            // HUD redesign (2026-10-21): the flight screen carries no buttons; Console and Enter show behind Esc (pause) and in menus, and F1
+            // opens the console anywhere.
+            if (launcher != null) launcher.style.display = host.Console.Screen.IsOpen || ui?.Navigator.Top is Game.UI.Views.FlightHudView ? DisplayStyle.None : DisplayStyle.Flex;
             bool coop = host.Context.TryGetService<Game.Core.Net.ICoopSession>(out var coopSession) && coopSession.Role != Game.Core.Net.SimRoleKind.Solo;
             if (enterButton != null) enterButton.style.display = active || coop ? DisplayStyle.None : DisplayStyle.Flex;
             var ctx = host.Context;
@@ -391,15 +394,22 @@ namespace Game.App.DevRuntime.Playground
                 hollowNearest = st;
                 bool atHollow = located && HollowLayout.Near(at, 600);
                 heading.text = st >= 0 ? HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE"
-                    : st == -2 ? "LOW ORBIT  ·  " + HollowOrbit.Name + "  ·  THE CLAN TETHER"
+                    : st == -2 ? HollowOrbit.Name + "  ·  LOW ORBIT  ·  THE CLAN TETHER"
                     : atHollow ? "THE HOLLOW  ·  KHUCHAD CLAN HAVEN" : Race != null && Race.IsOpen ? "TRACK 01  ·  BATTLE GRAVEYARD" : "THE HOLLOW";
+                // the place name is the HUD's title card now (4 s on arrival), not a plate that stays
+                if (ctx.TryGetService<UiComposition>(out var hudScreens)) hudScreens.HudModel.ZoneName = heading.text;
             }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status != DevOperationStatus.Running)
             { pending = 0; SetReport(operation.Status + ": " + operation.Message); }
+            // a report is an event: it shows for a few seconds, then the plate leaves (F1: playground status repeats it)
+            if (panel != null) panel.style.display = report.Length > 0 && UnityEngine.Time.unscaledTime - reportAt < ReportSeconds ? DisplayStyle.Flex : DisplayStyle.None;
         }
+        const float ReportSeconds = 8;
+        float reportAt = float.NegativeInfinity;
         void SetReport(string value)
         {
             report = value ?? "";
+            reportAt = UnityEngine.Time.unscaledTime;
             // Keep verbose diagnostics available in command output; the flight HUD remains bounded.
             if (outcome == null) return;
             outcome.text = report.Length > 240 ? report.Substring(0, 240) + "… (F1: playground status)" : report;
@@ -413,6 +423,7 @@ namespace Game.App.DevRuntime.Playground
             panel.style.maxWidth = 420; panel.style.paddingLeft = 12; panel.style.paddingRight = 12;
             panel.style.paddingTop = 8; panel.style.paddingBottom = 8;
             heading = AddLabel(panel, "THE HOLLOW", "text-s");
+            heading.style.display = DisplayStyle.None;   // kept as the zone name's source; the title card shows it
             detail = AddLabel(panel, "", "text-xs"); detail.AddToClassList("text-muted");
             detail.style.whiteSpace = WhiteSpace.Normal; detail.style.display = DisplayStyle.None;
             outcome = AddLabel(panel, report, "text-xs"); outcome.style.whiteSpace = WhiteSpace.Normal;
@@ -426,6 +437,7 @@ namespace Game.App.DevRuntime.Playground
         void ClearPresentation()
         {
             panel?.RemoveFromHierarchy();
+            if (host.Context.TryGetService<UiComposition>(out var hudScreens)) hudScreens.HudModel.ZoneName = "";
             shownTo.Clear();
             panel = null; heading = detail = outcome = null;
             hollow?.Dispose();

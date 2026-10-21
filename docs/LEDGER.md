@@ -1294,6 +1294,31 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-10-21 — HUD redesign built; third-person camera and VESHA polished (lead, claude-opus-5-5)
+- Owner, on the HUD mockup: "yes build it, only difference is, if the bars are at their max we don't need to show them". On the prototype: "that thirdperson + planet prototype looks soooo awful lets polish it as much as we can."
+- **HUD** (SPEC-61 §4.4 marked superseded; the recommended answers to the mockup's three questions):
+  - No plates in the corners. The view keeps an ability strip (bottom centre, small, lit only while usable), a title card (4 s on arrival in a system or zone; the playground's location plate feeds it), and a one-line objective toast (6 s on change).
+  - `HudMarks` draws the reticle (it is the cursor; the system cursor hides in flight) with three fire-group ticks, the lead pip, and the arcs at the player's ship.
+  - Ship arcs: hull on the left, shield on the right, energy below. **A full bar never shows.** Hull shows on a hit (3 s) or below 30 %, and a scratch above 97 % counts as full. Shield shows whenever it is below full. Energy shows while boosting or below 25 %. Numbers show only below their thresholds; speed shows only while boosting.
+  - `WorldOverlaySystem` tags only what matters: the hovered ship (`PlayerInputSampleSystem.HoverEntity`), the locked ship, the interaction target (the tag carries "[F] Dock · name", dimmed out of range), salvage wrecks nearby, and contacts a ping just revealed.
+  - A hovered or locked ship's bracket carries its shield and hull arcs.
+  - Edge chevrons replace the radar. They mark hostiles and allies (grouped, "2 hostiles · 1.9 km"), the next gate and points of interest in gold, and the two nearest stations. Neutral traffic gets none.
+  - The sensor ping (`Flight/SensorPing`, V; also on arrival in a system; `camera ping`) is a pulse on screen, and a world ring from a steep camera.
+  - Toasts rise from the player's ship while the flight HUD is on top (`NotificationService.SetAnchor`).
+  - Radar contacts keep their true offsets (flag 2 still marks beyond 2 km), so edge markers show true distances.
+  - The playground's Console and Enter buttons hide while flying (Esc shows them; F1 opens the console).
+- **Polish:**
+  - VESHA is now 80 km instead of 150 km, so the horizon dips 14° and shows the curve. The cap is 28°.
+  - The planet shader adds distance haze (aerial perspective) with a warm terminator, fewer octaves far away, coast, dry and forest land, and a sharper sun glint.
+  - The atmosphere glow follows the height at which the view ray passes over the surface (scale height 420 m). The hard band where the shell ended is gone.
+  - The tether is a pale cable with lit collars every 90 m, and `goto=orbit` puts it to the side of the view, not through the ship.
+  - The sky gets a tilted galactic band with smoke and denser stars, so a low camera no longer looks into black.
+  - The shield shell is about half as visible at rest; hits light it as before.
+- Proof: `Logs/playtest/hud_redesign_sheet.png` (orbit with the title card; combat with lock, bracket arcs and the shield arc; the ping; calm flight in the Hollow) and `final_*.png`. The `hud_redesign` scenario passes with no exceptions.
+- Not seen on screen: the lead pip (both ships stood still in the run) and the interaction tag (the playground stations are dev circles, not interaction targets).
+- Tests: PlayMode FlightHudView 7 (rewritten for the new HUD: layout at every logical size, contrast, zero-alloc updates, readouts only below thresholds and never at full, title card and objective toast, pooled elements), UiComposition 4, ShipEditorView 4, Playground 1, NocturneEnvironment 2, DevInput 2, AimCommand 1, Accessibility 4. EditMode HudSync 6, HudSnapshot 10 (beyond-range contacts keep their true offset), InputAsset 3 (SensorPing on V), FlightContract 2, ScreenTable 1, AimAssist 3, WeaponAim 5, PlayerTargeting 6, CameraRigService 6, CameraTargetSync 4, NotificationService 7, HudNotificationPresenter 3. All pass.
+  - HudNotificationPresenter's `TravelAndEconomyNotices_Mapped` had been failing since ABL-006 made `RepairDone` a positive notice; the test now expects that.
+
 ### 2026-10-21 — Feel prototype: auto-aim, camera presets, a planet below the plane (lead, claude-opus-5-5)
 - Owner: "the top down only view feels very restraining... can we implement a third person orbital camera that follows the cursor", "auto-aiming for players enabled by default so the weapons shoot at the target ship the player has their cursor on", then "build the feel prototype: auto-aim first, then the camera presets, then one planet with its orbit coast. Show me the HUD mockup before building it."
 - Design note: `docs/design/exploration/world-and-scale.md`. It covers:

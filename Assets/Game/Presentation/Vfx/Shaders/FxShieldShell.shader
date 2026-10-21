@@ -63,7 +63,8 @@ Shader "Game/Vfx/FxShieldShell"
                     +Ring(input.surfacePoint,e.Ripple4)+Ring(input.surfacePoint,e.Ripple5)+Ring(input.surfacePoint,e.Ripple6)+Ring(input.surfacePoint,e.Ripple7);
                 float lines = Lattice(input.surfacePoint, input.surfacePoint);
                 float shimmer = 0.75 + 0.25 * sin(_Time.y * 2.3 + input.surfacePoint.y * 6.0 + input.surfacePoint.x * 3.0);
-                float alpha = rim * 0.22 + lines * (0.035 * shimmer + rim * 0.25 + rings * 1.4 + e.Flash * 0.5) + rings * 0.55 + e.Flash * (0.15 + rim * 0.8);
+                // HUD redesign (2026-10-21): at rest the shell is a faint rim so the third-person camera sees the ship, not the bubble; hits light it as before
+                float alpha = rim * 0.11 + lines * (0.018 * shimmer + rim * 0.12 + rings * 1.4 + e.Flash * 0.5) + rings * 0.55 + e.Flash * (0.15 + rim * 0.8);
                 float hp = saturate(e.HpFraction);
                 return half4(e.Color.rgb * (1.0 + e.Flash * 1.5 + rings * 1.5 + lines * 0.5), saturate(alpha) * e.Color.a * (0.35 + 0.65 * hp) * step(0.001, hp));
             }

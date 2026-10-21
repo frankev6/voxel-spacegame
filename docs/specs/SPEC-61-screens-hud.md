@@ -179,6 +179,23 @@ Close buttons (`<key>-close`) call `UIScreen.Close()` inside the view; they are 
 
 ### 4.4 HUD zones (`FlightHudView`, `Theme/screens/hud.uss`)
 
+> **Superseded 2026-10-21 by the HUD redesign** (owner-approved mockup; owner: "a bar at its max doesn't need to show"). No plates sit in
+> the corners any more. What replaced each zone:
+>
+> | Was | Now | Where |
+> |---|---|---|
+> | Z-TL location | title card, 4 s on arrival in a system or zone | `hud-region-title` |
+> | Z-TC objective + route | one-line objective toast, 6 s on change; the next gate is a gold edge marker | `hud-region-objective`, `WorldOverlaySystem` |
+> | Z-TR radar | edge chevrons for off-screen hostiles, allies, the next gate, points of interest and the two nearest stations; a sensor ping (`Flight/SensorPing`, V, and on arrival) tags what it crosses | `WorldOverlaySystem` |
+> | Z-R target panel | bracket on the hovered or locked ship with shield (outer) and hull (inner) arcs | `WorldOverlaySystem` |
+> | Z-C prompt | "[F] Dock · name" tag on the object, dimmed out of range | `WorldOverlaySystem` |
+> | Z-BL meters, speed, shield status | hull (left), shield (right) and energy (below) arcs at the player's ship, only when not full: hull on a hit or below 30 %, shield below full, energy while boosting or below 25 %; numbers only below the threshold; speed only while boosting | `HudMarks`, `hud-readout-*` |
+> | Z-BC weapon groups | three ticks under the reticle (the reticle is the cursor; the system cursor hides in flight) | `HudMarks` |
+> | Z-BC abilities | a small ability strip, lit only while usable | `hud-region-abilities` |
+> | toast column | rises from the player's ship while the flight HUD is on top | `NotificationService.SetAnchor` |
+>
+> The table below is the shipped M1 layout, kept for history.
+
 | Zone | Region name | Anchor class | Contents (element names) |
 |---|---|---|---|
 | Z-TL | `hud-region-location` | `.anchor-top-left` | `hud-star-system` (label), `hud-zone` (label) |

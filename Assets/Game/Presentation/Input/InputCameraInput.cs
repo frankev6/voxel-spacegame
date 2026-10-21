@@ -10,7 +10,7 @@ namespace Game.Presentation.Input
     public sealed class InputCameraInput : ICameraInput
     {
         readonly InputService input;
-        bool cursorLocked;
+        bool cursorLocked, cursorHidden;
         public InputCameraInput(InputService input) { this.input = input ?? throw new ArgumentNullException(nameof(input)); }
         public Vector2 OrbitDelta { get; private set; }
         public Vector2 PanDelta { get; private set; }
@@ -40,13 +40,14 @@ namespace Game.Presentation.Input
                 return;
             }
             var flight = input.Controls.Flight;
-            // Feel prototype `orbit` preset: mouse look locks the cursor while flying; any other context gets it back.
-            bool look = input.CurrentContext == InputContext.Flight && flight.enabled && FlightCameraPreset.Current.MouseLook;
-            if (look != cursorLocked)
+            // While flying the HUD reticle is the cursor (HUD redesign, 2026-10-21), so the system cursor hides; mouse look (`orbit`)
+            // also locks it. Any other context gets it back.
+            bool flying = input.CurrentContext == InputContext.Flight && flight.enabled, look = flying && FlightCameraPreset.Current.MouseLook;
+            if (look != cursorLocked || flying != cursorHidden)
             {
-                cursorLocked = look;
+                cursorLocked = look; cursorHidden = flying;
                 Cursor.lockState = look ? CursorLockMode.Locked : CursorLockMode.None;
-                Cursor.visible = !look;
+                Cursor.visible = !flying;
             }
             if (input.CurrentContext != InputContext.Flight) return;
             if (look || flight.CameraOrbitHold.IsPressed()) OrbitDelta = flight.CameraLook.ReadValue<Vector2>();
