@@ -53,7 +53,7 @@ namespace Game.Presentation.Systems
             public int CompareTo(Candidate other) { int c = ((int)other.Why & 7).CompareTo((int)Why & 7); if (c != 0) return c; c = Distance.CompareTo(other.Distance); return c != 0 ? c : Entity.Index.CompareTo(other.Entity.Index); }
         }
         struct ArcMark { public Vector2 Centre; public float Radius, Hull, Shield; public bool HasShield; }
-        struct Chevron { public Vector2 Point, Direction; public Color Color; public int Count; public float Distance; public byte Group; }
+        struct Chevron { public Vector2 Point, Direction; public Color Color; public int Count; public float Distance; public byte Group; public string Label; }
         readonly Tag[] tags = new Tag[MaxTags];
         readonly Edge[] edges = new Edge[MaxEdges];
         readonly List<Candidate> candidates = new(64);
@@ -308,7 +308,7 @@ namespace Game.Presentation.Systems
                 if (chevrons.Count >= MaxEdges) continue;
                 if (group == 4) stations++;
                 var color = group == 3 ? Objective : group == 4 ? Station : group == 2 ? Enemy : group == 1 ? Ally : Neutral;
-                chevrons.Add(new Chevron { Point = at, Direction = direction.normalized, Color = color, Count = 1, Distance = distance, Group = group });
+                chevrons.Add(new Chevron { Point = at, Direction = direction.normalized, Color = color, Count = 1, Distance = distance, Group = group, Label = contact.Label });
             }
             for (int i = 0; i < chevrons.Count; i++)
             {
@@ -316,6 +316,7 @@ namespace Game.Presentation.Systems
                 text.Clear();
                 if (chevron.Count > 1) text.Append(chevron.Count).Append(chevron.Group == 2 ? " hostiles" : chevron.Group == 1 ? " allies" : " contacts").Append("  ·  ");
                 else if (chevron.Group == 4) text.Append("Station  ·  ");
+                else if (chevron.Label != null) text.Append(chevron.Label).Append("  ·  ");   // DEV-028: a named body or site
                 text.Append(Distance(chevron.Distance));
                 if (edge.Text == null || !Same(text, edge.Text)) { edge.Text = text.ToString(); edge.Label.text = edge.Text; }
                 Vector2 label = chevron.Point - chevron.Direction * 22;
@@ -381,7 +382,8 @@ namespace Game.Presentation.Systems
             painter.strokeColor = color;
             painter.BeginPath(); painter.Arc(centre, radius, Angle.Degrees(start), Angle.Degrees(start + span * fraction)); painter.Stroke();
         }
-        static string Distance(float metres) => metres < 1000 ? NumberStringCache.Get((int)math.round(metres / 10) * 10) + " m" : (metres / 1000).ToString("0.0") + " km";
+        static string Distance(float metres) => metres < 1000 ? NumberStringCache.Get((int)math.round(metres / 10) * 10) + " m"
+            : metres < 100000 ? (metres / 1000).ToString("0.0") + " km" : NumberStringCache.Get((int)math.round(metres / 1000)) + " km";
         static bool Same(System.Text.StringBuilder builder, string value)
         {
             if (builder.Length != value.Length) return false;

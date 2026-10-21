@@ -713,6 +713,18 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [x] The two Hollow repros run and pass on the current build.
 - **Tests:** `ScenarioRunnerTests.Report_RecordsMetrics`; the two scenario files.
 
+### DEV-028 — The Hollow system in the playground
+- **Milestone:** M4
+- **Tier:** frontier — a star system's bodies below the plane around the Hollow, at 640 km scale under the floating origin
+- **Depends on:** `DEV-023`, `TRV-015`
+- **Do:** Owner (2026-10-21) approved the exploration slice map (`docs/design/exploration/exploration-slice.md`, phase 1). Place the system round the Hollow so VESHA's tether stays put: the star far below with its heat zone, VESHA, CINDER, ORRO (ringed gas giant) and PALE at their depths, the Scatter (a cruise zone with rocks) and the Haze; markers for the sites to come, shown by the edge markers; `playground goto=<body or site>`; a scenario that cruises the system.
+- **Files:** `Assets/Game/App/DevRuntime/Playground/HollowSystem*.cs`, `HollowOrbit.cs`, `PlaygroundHollow.cs`, `DevPlayground.cs`; orbit shaders; `TestData/Scenarios/hollow_system_cruise.scenario`.
+- **Acceptance criteria:**
+  - [ ] Every body of the approved map is in place at its depth and reads from the plane as on the map.
+  - [ ] Cruising from the Hollow reaches CINDER and back with no exceptions, the Scatter slowing the ship.
+  - [ ] The edge markers name the bodies and the sites to come.
+- **Tests:** `PlaygroundTests` (existing); the `hollow_system_cruise` scenario.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

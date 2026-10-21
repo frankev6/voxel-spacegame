@@ -37,9 +37,7 @@ namespace Game.Simulation.Commands
             ref var consumed = ref SystemAPI.GetSingletonRW<PlayerEdgeConsumed>().ValueRW.Value;
             if (anyPlayerQuery.IsEmptyIgnoreFilter || playerQuery.IsEmptyIgnoreFilter)
             {
-                // Cruise belongs to the variable-rate travel consumer, including while no live player exists (Q13).
-                byte cruise = consumed.Cruise;
-                consumed = player.Edges; consumed.Cruise = cruise;
+                consumed = player.Edges;   // drop pending presses, Cruise included (ADR-0122 made it a ship edge)
                 return;
             }
             var command = PilotCommandConversion.Convert(player, ref consumed);   // shared with co-op guests' ships (ADR-0117)
@@ -56,10 +54,7 @@ namespace Game.Simulation.Commands
                     command.FireGroups = 0;
                     command.Edges = ShipCommandEdges.None;
                     // Drop the entire pending ship-action backlog, including multiple presses/counter wrap (SPEC-32 Q11).
-                    // Cruise remains the variable-rate travel consumer's counter (SPEC-20 Q13).
-                    byte cruise = consumed.Cruise;
                     consumed = player.Edges;
-                    consumed.Cruise = cruise;
                 }
             }
             holds.Update(ref state);

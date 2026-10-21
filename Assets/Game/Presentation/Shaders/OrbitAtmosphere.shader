@@ -10,6 +10,7 @@ Shader "Game/Orbit/Atmosphere"
         _Radius ("Planet radius (m)", Float) = 80000
         _ScaleHeight ("Scale height (m)", Float) = 420
         _SunFallback ("Sun direction if no light", Vector) = (0.4, 0.6, 0.3, 0)
+        _WorldScale ("Scaled-space factor (set per frame)", Float) = 1
     }
     SubShader
     {
@@ -27,7 +28,7 @@ Shader "Game/Orbit/Atmosphere"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             CBUFFER_START(UnityPerMaterial)
-                float4 _Glow, _Dusk, _SunFallback; float _Radius, _ScaleHeight;
+                float4 _Glow, _Dusk, _SunFallback; float _Radius, _ScaleHeight, _WorldScale;
             CBUFFER_END
             struct Attributes { float3 positionOS : POSITION; };
             struct Varyings { float4 positionCS : SV_POSITION; float3 normalWS : TEXCOORD0; float3 positionWS : TEXCOORD1; };
@@ -48,7 +49,7 @@ Shader "Game/Orbit/Atmosphere"
                 float3 eye = _WorldSpaceCameraPos - centre, ray = normalize(input.positionWS - _WorldSpaceCameraPos);
                 float along = max(0, -dot(eye, ray));
                 float3 closest = eye + ray * along;
-                float altitude = length(closest) - _Radius;
+                float altitude = (length(closest) - _Radius * _WorldScale) / max(1e-4, _WorldScale);   // true metres in scaled space
                 float glow = altitude >= 0 ? exp(-altitude / _ScaleHeight) : exp(altitude / (_ScaleHeight * 12));
                 Light sun = GetMainLight();
                 float3 L = dot(sun.direction, sun.direction) > 0.5 ? normalize(sun.direction) : normalize(_SunFallback.xyz);

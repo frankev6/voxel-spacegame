@@ -7,5 +7,6 @@ namespace Game.UI.Views
         public byte Kind;
         public byte Relation;
         public byte Flags;
+        public string Label;   // DEV-028: a named marker ("CINDER"); null for contacts
     }
 }

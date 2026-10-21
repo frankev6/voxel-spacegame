@@ -19,76 +19,25 @@ namespace Game.App.DevRuntime.Playground
         internal const float CoastRadius = 1600;   // within this of the tether the player is "over the coast"
         [Game.Core.StaticStateOk("feel prototype tuning, main thread")] internal static float Radius = 80000, Depth = 2500;
         // 80 km: from the plane the horizon dips 14°, a curve the chase camera frames; the cap reaches past it from anywhere near the Hollow
-        const float CapDeg = 28, AirThickness = 1800;
-        const int Rings = 220, Segments = 288;
 
         readonly List<Object> owned = new();
         GameObject root;
-        Transform planet, air;
 
+        /// <summary>The tether under the Hollow's dressing. The planet itself is drawn by <see cref="HollowSystem"/> (DEV-028) with the
+        /// rest of the star system, from <see cref="Radius"/> and <see cref="Depth"/>.</summary>
         internal void Build(Transform dressing)
         {
-            var surface = Shader.Find("Game/Orbit/Planet"); var glow = Shader.Find("Game/Orbit/Atmosphere");
-            if (surface == null || glow == null) { Debug.LogWarning("HollowOrbit: orbit shaders missing; no planet"); return; }
-            root = new GameObject("Hollow orbit (VESHA)"); root.transform.SetParent(dressing, false);
-            var planetMaterial = Own(new Material(surface) { name = "orbit planet" });
-            var airMaterial = Own(new Material(glow) { name = "orbit air" });
-            planet = Sphere("VESHA surface", planetMaterial, 1).transform;
-            air = Sphere("VESHA air", airMaterial, 1).transform;
-            Place();
+            root = new GameObject("Hollow orbit (VESHA's tether)"); root.transform.SetParent(dressing, false);
             BuildTether();
         }
 
-        /// <summary>Re-places the planet after a live tuning change.</summary>
+        /// <summary>After a live tuning change: the tether is rebuilt to the new depth (the planet follows on the next frame).</summary>
         internal void Place()
         {
             if (root == null) return;
-            var centre = new Vector3(Tether.x, -(Radius + Depth), Tether.y);
-            planet.localPosition = air.localPosition = centre;
-            planet.localScale = Vector3.one * Radius;
-            air.localScale = Vector3.one * (Radius + AirThickness);
-            air.GetComponent<MeshRenderer>().sharedMaterial.SetFloat("_Radius", Radius);
-        }
-
-        GameObject Sphere(string name, Material material, float radius)
-        {
-            var go = new GameObject(name); go.transform.SetParent(root.transform, false);
-            go.AddComponent<MeshFilter>().sharedMesh = Cap(radius);
-            var renderer = go.AddComponent<MeshRenderer>(); renderer.sharedMaterial = material;
-            renderer.shadowCastingMode = ShadowCastingMode.Off; renderer.receiveShadows = false;
-            renderer.lightProbeUsage = LightProbeUsage.Off; renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-            return go;
-        }
-
-        /// <summary>A unit-sphere cap round +Y, CapDeg wide: the only part ever in view from the plane. Rings crowd towards the top,
-        /// where the camera looks closest.</summary>
-        Mesh Cap(float radius)
-        {
-            var vertices = new Vector3[1 + Rings * Segments];
-            var triangles = new int[(Segments + (Rings - 1) * Segments * 2) * 3];
-            vertices[0] = Vector3.up * radius;
-            for (int r = 0; r < Rings; r++)
-            {
-                float t = (r + 1f) / Rings, polar = math.radians(CapDeg) * t * t;
-                for (int s = 0; s < Segments; s++)
-                {
-                    float az = 2 * math.PI * s / Segments;
-                    vertices[1 + r * Segments + s] = new Vector3(math.sin(polar) * math.cos(az), math.cos(polar), math.sin(polar) * math.sin(az)) * radius;
-                }
-            }
-            int k = 0;
-            for (int s = 0; s < Segments; s++) { triangles[k++] = 0; triangles[k++] = 1 + (s + 1) % Segments; triangles[k++] = 1 + s; }
-            for (int r = 0; r < Rings - 1; r++)
-                for (int s = 0; s < Segments; s++)
-                {
-                    int a = 1 + r * Segments + s, b = 1 + r * Segments + (s + 1) % Segments, c = a + Segments, d = b + Segments;
-                    triangles[k++] = a; triangles[k++] = b; triangles[k++] = c;
-                    triangles[k++] = b; triangles[k++] = d; triangles[k++] = c;
-                }
-            var mesh = Own(new Mesh { name = "orbit cap", indexFormat = IndexFormat.UInt32 });
-            mesh.vertices = vertices; mesh.triangles = triangles;
-            mesh.bounds = new Bounds(Vector3.up * radius * .98f, Vector3.one * radius * 2);
-            return mesh;
+            var dressing = root.transform.parent;
+            Dispose();
+            Build(dressing);
         }
 
         /// <summary>The tether: a pale cable banded with lit collars from the surface to the plane, and its anchor hub; its beacons are
@@ -147,7 +96,7 @@ namespace Game.App.DevRuntime.Playground
         {
             if (root != null) Object.Destroy(root);
             foreach (var o in owned) if (o != null) Object.Destroy(o);
-            owned.Clear(); root = null; planet = air = null;
+            owned.Clear(); root = null;
         }
     }
 }

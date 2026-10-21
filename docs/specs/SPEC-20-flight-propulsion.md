@@ -87,7 +87,7 @@ namespace Game.Simulation.Commands
     public struct PlayerEdgeCounters
     {
         public byte Interact, Ability1, Ability2, Ability3, Ability4, TargetNext, TargetUnderCursor, TargetClear, AutofireToggle;
-        public byte Cruise;              // SPEC-03 Flight/Cruise; not a ship edge: consumed only by SPEC-32 TravelService (M4) as a
+        public byte Cruise;              // SPEC-03 Flight/Cruise (J): a ship edge since ADR-0122 (in-world cruise); formerly
                                          // variable-rate edge. Present from M0 so the struct (and SPEC-71 replays) never change size
     }
 
@@ -700,7 +700,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 
 | 12 | Native float dot reductions differ by one ULP between managed and strict Burst on the reference machine | Accumulate three dot-product terms in double, cast once to float | Tech lead | Resolved FLT-004: the initial failing seeded case had identical coordinate traces but residual bits 1172050705 vs 1172050704. Explicit scalar float grouping also differed. Double product/sum accumulation with one final cast passes all six tests, including 100 problems × 127 intermediate states and two independently scheduled Burst solves against managed outputs. Public fields, fixed coordinate order and solver objective are unchanged; FLT-011 still owns whole-flight cost gates. |
 
-| 13 | No-player step 2 copies the Cruise counter despite its separate travel owner and the Cruise acceptance criterion | Drop only the nine ship counters, preserve consumed.Cruise | Tech lead | Resolved FLT-005: live player, hulk and absent-player paths all leave Cruise untouched. The specified Cruise_NotAShipEdge test covers all three. Other pending edges are dropped when no live ship exists; byte counter wrap consumes one press. |
+| 13 | No-player step 2 copies the Cruise counter despite its separate travel owner and the Cruise acceptance criterion | Drop only the nine ship counters, preserve consumed.Cruise | Tech lead | Resolved FLT-005: live player, hulk and absent-player paths all leave Cruise untouched. The specified Cruise_NotAShipEdge test covers all three. Other pending edges are dropped when no live ship exists; byte counter wrap consumes one press. **Superseded by ADR-0122 (2026-10-21):** Cruise is now the ship edge `ShipCommandEdges.Cruise` (512), consumed like the other nine; the no-player and control-lock paths drop it too; the test is `Cruise_IsAShipEdge`. |
 
 | 14 | Propulsion reads module rows but its required-singleton table omits BlockModulesRef | Require the module singleton before scheduling | Tech lead | Resolved FLT-007: add the missing boot-data guard; the thruster rebuild uses the existing BlockModulesBlob.TryGet API. No contract change. |
 | 15 | Default LinearAssistGain 0.5 makes the final braking approach exponential, so exact zero has no finite M×v/ΣF stopping time | Test the analytical saturated bound with gain 1 and convergence separately with shipped defaults | Tech lead | Resolved FLT-007: preserve §5.3's assist formula. Brake_Stops compares unit-gain stopping ticks to M×v/ΣF within two ticks, and separately requires the default half-gain fixture to reach below 0.01 m/s. Brake suppresses boost in both cases. |

@@ -36,6 +36,7 @@ namespace Game.Presentation.Systems
         uint lastSourceRadar;
         bool radarInitialized;
         readonly System.Collections.Generic.List<double3> markers = new();
+        readonly System.Collections.Generic.List<string> markerLabels = new();
         public ReadOnlySpan<HudRadarBlipView> Blips => radar.AsSpan(0, radarCount);
         /// <summary>Extra point-of-interest markers in star-system coordinates, drawn as POI blips after the
         /// simulation contacts and clamped to the rim when beyond range (QA-001: the dev playground's beacons use the
@@ -43,8 +44,11 @@ namespace Game.Presentation.Systems
         /// <summary>Displayed radar range; contacts are gathered within 2000 m and those beyond this range sit on the rim.</summary>
         public float DisplayRangeM { get => displayRange; set => displayRange = math.isfinite(value) ? math.clamp(value, 100, 2000) : 2000; }
         float displayRange = 2000;
-        public void SetMarkers(ReadOnlySpan<double3> positions)
-        { markers.Clear(); for (int i = 0; i < positions.Length; i++) markers.Add(positions[i]); }
+        public void SetMarkers(ReadOnlySpan<double3> positions, ReadOnlySpan<string> labels = default)
+        {
+            markers.Clear(); markerLabels.Clear();
+            for (int i = 0; i < positions.Length; i++) { markers.Add(positions[i]); markerLabels.Add(i < labels.Length ? labels[i] : null); }
+        }
         protected override void OnCreate()
         {
             snapshots = GetEntityQuery(ComponentType.ReadOnly<HudSnapshot>(), ComponentType.ReadOnly<HudRadarBlip>());
@@ -200,6 +204,10 @@ namespace Game.Presentation.Systems
             return math.distancesq(intercept, centre) > .25f;   // a still target needs no pip
         }
         float3 Velocity(Entity entity) => EntityManager.HasComponent<Unity.Physics.PhysicsVelocity>(entity) ? EntityManager.GetComponentData<Unity.Physics.PhysicsVelocity>(entity).Linear : float3.zero;
+        /// <summary>ADR-0122: the line under the speed: the phase, or why a press was refused (2.5 s).</summary>
+        static string CruiseLine(in HudSnapshot value) => value.CruisePhase == 2 ? "CRUISE" : value.CruisePhase == 1 ? "CRUISE · SPOOLING"
+            : value.CruiseBlockAgeTicks >= 150 ? "" : value.CruiseBlock switch
+            { 1 => "CRUISE · TOO CLOSE", 2 => "CRUISE · MASS LOCKED", 3 => "CRUISE · HIT", _ => "" };
         float ProjectileSpeed(Entity player)
         {
             if (!SystemAPI.TryGetSingleton<Game.Simulation.Weapons.WeaponDefsRef>(out var defs) || !defs.Value.IsCreated) return 0;
@@ -230,6 +238,7 @@ namespace Game.Presentation.Systems
             }
             model.ShieldStatus = value.ShieldStatus; model.SpeedMps = Rounded(value.SpeedMps);
             model.Boosting = (value.Flags & HudFlags.Boosting) != 0;
+            model.Cruising = ship && value.CruisePhase == 2; model.CruiseText = ship ? CruiseLine(value) : "";
             model.HasTarget = ship && (value.Flags & HudFlags.HasTarget) != 0;
             model.TargetName = !model.HasTarget ? "" : value.TargetPilot.Length > 0 ? PilotText(value.TargetPilot) : names.TargetName(value.TargetNameHash, value.TargetFaction);
             model.TargetRelation = value.TargetRelation;
@@ -296,7 +305,7 @@ namespace Game.Presentation.Systems
                 {
                     float2 offset = (float2)(markers[m] - playerPosition).xz; byte flags = 0;
                     if (math.lengthsq(offset) > range * range) flags = 2;
-                    var next = new HudRadarBlipView { OffsetXZ = new UnityEngine.Vector2(offset.x, offset.y), Kind = 3, Flags = flags };
+                    var next = new HudRadarBlipView { OffsetXZ = new UnityEngine.Vector2(offset.x, offset.y), Kind = 3, Flags = flags, Label = markerLabels[m] };
                     changed |= !Same(radar[count], next); radar[count++] = next;
                 }
             }
@@ -311,7 +320,7 @@ namespace Game.Presentation.Systems
             if (name != pilotKey) { pilotKey = name; pilotText = name.ToString(); }
             return pilotText;
         }
-        static bool Same(HudRadarBlipView a, HudRadarBlipView b) => a.OffsetXZ == b.OffsetXZ && a.Kind == b.Kind && a.Relation == b.Relation && a.Flags == b.Flags;
+        static bool Same(HudRadarBlipView a, HudRadarBlipView b) => a.OffsetXZ == b.OffsetXZ && a.Kind == b.Kind && a.Relation == b.Relation && a.Flags == b.Flags && ReferenceEquals(a.Label, b.Label);
         static int Rounded(float value) => math.isfinite(value) ? (int)math.clamp(math.round(value), int.MinValue, int.MaxValue) : 0;
         /// <summary>Name, description, cost and the blocked reason, for the ability slot's hover tooltip.</summary>
         static string Tooltip(Game.Data.Definitions.AbilityDefinition definition, byte blocked)

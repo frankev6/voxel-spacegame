@@ -68,7 +68,7 @@ This spec moves the player between star systems and, from M4, across a star syst
 11. **Events.** Both payloads live in `Game.Core.Events` and are published with `EventBus<T>.Publish` from managed code only (SPEC-02 §5.6 rule 4):
     - `LaneJumped`: once per completed lane jump, at the start of Arriving.
     - `TravelNotice`: messages for SPEC-61, which may contain a string.
-12. **Supercruise (M4) is an in-system hop.** It uses the same cover, pause and placement mechanism as a jump, with a same-star-system origin request. There is no high-speed flight mode. Reason: the glossary says "fast in-system travel (non-combat)". A hop avoids tunnelling, streaming at 1 km/s, and velocity assignment.
+12. **Superseded by [ADR-0122](../decisions/ADR-0122-in-world-cruise.md) (owner, 2026-10-21): cruise is in-world flight, built by TRV-015.** Original text: **Supercruise (M4) is an in-system hop.** It uses the same cover, pause and placement mechanism as a jump, with a same-star-system origin request. There is no high-speed flight mode. Reason: the glossary says "fast in-system travel (non-combat)". A hop avoids tunnelling, streaming at 1 km/s, and velocity assignment.
 13. **Folders and namespaces:**
     - `Assets/Game/Galaxy/Travel/` → `Game.Galaxy.Travel`: value types, solvers, the planner and internal tables.
     - `Assets/Game/Galaxy/Services/TravelService.cs` → `Game.Galaxy.Services`, as in SPEC-31 decision 13.
@@ -1074,6 +1074,8 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 - **Tests:** `TravelIntegrationTests.R30_ArrivesAtGateInsideTarget`, `.Jump_WithinBudget`, `.TwentyJumps_NoGrowth`, `.Save_BlockedDuringJump`.
 
 ### TRV-013 — Supercruise (in-system hop)
+> **Superseded by ADR-0122 and TRV-015** (2026-10-21). Kept for history; not to be built.
+
 - **Milestone:** M4
 - **Tier:** frontier — F5: same-star-system origin placement under a pause, with streaming readiness and combat gating
 - **Depends on:** `TRV-012`, `SPEC-23`, `SPEC-61`
@@ -1099,6 +1101,20 @@ Escorts never carry `StarSystemMember`, so the unload does not touch them while 
 - **Acceptance criteria:**
   - [ ] The fake sees `Capture` → `Place` for a jump and `Capture` → `Restore` for a refused change, and `Place` happens while the pause token is still held.
 - **Tests:** `EscortHookTests.Jump_CaptureThenPlace`, `.Refused_Restores`, `.Place_BeforeUnpause`.
+
+### TRV-015 — In-world cruise (ADR-0122)
+- **Milestone:** M4
+- **Tier:** frontier — a second speed regime on the same bodies, with clearance, mass lock and the floating origin at 8 km/s
+- **Depends on:** `TRV-001`, `SPEC-20`, `SPEC-23`
+- **Do:** Owner (2026-10-21), approving the exploration slice: "Write up the exploration slice plan (cruise ADR, …) and start building it". Build [ADR-0122](../decisions/ADR-0122-in-world-cruise.md): the `Cruise` ship edge, the `Cruise` component and `CruiseConfig`, `CruiseSystem` (phases, clearance from the spatial hash, mass lock, damage lock, cruise zones, the speed cap; holds weapons), `CruiseDriveSystem` (velocity along the nose after propulsion), `CruiseZone` entities, and the HUD readout.
+- **Files:** `Assets/Game/Simulation/Flight/Cruise*.cs`; `Assets/Game/Simulation/Commands/ShipCommandEdges.cs`, `PilotCommandConversion.cs`, `PlayerCommandApplySystem.cs`; HUD snapshot and view; `Assets/Game/Tests/EditMode/Simulation/Flight/CruiseTests.cs`.
+- **Acceptance criteria:**
+  - [ ] A press of J in open space spools for 1 s, then speed builds toward 8 km/s; another press, Brake or firing drops to flight speed.
+  - [ ] Cruise is refused within 1 km of any grid, with a hostile within 5 km, and for 5 s after a hit, and drops out on each.
+  - [ ] The cap follows `forward cap + 0.3 × (clearance − 1000 m)`; approaching a station ends cruise about 1 km from it at flight speed, without contact.
+  - [ ] A cruise zone caps the speed inside it.
+  - [ ] Weapons do not fire while spooling or cruising.
+- **Tests:** `CruiseTests.Cap_FollowsClearance`, `.Zone_CapsSpeed`, `.Refused_NearGrid`, `.Refused_MassLocked`, `.Drops_OnHostile`, `.Arrives_AtSlowRadius`, `.HoldsFire`; `PlayerCommandApplyTests.Cruise_IsAShipEdge`.
 
 ## 10. Open questions
 

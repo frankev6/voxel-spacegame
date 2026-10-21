@@ -73,6 +73,18 @@ namespace Game.UI.ViewModels
         [CreateProperty] public bool Boosting { get => boosting; set => Set(ref boosting, value, BoostingChanged); }
 
         [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs CruisingChanged = new BindablePropertyChangedEventArgs(nameof(Cruising));
+        bool cruising;
+        /// <summary>ADR-0122: the ship is in cruise (the speed reads in km/s).</summary>
+        [CreateProperty] public bool Cruising { get => cruising; set => Set(ref cruising, value, CruisingChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs CruiseTextChanged = new BindablePropertyChangedEventArgs(nameof(CruiseText));
+        string cruiseText = "";
+        /// <summary>ADR-0122: "CRUISE", "CRUISE · SPOOLING", or a refusal for a few seconds ("CRUISE · MASS LOCKED"); empty otherwise.</summary>
+        [CreateProperty] public string CruiseText { get => cruiseText; set => Set(ref cruiseText, value ?? "", CruiseTextChanged); }
+
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
         static readonly BindablePropertyChangedEventArgs HasTargetChanged = new BindablePropertyChangedEventArgs(nameof(HasTarget));
         bool hasTarget;
         [CreateProperty] public bool HasTarget { get => hasTarget; set => Set(ref hasTarget, value, HasTargetChanged); }
