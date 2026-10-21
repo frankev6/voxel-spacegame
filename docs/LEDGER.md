@@ -1317,6 +1317,9 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - 800 m/s in the Scatter, then 4 km/s past it;
   - J at 9.8 km from CINDER drops to 96 m/s;
   - a Raider 2.5 km away locks cruise.
+- Owner, on the first proof sheet: "there are a lot of rendering issues?" Fixed:
+  - Bodies were drawn with a 125° dome, so a planet seen side-on lost its lower part. It is now a closed sphere.
+  - Scaled space pulled every far body to the same 42 km, so their depth order was lost: the star's glow stopped at ORRO's rim although the star is nearer. Distance now eases monotonically (true to 25 km, then toward 42 km), so a nearer body stays in front.
 - Found while testing: the orbit and cursor cameras steer by the mouse, so cruising in them follows the reticle. The scenario flies in chase.
 - Not done yet: the route from VESHA to CINDER passes 23 km from the star, inside the heat zone; heat does nothing until phase 6. Bottom-edge marker labels can overlap.
 - Tests: EditMode CruiseTests 9 (new), PlayerCommandApply 6 (`Cruise_IsAShipEdge`), FlightContract 2, RoleSystemPolicy 4, HudSnapshot 10, HudSync 6, RemotePilot 1. PlayMode FlightHudView 7, Playground 1. All pass.
