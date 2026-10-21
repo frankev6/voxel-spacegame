@@ -123,6 +123,13 @@ namespace Game.Presentation.Systems
                 if (SystemAPI.HasComponent<PhysicsVelocity>(player)) value.SpeedMps = math.length(SystemAPI.GetComponent<PhysicsVelocity>(player).Linear);
                 if (SystemAPI.HasComponent<ShipCommand>(player) && (SystemAPI.GetComponent<ShipCommand>(player).Flags & ShipCommandFlags.Boost) != 0)
                     value.Flags |= HudFlags.Boosting;
+                if (SystemAPI.HasComponent<Game.Simulation.Flight.Cruise>(player))
+                {
+                    var cruise = SystemAPI.GetComponent<Game.Simulation.Flight.Cruise>(player);
+                    uint now = SystemAPI.TryGetSingleton<SimClock>(out var cruiseClock) ? cruiseClock.Tick : 0;
+                    value.CruisePhase = (byte)cruise.Phase; value.CruiseBlock = (byte)cruise.Block;
+                    value.CruiseBlockAgeTicks = (ushort)math.min(65535u, now - cruise.BlockTick);
+                }
                 if (SystemAPI.HasBuffer<AbilitySlot>(player))
                 {
                     var slots = SystemAPI.GetBuffer<AbilitySlot>(player);

@@ -8,5 +8,6 @@ namespace Game.Simulation.Commands
     {
         None = 0, Interact = 1, Ability1 = 2, Ability2 = 4, Ability3 = 8, Ability4 = 16,
         TargetNext = 32, TargetUnderCursor = 64, TargetClear = 128, AutofireToggle = 256,
+        Cruise = 512,   // ADR-0122: in-world cruise toggle
     }
 }

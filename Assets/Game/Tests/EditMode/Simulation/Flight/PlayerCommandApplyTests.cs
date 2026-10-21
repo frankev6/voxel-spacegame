@@ -30,16 +30,18 @@ namespace Game.Tests.EditMode.Simulation.Flight
         const ShipCommandEdges AllEdges = (ShipCommandEdges)511;
 
         [Test]
-        public void Cruise_NotAShipEdge()
+        public void Cruise_IsAShipEdge()
         {
+            // ADR-0122: J toggles in-world cruise on the ship, one press per tick like the other edges
             var ship = Ship();
-            Set(new PlayerCommand { Edges = new PlayerEdgeCounters { Cruise = 3 } });
+            Set(new PlayerCommand { Edges = new PlayerEdgeCounters { Cruise = 2 } });
+            Assert.AreEqual(ShipCommandEdges.Cruise, Tick(ship).Edges);
+            Assert.AreEqual(ShipCommandEdges.Cruise, Tick(ship).Edges);
             Assert.AreEqual(ShipCommandEdges.None, Tick(ship).Edges);
-            Assert.AreEqual(0, world.GetSingleton<PlayerEdgeConsumed>().Value.Cruise);
-            EM.AddComponent<Hulk>(ship); world.StepTicks(1);
-            Assert.AreEqual(0, world.GetSingleton<PlayerEdgeConsumed>().Value.Cruise);
+            Assert.AreEqual(2, world.GetSingleton<PlayerEdgeConsumed>().Value.Cruise);
+            Set(new PlayerCommand { Edges = new PlayerEdgeCounters { Cruise = 5 } });
             EM.DestroyEntity(ship); world.StepTicks(1);
-            Assert.AreEqual(0, world.GetSingleton<PlayerEdgeConsumed>().Value.Cruise);
+            Assert.AreEqual(5, world.GetSingleton<PlayerEdgeConsumed>().Value.Cruise, "no ship: pending presses are dropped");
         }
 
         [Test]

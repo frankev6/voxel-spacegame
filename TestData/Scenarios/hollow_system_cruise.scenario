@@ -1,0 +1,53 @@
+scenario hollow_system_cruise
+desc "DEV-028/TRV-015: cruise the Hollow system from VESHA's coast across the Scatter to CINDER; ORRO, the Haze and the star; mass lock"
+status active
+tags explore
+timeout 600
+wait scene == "MainMenu" timeout=30
+wait ticks=30
+playground
+wait player.ready timeout=60
+camera cursor
+playground goto=hollow@150,-13300,71
+wait ticks=120
+camera chase
+wait ticks=240
+key keys=J
+wait player.cruise == 2 timeout=10
+wait ticks=600
+report over_vesha_speed=player.speed
+# chase only while cruising: the orbit and cursor cameras steer by the mouse
+camera chase
+wait player.speed < 900 && player.speed > 600 && system.km("cinder") < 210 timeout=120
+report scatter_speed=player.speed
+camera chase
+wait player.speed > 4000 timeout=60
+report past_scatter_speed=player.speed
+wait system.km("cinder") < 10 timeout=120
+key keys=J
+wait player.cruise == 0 timeout=5
+report arrival_speed=player.speed
+report cinder_km=system.km("cinder")
+wait ticks=120
+camera topdown
+wait ticks=300
+camera chase
+wait ticks=300
+playground goto=orro
+wait ticks=120
+camera orbit
+wait ticks=300
+playground goto=haze
+wait ticks=120
+camera chase
+wait ticks=300
+playground goto=star
+wait ticks=120
+camera orbit
+wait ticks=300
+spawn blueprint=ship_nocturne_wraith dz=2500 face=player faction=faction_raiders team=2
+wait ticks=90
+key keys=J
+wait ticks=30
+assert player.cruise == 0 "a hostile 2.5 km away locks cruise"
+assert logs.exceptions == 0 "no exceptions"

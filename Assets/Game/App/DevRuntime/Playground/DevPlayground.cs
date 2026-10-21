@@ -45,6 +45,7 @@ namespace Game.App.DevRuntime.Playground
         Label heading, detail, outcome;
         Button enterButton;
         PlaygroundHollow hollow;
+        readonly HollowSystem system = new();   // DEV-028: the Hollow's star system round the playground
         int hollowNearest = -2;
         double3 origin;
         bool active, entering;
@@ -178,6 +179,13 @@ namespace Game.App.DevRuntime.Playground
             Place(HollowLayout.Offset + HollowLayout.Entrance, HollowLayout.EntranceYaw);
         }
         internal bool Active => active;
+        /// <summary>DEV-028: km in the plane from the player to a body or site of the Hollow system (as goto names them), or -1.</summary>
+        internal double SystemKm(string id)
+        {
+            if (!active || hollow == null || !DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var ship)) return -1;
+            if (!HollowSystem.TryLocal(id, out var local)) return -1;
+            return math.distance(ship.xz, hollow.Origin.xz + (double2)local) / 1000;
+        }
         internal PlaygroundHollow Hollow => hollow;
         internal double3 Origin => origin;
         DevCommandResult Place(float2 at, float yaw)
@@ -227,6 +235,13 @@ namespace Game.App.DevRuntime.Playground
                     var moved = Place(HollowLayout.Offset + st.Position, st.Yaw);
                     return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("At " + st.Title + ". Press F.");
                 }
+            // DEV-028: the system's bodies and sites (vesha, cinder, orro, pale, star, gate, hauler, colony, scatter, haze)
+            if (HollowSystem.TryGoTo(id, out var systemAt, out var systemYaw))
+            {
+                system.Build();
+                var moved = Place(HollowLayout.Offset + systemAt, systemYaw);
+                return moved.Kind == DevResultKind.Failed ? moved : DevCommandResult.Ok("Out in the Hollow system: " + id + ". J cruises (ADR-0122).");
+            }
             if (Array.IndexOf(ConsoleOnly, id) >= 0) return DevCommandResult.Fail(id + " is a screen, not a place: playground run=" + id + " opens it.");
             return DevCommandResult.Fail("Unknown place. " + Directory());
         }
@@ -288,7 +303,7 @@ namespace Game.App.DevRuntime.Playground
         }
         string Directory()
         {
-            var text = new System.Text.StringBuilder("Console: playground reset | playground goto=hollow (the entrance), goto=orbit (VESHA's tether), goto=<station> or goto=hollow@x,z[,yaw] | playground run=<station or screen>\nStations:");
+            var text = new System.Text.StringBuilder("Console: playground reset | playground goto=hollow (the entrance), goto=orbit (VESHA's tether), goto=vesha|cinder|orro|pale|star|gate|hauler|colony|scatter|haze (the system; J cruises), goto=<station> or goto=hollow@x,z[,yaw] | playground run=<station or screen>\nStations:");
             foreach (var st in HollowLayout.Stations) text.Append(' ').Append(st.Id);
             text.Append("\nScreens (run only): ").Append(string.Join(", ", ConsoleOnly)).Append("; shield / boost trigger equipped abilities; station: ARK in the practice campaign\n");
             return text.ToString();
@@ -369,6 +384,15 @@ namespace Game.App.DevRuntime.Playground
             float2 at = located ? (float2)(ship3.xz - origin.xz) - HollowLayout.Offset : new float2(float.MaxValue, float.MaxValue);
             if (located && !hollow.Built && HollowLayout.Near(at, 1500)) hollow.Build();
             hollow.Tick(located, ship3);
+            // DEV-028: the star system's bodies, the Scatter's cruise zone and edge markers for the bodies and the gate
+            if (!system.Built) system.Build();
+            if (ctx.TryGetFrame(out var frameNow))
+            {
+                system.Tick(hollow.Origin, frameNow, Camera.main);
+                system.SpawnZones(ctx.EntityManager, hollow.Origin, frameNow);
+            }
+            var hudSync = World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
+            if (hudSync != null && located) { system.Markers(hollow.Origin, at, out var markerAt, out var markerNames); hudSync.SetMarkers(markerAt, markerNames); }
             // the race portal (owner: "inside the hollow there should be a portal to the race") lands the pilot off the track; the race
             // opens and puts them on its grid
             bool racing = Race != null && Race.IsOpen;
@@ -389,12 +413,15 @@ namespace Game.App.DevRuntime.Playground
             int st = located && hollow.Built ? hollow.Nearest(at) : -1;
             // feel prototype: over VESHA's coast the plate names the orbit (-2 marks it, so crossing in and out updates the plate)
             if (st < 0 && located && math.distance(at, HollowOrbit.Tether) < HollowOrbit.CoastRadius) st = -2;
+            // DEV-028: elsewhere in the system the plate names the body below, the belt or the Haze (codes -10 and down)
+            if (st == -1 && located && !HollowLayout.Near(at, 2500)) { int place = HollowSystem.Locate(at); if (place >= 0) st = -10 - place; }
             if (st != hollowNearest && heading != null)
             {
                 hollowNearest = st;
                 bool atHollow = located && HollowLayout.Near(at, 600);
                 heading.text = st >= 0 ? HollowLayout.Stations[st].Title + "  ·  " + input.GetBindingDisplay("Flight/Interact") + " ACTIVATE"
                     : st == -2 ? HollowOrbit.Name + "  ·  LOW ORBIT  ·  THE CLAN TETHER"
+                    : st <= -10 ? HollowSystem.Place(-10 - st)
                     : atHollow ? "THE HOLLOW  ·  KHUCHAD CLAN HAVEN" : Race != null && Race.IsOpen ? "TRACK 01  ·  BATTLE GRAVEYARD" : "THE HOLLOW";
                 // the place name is the HUD's title card now (4 s on arrival), not a plate that stays
                 if (ctx.TryGetService<UiComposition>(out var hudScreens)) hudScreens.HudModel.ZoneName = heading.text;
@@ -441,6 +468,8 @@ namespace Game.App.DevRuntime.Playground
             shownTo.Clear();
             panel = null; heading = detail = outcome = null;
             hollow?.Dispose();
+            system.Dispose(host.Context.HasGameplay ? host.Context.EntityManager : null);
+            World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>()?.SetMarkers(default, default);
         }
         public void Dispose()
         {

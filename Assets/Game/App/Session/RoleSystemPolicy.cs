@@ -65,6 +65,8 @@ namespace Game.App.Session
             ["PropulsionStatsSystem"] = SystemAuthority.Both,
             ["WeaponStatsSystem"] = SystemAuthority.Both,
             ["PropulsionSystem"] = SystemAuthority.Both,                  // guests: flies their own predicted ship; kinematic replicas have no inverse mass
+            ["CruiseSystem"] = SystemAuthority.Both,                      // ADR-0122: guests cruise their own predicted ship
+            ["CruiseDriveSystem"] = SystemAuthority.Both,                 // same: dynamic bodies only
             ["PlanarConstraintSystem"] = SystemAuthority.Both,            // same: dynamic bodies only
             ["WeaponAimSystem"] = SystemAuthority.Both,
             ["WeaponFireSystem"] = SystemAuthority.Both,

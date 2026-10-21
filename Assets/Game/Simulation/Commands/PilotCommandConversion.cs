@@ -19,6 +19,7 @@ namespace Game.Simulation.Commands
             edges |= Consume(player.Edges.TargetUnderCursor, ref consumed.TargetUnderCursor, ShipCommandEdges.TargetUnderCursor);
             edges |= Consume(player.Edges.TargetClear, ref consumed.TargetClear, ShipCommandEdges.TargetClear);
             edges |= Consume(player.Edges.AutofireToggle, ref consumed.AutofireToggle, ShipCommandEdges.AutofireToggle);
+            edges |= Consume(player.Edges.Cruise, ref consumed.Cruise, ShipCommandEdges.Cruise);   // ADR-0122
             bool3 finiteAim = math.isfinite(player.AimWorld);
             return new ShipCommand
             {

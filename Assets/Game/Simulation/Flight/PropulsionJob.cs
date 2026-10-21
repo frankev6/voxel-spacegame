@@ -34,6 +34,7 @@ namespace Game.Simulation.Flight
         [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
         [ReadOnly] public ComponentLookup<ExternalPush> Pushes;   // SPEC-91 §5.1 step 4: last tick's pushes become carry
         [ReadOnly] public ComponentLookup<ShieldState> Shields;   // a raised shield slows the ship (FlightConfig.ShieldSpeedFraction)
+        [ReadOnly] public ComponentLookup<Cruise> Cruises;        // ADR-0122: a cruising ship is driven by CruiseDriveSystem
         public uint Tick;
         // Each thruster entity belongs to exactly one ship root and is written only by that root's execute (SPEC-20 §5.3).
         [NativeDisableParallelForRestriction] public ComponentLookup<ThrusterState> Thrusters;
@@ -45,6 +46,7 @@ namespace Game.Simulation.Flight
             if (mass.InverseMass <= 0 || (Spawning.HasComponent(entity) && Spawning.IsComponentEnabled(entity))) return;
             if ((flight.Flags & FlightFlags.Initialized) == 0 || flight.SourceRevision != grid.Revision)
                 Rebuild(ref flight, thrusters, instances, grid);
+            if (Cruises.HasComponent(entity) && Cruises[entity].Phase == CruisePhase.On) { CruisePlumes(ref flight, thrusters); return; }
 
             const float dt = SimTime.FixedTimestep;
             float bodyMass = 1f / mass.InverseMass;
@@ -167,6 +169,24 @@ namespace Game.Simulation.Flight
             flight.ForwardCap = forward; flight.ReverseCap = reverse; flight.StrafeCap = strafe; flight.YawRateCap = yawCap;
             flight.TargetLocalVelocity = target; flight.TargetYawRate = targetYaw;
             throttles.Dispose(); actuators.Dispose();
+        }
+
+        /// <summary>ADR-0122 §6: while cruising the engines that push forward show full burn and the rest go dark; no force is applied
+        /// (CruiseDriveSystem sets the velocity) and no throttle is carried into the warm start.</summary>
+        void CruisePlumes(ref FlightState flight, DynamicBuffer<FlightThruster> thrusters)
+        {
+            for (int k = 0; k < thrusters.Length; k++)
+            {
+                var thruster = thrusters[k];
+                thruster.Throttle = 0; thrusters[k] = thruster;
+                if (!Thrusters.HasComponent(thruster.Thruster)) continue;
+                float desired = thruster.ForceDirLocal.z > .7f ? math.max(Config.BoostThrottle, thruster.BoostMax) : 0;
+                float intensity = Thrusters[thruster.Thruster].Intensity;
+                intensity += (desired - intensity) * (desired > intensity ? Config.IntensityRise : Config.IntensityFall);
+                Thrusters[thruster.Thruster] = new ThrusterState { Intensity = intensity < .005f ? 0 : intensity };
+            }
+            flight.Gyro = 0; flight.CoreAssist = 0;
+            flight.Flags |= FlightFlags.Firing;
         }
 
         void Rebuild(ref FlightState flight, DynamicBuffer<FlightThruster> thrusters, in DynamicBuffer<BlockInstance> instances, in VoxelGrid grid)

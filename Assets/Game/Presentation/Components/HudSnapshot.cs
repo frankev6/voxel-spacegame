@@ -13,6 +13,8 @@ namespace Game.Presentation.Components
         public byte ShieldStatus;
         public float Energy, EnergyMax;
         public float SpeedMps;
+        public byte CruisePhase, CruiseBlock;    // ADR-0122: Game.Simulation.Flight.CruisePhase / CruiseBlock of the player's ship
+        public ushort CruiseBlockAgeTicks;       // ticks since CruiseBlock was set (saturates)
         public FixedList64Bytes<HudWeaponGroupState> WeaponGroups;
         public FixedList128Bytes<HudAbilityState> Abilities;
         public ContentHash TargetNameHash;

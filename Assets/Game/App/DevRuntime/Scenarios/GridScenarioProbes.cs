@@ -39,6 +39,10 @@ namespace Game.App.DevRuntime.Scenarios
                     return Number(bricks);
                 }
                 if (Name == "player.id") return Number(root != Entity.Null && ctx.EntityManager.HasComponent<PersistentId>(root) ? ctx.EntityManager.GetComponentData<PersistentId>(root).Value : 0);
+                if (Name == "player.cruise")   // ADR-0122: 0 off, 1 spooling, 2 cruising
+                    return Number(root != Entity.Null && ctx.EntityManager.HasComponent<Game.Simulation.Flight.Cruise>(root) ? (int)ctx.EntityManager.GetComponentData<Game.Simulation.Flight.Cruise>(root).Phase : 0);
+                if (Name == "system.km")       // DEV-028: km in the plane from the player to a body or site of the Hollow system (-1 unknown)
+                    return Number(ctx.Host?.Playground != null ? ctx.Host.Playground.SystemKm(RequireString(args[0])) : -1);
                 if (Name == "player.speed") return Number(root != Entity.Null && ctx.EntityManager.HasComponent<PhysicsVelocity>(root) ? Unity.Mathematics.math.length(ctx.EntityManager.GetComponentData<PhysicsVelocity>(root).Linear) : 0);
                 if (root == Entity.Null) throw new InvalidOperationException("player coordinates unavailable");
                 if (Name.StartsWith("player.upos.", StringComparison.Ordinal))
@@ -60,7 +64,8 @@ namespace Game.App.DevRuntime.Scenarios
         }
         internal static void Register(ScenarioProbeRegistry registry)
         {
-            foreach (string name in new[] { "player.pos.x", "player.pos.y", "player.pos.z", "player.upos.x", "player.upos.z", "player.speed", "player.id", "player.cells", "player.bricks" }) registry.Register(new Probe(name));
+            foreach (string name in new[] { "player.pos.x", "player.pos.y", "player.pos.z", "player.upos.x", "player.upos.z", "player.speed", "player.id", "player.cells", "player.bricks", "player.cruise" }) registry.Register(new Probe(name));
+            registry.Register(new Probe("system.km", 1));
             foreach (string name in new[] { "grid.exists", "grid.cells", "grid.kind", "grids.count" }) registry.Register(new Probe(name, 1));
         }
     }

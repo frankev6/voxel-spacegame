@@ -20,6 +20,8 @@ Shader "Game/Orbit/Planet"
         _HazeDistance ("Haze distance (m)", Float) = 26000
         _Seed ("Seed", Float) = 3.7
         _SunFallback ("Sun direction if no light", Vector) = (0.4, 0.6, 0.3, 0)
+        _Bands ("Gas giant bands (0 = rocky)", Range(0, 1)) = 0
+        _WorldScale ("Scaled-space factor (set per frame)", Float) = 1
     }
     SubShader
     {
@@ -38,7 +40,7 @@ Shader "Game/Orbit/Planet"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _Ocean, _Shallow, _Beach, _Lowland, _Dry, _Highland, _Peak, _Haze, _City, _SunFallback;
-                float _Sea, _Scale, _Clouds, _HazeDistance, _Seed;
+                float _Sea, _Scale, _Clouds, _HazeDistance, _Seed, _Bands, _WorldScale;
             CBUFFER_END
 
             struct Attributes { float3 positionOS : POSITION; };
@@ -71,7 +73,8 @@ Shader "Game/Orbit/Planet"
             {
                 float3 n = normalize(input.dirOS);
                 float3 p = n * _Scale + _Seed;
-                float distanceM = distance(_WorldSpaceCameraPos, input.positionWS);
+                // a far planet is drawn scaled toward the camera (DEV-028 scaled space): distances are true distances again
+                float distanceM = distance(_WorldSpaceCameraPos, input.positionWS) / max(1e-4, _WorldScale);
                 // fewer octaves far away: detail below a pixel only shimmers
                 int octaves = distanceM < 6000 ? 9 : distanceM < 14000 ? 7 : 5;
                 // domain-warp so coasts read as coasts, with archipelagos and long inlets
@@ -83,9 +86,18 @@ Shader "Game/Orbit/Planet"
                 float3 V = normalize(_WorldSpaceCameraPos - input.positionWS);
                 float sunUp = dot(nWS, L);
 
-                bool water = h < _Sea;
+                bool water = h < _Sea && _Bands <= 0;
                 float3 albedo;
-                if (water) albedo = lerp(_Ocean.rgb, _Shallow.rgb, pow(smoothstep(_Sea - 0.09, _Sea, h), 2));
+                if (_Bands > 0)
+                {   // gas giant: belts and zones along the spin axis (+Z, so from above they run as stripes), sheared by storms
+                    float lat = n.z * _Scale * 0.35 + (warp.x * 1.6 + warp.y * 0.6) * _Bands;
+                    float band = Fbm(float3(lat * 2.2, _Seed, lat * 0.7), 5);
+                    float swirl = Fbm(p * float3(2.4, 2.4, 0.6) + 91.0, 5);
+                    albedo = lerp(_Beach.rgb, _Dry.rgb, smoothstep(0.35, 0.55, band));
+                    albedo = lerp(albedo, _Highland.rgb, smoothstep(0.5, 0.7, swirl) * 0.6);
+                    albedo = lerp(albedo, _Peak.rgb, smoothstep(0.62, 0.8, band) * 0.7);
+                }
+                else if (water) albedo = lerp(_Ocean.rgb, _Shallow.rgb, pow(smoothstep(_Sea - 0.09, _Sea, h), 2));
                 else
                 {
                     float t = saturate((h - _Sea) / (1 - _Sea));
@@ -112,7 +124,7 @@ Shader "Game/Orbit/Planet"
                 }
                 // night side: city lights on low land, in clusters
                 float night = saturate(1 - diffuse * 5);
-                if (!water)
+                if (!water && _Bands <= 0)
                 {
                     float cities = smoothstep(0.62, 0.8, Fbm(p * 14 + 77.0, 4)) * (1 - smoothstep(0.08, 0.3, (h - _Sea) / (1 - _Sea)));
                     lit += _City.rgb * cities * night * (1 - cloud);

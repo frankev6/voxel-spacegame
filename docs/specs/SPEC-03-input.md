@@ -118,7 +118,7 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `TargetUnderCursor` | Button (press) | `<Keyboard>/r` | edge `TargetUnderCursor` |
 | `TargetClear` | Button (press) | `<Keyboard>/t` | edge `TargetClear` |
 | `AutofireToggle` | Button (press) | `<Keyboard>/z` | edge `AutofireToggle` |
-| `Cruise` | Button (press) | `<Keyboard>/j` | edge counter `Cruise` (SPEC-32 supercruise, consumed from M4; the action and counter exist from M0) |
+| `Cruise` | Button (press) | `<Keyboard>/j` | edge counter `Cruise`: the ship edge `ShipCommandEdges.Cruise` that toggles in-world cruise ([ADR-0122](../decisions/ADR-0122-in-world-cruise.md)) |
 | `CameraOrbitHold` | Button (held) | `<Mouse>/middleButton` | SPEC-62 |
 | `CameraLook` | Value / Vector2 | `<Mouse>/delta` | SPEC-62 (read only while orbit is held) |
 | `CameraZoom` | Value / Axis | `<Mouse>/scroll/y` (processor `scale(factor=0.008333)` so 1 notch = 1) | SPEC-62 |

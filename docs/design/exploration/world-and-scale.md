@@ -54,8 +54,8 @@ Planar movement stays. Free 3D makes the camera, aiming and reading destruction 
 | Combat bubble | ~2 km | What the current weapons, AI and streaming are tuned for |
 | Station / capital ship | 100 m – 1 km | Already true (the Hollow, the REQUIEM) |
 | Planet radius (below the plane) | ~80 km, top ~2.5 km under the plane | Measured in the prototype: from a 15–20° camera the horizon must sit just under the view. 150 km read almost flat; 80 km dips the horizon 14° and shows the curve. A 15 km planet 2.5 km down drops its limb 45° below the horizon, out of view. A huge, shallow planet reads as a world below you, and its surface scrolls by as you fly: a sense of speed that space otherwise lacks. Smaller bodies (moons, rocks) can still sit in the plane as obstacles |
-| Star system | 40–80 km across, not to scale | Crossed in 1–2 min of cruise |
-| Cruise speed | 1–2 km/s, out of combat only | Dropped by gravity wells, hostiles and hazards (mass lock) |
+| Star system | About 640 km across (the approved Hollow system, [exploration-slice.md](exploration-slice.md)), not to scale | A leg between planets takes 45–90 s of cruise |
+| Cruise speed | Builds to 8 km/s in open space and falls to flight speed 1 km from anything ([ADR-0122](../../decisions/ADR-0122-in-world-cruise.md)); 800 m/s in the belt | Dropped by hostiles within 5 km (mass lock), a hit, Brake or J |
 
 **Density beats size.** Aim for something worth a detour every 20–30 s of cruise:
 - a derelict, a signal or an anomaly;
@@ -65,7 +65,7 @@ Planar movement stays. Free 3D makes the camera, aiming and reading destruction 
 
 The jump gates stay: a system is a sea, and lanes are the straits between seas. The gates themselves are places.
 
-SPEC-32 decision 12 (supercruise as a covered hop) would change to in-world cruise. That needs an ADR before it is built.
+SPEC-32 decision 12 (supercruise as a covered hop) is superseded by in-world cruise: [ADR-0122](../../decisions/ADR-0122-in-world-cruise.md) (2026-10-21).
 
 ## Space or water
 

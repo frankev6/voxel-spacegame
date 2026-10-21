@@ -32,6 +32,8 @@
 .hud-readout--energy, .hud-readout--speed { translate: -50% 0; }
 .hud-readout--energy .hud-readout__value { color: var(--color-energy); }
 .hud-readout--speed .hud-readout__value { color: var(--color-accent); }
+/* ADR-0122: the cruise line sits under the speed */
+.hud-readout .hud-cruise { position: absolute; top: 100%; left: 50%; translate: -50% 0; margin: 2px 0 0 0; white-space: nowrap; color: var(--color-accent); }
 
 /* F: ability strip, small and quiet; a tile lights only while usable */
 .flight-hud .hud-abilities { bottom: var(--space-4); }

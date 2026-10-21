@@ -25,7 +25,7 @@ namespace Game.UI.Views
         readonly EventHandler<BindablePropertyChangedEventArgs> weaponChanged;
         readonly string[] abilityKeys = new string[AbilityCount];
         HudMarks marks;
-        Label hullValue, shieldValue, energyValue, speed, title, titleDetail;
+        Label hullValue, shieldValue, energyValue, speed, speedUnit, cruiseLine, title, titleDetail;
         VisualElement abilityRegion, titleRegion, objectiveRegion, hullReadout, shieldReadout, energyReadout, speedReadout;
         IVisualElementScheduledItem titleHide, objectiveHide;
         string shownSystem, shownZone, shownObjective;
@@ -49,7 +49,7 @@ namespace Game.UI.Views
             Root.dataSource = viewModel; Root.pickingMode = PickingMode.Ignore;
             var hud = Root.Q<VisualElement>(className: "flight-hud") ?? Root;
             marks = new HudMarks(viewModel); hud.Insert(0, marks);
-            hullValue = Q<Label>("hud-hull-value"); shieldValue = Q<Label>("hud-shield-value"); energyValue = Q<Label>("hud-energy-value"); speed = Q<Label>("hud-speed");
+            hullValue = Q<Label>("hud-hull-value"); shieldValue = Q<Label>("hud-shield-value"); energyValue = Q<Label>("hud-energy-value"); speed = Q<Label>("hud-speed"); speedUnit = Q<Label>("hud-speed-unit"); cruiseLine = Q<Label>("hud-cruise");
             hullReadout = Q<VisualElement>("hud-readout-hull"); shieldReadout = Q<VisualElement>("hud-readout-shield");
             energyReadout = Q<VisualElement>("hud-readout-energy"); speedReadout = Q<VisualElement>("hud-readout-speed");
             title = Q<Label>("hud-title"); titleDetail = Q<Label>("hud-title-detail"); titleRegion = Q<VisualElement>("hud-region-title");
@@ -106,6 +106,7 @@ namespace Game.UI.Views
             else if (ReferenceEquals(property, nameof(HudViewModel.HasShip))) { Visibility(); Readouts(); marks.MarkDirtyRepaint(); }
             else if (ReferenceEquals(property, nameof(HudViewModel.HullPercent)) || ReferenceEquals(property, nameof(HudViewModel.HullFraction)) || ReferenceEquals(property, nameof(HudViewModel.ShieldFraction))
                 || ReferenceEquals(property, nameof(HudViewModel.EnergyFraction)) || ReferenceEquals(property, nameof(HudViewModel.SpeedMps)) || ReferenceEquals(property, nameof(HudViewModel.Boosting))
+                || ReferenceEquals(property, nameof(HudViewModel.Cruising)) || ReferenceEquals(property, nameof(HudViewModel.CruiseText))
                 || ReferenceEquals(property, nameof(HudViewModel.IsHulk))) { Readouts(); marks.MarkDirtyRepaint(); }
             else if (ReferenceEquals(property, nameof(HudViewModel.StarSystemName)) || ReferenceEquals(property, nameof(HudViewModel.ZoneName))) Title();
             else if (ReferenceEquals(property, nameof(HudViewModel.HasObjective)) || ReferenceEquals(property, nameof(HudViewModel.ObjectiveTitle)) || ReferenceEquals(property, nameof(HudViewModel.ObjectiveText))) Objective();
@@ -125,7 +126,7 @@ namespace Game.UI.Views
             bool hull = ship && viewModel.HullArc > .5f && viewModel.HullFraction < .3f;
             bool shield = ship && viewModel.ShieldArc > .5f && viewModel.ShieldFraction < .3f;
             bool energy = ship && viewModel.EnergyArc > .5f && viewModel.EnergyFraction < .25f;
-            bool boost = ship && viewModel.Boosting;
+            bool boost = ship && (viewModel.Boosting || viewModel.Cruising || viewModel.CruiseText.Length > 0);
             Place(hullReadout, hull, x - radius - 8, y);
             Place(shieldReadout, shield, x + radius + 8, y);
             Place(energyReadout, energy, x, y + radius + 14);
@@ -133,8 +134,23 @@ namespace Game.UI.Views
             if (hull) hullValue.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.HullFraction * 100));
             if (shield) shieldValue.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.ShieldFraction * 100));
             if (energy) energyValue.text = NumberStringCache.Get(Mathf.RoundToInt(viewModel.EnergyFraction * 100));
-            speed.text = NumberStringCache.Get(viewModel.SpeedMps);
+            // ADR-0122: cruise reads in km/s with one decimal; the line under it says the phase or why J was refused
+            bool kilo = viewModel.Cruising && viewModel.SpeedMps >= 1000;
+            speed.text = kilo ? Tenths(viewModel.SpeedMps / 100) : NumberStringCache.Get(viewModel.SpeedMps);
+            speedUnit.text = kilo ? "km/s" : "m/s";
+            cruiseLine.text = viewModel.CruiseText;
+            Show(cruiseLine, viewModel.CruiseText.Length > 0);
         }
+        [Game.Core.StaticStateOk("immutable string cache built once")]
+        static readonly string[] tenths = BuildTenths();
+        static string[] BuildTenths()
+        {
+            var table = new string[1000];
+            for (int i = 0; i < table.Length; i++) table[i] = (i / 10).ToString(System.Globalization.CultureInfo.InvariantCulture) + "." + (i % 10).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return table;
+        }
+        /// <summary>"8.0" for 80 tenths, without allocating.</summary>
+        static string Tenths(int value) => tenths[Mathf.Clamp(value, 0, tenths.Length - 1)];
         static void Place(VisualElement element, bool visible, float x, float y)
         {
             Show(element, visible);
