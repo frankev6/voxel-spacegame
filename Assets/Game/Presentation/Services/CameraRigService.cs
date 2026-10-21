@@ -36,6 +36,10 @@ namespace Game.Presentation.Services
         float trauma, shakeTime;
         bool boosting;
         float fovKick;
+        // ADR-0122 cruise: blend in and out of the cruise view, the spool's dip, the cruise speed and its share of the FOV.
+        bool cruising, spooling, wasCruising;
+        float cruiseBlend, spoolBlend, cruiseSpeed, viewSpeed, cruisePunch, cruiseFov;
+        CruiseEffects cruiseEffects;
         // Feel prototype presets (FlightCameraPreset): aim feed for the `cursor` yaw and the last applied preset.
         float3 aimPoint; bool hasAim, hasPointer; float2 pointer01; float aimYawBase; int presetVersion = -1;
         static FlightCameraPreset Preset => FlightCameraPreset.Current;
@@ -75,6 +79,7 @@ namespace Game.Presentation.Services
                 camera.nearClipPlane = config.NearClip; camera.farClipPlane = config.FarClip;
                 listenerPivot = new GameObject("ListenerPivot").transform;
                 listenerPivot.SetParent(instance.transform, false);
+                cruiseEffects = new CruiseEffects(instance.transform);
                 mode = CameraMode.Menu; FocusState = config.MenuLookAt;
                 pitchDeg = pitchTargetDeg = config.DefaultPitchDeg; distance = distanceTarget = config.DefaultDistance; effectiveDistance = distance;
                 MenuPose(out outPos, out outRot);
@@ -128,6 +133,10 @@ namespace Game.Presentation.Services
         public void ClearTarget() { HasTarget = false; CutRequested = false; }
         /// <summary>QA-001: flight boost widens the field of view; reduce motion and non-flight modes keep the base FOV.</summary>
         public void SetBoost(bool active) => boosting = active;
+        /// <summary>ADR-0122: the followed ship's cruise. While cruising the camera holds the ship close (no follow lag), the view widens
+        /// with speed and speed streaks run past; while the drive spools the view narrows a little first.</summary>
+        public void SetCruise(bool on, bool spool, float speed) { cruising = on; spooling = spool; cruiseSpeed = math.isfinite(speed) ? math.max(0, speed) : 0; }
+        internal float CruiseBlend => cruiseBlend;
         /// <summary>The player's aim point this frame, for the `cursor` preset's yaw.</summary>
         public void SetAimPoint(float3 point, bool valid) { aimPoint = point; hasAim = valid && math.all(math.isfinite(point)); }
         /// <summary>The cursor as a fraction of the screen (0..1 from bottom-left), for the `cursor` preset's yaw.</summary>
@@ -136,6 +145,7 @@ namespace Game.Presentation.Services
         public void Warp(float3 delta)
         {
             if (disposed) return;
+            cruiseEffects?.Warp(delta);
             FocusState += delta; TargetPosition += delta;
             pivot += delta; pivotTarget += delta; boundsCenter += delta;
             blendFromPos += delta; previousFollowPosition += delta;
@@ -150,7 +160,7 @@ namespace Game.Presentation.Services
             float falloff = math.saturate(1 - math.distance(worldPos, Focus) / radius);
             trauma = math.saturate(trauma + strength * falloff);
         }
-        public float3 DesiredFlightPosition() => CameraMath.OrbitPosition(Focus, CameraMath.OrbitRotation(pitchDeg, yawDeg), distance);
+        public float3 DesiredFlightPosition() => CameraMath.OrbitPosition(Focus, CameraMath.OrbitRotation(pitchDeg, yawDeg), distance * FramingScale);
         public void SetOcclusionDistance(float distance) => occlusionDistance = math.isnan(distance) ? float.PositiveInfinity : math.max(0, distance);
         public void EnterEditorOrbit(float3 center, float radius, bool cut)
         {
@@ -199,7 +209,17 @@ namespace Game.Presentation.Services
             input?.Sample();
             float kickTarget = mode == CameraMode.Flight && boosting && !settings.ReduceMotion ? config.BoostFovKickDeg : 0;
             fovKick = settings.ReduceMotion ? 0 : CameraMath.Damp(fovKick, kickTarget, config.BoostFovHalfLife, dt);
-            camera.fieldOfView = BaseFov + fovKick;
+            bool flying = mode == CameraMode.Flight && HasTarget && !settings.ReduceMotion;
+            cruiseBlend = CameraMath.Damp(cruiseBlend, flying && cruising ? 1 : 0, config.CruiseHalfLife, dt);
+            spoolBlend = CameraMath.Damp(spoolBlend, flying && spooling ? 1 : 0, config.CruiseHalfLife, dt);
+            // the view follows an eased speed: the drive drops to a belt's cap in one tick, and the FOV and framing snapped with it
+            viewSpeed = CameraMath.Damp(viewSpeed, flying && cruising ? cruiseSpeed : 0, config.CruiseSpeedHalfLife, dt);
+            if (flying && cruising && !wasCruising) cruisePunch = 1;   // the drive engages: a kick
+            wasCruising = flying && cruising;
+            cruisePunch = CameraMath.Damp(cruisePunch, 0, config.CruisePunchHalfLife, dt);
+            cruiseFov = cruiseBlend * config.CruiseFovKickDeg * math.sqrt(math.saturate(viewSpeed / math.max(1, config.CruiseFovFullSpeed)))
+                - spoolBlend * config.CruiseSpoolFovDipDeg + cruisePunch * config.CruisePunchFovDeg;
+            camera.fieldOfView = BaseFov + fovKick + cruiseFov;
             float3 p = unshakenPos; quaternion r = unshakenRot;
             if (mode == CameraMode.Menu)
             {
@@ -232,7 +252,26 @@ namespace Game.Presentation.Services
                 outPos += math.rotate(r, offset);
                 outRot = math.mul(r, quaternion.EulerXYZ(math.radians(angles)));
             }
+            // cruise rumble: a fine angular shake that grows with speed, on the output pose only, never into the logical one
+            float rumble = (cruiseBlend * math.saturate(viewSpeed / math.max(1, config.CruiseFovFullSpeed)) + cruisePunch) * config.CruiseRumbleDeg;
+            if (rumble > 0 && !settings.ReduceMotion)
+            {
+                float t = shakeTime * config.CruiseRumbleHz;
+                outRot = math.mul(outRot, quaternion.EulerXYZ(math.radians(new float3(noise.snoise(new float2(t, 50)), noise.snoise(new float2(t, 60)), 0) * rumble)));
+            }
             ApplyPose();
+            cruiseEffects?.Tick(cruiseBlend, viewSpeed, TargetVelocity, camera, dt, cruisePunch);
+        }
+
+        /// <summary>The cruise FOV kick is matched by moving in, so the ship keeps its size on screen and the world, not the ship, widens.</summary>
+        float FramingScale
+        {
+            get
+            {
+                if (cruiseFov == 0) return 1;
+                float before = math.tan(math.radians((BaseFov + fovKick) * .5f)), after = math.tan(math.radians(camera.fieldOfView * .5f));
+                return before / math.max(1e-3f, after);
+            }
         }
 
         void EditorPose(float dt, out float3 position, out quaternion rotation)
@@ -279,7 +318,8 @@ namespace Game.Presentation.Services
             yawOffsetDeg += orbit.x * k;
             pitchTargetDeg = math.clamp(pitchTargetDeg - orbit.y * k * (settings.InvertOrbitY ? -1 : 1), MinPitch, MaxPitch);
             distanceTarget = math.clamp(distanceTarget * math.pow(config.ZoomStepFactor, input?.ZoomSteps ?? 0), MinDistance, MaxDistance);
-            if (input?.RecenterPressed == true)
+            // C toggles free look in `chase` and `orbit` (the preset switches next frame); elsewhere it recentres
+            if (input?.RecenterPressed == true && !FlightCameraPreset.ToggleFreeLook())
             {
                 yawOffsetDeg = preset.Yaw == FlightCameraYaw.Free ? CameraMath.HeadingYawDeg(TargetRotation) : 0;
                 pitchTargetDeg = DefaultPitch; aimYawBase = CameraMath.HeadingYawDeg(TargetRotation);
@@ -318,15 +358,20 @@ namespace Game.Presentation.Services
                 distance = CameraMath.Damp(distance, distanceTarget, config.ZoomHalfLife, dt);
                 float3 targetLookAhead = TargetVelocity * config.LookAheadSeconds; targetLookAhead.y = 0;
                 targetLookAhead = CameraMath.ClampLength(targetLookAhead, config.LookAheadMaxFraction * distance);
+                float3 offset = FocusState - previousFollowPosition;
                 UpdateFollowFocus(targetLookAhead, dt);
+                // Cruise: the focus rides with the ship and only the offset it had decays. The follow filter lags by speed × 0.087 s,
+                // 430 m at 5 km/s, and left the ship a dot ahead of the camera (owner, 2026-10-21).
+                if (cruiseBlend > 0)
+                    FocusState = math.lerp(FocusState, TargetPosition + offset * math.exp(-math.LN2 / config.FocusHalfLife * dt), cruiseBlend);
             }
             previousFollowPosition = TargetPosition;
             rotation = CameraMath.OrbitRotation(pitchDeg, yawDeg);
-            float limit = math.min(distance, occlusionDistance);
-            if (limit < distance) occlusionRecovering = true;
+            float framed = distance * FramingScale, limit = math.min(framed, occlusionDistance);
+            if (limit < framed) occlusionRecovering = true;
             if (!occlusionRecovering || limit <= effectiveDistance) effectiveDistance = limit;
             else effectiveDistance = CameraMath.Damp(effectiveDistance, limit, config.OcclusionReleaseHalfLife, dt);
-            if (math.abs(effectiveDistance - distance) < .0001f) { effectiveDistance = distance; occlusionRecovering = false; }
+            if (math.abs(effectiveDistance - framed) < .0001f) { effectiveDistance = framed; occlusionRecovering = false; }
             framingOffset = FrameFlightFocus(rotation, effectiveDistance) - FocusState;
             position = CameraMath.OrbitPosition(Focus, rotation, effectiveDistance);
             if (TiltUp != 0) rotation = CameraMath.OrbitRotation(pitchDeg - TiltUp, yawDeg);
@@ -399,6 +444,7 @@ namespace Game.Presentation.Services
         public void Dispose()
         {
             if (disposed) return; disposed = true;
+            cruiseEffects?.Dispose(); cruiseEffects = null;
             if (instance != null)
             {
                 if (Application.isPlaying) Object.Destroy(instance); else Object.DestroyImmediate(instance);

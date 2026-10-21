@@ -42,6 +42,14 @@ Two things were already in place:
    - The HUD reads it: the speed readout, "CRUISE", and "MASS LOCKED", "TOO CLOSE" or "HIT" when a press is refused.
    - AI ships carry the component too, and can cruise later through the same edge.
 8. **Floating origin:** at 8 km/s the origin rebases about four times a second, at the 2 km threshold. That is accepted: a rebase is one job over the roots, measured at ≤ 0.5 ms.
+9. **The view** (amended 2026-10-21). Owner: "the ship should stay near ... increase FOV and have a shader effect". Then: "i didn't mean just make them all dull, i meant lets make it feel like you're actually going really fast".
+   - The camera follows without lag while cruising. The usual follow filter trails by speed × 0.087 s, which is 430 m at 5 km/s.
+   - The FOV opens by up to 14° with √(speed / 5 km/s), and the camera moves in to match, so the ship keeps its size on screen. While the drive spools, the FOV narrows 4°. As it engages, a kick: +9° and a flare of the speed lines, easing out over about a second.
+   - The view follows an eased speed (half-life 0.5 s). The drive drops 5 km/s to a belt's 800 m/s in one tick, and the FOV and framing snapped with it.
+   - Speed lines race out from the middle of the view to its edges. They are an overlay on the whole view (`Game/Vfx/CruiseSpeedLines`), the middle is kept clear for the ship, and they run faster and brighter with speed.
+   - Bright dust dashes run past the ship in the world, at a felt speed the eye can follow: min(speed, 200 m/s + 0.12 × speed), so 920 m/s at 6 km/s. Dust at the true speed crossed the view in a frame or two and read as a still tunnel.
+   - A rumble of up to 0.15°, and a vignette. Lens distortion and chromatic aberration were tried and removed: they squashed the planets and fringed the ring. The FOV stops at +14° for the same reason: a wider view stretches the planets near the edges.
+   - All of it is off under reduce motion (`CruiseEffects`, `CameraRigService.SetCruise`).
 
 ## Consequences
 - **SPEC-32:** decision 12, §5.10 and TRV-013 are superseded. `TravelService.CanCruise` and `RequestCruise` stay unimplemented and are marked superseded. TRV-015 builds this ADR.

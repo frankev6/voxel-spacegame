@@ -85,7 +85,7 @@ namespace Game.Presentation.Data
         public UnityEngine.GameObject CameraPrefab;          // Presentation/Data/MainCamera.prefab
         public float VerticalFovDeg = 40f;
         public float NearClip = 0.3f;
-        public float FarClip = 50000f;
+        public float FarClip = 1000000f;   // 1000 km (2026-10-21: planets, rings and air at true scale)
         // flight
         public float DefaultPitchDeg = 55f, MinPitchDeg = 35f, MaxPitchDeg = 80f;
         public float DefaultDistance = 150f, MinDistance = 25f, MaxDistance = 400f;

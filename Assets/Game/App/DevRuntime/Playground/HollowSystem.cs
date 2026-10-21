@@ -16,7 +16,8 @@ namespace Game.App.DevRuntime.Playground
     /// each at its own depth; the Scatter (an asteroid belt) slows cruise; the Haze is a nebula; the lane gate waits at the edge.
     /// Map coordinates are km with the star at the origin (x east, y north = Hollow-local +z); VESHA's tether stays where the feel
     /// prototype put it. Bodies far from the camera are drawn scaled toward it (angular size kept) so they fit inside the camera's far
-    /// clip. Plain GameObjects, placed every frame from double-precision positions so they follow the floating origin.</summary>
+    /// clip. Plain GameObjects, placed every frame from double-precision positions so they follow the floating origin, just before the
+    /// frame renders (from the final camera pose: placed a frame early, they shook with the frame time while cruising).</summary>
     internal sealed class HollowSystem
     {
         internal enum Kind : byte { Ocean, Barren, Gas, Ice, Star }
@@ -50,18 +51,21 @@ namespace Game.App.DevRuntime.Playground
         static float Radius(Body b) => b.Kind == Kind.Ocean ? HollowOrbit.Radius : b.RadiusKm * 1000;
         static float Depth(Body b) => b.Kind == Kind.Ocean ? HollowOrbit.Depth : b.DepthKm * 1000;
 
-        // The camera's far clip is 50 km (CameraConfig), so far bodies are scaled toward the eye (which keeps their look) and their
-        // distance compressed: true up to Knee, then easing toward MaxView. The curve only rises, so a nearer body stays in front.
-        const double Knee = 25000, MaxView = 42000, Ease = 250000;
+        // The camera's far clip is 1000 km (CameraConfig): this system, its rings and air included, draws at true scale. Anything
+        // farther is scaled toward the eye (which keeps its look) and its distance compressed: true up to Knee, then easing toward
+        // MaxView. The curve only rises, so a nearer body stays in front.
+        const double Knee = 750000, MaxView = 900000, Ease = 2000000;
         const int Rings = 300, Segments = 288;
         readonly List<UnityEngine.Object> owned = new();
         readonly Transform[] surfaces = new Transform[Bodies.Length], airs = new Transform[Bodies.Length], rings = new Transform[Bodies.Length];
         readonly Material[] surfaceMaterials = new Material[Bodies.Length], airMaterials = new Material[Bodies.Length];
         GameObject root;
+        double3 placeOrigin; FrameOrigin placeFrame; bool placeReady;
         Mesh cap, rock, card;
         Material rockMaterial, hazeMaterial, dustMaterial;
         Entity beltZone = Entity.Null;
-        static readonly int WorldScale = Shader.PropertyToID("_WorldScale"), RadiusId = Shader.PropertyToID("_Radius");
+        static readonly int WorldScale = Shader.PropertyToID("_WorldScale"), RadiusId = Shader.PropertyToID("_Radius"),
+            ScaleHeightId = Shader.PropertyToID("_ScaleHeight");
 
         internal bool Built => root != null;
 
@@ -73,6 +77,7 @@ namespace Game.App.DevRuntime.Playground
             var lit = Shader.Find("Universal Render Pipeline/Lit");
             if (surface == null || glow == null) { Debug.LogWarning("HollowSystem: orbit shaders missing; no bodies"); return; }
             root = new GameObject("Hollow system (bodies)");
+            RenderPipelineManager.beginContextRendering += OnRender;
             cap = Own(Cap()); rock = Own(Rock()); card = Own(Card());
             for (int i = 0; i < Bodies.Length; i++)
             {
@@ -148,16 +153,35 @@ namespace Game.App.DevRuntime.Playground
             }
         }
 
-        /// <summary>Every frame: bodies at their places relative to the floating origin, far ones scaled toward the camera; the belt's
-        /// rocks and dust and the Haze's cards round the camera.</summary>
+        /// <summary>Every frame: the belt's rocks and dust and the Haze's cards round the camera; the bodies are placed when the frame
+        /// renders (<see cref="Place"/>).</summary>
         internal void Tick(double3 hollowOrigin, FrameOrigin frame, Camera camera)
         {
             if (root == null || camera == null) return;
+            placeOrigin = hollowOrigin; placeFrame = frame; placeReady = true;
+            Place(camera);
+            Scatter(hollowOrigin, frame, camera);
+        }
+
+        void OnRender(ScriptableRenderContext context, List<Camera> cameras)
+        {
+            if (root != null && placeReady) Place(Camera.main);
+        }
+
+        /// <summary>Bodies at their places relative to the floating origin, from the camera's pose now; far ones scaled toward it.</summary>
+        void Place(Camera camera)
+        {
+            if (camera == null) return;
+            double3 hollowOrigin = placeOrigin; var frame = placeFrame;
             double3 eye = (double3)(float3)camera.transform.position;
             for (int i = 0; i < Bodies.Length; i++)
             {
                 var b = Bodies[i];
-                float radius = Radius(b), depth = Depth(b), air = b.Kind == Kind.Star ? radius * 1.8f : radius + (b.Kind == Kind.Gas ? 5000 : 1800);
+                // the air reaches nine scale heights up, where its glow is gone, but stays under the flight plane: the shell draws its
+                // outside only, so a camera inside it would lose the glow (the shader fades it out before the shell ends)
+                float radius = Radius(b), depth = Depth(b);
+                float air = b.Kind == Kind.Star ? radius * 1.8f
+                    : radius + math.min(math.max(b.Kind == Kind.Gas ? 5000 : 1800, 9 * airMaterials[i].GetFloat(ScaleHeightId)), depth - 300);
                 var local = Local(b.MapKm);
                 double3 centre = hollowOrigin + new double3(local.x, -(radius + depth), local.y) - frame.OriginInStarSystem;
                 double d = math.distance(centre, eye), tangent = math.sqrt(math.max(1, d * d - (double)radius * radius));
@@ -169,7 +193,6 @@ namespace Game.App.DevRuntime.Playground
                 airMaterials[i].SetFloat(WorldScale, k); airMaterials[i].SetFloat(RadiusId, radius);
                 if (rings[i] != null) { rings[i].position = at; rings[i].localScale = Vector3.one * (radius * 1.75f * k); }
             }
-            Scatter(hollowOrigin, frame, camera);
         }
 
         /// <summary>Where a body whose limb is <paramref name="tangent"/> metres away is drawn: true up to Knee, then easing toward
@@ -289,7 +312,7 @@ namespace Game.App.DevRuntime.Playground
             if (fromStar < HeatKm) return Bodies.Length - 1;
             if (math.distance(at, Local(HazeMapKm)) / 1000 < HazeRadiusKm * .85f) return Bodies.Length;
             if (fromStar > BeltInnerKm && fromStar < BeltOuterKm) return Bodies.Length + 1;
-            for (int i = 0; i < Bodies.Length - 1; i++) if (math.distance(at, Local(Bodies[i].MapKm)) < Radius(Bodies[i]) * .8f) return i;
+            for (int i = 0; i < Bodies.Length - 1; i++) if (math.distance(at, Local(Bodies[i].MapKm)) < Radius(Bodies[i])) return i;
             return -1;
         }
         internal static string Place(int index) => index < 0 ? "" : index < Bodies.Length ? Bodies[index].Name + "  ·  " + Bodies[index].Line
@@ -414,6 +437,7 @@ namespace Game.App.DevRuntime.Playground
 
         internal void Dispose(EntityManager? em)
         {
+            RenderPipelineManager.beginContextRendering -= OnRender; placeReady = false;
             if (root != null) UnityEngine.Object.Destroy(root);
             foreach (var o in owned) if (o != null) UnityEngine.Object.Destroy(o);
             owned.Clear(); root = null; rockMaterial = hazeMaterial = dustMaterial = null;

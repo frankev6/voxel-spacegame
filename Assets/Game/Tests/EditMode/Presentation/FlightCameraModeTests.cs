@@ -95,6 +95,44 @@ namespace Game.Tests.EditMode.Presentation
             Assert.LessOrEqual(math.distance(positions[0], positions[1]), .05f);
             Assert.LessOrEqual(math.distance(positions[0], positions[2]), .05f);
         }
+        [Test] public void Cruise_HoldsShipClose_WidensView_ThenRestores()
+        {
+            // owner, 2026-10-21: "when cruising the ship moves ahead of the camera and becomes a dot ... increase FOV"
+            using var f = new Fixture(); var velocity = new float3(0, 0, 5000); Start(f, velocity);
+            float3 at = 0;
+            for (int i = 0; i < 240; i++)
+            {
+                at += velocity / 60; f.Rig.SetTarget(at, quaternion.identity, velocity, 10, false); f.Rig.SetCruise(true, false, 5000); f.Rig.Tick(1f / 60);
+            }
+            Assert.Less(math.distance(f.Rig.Focus, at), 2, "the focus rides with the ship, not 430 m behind it");
+            Assert.AreEqual(f.Config.VerticalFovDeg + f.Config.CruiseFovKickDeg, f.Rig.Camera.fieldOfView, .1f);
+            float framed = math.distance(f.Rig.Camera.transform.position, at);
+            Assert.Less(framed, f.Rig.CurrentDistance, "the camera moves in as the view widens, so the ship keeps its size");
+            for (int i = 0; i < 240; i++)
+            {
+                at += new float3(0, 0, 2); f.Rig.SetTarget(at, quaternion.identity, new float3(0, 0, 120), 10, false); f.Rig.SetCruise(false, false, 0); f.Rig.Tick(1f / 60);
+            }
+            Assert.AreEqual(f.Config.VerticalFovDeg, f.Rig.Camera.fieldOfView, .01f, "out of cruise the view is back");
+        }
+        [Test] public void Cruise_Spool_NarrowsView()
+        {
+            using var f = new Fixture(); Start(f);
+            for (int i = 0; i < 120; i++) { f.Rig.SetCruise(false, true, 0); f.Rig.Tick(1f / 60); }
+            Assert.AreEqual(f.Config.VerticalFovDeg - f.Config.CruiseSpoolFovDipDeg, f.Rig.Camera.fieldOfView, .1f);
+        }
+        [Test] public void C_TogglesFreeLook_InChaseAndOrbit_RecentresElsewhere()
+        {
+            // owner, 2026-10-21: "camera should follow ship rotation by default and C should toggle on/off so you can look around"
+            var input = new FrameInput(); using var f = new Fixture(input: input); Start(f);   // the fixture restores the preset
+            FlightCameraPreset.TrySet("chase");
+            input.RecenterPressed = true; f.Rig.Tick(1f / 60); input.RecenterPressed = false;
+            Assert.AreEqual("orbit", FlightCameraPreset.Current.Name, "C in chase: free look");
+            input.RecenterPressed = true; f.Rig.Tick(1f / 60); input.RecenterPressed = false;
+            Assert.AreEqual("chase", FlightCameraPreset.Current.Name, "C again: follow the ship");
+            FlightCameraPreset.TrySet("topdown");
+            input.RecenterPressed = true; f.Rig.Tick(1f / 60); input.RecenterPressed = false;
+            Assert.AreEqual("topdown", FlightCameraPreset.Current.Name, "C in topdown recentres");
+        }
         [Test] public void LookAhead_ClampedToFractionOfDistance()
         {
             using var f = new Fixture(); Start(f, new float3(1000, 20, 0));

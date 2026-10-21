@@ -17,7 +17,7 @@ MonoBehaviour:
   BoostFovKickDeg: 7
   BoostFovHalfLife: 0.18
   NearClip: 0.3
-  FarClip: 50000
+  FarClip: 1000000
   DefaultPitchDeg: 55
   MinPitchDeg: 35
   MaxPitchDeg: 80

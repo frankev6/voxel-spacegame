@@ -75,7 +75,7 @@ namespace Game.Presentation.Systems
             using (TargetMarker.Auto())
             {
                 int count = players.CalculateEntityCount();
-                if (count == 0) { rig.ClearTarget(); rig.SetBoost(false); lastTarget = Entity.Null; }
+                if (count == 0) { rig.ClearTarget(); rig.SetBoost(false); rig.SetCruise(false, false, 0); lastTarget = Entity.Null; }
                 else
                 {
                     Entity target;
@@ -106,6 +106,13 @@ namespace Game.Presentation.Systems
                     rig.SetBoost(EntityManager.HasComponent<ShipCommand>(target) &&
                         (EntityManager.GetComponentData<ShipCommand>(target).Flags & ShipCommandFlags.Boost) != 0);
                     if (hasBounds) rig.SetTargetBounds(boundsMin, boundsMax, ltw.Value);
+                    // ADR-0122: the cruise view (FOV, lag-free follow, streaks) follows the ship's drive
+                    if (EntityManager.HasComponent<Game.Simulation.Flight.Cruise>(target))
+                    {
+                        var cruise = EntityManager.GetComponentData<Game.Simulation.Flight.Cruise>(target);
+                        rig.SetCruise(cruise.Phase == Game.Simulation.Flight.CruisePhase.On, cruise.Phase == Game.Simulation.Flight.CruisePhase.Spooling, cruise.Speed);
+                    }
+                    else rig.SetCruise(false, false, 0);
                     // Feel prototype: the `cursor` camera preset turns towards the player's aim.
                     if (SystemAPI.TryGetSingleton<PlayerCommand>(out var aim)) rig.SetAimPoint(aim.AimWorld, aim.AimValid != 0);
                     var mouse = UnityEngine.InputSystem.Mouse.current; var cam = rig.Camera;
@@ -156,8 +163,10 @@ namespace Game.Presentation.Systems
                     float length = math.distance(focus, end), skip = math.min(math.max(0, rig.TargetRadius), length * .5f);
                     float3 start = focus + (end - focus) * (skip / math.max(length, 1e-3f));
                     var ray = new RaycastInput { Start = start, End = end, Filter = PhysicsLayers.CameraOcclusionQuery };
+                    // the top-down camera rides above the Hollow's rock (CameraSeeThrough); the low cameras pull in when its walls stand
+                    // between them and the ship (owner, 2026-10-21: "ship is getting lost behind the walls"). The cut-away rock never blocks.
                     var collector = new IgnoreEntityClosestHitCollector(lastTarget, GetComponentLookup<Game.Voxel.Rendering.CameraSeeThrough>(true),
-                        GetComponentLookup<Game.Voxel.Rendering.GridRenderHidden>(true));
+                        GetComponentLookup<Game.Voxel.Rendering.GridRenderHidden>(true), FlightCameraPreset.Current.UseConfig);
                     var collision = physics.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
                     if (collision.CastRay(ray, ref collector))
                         limit = math.max(rig.Config.OcclusionMinDistance, skip + collector.ClosestHit.Fraction * (length - skip) - rig.Config.OcclusionMargin);
