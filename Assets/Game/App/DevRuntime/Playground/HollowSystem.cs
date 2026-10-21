@@ -50,9 +50,10 @@ namespace Game.App.DevRuntime.Playground
         static float Radius(Body b) => b.Kind == Kind.Ocean ? HollowOrbit.Radius : b.RadiusKm * 1000;
         static float Depth(Body b) => b.Kind == Kind.Ocean ? HollowOrbit.Depth : b.DepthKm * 1000;
 
-        const float MaxView = 42000;   // the camera's far clip is 50 km (CameraConfig): far bodies are scaled to fit inside it
-        const int Rings = 240, Segments = 288;
-        const float CapDeg = 125;      // past the equator: from far away the view reaches a planet's side
+        // The camera's far clip is 50 km (CameraConfig), so far bodies are scaled toward the eye (which keeps their look) and their
+        // distance compressed: true up to Knee, then easing toward MaxView. The curve only rises, so a nearer body stays in front.
+        const double Knee = 25000, MaxView = 42000, Ease = 250000;
+        const int Rings = 300, Segments = 288;
         readonly List<UnityEngine.Object> owned = new();
         readonly Transform[] surfaces = new Transform[Bodies.Length], airs = new Transform[Bodies.Length], rings = new Transform[Bodies.Length];
         readonly Material[] surfaceMaterials = new Material[Bodies.Length], airMaterials = new Material[Bodies.Length];
@@ -160,7 +161,7 @@ namespace Game.App.DevRuntime.Playground
                 var local = Local(b.MapKm);
                 double3 centre = hollowOrigin + new double3(local.x, -(radius + depth), local.y) - frame.OriginInStarSystem;
                 double d = math.distance(centre, eye), tangent = math.sqrt(math.max(1, d * d - (double)radius * radius));
-                float k = (float)math.min(1, MaxView / tangent);
+                float k = (float)(ViewDistance(tangent) / tangent);
                 var at = (Vector3)(float3)(eye + (centre - eye) * k);
                 surfaces[i].position = airs[i].position = at;
                 surfaces[i].localScale = Vector3.one * (radius * k); airs[i].localScale = Vector3.one * (air * k);
@@ -170,6 +171,11 @@ namespace Game.App.DevRuntime.Playground
             }
             Scatter(hollowOrigin, frame, camera);
         }
+
+        /// <summary>Where a body whose limb is <paramref name="tangent"/> metres away is drawn: true up to Knee, then easing toward
+        /// MaxView. Monotonic, so depth order between bodies holds.</summary>
+        internal static double ViewDistance(double tangent) =>
+            tangent <= Knee ? tangent : Knee + (MaxView - Knee) * (1 - math.exp(-(tangent - Knee) / Ease));
 
         // ------------------------------------------------------------------------------------------------ belt rocks, dust and haze
         readonly List<Matrix4x4> rocks = new(), dusts = new(), hazes = new();
@@ -328,7 +334,8 @@ namespace Game.App.DevRuntime.Playground
             r.lightProbeUsage = LightProbeUsage.Off; r.reflectionProbeUsage = ReflectionProbeUsage.Off;
         }
 
-        /// <summary>A unit-sphere cap round +Y to CapDeg, rings crowding toward the top where the camera is closest.</summary>
+        /// <summary>A unit sphere from +Y, rings crowding toward the top where the camera is closest (the coast); closed at the bottom
+        /// so a body seen side-on is whole.</summary>
         static Mesh Cap()
         {
             var vertices = new Vector3[1 + Rings * Segments];
@@ -336,7 +343,7 @@ namespace Game.App.DevRuntime.Playground
             vertices[0] = Vector3.up;
             for (int r = 0; r < Rings; r++)
             {
-                float t = (r + 1f) / Rings, polar = math.radians(CapDeg) * t * t;
+                float t = (r + 1f) / Rings, polar = math.PI * t * t;
                 for (int s = 0; s < Segments; s++)
                 {
                     float az = 2 * math.PI * s / Segments;
@@ -352,7 +359,7 @@ namespace Game.App.DevRuntime.Playground
                     triangles[k++] = a; triangles[k++] = b; triangles[k++] = c;
                     triangles[k++] = b; triangles[k++] = d; triangles[k++] = c;
                 }
-            var mesh = new Mesh { name = "system cap", indexFormat = IndexFormat.UInt32 };
+            var mesh = new Mesh { name = "system sphere", indexFormat = IndexFormat.UInt32 };
             mesh.vertices = vertices; mesh.triangles = triangles;
             mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 2);
             return mesh;
