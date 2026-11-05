@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 13 | 13 | 0 | 0 | 60 | 1 | 87 | 6 |
+| M4 | 13 | 12 | 0 | 0 | 61 | 1 | 87 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -521,7 +521,7 @@
 | DEV-027 | Repro scenarios that report numbers | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-005, DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | `report` statement, combat probes, `hollow_hostile_entrance` and `hollow_traffic_calm`. |
 | DEV-028 | The Hollow system in the playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-023, TRV-015 | no | done | lead (claude-opus-5-5) | 2026-10-21 | 47ace36 | Exploration slice phase 1: the approved map in the playground. |
 | DEV-029 | Control sheet: every control on a second monitor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-015 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 6a98a932 | Owner request 2026-11-04: controls on a second monitor, local web page; owner checked live: "It works great" |
-| DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-04 | — | Owner request 2026-11-04: Flight configs panel, runtime-only edits |
+| DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1302,7 +1302,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 - Owner: "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean."
 - A *Flight configs* tab on the control sheet. `DevFlightConfig` lists all 25 `FlightConfig` fields with ranges from `FlightConfigDefinition` (practical ceilings for Min-only fields). `GET /flight` gives each live value, boot value and range; `POST /flight?name=&value=` and `POST /flight/reset[?name=]` queue a change that `DevRuntimeHost.Update` applies after `CompleteAllTrackedJobs()` (new SPEC-70 §5.4 row). Values are clamped, integer fields rounded, NaN and unknown names refused. Posts need the `X-Control-Sheet` header, so another web page cannot change the game. `config_flight` is never written: Reset, or leaving Play, restores it.
 - `tools/controlsheet/flight.json` holds the groups, labels and plain "what it does / lower / higher" text, plus log sliders for the push fades (0.01 … 1,000,000). Flight reads every value live each tick; the four core-assist values reach AI pilots' `PropulsionStats` only after a ship rebuild, and the page says so.
-- Tests: `ControlSheetTests` 4/4 pass (EditMode, headless, Windows), including `FlightConfig_SetClampsAndResets` (also checks every setter writes only its own field) and `Server_FlightPostNeedsHeader`. spec-required: 2, extra: 0. Waiting on the owner's live check.
+- Tests: `ControlSheetTests` 4/4 pass (EditMode, headless, Windows), including `FlightConfig_SetClampsAndResets` (also checks every setter writes only its own field) and `Server_FlightPostNeedsHeader`. spec-required: 2, extra: 0. Owner, after trying it live: "looks good, go for it".
 
 ### 2026-11-04 — DEV-029: the control sheet, every control on a second monitor (claude, claude-opus-5-5)
 - Owner: "a second window that opens on my other monitor along with the game, which shows all of the controls for me and leaves space for adding info visuals under each control … can be opened with a console command"; chose the local web page over a second Unity display.
