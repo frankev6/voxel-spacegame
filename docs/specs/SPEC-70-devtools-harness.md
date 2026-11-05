@@ -747,9 +747,9 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Do:** Owner (2026-11-04): "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean." A tab on the control sheet. `GET /flight` lists every `FlightConfig` field with its live value, boot value and range; `POST /flight?name=&value=` and `POST /flight/reset[?name=]` queue a change that the main thread applies next frame (§5.4). Posts need the `X-Control-Sheet` header, which a cross-site page cannot send without a CORS preflight the server never grants. Descriptions, groups and "lower / higher" text live in `tools/controlsheet/flight.json`. Nothing is saved: Reset, or leaving Play, restores `config_flight`.
 - **Files:** `Assets/Game/App/DevRuntime/ControlSheet/{DevFlightConfig,ControlSheetServer,DevControlSheet}.cs`, `tools/controlsheet/{index.html,sheet.js,sheet.css,flight.js,flight.json}`, `Assets/Game/Tests/EditMode/App/ControlSheetTests.cs`.
 - **Acceptance criteria:**
-  - [ ] The page swaps between *Controls* and *Flight configs*; every `FlightConfig` field is listed with its value, boot value and a plain description of what lower and higher numbers do.
-  - [ ] Changing a value changes the flight on the next tick; Reset (one or all) restores the boot values; nothing is written to `config_flight`.
-  - [ ] Out-of-range or non-finite values are clamped or refused; a post without the header is refused.
+  - [x] The page swaps between *Controls* and *Flight configs*; every `FlightConfig` field is listed with its value, boot value and a plain description of what lower and higher numbers do.
+  - [x] Changing a value changes the flight on the next tick; Reset (one or all) restores the boot values; nothing is written to `config_flight`.
+  - [x] Out-of-range or non-finite values are clamped or refused; a post without the header is refused.
 - **Tests:** `ControlSheetTests.FlightConfig_SetClampsAndResets`, `ControlSheetTests.Server_FlightPostNeedsHeader` (EditMode).
 
 ## 10. Open questions

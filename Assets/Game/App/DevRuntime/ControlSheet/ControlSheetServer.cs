@@ -1,6 +1,8 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -12,13 +14,14 @@ namespace Game.App.DevRuntime.ControlSheet
     /// it reads only files under the page root and the bytes the main thread last published.</summary>
     internal sealed class ControlSheetServer : IDisposable
     {
-        const int MaxProbeQuery = 2048;
+        const int MaxProbeQuery = 2048, MaxQueuedChanges = 256;
         static readonly byte[] EmptyJson = Encoding.UTF8.GetBytes("{}");
         readonly string pageRoot;
         readonly ManualResetEvent stop = new ManualResetEvent(false);
         HttpListener listener;
         Thread thread;
-        volatile byte[] layout = EmptyJson, state = EmptyJson;
+        volatile byte[] layout = EmptyJson, state = EmptyJson, flight = EmptyJson;
+        readonly ConcurrentQueue<FlightChange> flightChanges = new ConcurrentQueue<FlightChange>();
         volatile string probeQuery = string.Empty;
         long lastPoll;                                  // Stopwatch timestamp of the last /state request; 0 = never
         bool disposed;
@@ -30,6 +33,15 @@ namespace Game.App.DevRuntime.ControlSheet
         internal string ProbeQuery => probeQuery;
         internal byte[] Layout { set => layout = value ?? EmptyJson; }
         internal byte[] State { set => state = value ?? EmptyJson; }
+        internal byte[] Flight { set => flight = value ?? EmptyJson; }
+
+        /// <summary>A Flight configs edit posted by the page, applied by the main thread (DEV-030). Reset with an empty name resets every field.</summary>
+        internal readonly struct FlightChange
+        {
+            internal readonly string Name; internal readonly double Value; internal readonly bool Reset;
+            internal FlightChange(string name, double value, bool reset) { Name = name; Value = value; Reset = reset; }
+        }
+        internal bool TryTakeFlightChange(out FlightChange change) => flightChanges.TryDequeue(out change);
 
         internal bool TryStart(int port, out string error)
         {
@@ -77,9 +89,11 @@ namespace Game.App.DevRuntime.ControlSheet
         {
             var response = context.Response;
             response.Headers["Cache-Control"] = "no-store";
-            if (context.Request.HttpMethod != "GET") { response.StatusCode = 405; return; }
             string path = context.Request.Url.AbsolutePath;
+            if (context.Request.HttpMethod == "POST") { HandlePost(context, path); return; }
+            if (context.Request.HttpMethod != "GET") { response.StatusCode = 405; return; }
             if (path == "/layout") { Send(response, "application/json", layout); return; }
+            if (path == "/flight") { Send(response, "application/json", flight); return; }
             if (path == "/state")
             {
                 string probes = context.Request.QueryString["probes"] ?? string.Empty;
@@ -92,6 +106,22 @@ namespace Game.App.DevRuntime.ControlSheet
             string type = file == null ? null : ContentType(file);
             if (type == null || !File.Exists(file)) { response.StatusCode = 404; return; }
             Send(response, type, File.ReadAllBytes(file));                    // read per request: edit the page, refresh, no recompile
+        }
+
+        void HandlePost(HttpListenerContext context, string path)
+        {
+            var response = context.Response;
+            // A cross-site page can post plain forms to localhost but cannot add this header without a CORS preflight, which is never granted.
+            if (context.Request.Headers["X-Control-Sheet"] != "1") { response.StatusCode = 403; return; }
+            if (flightChanges.Count >= MaxQueuedChanges) { response.StatusCode = 503; return; }
+            string name = context.Request.QueryString["name"] ?? string.Empty;
+            if (path == "/flight/reset") flightChanges.Enqueue(new FlightChange(name, 0, true));
+            else if (path == "/flight" && name.Length > 0 &&
+                     double.TryParse(context.Request.QueryString["value"], NumberStyles.Float, CultureInfo.InvariantCulture, out double value))
+                flightChanges.Enqueue(new FlightChange(name, value, false));
+            else { response.StatusCode = path == "/flight" ? 400 : 404; return; }
+            response.StatusCode = 202;                                         // applied by the main thread next frame
+            Send(response, "application/json", EmptyJson);
         }
 
         static void Send(HttpListenerResponse response, string type, byte[] body)
