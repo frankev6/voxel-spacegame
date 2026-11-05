@@ -1,0 +1,63 @@
+/* Colours follow Assets/Game/UI/Theme/tokens.uss (NOCTURNE). */
+:root {
+  --bg: #05070D; --surface-1: #0A0F1A; --surface-2: #101826; --surface-3: #172233;
+  --border: #2A3B55; --border-strong: #56769F; --text: #DCE8F5; --text-muted: #8FA6C2;
+  --accent: #39D5FF; --accent-strong: #A6EEFF; --positive: #3DD6A3; --warning: #FFC247; --danger: #FF5C7A;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --body: Inter, "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 var(--body); }
+
+.bar { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 12px 16px; background: rgba(5, 7, 13, 0.92); border-bottom: 1px solid var(--border); }
+.bar h1 { margin: 0; font-size: 16px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent-strong); }
+.status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pill { padding: 2px 10px; border: 1px solid var(--border); border-radius: 999px; color: var(--text-muted); font: 12px var(--mono); }
+.pill b { color: var(--text); font-weight: normal; }
+.pill--live { border-color: var(--positive); color: var(--positive); }
+.pill--down { border-color: var(--danger); color: var(--danger); }
+.toggle { color: var(--text-muted); font-size: 12px; user-select: none; }
+
+main { padding: 16px; display: grid; gap: 20px; }
+.map { border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); }
+.map > h2 { margin: 0; padding: 8px 12px; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
+  border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.map > h2 { cursor: pointer; user-select: none; }
+.map > h2 > span:first-child::before { content: "▾ "; }
+.map--collapsed > h2 > span:first-child::before { content: "▸ "; }
+.map--collapsed > h2 { border-bottom: none; }
+.map--collapsed > .cards { display: none; }
+.map--active { border-color: var(--accent); }
+.map--active > h2 { color: var(--accent); }
+.map--idle { opacity: 0.55; }
+.map--idle:hover { opacity: 0.8; }
+body.active-only .map--idle { display: none; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; padding: 10px; }
+.card { min-height: 92px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-2);
+  display: flex; flex-direction: column; gap: 6px; transition: border-color 80ms, background 80ms; }
+.card--pressed { border-color: var(--accent); background: var(--surface-3); }
+.head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.name { font-weight: 600; }
+.key { padding: 1px 6px; border: 1px solid var(--border-strong); border-radius: 3px; font: 12px var(--mono); color: var(--accent-strong); white-space: nowrap;
+  max-width: 60%; overflow: hidden; text-overflow: ellipsis; }
+.key--none { color: var(--text-muted); border-style: dashed; }
+
+/* The visual slot under each control: the default live visual, then notes, probes and any custom visual. */
+.slot { display: flex; flex-direction: column; gap: 4px; }
+.note { color: var(--text-muted); font-size: 12px; }
+.lamp { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--border-strong); }
+.lamp--on { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.axis { position: relative; height: 6px; border-radius: 3px; background: var(--surface-1); border: 1px solid var(--border); }
+.axis i { position: absolute; top: -1px; bottom: -1px; background: var(--accent); }
+.axis::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--border-strong); }
+.stick { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface-1); }
+.stick i { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--accent); left: 50%; top: 50%; }
+.probe { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font: 12px var(--mono); }
+.probe .label { color: var(--text-muted); }
+.probe .meter { grid-column: 1 / -1; height: 4px; background: var(--surface-1); border-radius: 2px; overflow: hidden; }
+.probe .meter i { display: block; height: 100%; background: var(--positive); }
+.spark { width: 100%; height: 28px; display: block; }
+.spark polyline { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+.empty { color: var(--text-muted); padding: 24px; text-align: center; }

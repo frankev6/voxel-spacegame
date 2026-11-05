@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- Control sheet (SPEC-70 DEV-029). Served by the game on 127.0.0.1; open with the `controls` console command.
+     Edit any file in this folder and refresh the browser: the game reads them from disk on every request. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control Sheet</title>
+  <link rel="stylesheet" href="sheet.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>Controls</h1>
+    <div class="status">
+      <span id="link" class="pill pill--down">connecting</span>
+      <span class="pill">context <b id="context">—</b></span>
+      <span class="pill">scheme <b id="scheme">—</b></span>
+      <label class="toggle"><input id="activeOnly" type="checkbox"> active maps only</label>
+    </div>
+  </header>
+  <main id="maps"></main>
+  <script src="visuals.js"></script>
+  <script src="sheet.js"></script>
+</body>
+</html>
