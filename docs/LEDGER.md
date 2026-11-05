@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 12 | 0 | 1 | 62 | 1 | 90 | 7 |
+| M4 | 13 | 12 | 0 | 2 | 62 | 1 | 90 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -514,7 +514,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-04 | — | ADR-0123 decision 6; stacked on DEV-031 |
+| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | review | claude (claude-opus-5-5) | 2026-11-04 | 44315762 | ADR-0123 decision 6; stacked on DEV-031; tests pass, waiting on the owner\'s live check |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
 | DEV-024 | `probe`: asking the colliders where things fit | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Owner asked for tools for building big places. Clearance, floor/roof, line of sight, reachability and `find` for spots that fit, in local or Hollow coordinates. DevProbeTests pass. |
@@ -1300,6 +1300,16 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-04 — DEV-031 and CAM-013: the `flight3d` toggle and the free-aim chase camera (claude, claude-opus-5-5)
+- **DEV-031:** `flight3d [on|off|status]` writes `Flight3DRequest` on the player ship (new SPEC-70 §5.4 row; solo only) and reports the mode and the keys. The five 3D values join the control sheet's Flight configs tab in their own group, with plain lower/higher text in `flight.json`; `sheet.json` notes the three new actions. `Flight3DDevCommandTests.Toggle_EnablesAndDisables` passes.
+- **CAM-013** (ADR-0123 decision 6, owner: "Chase camera, flight-sim style"):
+  - a `freeaim` flight camera preset: mouse look, free yaw, pitch −60…70° so the view can look up from below the ship, centre reticle;
+  - the sampler switches to it while the ship is in 3D with FaceAim on, and gives back the player's preset when either ends (`FreeAim.Switch`);
+  - a reticle ray that hits nothing aims 1,000 m along it, so the nose and the guns point where the view looks;
+  - menus and the console free the cursor through the existing mouse-look path.
+- **CAM-013 tests:** `FreeAimTests` 3/3 pass (pitch held within the preset over 1,000 fuzzed frames and able to look up; the camera looks along the aim; the far point and the preset switch). The camera fixture resets the process-wide preset when it is built, so the tests set `freeaim` after building it.
+- **Both:** spec-required 1 + 3, extra 0. 36/36 related EditMode tests pass. Not yet flown live; both tasks are in `review` on `task/CAM-013-free-aim`, which is stacked on `task/DEV-031-flight3d-command` and not merged.
 
 ### 2026-11-04 — FLT-016: experimental 3D flight for the player ship (claude, claude-opus-5-5)
 - Owner: "an experimental mode, toggleable in console, which unlocks 3d travel … two buttons to control the ship's upwards and downwards thrust … a toggle which while enabled, makes the ship look at where the mouse is aiming … and have a toggle which while enabled, makes the ship face whatever the selected target is". The owner chose the player-only layer and accepted ADR-0123 ("Accept as written"; open question 1: "Chase camera, flight-sim style", CAM-013).
