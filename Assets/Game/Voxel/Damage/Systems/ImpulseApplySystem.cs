@@ -23,6 +23,7 @@ namespace Game.Voxel.Damage
         NativeList<ImpulseRequest> requests;
         ApplyRequestedImpulseJob applyRequested;
         ComponentLookup<PlanarConstraint> planar;
+        ComponentLookup<Flight3D> flight3D;   // ADR-0123: a 3D-flying ship keeps vertical and pitch/roll impulses
         ComponentLookup<ExternalPush> pushes;
         static readonly ProfilerMarker Apply = new ProfilerMarker(ProfilerCategory.Scripts, "ImpulseApplySystem.Apply");
         [BurstCompile] public void OnCreate(ref SystemState state)
@@ -32,6 +33,7 @@ namespace Game.Voxel.Damage
             applyRequested.Masses = state.GetComponentLookup<PhysicsMass>(true);
             applyRequested.Transforms = state.GetComponentLookup<LocalTransform>(true);
             planar = state.GetComponentLookup<PlanarConstraint>(true);
+            flight3D = state.GetComponentLookup<Flight3D>(true);
             pushes = state.GetComponentLookup<ExternalPush>();
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<SimClock>();
         }
@@ -39,13 +41,13 @@ namespace Game.Voxel.Damage
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
             var streams = SystemAPI.GetSingleton<DamageStreams>(); var data = streams.Data; uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
-            state.Dependency = data->AllJobs(state.Dependency); planar.Update(ref state); pushes.Update(ref state);
-            using (Apply.Auto()) state.Dependency = new ApplyPendingImpulseJob { Tick = tick, Planar = planar, Pushes = pushes }.ScheduleParallel(state.Dependency);
+            state.Dependency = data->AllJobs(state.Dependency); planar.Update(ref state); flight3D.Update(ref state); pushes.Update(ref state);
+            using (Apply.Auto()) state.Dependency = new ApplyPendingImpulseJob { Tick = tick, Planar = planar, Flight3D = flight3D, Pushes = pushes }.ScheduleParallel(state.Dependency);
             applyRequested.Velocities.Update(ref state); applyRequested.Masses.Update(ref state); applyRequested.Transforms.Update(ref state);
             state.Dependency = new ClearRequestsJob { Requests = requests }.Schedule(state.Dependency);
             var requested = streams.Impulses.BeginRead(ref state);
             state.Dependency = SimEventGather.Schedule(requested, requests, state.Dependency);
-            applyRequested.Requests = requests; applyRequested.Planar = planar; applyRequested.Data = data;
+            applyRequested.Requests = requests; applyRequested.Planar = planar; applyRequested.Flight3D = flight3D; applyRequested.Data = data;
             applyRequested.Pushes = pushes; applyRequested.Tick = tick;
             using (Apply.Auto()) state.Dependency = applyRequested.Schedule(state.Dependency);
             streams.Impulses.EndRead(state.Dependency);

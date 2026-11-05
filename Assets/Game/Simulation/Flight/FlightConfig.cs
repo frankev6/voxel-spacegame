@@ -31,11 +31,18 @@ namespace Game.Simulation.Flight
         public float MaxCarry;             // m/s per axis
         public float MaxCarryYaw;          // rad/s
         public float ShieldSpeedFraction;  // 0.8: speed caps while the ship's shield is up (safer but slower); 0 = no change
+        // ADR-0123 experimental 3D flight (player ship with Flight3D enabled only).
+        public float VerticalSpeedFraction; // 0.5 of MaxForwardSpeed: the Lift speed cap
+        public float VerticalAccel;         // 20 m/s²: vertical assist force = mass × this, capped by CoreMaxLinearForce when that is > 0
+        public float HeadingResponse;       // 3 /s: target turn rate = angle to the facing direction × this (lower = lazier, wider swings)
+        public float MaxPitchDeg;           // 75°: the nose never pitches past this
+        public float MaxPitchRateDeg;       // 90°/s
         public static FlightConfig Default => new FlightConfig {
             MaxForwardSpeed = 120f, ReverseSpeedFraction = 0.5f, StrafeSpeedFraction = 0.6f, BoostSpeedMultiplier = 1.5f,
             BoostThrottle = 1.25f, MaxYawRateDeg = 120f, LinearAssistGain = 0.5f, CoastDeceleration = 0.08f, AngularAssistGain = 0.5f, TorqueWeight = 2f,
             AllocationSweeps = 6, CoreYawAccelDeg = 60f, CoreMaxYawTorque = 2.0e6f, CoreLinearAccel = 0f, CoreMaxLinearForce = 0f, ThrottleEpsilon = 0.001f,
             PlaneCorrection = 0.2f, IntensityRise = 0.35f, IntensityFall = 0.15f,
-            CarryDecel = 1e6f, CarryBrakeDecel = 1e6f, CarryYawDecel = 1e6f, MaxCarry = 120f, MaxCarryYaw = 3.5f, ShieldSpeedFraction = .8f };
+            CarryDecel = 1e6f, CarryBrakeDecel = 1e6f, CarryYawDecel = 1e6f, MaxCarry = 120f, MaxCarryYaw = 3.5f, ShieldSpeedFraction = .8f,
+            VerticalSpeedFraction = .5f, VerticalAccel = 20f, HeadingResponse = 3f, MaxPitchDeg = 75f, MaxPitchRateDeg = 90f };
     }
 }

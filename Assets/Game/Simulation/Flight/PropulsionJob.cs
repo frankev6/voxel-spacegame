@@ -2,6 +2,7 @@ using Game.Core;
 using Game.Data.Combat;
 using Game.Simulation.Power;
 using Game.Data.Blocks;
+using Game.Data.Components;
 using Game.Simulation.Commands;
 using Game.Simulation.Common;
 using Game.Voxel.Damage;
@@ -35,6 +36,11 @@ namespace Game.Simulation.Flight
         [ReadOnly] public ComponentLookup<ExternalPush> Pushes;   // SPEC-91 §5.1 step 4: last tick's pushes become carry
         [ReadOnly] public ComponentLookup<ShieldState> Shields;   // a raised shield slows the ship (FlightConfig.ShieldSpeedFraction)
         [ReadOnly] public ComponentLookup<Cruise> Cruises;        // ADR-0122: a cruising ship is driven by CruiseDriveSystem
+        // ADR-0123 experimental 3D flight: the mode, its switch, and what FaceTarget points at.
+        [ReadOnly] public ComponentLookup<Flight3D> Flight3D;
+        [ReadOnly] public ComponentLookup<Flight3DRequest> Flight3DRequests;
+        [ReadOnly] public ComponentLookup<Weapons.ShipTarget> Targets;
+        [ReadOnly] public ComponentLookup<LocalTransform> Poses;
         public uint Tick;
         // Each thruster entity belongs to exactly one ship root and is written only by that root's execute (SPEC-20 §5.3).
         [NativeDisableParallelForRestriction] public ComponentLookup<ThrusterState> Thrusters;
@@ -47,6 +53,8 @@ namespace Game.Simulation.Flight
             if ((flight.Flags & FlightFlags.Initialized) == 0 || flight.SourceRevision != grid.Revision)
                 Rebuild(ref flight, thrusters, instances, grid);
             if (Cruises.HasComponent(entity) && Cruises[entity].Phase == CruisePhase.On) { CruisePlumes(ref flight, thrusters); return; }
+            if (Flight3D.HasComponent(entity) && Flight3D.IsComponentEnabled(entity))
+            { Execute3D(entity, command, ref flight, thrusters, transform, ref velocity, mass); return; }
 
             const float dt = SimTime.FixedTimestep;
             float bodyMass = 1f / mass.InverseMass;
@@ -169,6 +177,171 @@ namespace Game.Simulation.Flight
             flight.ForwardCap = forward; flight.ReverseCap = reverse; flight.StrafeCap = strafe; flight.YawRateCap = yawCap;
             flight.TargetLocalVelocity = target; flight.TargetYawRate = targetYaw;
             throttles.Dispose(); actuators.Dispose();
+        }
+
+        /// <summary>ADR-0123 decision 5: experimental 3D flight. Forward, reverse, strafe and yaw keep the planar allocation in the ship's
+        /// own frame, so the planar feel carries over. A vertical assist along the ship's up axis follows Lift, and the heading controller
+        /// (Flight3DMath) sets yaw, pitch and roll rates. Thrusters push through the centre of mass apart from their yaw torque: the
+        /// attitude is the controller's, so an off-centre engine never tumbles the ship. The planar Execute is unchanged.</summary>
+        void Execute3D(Entity entity, in ShipCommand command, ref FlightState flight, DynamicBuffer<FlightThruster> thrusters,
+            in LocalTransform transform, ref PhysicsVelocity velocity, in PhysicsMass mass)
+        {
+            const float dt = SimTime.FixedTimestep;
+            // Requested off: the ship is levelling before Flight3DModeSystem hands it back to the plane, so Lift and facing stop.
+            bool requested = Flight3DRequests.HasComponent(entity) && Flight3DRequests[entity].On != 0;
+            float bodyMass = 1f / mass.InverseMass;
+            quaternion rotation = transform.Rotation;
+            quaternion inertiaRotation = math.mul(rotation, mass.InertiaOrientation);
+            float3 up = math.rotate(rotation, new float3(0, 1, 0)), right = math.rotate(rotation, new float3(1, 0, 0)),
+                nose = math.rotate(rotation, new float3(0, 0, 1));
+            float3 omega = math.rotate(math.inverse(rotation), math.rotate(inertiaRotation, velocity.Angular));   // ship frame
+            float2 local = FlightMath.ToLocalPlanar(velocity.Linear, rotation);
+            var multipliers = Multipliers.HasComponent(entity) ? Multipliers[entity] : default;
+            float thrustMultiplier = multipliers.Get(StatId.Thrust);
+            float turnMultiplier = multipliers.Get(StatId.TurnRate);
+            bool brake = (command.Flags & ShipCommandFlags.Brake) != 0;
+            bool boost = (command.Flags & ShipCommandFlags.Boost) != 0 && !brake;
+            bool shielded = Shields.HasComponent(entity) && Shields[entity].Active != 0;
+            float speedMultiplier = FlightMath.SpeedMultiplier(Config, multipliers.Get(StatId.MaxSpeed), shielded);
+            FlightMath.SpeedCaps(Config, speedMultiplier, boost, out float forward, out float reverse, out float strafe);
+            float yawCap = FlightMath.YawRateCap(Config, turnMultiplier);
+            FlightMath.Targets(Config, command.Thrust, command.Turn, command.Flags, local, forward, reverse, strafe,
+                yawCap, out float2 target, out float turnYaw);
+
+            // FaceTarget wins over FaceAim; without a target or aim the ship steers by Turn with its nose held level.
+            bool face = false; float3 direction = default;
+            if (requested && (command.Flags & ShipCommandFlags.FaceTarget) != 0 && Targets.HasComponent(entity))
+            {
+                Entity aimed = Targets[entity].Value;
+                if (aimed != Entity.Null && Poses.HasComponent(aimed)) { direction = Poses[aimed].Position - transform.Position; face = true; }
+            }
+            if (requested && !face && (command.Flags & ShipCommandFlags.FaceAim) != 0 && command.AimValid != 0)
+            { direction = command.AimWorld - transform.Position; face = true; }
+            float3 targetOmega = Flight3DMath.TargetRates(Config, rotation, face, direction, turnYaw, yawCap);
+
+            // ADR-0118 carry, as on the plane: pushes bleed off through the assist targets.
+            if (Tick > 0 && Pushes.HasComponent(entity))
+            {
+                var push = Pushes[entity];
+                if (push.Tick == Tick - 1) { flight.Carry += FlightMath.ToLocalPlanar(push.LinearDv, rotation); flight.CarryYaw += push.YawDv; }
+            }
+            flight.Carry = FlightMath.ClampCarry(flight.Carry, local, Config.MaxCarry);
+            flight.CarryYaw = FlightMath.ClampCarry(flight.CarryYaw, omega.y, Config.MaxCarryYaw);
+            target += flight.Carry; float targetYaw = targetOmega.y + flight.CarryYaw;
+            FlightMath.DecayCarry(Config, brake, ref flight.Carry, ref flight.CarryYaw);
+
+            // The planar allocation (mirrors Execute), with yaw about the ship's own up axis.
+            float inverseUp = Flight3DMath.InverseInertiaAbout(mass.InverseInertia, inertiaRotation, up);
+            float inertia = inverseUp > 0 ? 1f / inverseUp : 0;
+            var problem = new ThrustProblem
+            {
+                Target = new float3(bodyMass * (target - local) * Config.LinearAssistGain / dt,
+                    inertia * (targetYaw - omega.y) * Config.AngularAssistGain / dt),
+                Weights = new float3(1f / math.max(1, bodyMass * 10), 1f / math.max(1, bodyMass * 10),
+                    Config.TorqueWeight / math.max(1, inertia)), Sweeps = Config.AllocationSweeps
+            };
+            var actuators = new NativeArray<ThrustActuator>(thrusters.Length + 3, Allocator.Temp);
+            var throttles = new NativeArray<float>(actuators.Length, Allocator.Temp);
+            for (int k = 0; k < thrusters.Length; k++)
+            {
+                var thruster = thrusters[k];
+                bool usable = Entities.Exists(thruster.Thruster) &&
+                    (!Powered.HasComponent(thruster.Thruster) || Powered.IsComponentEnabled(thruster.Thruster));
+                float max = usable ? (boost ? (thruster.BoostMax > 0 ? thruster.BoostMax : Config.BoostThrottle) : 1) : 0;
+                float min = 0;
+                if (thruster.SpoolUp > 0) max = math.min(max, thruster.Throttle + thruster.SpoolUp * dt);
+                if (thruster.SpoolDown > 0) min = math.min(math.max(0, thruster.Throttle - thruster.SpoolDown * dt), max);
+                actuators[k] = new ThrustActuator
+                {
+                    Column = thruster.MaxForce * thrustMultiplier * new float3(thruster.ForceDirLocal.x, thruster.ForceDirLocal.z,
+                        math.cross(thruster.PositionLocal - mass.CenterOfMass, thruster.ForceDirLocal).y), Min = min, Max = max
+                };
+                throttles[k] = math.clamp(thruster.Throttle, 0, max);
+            }
+            float gyroTorque = FlightMath.GyroYawTorque(Config, inverseUp) * turnMultiplier;
+            int gyroIndex = thrusters.Length;
+            actuators[gyroIndex] = new ThrustActuator { Column = new float3(0, 0, gyroTorque), Min = -1, Max = 1 };
+            throttles[gyroIndex] = flight.Gyro;
+            float coreForce = FlightMath.CoreAssistForce(Config, mass.InverseMass) * thrustMultiplier;
+            actuators[gyroIndex + 1] = new ThrustActuator { Column = new float3(coreForce, 0, 0), Min = -1, Max = 1 };
+            actuators[gyroIndex + 2] = new ThrustActuator { Column = new float3(0, coreForce, 0), Min = -1, Max = boost ? Config.BoostThrottle : 1 };
+            throttles[gyroIndex + 1] = flight.CoreAssist.x; throttles[gyroIndex + 2] = flight.CoreAssist.y;
+            float3 minimum = 0, maximum = 0;
+            for (int k = 0; k < actuators.Length; k++)
+            {
+                var actuator = actuators[k];
+                minimum += math.min(actuator.Column * actuator.Min, actuator.Column * actuator.Max);
+                maximum += math.max(actuator.Column * actuator.Min, actuator.Column * actuator.Max);
+            }
+            problem.Target = math.clamp(problem.Target, minimum, maximum);
+            var exact = new NativeArray<float>(throttles, Allocator.Temp);
+            for (int k = 0; k < throttles.Length; k++) throttles[k] *= WarmStartDecay;
+            float bled = ThrustAllocator.Solve(problem, actuators, throttles);
+            float carried = ThrustAllocator.Solve(problem, actuators, exact);
+            if (bled - carried > math.max(BleedTolerance, bled * .01f)) throttles.CopyFrom(exact);
+            exact.Dispose();
+
+            float3 linear = 0; float yawImpulse = 0; bool firing = false;
+            for (int k = 0; k < thrusters.Length; k++)
+            {
+                var thruster = thrusters[k];
+                float throttle = throttles[k] < Config.ThrottleEpsilon ? 0 : throttles[k];
+                if (throttle > 0)
+                {
+                    float force = thruster.MaxForce * thrustMultiplier * throttle;
+                    linear += math.rotate(rotation, thruster.ForceDirLocal) * (force * dt);
+                    yawImpulse += math.cross(thruster.PositionLocal - mass.CenterOfMass, thruster.ForceDirLocal).y * force * dt;
+                    firing = true;
+                }
+                thruster.Throttle = throttle;
+                thrusters[k] = thruster;
+                if (Thrusters.HasComponent(thruster.Thruster))
+                {
+                    float intensity = Thrusters[thruster.Thruster].Intensity;
+                    float desired = math.clamp(throttle, 0, math.max(Config.BoostThrottle, thruster.BoostMax));
+                    intensity += (desired - intensity) * (desired > intensity ? Config.IntensityRise : Config.IntensityFall);
+                    Thrusters[thruster.Thruster] = new ThrusterState { Intensity = intensity < .005f ? 0 : intensity };
+                }
+            }
+            float gyro = math.abs(throttles[gyroIndex]) < Config.ThrottleEpsilon ? 0 : throttles[gyroIndex];
+            yawImpulse += gyro * gyroTorque * dt;
+            flight.Gyro = gyro; flight.GyroTorque = gyroTorque;
+            float2 core = new float2(throttles[gyroIndex + 1], throttles[gyroIndex + 2]);
+            core = math.select(core, 0, math.abs(core) < Config.ThrottleEpsilon);
+            if (coreForce > 0) linear += math.rotate(rotation, new float3(core.x, 0, core.y)) * (coreForce * dt);
+            flight.CoreAssist = core; flight.CoreAssistForce = coreForce;
+
+            // Vertical assist: Lift × the vertical cap along the ship's up axis; released, it holds the height.
+            float lift = requested && !brake && math.isfinite(command.Lift) ? math.clamp(command.Lift, -1, 1) : 0;
+            float verticalCap = bodyMass * Config.VerticalAccel * thrustMultiplier;
+            if (Config.CoreMaxLinearForce > 0) verticalCap = math.min(verticalCap, Config.CoreMaxLinearForce * thrustMultiplier);
+            float verticalTarget = lift * Config.MaxForwardSpeed * speedMultiplier * Config.VerticalSpeedFraction;
+            float verticalForce = math.clamp(bodyMass * (verticalTarget - math.dot(velocity.Linear, up)) * Config.LinearAssistGain / dt,
+                -verticalCap, verticalCap);
+            linear += up * (verticalForce * dt);
+            velocity.ApplyLinearImpulse(mass, linear);
+
+            // Pitch and roll: the turning assist on the ship's right and nose axes, at most this angular acceleration.
+            float accel = math.radians(math.max(Config.CoreYawAccelDeg, Config.MaxPitchRateDeg)) * turnMultiplier;
+            float3 angular = up * yawImpulse
+                + Stabilise(mass.InverseInertia, inertiaRotation, right, targetOmega.x - omega.x, accel * dt)
+                + Stabilise(mass.InverseInertia, inertiaRotation, nose, targetOmega.z - omega.z, accel * dt);
+            velocity.ApplyAngularImpulse(mass, math.rotate(math.inverse(inertiaRotation), angular));
+
+            flight.Flags = firing ? flight.Flags | FlightFlags.Firing : flight.Flags & ~FlightFlags.Firing;
+            flight.LocalVelocity = local; flight.YawRate = omega.y;
+            flight.ForwardCap = forward; flight.ReverseCap = reverse; flight.StrafeCap = strafe; flight.YawRateCap = yawCap;
+            flight.TargetLocalVelocity = target; flight.TargetYawRate = targetYaw;
+            throttles.Dispose(); actuators.Dispose();
+        }
+
+        /// <summary>The world angular impulse that closes AngularAssistGain of a rate error about <paramref name="axis"/>, at most
+        /// <paramref name="maxStep"/> rad/s per tick.</summary>
+        float3 Stabilise(float3 inverseInertia, quaternion inertiaRotation, float3 axis, float error, float maxStep)
+        {
+            float inverse = Flight3DMath.InverseInertiaAbout(inverseInertia, inertiaRotation, axis);
+            if (!(inverse > 0)) return float3.zero;
+            return axis * (math.clamp(error * Config.AngularAssistGain, -maxStep, maxStep) / inverse);
         }
 
         /// <summary>ADR-0122 §6: while cruising the engines that push forward show full burn and the rest go dark; no force is applied

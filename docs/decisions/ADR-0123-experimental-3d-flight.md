@@ -12,7 +12,11 @@ Today two separate locks hold ships to the plane:
 The thruster allocator is 2D (local X force, local Z force, yaw torque). Thrusters pointing up or down are dropped when a ship is built. Ships track a turn rate only; no system turns a ship to face a direction. Origin rebasing, cruise, spawn and teleport rebuild yaw-only rotations.
 
 ## Decision
-1. **A per-ship enableable component `Flight3D`** (`Game.Simulation.Flight`), added disabled to the player ship by `FlightSetup`. Enabling it is the only switch. The dev command `flight3d [on|off]` (SPEC-70) toggles it on the player ship, main thread between world updates (a SPEC-70 §5.4 write). The mode is dev-only: nothing outside `DevRuntime` enables it, and it is not saved. Release builds have no way to enable it.
+1. **The switch.**
+   - **`Flight3D`:** a per-ship enableable component in `Game.Data.Components`, next to `PlanarConstraint`, because the voxel mass and impulse code that honours it cannot see Simulation types. `FlightSetup` adds it to player ships only. Its sole writer is `Flight3DModeSystem`.
+   - **`Flight3DRequest { On }`:** the switch itself. The dev command `flight3d [on|off]` (SPEC-70) writes it on the main thread between world updates (a SPEC-70 §5.4 write).
+   - **On** enables `Flight3D` at once. **Off** keeps it enabled until the ship has levelled (decision 2), then disables it.
+   - The mode is dev-only: nothing outside `DevRuntime` writes the request, and it is not saved. Release builds have no way to enable it.
 2. **The plane locks honour it:**
    - `PlanarImpulseJob` and both impulse-flattening jobs skip bodies whose `Flight3D` is enabled;
    - `GridMassMath` builds the full inertia tensor for them. `GridMassUpdateSystem`, the existing `PhysicsMass` writer, rebuilds the mass when the enabled state changes;
@@ -27,7 +31,8 @@ The thruster allocator is 2D (local X force, local Z force, yaw torque). Thruste
    All are rebindable. Toggles are latched edges, as Cruise and AutofireToggle are. Turning one facing toggle on turns the other off. With the mode off, they do nothing.
 5. **Movement while `Flight3D` is enabled** (`PropulsionJob` branch):
    - **Horizontal flight:** forward, reverse, strafe and yaw keep the existing allocator and caps in the ship's own frame, so the planar feel is unchanged.
-   - **Vertical flight:** a vertical assist force along the ship's up axis drives local vertical speed toward `Lift × MaxForwardSpeed × VerticalSpeedFraction`. It is `mass × VerticalAccel`, capped by `CoreMaxLinearForce`, like the core assist (ADR-0114). With no Lift input it brakes vertical speed at the coast rate. Real up/down thrusters stay out of the allocator in this mode (a later 6-DOF step).
+   - **Vertical flight:** a vertical assist force along the ship's up axis drives local vertical speed toward `Lift × MaxForwardSpeed × VerticalSpeedFraction`. It is `mass × VerticalAccel`, also capped by `CoreMaxLinearForce` when that is above 0 (its default 0 means no core assist, not "no vertical flight"). With no Lift input it brakes vertical speed at the coast rate. Real up/down thrusters stay out of the allocator in this mode (a later 6-DOF step).
+   - **Thrusters:** they push through the centre of mass apart from their yaw torque. The attitude belongs to the controller, so an off-centre engine never tumbles the ship. Hits still pitch and roll it, and the controller recovers.
    - **Attitude:** a heading controller sets target yaw and pitch rates from the angle to a desired forward direction:
 
      `rate = clamp(angle × HeadingResponse, ±MaxYawRateDeg / ±MaxPitchRateDeg)`
@@ -48,8 +53,7 @@ The thruster allocator is 2D (local X force, local Z force, yaw torque). Thruste
    - **FaceAim off:** the existing camera. The mouse ray first hits colliders, as today; without a hit, the fallback plane is the horizontal plane at the ship's height, not Y = 0.
 7. **Systems that assume the plane, and what they do in this mode:**
    - **Cruise:** refused while `Flight3D` is enabled. `CruiseSystem` reports the block reason "3D flight".
-   - **Origin rebasing:** keeps the full rotation for a `Flight3D` ship instead of rebuilding a yaw-only one.
-   - **Spawn and teleport:** stay yaw-only. Teleport turns the mode off first.
+   - **Origin rebasing:** shifts positions only, so a 3D ship keeps its attitude. Placing the player on arrival in a star system still sets a level, yaw-only rotation, as do spawn and teleport. The mode stays on.
    - **Unchanged:** AI steering, hazards and `WorldZone` (infinite vertical prisms), the radar (XZ), and the Hollow dressing. An off-plane player is still found by the spatial hash (XZ columns, 3D tests) and can hit and be hit. Turret elevation limits may stop some shots until the ship pitches.
 
 ## Consequences
@@ -65,7 +69,6 @@ The thruster allocator is 2D (local X force, local Z force, yaw torque). Thruste
   - SPEC-03: three actions;
   - SPEC-70: the `flight3d` command and its §5.4 row;
   - SPEC-32: cruise refusal;
-  - SPEC-30: rebasing;
   - SPEC-90: the co-op format;
   - SPEC-71: the replay script.
 - **Tests:**

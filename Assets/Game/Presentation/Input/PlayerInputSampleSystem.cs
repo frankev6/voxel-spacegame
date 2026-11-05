@@ -40,6 +40,8 @@ namespace Game.Presentation.Input
         InputAction thrust, strafe, turn, strafeModifier, boost, brake, firePrimary, fireSecondary, fireTertiary;
         InputAction interact, ability1, ability2, ability3, ability4, targetNext, targetUnderCursor, targetClear, autofire, cruise;
         InputAction aimDirection;
+        InputAction lift, faceAimToggle, faceTargetToggle;   // ADR-0123 experimental 3D flight
+        bool faceAim, faceTarget;                           // the toggles, kept only while the player ship is in 3D flight
         Entity aimPlayer;
         float2 lastGamepadDirection;
         static readonly ProfilerMarker Sample = new ProfilerMarker(ProfilerCategory.Scripts, "PlayerInputSampleSystem.Sample");
@@ -64,6 +66,9 @@ namespace Game.Presentation.Input
             if (input == null) return;
             var flight = input.Controls.Flight;
             strafeModifier = flight.Get().FindAction("StrafeModifier", true);
+            lift = flight.Get().FindAction("Lift", true);
+            faceAimToggle = flight.Get().FindAction("FaceAimToggle", true); faceTargetToggle = flight.Get().FindAction("FaceTargetToggle", true);
+            faceAim = faceTarget = false;
             aimDirection = flight.AimDirection;
             thrust = flight.Thrust; strafe = flight.Strafe; turn = flight.Turn; boost = flight.Boost; brake = flight.Brake;
             firePrimary = flight.FirePrimary; fireSecondary = flight.FireSecondary; fireTertiary = flight.FireTertiary;
@@ -89,6 +94,7 @@ namespace Game.Presentation.Input
                 }
                 else if (boost.IsPressed()) command.Flags |= ShipCommandFlags.Boost;
                 if (brake.IsPressed()) command.Flags |= ShipCommandFlags.Brake;
+                Sample3D(ref command);
                 bool allowed = false;
                 if (input.CurrentControlScheme == "Gamepad") AimGamepad(ref command);
                 else if (Mouse.current != null)
@@ -174,7 +180,33 @@ namespace Game.Presentation.Input
             }
             if (Snap(pointer, camera, ref command)) { HoverEntity = assistTarget; return; }
             assistTarget = Entity.Null;
-            if (Planar.RayPlaneY(near, direction, 0, out var hit, out _)) SetAim(ref command, hit);
+            // ADR-0123: a ship off the plane aims on the plane through itself.
+            if (Planar.RayPlaneY(near, direction, Flying3D(out float3 position) ? position.y : 0, out var hit, out _)) SetAim(ref command, hit);
+        }
+
+        /// <summary>ADR-0123: Lift and the facing toggles, only while the player ship flies in 3D; leaving 3D clears both toggles.
+        /// Turning one on turns the other off.</summary>
+        void Sample3D(ref PlayerCommand command)
+        {
+            if (!Flying3D(out _)) { faceAim = faceTarget = false; return; }
+            command.Lift = math.clamp(lift.ReadValue<float>(), -1, 1);
+            if (faceAimToggle.WasPressedThisFrame()) { faceAim = !faceAim; if (faceAim) faceTarget = false; }
+            if (faceTargetToggle.WasPressedThisFrame()) { faceTarget = !faceTarget; if (faceTarget) faceAim = false; }
+            if (faceAim) command.Flags |= ShipCommandFlags.FaceAim;
+            if (faceTarget) command.Flags |= ShipCommandFlags.FaceTarget;
+        }
+
+        bool Flying3D(out float3 position)
+        {
+            position = default;
+            players.CompleteDependency();
+            if (players.CalculateEntityCount() != 1) return false;
+            Entity player = players.GetSingletonEntity();
+            EntityManager.CompleteDependencyBeforeRO<Game.Data.Components.Flight3D>();
+            if (!EntityManager.HasComponent<Game.Data.Components.Flight3D>(player) || !EntityManager.IsComponentEnabled<Game.Data.Components.Flight3D>(player)) return false;
+            if (EntityManager.HasComponent<LocalTransform>(player))
+            { EntityManager.CompleteDependencyBeforeRO<LocalTransform>(); position = EntityManager.GetComponentData<LocalTransform>(player).Position; }
+            return true;
         }
 
         static void SetAim(ref PlayerCommand command, float3 point)

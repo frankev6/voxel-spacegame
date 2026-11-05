@@ -7,7 +7,7 @@ namespace Game.Simulation.Flight
     public enum CruisePhase : byte { Off = 0, Spooling = 1, On = 2 }
 
     /// <summary>ADR-0122: why the last press was refused, or why cruise ended. Add at the end only.</summary>
-    public enum CruiseBlock : byte { None = 0, TooClose = 1, MassLocked = 2, Hit = 3, Arrived = 4, Cancelled = 5 }
+    public enum CruiseBlock : byte { None = 0, TooClose = 1, MassLocked = 2, Hit = 3, Arrived = 4, Cancelled = 5, Flight3D = 6 }   // Flight3D: ADR-0123
 
     /// <summary>ADR-0122: per-ship cruise state on every flying root (FlightSetup). Only writer: CruiseSystem. CruiseDriveSystem and
     /// PropulsionJob read it; the HUD reads the player's.</summary>

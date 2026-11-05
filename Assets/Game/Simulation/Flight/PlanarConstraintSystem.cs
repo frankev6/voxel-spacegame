@@ -1,4 +1,5 @@
 using Game.Core.Components;
+using Game.Data.Components;
 using Game.Core.Systems;
 using Unity.Burst;
 using Unity.Collections;
@@ -15,6 +16,7 @@ namespace Game.Simulation.Flight
     {
         static readonly ProfilerMarker ScheduleMarker = new ProfilerMarker(ProfilerCategory.Scripts, "PlanarConstraintSystem.Schedule");
         NativeReference<int> tiltReported;
+        ComponentLookup<Flight3D> flight3D;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -22,15 +24,17 @@ namespace Game.Simulation.Flight
             state.RequireForUpdate<GameplayActive>();
             state.RequireForUpdate<FlightConfig>();
             tiltReported = new NativeReference<int>(Allocator.Persistent);
+            flight3D = state.GetComponentLookup<Flight3D>(true);
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             using var marker = ScheduleMarker.Auto();
+            flight3D.Update(ref state);
             state.Dependency = new PlanarImpulseJob
             {
-                Correction = SystemAPI.GetSingleton<FlightConfig>().PlaneCorrection, TiltReported = tiltReported
+                Correction = SystemAPI.GetSingleton<FlightConfig>().PlaneCorrection, TiltReported = tiltReported, Flight3D = flight3D
             }.ScheduleParallel(state.Dependency);
         }
 
