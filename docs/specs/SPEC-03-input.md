@@ -120,8 +120,8 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `AutofireToggle` | Button (press) | `<Keyboard>/z` | edge `AutofireToggle` |
 | `Cruise` | Button (press) | `<Keyboard>/j` | edge counter `Cruise`: the ship edge `ShipCommandEdges.Cruise` that toggles in-world cruise ([ADR-0122](../decisions/ADR-0122-in-world-cruise.md)) |
 | `Lift` | Value (Axis), 1D composite | `<Keyboard>/y` (+), `<Keyboard>/h` (−); pad Select+D-pad up/down | `PlayerCommand.Lift`, only while the player ship flies in experimental 3D ([ADR-0123](../decisions/ADR-0123-experimental-3d-flight.md)); 0 otherwise |
-| `FaceAimToggle` | Button (press) | `<Keyboard>/b`; pad Select+D-pad left | toggles `ShipCommandFlags.FaceAim` while in experimental 3D (ADR-0123); turns FaceTarget off; cleared when the mode ends |
-| `FaceTargetToggle` | Button (press) | `<Keyboard>/p`; pad Select+D-pad right | toggles `ShipCommandFlags.FaceTarget` while in experimental 3D (ADR-0123); turns FaceAim off; cleared when the mode ends |
+| `FaceAimToggle` | Button (press) | `<Keyboard>/b`; pad Select+D-pad left | toggles `ShipCommandFlags.FaceAim` while in experimental 3D (ADR-0123); independent of FaceTargetToggle; cleared when the mode ends |
+| `FaceTargetToggle` | Button (press) | `<Keyboard>/p`; pad Select+D-pad right | toggles `ShipCommandFlags.FaceTarget` while in experimental 3D (ADR-0123); independent of FaceAimToggle, and wins while both are on and a target is selected; cleared when the mode ends |
 | `CameraOrbitHold` | Button (held) | `<Mouse>/middleButton` | SPEC-62 |
 | `CameraLook` | Value / Vector2 | `<Mouse>/delta` | SPEC-62 (read only while orbit is held) |
 | `CameraZoom` | Value / Axis | `<Mouse>/scroll/y` (processor `scale(factor=0.008333)` so 1 notch = 1) | SPEC-62 |

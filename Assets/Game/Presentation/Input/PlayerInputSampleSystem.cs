@@ -42,6 +42,7 @@ namespace Game.Presentation.Input
         InputAction aimDirection;
         InputAction lift, faceAimToggle, faceTargetToggle;   // ADR-0123 experimental 3D flight
         bool faceAim, faceTarget;                           // the toggles, kept only while the player ship is in 3D flight
+        string savedPreset;                                 // CAM-013: the flight camera preset to restore after free aim
         Entity aimPlayer;
         float2 lastGamepadDirection;
         static readonly ProfilerMarker Sample = new ProfilerMarker(ProfilerCategory.Scripts, "PlayerInputSampleSystem.Sample");
@@ -180,20 +181,32 @@ namespace Game.Presentation.Input
             }
             if (Snap(pointer, camera, ref command)) { HoverEntity = assistTarget; return; }
             assistTarget = Entity.Null;
+            // CAM-013: in free aim the reticle ray that hits nothing aims far ahead, where the view looks.
+            if (faceAim && Game.Presentation.Services.FlightCameraPreset.Current.Name == Game.Presentation.Services.FreeAim.PresetName)
+            { SetAim(ref command, Game.Presentation.Services.FreeAim.FarPoint(near, direction)); return; }
             // ADR-0123: a ship off the plane aims on the plane through itself.
             if (Planar.RayPlaneY(near, direction, Flying3D(out float3 position) ? position.y : 0, out var hit, out _)) SetAim(ref command, hit);
         }
 
         /// <summary>ADR-0123: Lift and the facing toggles, only while the player ship flies in 3D; leaving 3D clears both toggles.
-        /// Turning one on turns the other off.</summary>
+        /// The toggles are independent (owner, 2026-11-04: "toggling off P shouldn't also toggle off B"); with both on, FaceTarget wins
+        /// in PropulsionJob while there is a target, and turning it off goes back to following the mouse.</summary>
         void Sample3D(ref PlayerCommand command)
         {
-            if (!Flying3D(out _)) { faceAim = faceTarget = false; return; }
+            if (!Flying3D(out _)) { faceAim = faceTarget = false; FreeAimCamera(false); return; }
             command.Lift = math.clamp(lift.ReadValue<float>(), -1, 1);
-            if (faceAimToggle.WasPressedThisFrame()) { faceAim = !faceAim; if (faceAim) faceTarget = false; }
-            if (faceTargetToggle.WasPressedThisFrame()) { faceTarget = !faceTarget; if (faceTarget) faceAim = false; }
+            if (faceAimToggle.WasPressedThisFrame()) faceAim = !faceAim;
+            if (faceTargetToggle.WasPressedThisFrame()) faceTarget = !faceTarget;
             if (faceAim) command.Flags |= ShipCommandFlags.FaceAim;
             if (faceTarget) command.Flags |= ShipCommandFlags.FaceTarget;
+            FreeAimCamera(faceAim);
+        }
+
+        /// <summary>CAM-013: face-the-mouse in 3D flies with the free-aim chase camera; turning it off brings the player's preset back.</summary>
+        void FreeAimCamera(bool active)
+        {
+            string next = Game.Presentation.Services.FreeAim.Switch(active, Game.Presentation.Services.FlightCameraPreset.Current.Name, ref savedPreset);
+            if (next != null) Game.Presentation.Services.FlightCameraPreset.TrySet(next);
         }
 
         bool Flying3D(out float3 position)

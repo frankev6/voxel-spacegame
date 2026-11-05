@@ -93,6 +93,31 @@ namespace Game.Tests.EditMode.Input
         }
         [Test] public void Edge_CountsOnce()
         { Frame(Key.F); Frame(Key.F); Frame(Key.F); Assert.AreEqual(1, Command.Edges.Interact); }
+        /// <summary>ADR-0123, owner (2026-11-04): "toggling off P shouldn't also toggle off B". The facing toggles and Lift only act while
+        /// the player ship is in 3D flight, and leaving it clears both toggles.</summary>
+        [Test] public void FacingToggles_AreIndependent()
+        {
+            string preset = Game.Presentation.Services.FlightCameraPreset.Current.Name;   // B switches the process-wide camera preset
+            try
+            {
+                var em = world.EntityManager;
+                var ship = em.CreateEntity(typeof(PlayerShip), typeof(Game.Data.Components.Flight3D), typeof(Unity.Transforms.LocalTransform));
+                em.SetComponentData(ship, Unity.Transforms.LocalTransform.Identity);
+                const ShipCommandFlags Both = ShipCommandFlags.FaceAim | ShipCommandFlags.FaceTarget;
+                Frame(Key.B); Frame(); Assert.AreEqual(ShipCommandFlags.FaceAim, Command.Flags & Both);
+                Frame(Key.P); Frame(); Assert.AreEqual(Both, Command.Flags & Both, "P on keeps B on.");
+                Frame(Key.P); Frame(); Assert.AreEqual(ShipCommandFlags.FaceAim, Command.Flags & Both, "P off keeps B on.");
+                Frame(Key.B); Frame(); Assert.AreEqual(ShipCommandFlags.None, Command.Flags & Both);
+                Frame(Key.P); Frame(); Assert.AreEqual(ShipCommandFlags.FaceTarget, Command.Flags & Both, "B off does not touch P either.");
+                Frame(Key.Y); Assert.AreEqual(1, Command.Lift); Frame(Key.H); Assert.AreEqual(-1, Command.Lift);
+
+                em.SetComponentEnabled<Game.Data.Components.Flight3D>(ship, false);
+                Frame(Key.Y); Assert.AreEqual(ShipCommandFlags.None, Command.Flags & Both, "Leaving 3D clears the toggles."); Assert.AreEqual(0, Command.Lift);
+                em.SetComponentEnabled<Game.Data.Components.Flight3D>(ship, true);
+                Frame(); Assert.AreEqual(ShipCommandFlags.None, Command.Flags & Both, "...and they stay off when 3D comes back.");
+            }
+            finally { Game.Presentation.Services.FlightCameraPreset.TrySet(preset); }
+        }
         [Test] public void Cruise_Counts()
         { Frame(Key.J); Frame(Key.J); Frame(Key.J); Assert.AreEqual(1, Command.Edges.Cruise); }
         [Test] public void Aim_ScreenCenter() { Camera(); Frame(); AssertAim(new float3(20, 0, 30)); }

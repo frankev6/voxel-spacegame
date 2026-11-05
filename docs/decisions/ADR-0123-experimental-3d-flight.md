@@ -28,7 +28,7 @@ The thruster allocator is 2D (local X force, local Z force, yaw torque). Thruste
    - `FaceAimToggle`: B;
    - `FaceTargetToggle`: P.
 
-   All are rebindable. Toggles are latched edges, as Cruise and AutofireToggle are. Turning one facing toggle on turns the other off. With the mode off, they do nothing.
+   All are rebindable. Toggles are latched edges, as Cruise and AutofireToggle are. The two toggles are independent (owner, 2026-11-04: "toggling off P shouldn't also toggle off B"); with both on, FaceTarget wins while a target is selected. With the mode off, they do nothing.
 5. **Movement while `Flight3D` is enabled** (`PropulsionJob` branch):
    - **Horizontal flight:** forward, reverse, strafe and yaw keep the existing allocator and caps in the ship's own frame, so the planar feel is unchanged.
    - **Vertical flight:** a vertical assist force along the ship's up axis drives local vertical speed toward `Lift × MaxForwardSpeed × VerticalSpeedFraction`. It is `mass × VerticalAccel`, also capped by `CoreMaxLinearForce` when that is above 0 (its default 0 means no core assist, not "no vertical flight"). With no Lift input it brakes vertical speed at the coast rate. Real up/down thrusters stay out of the allocator in this mode (a later 6-DOF step).
