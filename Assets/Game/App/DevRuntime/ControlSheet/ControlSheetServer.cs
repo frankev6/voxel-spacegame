@@ -15,7 +15,7 @@ namespace Game.App.DevRuntime.ControlSheet
     internal sealed class ControlSheetServer : IDisposable
     {
         const int MaxProbeQuery = 2048, MaxQueuedChanges = 256;
-        static readonly byte[] EmptyJson = Encoding.UTF8.GetBytes("{}");
+        [Game.Core.StaticStateOk("constant bytes, never written")] static readonly byte[] EmptyJson = Encoding.UTF8.GetBytes("{}");
         readonly string pageRoot;
         readonly ManualResetEvent stop = new ManualResetEvent(false);
         HttpListener listener;

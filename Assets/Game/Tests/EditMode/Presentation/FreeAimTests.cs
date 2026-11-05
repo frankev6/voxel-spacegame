@@ -56,12 +56,26 @@ namespace Game.Tests.EditMode.Presentation
             for (int i = 0; i < 240; i++) f.Rig.Tick(1f / 60);
             var camera = f.Rig.Camera.transform;
             float3 forward = camera.forward, position = camera.position;
-            // The reticle (screen centre) looks over the ship: the centre ray passes through the focus, so its far point is where the
-            // nose is sent, straight ahead of the view.
+            // Owner (2026-11-04): the ship sits below the crosshair. The view looks TiltDeg above the line to the ship, so the ship is
+            // below the screen centre where the reticle is.
             float3 toFocus = math.normalize(f.Rig.Focus - position);
-            Assert.Greater(math.dot(forward, toFocus), .999f, "The camera sits behind the aim and looks along it.");
+            float tilt = math.degrees(math.acos(math.clamp(math.dot(forward, toFocus), -1, 1)));
+            Assert.AreEqual(FreeAim.TiltDeg, tilt, .5f, "The view looks TiltDeg above the ship.");
+            Vector3 onScreen = f.Rig.Camera.WorldToViewportPoint(f.Rig.Focus);
+            Assert.Less(onScreen.y, .45f, "The ship sits below the centre crosshair.");
+            Assert.AreEqual(.5f, onScreen.x, .02f, "...straight below it.");
+            // Seen from the ship, the reticle's far point is still where the view looks, so the nose and the guns follow the crosshair.
             float3 aim = FreeAim.FarPoint(position, forward);
-            Assert.Greater(math.dot(math.normalize(aim - ship), forward), .99f, "Seen from the ship, the aim point is where the view looks.");
+            Assert.Greater(math.dot(math.normalize(aim - ship), forward), .99f);
+
+            // Tilt 0 puts the ship back on the crosshair.
+            float previousTilt = FreeAim.TiltDeg;
+            try
+            {
+                FreeAim.TiltDeg = 0; f.Rig.Tick(1f / 60);
+                Assert.Greater(math.dot((float3)f.Rig.Camera.transform.forward, math.normalize(f.Rig.Focus - (float3)f.Rig.Camera.transform.position)), .999f);
+            }
+            finally { FreeAim.TiltDeg = previousTilt; }
         }
 
         [Test] public void AimWorld_HitOrFarPoint()

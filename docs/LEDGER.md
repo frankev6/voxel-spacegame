@@ -1309,6 +1309,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - a reticle ray that hits nothing aims 1,000 m along it, so the nose and the guns point where the view looks;
   - menus and the console free the cursor through the existing mouse-look path.
 - **CAM-013 tests:** `FreeAimTests` 3/3 pass (pitch held within the preset over 1,000 fuzzed frames and able to look up; the camera looks along the aim; the far point and the preset switch). The camera fixture resets the process-wide preset when it is built, so the tests set `freeaim` after building it.
+- **Crosshair offset.** Owner: "add an offset between the ship and the crosshair, so the ship doesn't sit right on top of the crosshair (not sure if that would imply offsetting the camera or the ship itself, what do you think is better?)".
+  - It is a camera offset: moving the ship would move its collider and guns.
+  - The free-aim view looks `FreeAim.TiltDeg` (default 8°) above the ship, so the ship sits straight below the centre reticle.
+  - Tuned live with `camera tilt=<0..30>`.
+  - `FreeAimTests.ChasePose_LooksAlongAim` checks the tilt, the ship below the reticle, and that tilt 0 lines them up.
+- **Static audit:** `ControlSheetServer.EmptyJson` and `DevFlightConfig.Fields` (DEV-029/030) were missing `[StaticStateOk]`; now annotated. `StaticStateAuditTests` still lists seven older statics this work did not add (RepairPlanner, Hollow playground, `FlightCameraPreset.All`).
 - **Both:** spec-required 1 + 3, extra 0. 36/36 related EditMode tests pass. Not yet flown live; both tasks are in `review` on `task/CAM-013-free-aim`, which is stacked on `task/DEV-031-flight3d-command` and not merged.
 
 ### 2026-11-04 — FLT-016: experimental 3D flight for the player ship (claude, claude-opus-5-5)

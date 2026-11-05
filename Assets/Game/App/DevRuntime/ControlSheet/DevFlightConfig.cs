@@ -24,6 +24,7 @@ namespace Game.App.DevRuntime.ControlSheet
         }
 
         // aiLags: PropulsionJob reads these live, but PropulsionStats (AI planning, HUD acceleration) recomputes them only when the ship changes.
+        [Game.Core.StaticStateOk("constant field table, never written")]
         internal static readonly IReadOnlyList<Field> Fields = new[]
         {
             new Field("MaxForwardSpeed", "m/s", 1, 1000, (in FlightConfig c) => c.MaxForwardSpeed, (ref FlightConfig c, float v) => c.MaxForwardSpeed = v),

@@ -50,7 +50,7 @@ namespace Game.Presentation.Services
             {
                 Name = FreeAim.PresetName, Description = "3D free aim: the mouse turns the view, the ship's nose follows it",
                 DefaultPitchDeg = 8, MinPitchDeg = -60, MaxPitchDeg = 70, DefaultDistance = 70, MinDistance = 25, MaxDistance = 320,
-                FovDeg = 55, TiltUpDeg = 0, Yaw = FlightCameraYaw.Free, MouseLook = true, ReticleHeight = .5f
+                FovDeg = 55, TiltUpDeg = FreeAim.DefaultTiltDeg, Yaw = FlightCameraYaw.Free, MouseLook = true, ReticleHeight = .5f   // the rig reads FreeAim.TiltDeg
             },
         };
 
