@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 16 | 12 | 0 | 0 | 57 | 0 | 85 | 6 |
+| M4 | 13 | 13 | 0 | 0 | 59 | 1 | 86 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -520,6 +520,7 @@
 | DEV-026 | Live PlayMode tests in the open Editor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-002 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Through TestRunnerApi instead of Pipeline's run_tests, which entered Play too early; PlaygroundTests 12 s live, Editor kept open. |
 | DEV-027 | Repro scenarios that report numbers | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-005, DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | `report` statement, combat probes, `hollow_hostile_entrance` and `hollow_traffic_calm`. |
 | DEV-028 | The Hollow system in the playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-023, TRV-015 | no | done | lead (claude-opus-5-5) | 2026-10-21 | 47ace36 | Exploration slice phase 1: the approved map in the playground. |
+| DEV-029 | Control sheet: every control on a second monitor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-015 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-04 | — | Owner request 2026-11-04: controls on a second monitor, local web page |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
