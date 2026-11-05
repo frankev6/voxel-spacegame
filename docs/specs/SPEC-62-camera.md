@@ -514,9 +514,9 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
   - **Cursor release:** menus, the console and leaving the mode unlock the cursor and return the normal camera.
 - **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `CameraMath.cs`, `PlayerInputSampleSystem.cs`, a reticle in the HUD; tests in `Assets/Game/Tests/EditMode/Presentation/`.
 - **Acceptance criteria:**
-  - [ ] With FaceAim on in 3D mode, moving the mouse turns the view, and the ship's nose follows it with the `HeadingResponse` lag; weapons fire at the reticle.
-  - [ ] Opening a menu or the console frees the cursor; closing it resumes the free aim without a jump.
-  - [ ] With FaceAim off, or outside 3D mode, the camera and aim behave exactly as before.
+  - [x] With FaceAim on in 3D mode, moving the mouse turns the view, and the ship's nose follows it with the `HeadingResponse` lag; weapons fire at the reticle.
+  - [x] Opening a menu or the console frees the cursor; closing it resumes the free aim without a jump.
+  - [x] With FaceAim off, or outside 3D mode, the camera and aim behave exactly as before.
 - **Tests:** `FreeAimTests.MouseDelta_TurnsAimWithinPitchLimit`, `FreeAimTests.ChasePose_LooksAlongAim`, `FreeAimTests.AimWorld_HitOrFarPoint` (EditMode).
 
 ## 10. Open questions

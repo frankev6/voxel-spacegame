@@ -761,8 +761,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Do:** `flight3d [on|off|status]` enables or disables `Flight3D` on the player ship (ADR-0123 decision 1; a §5.4 write). It reports the current mode and the keys. The five new `FlightConfig` values join the control sheet's Flight configs tab, with descriptions in `flight.json`.
 - **Files:** `Assets/Game/App/DevRuntime/Commands/Flight3DDevCommand.cs`, `DevCommandRegistry.cs`, `ControlSheet/DevFlightConfig.cs`, `tools/controlsheet/flight.json`.
 - **Acceptance criteria:**
-  - [ ] `flight3d on` in the console unlocks vertical flight for the player ship; `off` returns it to the plane; status reports the mode.
-  - [ ] The new values are listed and editable on the Flight configs tab.
+  - [x] `flight3d on` in the console unlocks vertical flight for the player ship; `off` returns it to the plane; status reports the mode.
+  - [x] The new values are listed and editable on the Flight configs tab.
 - **Tests:** `Flight3DDevCommandTests.Toggle_EnablesAndDisables` (EditMode); `ControlSheetTests.FlightConfig_SetClampsAndResets` covers the new fields.
 
 ## 10. Open questions

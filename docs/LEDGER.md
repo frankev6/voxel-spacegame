@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 13 | 12 | 0 | 2 | 62 | 1 | 90 | 6 |
+| M4 | 13 | 12 | 0 | 0 | 64 | 1 | 90 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -514,7 +514,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | review | claude (claude-opus-5-5) | 2026-11-04 | 44315762 | ADR-0123 decision 6; stacked on DEV-031; tests pass, waiting on the owner\'s live check |
+| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
 | DEV-024 | `probe`: asking the colliders where things fit | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Owner asked for tools for building big places. Clearance, floor/roof, line of sight, reachability and `find` for spots that fit, in local or Hollow coordinates. DevProbeTests pass. |
@@ -524,7 +524,7 @@
 | DEV-028 | The Hollow system in the playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-023, TRV-015 | no | done | lead (claude-opus-5-5) | 2026-10-21 | 47ace36 | Exploration slice phase 1: the approved map in the playground. |
 | DEV-029 | Control sheet: every control on a second monitor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-015 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 6a98a932 | Owner request 2026-11-04: controls on a second monitor, local web page; owner checked live: "It works great" |
 | DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
-| DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | review | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; tests pass, waiting on the owner\'s live check |
+| DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1316,7 +1316,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - `FreeAimTests.ChasePose_LooksAlongAim` checks the tilt, the ship below the reticle, and that tilt 0 lines them up.
 - **Independent toggles.** Owner: "toggling off P shouldn't also toggle off B". Before, turning one facing toggle on switched the other off. Now they are independent; with both on, FaceTarget wins while a target is selected, and turning P off goes back to following the mouse (and the free-aim camera stays on with B). `PlayerInputSampleSystemTests.FacingToggles_AreIndependent` passes; ADR-0123 decision 4 and SPEC-03 updated.
 - **Static audit:** `ControlSheetServer.EmptyJson` and `DevFlightConfig.Fields` (DEV-029/030) were missing `[StaticStateOk]`; now annotated. `StaticStateAuditTests` still lists seven older statics this work did not add (RepairPlanner, Hollow playground, `FlightCameraPreset.All`).
-- **Both:** spec-required 1 + 3, extra 0. 36/36 related EditMode tests pass. Not yet flown live; both tasks are in `review` on `task/CAM-013-free-aim`, which is stacked on `task/DEV-031-flight3d-command` and not merged.
+- **Both:** spec-required 1 + 3, extra 0 (plus `FacingToggles_AreIndependent` for the owner's fix). Owner, after flying it: "looks good, push the changes to main". Merged and pushed 2026-11-04.
 
 ### 2026-11-04 — FLT-016: experimental 3D flight for the player ship (claude, claude-opus-5-5)
 - Owner: "an experimental mode, toggleable in console, which unlocks 3d travel … two buttons to control the ship's upwards and downwards thrust … a toggle which while enabled, makes the ship look at where the mouse is aiming … and have a toggle which while enabled, makes the ship face whatever the selected target is". The owner chose the player-only layer and accepted ADR-0123 ("Accept as written"; open question 1: "Chase camera, flight-sim style", CAM-013).
