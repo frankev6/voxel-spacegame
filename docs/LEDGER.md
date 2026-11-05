@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 15 | 13 | 0 | 0 | 61 | 1 | 90 | 6 |
+| M4 | 15 | 12 | 0 | 0 | 62 | 1 | 90 | 8 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -501,7 +501,7 @@
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
 | FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
 | FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play Owner 2026-10-17: not flown yet. Renders of the five engine blocks (docs/design/racing/img/engine_line.jpg) shown; owner: "engines look good". Still waiting for owner play. Render fixes from the review (332ae4d9): Sprint bodies closed (no see-through seam), nozzles bare heat-dark metal with no plating lights and a throttle glow inside, Torch XL its own design (radiator fins, six ribs, eight struts, banded bell); sheet revised. |
-| FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-04 | — | ADR-0123 accepted by the owner 2026-11-04 |
+| FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 35104965 | ADR-0123 accepted by the owner 2026-11-04; live check comes with DEV-031 (the toggle) |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
 | ABL-006 | Emergency repairs | [SPEC-24](specs/SPEC-24-abilities.md) | M4 | frontier | ABL-005, DMG-019, DMG-020 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Engines first, 35% of what is missing, 150 E, 90 s, hull items for pilots; lost bricks and blocks rebuilt; scenarios `emergency_repair`, `emergency_repair_brick`. |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
@@ -514,7 +514,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | no | todo |  |  |  |  |
+| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | todo |  |  |  |  |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
 | DEV-024 | `probe`: asking the colliders where things fit | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Owner asked for tools for building big places. Clearance, floor/roof, line of sight, reachability and `find` for spots that fit, in local or Hollow coordinates. DevProbeTests pass. |
@@ -524,7 +524,7 @@
 | DEV-028 | The Hollow system in the playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-023, TRV-015 | no | done | lead (claude-opus-5-5) | 2026-10-21 | 47ace36 | Exploration slice phase 1: the approved map in the playground. |
 | DEV-029 | Control sheet: every control on a second monitor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-015 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 6a98a932 | Owner request 2026-11-04: controls on a second monitor, local web page; owner checked live: "It works great" |
 | DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
-| DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | no | todo |  |  |  |  |
+| DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | todo |  |  |  |  |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1300,6 +1300,23 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-04 — FLT-016: experimental 3D flight for the player ship (claude, claude-opus-5-5)
+- Owner: "an experimental mode, toggleable in console, which unlocks 3d travel … two buttons to control the ship's upwards and downwards thrust … a toggle which while enabled, makes the ship look at where the mouse is aiming … and have a toggle which while enabled, makes the ship face whatever the selected target is". The owner chose the player-only layer and accepted ADR-0123 ("Accept as written"; open question 1: "Chase camera, flight-sim style", CAM-013).
+- **Switch:** `Flight3D` (enableable, `Game.Data.Components`, player ships only) plus `Flight3DRequest`. `Flight3DModeSystem` turns the mode on at once, and off only once the ship is level (pitch and roll under 0.03°).
+- **Plane locks:** every lock asks `PlaneLock.Holds`: the plane pull, both impulse-flattening jobs and the planar mass. `Flight3DMassModeJob` queues a mass rebuild when the mode and the inertia disagree. `SpinLimitSystem` caps the whole spin in 3D.
+- **Propulsion:** `PropulsionJob.Execute3D` keeps the planar allocation in the ship's frame, adds a vertical assist along the ship's up axis (Lift × MaxForwardSpeed × VerticalSpeedFraction) and runs a heading controller (`Flight3DMath`). Yaw and pitch close the angle to the target or aim at `HeadingResponse`, capped by the yaw/pitch rates and ±MaxPitchDeg; roll is held level. In 3D, thrusters push through the centre of mass apart from their yaw torque. The planar `Execute` is unchanged.
+- **Contracts:**
+  - `ShipCommand.Lift` and `PlayerCommand.Lift`; `ShipCommandFlags.FaceAim` and `FaceTarget`;
+  - SPEC-03 actions `Lift` (Y/H; pad Select+D-pad up/down), `FaceAimToggle` (B; Select+D-pad left) and `FaceTargetToggle` (P; Select+D-pad right). The sampler keeps the toggles only while in 3D, and the aim fallback plane is at the ship's height;
+  - co-op `NetProtocol.Version` 9 carries Lift;
+  - replay scripts are written as `cmdrec 2` only when a record has lift; `cmdrec 1` files are unchanged.
+- **Cruise:** refused in 3D (`CruiseBlock.Flight3D`, HUD "CRUISE · 3D FLIGHT").
+- **Config:** five `FlightConfig` values: `VerticalSpeedFraction` .5, `VerticalAccel` 20, `HeadingResponse` 3, `MaxPitchDeg` 75, `MaxPitchRateDeg` 90.
+- **Tests:** `Flight3DTests` 3/3 pass (Lift cap and hold; FaceTarget converges within 2° with roll settling under 0.5°, no flip past 75°, and HeadingResponse changes the speed; disabling levels the ship and returns it to Y = 0). spec-required: 3, extra: 0. 141 of 143 related EditMode tests pass. Two fail on things this task did not touch:
+  - `ConventionsTests`: the `Mouse.current` and `Debug.LogWarning` reads logged under DEV-029;
+  - `GamepadTests.AllFlightActionsBound`: `Flight/SensorPing` has no gamepad binding. It was hidden before because the test stops at the first unbound action.
+- No live check yet: the mode is switched by DEV-031.
 
 ### 2026-11-04 — DEV-030: the Flight configs panel on the control sheet (claude, claude-opus-5-5)
 - Owner: "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean."
