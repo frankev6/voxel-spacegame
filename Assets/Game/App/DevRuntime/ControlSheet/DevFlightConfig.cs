@@ -51,6 +51,12 @@ namespace Game.App.DevRuntime.ControlSheet
             new Field("PlaneCorrection", "/tick", .01f, 1, (in FlightConfig c) => c.PlaneCorrection, (ref FlightConfig c, float v) => c.PlaneCorrection = v),
             new Field("IntensityRise", "/tick", .01f, 1, (in FlightConfig c) => c.IntensityRise, (ref FlightConfig c, float v) => c.IntensityRise = v),
             new Field("IntensityFall", "/tick", .01f, 1, (in FlightConfig c) => c.IntensityFall, (ref FlightConfig c, float v) => c.IntensityFall = v),
+            // ADR-0123 experimental 3D flight (DEV-031)
+            new Field("VerticalSpeedFraction", "× forward", 0, 1, (in FlightConfig c) => c.VerticalSpeedFraction, (ref FlightConfig c, float v) => c.VerticalSpeedFraction = v),
+            new Field("VerticalAccel", "m/s²", 0, 60, (in FlightConfig c) => c.VerticalAccel, (ref FlightConfig c, float v) => c.VerticalAccel = v),
+            new Field("HeadingResponse", "/s", .2f, 20, (in FlightConfig c) => c.HeadingResponse, (ref FlightConfig c, float v) => c.HeadingResponse = v),
+            new Field("MaxPitchDeg", "°", 5, 85, (in FlightConfig c) => c.MaxPitchDeg, (ref FlightConfig c, float v) => c.MaxPitchDeg = v),
+            new Field("MaxPitchRateDeg", "°/s", 5, 360, (in FlightConfig c) => c.MaxPitchRateDeg, (ref FlightConfig c, float v) => c.MaxPitchRateDeg = v),
         };
 
         FlightConfig boot;

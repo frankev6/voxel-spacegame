@@ -1,12 +1,71 @@
 {
   "_help": "Descriptions for the Flight configs panel (SPEC-70 DEV-030). Keys are FlightConfig field names. Fields: label, what, lower, higher, and optional slider [min, max] or [min, max, \"log\"] when the field's full range is too wide for a slider. Edits here need only a browser refresh. The values themselves come from the game; edits on the page last until you leave Play.",
   "groups": [
-    { "name": "Top speeds", "fields": ["MaxForwardSpeed", "ReverseSpeedFraction", "StrafeSpeedFraction", "BoostSpeedMultiplier", "BoostThrottle", "ShieldSpeedFraction"] },
-    { "name": "Turning", "fields": ["MaxYawRateDeg"] },
-    { "name": "Flight assist feel", "fields": ["LinearAssistGain", "AngularAssistGain", "CoastDeceleration"] },
-    { "name": "Core assist (help every ship gets, whatever its thrusters)", "fields": ["CoreLinearAccel", "CoreMaxLinearForce", "CoreYawAccelDeg", "CoreMaxYawTorque"] },
-    { "name": "Pushes (knockback and drift from hits and hazards)", "fields": ["CarryDecel", "CarryBrakeDecel", "CarryYawDecel", "MaxCarry", "MaxCarryYaw"] },
-    { "name": "Thruster solver and plumes", "fields": ["TorqueWeight", "AllocationSweeps", "ThrottleEpsilon", "PlaneCorrection", "IntensityRise", "IntensityFall"] }
+    {
+      "name": "Top speeds",
+      "fields": [
+        "MaxForwardSpeed",
+        "ReverseSpeedFraction",
+        "StrafeSpeedFraction",
+        "BoostSpeedMultiplier",
+        "BoostThrottle",
+        "ShieldSpeedFraction"
+      ]
+    },
+    {
+      "name": "Turning",
+      "fields": [
+        "MaxYawRateDeg"
+      ]
+    },
+    {
+      "name": "Experimental 3D flight (console: flight3d on)",
+      "fields": [
+        "VerticalSpeedFraction",
+        "VerticalAccel",
+        "HeadingResponse",
+        "MaxPitchDeg",
+        "MaxPitchRateDeg"
+      ]
+    },
+    {
+      "name": "Flight assist feel",
+      "fields": [
+        "LinearAssistGain",
+        "AngularAssistGain",
+        "CoastDeceleration"
+      ]
+    },
+    {
+      "name": "Core assist (help every ship gets, whatever its thrusters)",
+      "fields": [
+        "CoreLinearAccel",
+        "CoreMaxLinearForce",
+        "CoreYawAccelDeg",
+        "CoreMaxYawTorque"
+      ]
+    },
+    {
+      "name": "Pushes (knockback and drift from hits and hazards)",
+      "fields": [
+        "CarryDecel",
+        "CarryBrakeDecel",
+        "CarryYawDecel",
+        "MaxCarry",
+        "MaxCarryYaw"
+      ]
+    },
+    {
+      "name": "Thruster solver and plumes",
+      "fields": [
+        "TorqueWeight",
+        "AllocationSweeps",
+        "ThrottleEpsilon",
+        "PlaneCorrection",
+        "IntensityRise",
+        "IntensityFall"
+      ]
+    }
   ],
   "fields": {
     "MaxForwardSpeed": {
@@ -14,7 +73,10 @@
       "what": "The fastest a ship flies forward without boost. Reverse and strafe speeds are fractions of it, and cruise starts from it.",
       "lower": "every ship is slower in every direction",
       "higher": "every ship is faster in every direction",
-      "slider": [10, 400]
+      "slider": [
+        10,
+        400
+      ]
     },
     "ReverseSpeedFraction": {
       "label": "Reverse speed",
@@ -81,7 +143,10 @@
       "what": "A cap on the core push force, so it matters less for heavy ships.",
       "lower": "big ships get little core help and rely on their thrusters",
       "higher": "big ships get the full core push too",
-      "slider": [0, 2000000]
+      "slider": [
+        0,
+        2000000
+      ]
     },
     "CoreYawAccelDeg": {
       "label": "Core turning",
@@ -94,35 +159,53 @@
       "what": "A cap on the gyro's turning force, so heavy ships turn on their thrusters more.",
       "lower": "big ships turn sluggishly unless they have good thrusters",
       "higher": "big ships get the full gyro help",
-      "slider": [0, 10000000]
+      "slider": [
+        0,
+        10000000
+      ]
     },
     "CarryDecel": {
       "label": "Push fade",
       "what": "When a hit or hazard shoves the ship, how fast that drift fades away, in m/s every second.",
       "lower": "shoves keep you drifting for a long time",
       "higher": "shoves fade almost at once; 1,000,000 means the assist cancels them instantly",
-      "slider": [0.01, 1000000, "log"]
+      "slider": [
+        0.01,
+        1000000,
+        "log"
+      ]
     },
     "CarryBrakeDecel": {
       "label": "Push fade while braking",
       "what": "The same as push fade, while Brake is held.",
       "lower": "braking does little against a shove",
       "higher": "braking kills a shove quickly",
-      "slider": [0.01, 1000000, "log"]
+      "slider": [
+        0.01,
+        1000000,
+        "log"
+      ]
     },
     "CarryYawDecel": {
       "label": "Spin fade",
       "what": "How fast a spin from a hit or hazard fades.",
       "lower": "you keep spinning after a hit",
       "higher": "spins from hits stop almost at once",
-      "slider": [0.01, 1000000, "log"]
+      "slider": [
+        0.01,
+        1000000,
+        "log"
+      ]
     },
     "MaxCarry": {
       "label": "Max push speed",
       "what": "The fastest a shove can make you drift, per direction.",
       "lower": "big hits push you only a little",
       "higher": "big hits can fling you across the map",
-      "slider": [0, 300]
+      "slider": [
+        0,
+        300
+      ]
     },
     "MaxCarryYaw": {
       "label": "Max push spin",
@@ -165,6 +248,36 @@
       "what": "Looks only: how quickly thruster plumes dim when throttle goes down.",
       "lower": "plumes linger after you let go",
       "higher": "plumes cut out instantly"
+    },
+    "VerticalSpeedFraction": {
+      "label": "Up/down speed",
+      "what": "How fast Lift (Y/H) can climb or dive, as a share of max forward speed.",
+      "lower": "climbing and diving are slow; 0 means you cannot change height",
+      "higher": "you change height as fast as you fly forward"
+    },
+    "VerticalAccel": {
+      "label": "Up/down push",
+      "what": "How hard the ship accelerates up or down toward that speed, and how quickly it stops when you let go.",
+      "lower": "climbs build up slowly and the ship drifts on after you release",
+      "higher": "the ship starts and stops climbing almost at once"
+    },
+    "HeadingResponse": {
+      "label": "Facing lag",
+      "what": "With face-the-mouse (B) or face-the-target (P) on, how quickly the nose closes the gap to where it should point. It also levels the ship when nothing is being faced.",
+      "lower": "lazy, heavy turns that swing wide and lag behind the mouse",
+      "higher": "the nose snaps onto the mouse or target"
+    },
+    "MaxPitchDeg": {
+      "label": "Max nose angle",
+      "what": "The steepest the nose may point up or down, so the ship never flips over.",
+      "lower": "the ship stays close to level, even facing something far above or below",
+      "higher": "the ship can point almost straight up or down"
+    },
+    "MaxPitchRateDeg": {
+      "label": "Max pitch rate",
+      "what": "The fastest the nose may tip up or down, in degrees per second.",
+      "lower": "slow, steady pitching",
+      "higher": "the nose can whip up and down quickly"
     }
   }
 }
