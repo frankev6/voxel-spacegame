@@ -503,6 +503,22 @@ Profiler markers: `CameraTargetSyncSystem.Origin`, `CameraTargetSyncSystem.ReadT
   - [ ] Existing camera/flight tests pass; an actual game capture demonstrates the corrected fast-flight framing.
 - **Tests:** `FlightFramingTests.Starter_FastFlight_KeepsFittingHullInViewport`, `FlightFramingTests.CloseInspection_KeepsCenterWithoutResettingInput`.
 
+### CAM-013 — Free-aim chase camera for experimental 3D flight (ADR-0123)
+- **Milestone:** M4
+- **Tier:** frontier — a new camera mode that drives `PlayerCommand.AimWorld` and locks the cursor across UI contexts
+- **Depends on:** `FLT-016`, `CAM-012`
+- **Do:** ADR-0123 decision 6, owner's answer "Chase camera, flight-sim style".
+  - **Free aim:** while the player ship has `Flight3D` enabled and FaceAim on, the cursor is locked, and mouse motion moves a free-aim yaw and pitch (pitch within ±`MaxPitchDeg`, scaled by mouse sensitivity).
+  - **Camera:** it sits behind and above that direction and looks along it, with a centre reticle.
+  - **Aim point:** `AimWorld` is the first collider hit on the centre ray, else 1,000 m along it.
+  - **Cursor release:** menus, the console and leaving the mode unlock the cursor and return the normal camera.
+- **Files:** `Assets/Game/Presentation/Services/CameraRigService.cs`, `CameraMath.cs`, `PlayerInputSampleSystem.cs`, a reticle in the HUD; tests in `Assets/Game/Tests/EditMode/Presentation/`.
+- **Acceptance criteria:**
+  - [ ] With FaceAim on in 3D mode, moving the mouse turns the view, and the ship's nose follows it with the `HeadingResponse` lag; weapons fire at the reticle.
+  - [ ] Opening a menu or the console frees the cursor; closing it resumes the free aim without a jump.
+  - [ ] With FaceAim off, or outside 3D mode, the camera and aim behave exactly as before.
+- **Tests:** `FreeAimTests.MouseDelta_TurnsAimWithinPitchLimit`, `FreeAimTests.ChasePose_LooksAlongAim`, `FreeAimTests.AimWorld_HitOrFarPoint` (EditMode).
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

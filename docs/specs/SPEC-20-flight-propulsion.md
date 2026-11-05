@@ -681,6 +681,26 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
   - [ ] A torch-driven Ram is measurably slower to launch than a sprint-driven Dart, and keeps pushing after release (playground measurement in the ledger).
 - **Tests:** `RacerShipTests.Racers_HaveCoreEnginesAndGuns` (engine kinds per line), content validation.
 
+### FLT-016 — Experimental 3D flight for the player ship (ADR-0123)
+- **Milestone:** M4
+- **Tier:** frontier — opts one ship out of the plane locks, adds a branch to the shared propulsion job and changes `ShipCommand` and two binary formats
+- **Depends on:** `FLT-014`
+- **Do:** ADR-0123 decisions 1–5 and 7. Owner (2026-11-04): "an experimental mode, toggleable in console, which unlocks 3d travel … two buttons to control the ship's upwards and downwards thrust … a toggle which while enabled, makes the ship look at where the mouse is aiming … and have a toggle which while enabled, makes the ship face whatever the selected target is".
+  - **Component:** an enableable `Flight3D`, added disabled to the player ship.
+  - **Plane locks:** they skip it; full inertia while it is enabled; leveling before it turns off.
+  - **Commands:** `ShipCommand.Lift` and `ShipCommandFlags.FaceAim` / `FaceTarget`, plus the SPEC-03 actions `Lift`, `FaceAimToggle` and `FaceTargetToggle`. The co-op and replay formats carry them.
+  - **Propulsion:** the vertical assist and the heading controller.
+  - **Config:** five new `FlightConfig` values.
+  - **Cruise:** refused in 3D mode.
+  - **Rebasing:** keeps the full rotation.
+- **Files:** `Assets/Game/Simulation/Flight/{Flight3D,FlightConfig,FlightConfigFactory,FlightMath,FlightSetup,PropulsionJob,PlanarImpulseJob,SpinLimitSystem,CruiseSystem}.cs`; `Assets/Game/Data/Definitions/Flight/FlightConfigDefinition.cs`; `Assets/Game/Content/Config/config_flight.asset`; the grid mass and impulse jobs; `ShipCommand`, `ShipCommandFlags`, `PlayerCommand`, `PlayerInputSampleSystem`, `PilotCommandConversion`; `Controls.inputactions`; `CoopNet`, `PlayerCommandScript`; `OriginRebaseSystem`; tests in `Assets/Game/Tests/EditMode/Simulation/Flight/`.
+- **Acceptance criteria:**
+  - [ ] With `Flight3D` enabled, Lift moves the ship off the plane up to its vertical speed cap, and releasing it brakes vertical speed.
+  - [ ] With FaceTarget or FaceAim, the nose converges on the direction without flipping past `MaxPitchDeg`, roll stays level, and `HeadingResponse` changes how fast.
+  - [ ] Disabling `Flight3D` levels the ship, restores the inertia lock and returns it to Y = 0.
+  - [ ] Ships without `Flight3D` fly exactly as before (existing flight tests pass unchanged).
+- **Tests:** `Flight3DTests.Lift_ReachesVerticalCap`, `Flight3DTests.FaceTarget_ConvergesWithoutFlip`, `Flight3DTests.Disable_LevelsAndReturnsToPlane`; existing `PropulsionTests`, `PlanarConstraintTests`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
