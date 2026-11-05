@@ -421,6 +421,36 @@ namespace Game.Input
                     ""priority"": 0
                 },
                 {
+                    ""name"": ""Lift"",
+                    ""type"": ""Value"",
+                    ""id"": ""fd52f3ae-cb06-484c-b29d-03308f85a944"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""FaceAimToggle"",
+                    ""type"": ""Button"",
+                    ""id"": ""5ab73189-ee8c-4f1d-bd9b-1a641285e0cb"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""FaceTargetToggle"",
+                    ""type"": ""Button"",
+                    ""id"": ""26a17623-20b2-4d1e-9efd-9bddf6ed2503"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
                     ""name"": ""SensorPing"",
                     ""type"": ""Button"",
                     ""id"": ""84e5183f-2fe9-5177-8e6e-7d8827c4b983"",
@@ -1080,6 +1110,193 @@ namespace Game.Input
                     ""action"": ""Cruise"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""1DAxis"",
+                    ""id"": ""a0a488db-e18b-41bf-81c1-c800648420ad"",
+                    ""path"": ""1DAxis"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Lift"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""negative"",
+                    ""id"": ""fec68699-4f97-48eb-ae7f-92c0647ba2bb"",
+                    ""path"": ""<Keyboard>/h"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""positive"",
+                    ""id"": ""b8bd31bd-032b-49c7-b6a0-b291194de184"",
+                    ""path"": ""<Keyboard>/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b1a8c738-809a-40ca-b922-d186267802bd"",
+                    ""path"": ""<Keyboard>/b"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""FaceAimToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5dca4253-48f9-4f23-a3f4-65b83077d6f4"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""KeyboardMouse"",
+                    ""action"": ""FaceTargetToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""91adbe0e-a423-485e-a44c-fb106a79e7ee"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""967c2a9c-659a-4153-8f70-fbff12f1dfcb"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""47972f58-c9bd-43e3-8859-53888b47edc7"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""856d418a-f4cc-4caa-873f-be437e4e3f2f"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": ""Invert"",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""bbd21b0b-aad4-42aa-b56b-3dfad00900d8"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""9d753c88-f471-4937-9e18-8a56fb92fb07"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Lift"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""36055b94-cea3-4985-bee0-6e98b894f402"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FaceAimToggle"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""d917bdca-5922-49f0-a62c-3dd5c588a129"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FaceAimToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""7c41d2bb-6a88-4a04-b6a8-c59decda9d50"",
+                    ""path"": ""<Gamepad>/dpad/left"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FaceAimToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8495a900-37b6-4cb7-9275-99ee60edf70f"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FaceTargetToggle"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""9763ba21-e3a8-4bf1-af98-22791f77e85e"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FaceTargetToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""30465677-17e4-4572-9528-3629f19bbc68"",
+                    ""path"": ""<Gamepad>/dpad/right"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FaceTargetToggle"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
@@ -4169,6 +4386,9 @@ namespace Game.Input
             m_Flight_TargetClear = m_Flight.FindAction("TargetClear", throwIfNotFound: true);
             m_Flight_AutofireToggle = m_Flight.FindAction("AutofireToggle", throwIfNotFound: true);
             m_Flight_Cruise = m_Flight.FindAction("Cruise", throwIfNotFound: true);
+            m_Flight_Lift = m_Flight.FindAction("Lift", throwIfNotFound: true);
+            m_Flight_FaceAimToggle = m_Flight.FindAction("FaceAimToggle", throwIfNotFound: true);
+            m_Flight_FaceTargetToggle = m_Flight.FindAction("FaceTargetToggle", throwIfNotFound: true);
             m_Flight_SensorPing = m_Flight.FindAction("SensorPing", throwIfNotFound: true);
             m_Flight_CameraOrbitHold = m_Flight.FindAction("CameraOrbitHold", throwIfNotFound: true);
             m_Flight_CameraLook = m_Flight.FindAction("CameraLook", throwIfNotFound: true);
@@ -4505,6 +4725,9 @@ namespace Game.Input
         private readonly InputAction m_Flight_TargetClear;
         private readonly InputAction m_Flight_AutofireToggle;
         private readonly InputAction m_Flight_Cruise;
+        private readonly InputAction m_Flight_Lift;
+        private readonly InputAction m_Flight_FaceAimToggle;
+        private readonly InputAction m_Flight_FaceTargetToggle;
         private readonly InputAction m_Flight_SensorPing;
         private readonly InputAction m_Flight_CameraOrbitHold;
         private readonly InputAction m_Flight_CameraLook;
@@ -4600,6 +4823,18 @@ namespace Game.Input
             /// Provides access to the underlying input action "Flight/Cruise".
             /// </summary>
             public InputAction @Cruise => m_Wrapper.m_Flight_Cruise;
+            /// <summary>
+            /// Provides access to the underlying input action "Flight/Lift".
+            /// </summary>
+            public InputAction @Lift => m_Wrapper.m_Flight_Lift;
+            /// <summary>
+            /// Provides access to the underlying input action "Flight/FaceAimToggle".
+            /// </summary>
+            public InputAction @FaceAimToggle => m_Wrapper.m_Flight_FaceAimToggle;
+            /// <summary>
+            /// Provides access to the underlying input action "Flight/FaceTargetToggle".
+            /// </summary>
+            public InputAction @FaceTargetToggle => m_Wrapper.m_Flight_FaceTargetToggle;
             /// <summary>
             /// Provides access to the underlying input action "Flight/SensorPing".
             /// </summary>
@@ -4728,6 +4963,15 @@ namespace Game.Input
                 @Cruise.started += instance.OnCruise;
                 @Cruise.performed += instance.OnCruise;
                 @Cruise.canceled += instance.OnCruise;
+                @Lift.started += instance.OnLift;
+                @Lift.performed += instance.OnLift;
+                @Lift.canceled += instance.OnLift;
+                @FaceAimToggle.started += instance.OnFaceAimToggle;
+                @FaceAimToggle.performed += instance.OnFaceAimToggle;
+                @FaceAimToggle.canceled += instance.OnFaceAimToggle;
+                @FaceTargetToggle.started += instance.OnFaceTargetToggle;
+                @FaceTargetToggle.performed += instance.OnFaceTargetToggle;
+                @FaceTargetToggle.canceled += instance.OnFaceTargetToggle;
                 @SensorPing.started += instance.OnSensorPing;
                 @SensorPing.performed += instance.OnSensorPing;
                 @SensorPing.canceled += instance.OnSensorPing;
@@ -4829,6 +5073,15 @@ namespace Game.Input
                 @Cruise.started -= instance.OnCruise;
                 @Cruise.performed -= instance.OnCruise;
                 @Cruise.canceled -= instance.OnCruise;
+                @Lift.started -= instance.OnLift;
+                @Lift.performed -= instance.OnLift;
+                @Lift.canceled -= instance.OnLift;
+                @FaceAimToggle.started -= instance.OnFaceAimToggle;
+                @FaceAimToggle.performed -= instance.OnFaceAimToggle;
+                @FaceAimToggle.canceled -= instance.OnFaceAimToggle;
+                @FaceTargetToggle.started -= instance.OnFaceTargetToggle;
+                @FaceTargetToggle.performed -= instance.OnFaceTargetToggle;
+                @FaceTargetToggle.canceled -= instance.OnFaceTargetToggle;
                 @SensorPing.started -= instance.OnSensorPing;
                 @SensorPing.performed -= instance.OnSensorPing;
                 @SensorPing.canceled -= instance.OnSensorPing;
@@ -6191,6 +6444,27 @@ namespace Game.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnCruise(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Lift" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnLift(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "FaceAimToggle" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnFaceAimToggle(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "FaceTargetToggle" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnFaceTargetToggle(InputAction.CallbackContext context);
             /// <summary>
             /// Method invoked when associated input action "SensorPing" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
             /// </summary>

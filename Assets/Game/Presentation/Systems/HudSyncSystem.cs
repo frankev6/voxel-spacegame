@@ -207,7 +207,7 @@ namespace Game.Presentation.Systems
         /// <summary>ADR-0122: the line under the speed: the phase, or why a press was refused (2.5 s).</summary>
         static string CruiseLine(in HudSnapshot value) => value.CruisePhase == 2 ? "CRUISE" : value.CruisePhase == 1 ? "CRUISE · SPOOLING"
             : value.CruiseBlockAgeTicks >= 150 ? "" : value.CruiseBlock switch
-            { 1 => "CRUISE · TOO CLOSE", 2 => "CRUISE · MASS LOCKED", 3 => "CRUISE · HIT", _ => "" };
+            { 1 => "CRUISE · TOO CLOSE", 2 => "CRUISE · MASS LOCKED", 3 => "CRUISE · HIT", 6 => "CRUISE · 3D FLIGHT", _ => "" };
         float ProjectileSpeed(Entity player)
         {
             if (!SystemAPI.TryGetSingleton<Game.Simulation.Weapons.WeaponDefsRef>(out var defs) || !defs.Value.IsCreated) return 0;

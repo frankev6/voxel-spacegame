@@ -15,13 +15,14 @@ namespace Game.Voxel.Damage.Jobs
     {
         public uint Tick;
         [ReadOnly] public ComponentLookup<PlanarConstraint> Planar;
+        [ReadOnly] public ComponentLookup<Flight3D> Flight3D;
         // Each entity writes only its own row.
         [NativeDisableParallelForRestriction] public ComponentLookup<ExternalPush> Pushes;
         void Execute(Entity entity, ref PhysicsVelocity velocity, in PhysicsMass mass, in LocalTransform transform, in PendingImpulse pending)
         {
             if (Tick == 0 || pending.Tick != Tick - 1) return;
             float3 linear = pending.LinearWorld, angular = pending.AngularWorld;
-            if (Planar.HasComponent(entity)) { linear.y = 0; angular.x = angular.z = 0; }
+            if (PlaneLock.Holds(Planar.HasComponent(entity), Flight3D, entity)) { linear.y = 0; angular.x = angular.z = 0; }
             velocity.ApplyLinearImpulse(mass, linear);
             quaternion inertia = math.mul(transform.Rotation, mass.InertiaOrientation);
             float3 dw = math.rotate(math.inverse(inertia), angular) * mass.InverseInertia;

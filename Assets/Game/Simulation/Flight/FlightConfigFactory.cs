@@ -29,6 +29,8 @@ namespace Game.Simulation.Flight
             CarryDecel = def.CarryDecel, CarryBrakeDecel = def.CarryBrakeDecel, CarryYawDecel = def.CarryYawDecel,
             MaxCarry = def.MaxCarry, MaxCarryYaw = def.MaxCarryYaw,   // SPEC-91 carry (HAZ-002)
             ShieldSpeedFraction = def.ShieldSpeedFraction,
+            VerticalSpeedFraction = def.VerticalSpeedFraction, VerticalAccel = def.VerticalAccel, HeadingResponse = def.HeadingResponse,
+            MaxPitchDeg = def.MaxPitchDeg, MaxPitchRateDeg = def.MaxPitchRateDeg,   // ADR-0123
         };
     }
 }

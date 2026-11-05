@@ -33,11 +33,12 @@ namespace Game.Tests.EditMode.Voxel.Physics
             apply.Masses = state.GetComponentLookup<GridMass>(true); apply.States = state.GetComponentLookup<GridColliderState>(true);
             apply.Grids = state.GetComponentLookup<VoxelGrid>(true); apply.Sources = state.GetComponentLookup<GridSource>(true); apply.Transforms = state.GetComponentLookup<LocalTransform>(true);
             apply.PhysicsMasses = state.GetComponentLookup<PhysicsMass>(); apply.Velocities = state.GetComponentLookup<PhysicsVelocity>();
+            apply.Flight3D = state.GetComponentLookup<Game.Data.Components.Flight3D>(true);
         }
         public void OnUpdate(ref SystemState state)
         {
             remove.Grids.Update(ref state); remove.Masses.Update(ref state); apply.Masses.Update(ref state); apply.States.Update(ref state);
-            apply.Grids.Update(ref state); apply.Sources.Update(ref state); apply.Transforms.Update(ref state); apply.PhysicsMasses.Update(ref state); apply.Velocities.Update(ref state);
+            apply.Grids.Update(ref state); apply.Sources.Update(ref state); apply.Transforms.Update(ref state); apply.PhysicsMasses.Update(ref state); apply.Velocities.Update(ref state); apply.Flight3D.Update(ref state);
             remove.Cells = Cells; remove.Ranges = Ranges; remove.Changed = Changed; remove.Blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value;
             var removed = remove.Schedule(state.Dependency); apply.Changed = Changed; state.Dependency = apply.Schedule(removed);
         }

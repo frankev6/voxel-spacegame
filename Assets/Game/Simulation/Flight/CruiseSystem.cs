@@ -1,6 +1,7 @@
 using Game.Core;
 using Game.Core.Components;
 using Game.Core.Systems;
+using Game.Data.Components;
 using Game.Simulation.Commands;
 using Game.Simulation.Spatial;
 using Game.Voxel.Damage;
@@ -25,6 +26,7 @@ namespace Game.Simulation.Flight
         EntityQuery zones;
         ComponentLookup<Allegiance> allegiances;
         ComponentLookup<GridDamageStats> damage;
+        ComponentLookup<Flight3D> flight3D;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -37,13 +39,14 @@ namespace Game.Simulation.Flight
             zones = SystemAPI.QueryBuilder().WithAll<CruiseZone, LocalTransform>().Build();
             allegiances = state.GetComponentLookup<Allegiance>(true);
             damage = state.GetComponentLookup<GridDamageStats>(true);
+            flight3D = state.GetComponentLookup<Flight3D>(true);
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             using var marker = ScheduleMarker.Auto();
-            allegiances.Update(ref state); damage.Update(ref state);
+            allegiances.Update(ref state); damage.Update(ref state); flight3D.Update(ref state);
             var hash = SystemAPI.GetSingleton<SpatialHash>();
             var zoneData = zones.ToComponentDataListAsync<CruiseZone>(state.WorldUpdateAllocator, state.Dependency, out var a);
             var zonePoses = zones.ToComponentDataListAsync<LocalTransform>(state.WorldUpdateAllocator, state.Dependency, out var b);
@@ -51,7 +54,7 @@ namespace Game.Simulation.Flight
             {
                 Config = SystemAPI.GetSingleton<CruiseConfig>(), ForwardCap = SystemAPI.GetSingleton<FlightConfig>().MaxForwardSpeed,
                 Hash = hash.AsReadOnly(), Relations = SystemAPI.GetSingleton<FactionRelations>(),
-                Allegiances = allegiances, Damage = damage, Zones = zoneData, ZonePoses = zonePoses,
+                Allegiances = allegiances, Damage = damage, Flight3D = flight3D, Zones = zoneData, ZonePoses = zonePoses,
                 Tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0
             };
             var handle = job.ScheduleParallel(hash.BeginRead(Unity.Jobs.JobHandle.CombineDependencies(state.Dependency, a, b)));
@@ -69,6 +72,7 @@ namespace Game.Simulation.Flight
             [ReadOnly] public FactionRelations Relations;
             [ReadOnly] public ComponentLookup<Allegiance> Allegiances;
             [ReadOnly] public ComponentLookup<GridDamageStats> Damage;
+            [ReadOnly] public ComponentLookup<Flight3D> Flight3D;   // ADR-0123: no cruise in experimental 3D flight
             [ReadOnly] public NativeList<CruiseZone> Zones;
             [ReadOnly] public NativeList<LocalTransform> ZonePoses;
             public uint Tick;
@@ -101,7 +105,8 @@ namespace Game.Simulation.Flight
                 bool hit = Damage.HasComponent(entity) && Damage[entity].LastDamageTick != 0 && Tick - Damage[entity].LastDamageTick < (uint)Config.DamageLockTicks;
                 cruise.Clearance = clearance; cruise.LockDistance = lockDistance;
                 cruise.Cap = CruiseMath.Cap(Config, ForwardCap, clearance, zoneCap);
-                var why = lockDistance > 0 ? CruiseBlock.MassLocked : hit ? CruiseBlock.Hit : clearance < Config.SlowRadius ? CruiseBlock.TooClose : CruiseBlock.None;
+                bool flying3D = Flight3D.HasComponent(entity) && Flight3D.IsComponentEnabled(entity);
+                var why = flying3D ? CruiseBlock.Flight3D : lockDistance > 0 ? CruiseBlock.MassLocked : hit ? CruiseBlock.Hit : clearance < Config.SlowRadius ? CruiseBlock.TooClose : CruiseBlock.None;
                 bool firing = command.FireGroups != 0;
                 bool brake = (command.Flags & ShipCommandFlags.Brake) != 0 || command.Thrust.y < -.5f;
 

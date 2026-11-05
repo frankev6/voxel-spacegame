@@ -31,6 +31,7 @@ namespace Game.Voxel.PhysicsBody
         BrickMassJob bricks;
         RecomputeSumJob sum;
         PhysicsMassApplyJob apply;
+        Flight3DMassModeJob modes;
 
         [BurstCompile] public void OnCreate(ref SystemState state)
         {
@@ -44,6 +45,7 @@ namespace Game.Voxel.PhysicsBody
             apply.Masses = state.GetComponentLookup<GridMass>(true); apply.States = state.GetComponentLookup<GridColliderState>(true);
             apply.Grids = state.GetComponentLookup<VoxelGrid>(true); apply.Sources = state.GetComponentLookup<GridSource>(true); apply.Transforms = state.GetComponentLookup<LocalTransform>(true);
             apply.PhysicsMasses = state.GetComponentLookup<PhysicsMass>(); apply.Velocities = state.GetComponentLookup<PhysicsVelocity>();
+            apply.Flight3D = state.GetComponentLookup<Flight3D>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<BlockDefsRef>();
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
@@ -53,6 +55,7 @@ namespace Game.Voxel.PhysicsBody
             bricks.Cells.Update(ref state); bricks.Sparse.Update(ref state); bricks.Masks.Update(ref state); bricks.Palettes.Update(ref state); bricks.Instances.Update(ref state);
             sum.Masses.Update(ref state); sum.Recompute.Update(ref state); apply.Masses.Update(ref state); apply.States.Update(ref state);
             apply.Grids.Update(ref state); apply.Sources.Update(ref state); apply.Transforms.Update(ref state); apply.PhysicsMasses.Update(ref state); apply.Velocities.Update(ref state);
+            apply.Flight3D.Update(ref state);
             var allocator = state.WorldUpdateAllocator;
             var changed = new NativeList<Entity>(allocator); var blocks = SystemAPI.GetSingleton<BlockDefsRef>().Value;
             using (Remove.Auto())
@@ -80,7 +83,24 @@ namespace Game.Voxel.PhysicsBody
                 var built = bricks.Schedule(work, 4, planned);
                 sum.Roots = rootList; sum.Results = results; sum.Changed = changed; state.Dependency = sum.Schedule(built);
             }
+            // ADR-0123: a ship entering or leaving experimental 3D flight needs its inertia rebuilt, full or planar.
+            modes.Changed = changed; state.Dependency = modes.Schedule(state.Dependency);
             using (Apply.Auto()) { apply.Changed = changed; state.Dependency = apply.Schedule(state.Dependency); }
+        }
+    }
+
+    /// <summary>ADR-0123: queues a mass rebuild for a ship whose inertia no longer matches its Flight3D state. Planar inertia has exactly
+    /// zero X and Z inverse inertia (GridMassMath), so the check is exact. Single-threaded: it appends to the shared changed list.</summary>
+    [BurstCompile, WithPresent(typeof(Flight3D))]
+    internal partial struct Flight3DMassModeJob : IJobEntity
+    {
+        public NativeList<Entity> Changed;
+        void Execute(Entity entity, EnabledRefRO<Flight3D> flight3D, in PhysicsMass mass, in GridSource source)
+        {
+            if (mass.InverseMass <= 0) return;
+            bool wantPlanar = (source.Flags & GridSpawnFlags.PlanarInertia) != 0 && !flight3D.ValueRO;
+            bool isPlanar = mass.InverseInertia.x == 0 && mass.InverseInertia.z == 0;
+            if (wantPlanar != isPlanar) Changed.Add(entity);
         }
     }
 }

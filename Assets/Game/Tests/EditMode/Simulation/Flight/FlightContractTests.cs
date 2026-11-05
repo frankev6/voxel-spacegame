@@ -20,7 +20,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             {
                 ["Thrust"] = typeof(float2), ["Turn"] = typeof(float), ["AimWorld"] = typeof(float3),
                 ["AimValid"] = typeof(byte), ["Flags"] = typeof(ShipCommandFlags), ["FireGroups"] = typeof(uint),
-                ["Edges"] = typeof(PlayerEdgeCounters), ["FrameIndex"] = typeof(uint)
+                ["Edges"] = typeof(PlayerEdgeCounters), ["FrameIndex"] = typeof(uint), ["Lift"] = typeof(float)   // Lift: ADR-0123
             };
             var fields = typeof(PlayerCommand).GetFields(BindingFlags.Public | BindingFlags.Instance);
             Assert.AreEqual(expected.Count, fields.Length);
