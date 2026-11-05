@@ -23,9 +23,15 @@ main { padding: 16px; display: grid; gap: 20px; }
 .map { border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); }
 .map > h2 { margin: 0; padding: 8px 12px; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
   border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.map > h2 { cursor: pointer; user-select: none; }
+.map > h2 > span:first-child::before { content: "▾ "; }
+.map--collapsed > h2 > span:first-child::before { content: "▸ "; }
+.map--collapsed > h2 { border-bottom: none; }
+.map--collapsed > .cards { display: none; }
 .map--active { border-color: var(--accent); }
 .map--active > h2 { color: var(--accent); }
 .map--idle { opacity: 0.55; }
+.map--idle:hover { opacity: 0.8; }
 body.active-only .map--idle { display: none; }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; padding: 10px; }

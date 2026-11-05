@@ -3,7 +3,7 @@
   const POLL_MS = 100, RETRY_MS = 1000;
   const $ = id => document.getElementById(id);
   const mapsEl = $('maps');
-  let config = { actions: {} }, layout = null, probeQuery = '';
+  let config = { actions: {} }, layout = null, probeQuery = '', activeKey = null;
   const cards = new Map();                 // action path -> { card, updates: [fn] }
   const sections = new Map();              // map name -> section element
 
@@ -88,11 +88,14 @@
   }
 
   function render() {
-    mapsEl.replaceChildren(); cards.clear(); sections.clear();
+    mapsEl.replaceChildren(); cards.clear(); sections.clear(); activeKey = null;
     for (const map of layout.maps) {
-      const section = el('section', 'map map--idle'), h = el('h2'), grid = el('div', 'cards');
-      h.append(el('span', null, map.name), el('span', null, map.actions.length + ' actions'));
+      // Starts idle and collapsed; the first state expands the maps that are on.
+      const section = el('section', 'map map--idle map--collapsed'), h = el('h2'), grid = el('div', 'cards');
+      h.append(el('span', null, map.name), el('span', 'count', map.actions.length + ' actions'));
+      h.addEventListener('click', () => section.classList.toggle('map--collapsed'));
       section.append(h, grid);
+      section.active = false;
       for (const action of map.actions) { const c = buildCard(action); grid.appendChild(c.card); cards.set(action.path, c); }
       if (map.actions.length === 0) grid.appendChild(el('div', 'empty', 'no actions'));
       mapsEl.appendChild(section); sections.set(map.name, section);
@@ -103,8 +106,19 @@
     $('context').textContent = state.context; $('scheme').textContent = state.scheme;
     const active = new Set(state.active);
     for (const [name, section] of sections) {
-      section.classList.toggle('map--active', active.has(name));
-      section.classList.toggle('map--idle', !active.has(name));
+      const on = active.has(name);
+      if (on === section.active) continue;           // only a change of state resets the fold, so a manual toggle sticks
+      section.active = on;
+      section.classList.toggle('map--active', on);
+      section.classList.toggle('map--idle', !on);
+      section.classList.toggle('map--collapsed', !on);
+    }
+    // Active maps first, idle maps below; each group keeps the asset's order, so a map that turns on returns to its spot.
+    const key = state.active.join(',');
+    if (key !== activeKey) {
+      activeKey = key;
+      const order = [...sections.values()];
+      mapsEl.append(...order.filter(s => s.active), ...order.filter(s => !s.active));
     }
     const probes = state.probes || {};
     for (const [path, c] of cards) {

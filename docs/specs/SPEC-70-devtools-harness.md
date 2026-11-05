@@ -733,10 +733,10 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Do:** Owner (2026-11-04): "a second window that opens on my other monitor along with the game, which shows all of the controls for me and leaves space for adding info visuals under each control … can be opened with a console command"; chose the local web page. `controls` starts a localhost-only `HttpListener` owned by `DevRuntimeHost` and opens the browser. The page (`tools/controlsheet/`, outside `Assets/` so nothing ships, read from disk per request so edits need only a refresh) polls two JSON endpoints: `/layout` (every map and action of `Controls.inputactions`, binding labels from `InputService.GetBindingDisplay`, rebuilt on `BindingsChanged`) and `/state` (context, scheme, each action's pressed state and value, and the scenario probes the page asks for with `?probes=`). The main thread builds the JSON only while the sheet is open and polled, at most 15 times a second; the listener thread reads the latest bytes and files and never calls Unity. Under each control the page shows a default live visual by control type, plus the notes and probe values configured per action in `tools/controlsheet/sheet.json`.
 - **Files:** `Assets/Game/App/DevRuntime/ControlSheet/{DevControlSheet,ControlSheetServer,ControlSheetJson}.cs`, `Assets/Game/App/DevRuntime/Commands/ControlsDevCommand.cs`, `DevRuntimeHost.cs`, `DevCommandRegistry.cs`, `tools/controlsheet/*`, `Assets/Game/Tests/EditMode/App/ControlSheetTests.cs`, `docs/08-tools.md`.
 - **Acceptance criteria:**
-  - [ ] `controls` in the console opens the page in the browser; `controls close` stops the server and frees the port; the server closes with the host.
-  - [ ] The page lists every action of every map with its current binding, highlights the active map, and follows rebinds and the keyboard/gamepad switch.
-  - [ ] Each control has a live visual and room for notes and probe values set in `sheet.json`, without C# changes.
-  - [ ] Only `127.0.0.1` is served, only files under `tools/controlsheet/`; no work and no allocation while closed.
+  - [x] `controls` in the console opens the page in the browser; `controls close` stops the server and frees the port; the server closes with the host.
+  - [x] The page lists every action of every map with its current binding, highlights the active map, and follows rebinds and the keyboard/gamepad switch.
+  - [x] Each control has a live visual and room for notes and probe values set in `sheet.json`, without C# changes.
+  - [x] Only `127.0.0.1` is served, only files under `tools/controlsheet/`; no work and no allocation while closed.
 - **Tests:** `ControlSheetTests.Layout_ListsEveryAction`, `ControlSheetTests.Server_ServesPageAndState_ThenFreesPort` (EditMode).
 
 ## 10. Open questions
