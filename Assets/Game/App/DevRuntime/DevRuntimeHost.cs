@@ -50,6 +50,7 @@ namespace Game.App.DevRuntime
         internal Game.App.DevRuntime.Console.DevConsole Console { get; private set; }
         internal Commands.FlightReplaySession Replay { get; private set; }
         internal Game.App.DevRuntime.Perf.DevPerfCounters Perf { get; private set; }
+        internal ControlSheet.DevControlSheet ControlSheet { get; private set; }
         public static DevRuntimeHost Create(Transform parent)
         {
             var root = new GameObject("DevRuntimeHost");
@@ -73,7 +74,10 @@ namespace Game.App.DevRuntime
             catch { host.Dispose(); throw; }
         }
         internal void BindConsole(Game.Input.InputService input, Game.UI.Services.UIRoot ui)
-        { Console = new Game.App.DevRuntime.Console.DevConsole(this, input, ui); Playground.Bind(input, ui); }
+        {
+            Console = new Game.App.DevRuntime.Console.DevConsole(this, input, ui); Playground.Bind(input, ui);
+            ControlSheet = new ControlSheet.DevControlSheet(input, Probes, Context, Game.App.DevRuntime.ControlSheet.DevControlSheet.FindPageRoot(Application.dataPath));
+        }
 
         public Scenarios.ScenarioRunner RunScenario(Scenarios.ScenarioScript script, string path, int runId, string outputDirectory = null)
         {
@@ -112,6 +116,7 @@ namespace Game.App.DevRuntime
             for (int i = 0; i < scenarioCount; i++) scenarios[i].Step();
             for (int i = scenarioCount - 1; i >= 0; i--) if (scenarios[i].Finished) scenarios.RemoveAt(i);
             Console?.Update();
+            ControlSheet?.Tick(Time.realtimeSinceStartupAsDouble);
         }
         void LateUpdate() { Playground?.Tick(); Overlays?.Draw(Context); }
         void OnDestroy() { Cleanup(); }
@@ -125,6 +130,7 @@ namespace Game.App.DevRuntime
             scenarios.Clear();
             Playground?.Dispose();
             Console?.Dispose();
+            ControlSheet?.Dispose();                 // frees the port before a domain reload
             Replay?.Dispose();
             Perf?.Dispose();
             Overlays?.Dispose();

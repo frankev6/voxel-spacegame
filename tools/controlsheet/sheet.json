@@ -1,0 +1,21 @@
+{
+  "_help": "Per-control notes and visuals for the control sheet (SPEC-70 DEV-029). Keys are action paths (Map/Action, hover a card to see it). Fields: label, note, probes (scenario probe names, or {name, label, unit, digits, min, max, values}), visual (a name in visuals.js) and visualProbe. Save and refresh the browser; no recompile.",
+  "actions": {
+    "Flight/Thrust": {
+      "note": "Forward and reverse thrust.",
+      "probes": [
+        { "name": "player.speed", "label": "speed", "unit": "m/s", "max": 200 },
+        { "name": "player.thrust", "label": "forward thrust", "unit": "N", "digits": 0 }
+      ],
+      "visual": "sparkline",
+      "visualProbe": "player.speed"
+    },
+    "Flight/Cruise": {
+      "note": "Spools up, then cruises (ADR-0122).",
+      "probes": [ { "name": "player.cruise", "label": "cruise", "values": { "0": "off", "1": "spooling", "2": "cruising" } } ]
+    },
+    "Global/DevConsole": {
+      "note": "Type `controls` to open this sheet, `controls close` to stop it."
+    }
+  }
+}
