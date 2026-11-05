@@ -189,13 +189,14 @@ namespace Game.Presentation.Input
         }
 
         /// <summary>ADR-0123: Lift and the facing toggles, only while the player ship flies in 3D; leaving 3D clears both toggles.
-        /// Turning one on turns the other off.</summary>
+        /// The toggles are independent (owner, 2026-11-04: "toggling off P shouldn't also toggle off B"); with both on, FaceTarget wins
+        /// in PropulsionJob while there is a target, and turning it off goes back to following the mouse.</summary>
         void Sample3D(ref PlayerCommand command)
         {
             if (!Flying3D(out _)) { faceAim = faceTarget = false; FreeAimCamera(false); return; }
             command.Lift = math.clamp(lift.ReadValue<float>(), -1, 1);
-            if (faceAimToggle.WasPressedThisFrame()) { faceAim = !faceAim; if (faceAim) faceTarget = false; }
-            if (faceTargetToggle.WasPressedThisFrame()) { faceTarget = !faceTarget; if (faceTarget) faceAim = false; }
+            if (faceAimToggle.WasPressedThisFrame()) faceAim = !faceAim;
+            if (faceTargetToggle.WasPressedThisFrame()) faceTarget = !faceTarget;
             if (faceAim) command.Flags |= ShipCommandFlags.FaceAim;
             if (faceTarget) command.Flags |= ShipCommandFlags.FaceTarget;
             FreeAimCamera(faceAim);

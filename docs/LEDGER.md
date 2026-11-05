@@ -1314,6 +1314,7 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - The free-aim view looks `FreeAim.TiltDeg` (default 8°) above the ship, so the ship sits straight below the centre reticle.
   - Tuned live with `camera tilt=<0..30>`.
   - `FreeAimTests.ChasePose_LooksAlongAim` checks the tilt, the ship below the reticle, and that tilt 0 lines them up.
+- **Independent toggles.** Owner: "toggling off P shouldn't also toggle off B". Before, turning one facing toggle on switched the other off. Now they are independent; with both on, FaceTarget wins while a target is selected, and turning P off goes back to following the mouse (and the free-aim camera stays on with B). `PlayerInputSampleSystemTests.FacingToggles_AreIndependent` passes; ADR-0123 decision 4 and SPEC-03 updated.
 - **Static audit:** `ControlSheetServer.EmptyJson` and `DevFlightConfig.Fields` (DEV-029/030) were missing `[StaticStateOk]`; now annotated. `StaticStateAuditTests` still lists seven older statics this work did not add (RepairPlanner, Hollow playground, `FlightCameraPreset.All`).
 - **Both:** spec-required 1 + 3, extra 0. 36/36 related EditMode tests pass. Not yet flown live; both tasks are in `review` on `task/CAM-013-free-aim`, which is stacked on `task/DEV-031-flight3d-command` and not merged.
 
