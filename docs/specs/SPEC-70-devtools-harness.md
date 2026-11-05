@@ -190,6 +190,7 @@ flowchart LR
 | Inventory add, credits add | `InventoryModel` / `Wallet` public methods (owner methods, dev caller) | No direct field writes |
 | Fact set | `FactStore.SetBySlot(slot, value, FactWriteSource.Debugger)` (owner method, dev caller) | No direct field writes |
 | `PlayerCommand` during replay | SPEC-71 replay system | Specified by SPEC-71 |
+| `FlightConfig` singleton fields (DEV-030, control sheet *Flight configs*) | `DevFlightConfig.TrySet` / `Reset` | Main thread in `DevRuntimeHost.Update`, between world updates, after `CompleteAllTrackedJobs()`; each value clamped to its field range; never written to `config_flight`; the first read keeps the boot values for Reset |
 
 ## 6. Public API
 
@@ -738,6 +739,18 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [x] Each control has a live visual and room for notes and probe values set in `sheet.json`, without C# changes.
   - [x] Only `127.0.0.1` is served, only files under `tools/controlsheet/`; no work and no allocation while closed.
 - **Tests:** `ControlSheetTests.Layout_ListsEveryAction`, `ControlSheetTests.Server_ServesPageAndState_ThenFreesPort` (EditMode).
+
+### DEV-030 — Control sheet: the Flight configs panel
+- **Milestone:** M4
+- **Tier:** standard — a dev write of one boot singleton, listed in §5.4, behind the DEV-029 page
+- **Depends on:** `DEV-029`
+- **Do:** Owner (2026-11-04): "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean." A tab on the control sheet. `GET /flight` lists every `FlightConfig` field with its live value, boot value and range; `POST /flight?name=&value=` and `POST /flight/reset[?name=]` queue a change that the main thread applies next frame (§5.4). Posts need the `X-Control-Sheet` header, which a cross-site page cannot send without a CORS preflight the server never grants. Descriptions, groups and "lower / higher" text live in `tools/controlsheet/flight.json`. Nothing is saved: Reset, or leaving Play, restores `config_flight`.
+- **Files:** `Assets/Game/App/DevRuntime/ControlSheet/{DevFlightConfig,ControlSheetServer,DevControlSheet}.cs`, `tools/controlsheet/{index.html,sheet.js,sheet.css,flight.js,flight.json}`, `Assets/Game/Tests/EditMode/App/ControlSheetTests.cs`.
+- **Acceptance criteria:**
+  - [ ] The page swaps between *Controls* and *Flight configs*; every `FlightConfig` field is listed with its value, boot value and a plain description of what lower and higher numbers do.
+  - [ ] Changing a value changes the flight on the next tick; Reset (one or all) restores the boot values; nothing is written to `config_flight`.
+  - [ ] Out-of-range or non-finite values are clamped or refused; a post without the header is refused.
+- **Tests:** `ControlSheetTests.FlightConfig_SetClampsAndResets`, `ControlSheetTests.Server_FlightPostNeedsHeader` (EditMode).
 
 ## 10. Open questions
 
