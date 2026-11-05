@@ -1,0 +1,170 @@
+{
+  "_help": "Descriptions for the Flight configs panel (SPEC-70 DEV-030). Keys are FlightConfig field names. Fields: label, what, lower, higher, and optional slider [min, max] or [min, max, \"log\"] when the field's full range is too wide for a slider. Edits here need only a browser refresh. The values themselves come from the game; edits on the page last until you leave Play.",
+  "groups": [
+    { "name": "Top speeds", "fields": ["MaxForwardSpeed", "ReverseSpeedFraction", "StrafeSpeedFraction", "BoostSpeedMultiplier", "BoostThrottle", "ShieldSpeedFraction"] },
+    { "name": "Turning", "fields": ["MaxYawRateDeg"] },
+    { "name": "Flight assist feel", "fields": ["LinearAssistGain", "AngularAssistGain", "CoastDeceleration"] },
+    { "name": "Core assist (help every ship gets, whatever its thrusters)", "fields": ["CoreLinearAccel", "CoreMaxLinearForce", "CoreYawAccelDeg", "CoreMaxYawTorque"] },
+    { "name": "Pushes (knockback and drift from hits and hazards)", "fields": ["CarryDecel", "CarryBrakeDecel", "CarryYawDecel", "MaxCarry", "MaxCarryYaw"] },
+    { "name": "Thruster solver and plumes", "fields": ["TorqueWeight", "AllocationSweeps", "ThrottleEpsilon", "PlaneCorrection", "IntensityRise", "IntensityFall"] }
+  ],
+  "fields": {
+    "MaxForwardSpeed": {
+      "label": "Max forward speed",
+      "what": "The fastest a ship flies forward without boost. Reverse and strafe speeds are fractions of it, and cruise starts from it.",
+      "lower": "every ship is slower in every direction",
+      "higher": "every ship is faster in every direction",
+      "slider": [10, 400]
+    },
+    "ReverseSpeedFraction": {
+      "label": "Reverse speed",
+      "what": "How fast you can back up, as a share of max forward speed.",
+      "lower": "backing up is slow; 0 means you cannot reverse at all",
+      "higher": "backing up gets closer to forward speed; 1 means just as fast"
+    },
+    "StrafeSpeedFraction": {
+      "label": "Strafe speed",
+      "what": "How fast you can slide sideways, as a share of max forward speed.",
+      "lower": "sideways dodges are slow",
+      "higher": "sideways movement is as quick as flying forward"
+    },
+    "BoostSpeedMultiplier": {
+      "label": "Boost top speed",
+      "what": "Boost multiplies the forward speed limit by this. It only raises forward speed, not reverse or strafe.",
+      "lower": "boost barely raises top speed; 1 means no higher top speed at all",
+      "higher": "boost lets you fly much faster than normal"
+    },
+    "BoostThrottle": {
+      "label": "Boost push",
+      "what": "How hard thrusters may push while boosting, compared with normal full throttle. A ship's own thruster setting can override it.",
+      "lower": "boost speeds you up gently; 1 means no extra push",
+      "higher": "boost kicks in hard and reaches its top speed sooner, with longer plumes"
+    },
+    "ShieldSpeedFraction": {
+      "label": "Speed with shield up",
+      "what": "While a ship's shield is up, its speed limits are multiplied by this: the shield's trade-off.",
+      "lower": "raising the shield slows you a lot",
+      "higher": "the shield costs little speed; 1 means no slowdown"
+    },
+    "MaxYawRateDeg": {
+      "label": "Max turn rate",
+      "what": "The fastest a ship may spin, in degrees per second. A heavy ship with weak thrusters may never reach it.",
+      "lower": "turning is capped slower, even for agile ships",
+      "higher": "agile ships can whip around faster"
+    },
+    "LinearAssistGain": {
+      "label": "Movement assist strength",
+      "what": "How much of the gap between your speed and the speed you are asking for the flight assist closes each tick, within what the thrusters can push.",
+      "lower": "softer, floatier: the ship eases toward the speed you want",
+      "higher": "snappier: the ship locks onto the speed you want almost at once"
+    },
+    "AngularAssistGain": {
+      "label": "Turning assist strength",
+      "what": "The same as movement assist, for spinning: how quickly the assist matches the turn rate you are asking for.",
+      "lower": "turns ease in and out, with a little drift",
+      "higher": "turns start and stop crisply"
+    },
+    "CoastDeceleration": {
+      "label": "Coast slowdown",
+      "what": "With no forward or back input, how quickly the ship slows down by itself, per second, as far as its thrusters allow.",
+      "lower": "you coast a long way after letting go; 0 means you keep your speed",
+      "higher": "the ship stops soon after you let go"
+    },
+    "CoreLinearAccel": {
+      "label": "Core push",
+      "what": "Extra acceleration the ship core adds along every direction, on top of real thrusters, so ships with few or lopsided thrusters can still move.",
+      "lower": "movement depends more on where thrusters are placed; 0 means thrusters only",
+      "higher": "every ship accelerates, brakes and strafes harder whatever its layout"
+    },
+    "CoreMaxLinearForce": {
+      "label": "Core push limit",
+      "what": "A cap on the core push force, so it matters less for heavy ships.",
+      "lower": "big ships get little core help and rely on their thrusters",
+      "higher": "big ships get the full core push too",
+      "slider": [0, 2000000]
+    },
+    "CoreYawAccelDeg": {
+      "label": "Core turning",
+      "what": "Extra turning acceleration from the ship core's gyro, on top of thrusters.",
+      "lower": "turning depends more on thruster placement; 0 means thrusters only",
+      "higher": "every ship starts and stops turning faster"
+    },
+    "CoreMaxYawTorque": {
+      "label": "Core turning limit",
+      "what": "A cap on the gyro's turning force, so heavy ships turn on their thrusters more.",
+      "lower": "big ships turn sluggishly unless they have good thrusters",
+      "higher": "big ships get the full gyro help",
+      "slider": [0, 10000000]
+    },
+    "CarryDecel": {
+      "label": "Push fade",
+      "what": "When a hit or hazard shoves the ship, how fast that drift fades away, in m/s every second.",
+      "lower": "shoves keep you drifting for a long time",
+      "higher": "shoves fade almost at once; 1,000,000 means the assist cancels them instantly",
+      "slider": [0.01, 1000000, "log"]
+    },
+    "CarryBrakeDecel": {
+      "label": "Push fade while braking",
+      "what": "The same as push fade, while Brake is held.",
+      "lower": "braking does little against a shove",
+      "higher": "braking kills a shove quickly",
+      "slider": [0.01, 1000000, "log"]
+    },
+    "CarryYawDecel": {
+      "label": "Spin fade",
+      "what": "How fast a spin from a hit or hazard fades.",
+      "lower": "you keep spinning after a hit",
+      "higher": "spins from hits stop almost at once",
+      "slider": [0.01, 1000000, "log"]
+    },
+    "MaxCarry": {
+      "label": "Max push speed",
+      "what": "The fastest a shove can make you drift, per direction.",
+      "lower": "big hits push you only a little",
+      "higher": "big hits can fling you across the map",
+      "slider": [0, 300]
+    },
+    "MaxCarryYaw": {
+      "label": "Max push spin",
+      "what": "The fastest a hit can spin you, in radians per second (3.5 is about 200°/s).",
+      "lower": "hits barely spin you",
+      "higher": "hits can send you spinning wildly"
+    },
+    "TorqueWeight": {
+      "label": "Turning priority",
+      "what": "When thrusters cannot do everything at once, how much the solver favours turning over moving.",
+      "lower": "the ship keeps its speed but turns late",
+      "higher": "the ship holds its heading but loses speed while turning"
+    },
+    "AllocationSweeps": {
+      "label": "Solver passes",
+      "what": "How many passes the solver makes to share the work between thrusters each tick. Rarely felt.",
+      "lower": "cheaper, but thrusters are used less precisely",
+      "higher": "thrusters are used more precisely, at a small CPU cost"
+    },
+    "ThrottleEpsilon": {
+      "label": "Throttle dead zone",
+      "what": "Thruster throttles below this count as off.",
+      "lower": "tiny corrections fire, so plumes may flicker",
+      "higher": "small corrections are dropped, so fine adjustments are lost"
+    },
+    "PlaneCorrection": {
+      "label": "Plane pull",
+      "what": "How much of the ship's drift off the flight plane is pulled back each tick.",
+      "lower": "after hits the ship may bob above or below the plane for a while",
+      "higher": "the ship snaps straight back onto the plane"
+    },
+    "IntensityRise": {
+      "label": "Plume rise",
+      "what": "Looks only: how quickly thruster plumes brighten when throttle goes up.",
+      "lower": "plumes swell slowly",
+      "higher": "plumes flare instantly"
+    },
+    "IntensityFall": {
+      "label": "Plume fade",
+      "what": "Looks only: how quickly thruster plumes dim when throttle goes down.",
+      "lower": "plumes linger after you let go",
+      "higher": "plumes cut out instantly"
+    }
+  }
+}

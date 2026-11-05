@@ -21,8 +21,9 @@ namespace Game.App.DevRuntime.ControlSheet
         readonly string pageRoot;
         readonly List<string> probeNames = new List<string>();
         readonly Func<string, string> bindingLabel, probeJson;
+        readonly DevFlightConfig flight = new DevFlightConfig();
         ControlSheetServer server;
-        string parsedProbeQuery = string.Empty;
+        string parsedProbeQuery = string.Empty, flightError;
         int layoutVersion;
         bool layoutDirty;
         double nextBuild;
@@ -69,7 +70,16 @@ namespace Game.App.DevRuntime.ControlSheet
 
         internal void Tick(double realtime)
         {
-            if (server == null || realtime < nextBuild || !server.PolledWithin(PollWindow)) return;
+            if (server == null) return;
+            bool changed = false;
+            while (server.TryTakeFlightChange(out var change))
+            {
+                // §5.4: runs in DevRuntimeHost.Update, between world updates.
+                if (flight.TryApply(context?.World, change.Name, change.Value, change.Reset, out string error)) flightError = null;
+                else flightError = error;
+                changed = true;
+            }
+            if (!changed && (realtime < nextBuild || !server.PolledWithin(PollWindow))) return;
             nextBuild = realtime + BuildInterval;
             Publish();
         }
@@ -84,6 +94,8 @@ namespace Game.App.DevRuntime.ControlSheet
                 layoutDirty = false; layoutVersion++;
                 server.Layout = Encoding.UTF8.GetBytes(ControlSheetJson.Layout(asset, bindingLabel, layoutVersion));
             }
+            bool flightAvailable = flight.TryRead(context?.World, out var current, out var original);
+            server.Flight = Encoding.UTF8.GetBytes(DevFlightConfig.Json(flightAvailable, current, original, flightError));
             ParseProbeQuery(server.ProbeQuery);
             server.State = Encoding.UTF8.GetBytes(ControlSheetJson.State(asset, layoutVersion, input.CurrentContext.ToString(), input.CurrentControlScheme, probeNames, probeJson));
         }

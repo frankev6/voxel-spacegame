@@ -19,6 +19,20 @@ body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 var(
 .pill--down { border-color: var(--danger); color: var(--danger); }
 .toggle { color: var(--text-muted); font-size: 12px; user-select: none; }
 
+/* Tabs: body[data-panel] picks the visible panel and the header controls that belong to it. */
+.tabs { display: flex; gap: 4px; }
+.tabs button { padding: 6px 14px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-1); color: var(--text-muted);
+  font: 13px var(--body); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
+.tabs button:hover { color: var(--text); border-color: var(--border-strong); }
+body[data-panel="controls"] .tabs [data-panel="controls"], body[data-panel="flight"] .tabs [data-panel="flight"] {
+  color: var(--accent-strong); border-color: var(--accent); background: var(--surface-3); }
+body:not([data-panel="controls"]) .panel--controls, body:not([data-panel="controls"]) .only-controls { display: none; }
+body:not([data-panel="flight"]) .panel--flight, body:not([data-panel="flight"]) .only-flight { display: none; }
+.button { padding: 3px 10px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--surface-2); color: var(--text);
+  font: 12px var(--body); cursor: pointer; }
+.button:hover { border-color: var(--accent); color: var(--accent-strong); }
+.button:disabled { opacity: 0.4; cursor: default; }
+
 main { padding: 16px; display: grid; gap: 20px; }
 .map { border: 1px solid var(--border); border-radius: 6px; background: var(--surface-1); }
 .map > h2 { margin: 0; padding: 8px 12px; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted);
@@ -61,3 +75,24 @@ body.active-only .map--idle { display: none; }
 .spark { width: 100%; height: 28px; display: block; }
 .spark polyline { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .empty { color: var(--text-muted); padding: 24px; text-align: center; }
+
+/* Flight configs panel (DEV-030). */
+.banner { padding: 8px 12px; border: 1px solid var(--border); border-left: 3px solid var(--warning); border-radius: 4px;
+  background: var(--surface-1); color: var(--text-muted); font-size: 13px; }
+.banner--error { border-left-color: var(--danger); color: var(--danger); }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 8px; padding: 10px; }
+.field { padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-2); display: flex; flex-direction: column; gap: 6px; }
+.field--changed { border-color: var(--warning); }
+.field .title { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.field .label { font-weight: 600; }
+.field .code { color: var(--text-muted); font: 11px var(--mono); }
+.field .what { font-size: 13px; }
+.field .range { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; font-size: 12px; color: var(--text-muted); }
+.field .range b { color: var(--text); font-weight: 600; }
+.field .edit { display: flex; gap: 8px; align-items: center; }
+.field input[type="range"] { flex: 1; accent-color: var(--accent); }
+.field input[type="number"] { width: 110px; padding: 2px 6px; border: 1px solid var(--border-strong); border-radius: 3px;
+  background: var(--surface-1); color: var(--text); font: 12px var(--mono); }
+.field .unit { color: var(--text-muted); font: 12px var(--mono); min-width: 48px; }
+.field .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 11px var(--mono); color: var(--text-muted); }
+.field .tag { color: var(--warning); }

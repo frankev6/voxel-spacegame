@@ -1298,6 +1298,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 ## Log
 
+### 2026-11-04 — DEV-030: the Flight configs panel on the control sheet (claude, claude-opus-5-5)
+- Owner: "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean."
+- A *Flight configs* tab on the control sheet. `DevFlightConfig` lists all 25 `FlightConfig` fields with ranges from `FlightConfigDefinition` (practical ceilings for Min-only fields). `GET /flight` gives each live value, boot value and range; `POST /flight?name=&value=` and `POST /flight/reset[?name=]` queue a change that `DevRuntimeHost.Update` applies after `CompleteAllTrackedJobs()` (new SPEC-70 §5.4 row). Values are clamped, integer fields rounded, NaN and unknown names refused. Posts need the `X-Control-Sheet` header, so another web page cannot change the game. `config_flight` is never written: Reset, or leaving Play, restores it.
+- `tools/controlsheet/flight.json` holds the groups, labels and plain "what it does / lower / higher" text, plus log sliders for the push fades (0.01 … 1,000,000). Flight reads every value live each tick; the four core-assist values reach AI pilots' `PropulsionStats` only after a ship rebuild, and the page says so.
+- Tests: `ControlSheetTests` 4/4 pass (EditMode, headless, Windows), including `FlightConfig_SetClampsAndResets` (also checks every setter writes only its own field) and `Server_FlightPostNeedsHeader`. spec-required: 2, extra: 0. Waiting on the owner's live check.
+
 ### 2026-11-04 — DEV-029: the control sheet, every control on a second monitor (claude, claude-opus-5-5)
 - Owner: "a second window that opens on my other monitor along with the game, which shows all of the controls for me and leaves space for adding info visuals under each control … can be opened with a console command"; chose the local web page over a second Unity display.
 - `controls` (console/registry) starts `DevControlSheet`: a localhost-only `HttpListener` owned by `DevRuntimeHost` (closed with it, so domain reloads free the port), then opens `http://127.0.0.1:47810/`. Without `port=` it tries the next 9 ports, for two dev builds on one machine.
