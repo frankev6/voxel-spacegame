@@ -94,28 +94,41 @@ namespace Game.Tests.EditMode.Voxel
             var ship = ships.OrderByDescending(s => s.Payload.Length).First(); byte[] bytes = ship.Payload.ToArray();
             Compare(bytes, catalog);
             var baseline = new double[300]; var buffered = new double[300];
+            var legacyCodec = new double[300]; var bufferedCodec = new double[300];
+            var legacyStorage = new double[300]; var bufferedStorage = new double[300];
+            int brickCount = 0, instanceCount = 0, denseCells = 0;
             for (int i = -60; i < 300; i++)
             {
-                double a, b;
+                (double total, double codec, double storage) a, b;
                 if ((i & 1) == 0) { a = Measure(true); b = Measure(false); }
                 else { b = Measure(false); a = Measure(true); }
-                if (i >= 0) { baseline[i] = a; buffered[i] = b; }
+                if (i >= 0)
+                {
+                    baseline[i] = a.total; buffered[i] = b.total;
+                    legacyCodec[i] = a.codec; bufferedCodec[i] = b.codec;
+                    legacyStorage[i] = a.storage; bufferedStorage[i] = b.storage;
+                }
             }
-            TestContext.WriteLine($"{ship.IdString}: {bytes.Length} compressed bytes, {ship.CellCount} solid cells; full decode+structure storage, disposal excluded; 60 warmup/300 paired samples");
+            TestContext.WriteLine($"{ship.IdString}: {bytes.Length} compressed bytes, {ship.CellCount} solid cells, {brickCount} bricks, {instanceCount} instances, {denseCells} dense cells; full decode+structure storage, disposal excluded; 60 warmup/300 paired samples");
             new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("LegacyDecodeMs", baseline)
-                .AddSamples("BufferedDecodeMs", buffered).Write();
-            double Measure(bool legacy)
+                .AddSamples("BufferedDecodeMs", buffered)
+                .AddSamples("LegacyCodecMs", legacyCodec).AddSamples("BufferedCodecMs", bufferedCodec)
+                .AddSamples("LegacyStorageMs", legacyStorage).AddSamples("BufferedStorageMs", bufferedStorage).Write();
+            (double total, double codec, double storage) Measure(bool legacy)
             {
                 var timer = Stopwatch.StartNew();
                 VoxsDecoded decoded; string error;
                 bool ok = legacy ? VoxsCodec.TryDecodeLegacyInput(bytes, catalog, Allocator.TempJob, out decoded, out error)
                     : VoxsCodec.TryDecode(bytes, catalog, Allocator.TempJob, out decoded, out error);
+                double codecMs = timer.Elapsed.TotalMilliseconds;
                 using (decoded)
                 {
                     Assert.IsTrue(ok, error);
+                    double storageStart = timer.Elapsed.TotalMilliseconds;
                     using var structure = VoxelStructureCodec.FromDecoded(decoded); timer.Stop();
+                    brickCount = decoded.BrickCoords.Length; instanceCount = decoded.Instances.Length; denseCells = decoded.Cells.Length;
                     Assert.AreEqual(ship.CellCount, structure.SolidCellCount);
-                    return timer.Elapsed.TotalMilliseconds;
+                    return (timer.Elapsed.TotalMilliseconds, codecMs, timer.Elapsed.TotalMilliseconds - storageStart);
                 }
             }
         }
