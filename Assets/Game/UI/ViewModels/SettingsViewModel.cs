@@ -17,6 +17,13 @@ namespace Game.UI.ViewModels
         /// <summary>HUD-021: the Controls page's sub-tab, an index into <see cref="ControlsGroupMaps"/>.</summary>
         [CreateProperty] public int ControlsGroup { get => controlsGroup; set => Set(ref controlsGroup, value, ControlsGroupChanged); }
         /// <summary>HUD-021: the action maps behind the Controls sub-tabs, in tab order (General, Flight, Ship editor, Dialogue).</summary>
+        [Game.Core.StaticStateOk("Readonly cached property-name notification; passed by readonly reference, contains no session state.")]
+        static readonly BindablePropertyChangedEventArgs ControlsDeviceChanged = new BindablePropertyChangedEventArgs(nameof(ControlsDevice));
+        int controlsDevice;
+        /// <summary>HUD-021: which device's bindings the Controls page shows: 0 keyboard and mouse, 1 controller.</summary>
+        [CreateProperty] public int ControlsDevice { get => controlsDevice; set => Set(ref controlsDevice, value, ControlsDeviceChanged); }
+        [Game.Core.StaticStateOk("constant tab table, never written")]
+        public static readonly string[] ControlsDeviceLabels = { "Keyboard & mouse", "Controller" };
         [Game.Core.StaticStateOk("constant tab table, never written")]
         public static readonly string[] ControlsGroupMaps = { "Global", "Flight", "Editor", "Dialog" };
         [Game.Core.StaticStateOk("constant tab table, never written")]

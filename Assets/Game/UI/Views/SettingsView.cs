@@ -7,8 +7,9 @@ using UnityEngine.UIElements;
 
 namespace Game.UI.Views
 {
-    /// <summary>SPEC-61 HUD-005: five authored tabs. HUD-021: the Controls page groups its binding rows under sub-tabs by action map and
-    /// lays them out in two columns (about sixty rows in all, so they are built once rather than virtualized).</summary>
+    /// <summary>SPEC-61 HUD-005: five authored tabs. HUD-021: the Controls page shows one row per action, in two columns, under sub-tabs
+    /// by action map and a keyboard/controller switch; each row holds one button per binding for that device (owner: "only being mentioned
+    /// once but being able to put different binds in"). The model keeps one entry per binding, so a slot button is settings-rebind-&lt;index&gt;.</summary>
     public sealed class SettingsView : UIScreen
     {
         readonly SettingsViewModel viewModel;
@@ -22,11 +23,13 @@ namespace Game.UI.Views
         readonly Slider[] sliders = new Slider[7];
         readonly Toggle[] toggles = new Toggle[3];
         readonly VisualElement[] pages = new VisualElement[5];
-        TabBar tabs, controlsTabs;
+        TabBar tabs, controlsTabs, controlsDevice;
         DropdownField resolution, fullscreen, quality, yaw, textScale;
         VisualElement rebinds;
         VisualTreeAsset rowTemplate;
-        readonly System.Collections.Generic.List<TemplateContainer> rows = new System.Collections.Generic.List<TemplateContainer>(64);
+        readonly System.Collections.Generic.List<TemplateContainer> rows = new System.Collections.Generic.List<TemplateContainer>(48);
+        readonly System.Collections.Generic.List<Button> slots = new System.Collections.Generic.List<Button>(64);     // by binding index
+        readonly System.Collections.Generic.List<string> builtPaths = new System.Collections.Generic.List<string>(64);
         bool observing;
         public SettingsView(SettingsViewModel vm, ISettingsCommands commands)
         { viewModel = vm ?? throw new ArgumentNullException(nameof(vm)); this.commands = commands ?? throw new ArgumentNullException(nameof(commands)); }
@@ -59,6 +62,9 @@ namespace Game.UI.Views
             var groupNames = new string[SettingsViewModel.ControlsGroupLabels.Length];
             for (int i = 0; i < groupNames.Length; i++) groupNames[i] = "settings-controls-tab-" + SettingsViewModel.ControlsGroupMaps[i].ToLowerInvariant();
             controlsTabs.SetTabs(SettingsViewModel.ControlsGroupLabels, groupNames); controlsTabs.SelectionChanged += commands.SelectControlsGroup;
+            controlsDevice = Q<TabBar>("settings-controls-device");
+            controlsDevice.SetTabs(SettingsViewModel.ControlsDeviceLabels, new[] { "settings-controls-device-keyboard", "settings-controls-device-controller" });
+            controlsDevice.SelectionChanged += commands.SelectControlsDevice;
             rebinds = Q<VisualElement>("settings-rebinds");
             // The UXML carries one RebindRow instance only to hand its template to code; rows are made from it per binding.
             var carrier = Q<TemplateContainer>("settings-rebind-template");
@@ -82,7 +88,7 @@ namespace Game.UI.Views
         void Refresh()
         {
             tabs.SelectedIndex = viewModel.SelectedTab;
-            controlsTabs.SelectedIndex = viewModel.ControlsGroup;
+            controlsTabs.SelectedIndex = viewModel.ControlsGroup; controlsDevice.SelectedIndex = viewModel.ControlsDevice;
             for (int i = 0; i < pages.Length; i++) pages[i].EnableInClassList(UIStyleClasses.IsHidden, i != viewModel.SelectedTab);
             sliders[0].SetValueWithoutNotify(viewModel.MasterVolume); sliders[1].SetValueWithoutNotify(viewModel.MusicVolume);
             sliders[2].SetValueWithoutNotify(viewModel.SfxVolume); sliders[3].SetValueWithoutNotify(viewModel.UiVolume);
@@ -95,29 +101,51 @@ namespace Game.UI.Views
             RefreshRows();
         }
 
-        /// <summary>One row per binding, made once for the list's length; each keeps its global index (the button is
-        /// settings-rebind-&lt;index&gt;), and only the selected group's rows show.</summary>
+        /// <summary>One row per action and one slot button per binding, built when the list of bindings changes; the selected group and
+        /// device decide what shows.</summary>
         void RefreshRows()
         {
             var items = viewModel.Rebinds;
-            while (rows.Count > items.Count) { rows[rows.Count - 1].RemoveFromHierarchy(); rows.RemoveAt(rows.Count - 1); }
-            while (rows.Count < items.Count)
-            {
-                var row = rowTemplate.Instantiate(); row.AddToClassList("settings-rebind-cell"); row.userData = rows.Count;
-                row.Q<Button>("settings-rebind-button").clicked += () =>
-                { if (row.userData is int index) { if (index == viewModel.ListeningRow) commands.CancelRebind(); else commands.StartRebind(index); } };
-                rows.Add(row); rebinds.Add(row);
-            }
-            int group = viewModel.ControlsGroup;
+            if (!SameBindings(items)) BuildRows(items);
+            int group = viewModel.ControlsGroup, device = viewModel.ControlsDevice;
             string prefix = group >= 0 && group < SettingsViewModel.ControlsGroupMaps.Length ? SettingsViewModel.ControlsGroupMaps[group] + "/" : "";
+            foreach (var row in rows) row.EnableInClassList(UIStyleClasses.IsHidden, true);
             for (int i = 0; i < items.Count; i++)
             {
-                var row = rows[i]; var item = items[i];
-                row.dataSource = item;
-                row.Q<Label>("settings-rebind-action").text = item.DisplayName;
-                row.Q<Label>("settings-rebind-binding").text = item.BindingText;
-                var button = row.Q<Button>(); button.name = "settings-rebind-" + i; button.text = item.IsListening ? "Cancel" : "Rebind";
-                row.EnableInClassList(UIStyleClasses.IsHidden, item.ActionPath == null || !item.ActionPath.StartsWith(prefix, StringComparison.Ordinal));
+                var item = items[i]; var slot = slots[i];
+                bool show = item.Device == device && item.ActionPath.StartsWith(prefix, StringComparison.Ordinal);
+                slot.EnableInClassList(UIStyleClasses.IsHidden, !show);
+                slot.text = item.IsListening ? "Press a key…" : item.BindingText;
+                slot.EnableInClassList("is-listening", item.IsListening);
+                if (show) RowOf(slot).EnableInClassList(UIStyleClasses.IsHidden, false);
+            }
+        }
+        static TemplateContainer RowOf(Button slot) => slot.GetFirstAncestorOfType<TemplateContainer>();
+        bool SameBindings(System.Collections.Generic.List<RebindRowViewModel> items)
+        {
+            if (builtPaths.Count != items.Count) return false;
+            for (int i = 0; i < items.Count; i++) if (builtPaths[i] != items[i].ActionPath) return false;
+            return true;
+        }
+        void BuildRows(System.Collections.Generic.List<RebindRowViewModel> items)
+        {
+            foreach (var row in rows) row.RemoveFromHierarchy();
+            rows.Clear(); slots.Clear(); builtPaths.Clear();
+            var byAction = new System.Collections.Generic.Dictionary<string, TemplateContainer>(StringComparer.Ordinal);
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i]; builtPaths.Add(item.ActionPath);
+                if (!byAction.TryGetValue(item.ActionPath, out var row))
+                {
+                    row = rowTemplate.Instantiate(); row.AddToClassList("settings-rebind-cell"); row.userData = item.ActionPath;
+                    row.Q<Label>("settings-rebind-action").text = item.DisplayName;
+                    byAction.Add(item.ActionPath, row); rows.Add(row); rebinds.Add(row);
+                }
+                int index = i;
+                var slot = new Button(() => { if (index == viewModel.ListeningRow) commands.CancelRebind(); else commands.StartRebind(index); })
+                    { name = "settings-rebind-" + index, userData = index };
+                slot.AddToClassList("btn"); slot.AddToClassList("btn--secondary"); slot.AddToClassList("settings-rebind-slot");
+                row.Q<VisualElement>("settings-rebind-slots").Add(slot); slots.Add(slot);
             }
         }
         void SetIndex(DropdownField field, int index)

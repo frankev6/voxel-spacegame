@@ -526,3 +526,4 @@ Owner playtest: the editor "needs to be much more friendly". The Editor map chan
 - `TogglePalette` on `Tab` opens and closes the block catalogue.
 - `OrbitHold` also binds the right mouse button. `EditorInputSampler` resolves `Secondary` on release only when the pointer moved less than 6 px, so a right-drag orbits the camera and a right-click removes.
 
+> HUD-021 (2026-11-05): during an interactive rebind, Backspace or Delete applies an empty binding override (unbound) instead of binding to themselves; Esc still cancels.

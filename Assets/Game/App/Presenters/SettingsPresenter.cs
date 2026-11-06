@@ -83,7 +83,8 @@ namespace Game.App.Presenters
                             path.EndsWith("/delta", StringComparison.Ordinal) || path.EndsWith("/scroll", StringComparison.Ordinal)) continue;
                         bindings.Add((action, i));
                         // HUD-021: the sub-tab names the map, so the row shows the action alone ("Fire primary").
-                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = map.name + "/" + action.name, DisplayName = Humanize(action.name) });
+                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = map.name + "/" + action.name, DisplayName = Humanize(action.name),
+                            Device = (binding.groups ?? "").Contains("Gamepad") ? 1 : 0 });
                     }
             }
             RefreshBindings();
@@ -107,7 +108,8 @@ namespace Game.App.Presenters
             {
                 var target = bindings[i]; var row = model.Rebinds[i];
                 row.IsListening = i == model.ListeningRow;
-                row.BindingText = row.IsListening ? "Press a key…" : target.action.GetBindingDisplayString(target.index);
+                string display = target.action.GetBindingDisplayString(target.index);
+                row.BindingText = row.IsListening ? "Press a key…" : string.IsNullOrEmpty(display) ? "Unbound" : display;   // HUD-021: Backspace/Delete unbinds
             }
             model.NotifyRebinds();
         }
@@ -131,6 +133,11 @@ namespace Game.App.Presenters
         {
             if (bound && !disposed && group >= 0 && group < SettingsViewModel.ControlsGroupMaps.Length && group != model.ControlsGroup)
             { CancelRebind(); model.ControlsGroup = group; }
+        }
+        public void SelectControlsDevice(int device)
+        {
+            if (bound && !disposed && device >= 0 && device < SettingsViewModel.ControlsDeviceLabels.Length && device != model.ControlsDevice)
+            { CancelRebind(); model.ControlsDevice = device; }
         }
         void Apply(GameSettings edited, SettingsSection section)
         {

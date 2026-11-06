@@ -1308,6 +1308,15 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 - **Sub-tabs:** the Controls page has a second `TabBar`: General, Flight, Ship editor and Dialogue (the Global, Flight, Editor and Dialog maps the rebind list covers). The selection is `SettingsViewModel.ControlsGroup`, set through `ISettingsCommands.SelectControlsGroup`, and switching cancels a listening rebind as tab switches do. Rows drop the map prefix ("Fire primary").
 - **Two columns:** the virtualized `ListView` became a wrapping two-column grid. The roughly 60 rows are built once from `RebindRow.uxml`, taken from a template instance in the UXML. Each button keeps its global index (`settings-rebind-<index>`).
 - **Bigger panel:** 1400 × 920, within 94% / 92% of the screen.
+- **One row per action.** Owner: "some controls show multiple times with different binds, is there a way to consolidate it into only being mentioned once but being able to put different binds in?" They chose a device switch, with every bind as a slot.
+  - A Keyboard & mouse / Controller switch sits above the group tabs.
+  - Each action shows once, with one slot button per binding for that device (Fire primary: LMB and Space, or RT).
+  - The model stays one entry per binding, so rebinding and the button names are unchanged.
+  - The panel is now opaque; the pause menu showed through it in the owner's screenshot.
+- **Unbinding.** Owner: "there should be a way to unbind a bind completely"; they chose Backspace/Delete.
+  - While a slot listens, those keys apply an empty override through the rebind operation's `OnApplyBinding`, so no new `InputService` entry point was needed.
+  - The slot reads "Unbound", the change saves, and Reset restores the default.
+  - A hint under the tabs explains it. `SettingsViewTests.Rebind_Backspace_Unbinds` passes, as do `RebindTests` and `InputServiceTests` (10/10).
 - **Hover:** the pale grey was Unity's default theme, which the NOCTURNE theme never overrode. `list.uss` now points the default hover and selection colours (list rows, dropdown items, buttons, slider thumbs, scrollbars) at NOCTURNE surfaces, with explicit rules for collection rows and dropdown items. Binding rows hover in surface-3 with an accent edge.
 - **Tests:**
   - `SettingsViewTests.ControlsGroups_FilterRows` (new), the updated rebind cases and the layout audit at every logical size pass, as do `ScreenTableTests`. spec-required: 1, extra: 0.
