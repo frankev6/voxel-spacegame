@@ -68,7 +68,7 @@ namespace Game.ShipEditor.Tools
                 for (int y = min.y; y <= max.y; y++)
                     for (int z = min.z; z <= max.z; z++)
                         if (reader.TryGetBlockAt(new int3(x, y, z), out var record) && selected.Add(record)) ordered.Add(record);
-            foreach (var record in ordered) context.Remove(record, Id);
+            context.RemoveSelected(ordered, Id);
         }
         public void BuildPreview(ToolContext context, PreviewBuffer preview)
         {

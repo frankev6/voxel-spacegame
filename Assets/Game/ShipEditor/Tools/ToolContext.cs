@@ -147,6 +147,28 @@ namespace Game.ShipEditor.Tools
             Batch.Groups.Add(new BatchGroup { OpStart = 0, OpCount = Batch.Ops.Length });
             return Apply(tool, "Remove blocks");
         }
+        // Box selection contains unique live records in traversal order. Keep mirrored removal
+        // sequential: later groups are mapped against the draft after earlier mirrors were removed.
+        internal void RemoveSelected(System.Collections.Generic.IReadOnlyList<BlockRecord> records, ToolId tool)
+        {
+            if (Symmetry.MirrorX || Symmetry.MirrorY || Symmetry.MirrorZ || Symmetry.RadialFold != 0)
+            {
+                foreach (var record in records) Remove(record, tool);
+                return;
+            }
+            if (records.Count == 0) return;
+            Batch.Clear(); copies.Clear(); Error = PlacementError.None;
+            foreach (var record in records)
+            {
+                int start = Batch.Ops.Length;
+                Batch.Ops.Add(new DiffOp { Kind = DiffOpKind.Remove, Record = record });
+                Batch.Groups.Add(new BatchGroup { OpStart = start, OpCount = 1 });
+            }
+            // Connectivity still consumes each accepted operation in its original order. Combining
+            // cells into one connectivity removal would change equal-size island root tie breaks.
+            Session.TryApply(Batch, AtomicityMode.PerGroup, StrokeId, tool, "Remove blocks", Report);
+            Error = Report.GroupErrors.Count > 0 ? Report.GroupErrors[Report.GroupErrors.Count - 1] : PlacementError.None;
+        }
         internal bool Paint(BlockRecord record)
         {
             if (record.Color == Color) return false;
