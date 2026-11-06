@@ -144,7 +144,10 @@ namespace Game.Input
                 operation = action.PerformInteractiveRebinding(bindingIndex)
                     .WithCancelingThrough("<Keyboard>/escape")
                     .WithControlsExcluding("<Mouse>/position").WithControlsExcluding("<Mouse>/delta")
-                    .OnMatchWaitForAnother(0.1f);
+                    .OnMatchWaitForAnother(0.1f)
+                    // HUD-021 (owner: "there should be a way to unbind a bind completely"; chose Backspace/Delete): those keys leave the
+                    // binding empty instead of binding to themselves. Esc still cancels. The empty override saves like any other.
+                    .OnApplyBinding((_, path) => action.ApplyBindingOverride(bindingIndex, IsUnbindKey(path) ? "" : path));
                 rebind = operation;
                 operation.OnComplete(op =>
                 {
@@ -164,6 +167,9 @@ namespace Game.Input
                 done?.Invoke(new RebindResult(RebindStatus.Failed, actionPath, GetBindingDisplay(actionPath), null));
             }
         }
+        /// <summary>HUD-021: the keys that clear a binding while rebinding.</summary>
+        public static bool IsUnbindKey(string path) =>
+            string.Equals(path, "<Keyboard>/backspace", StringComparison.OrdinalIgnoreCase) || string.Equals(path, "<Keyboard>/delete", StringComparison.OrdinalIgnoreCase);
         string FindConflict(InputAction action, string path)
         {
             if (string.IsNullOrEmpty(path)) return null;

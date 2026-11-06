@@ -14,5 +14,6 @@ namespace Game.Simulation.Commands
         public uint FireGroups;
         public PlayerEdgeCounters Edges;
         public uint FrameIndex;          // UnityEngine.Time.frameCount of the sample (diagnostics, replay)
+        public float Lift;               // ADR-0123: −1..1, + = up
     }
 }

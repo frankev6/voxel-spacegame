@@ -50,7 +50,7 @@ namespace Game.Presentation.Services
         float MinDistance => Preset.UseConfig ? config.MinDistance : Preset.MinDistance;
         float MaxDistance => Preset.UseConfig ? config.MaxDistance : Preset.MaxDistance;
         float BaseFov => Preset.UseConfig || mode != CameraMode.Flight ? config.VerticalFovDeg : Preset.FovDeg;
-        float TiltUp => Preset.UseConfig ? 0 : Preset.TiltUpDeg;
+        float TiltUp => Preset.UseConfig ? 0 : Preset.Name == FreeAim.PresetName ? FreeAim.TiltDeg : Preset.TiltUpDeg;
         internal CameraConfig Config => config;
         internal bool HasTarget { get; private set; }
         internal float3 TargetPosition { get; private set; }

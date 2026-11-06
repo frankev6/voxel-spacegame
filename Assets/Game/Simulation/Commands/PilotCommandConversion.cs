@@ -25,6 +25,7 @@ namespace Game.Simulation.Commands
             {
                 Thrust = math.clamp(math.select(float2.zero, player.Thrust, math.isfinite(player.Thrust)), -1, 1),
                 Turn = math.isfinite(player.Turn) ? math.clamp(player.Turn, -1, 1) : 0,
+                Lift = math.isfinite(player.Lift) ? math.clamp(player.Lift, -1, 1) : 0,
                 AimWorld = math.select(float3.zero, player.AimWorld, finiteAim),
                 AimValid = math.all(finiteAim) ? player.AimValid : (byte)0,
                 Flags = player.Flags, Edges = edges, FireGroups = player.FireGroups
@@ -34,7 +35,7 @@ namespace Game.Simulation.Commands
         /// <summary>SPEC-92 §4.3: a held pilot brakes in place and cannot fire; Interact still passes (pilots ready up with it).</summary>
         public static ShipCommand Hold(ShipCommand command)
         {
-            command.Thrust = float2.zero; command.Turn = 0; command.Flags = ShipCommandFlags.Brake; command.FireGroups = 0;
+            command.Thrust = float2.zero; command.Turn = 0; command.Lift = 0; command.Flags = ShipCommandFlags.Brake; command.FireGroups = 0;
             command.Edges &= ShipCommandEdges.Interact;
             return command;
         }

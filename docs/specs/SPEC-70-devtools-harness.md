@@ -190,6 +190,8 @@ flowchart LR
 | Inventory add, credits add | `InventoryModel` / `Wallet` public methods (owner methods, dev caller) | No direct field writes |
 | Fact set | `FactStore.SetBySlot(slot, value, FactWriteSource.Debugger)` (owner method, dev caller) | No direct field writes |
 | `PlayerCommand` during replay | SPEC-71 replay system | Specified by SPEC-71 |
+| `Flight3DRequest.On` on the player ship (DEV-031, `flight3d`) | `Flight3DDevCommand.TryApply` | Main thread between world updates, after completing the component's jobs; solo only; `Flight3DModeSystem` owns the resulting `Flight3D` state (ADR-0123) |
+| `FlightConfig` singleton fields (DEV-030, control sheet *Flight configs*) | `DevFlightConfig.TrySet` / `Reset` | Main thread in `DevRuntimeHost.Update`, between world updates, after `CompleteAllTrackedJobs()`; each value clamped to its field range; never written to `config_flight`; the first read keeps the boot values for Reset |
 
 ## 6. Public API
 
@@ -315,6 +317,8 @@ assert ecs.count("Brick") > 0 "voxels present"
 | `overlay` | `name` = bricks\|dirty\|colliders\|islands\|spatial\|interaction\|all\|none; `on` (true); `id` (islands target, default player) | Toggles overlays | Ok |
 | `record` | `start` \| `stop` \| `save name=<file>` | SPEC-71 `PlayerCommandRecorder` | Ok |
 | `replay` | `name=<file>` | SPEC-71 replay; done when the script ends | Pending |
+| `controls` | `open` (default) \| `close` \| `status`; `port` (47810; without it the next 9 ports are tried), `browser` (true) | Starts or stops the control sheet server (DEV-029) and opens its page with `Application.OpenURL`. Needs the bound `InputService` | Ok: the URL, `closed` or the status |
+| `flight3d` | `on` \| `off` \| `status` (default) | Sets `Flight3DRequest` on the player ship (DEV-031, ADR-0123): on unlocks up/down thrust and the facing toggles, off levels the ship and returns it to the plane. Solo only | Ok: the mode and the keys |
 | `key`, `mouse`, `click`, `ui` | as §6.1 | Runtime equivalents of the generic commands (for scenarios and the console) | Ok / Pending |
 
 CLI-only: `gh_scenario --file <path>` (starts a run, enters play mode first when needed; returns the run id), `gh_scenario_status --run <id>` (outcome, line, message, JSON path), `gh_scenario_stop --run <id>`, `gh_dev --cmd "<console line>"` (any registry command). Arguments of wrappers use the same names as the registry; ulong values are passed as strings.
@@ -724,6 +728,53 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [ ] Cruising from the Hollow reaches CINDER and back with no exceptions, the Scatter slowing the ship.
   - [ ] The edge markers name the bodies and the sites to come.
 - **Tests:** `PlaygroundTests` (existing); the `hollow_system_cruise` scenario.
+
+### DEV-029 — Control sheet: every control on a second monitor
+- **Milestone:** M4
+- **Tier:** standard — a read-only dev page over the existing input service and probes
+- **Depends on:** `DEV-015`
+- **Do:** Owner (2026-11-04): "a second window that opens on my other monitor along with the game, which shows all of the controls for me and leaves space for adding info visuals under each control … can be opened with a console command"; chose the local web page. `controls` starts a localhost-only `HttpListener` owned by `DevRuntimeHost` and opens the browser. The page (`tools/controlsheet/`, outside `Assets/` so nothing ships, read from disk per request so edits need only a refresh) polls two JSON endpoints: `/layout` (every map and action of `Controls.inputactions`, binding labels from `InputService.GetBindingDisplay`, rebuilt on `BindingsChanged`) and `/state` (context, scheme, each action's pressed state and value, and the scenario probes the page asks for with `?probes=`). The main thread builds the JSON only while the sheet is open and polled, at most 15 times a second; the listener thread reads the latest bytes and files and never calls Unity. Under each control the page shows a default live visual by control type, plus the notes and probe values configured per action in `tools/controlsheet/sheet.json`.
+- **Files:** `Assets/Game/App/DevRuntime/ControlSheet/{DevControlSheet,ControlSheetServer,ControlSheetJson}.cs`, `Assets/Game/App/DevRuntime/Commands/ControlsDevCommand.cs`, `DevRuntimeHost.cs`, `DevCommandRegistry.cs`, `tools/controlsheet/*`, `Assets/Game/Tests/EditMode/App/ControlSheetTests.cs`, `docs/08-tools.md`.
+- **Acceptance criteria:**
+  - [x] `controls` in the console opens the page in the browser; `controls close` stops the server and frees the port; the server closes with the host.
+  - [x] The page lists every action of every map with its current binding, highlights the active map, and follows rebinds and the keyboard/gamepad switch.
+  - [x] Each control has a live visual and room for notes and probe values set in `sheet.json`, without C# changes.
+  - [x] Only `127.0.0.1` is served, only files under `tools/controlsheet/`; no work and no allocation while closed.
+- **Tests:** `ControlSheetTests.Layout_ListsEveryAction`, `ControlSheetTests.Server_ServesPageAndState_ThenFreesPort` (EditMode).
+
+### DEV-030 — Control sheet: the Flight configs panel
+- **Milestone:** M4
+- **Tier:** standard — a dev write of one boot singleton, listed in §5.4, behind the DEV-029 page
+- **Depends on:** `DEV-029`
+- **Do:** Owner (2026-11-04): "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean." A tab on the control sheet. `GET /flight` lists every `FlightConfig` field with its live value, boot value and range; `POST /flight?name=&value=` and `POST /flight/reset[?name=]` queue a change that the main thread applies next frame (§5.4). Posts need the `X-Control-Sheet` header, which a cross-site page cannot send without a CORS preflight the server never grants. Descriptions, groups and "lower / higher" text live in `tools/controlsheet/flight.json`. Nothing is saved: Reset, or leaving Play, restores `config_flight`.
+- **Files:** `Assets/Game/App/DevRuntime/ControlSheet/{DevFlightConfig,ControlSheetServer,DevControlSheet}.cs`, `tools/controlsheet/{index.html,sheet.js,sheet.css,flight.js,flight.json}`, `Assets/Game/Tests/EditMode/App/ControlSheetTests.cs`.
+- **Acceptance criteria:**
+  - [x] The page swaps between *Controls* and *Flight configs*; every `FlightConfig` field is listed with its value, boot value and a plain description of what lower and higher numbers do.
+  - [x] Changing a value changes the flight on the next tick; Reset (one or all) restores the boot values; nothing is written to `config_flight`.
+  - [x] Out-of-range or non-finite values are clamped or refused; a post without the header is refused.
+- **Tests:** `ControlSheetTests.FlightConfig_SetClampsAndResets`, `ControlSheetTests.Server_FlightPostNeedsHeader` (EditMode).
+
+### DEV-031 — `flight3d`: the experimental 3D flight toggle (ADR-0123)
+- **Milestone:** M4
+- **Tier:** standard — a dev command over FLT-016's component
+- **Depends on:** `FLT-016`, `DEV-030`
+- **Do:** `flight3d [on|off|status]` enables or disables `Flight3D` on the player ship (ADR-0123 decision 1; a §5.4 write). It reports the current mode and the keys. The five new `FlightConfig` values join the control sheet's Flight configs tab, with descriptions in `flight.json`.
+- **Files:** `Assets/Game/App/DevRuntime/Commands/Flight3DDevCommand.cs`, `DevCommandRegistry.cs`, `ControlSheet/DevFlightConfig.cs`, `tools/controlsheet/flight.json`.
+- **Acceptance criteria:**
+  - [x] `flight3d on` in the console unlocks vertical flight for the player ship; `off` returns it to the plane; status reports the mode.
+  - [x] The new values are listed and editable on the Flight configs tab.
+- **Tests:** `Flight3DDevCommandTests.Toggle_EnablesAndDisables` (EditMode); `ControlSheetTests.FlightConfig_SetClampsAndResets` covers the new fields.
+
+### DEV-032 — Enter playground from any scene
+- **Milestone:** M4
+- **Tier:** standard — a precondition fix in the playground entry
+- **Depends on:** `DEV-021`
+- **Do:** Owner (2026-11-05): "why can't I jump into the playground from the button on the scene when I open the game in unity? currently I have to jump hoops to get to the playground (I have to go to sandbox and then playground)", with a screenshot of a black screen showing only the Console and Enter playground buttons. Play had been pressed in an empty scene: startup leaves non-game scenes alone (SPEC-01 Q9), and `DevPlayground.Enter` accepted only World and MainMenu, refusing with "Leave the current editor…". The sandbox transition loads World from any scene, so entry now refuses only a Blueprint Lab outside the playground profile, whose unsaved edits would be lost (`DevPlayground.CanEnterFrom`), with a message that says so.
+- **Files:** `Assets/Game/App/DevRuntime/Playground/DevPlayground.cs`; `Assets/Game/Tests/PlayMode/App/{PlaygroundButtonTests,ProductionSessionFixture}.cs`; `Assets/Game/Tests/EditMode/App/PlaygroundEntryTests.cs`.
+- **Acceptance criteria:**
+  - [x] One click on Enter playground enters it from the main menu and from a non-game scene.
+  - [x] A campaign's Blueprint Lab still refuses, with a message naming the reason.
+- **Tests:** `PlaygroundEntryTests.CanEnterFrom_AnySceneButLab` (EditMode); `PlaygroundButtonTests.MainMenuButton_EntersPlayground`, `PlaygroundButtonNonGameSceneTests.NonGameScene_ButtonEntersPlayground` (PlayMode, real boot, the button's own submit).
 
 ## 10. Open questions
 

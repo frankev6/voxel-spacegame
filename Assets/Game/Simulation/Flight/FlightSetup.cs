@@ -26,6 +26,10 @@ namespace Game.Simulation.Flight
                     registrations.Add(new RootComponentRegistration { Profile = profile, Type = types.GetComponentType(i) });
             }
             registrations.Add(new RootComponentRegistration { Profile = GridProfile.PlayerShip, Type = ComponentType.ReadWrite<PlayerShip>() });
+            // ADR-0123: experimental 3D flight is a player-ship mode. Flight3D is added enabled; Flight3DModeSystem disables it on the
+            // first tick because the request is off.
+            registrations.Add(new RootComponentRegistration { Profile = GridProfile.PlayerShip, Type = ComponentType.ReadWrite<Flight3D>() });
+            registrations.Add(new RootComponentRegistration { Profile = GridProfile.PlayerShip, Type = ComponentType.ReadWrite<Flight3DRequest>() });
         }
     }
 }

@@ -119,6 +119,9 @@ Action names are PascalCase and unique within their map. The **action path** use
 | `TargetClear` | Button (press) | `<Keyboard>/t` | edge `TargetClear` |
 | `AutofireToggle` | Button (press) | `<Keyboard>/z` | edge `AutofireToggle` |
 | `Cruise` | Button (press) | `<Keyboard>/j` | edge counter `Cruise`: the ship edge `ShipCommandEdges.Cruise` that toggles in-world cruise ([ADR-0122](../decisions/ADR-0122-in-world-cruise.md)) |
+| `Lift` | Value (Axis), 1D composite | `<Keyboard>/y` (+), `<Keyboard>/h` (−); pad Select+D-pad up/down | `PlayerCommand.Lift`, only while the player ship flies in experimental 3D ([ADR-0123](../decisions/ADR-0123-experimental-3d-flight.md)); 0 otherwise |
+| `FaceAimToggle` | Button (press) | `<Keyboard>/b`; pad Select+D-pad left | toggles `ShipCommandFlags.FaceAim` while in experimental 3D (ADR-0123); independent of FaceTargetToggle; cleared when the mode ends |
+| `FaceTargetToggle` | Button (press) | `<Keyboard>/p`; pad Select+D-pad right | toggles `ShipCommandFlags.FaceTarget` while in experimental 3D (ADR-0123); independent of FaceAimToggle, and wins while both are on and a target is selected; cleared when the mode ends |
 | `CameraOrbitHold` | Button (held) | `<Mouse>/middleButton` | SPEC-62 |
 | `CameraLook` | Value / Vector2 | `<Mouse>/delta` | SPEC-62 (read only while orbit is held) |
 | `CameraZoom` | Value / Axis | `<Mouse>/scroll/y` (processor `scale(factor=0.008333)` so 1 notch = 1) | SPEC-62 |
@@ -523,3 +526,4 @@ Owner playtest: the editor "needs to be much more friendly". The Editor map chan
 - `TogglePalette` on `Tab` opens and closes the block catalogue.
 - `OrbitHold` also binds the right mouse button. `EditorInputSampler` resolves `Secondary` on release only when the pointer moved less than 6 px, so a right-drag orbits the camera and a right-click removes.
 
+> HUD-021 (2026-11-05): during an interactive rebind, Backspace or Delete applies an empty binding override (unbound) instead of binding to themselves; Esc still cancels.

@@ -95,7 +95,7 @@ namespace Game.Net
         {
             var c = new PlayerCommand
             {
-                Thrust = r.F2(), Turn = r.F32(), AimWorld = r.F3(), AimValid = r.U8(), Flags = (ShipCommandFlags)r.U8(), FireGroups = r.U32(),
+                Thrust = r.F2(), Turn = r.F32(), AimWorld = r.F3(), AimValid = r.U8(), Flags = (ShipCommandFlags)r.U8(), FireGroups = r.U32(), Lift = r.F32(),
                 Edges = new PlayerEdgeCounters
                 {
                     Interact = r.U8(), Ability1 = r.U8(), Ability2 = r.U8(), Ability3 = r.U8(), Ability4 = r.U8(), TargetNext = r.U8(),
@@ -115,7 +115,7 @@ namespace Game.Net
 
         static bool Same(in PlayerCommand a, in PlayerCommand b) =>
             a.Thrust.Equals(b.Thrust) && a.Turn.Equals(b.Turn) && a.AimWorld.Equals(b.AimWorld) && a.AimValid == b.AimValid && a.Flags == b.Flags
-            && a.FireGroups == b.FireGroups && SameEdges(a.Edges, b.Edges);
+            && a.FireGroups == b.FireGroups && a.Lift.Equals(b.Lift) && SameEdges(a.Edges, b.Edges);
 
         static bool SameEdges(in PlayerEdgeCounters a, in PlayerEdgeCounters b) =>
             a.Interact == b.Interact && a.Ability1 == b.Ability1 && a.Ability2 == b.Ability2 && a.Ability3 == b.Ability3 && a.Ability4 == b.Ability4
@@ -154,7 +154,7 @@ namespace Game.Net
                 var pilot = tickCommands[seq % CommandsPerPacket]; var c = pilot.Command;
                 if (i > 0 && Same(pilot, tickCommands[(seq - 1) % CommandsPerPacket])) { command.U8(1); continue; }
                 command.U8(0);
-                command.F2(c.Thrust); command.F32(c.Turn); command.F3(c.AimWorld); command.U8(c.AimValid); command.U8((byte)c.Flags); command.U32(c.FireGroups);
+                command.F2(c.Thrust); command.F32(c.Turn); command.F3(c.AimWorld); command.U8(c.AimValid); command.U8((byte)c.Flags); command.U32(c.FireGroups); command.F32(c.Lift);
                 var e = c.Edges;
                 command.U8(e.Interact); command.U8(e.Ability1); command.U8(e.Ability2); command.U8(e.Ability3); command.U8(e.Ability4);
                 command.U8(e.TargetNext); command.U8(e.TargetUnderCursor); command.U8(e.TargetClear); command.U8(e.AutofireToggle); command.U8(e.Cruise);

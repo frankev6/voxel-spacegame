@@ -32,7 +32,7 @@ namespace Game.App.Testing
         {
             if (tick == uint.MaxValue || (hasSet && tick < lastSet) || (fixedStart && tick < StartTick))
                 throw new ArgumentOutOfRangeException(nameof(tick), "Ticks must be ascending and have a representable exclusive end.");
-            if (!math.all(math.isfinite(command.Thrust)) || !math.isfinite(command.Turn) || !math.all(math.isfinite(command.AimWorld)))
+            if (!math.all(math.isfinite(command.Thrust)) || !math.isfinite(command.Turn) || !math.all(math.isfinite(command.AimWorld)) || !math.isfinite(command.Lift))
                 throw new ArgumentException("Command text requires finite floats.", nameof(command));
             if (!fixedStart && !hasSet) StartTick = tick;
             hasSet = true; lastSet = tick; EndTick = Math.Max(EndTick, tick + 1);
@@ -70,7 +70,7 @@ namespace Game.App.Testing
         static bool Same(in PlayerCommand a, in PlayerCommand b) =>
             math.all(math.asuint(a.Thrust) == math.asuint(b.Thrust)) && math.asuint(a.Turn) == math.asuint(b.Turn) &&
             math.all(math.asuint(a.AimWorld) == math.asuint(b.AimWorld)) && a.AimValid == b.AimValid && a.Flags == b.Flags &&
-            a.FireGroups == b.FireGroups && a.Edges.Interact == b.Edges.Interact && a.Edges.Ability1 == b.Edges.Ability1 &&
+            a.FireGroups == b.FireGroups && math.asuint(a.Lift) == math.asuint(b.Lift) && a.Edges.Interact == b.Edges.Interact && a.Edges.Ability1 == b.Edges.Ability1 &&
             a.Edges.Ability2 == b.Edges.Ability2 && a.Edges.Ability3 == b.Edges.Ability3 && a.Edges.Ability4 == b.Edges.Ability4 &&
             a.Edges.TargetNext == b.Edges.TargetNext && a.Edges.TargetUnderCursor == b.Edges.TargetUnderCursor &&
             a.Edges.TargetClear == b.Edges.TargetClear && a.Edges.AutofireToggle == b.Edges.AutofireToggle && a.Edges.Cruise == b.Edges.Cruise;
@@ -78,7 +78,10 @@ namespace Game.App.Testing
         public string ToText()
         {
             var text = new StringBuilder();
-            text.Append("cmdrec 1\nstart ").Append(StartTick.ToString(CultureInfo.InvariantCulture));
+            // cmdrec 2 adds Lift (ADR-0123) as a 21st field; a script without lift stays cmdrec 1, byte for byte as before.
+            bool lifts = false;
+            foreach (var change in changes) if (math.asuint(change.Command.Lift) != 0) { lifts = true; break; }
+            text.Append(lifts ? "cmdrec 2\nstart " : "cmdrec 1\nstart ").Append(StartTick.ToString(CultureInfo.InvariantCulture));
             text.Append("\nend ").Append(EndTick.ToString(CultureInfo.InvariantCulture)).Append('\n');
             if (seed.HasValue) text.Append("seed ").Append(seed.Value.ToString("X16", CultureInfo.InvariantCulture)).Append('\n');
             if (content.HasValue) text.Append("content ").Append(content.Value.ToString("X16", CultureInfo.InvariantCulture)).Append('\n');
@@ -89,6 +92,7 @@ namespace Game.App.Testing
                 foreach (float f in new[] { c.Thrust.x, c.Thrust.y, c.Turn, c.AimWorld.x, c.AimWorld.y, c.AimWorld.z }) text.Append(' ').Append(Float(f));
                 foreach (uint n in new uint[] { c.AimValid, (byte)c.Flags, c.FireGroups, e.Interact, e.Ability1, e.Ability2, e.Ability3, e.Ability4,
                     e.TargetNext, e.TargetUnderCursor, e.TargetClear, e.AutofireToggle, e.Cruise }) text.Append(' ').Append(n.ToString(CultureInfo.InvariantCulture));
+                if (lifts) text.Append(' ').Append(Float(c.Lift));
                 text.Append('\n');
             }
             return text.ToString();
@@ -96,7 +100,7 @@ namespace Game.App.Testing
         public static PlayerCommandScript Parse(string text)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
-            var script = new PlayerCommandScript(); bool version = false, start = false, end = false, records = false;
+            var script = new PlayerCommandScript(); bool version = false, start = false, end = false, records = false; int fields = 20;
             uint declaredEnd = 0, previous = 0; int lineNumber = 0;
             using var reader = new StringReader(text);
             string line;
@@ -108,8 +112,8 @@ namespace Game.App.Testing
                 {
                     if (!version)
                     {
-                        if (tokens.Length != 2 || tokens[0] != "cmdrec" || tokens[1] != "1") throw new FormatException("Expected cmdrec 1.");
-                        version = true; continue;
+                        if (tokens.Length != 2 || tokens[0] != "cmdrec" || (tokens[1] != "1" && tokens[1] != "2")) throw new FormatException("Expected cmdrec 1.");
+                        fields = tokens[1] == "2" ? 21 : 20; version = true; continue;
                     }
                     if (tokens[0] == "start" || tokens[0] == "end" || tokens[0] == "seed" || tokens[0] == "content")
                     {
@@ -123,7 +127,7 @@ namespace Game.App.Testing
                         }
                         continue;
                     }
-                    if (!start || !end || tokens.Length != 20) throw new FormatException("Expected start/end headers and 20 record fields.");
+                    if (!start || !end || tokens.Length != fields) throw new FormatException("Expected start/end headers and " + fields + " record fields.");
                     uint tick = UInt(tokens[0]);
                     if (tick < script.StartTick || tick >= declaredEnd || (records && tick <= previous)) throw new FormatException("Record ticks must increase within [start, end).");
                     var c = new PlayerCommand
@@ -133,7 +137,8 @@ namespace Game.App.Testing
                         Flags = (ShipCommandFlags)Byte(tokens[8]), FireGroups = UInt(tokens[9]),
                         Edges = new PlayerEdgeCounters { Interact = Byte(tokens[10]), Ability1 = Byte(tokens[11]), Ability2 = Byte(tokens[12]), Ability3 = Byte(tokens[13]),
                             Ability4 = Byte(tokens[14]), TargetNext = Byte(tokens[15]), TargetUnderCursor = Byte(tokens[16]), TargetClear = Byte(tokens[17]),
-                            AutofireToggle = Byte(tokens[18]), Cruise = Byte(tokens[19]) }
+                            AutofireToggle = Byte(tokens[18]), Cruise = Byte(tokens[19]) },
+                        Lift = fields == 21 ? ParseFloat(tokens[20]) : 0
                     };
                     script.Set(tick, c); previous = tick; records = true;
                 }

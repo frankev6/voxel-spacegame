@@ -111,7 +111,7 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             using var window = new Window(keyboard); window.Presenter.SelectTab(2); yield return null;
             int row = window.InteractRow; Assert.GreaterOrEqual(row, 0);
-            var list = window.View.Root.Q<ListView>("settings-rebinds"); list.ScrollToItem(row); yield return null;
+            window.Presenter.SelectControlsGroup(1); yield return null;   // HUD-021: Interact is under the Flight sub-tab
             window.Click("settings-rebind-" + row); Assert.IsTrue(window.Input.IsRebinding);
             Assert.AreEqual("Press a key…", window.Model.Rebinds[row].BindingText);
             PressNow(keyboard.escapeKey); ReleaseNow(keyboard.escapeKey);
@@ -136,15 +136,71 @@ namespace Game.Tests.PlayMode.UI.Screens
         [UnityTest] public IEnumerator Rebind_Success_UpdatesRow()
         {
             using var window = new Window(keyboard); window.Presenter.SelectTab(2); yield return null;
-            int row = window.InteractRow; window.View.Root.Q<ListView>("settings-rebinds").ScrollToItem(row); yield return null;
+            int row = window.InteractRow; window.Presenter.SelectControlsGroup(1); yield return null;
             window.Click("settings-rebind-" + row); PressNow(keyboard.uKey); currentTime += .2; InputSystem.Update(); ReleaseNow(keyboard.uKey);
             Assert.IsFalse(window.Input.IsRebinding); Assert.AreEqual("U", window.Model.Rebinds[row].BindingText);
             yield return null;
-            Assert.AreEqual("U", window.View.Root.Query<Label>("settings-rebind-binding").ToList().Single(label => label.parent.parent.userData is int index && index == row).text);
+            Assert.AreEqual("U", window.View.Root.Q<Button>("settings-rebind-" + row).text, "The slot button shows the new bind");
             using var loaded = new SettingsService(new NewtonsoftSaveJsonCodec(), window.Paths); loaded.Load();
             using var restored = new InputService(loaded.Current.Controls); Assert.AreEqual("U", restored.GetBindingDisplay("Flight/Interact"));
             window.Click("settings-reset-bindings"); Assert.AreEqual("F", window.Model.Rebinds[row].BindingText);
             loaded.Load(); restored.ApplyBindingOverrides(loaded.Current.Controls.BindingOverridesJson); Assert.AreEqual("F", restored.GetBindingDisplay("Flight/Interact"));
+        }
+        /// <summary>HUD-021, owner: "put the controls into different tabs inside the controls tab ... divide the controls into two columns",
+        /// then "some controls show multiple times with different binds ... consolidate it into only being mentioned once but being able to
+        /// put different binds in", choosing a keyboard/controller switch with every bind as its own slot.</summary>
+        [UnityTest] public IEnumerator ControlsGroups_FilterRows()
+        {
+            using var window = new Window(keyboard, 1920, 1080); window.Presenter.SelectTab(2); yield return null;
+            var groupTabs = window.View.Root.Q<TabBar>("settings-controls-tabs");
+            var deviceTabs = window.View.Root.Q<TabBar>("settings-controls-device");
+            Assert.NotNull(groupTabs); Assert.NotNull(deviceTabs);
+            var model = window.Model.Rebinds;
+            for (int device = 0; device < 2; device++)
+                for (int group = 0; group < SettingsViewModel.ControlsGroupMaps.Length; group++)
+                {
+                    deviceTabs.SelectedIndex = device; groupTabs.SelectedIndex = group; yield return null;
+                    Assert.AreEqual(group, window.Model.ControlsGroup); Assert.AreEqual(device, window.Model.ControlsDevice);
+                    string prefix = SettingsViewModel.ControlsGroupMaps[group] + "/";
+                    var expected = model.Where(r => r.Device == device && r.ActionPath.StartsWith(prefix, StringComparison.Ordinal)).Select(r => r.RowKey).Distinct().ToList();
+                    var shown = window.View.Root.Query<TemplateContainer>(className: "settings-rebind-cell").ToList()
+                        .Where(row => !row.ClassListContains(UIStyleClasses.IsHidden)).ToList();
+                    CollectionAssert.AreEqual(expected, shown.Select(row => (string)row.userData), prefix + " device " + device + ": each action once");
+                    for (int i = 0; i < model.Count; i++)
+                        Assert.AreEqual(!(model[i].Device == device && model[i].ActionPath.StartsWith(prefix, StringComparison.Ordinal)),
+                            window.View.Root.Q<Button>("settings-rebind-" + i).ClassListContains(UIStyleClasses.IsHidden), model[i].ActionPath);
+                    if (shown.Count >= 2)
+                    {
+                        Assert.AreEqual(shown[0].worldBound.y, shown[1].worldBound.y, 1f, prefix + " rows share a line (two columns)");
+                        Assert.Greater(shown[1].worldBound.x, shown[0].worldBound.x + shown[0].worldBound.width * .5f);
+                    }
+                }
+            // Fire primary: one row, two keyboard slots (LMB and Space), one controller slot (RT).
+            Button[] Slots(int device) => Enumerable.Range(0, model.Count).Where(i => model[i].ActionPath == "Flight/FirePrimary" && model[i].Device == device)
+                .Select(i => window.View.Root.Q<Button>("settings-rebind-" + i)).ToArray();
+            Assert.AreEqual(2, Slots(0).Length); Assert.AreEqual(1, Slots(1).Length);
+            Assert.AreSame(Slots(0)[0].GetFirstAncestorOfType<TemplateContainer>(), Slots(1)[0].GetFirstAncestorOfType<TemplateContainer>(), "One row per action");
+            Assert.AreEqual("Fire primary", model.Find(row => row.ActionPath == "Flight/FirePrimary").DisplayName, "Rows name the action without its map");
+            window.Presenter.SelectControlsGroup(2); window.Presenter.StartRebind(window.InteractRow); Assert.IsTrue(window.Input.IsRebinding);
+            window.Presenter.SelectControlsDevice(1); window.Presenter.SelectControlsDevice(0);   // the loops ended on the controller
+            window.Presenter.StartRebind(window.InteractRow); Assert.IsTrue(window.Input.IsRebinding);
+            window.Presenter.SelectControlsDevice(1); Assert.IsFalse(window.Input.IsRebinding, "Switching device cancels a listening rebind, as switching tabs does");
+        }
+        /// <summary>HUD-021, owner: "there should be a way to unbind a bind completely"; Backspace (or Delete) clears, Esc still cancels.</summary>
+        [UnityTest] public IEnumerator Rebind_Backspace_Unbinds()
+        {
+            using var window = new Window(keyboard); window.Presenter.SelectTab(2); yield return null;
+            int row = window.InteractRow; window.Presenter.SelectControlsGroup(1); yield return null;
+            window.Click("settings-rebind-" + row); PressNow(keyboard.backspaceKey); currentTime += .2; InputSystem.Update(); ReleaseNow(keyboard.backspaceKey);
+            Assert.IsFalse(window.Input.IsRebinding);
+            Assert.AreEqual("Unbound", window.Model.Rebinds[row].BindingText);
+            yield return null;
+            Assert.AreEqual("Unbound", window.View.Root.Q<Button>("settings-rebind-" + row).text);
+            Assert.IsFalse(window.Input.Controls.Flight.Interact.controls.Any(c => c.device == keyboard), "Interact no longer answers to any key");
+            using var loaded = new SettingsService(new NewtonsoftSaveJsonCodec(), window.Paths); loaded.Load();
+            using var restored = new InputService(loaded.Current.Controls);
+            Assert.AreEqual("", restored.Controls.Flight.Interact.bindings[0].effectivePath, "The unbinding is saved");
+            window.Click("settings-reset-bindings"); Assert.AreEqual("F", window.Model.Rebinds[row].BindingText, "Reset brings it back");
         }
         [UnityTest] public IEnumerator RebindList_ExcludesPointerAndComposites()
         {
@@ -154,14 +210,26 @@ namespace Game.Tests.PlayMode.UI.Screens
             {
                 if (!new[] { "Global", "Flight", "Editor", "Dialog" }.Contains(map.name)) continue;
                 foreach (var action in map.actions)
+                {
+                    string composite = null;
                     foreach (var binding in action.bindings)
                     {
-                        if (binding.isComposite || binding.isPartOfComposite || binding.path == "<Mouse>/position" || binding.path == "<Mouse>/delta" || binding.path == "<Mouse>/scroll") continue;
+                        if (binding.isComposite) { composite = binding.path; continue; }
+                        // HUD-021: halves of a 1D axis are listed; modifier-combo parts are not.
+                        if (binding.isPartOfComposite && composite != "1DAxis" || binding.path == "<Mouse>/position" || binding.path == "<Mouse>/delta" || binding.path == "<Mouse>/scroll") continue;
                         expected.Add(map.name + "/" + action.name);
                     }
+                }
             }
             CollectionAssert.AreEqual(expected, window.Model.Rebinds.Select(row => row.ActionPath));
             Assert.IsTrue(window.Model.Rebinds.Any(row => row.ActionPath == "Flight/FirePrimary"));
+            // Owner: the experimental flight3d binds belong in the list: Lift's two keys and the two facing toggles.
+            var lift = window.Model.Rebinds.Where(row => row.ActionPath == "Flight/Lift").ToList();
+            CollectionAssert.AreEquivalent(new[] { "Lift up", "Lift down" }, lift.Select(row => row.DisplayName));
+            CollectionAssert.AreEquivalent(new[] { "Y", "H" }, lift.Select(row => row.BindingText));
+            Assert.IsTrue(window.Model.Rebinds.Any(row => row.ActionPath == "Flight/FaceAimToggle" && row.BindingText == "B"));
+            Assert.IsTrue(window.Model.Rebinds.Any(row => row.ActionPath == "Flight/FaceTargetToggle" && row.BindingText == "P"));
+            Assert.IsTrue(window.Model.Rebinds.Any(row => row.DisplayName == "Thrust forward" && row.BindingText == "W"), "Movement keys are rebindable too");
             Assert.IsFalse(window.Model.Rebinds.Any(row => row.ActionPath.StartsWith("UI/", StringComparison.Ordinal) || row.ActionPath.StartsWith("Menu/", StringComparison.Ordinal)));
         }
         [UnityTest] public IEnumerator Layout_AllTabs_AllLogicalSizes_NoIssues()

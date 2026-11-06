@@ -7,3 +7,21 @@
 .list__item-value { -unity-font-definition: var(--font-mono); margin-left: var(--space-4); }
 .list__empty { padding: var(--space-5); color: var(--color-text-muted); -unity-text-align: middle-center; }
 .list--compact .list__item { padding: var(--space-1) var(--space-2); }
+
+/* HUD-021 (owner, 2026-11-05: make the hover colour "more legible"). Unity's default theme lights hovered list rows, dropdown items
+   and some controls in a pale grey, under the theme's light text. These point the default theme's hover and selection colours at
+   NOCTURNE surfaces, and the explicit rules cover the list rows and dropdown items directly. */
+:root {
+    --unity-colors-highlight-background-hover: var(--color-surface-3);
+    --unity-colors-highlight-background-hover-lighter: var(--color-surface-3);
+    --unity-colors-highlight-background: var(--color-surface-3);
+    --unity-colors-highlight-background-inactive: var(--color-surface-2);
+    --unity-colors-button-background-hover: var(--color-surface-3);
+    --unity-colors-dropdown-background-hover: var(--color-surface-3);
+    --unity-colors-slider_thumb-background-hover: var(--color-accent-strong);
+    --unity-colors-scrollbar_thumb-background-hover: var(--color-border-strong);
+}
+.unity-collection-view__item:hover { background-color: var(--color-surface-3); color: var(--color-text); }
+.unity-collection-view__item--selected, .unity-collection-view__item:checked { background-color: var(--color-surface-3); color: var(--color-text); }
+.unity-base-dropdown__item:hover, .unity-base-dropdown__item:focus { background-color: var(--color-surface-3); color: var(--color-text); }
+.unity-base-dropdown__item:hover .unity-base-dropdown__label, .unity-base-dropdown__item:focus .unity-base-dropdown__label { color: var(--color-text); }

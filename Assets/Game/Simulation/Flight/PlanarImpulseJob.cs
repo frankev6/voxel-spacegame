@@ -18,12 +18,13 @@ namespace Game.Simulation.Flight
     public partial struct PlanarImpulseJob : IJobEntity
     {
         public float Correction;
+        [ReadOnly] public ComponentLookup<Flight3D> Flight3D;   // ADR-0123: a 3D-flying ship is not pulled to the plane
         // Shared diagnostic latch: only atomic compare-exchange writes it; one warning per system lifetime (Q16).
         [NativeDisableParallelForRestriction] public NativeReference<int> TiltReported;
 
-        unsafe void Execute(ref PhysicsVelocity velocity, in PhysicsMass mass, in LocalTransform transform)
+        unsafe void Execute(Entity entity, ref PhysicsVelocity velocity, in PhysicsMass mass, in LocalTransform transform)
         {
-            if (mass.InverseMass <= 0) return;
+            if (mass.InverseMass <= 0 || !PlaneLock.Holds(true, Flight3D, entity)) return;
             float target = -Correction * transform.Position.y / SimTime.FixedTimestep;
             float impulse = (target - velocity.Linear.y) / mass.InverseMass;
             velocity.ApplyLinearImpulse(mass, new float3(0, impulse, 0));

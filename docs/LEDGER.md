@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 16 | 12 | 0 | 0 | 57 | 0 | 85 | 6 |
+| M4 | 13 | 12 | 0 | 0 | 66 | 1 | 92 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -501,6 +501,7 @@
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
 | FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
 | FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play Owner 2026-10-17: not flown yet. Renders of the five engine blocks (docs/design/racing/img/engine_line.jpg) shown; owner: "engines look good". Still waiting for owner play. Render fixes from the review (332ae4d9): Sprint bodies closed (no see-through seam), nozzles bare heat-dark metal with no plating lights and a throttle glow inside, Torch XL its own design (radiator fins, six ribs, eight struts, banded bell); sheet revised. |
+| FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 35104965 | ADR-0123 accepted by the owner 2026-11-04; live check comes with DEV-031 (the toggle) |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
 | ABL-006 | Emergency repairs | [SPEC-24](specs/SPEC-24-abilities.md) | M4 | frontier | ABL-005, DMG-019, DMG-020 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Engines first, 35% of what is missing, 150 E, 90 s, hull items for pilots; lost bricks and blocks rebuilt; scenarios `emergency_repair`, `emergency_repair_brick`. |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
@@ -513,6 +514,8 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
+| HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | done | claude (claude-opus-5-5) | 2026-11-05 | 851a6027 | Owner checked in the game: "The changes are good" |
+| CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
 | DEV-024 | `probe`: asking the colliders where things fit | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | Owner asked for tools for building big places. Clearance, floor/roof, line of sight, reachability and `find` for spots that fit, in local or Hollow coordinates. DevProbeTests pass. |
@@ -520,6 +523,10 @@
 | DEV-026 | Live PlayMode tests in the open Editor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-002 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Through TestRunnerApi instead of Pipeline's run_tests, which entered Play too early; PlaygroundTests 12 s live, Editor kept open. |
 | DEV-027 | Repro scenarios that report numbers | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-005, DEV-023 | no | done | lead (claude-opus-5-5) | 2026-10-18 | — | `report` statement, combat probes, `hollow_hostile_entrance` and `hollow_traffic_calm`. |
 | DEV-028 | The Hollow system in the playground | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-023, TRV-015 | no | done | lead (claude-opus-5-5) | 2026-10-21 | 47ace36 | Exploration slice phase 1: the approved map in the playground. |
+| DEV-029 | Control sheet: every control on a second monitor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-015 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 6a98a932 | Owner request 2026-11-04: controls on a second monitor, local web page; owner checked live: "It works great" |
+| DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
+| DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
+| DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | done | claude (claude-opus-5-5) | 2026-11-05 | 24efec2e | Owner: the button did nothing after Play in an empty scene |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1295,6 +1302,83 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-05 — HUD-021: settings controls in sub-tabs and two columns, a bigger panel, legible hover (claude, claude-opus-5-5)
+- Owner: "In the settings, can you put the controls into different tabs inside the controls tab, based on what they're for, similar to the controls website? editor, flight, etc. Also you can make the settings panel much bigger … (and can divide the controls into two columns so there's less scrolling through them). Plus change the cursor hover triggered color of the components in all UI to be more legible", with a screenshot of a pale grey hovered binding row.
+- **Sub-tabs:** the Controls page has a second `TabBar`: General, Flight, Ship editor and Dialogue (the Global, Flight, Editor and Dialog maps the rebind list covers). The selection is `SettingsViewModel.ControlsGroup`, set through `ISettingsCommands.SelectControlsGroup`, and switching cancels a listening rebind as tab switches do. Rows drop the map prefix ("Fire primary").
+- **Two columns:** the virtualized `ListView` became a wrapping two-column grid. The roughly 60 rows are built once from `RebindRow.uxml`, taken from a template instance in the UXML. Each button keeps its global index (`settings-rebind-<index>`).
+- **Bigger panel:** 1400 × 920, within 94% / 92% of the screen.
+- **One row per action.** Owner: "some controls show multiple times with different binds, is there a way to consolidate it into only being mentioned once but being able to put different binds in?" They chose a device switch, with every bind as a slot.
+  - A Keyboard & mouse / Controller switch sits above the group tabs.
+  - Each action shows once, with one slot button per binding for that device (Fire primary: LMB and Space, or RT).
+  - The model stays one entry per binding, so rebinding and the button names are unchanged.
+  - The panel is now opaque; the pause menu showed through it in the owner's screenshot.
+- **Layout.** Owner: "put the keyboard & mouse and Controller buttons inline with the different control tabs, and on the right side of the panel": one bar now holds the group tabs and the device switch, which wraps under them when the panel is narrow.
+- **Axis halves.** Owner: "can you add the experimental flight3d binds to the controls? they're not there". The halves of each 1D axis are now listed and rebindable: Lift up/down (Y/H), and Thrust, Strafe and Turn (W/S, Q/E, A/D), via `RebindRowViewModel.RowKey`. Modifier combos stay out. The face toggles were already listed.
+- **Done.** Owner, after checking in the game: "The changes are good. send them in".
+- **Unbinding.** Owner: "there should be a way to unbind a bind completely"; they chose Backspace/Delete.
+  - While a slot listens, those keys apply an empty override through the rebind operation's `OnApplyBinding`, so no new `InputService` entry point was needed.
+  - The slot reads "Unbound", the change saves, and Reset restores the default.
+  - A hint under the tabs explains it. `SettingsViewTests.Rebind_Backspace_Unbinds` passes, as do `RebindTests` and `InputServiceTests` (10/10).
+- **Hover:** the pale grey was Unity's default theme, which the NOCTURNE theme never overrode. `list.uss` now points the default hover and selection colours (list rows, dropdown items, buttons, slider thumbs, scrollbars) at NOCTURNE surfaces, with explicit rules for collection rows and dropdown items. Binding rows hover in surface-3 with an accent edge.
+- **Tests:**
+  - `SettingsViewTests.ControlsGroups_FilterRows` (new), the updated rebind cases and the layout audit at every logical size pass, as do `ScreenTableTests`. spec-required: 1, extra: 0.
+  - Already failing on `main` before this change (checked with the change stashed): `SettingsViewTests.Slider_PersistsImmediately` ("Free orbit does not follow the ship heading", 90 vs 0) and `ThemeFilesTests.ThemeUss_NoLiteralColorsOrFonts` on `toast.uss`.
+  - `StaticStateAuditTests` lists only the seven older statics.
+
+### 2026-11-05 — DEV-032: Enter playground from any scene (claude, claude-opus-5-5)
+- Owner: "why can't I jump into the playground from the button on the scene when I open the game in unity? … I have to go to sandbox and then playground", with a screenshot of a black screen and only the Console and Enter playground buttons.
+- Cause: Play was pressed in an empty scene (`Library/LastSceneManagerSetup.txt`: no scenes). Startup leaves non-game scenes alone (SPEC-01 Q9), and `DevPlayground.Enter` accepted only World and MainMenu; the Editor log shows its refusal three times ("Leave the current editor for World or MainMenu first…").
+- Fix: the sandbox transition already loads World from any scene, so entry now refuses only a Blueprint Lab outside the playground profile (unsaved edits), with a message that says so.
+- Tests: `PlaygroundEntryTests.CanEnterFrom_AnySceneButLab` (EditMode) and two PlayMode button cases (main menu; Test Runner scene, the owner's case) pass, with `PlaygroundTests.Enter_Interact_Reset` unchanged. spec-required: 3, extra: 0. `ProductionSessionFixture.StartAtMainMenu` lets a fixture keep the non-game scene.
+
+### 2026-11-04 — DEV-031 and CAM-013: the `flight3d` toggle and the free-aim chase camera (claude, claude-opus-5-5)
+- **DEV-031:** `flight3d [on|off|status]` writes `Flight3DRequest` on the player ship (new SPEC-70 §5.4 row; solo only) and reports the mode and the keys. The five 3D values join the control sheet's Flight configs tab in their own group, with plain lower/higher text in `flight.json`; `sheet.json` notes the three new actions. `Flight3DDevCommandTests.Toggle_EnablesAndDisables` passes.
+- **CAM-013** (ADR-0123 decision 6, owner: "Chase camera, flight-sim style"):
+  - a `freeaim` flight camera preset: mouse look, free yaw, pitch −60…70° so the view can look up from below the ship, centre reticle;
+  - the sampler switches to it while the ship is in 3D with FaceAim on, and gives back the player's preset when either ends (`FreeAim.Switch`);
+  - a reticle ray that hits nothing aims 1,000 m along it, so the nose and the guns point where the view looks;
+  - menus and the console free the cursor through the existing mouse-look path.
+- **CAM-013 tests:** `FreeAimTests` 3/3 pass (pitch held within the preset over 1,000 fuzzed frames and able to look up; the camera looks along the aim; the far point and the preset switch). The camera fixture resets the process-wide preset when it is built, so the tests set `freeaim` after building it.
+- **Crosshair offset.** Owner: "add an offset between the ship and the crosshair, so the ship doesn't sit right on top of the crosshair (not sure if that would imply offsetting the camera or the ship itself, what do you think is better?)".
+  - It is a camera offset: moving the ship would move its collider and guns.
+  - The free-aim view looks `FreeAim.TiltDeg` (default 8°) above the ship, so the ship sits straight below the centre reticle.
+  - Tuned live with `camera tilt=<0..30>`.
+  - `FreeAimTests.ChasePose_LooksAlongAim` checks the tilt, the ship below the reticle, and that tilt 0 lines them up.
+- **Independent toggles.** Owner: "toggling off P shouldn't also toggle off B". Before, turning one facing toggle on switched the other off. Now they are independent; with both on, FaceTarget wins while a target is selected, and turning P off goes back to following the mouse (and the free-aim camera stays on with B). `PlayerInputSampleSystemTests.FacingToggles_AreIndependent` passes; ADR-0123 decision 4 and SPEC-03 updated.
+- **Static audit:** `ControlSheetServer.EmptyJson` and `DevFlightConfig.Fields` (DEV-029/030) were missing `[StaticStateOk]`; now annotated. `StaticStateAuditTests` still lists seven older statics this work did not add (RepairPlanner, Hollow playground, `FlightCameraPreset.All`).
+- **Both:** spec-required 1 + 3, extra 0 (plus `FacingToggles_AreIndependent` for the owner's fix). Owner, after flying it: "looks good, push the changes to main". Merged and pushed 2026-11-04.
+
+### 2026-11-04 — FLT-016: experimental 3D flight for the player ship (claude, claude-opus-5-5)
+- Owner: "an experimental mode, toggleable in console, which unlocks 3d travel … two buttons to control the ship's upwards and downwards thrust … a toggle which while enabled, makes the ship look at where the mouse is aiming … and have a toggle which while enabled, makes the ship face whatever the selected target is". The owner chose the player-only layer and accepted ADR-0123 ("Accept as written"; open question 1: "Chase camera, flight-sim style", CAM-013).
+- **Switch:** `Flight3D` (enableable, `Game.Data.Components`, player ships only) plus `Flight3DRequest`. `Flight3DModeSystem` turns the mode on at once, and off only once the ship is level (pitch and roll under 0.03°).
+- **Plane locks:** every lock asks `PlaneLock.Holds`: the plane pull, both impulse-flattening jobs and the planar mass. `Flight3DMassModeJob` queues a mass rebuild when the mode and the inertia disagree. `SpinLimitSystem` caps the whole spin in 3D.
+- **Propulsion:** `PropulsionJob.Execute3D` keeps the planar allocation in the ship's frame, adds a vertical assist along the ship's up axis (Lift × MaxForwardSpeed × VerticalSpeedFraction) and runs a heading controller (`Flight3DMath`). Yaw and pitch close the angle to the target or aim at `HeadingResponse`, capped by the yaw/pitch rates and ±MaxPitchDeg; roll is held level. In 3D, thrusters push through the centre of mass apart from their yaw torque. The planar `Execute` is unchanged.
+- **Contracts:**
+  - `ShipCommand.Lift` and `PlayerCommand.Lift`; `ShipCommandFlags.FaceAim` and `FaceTarget`;
+  - SPEC-03 actions `Lift` (Y/H; pad Select+D-pad up/down), `FaceAimToggle` (B; Select+D-pad left) and `FaceTargetToggle` (P; Select+D-pad right). The sampler keeps the toggles only while in 3D, and the aim fallback plane is at the ship's height;
+  - co-op `NetProtocol.Version` 9 carries Lift;
+  - replay scripts are written as `cmdrec 2` only when a record has lift; `cmdrec 1` files are unchanged.
+- **Cruise:** refused in 3D (`CruiseBlock.Flight3D`, HUD "CRUISE · 3D FLIGHT").
+- **Config:** five `FlightConfig` values: `VerticalSpeedFraction` .5, `VerticalAccel` 20, `HeadingResponse` 3, `MaxPitchDeg` 75, `MaxPitchRateDeg` 90.
+- **Tests:** `Flight3DTests` 3/3 pass (Lift cap and hold; FaceTarget converges within 2° with roll settling under 0.5°, no flip past 75°, and HeadingResponse changes the speed; disabling levels the ship and returns it to Y = 0). spec-required: 3, extra: 0. 141 of 143 related EditMode tests pass. Two fail on things this task did not touch:
+  - `ConventionsTests`: the `Mouse.current` and `Debug.LogWarning` reads logged under DEV-029;
+  - `GamepadTests.AllFlightActionsBound`: `Flight/SensorPing` has no gamepad binding. It was hidden before because the test stops at the first unbound action.
+- No live check yet: the mode is switched by DEV-031.
+
+### 2026-11-04 — DEV-030: the Flight configs panel on the control sheet (claude, claude-opus-5-5)
+- Owner: "swap to a panel called Flight Configs, which shows (and allows to adjust in runtime, but not permanently) the flight config variables such as max forward speed, reverse speed fraction, etc. Each variable should have a simple word description as to how it affects the movement, and what lower or larger numbers would mean."
+- A *Flight configs* tab on the control sheet. `DevFlightConfig` lists all 25 `FlightConfig` fields with ranges from `FlightConfigDefinition` (practical ceilings for Min-only fields). `GET /flight` gives each live value, boot value and range; `POST /flight?name=&value=` and `POST /flight/reset[?name=]` queue a change that `DevRuntimeHost.Update` applies after `CompleteAllTrackedJobs()` (new SPEC-70 §5.4 row). Values are clamped, integer fields rounded, NaN and unknown names refused. Posts need the `X-Control-Sheet` header, so another web page cannot change the game. `config_flight` is never written: Reset, or leaving Play, restores it.
+- `tools/controlsheet/flight.json` holds the groups, labels and plain "what it does / lower / higher" text, plus log sliders for the push fades (0.01 … 1,000,000). Flight reads every value live each tick; the four core-assist values reach AI pilots' `PropulsionStats` only after a ship rebuild, and the page says so.
+- Tests: `ControlSheetTests` 4/4 pass (EditMode, headless, Windows), including `FlightConfig_SetClampsAndResets` (also checks every setter writes only its own field) and `Server_FlightPostNeedsHeader`. spec-required: 2, extra: 0. Owner, after trying it live: "looks good, go for it".
+
+### 2026-11-04 — DEV-029: the control sheet, every control on a second monitor (claude, claude-opus-5-5)
+- Owner: "a second window that opens on my other monitor along with the game, which shows all of the controls for me and leaves space for adding info visuals under each control … can be opened with a console command"; chose the local web page over a second Unity display.
+- `controls` (console/registry) starts `DevControlSheet`: a localhost-only `HttpListener` owned by `DevRuntimeHost` (closed with it, so domain reloads free the port), then opens `http://127.0.0.1:47810/`. Without `port=` it tries the next 9 ports, for two dev builds on one machine.
+- `/layout` lists every map and action of `Controls.inputactions` with `GetBindingDisplay` labels (rebuilt on `BindingsChanged`); `/state` carries context, scheme, enabled maps, each enabled action's pressed state and value, and the zero-argument scenario probes the page names in `?probes=`. The main thread builds JSON at most 15×/s and only while the page polled in the last 2 s; closed, nothing runs. The listener thread reads only the published bytes and page files.
+- The page lives in `tools/controlsheet/` (outside `Assets/`, so nothing ships; read from disk per request, so edits need only a refresh). Under each control: a light, axis bar or stick by type; notes and probe rows from `sheet.json` (seeded with speed and thrust under Thrust, cruise state under Cruise); custom visuals registered in `visuals.js` (`sparkline` included). A dev build finds the page when it sits inside the project (`Builds/…`); builds sent elsewhere report the page missing.
+- Owner follow-up: inactive maps move below the active ones (each group in asset order), collapse when they turn off and expand when they turn on; headers fold by click. Owner, after trying it live: "It works great."
+- Tests: `ControlSheetTests.Layout_ListsEveryAction`, `Server_ServesPageAndState_ThenFreesPort` pass (EditMode, headless, Windows). spec-required: 2, extra: 0. `ConventionsTests` fails on files this task did not touch: `Mouse.current` in `CameraTargetSyncSystem.cs:118`, `HudSyncSystem.cs:143/145`, and `Debug.LogWarning` in `HollowSystem.cs:78`.
 
 ### 2026-10-21 — Playing the slice: cruise view, planets at true scale, anti-aliasing, a camera that follows (lead, claude-opus-5-5)
 - Owner, after flying the slice: "when cruising the ship moves ahead of the camera and becomes a dot, instead we should increase FOV and have a shader effect to make it feel like you're going really really fast"; "camera jitter back and forth flickering"; the rings and atmospheres "clipping", and "wrongly saying the hollow when im not near the hollow"; "lines flickering, like lack of antialiasing"; inside the Hollow, "camera should follow ship rotation by default and C should toggle on/off so you can look around. also ship is getting lost behind the walls. also lets try not cutting the hollow in half when inside".

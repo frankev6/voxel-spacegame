@@ -25,6 +25,10 @@ namespace Game.Simulation.Flight
         ComponentLookup<Game.Voxel.Damage.ExternalPush> pushes;
         ComponentLookup<ShieldState> shields;
         ComponentLookup<Cruise> cruises;
+        ComponentLookup<Flight3D> flight3D;   // ADR-0123
+        ComponentLookup<Flight3DRequest> flight3DRequests;
+        ComponentLookup<Weapons.ShipTarget> targets;
+        ComponentLookup<Unity.Transforms.LocalTransform> poses;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
@@ -42,6 +46,8 @@ namespace Game.Simulation.Flight
             pushes = state.GetComponentLookup<Game.Voxel.Damage.ExternalPush>(true);
             shields = state.GetComponentLookup<ShieldState>(true);
             cruises = state.GetComponentLookup<Cruise>(true);
+            flight3D = state.GetComponentLookup<Flight3D>(true); flight3DRequests = state.GetComponentLookup<Flight3DRequest>(true);
+            targets = state.GetComponentLookup<Weapons.ShipTarget>(true); poses = state.GetComponentLookup<Unity.Transforms.LocalTransform>(true);
         }
 
         [BurstCompile]
@@ -52,6 +58,7 @@ namespace Game.Simulation.Flight
             spawning.Update(ref state);
             thrusters.Update(ref state);
             powered.Update(ref state); multipliers.Update(ref state); pushes.Update(ref state); shields.Update(ref state); cruises.Update(ref state);
+            flight3D.Update(ref state); flight3DRequests.Update(ref state); targets.Update(ref state); poses.Update(ref state);
             uint tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
             state.Dependency = new PropulsionJob
             {
@@ -60,7 +67,8 @@ namespace Game.Simulation.Flight
                 Modules = SystemAPI.GetSingleton<BlockModulesRef>().Value,
                 Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value,
                 Entities = entities, Spawning = spawning, Thrusters = thrusters, Powered = powered, Multipliers = multipliers,
-                Pushes = pushes, Shields = shields, Cruises = cruises, Tick = tick
+                Pushes = pushes, Shields = shields, Cruises = cruises, Tick = tick,
+                Flight3D = flight3D, Flight3DRequests = flight3DRequests, Targets = targets, Poses = poses
             }.ScheduleParallel(state.Dependency);
             state.Dependency = new ThrusterIdleJob { Thrusters = thrusters }.Schedule(state.Dependency);
         }

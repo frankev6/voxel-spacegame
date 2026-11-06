@@ -39,3 +39,8 @@ MonoBehaviour:
   maxCarry: 120
   maxCarryYaw: 3.5
   shieldSpeedFraction: 0.8
+  verticalSpeedFraction: 0.5
+  verticalAccel: 20
+  headingResponse: 3
+  maxPitchDeg: 75
+  maxPitchRateDeg: 90

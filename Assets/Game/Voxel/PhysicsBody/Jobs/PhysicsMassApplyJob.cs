@@ -1,3 +1,4 @@
+using Game.Data.Components;
 using Game.Voxel.Model;
 using Unity.Burst;
 using Unity.Collections;
@@ -19,6 +20,7 @@ namespace Game.Voxel.PhysicsBody
         [ReadOnly] public ComponentLookup<VoxelGrid> Grids;
         [ReadOnly] public ComponentLookup<GridSource> Sources;
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
+        [ReadOnly] public ComponentLookup<Flight3D> Flight3D;   // ADR-0123: a 3D-flying ship gets its full inertia
         public ComponentLookup<PhysicsMass> PhysicsMasses;
         public ComponentLookup<PhysicsVelocity> Velocities;
         public void Execute()
@@ -29,7 +31,7 @@ namespace Game.Voxel.PhysicsBody
                 var root = Changed[i];
                 if (!seen.Add(root) || !PhysicsMasses.HasComponent(root) || !States.HasComponent(root) || States[root].Motion != GridMotion.Dynamic) continue;
                 var mass = Masses[root].Data; if (mass.CellCount == 0) continue;
-                var grid = Grids[root]; bool planar = (Sources[root].Flags & GridSpawnFlags.PlanarInertia) != 0;
+                var grid = Grids[root]; bool planar = PlaneLock.Holds((Sources[root].Flags & GridSpawnFlags.PlanarInertia) != 0, Flight3D, root);
                 var next = GridMassMath.CreateDynamicMass(mass, grid.CellMin, grid.CellMax, grid.CellSize, planar); var old = PhysicsMasses[root];
                 if (Equal(old, next)) continue;
                 if (Velocities.HasComponent(root))

@@ -90,14 +90,18 @@ namespace Game.App.DevRuntime.Playground
             if (entering || !ctx.TryGetService<IGameFlow>(out var flow) || flow.IsTransitioning
                 || !ctx.TryGetService<SaveService>(out var save) || save.IsBusy
                 || !ctx.TryGetService<SceneFlow>(out var scenes)) return DevCommandResult.Fail("flow/save busy or unavailable");
-            if (flow.CurrentScene != GameScene.World && flow.CurrentScene != GameScene.MainMenu
-                && !(flow.CurrentScene == GameScene.BlueprintLab && IsPlaygroundProfile(save)))
-                return DevCommandResult.Fail("Leave the current editor for World or MainMenu first; direct Lab reset is limited to the playground profile");
+            if (!CanEnterFrom(flow.CurrentScene, IsPlaygroundProfile(save)))
+                return DevCommandResult.Fail("Leave the Blueprint Lab first (its unsaved edits would be lost); direct Lab reset is limited to the playground profile");
             entering = true;
             ClearPresentation(); active = false;
             var operation = new EntryOperation(this, Begin(flow, save, scenes));
             return DevCommandResult.Pending(host.AddOperation(operation), "resetting isolated playground");
         }
+        /// <summary>Owner (2026-11-05): the Enter playground button did nothing after pressing Play in an empty or non-game scene (a black
+        /// screen with only the dev buttons). Startup leaves such scenes alone (SPEC-01 Q9), so the playground now enters from them too:
+        /// the sandbox transition loads World from any scene. Only the Blueprint Lab still refuses, outside the playground profile,
+        /// because leaving it would drop unsaved edits.</summary>
+        internal static bool CanEnterFrom(GameScene scene, bool playgroundProfile) => scene != GameScene.BlueprintLab || playgroundProfile;
         static bool IsPlaygroundProfile(SaveService save)
         {
             foreach (var profile in save.ListProfiles())

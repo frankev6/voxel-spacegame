@@ -20,6 +20,7 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
         [ReadOnly] public ComponentLookup<LocalTransform> Transforms;
         [ReadOnly] public ComponentLookup<PlanarConstraint> Planar;
+        [ReadOnly] public ComponentLookup<Flight3D> Flight3D;
         public ComponentLookup<ExternalPush> Pushes;   // summed per root this tick (SPEC-91 §5.1 step 3)
         public uint Tick;
         [NativeDisableUnsafePtrRestriction] public DamageStreamsData* Data;
@@ -50,7 +51,7 @@ namespace Game.Voxel.Damage.Jobs
                 float3 linear = request.WorldImpulse, angular = float3.zero;
                 var pose = atCentre ? LocalTransform.Identity : Transforms[body];
                 if (!atCentre) angular = math.cross(request.WorldPoint - pose.TransformPoint(mass.CenterOfMass), linear);
-                if (Planar.HasComponent(body)) { linear.y = 0; angular.x = angular.z = 0; }
+                if (PlaneLock.Holds(Planar.HasComponent(body), Flight3D, body)) { linear.y = 0; angular.x = angular.z = 0; }
                 velocity.ApplyLinearImpulse(mass, linear);
                 float yawDv = 0;
                 if (!atCentre)
