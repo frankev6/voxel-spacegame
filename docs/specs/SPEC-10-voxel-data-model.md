@@ -1070,6 +1070,18 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
   - [x] A Burst job producer followed by a main-thread consumer uses Acquire/Release/CompleteAccess without job safety errors; guard handles are never passed into the job.
 - **Tests:** `BrickMeshQueueTests.PriorityOrder`, `.UpgradeDedup`, `.StaleSkipped`, `.JobProducer_MainThreadConsumer_NoSafetyErrors` (with Burst safety checks on).
 
+### VOX-022 — Burst dense brick ingestion without changing storage semantics
+- **Milestone:** M4
+- **Tier:** frontier — owner-directed optimization of native storage with differential evidence
+- **Depends on:** `VOX-003`, `VOX-009`
+- **Do:** Move synchronous mask/count and normalized destination-copy loops in dense brick ingestion to Burst direct calls. Keep allocation, replacement equality, revision, free-page and ownership behavior unchanged. Compare complete reconstruction against frozen original inflater and storage loops.
+- **Files:** `Assets/Game/Voxel/Model/VoxelStructure.cs`, internal ingestion helper, owning-module correctness and paired performance tests.
+- **Acceptance criteria:**
+  - [ ] Exact masks, cells, sparse/dense selection, revisions and replacement behavior match the original, including noncanonical air values.
+  - [ ] Existing codec/storage tests and focused differential tests pass with safety checks.
+  - [ ] Paired full reconstruction timings report median/p95 and unchanged workload; compile passes.
+- **Tests:** Differential ingestion and original-versus-optimized full Hollow reconstruction.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 16 | 0 | 0 | 66 | 1 | 97 | 7 |
+| M4 | 14 | 17 | 0 | 0 | 66 | 1 | 98 | 7 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -498,6 +498,7 @@
 | DATA-013 | Large hull blocks (ADR-0121) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M4 | standard | DATA-012 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | b7d0c733 | DATA-E036 accepts full 2x2x2 and 3x3x3 cube boxes; block_hull_large_2 and _3; damage takes them apart cell by cell (exempt from the half-footprint collapse); the snapshot and mesher carry each cell place in its block so a large block shows one plate (docs/design/blocks/large_hull_blocks.jpg). Tests: LargeHullTests 3, LargeHullPanelTests 2. Not checked in the ship editor UI |
 | DATA-014 | Update imported content membership without rescanning all assets | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M4 | frontier | DATA-008 | yes | in-progress | lead (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
 | PERS-020 | Buffer compressed blueprint input with exact stream validation | [SPEC-05](specs/SPEC-05-persistence.md) | M4 | frontier | PERS-007 | yes | in-progress | loading (gpt-6-astra) | 2026-11-06 |  | Owner-directed loading optimization; exact termination parity required |
+| VOX-022 | Burst dense brick ingestion without changing storage semantics | [SPEC-10](specs/SPEC-10-voxel-data-model.md) | M4 | frontier | VOX-003, VOX-009 | yes | in-progress | loading (gpt-6-astra) | 2026-11-06 |  | Second measured loading pass; exact storage parity required |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
