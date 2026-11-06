@@ -8,6 +8,9 @@ using Game.Tests.EditMode.Data;
 using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Mathematics;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.PerformanceTesting;
 
 namespace Game.Tests.EditMode.ShipEditor
@@ -73,9 +76,34 @@ namespace Game.Tests.EditMode.ShipEditor
             Assert.IsTrue(batched.Draft.GetCell(new int3(20, 0, 0)).IsAir);
             Assert.IsTrue(reference.Redo()); Assert.IsTrue(batched.Redo()); Equal(reference, batched, 24, 3);
         }
+        sealed class ReferenceSettings : System.IDisposable
+        {
+            readonly bool burst = BurstCompiler.Options.EnableBurstCompilation;
+            readonly bool safety = BurstCompiler.Options.EnableBurstSafetyChecks;
+            readonly bool synchronous = BurstCompiler.Options.EnableBurstCompileSynchronously;
+            readonly bool debugger = JobsUtility.JobDebuggerEnabled;
+            readonly NativeLeakDetectionMode leaks = NativeLeakDetection.Mode;
+            internal ReferenceSettings()
+            {
+                BurstCompiler.Options.EnableBurstCompilation = true;
+                BurstCompiler.Options.EnableBurstSafetyChecks = false;
+                BurstCompiler.Options.EnableBurstCompileSynchronously = true;
+                JobsUtility.JobDebuggerEnabled = false;
+                NativeLeakDetection.Mode = NativeLeakDetectionMode.Disabled;
+            }
+            public void Dispose()
+            {
+                BurstCompiler.Options.EnableBurstCompilation = burst;
+                BurstCompiler.Options.EnableBurstSafetyChecks = safety;
+                BurstCompiler.Options.EnableBurstCompileSynchronously = synchronous;
+                JobsUtility.JobDebuggerEnabled = debugger;
+                NativeLeakDetection.Mode = leaks;
+            }
+        }
         [Test, Performance, Category("Performance")]
         public void SelectedRemoval_ProductionPathPaired()
         {
+            using var settings = new ReferenceSettings();
             PerfSettings.AssertReference();
             using var f = new DraftAdapterTests.Fixture(); Fill(f, 33, 32);
             var selected = Selection(f, 16, 32);
