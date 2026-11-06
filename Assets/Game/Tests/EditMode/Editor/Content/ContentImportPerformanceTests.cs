@@ -42,6 +42,15 @@ namespace Game.Tests.EditMode.Editor.Content
                 AssertParity(path);
                 AssetDatabase.DeleteAsset(path);
                 AssertParity(path);
+                var database = ContentDatabaseBuilder.Rebuild();
+                var members = (System.Collections.Generic.List<ContentDefinition>)database.Definitions;
+                Assert.That(members.Count, Is.GreaterThan(1));
+                string unrelated = AssetDatabase.GetAssetPath(members[1]);
+                members.RemoveAt(0);
+                AssertParity(unrelated);
+                members = (System.Collections.Generic.List<ContentDefinition>)database.Definitions;
+                members.Add(members[0]);
+                AssertParity(unrelated);
             }
             finally
             {

@@ -15,7 +15,7 @@ namespace Game.Editor.Content
         // Trust incremental membership only after a full scan in this editor domain. Reloads,
         // database replacement and external list edits fall back to the canonical scan.
         static ContentDatabase scannedDatabase;
-        static IReadOnlyList<ContentDefinition> scannedDefinitions;
+        static ContentDefinition[] scannedDefinitions;
 
         /// <summary>Loads every definition under the content root, sorts by ordinal ID (empty IDs last, then by path) and updates the database
         /// only if the list changed. Creates the database if it is missing.</summary>
@@ -40,7 +40,7 @@ namespace Game.Editor.Content
         {
             var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>(DatabasePath);
             if (database == null || database != scannedDatabase ||
-                !ReferenceEquals(database.Definitions, scannedDefinitions)) return Rebuild();
+                scannedDefinitions == null || !database.Definitions.SequenceEqual(scannedDefinitions)) return Rebuild();
             var paths = new HashSet<string>(imported, System.StringComparer.Ordinal);
             var found = new List<(ContentDefinition Def, string Path)>(database.Definitions.Count);
             foreach (var definition in database.Definitions)
@@ -76,7 +76,9 @@ namespace Game.Editor.Content
                 AssetDatabase.SaveAssetIfDirty(database);
             }
             scannedDatabase = database;
-            scannedDefinitions = database.Definitions;
+            // Own the snapshot: Definitions exposes its underlying list as IReadOnlyList, and
+            // serialized/editor changes can mutate that list without replacing its identity.
+            scannedDefinitions = database.Definitions.ToArray();
         }
     }
 }
