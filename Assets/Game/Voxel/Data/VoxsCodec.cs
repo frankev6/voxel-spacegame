@@ -231,7 +231,7 @@ namespace Game.Voxel.Data
         public static bool TryDecode(ReadOnlySpan<byte> data, ContentCatalog catalog, Allocator allocator, out VoxsDecoded result, out string error)
             => Decode(data, catalog, allocator, out result, out error, false);
 
-        // Differential test seam: the previous input granularity, with the same complete decoder.
+        // Differential test seam: original one-byte input and managed cell loops; all parsing/repair rules are shared.
         internal static bool TryDecodeLegacyInput(ReadOnlySpan<byte> data, ContentCatalog catalog, Allocator allocator, out VoxsDecoded result, out string error)
             => Decode(data, catalog, allocator, out result, out error, true);
 
@@ -285,14 +285,27 @@ namespace Game.Voxel.Data
                     int3 coord = Coord(r); Require(seen.Add(coord), "duplicate brick coordinate", r.Position); d.BrickCoords.Add(coord);
                     Cell* brick = cells + b * 4096;
                     int order = r.ReadByte(); Require(order <= 3, "invalid traversal", r.Position - 1);
-                    if (order == 3) { ushort v = r.ReadUInt16(); for (int j = 0; j < 4096; j++) brick[j].Ref = v; }
+                    if (order == 3)
+                    {
+                        ushort v = r.ReadUInt16();
+                        if (legacyOneByteInput) { for (int j = 0; j < 4096; j++) brick[j].Ref = v; }
+                        else VoxsCellLoops.FillReferences(brick, v);
+                    }
                     else ReadRuns(r, bytes, brick, order, 0, 4096);
                     int solid = 0;
-                    for (int j = 0; j < 4096; j++)
+                    if (legacyOneByteInput)
                     {
-                        Cell c = brick[j]; if (c.Ref == 0) continue;
-                        Require(c.IsInstance ? c.InstanceIndex < instances : c.Ref < palettes, "cell ref out of range", r.Position);
-                        brick[j].Hp = 255; solid++;
+                        for (int j = 0; j < 4096; j++)
+                        {
+                            Cell c = brick[j]; if (c.Ref == 0) continue;
+                            Require(c.IsInstance ? c.InstanceIndex < instances : c.Ref < palettes, "cell ref out of range", r.Position);
+                            brick[j].Hp = 255; solid++;
+                        }
+                    }
+                    else
+                    {
+                        solid = VoxsCellLoops.ValidateReferencesAndInitializeHp(brick, instances, palettes);
+                        Require(solid >= 0, "cell ref out of range", r.Position);
                     }
                     Require(solid > 0, "empty brick", r.Position);
                     for (int field = 1; field <= 2; field++)
@@ -300,7 +313,9 @@ namespace Game.Voxel.Data
                         byte mode = r.ReadByte(); Require(mode <= 1, "invalid run mode", r.Position - 1);
                         if (mode != 0) ReadRuns(r, bytes, brick, order, field, solid);
                     }
-                    for (int j = 0; j < 4096; j++) Require(brick[j].Ref == 0 || brick[j].Hp > 0, "solid HP is zero", r.Position);
+                    if (legacyOneByteInput)
+                    { for (int j = 0; j < 4096; j++) Require(brick[j].Ref == 0 || brick[j].Hp > 0, "solid HP is zero", r.Position); }
+                    else Require(VoxsCellLoops.ValidateHp(brick) != 0, "solid HP is zero", r.Position);
                 }
                 int removed = Count(r, 1048576, 3);
                 Require(partial || removed == 0, "removed bricks without Partial", r.Position);
@@ -308,7 +323,7 @@ namespace Game.Voxel.Data
                 for (int i = 0; i < removed; i++) { int3 c = Coord(r); Require(seen.Add(c), "duplicate removed coordinate", r.Position); d.RemovedBricks.Add(c); }
                 Require(r.IsAtEnd, "trailing bytes", r.Position);
                 SortDecoded(d);
-                Repair(d, catalog, paletteNames, instanceNames);
+                Repair(d, catalog, paletteNames, instanceNames, legacyOneByteInput);
                 result = d; return true;
             }
             catch (Exception e) when (e is SaveFormatException || e is InvalidDataException || e is IOException)
@@ -343,7 +358,7 @@ namespace Game.Voxel.Data
             id ??= "air";
             GameLog.WarnOnce("VOXS-drift-" + id, "Persistence", "VOXS content drift repaired or retained for " + id);
         }
-        static void Repair(VoxsDecoded d, ContentCatalog catalog, string[] paletteNames, string[] instanceNames)
+        static void Repair(VoxsDecoded d, ContentCatalog catalog, string[] paletteNames, string[] instanceNames, bool legacyCellLoops)
         {
             ushort missing = catalog.GetBlockIndex(catalog.MissingBlock);
             for (int i = 0; i < d.Palette.Length; i++)
@@ -355,7 +370,9 @@ namespace Game.Voxel.Data
             int original = d.Instances.Length;
             var counts = new int[original]; var remap = new ushort[original]; int kept = 0;
             Cell* cells = (Cell*)d.Cells.GetUnsafePtr();
-            for (int i = 0; i < d.Cells.Length; i++) if (cells[i].IsInstance) counts[cells[i].InstanceIndex]++;
+            if (legacyCellLoops)
+            { for (int i = 0; i < d.Cells.Length; i++) if (cells[i].IsInstance) counts[cells[i].InstanceIndex]++; }
+            else fixed (int* countPointer = counts) VoxsCellLoops.CountInstances(cells, d.Cells.Length, countPointer);
             var palettes = new Dictionary<uint, ushort>();
             uint Key(PaletteEntry p) => p.Block | ((uint)p.Orient << 16) | ((uint)p.Color << 24);
             for (int i = 1; i < d.Palette.Length; i++) { uint key = Key(d.Palette[i]); if (!palettes.ContainsKey(key)) palettes.Add(key, (ushort)i); }
@@ -406,7 +423,9 @@ namespace Game.Voxel.Data
                     d.Instances[kept] = instance; remap[i] = (ushort)(0x8000 | kept++);
                 }
             }
-            for (int i = 0; i < d.Cells.Length; i++) if (cells[i].IsInstance) cells[i].Ref = remap[cells[i].InstanceIndex];
+            if (legacyCellLoops)
+            { for (int i = 0; i < d.Cells.Length; i++) if (cells[i].IsInstance) cells[i].Ref = remap[cells[i].InstanceIndex]; }
+            else fixed (ushort* remapPointer = remap) VoxsCellLoops.RemapInstances(cells, d.Cells.Length, remapPointer);
             if (d.AnchorInstance >= 0) { ushort m = remap[d.AnchorInstance]; d.AnchorInstance = (m & 0x8000) == 0 ? -1 : m & 0x7fff; }
             d.Instances.ResizeUninitialized(kept);
         }
