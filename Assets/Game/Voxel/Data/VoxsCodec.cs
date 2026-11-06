@@ -162,7 +162,7 @@ namespace Game.Voxel.Data
         static void WriteRuns(SaveWriter w, Cell* cells, int order, int field, UnsafeList<byte>* runs)
         { runs->Clear(); VoxsRuns.EncodeRuns(cells, order, field, runs); w.WriteBytes(new ReadOnlySpan<byte>(runs->Ptr, runs->Length)); }
 
-        static byte[] Body(ReadOnlySpan<byte> data, out ushort version, out bool partial)
+        static byte[] Body(ReadOnlySpan<byte> data, out ushort version, out bool partial, bool legacyOneByteInput = false)
         {
             Require(data.Length >= 8, "truncated header");
             var header = new SaveReader(data.Slice(0, 8).ToArray());
@@ -173,7 +173,7 @@ namespace Game.Voxel.Data
             Require((flags & ~3) == 0, "unknown flags", 6);
             Require(data.Length - 8 <= MaxBodyBytes, "body exceeds byte limit", 8);
             if ((flags & 1) == 0) return data.Slice(8).ToArray();
-            using var input = new ExactDeflateInput(data.Slice(8).ToArray());
+            using var input = new ExactDeflateInput(data.Slice(8).ToArray(), legacyOneByteInput);
             using var deflate = new DeflateStream(input, CompressionMode.Decompress);
             using var output = new MemoryStream();
             var buffer = new byte[8192]; int count;
@@ -185,21 +185,29 @@ namespace Game.Voxel.Data
             Require(!input.ReadPastEnd && input.Position == input.Length, "truncated Deflate or trailing compressed bytes", 0);
             return output.ToArray();
         }
-        // DeflateStream normally reads ahead and accepts an unfinished stream. One-byte input
-        // exposes its actual end marker and preserves the no-trailing-bytes guarantee.
+        // DeflateStream can read ahead and accepts unfinished streams. Reserve the final byte:
+        // an earlier end marker leaves that byte unread, even if a bulk read swallowed trailing
+        // bytes. Only a stream requiring its final byte can reach Length without reading past EOF.
+        // This retains the old one-byte reader's exact byte-level end check without tiny reads.
         sealed class ExactDeflateInput : MemoryStream
         {
             public bool ReadPastEnd;
-            public ExactDeflateInput(byte[] bytes) : base(bytes, false) { }
+            readonly bool legacyOneByte;
+            public ExactDeflateInput(byte[] bytes, bool legacyOneByte) : base(bytes, false) { this.legacyOneByte = legacyOneByte; }
+            int ReadLimit(int requested)
+            {
+                long remaining = Length - Position;
+                return Math.Min(requested, legacyOneByte || remaining <= 1 ? 1 : (int)(remaining - 1));
+            }
             public override int Read(byte[] buffer, int offset, int count)
             {
-                int n = base.Read(buffer, offset, Math.Min(count, 1));
+                int n = base.Read(buffer, offset, ReadLimit(count));
                 if (n == 0 && count > 0) ReadPastEnd = true;
                 return n;
             }
             public override int Read(Span<byte> buffer)
             {
-                int n = base.Read(buffer.Slice(0, Math.Min(buffer.Length, 1)));
+                int n = base.Read(buffer.Slice(0, ReadLimit(buffer.Length)));
                 if (n == 0 && buffer.Length > 0) ReadPastEnd = true;
                 return n;
             }
@@ -221,13 +229,20 @@ namespace Game.Voxel.Data
             catch (Exception e) when (e is SaveFormatException || e is InvalidDataException || e is IOException) { return false; }
         }
         public static bool TryDecode(ReadOnlySpan<byte> data, ContentCatalog catalog, Allocator allocator, out VoxsDecoded result, out string error)
+            => Decode(data, catalog, allocator, out result, out error, false);
+
+        // Differential test seam: the previous input granularity, with the same complete decoder.
+        internal static bool TryDecodeLegacyInput(ReadOnlySpan<byte> data, ContentCatalog catalog, Allocator allocator, out VoxsDecoded result, out string error)
+            => Decode(data, catalog, allocator, out result, out error, true);
+
+        static bool Decode(ReadOnlySpan<byte> data, ContentCatalog catalog, Allocator allocator, out VoxsDecoded result, out string error, bool legacyOneByteInput)
         {
             using var marker = DecodeMarker.Auto();
             result = null; error = null;
             VoxsDecoded d = null; SaveReader r = null;
             try
             {
-                byte[] body = Body(data, out _, out bool partial); r = new SaveReader(body);
+                byte[] body = Body(data, out _, out bool partial, legacyOneByteInput); r = new SaveReader(body);
                 d = new VoxsDecoded { Partial = partial, CellSize = r.ReadSingle(), AnchorInstance = r.ReadInt32() };
                 Require(math.isfinite(d.CellSize) && d.CellSize > 0, "invalid cell size", r.Position);
                 int blocks = Count(r, 65535, 1);
