@@ -18,7 +18,8 @@ namespace Game.Tests.EditMode.Voxel
                 BurstCompiler.Options.EnableBurstCompilation = burst;
                 BurstCompiler.Options.EnableBurstCompileSynchronously = true;
                 using var expected = new VoxelStructure(); using var actual = new VoxelStructure();
-                using var cells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
+                using var ownedCells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
+                var cells = ownedCells; // Writable local view; ownedCells retains deterministic disposal.
                 int3 coord = new int3(-1, 2, 3);
                 foreach (int count in new[] { 0, 1, SparseCellStorage.Limit, 1, SparseCellStorage.Limit + 1, SparseCellStorage.Limit, 4096, 1, 0, 4096 })
                 {
