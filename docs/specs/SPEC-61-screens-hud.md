@@ -709,6 +709,22 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
   - [ ] Runs in under 60 s.
 - **Tests:** `AllScreensLayoutTests.EveryScreen_EverySize_NoLayoutIssues`, `AllScreensLayoutTests.EveryScreen_NoContrastIssues`.
 
+### HUD-021 — Settings: grouped controls in two columns, a bigger panel, legible hover
+- **Milestone:** M4
+- **Tier:** standard — layout and theme over the existing settings view model
+- **Depends on:** `HUD-005`
+- **Do:** Owner (2026-11-05): "In the settings, can you put the controls into different tabs inside the controls tab, based on what they're for, similar to the controls website? editor, flight, etc. Also you can make the settings panel much bigger so it fits more information (and can divide the controls into two columns so there's less scrolling through them). Plus change the cursor hover triggered color of the components in all UI to be more legible than what it is now", with a screenshot of a hovered binding row in light grey with white text.
+  - **Sub-tabs:** a second `TabBar` in the Controls page: General (Global), Flight, Ship editor (Editor), Dialogue (Dialog), the maps the rebind list already covers. The selection lives in `SettingsViewModel.ControlsGroup` through `ISettingsCommands.SelectControlsGroup`.
+  - **Two columns:** binding rows in a wrapping grid, two per line, built from `RebindRow.uxml`, one row per binding, with the global row index kept in each button's name. Row names drop the map prefix ("Fire primary").
+  - **Bigger panel:** the panel grows to 1400 × 920 within 94% / 92% of the screen.
+  - **Hover:** the theme overrides Unity's default hover and selection colours (list rows, dropdown items, buttons, sliders, scrollbars) with NOCTURNE surfaces, so light text stays readable.
+- **Files:** `Assets/Game/UI/Views/{SettingsView.cs,Uxml/SettingsView.uxml,Uxml/RebindRow.uxml}`, `Assets/Game/UI/ViewModels/SettingsViewModel.cs`, `Assets/Game/UI/Views/Commands/ISettingsCommands.cs`, `Assets/Game/App/Presenters/SettingsPresenter.cs`, `Assets/Game/UI/Theme/{screens/settings.uss,components/list.uss}`, `Assets/Game/Tests/PlayMode/UI/Screens/SettingsViewTests.cs`.
+- **Acceptance criteria:**
+  - [ ] The Controls tab shows four sub-tabs and only the selected group's bindings, in two columns.
+  - [ ] The settings panel is larger and still passes the layout audit at every logical size.
+  - [ ] Hovered list rows and other default-themed controls keep legible text on a dark surface.
+- **Tests:** `SettingsViewTests.ControlsGroups_FilterRows` (new); the existing rebind and layout cases, updated to select the group.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider |
