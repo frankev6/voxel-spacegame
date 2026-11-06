@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 13 | 12 | 0 | 0 | 66 | 1 | 92 | 6 |
+| M4 | 17 | 12 | 0 | 0 | 66 | 1 | 96 | 10 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -496,9 +496,11 @@
 | MIG-015 | Hand-off package | [SPEC-72](specs/SPEC-72-legacy-migration.md) | M3 | standard | MIG-002, MIG-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 5241ee5 | Typed legacy handoff metadata; spec-required: 3, extra: 0 |
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 33e24c3 | Gamepad bindings/device labels/aim; hardware feel untested; spec-required: 2, extra: 0 |
 | DATA-013 | Large hull blocks (ADR-0121) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M4 | standard | DATA-012 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | b7d0c733 | DATA-E036 accepts full 2x2x2 and 3x3x3 cube boxes; block_hull_large_2 and _3; damage takes them apart cell by cell (exempt from the half-footprint collapse); the snapshot and mesher carry each cell place in its block so a large block shows one plate (docs/design/blocks/large_hull_blocks.jpg). Tests: LargeHullTests 3, LargeHullPanelTests 2. Not checked in the ship editor UI |
+| DATA-014 | Update imported content membership without rescanning all assets | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M4 | frontier | DATA-008 | yes | in-progress | lead (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
+| DMG-021 | Skip integrity selection scratch work for unchanged grids | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-009 | yes | in-progress | runtime (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
 | FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
 | FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play Owner 2026-10-17: not flown yet. Renders of the five engine blocks (docs/design/racing/img/engine_line.jpg) shown; owner: "engines look good". Still waiting for owner play. Render fixes from the review (332ae4d9): Sprint bodies closed (no see-through seam), nozzles bare heat-dark metal with no plating lights and a throttle glow inside, Torch XL its own design (radiator fins, six ribs, eight struts, banded bell); sheet revised. |
 | FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 35104965 | ADR-0123 accepted by the owner 2026-11-04; live check comes with DEV-031 (the toggle) |
@@ -514,6 +516,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
+| EDT-027 | Batch draft connectivity removals without repeated relabels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-008 | yes | in-progress | loading (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
 | HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | done | claude (claude-opus-5-5) | 2026-11-05 | 851a6027 | Owner checked in the game: "The changes are good" |
 | CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
@@ -527,6 +530,7 @@
 | DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
 | DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
 | DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | done | claude (claude-opus-5-5) | 2026-11-05 | 24efec2e | Owner: the button did nothing after Play in an empty scene |
+| TST-010 | Owner-directed performance audit and comparative evidence | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M4 | frontier | TST-001 | yes | in-progress | lead (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1302,6 +1306,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-06 — TST-010: owner-directed parallel performance investigation
+
+- Owner, verbatim: [HANDOFF-ASTRA.md](docs/HANDOFF-ASTRA.md)  read this file. its a handoff of the voxel spacegame. pull the latest changes, theres someone else helping me work, his name is Daniel. I want this next round for you to work in tandem with 2 other astra light workers under your wing (you'll be working as well not just orchestrating) and I want you all to parallelize looking at the codebase entirely through every nook and cranny, and looking for potential optimizations we can make for the game to run faster and smoother, load things faster, our tools to make the game also be faster. all while keeping the same visual and physics quality and resolution, i don't want you making shortcuts blindly just to "make it faster" but then everything else gets regressions. please make yourself a /goal with the objective of improving it by atleast 2x
+- Fetched origin: Daniel's latest published commit remains integrated; local main cc19fd5f. Baseline compile passes. Two Astra light audit workers and lead cover runtime, loading/tools, and presentation/network/UI respectively. Fresh owner direction authorizes this optimization effort; quality and correctness stay mandatory.
+- Initial candidate claims: DMG-021 idle integrity, EDT-027 batched connectivity, DATA-014 content import membership. No speedup claimed until measured; subsystem timings and whole-frame timings are distinct.
 
 ### 2026-11-05 — HUD-021: settings controls in sub-tabs and two columns, a bigger panel, legible hover (claude, claude-opus-5-5)
 - Owner: "In the settings, can you put the controls into different tabs inside the controls tab, based on what they're for, similar to the controls website? editor, flight, etc. Also you can make the settings panel much bigger … (and can divide the controls into two columns so there's less scrolling through them). Plus change the cursor hover triggered color of the components in all UI to be more legible", with a screenshot of a pale grey hovered binding row.

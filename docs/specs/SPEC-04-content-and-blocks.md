@@ -1172,6 +1172,18 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
   - Tests: `LargeHullTests` (EditMode 2, PlayMode 1) and `LargeHullPanelTests` 2.
   - The editor and bill-of-materials criterion is covered by the instance being one block (`TryGetBlockAt` and `TryRemoveBlockAt` act on the whole block). It has not been checked in the editor UI.
 
+### DATA-014 — Update imported content membership without rescanning all assets
+- **Milestone:** M4
+- **Tier:** frontier — owner-directed optimization with equivalence evidence
+- **Depends on:** `DATA-008`
+- **Do:** Use the existing database and imported paths for ordinary content edits; retain full scans for deletion, moves, missing database or ambiguous invalid membership. Preserve exact ID/path ordering and subasset membership.
+- **Files:** `Assets/Game/Editor/Content/ContentDatabaseBuilder.cs; ContentDatabasePostprocessor.cs` and focused owning-module tests.
+- **Acceptance criteria:**
+  - [ ] Identical observable behavior and no quality, resolution or physics reductions.
+  - [ ] Paired before/after timings recorded with workload, median/p95 and limitations.
+  - [ ] Focused correctness checks and compile pass.
+- **Tests:** One functional parity test covering imported subassets and ID changes; paired existing-content rebuild timings.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

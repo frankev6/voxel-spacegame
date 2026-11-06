@@ -998,6 +998,18 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
   - [ ] Exit restores flight HUD, context and camera; no editor objects remain.
 - **Tests:** `Assets/Game/Tests/PlayMode/ShipEditor/InWorldEditTests.cs`: `Commit_ReplacesGrid_SameRootAndId`, `Exit_RestoresFlight`, `NoStructuralCallsOutsideVoxel_SourceScan`.
 
+### EDT-027 — Batch draft connectivity removals without repeated relabels
+- **Milestone:** M4
+- **Tier:** frontier — owner-directed optimization with equivalence evidence
+- **Depends on:** `EDT-008`
+- **Do:** Coalesce compatible removal operations within a draft command without changing mixed operation order, damage masks, undo/redo results or disconnected-island selection.
+- **Files:** `Assets/Game/ShipEditor/Services/EditSession.cs; validation internals` and focused owning-module tests.
+- **Acceptance criteria:**
+  - [ ] Identical observable behavior and no quality, resolution or physics reductions.
+  - [ ] Paired before/after timings recorded with workload, median/p95 and limitations.
+  - [ ] Focused correctness checks and compile pass.
+- **Tests:** One differential batched edit/undo/redo regression and comparative large connected-draft edit workload.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

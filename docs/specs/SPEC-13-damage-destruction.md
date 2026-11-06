@@ -1089,6 +1089,18 @@ Internal targets (Burst, safety off, reference machine): point event ≤ 2 µs; 
   - [ ] A planar cut through a 1M-cell station visits ≤ 5,000 nodes.
 - **Tests:** `BrickLabelTests.Labels_MatchReference`, `IntegrityTests.Cut_On1MStation_VisitsFewNodes`.
 
+### DMG-021 — Skip integrity selection scratch work for unchanged grids
+- **Milestone:** M4
+- **Tier:** frontier — owner-directed optimization with equivalence evidence
+- **Depends on:** `DMG-009`
+- **Do:** Preserve all removal ranges, retained seeds, deterministic selection and deferred work while avoiding per-grid scratch allocations when there is no work.
+- **Files:** `Assets/Game/Voxel/Damage/Jobs/SelectIntegrityGridsJob.cs` and focused owning-module tests.
+- **Acceptance criteria:**
+  - [ ] Identical observable behavior and no quality, resolution or physics reductions.
+  - [ ] Paired before/after timings recorded with workload, median/p95 and limitations.
+  - [ ] Focused correctness checks and compile pass.
+- **Tests:** Differential selection checks for idle, removed and retained-seed grids; paired 92-grid and larger production-job measurements.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

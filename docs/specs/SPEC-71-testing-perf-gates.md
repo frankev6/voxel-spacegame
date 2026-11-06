@@ -595,6 +595,18 @@ The game gates it owns are those listed in §5.7.
   - [ ] Full live EditMode, PlayMode and perf runs still pass; direct interrupted-run recovery refuses to clobber an active request.
 - **Tests:** Python unittest cases for competing/released locks, nested ownership, inventory mismatch and inconsistent summaries; live overlap smoke plus full Unity suites.
 
+### TST-010 — Owner-directed performance audit and comparative evidence
+- **Milestone:** M4
+- **Tier:** frontier — cross-system performance investigation and measurement
+- **Depends on:** `TST-001`
+- **Do:** Audit runtime, loading, authoring and developer tools with two Astra light workers and the lead. Record coverage, ranked hypotheses, reproducible baselines and quality invariants; create targeted tasks in owning specs. Seek at least 2x improvement in representative bottleneck workloads and measure integrated impact separately, without implying a microbenchmark is whole-game FPS.
+- **Files:** `docs/performance/2026-11-audit.md`, owning specs, ledger and handoff.
+- **Acceptance criteria:**
+  - [ ] All runtime modules and tool families have recorded audit coverage and actionable findings or bounded exclusions.
+  - [ ] Before/after evidence identifies machine, workload, settings, median/p95 and correctness checks; unavailable measurements remain explicit.
+  - [ ] Visual resolution, geometry, shading, physics fidelity, simulation rate and behavior are preserved.
+- **Tests:** Existing relevant functional suites and focused comparative workloads belonging to implementation tasks; no production quality reductions.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
