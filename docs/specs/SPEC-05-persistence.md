@@ -1041,9 +1041,9 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 - **Do:** Reduce byte-at-a-time Deflate input overhead while retaining exact compressed termination and truncation rejection. Prove parity against the legacy stream on valid, truncated, trailing and mutated payloads; measure real compressed Hollow blueprints.
 - **Files:** `Assets/Game/Voxel/Data/VoxsCodec.cs`, focused codec tests.
 - **Acceptance criteria:**
-  - [ ] Existing wire bytes, decoded cells and corruption rejection remain identical; no new dependency or public API.
-  - [ ] Paired full-decode baseline and optimized median/p95 timings with explicit workload.
-  - [ ] Focused roundtrip, malformed-data, fuzz and compile checks pass.
+  - [x] Existing wire bytes, decoded cells and corruption rejection remain identical; no new dependency or public API.
+  - [x] Paired full-decode baseline and optimized median/p95 timings with explicit workload.
+  - [x] Focused roundtrip, malformed-data, fuzz and compile checks pass.
 - **Tests:** Differential compressed-stream termination corpus and actual blueprint decoding benchmark; existing VOXS codec tests.
 
 ### PERS-021 — Burst exact decoded cell validation and remapping
@@ -1053,9 +1053,9 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
 - **Do:** Execute existing integer cell-reference validation, HP initialization/validation, instance counting and remapping loops synchronously in Burst. Preserve all acceptance rules, error offsets, repairs and ordering. Keep original loops in the legacy differential path.
 - **Files:** `Assets/Game/Voxel/Data/VoxsCodec.cs`, internal bounded cell-loop helper, codec parity tests.
 - **Acceptance criteria:**
-  - [ ] Exact decoded fields, canonical reconstruction bytes and malformed acceptance match the original.
-  - [ ] Focused codec and disposal checks plus compile pass.
-  - [ ] Paired original-versus-optimized full reconstruction timings recorded with unchanged content.
+  - [x] Exact decoded fields, canonical reconstruction bytes and malformed acceptance match the original.
+  - [x] Focused codec and disposal checks plus compile pass.
+  - [x] Paired original-versus-optimized full reconstruction timings recorded with unchanged content.
 - **Tests:** Existing malformed corpus, all shipped Hollow payloads, codec roundtrip/drift/limits, paired largest-asset reconstruction.
 
 ## 10. Open questions

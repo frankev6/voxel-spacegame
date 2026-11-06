@@ -1005,9 +1005,9 @@ Profiler markers: `EditSession.Validate`, `EditSession.Apply`, `EditSession.Undo
 - **Do:** Submit unmirrored box-removal records as one ordered draft command, retaining per-operation connectivity updates and mirrored sequential fallback. Preserve damage masks, undo/redo, symmetry rejection and disconnected-island root ties.
 - **Files:** `Assets/Game/ShipEditor/Tools/{RemoveTool,ToolContext}.cs` and focused owning-module tests.
 - **Acceptance criteria:**
-  - [ ] Identical observable behavior and no quality, resolution or physics reductions.
-  - [ ] Paired before/after timings recorded with workload, median/p95 and limitations.
-  - [ ] Focused correctness checks and compile pass.
+  - [x] Identical observable behavior and no quality, resolution or physics reductions.
+  - [x] Paired before/after timings recorded with workload, median/p95 and limitations.
+  - [x] Focused correctness checks and compile pass.
 - **Tests:** One differential batched edit/undo/redo regression and comparative large connected-draft edit workload.
 
 ## 10. Open questions

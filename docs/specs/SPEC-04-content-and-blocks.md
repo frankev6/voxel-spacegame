@@ -848,6 +848,8 @@ flowchart LR
 2. Sort by ordinal ID (empty IDs last, then by asset path) → if the list differs from `database.Definitions` (reference sequence), call `EditorSetDefinitions`, `EditorUtility.SetDirty`, `AssetDatabase.SaveAssetIfDirty(database)`.
 3. Never react to the postprocess event of `ContentDatabase.asset` itself (prevents loops). If the database asset is missing, create it at `Assets/Game/Content/ContentDatabase.asset`.
 
+DATA-014 preserves this canonical rebuild for explicit commands, the first import after domain reload, moves/deletions and uncertain membership. Subsequent ordinary imports may refresh only the imported paths against an independently snapshotted database membership, then apply the same ordinal ID/path sorting. Subassets are reloaded together; destroyed references or external membership edits force a full rebuild. Deferred play-mode imports retain their paths until returning to EditMode.
+
 `ContentValidatorRunner.Run(out ValidationReport report)` (editor pass, `context.IsEditorPass = true`):
 1. Everything in §5.4 and every `Validate` override.
 2. `DATA-E011`: any `ContentDefinition` asset outside `Assets/Game/Content/` (search whole `Assets/`).
@@ -1179,9 +1181,9 @@ These are boot/editor costs; no per-frame cost exists. Enter Play Mode gate (≤
 - **Do:** Use the existing database and imported paths for ordinary content edits; retain full scans for deletion, moves, missing database or ambiguous invalid membership. Preserve exact ID/path ordering and subasset membership.
 - **Files:** `Assets/Game/Editor/Content/ContentDatabaseBuilder.cs; ContentDatabasePostprocessor.cs` and focused owning-module tests.
 - **Acceptance criteria:**
-  - [ ] Identical observable behavior and no quality, resolution or physics reductions.
-  - [ ] Paired before/after timings recorded with workload, median/p95 and limitations.
-  - [ ] Focused correctness checks and compile pass.
+  - [x] Identical observable behavior and no quality, resolution or physics reductions.
+  - [x] Paired before/after timings recorded with workload, median/p95 and limitations.
+  - [x] Focused correctness checks and compile pass.
 - **Tests:** One functional parity test covering imported subassets and ID changes; paired existing-content rebuild timings.
 
 ## 10. Open questions

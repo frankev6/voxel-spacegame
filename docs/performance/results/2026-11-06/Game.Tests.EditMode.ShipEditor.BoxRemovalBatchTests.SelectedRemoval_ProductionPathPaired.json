@@ -1,0 +1,13 @@
+{
+  "test": "Game.Tests.EditMode.ShipEditor.BoxRemovalBatchTests.SelectedRemoval_ProductionPathPaired",
+  "gate": null,
+  "utc": "2026-11-06T05:24:53Z",
+  "machine": "Mac17,8 / Apple M5 Pro",
+  "unity": "6000.6.5f1",
+  "stats": [
+    { "name": "SequentialRemovalMs", "unit": "ms", "median": 0.5542, "p95": 1.3598000000000001, "max": 6.5922, "mean": 0.785711, "samples": 300 },
+    { "name": "BatchedRemovalMs", "unit": "ms", "median": 0.30555, "p95": 0.5193, "max": 8.0301000000000009, "mean": 0.39605966666666653, "samples": 300 }
+  ],
+  "budget": { "median": null, "p95": null },
+  "pass": true
+}

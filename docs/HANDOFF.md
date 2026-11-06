@@ -31,6 +31,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-11-06)
 
+- **Latest: owner-directed performance round completed locally.** Lead + two Astra light workers audited runtime/loading/authoring/tooling. Largest Hollow blueprint reconstruction is **3.16x faster** (19.75 → 6.24 ms median), catalog refresh 2.04x, integrity selection 5.81–10.90x, box removal 1.81x. Quality and physics settings unchanged. Combined 52 tests and final overlapping 32 codec tests pass; compile clean. [Audit, evidence and limitations](performance/2026-11-audit.md). No claim of doubled whole-game FPS; no push.
+
 - **Last game work: 2026-11-04/05, by Daniel, the second developer** (pushed to `origin/main`):
   - the control sheet (DEV-029) and its Flight configs panel (DEV-030);
   - experimental 3D flight (FLT-016, ADR-0123; DEV-031 `flight3d`) and the `freeaim` camera (CAM-013);
@@ -58,6 +60,8 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Uncommitted on purpose:** the URP global settings asset that Unity rewrites on open.
 
 ## 3. Next
+
+Performance follow-ups are ranked in the [audit](performance/2026-11-audit.md). Further runtime tuning needs a focused integrated capture (render/presentation waits and sampler overhead); codec has used two initial passes. Continue the gameplay priorities below unless Frank directs more optimization.
 
 1. Show Frank where the slice stands, then build exploration slice phase 2: "?" contacts and the loud ping. Phases 3–7 follow in order ([exploration-slice.md](design/exploration/exploration-slice.md)), each proven by a playground scenario before the next.
 2. Fix the save-load error above.

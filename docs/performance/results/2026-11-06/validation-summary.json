@@ -1,0 +1,581 @@
+{
+  "finalProductionCommit": "47b95568",
+  "compile": {
+    "command": "tools/compile.sh",
+    "result": "COMPILE OK",
+    "log": "Logs/tools/compile.log",
+    "sha256": "5aed84625b905f00ad6125df0f035f0ff130d684dfd8d98590444dd8036fa2aa"
+  },
+  "runs": [
+    {
+      "source": "Logs/perf-round/combined-functional.xml",
+      "sha256": "320306924a170b8cc736851ec1b90cb0ae9ea186d422264965bf5fa1501870a2",
+      "result": {
+        "id": "2",
+        "testcasecount": "52",
+        "result": "Passed",
+        "total": "52",
+        "passed": "52",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-11-06 05:48:53Z",
+        "end-time": "2026-11-06 05:49:31Z",
+        "duration": "38.2542023"
+      },
+      "tests": [
+        {
+          "name": "Game.Tests.EditMode.Editor.Content.ContentImportPerformanceTests.ImportedDefinitions_SubassetsAndIdChanges_MatchFullScan",
+          "result": "Passed",
+          "duration": "0.813185"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.Box_Solid_Hollow_Frame_Counts",
+          "result": "Passed",
+          "duration": "0.095204"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.Box_WheelHeight",
+          "result": "Passed",
+          "duration": "0.002499"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.Fill_Enclosed_FillsRegion",
+          "result": "Passed",
+          "duration": "0.006738"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.Fill_Open_Aborts",
+          "result": "Passed",
+          "duration": "0.002098"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.Fill_TooLarge_Aborts",
+          "result": "Passed",
+          "duration": "0.001844"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.Line_DominantAxis",
+          "result": "Passed",
+          "duration": "0.006961"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.AreaToolsTests.MultiCell_Rejected",
+          "result": "Passed",
+          "duration": "0.001684"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.CancelChain_Order",
+          "result": "Passed",
+          "duration": "0.003414"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.Eyedropper_CopiesTypeOrientColor",
+          "result": "Passed",
+          "duration": "0.002698"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.Paint_KeepsDamage",
+          "result": "Passed",
+          "duration": "0.003733"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.PlaceHeldStill_PlacesOneBlock",
+          "result": "Passed",
+          "duration": "0.002960"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.PlaceStroke_OneUndoStep",
+          "result": "Passed",
+          "duration": "0.002815"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.PointerBlocked_NoEdit",
+          "result": "Passed",
+          "duration": "0.001329"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.RemoveHeldStill_RemovesOnlyTheFirstLayer",
+          "result": "Passed",
+          "duration": "0.002769"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.Rotate_SkipsDisallowed",
+          "result": "Passed",
+          "duration": "0.001428"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BasicToolsTests.SecondaryClick_RemovesWithSymmetry",
+          "result": "Passed",
+          "duration": "0.002168"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BoxRemovalBatchTests.SelectedRemoval_MatchesSequentialRootsDamageAndUndo(False)",
+          "result": "Passed",
+          "duration": "0.007133"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BoxRemovalBatchTests.SelectedRemoval_MatchesSequentialRootsDamageAndUndo(True)",
+          "result": "Passed",
+          "duration": "0.003628"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegrityReviewTests.FormerSizeCap_DoesNotBlockHybridTraversal",
+          "result": "Passed",
+          "duration": "0.173134"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegrityReviewTests.StationBreakaway_MasksMatchPreviousSlotScan",
+          "result": "Passed",
+          "duration": "0.062318"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegritySelectionTests.Selection_MatchesLegacy_WithIdleDirtyAndRetainedSeeds",
+          "result": "Passed",
+          "duration": "0.013252"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.DenseBrickIngestionTests.DenseIngestion_MatchesLegacyAcrossStorageTransitions(True)",
+          "result": "Passed",
+          "duration": "1.273955"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.DenseBrickIngestionTests.DenseIngestion_MatchesLegacyAcrossStorageTransitions(False)",
+          "result": "Passed",
+          "duration": "1.899422"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.CellIndex_MatchesLocalIndex",
+          "result": "Passed",
+          "duration": "0.005048"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.Decode_EqualsOriginal",
+          "result": "Passed",
+          "duration": "0.386992"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.Encode_OnWorker_EqualsMainThread",
+          "result": "Passed",
+          "duration": "0.010153"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.PartialAndTruncatedPayloads_AreRejected",
+          "result": "Passed",
+          "duration": "0.065991"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.RoundTrip_ByteIdentical",
+          "result": "Passed",
+          "duration": "0.842113"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.Tombstones_PreserveIndicesAndAreReusable",
+          "result": "Passed",
+          "duration": "0.003063"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.UnknownId_MapsToMissing",
+          "result": "Passed",
+          "duration": "0.004723"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.Dispose_NoLeaks",
+          "result": "Passed",
+          "duration": "0.000815"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.EmptyBrick_IsRemovedAndPageReused",
+          "result": "Passed",
+          "duration": "0.001015"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.Pinned_MutatorsThrow",
+          "result": "Passed",
+          "duration": "0.000888"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.ReadOnly_MutatorsReject",
+          "result": "Passed",
+          "duration": "0.000328"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.SetGet_FuzzMatchesDictionary",
+          "result": "Passed",
+          "duration": "0.795053"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.SortedOrder_IsZYX",
+          "result": "Passed",
+          "duration": "0.000757"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.Uniform_RoundTripAndDensify",
+          "result": "Passed",
+          "duration": "0.016785"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.BufferedInput_MatchesLegacyForTruncationTrailingAndMutationCorpus",
+          "result": "Passed",
+          "duration": "0.078795"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.HollowLargest_StorageProducesIdenticalCanonicalBytes",
+          "result": "Passed",
+          "duration": "0.148130"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.ShippedHollow_AllDecodedFieldsMatchLegacy",
+          "result": "Passed",
+          "duration": "1.361733"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.BrickOrder_PicksShortest",
+          "result": "Passed",
+          "duration": "0.002656"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.BurstDisabled_IdenticalBytesAndNoLeaks",
+          "result": "Passed",
+          "duration": "1.007802"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Decode_EqualsSource",
+          "result": "Passed",
+          "duration": "0.370099"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Deflate_RoundTrip",
+          "result": "Passed",
+          "duration": "0.191214"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Drift_D2_D3_Compaction",
+          "result": "Passed",
+          "duration": "0.002556"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Drift_FullPalette_UsesDeterministicFallback",
+          "result": "Passed",
+          "duration": "0.008488"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Encode_InvalidSource_Rejects",
+          "result": "Passed",
+          "duration": "0.000941"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Limits_RejectMalformed",
+          "result": "Passed",
+          "duration": "0.004299"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.RoundTrip_EdgeStructures",
+          "result": "Passed",
+          "duration": "0.161124"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.RoundTrip_RandomStructures",
+          "result": "Passed",
+          "duration": "27.889194"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.UnknownBlock_BecomesMissing",
+          "result": "Passed",
+          "duration": "0.001620"
+        }
+      ]
+    },
+    {
+      "source": "Logs/perf-round/codec-final-functional.xml",
+      "sha256": "f162c7f3dc3f80b4213a82034c202490ba3f8aae7559962aa9f5b731224f6fc3",
+      "result": {
+        "id": "2",
+        "testcasecount": "32",
+        "result": "Passed",
+        "total": "32",
+        "passed": "32",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-11-06 05:50:32Z",
+        "end-time": "2026-11-06 05:51:41Z",
+        "duration": "69.8932953"
+      },
+      "tests": [
+        {
+          "name": "Game.Tests.EditMode.Voxel.DenseBrickIngestionTests.DenseIngestion_MatchesLegacyAcrossStorageTransitions(True)",
+          "result": "Passed",
+          "duration": "28.389728"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.DenseBrickIngestionTests.DenseIngestion_MatchesLegacyAcrossStorageTransitions(False)",
+          "result": "Passed",
+          "duration": "5.554349"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.CellIndex_MatchesLocalIndex",
+          "result": "Passed",
+          "duration": "0.037410"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.Decode_EqualsOriginal",
+          "result": "Passed",
+          "duration": "0.441911"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.Encode_OnWorker_EqualsMainThread",
+          "result": "Passed",
+          "duration": "0.074419"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.PartialAndTruncatedPayloads_AreRejected",
+          "result": "Passed",
+          "duration": "0.049584"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.RoundTrip_ByteIdentical",
+          "result": "Passed",
+          "duration": "0.851208"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.Tombstones_PreserveIndicesAndAreReusable",
+          "result": "Passed",
+          "duration": "0.002900"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelCodecTests.UnknownId_MapsToMissing",
+          "result": "Passed",
+          "duration": "0.006473"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.Dispose_NoLeaks",
+          "result": "Passed",
+          "duration": "0.001096"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.EmptyBrick_IsRemovedAndPageReused",
+          "result": "Passed",
+          "duration": "0.001647"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.Pinned_MutatorsThrow",
+          "result": "Passed",
+          "duration": "0.001039"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.ReadOnly_MutatorsReject",
+          "result": "Passed",
+          "duration": "0.000348"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.SetGet_FuzzMatchesDictionary",
+          "result": "Passed",
+          "duration": "0.827773"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.SortedOrder_IsZYX",
+          "result": "Passed",
+          "duration": "0.000703"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxelStructureStorageTests.Uniform_RoundTripAndDensify",
+          "result": "Passed",
+          "duration": "0.021282"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.BufferedInput_MatchesLegacyForTruncationTrailingAndMutationCorpus",
+          "result": "Passed",
+          "duration": "0.079463"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.HollowLargest_StorageProducesIdenticalCanonicalBytes",
+          "result": "Passed",
+          "duration": "0.276929"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.ShippedHollow_AllDecodedFieldsMatchLegacy",
+          "result": "Passed",
+          "duration": "1.227676"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCellLoopTests.CellLoops_MatchManagedAtValidationBoundaries(True)",
+          "result": "Passed",
+          "duration": "0.048539"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCellLoopTests.CellLoops_MatchManagedAtValidationBoundaries(False)",
+          "result": "Passed",
+          "duration": "1.376258"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.BrickOrder_PicksShortest",
+          "result": "Passed",
+          "duration": "0.002863"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.BurstDisabled_IdenticalBytesAndNoLeaks",
+          "result": "Passed",
+          "duration": "1.954254"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Decode_EqualsSource",
+          "result": "Passed",
+          "duration": "0.397660"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Deflate_RoundTrip",
+          "result": "Passed",
+          "duration": "0.176825"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Drift_D2_D3_Compaction",
+          "result": "Passed",
+          "duration": "0.002490"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Drift_FullPalette_UsesDeterministicFallback",
+          "result": "Passed",
+          "duration": "0.008567"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Encode_InvalidSource_Rejects",
+          "result": "Passed",
+          "duration": "0.000920"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.Limits_RejectMalformed",
+          "result": "Passed",
+          "duration": "0.004190"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.RoundTrip_EdgeStructures",
+          "result": "Passed",
+          "duration": "0.152931"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.RoundTrip_RandomStructures",
+          "result": "Passed",
+          "duration": "27.572732"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsCodecTests.UnknownBlock_BecomesMissing",
+          "result": "Passed",
+          "duration": "0.001901"
+        }
+      ]
+    },
+    {
+      "source": "Logs/perf-round/first-performance.xml",
+      "sha256": "620a70f4273fe143ac7076307bfd414f2bb112adb52ca3e9538bddafccb87136",
+      "result": {
+        "id": "2",
+        "testcasecount": "6",
+        "result": "Passed",
+        "total": "6",
+        "passed": "6",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-11-06 05:24:31Z",
+        "end-time": "2026-11-06 05:25:23Z",
+        "duration": "51.9097847"
+      },
+      "tests": [
+        {
+          "name": "Game.Tests.EditMode.Editor.Content.ContentImportPerformanceTests.ExistingContentImport_ComparedWithFullScan",
+          "result": "Passed",
+          "duration": "2.997989"
+        },
+        {
+          "name": "Game.Tests.EditMode.ShipEditor.BoxRemovalBatchTests.SelectedRemoval_ProductionPathPaired",
+          "result": "Passed",
+          "duration": "47.930761"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegritySelectionTests.Selection_PairedBaseline(92,False)",
+          "result": "Passed",
+          "duration": "0.281129"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegritySelectionTests.Selection_PairedBaseline(1000,False)",
+          "result": "Passed",
+          "duration": "0.212034"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegritySelectionTests.Selection_PairedBaseline(92,True)",
+          "result": "Passed",
+          "duration": "0.094265"
+        },
+        {
+          "name": "Game.Tests.EditMode.Voxel.Damage.IntegritySelectionTests.Selection_PairedBaseline(1000,True)",
+          "result": "Passed",
+          "duration": "0.220105"
+        }
+      ]
+    },
+    {
+      "source": "Logs/perf-round/codec-final-performance.xml",
+      "sha256": "e5568d8befbab217fe0a9cc814b36857ed4be800f5529427526247b29a5e103e",
+      "result": {
+        "id": "2",
+        "testcasecount": "1",
+        "result": "Passed",
+        "total": "1",
+        "passed": "1",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-11-06 05:52:42Z",
+        "end-time": "2026-11-06 05:55:08Z",
+        "duration": "145.4015792"
+      },
+      "tests": [
+        {
+          "name": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.HollowLargest_FullStructureDecodePaired",
+          "result": "Passed",
+          "duration": "145.219195"
+        }
+      ]
+    },
+    {
+      "source": "Logs/perf-round/hollow-interactive.xml",
+      "sha256": "8ee35b46895ed42aa8565fc61a82c78cdef08128626b65535983f8dc3246563a",
+      "result": {
+        "id": "2",
+        "testcasecount": "1",
+        "result": "Passed",
+        "total": "1",
+        "passed": "1",
+        "failed": "0",
+        "inconclusive": "0",
+        "skipped": "0",
+        "asserts": "0",
+        "engine-version": "3.5.0.0",
+        "clr-version": "4.0.30319.42000",
+        "start-time": "2026-11-06 05:40:55Z",
+        "end-time": "2026-11-06 05:41:07Z",
+        "duration": "11.9266981"
+      },
+      "tests": [
+        {
+          "name": "Game.Tests.PlayMode.App.HollowIntegratedPerfTests.Hollow_ProductionSettings_PassiveCapture",
+          "result": "Passed",
+          "duration": "11.876863"
+        }
+      ]
+    }
+  ]
+}

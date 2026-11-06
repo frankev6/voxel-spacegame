@@ -1,0 +1,13 @@
+{
+  "test": "Game.Tests.EditMode.Voxel.Damage.IntegritySelectionTests.Selection_PairedBaseline(1000,True)",
+  "gate": null,
+  "utc": "2026-11-06T05:25:23Z",
+  "machine": "Mac17,8 / Apple M5 Pro",
+  "unity": "6000.6.5f1",
+  "stats": [
+    { "name": "LegacySelection", "unit": "ms", "median": 0.43425, "p95": 0.4771, "max": 5.2083, "mean": 0.46341300000000019, "samples": 300 },
+    { "name": "ProductionSelection", "unit": "ms", "median": 0.0426, "p95": 0.0457, "max": 0.1733, "mean": 0.043735999999999962, "samples": 300 }
+  ],
+  "budget": { "median": null, "p95": null },
+  "pass": true
+}

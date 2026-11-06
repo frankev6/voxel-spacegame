@@ -1,0 +1,1791 @@
+utc=2026-11-06T05:40:59.5595390Z
+screen=1920x1080; camera=1920x1080; pipeline=PC_RPAsset; MSAA=4; renderScale=1; shadowDistance=250
+quality=0; vsync=1; targetFrameRate=-1; graphics=Metal; device=Apple M5 Pro
+cameraPosition=(-37.68, 20.67, -61.46); cameraRotation=(0.06714, 0.27089, -0.01894, 0.96008); FOV=50; hdr=True; msaaAllowed=True; postProcessing=True
+referencePerfSettings=False; Burst safety checks are on; the job debugger is on; leak detection is Enabled
+before={"mainMs":24.052902666666668,"draws":1310,"triangles":2284643,"gcAllocBytes":10049,"systemMemoryBytes":3427947032,"entities":11582,"worldAvailable":true,"voxel":{"ships":15,"stations":140,"asteroids":44,"hulkGrids":5,"bricks":8110,"solidCells":3314251,"dirtyBricks":0,"meshDirty":0,"colliderDirty":0,"chunkBodies":0,"hulks":5},"combat":{"projectiles":0,"activeBeams":0,"fx":{"drained":0,"culled":0,"budgetDropped":0,"debrisLiveEstimate":0,"bound":true},"audio":{"drained":0,"started":0,"activeSfxVoices":0,"activeLoopVoices":0,"bound":true}}}
+marker=Main Thread
+marker=PlayerLoop
+marker=Physics2D.GenerateBoxTilingShape
+marker=Physics2D.GenerateTilingArea
+marker=Physics2D.PrepareTilingSegment
+marker=Physics.StoreInterpolationPoses
+marker=Physics.SendJointBreakEvents
+marker=Physics.SendContactEvents
+marker=Physics.TriggerStayCacheMaintenanceJob
+marker=Physics.SendTriggerEvents
+marker=Physics.SendEvents
+marker=Physics.ClearSceneBuffers
+marker=Rigidbody.SetKinematic [Re-create non-convex MeshCollider for Rigidbody]
+marker=Physics.SyncRigidbodyTransformBatchJob
+marker=Physics.SyncColliderTransformBatchJob
+marker=Physics.WriteRigidbodyPoses
+marker=Physics.WriteColliderPoses
+marker=Physics.CalculateChangedColliderTransforms
+marker=Physics.CalculateChangedBodyTransforms
+marker=Physics.CreateHeightField
+marker=Physics.BakeScaleIntoVertexData
+marker=Profiler.CollectPhysicsStats
+marker=Physics.SyncBatchQueries
+marker=Physics.HandleArticulationHierarchyChanges
+marker=Physics.HandleBodyHierarchyChanges
+marker=Physics.HandleColliderHierarchyChanges
+marker=Physics.ReadTransforms
+marker=Physics.SyncTransforms
+marker=Physics.PublishResultsStage
+marker=Physics.RunSimulationStage
+marker=Physics.PrepareSimulationStage
+marker=Physics.UpdateVehicles
+marker=Physics.UpdateArticulations
+marker=Physics.UpdateRigidbodies
+marker=Physics.Simulate
+marker=Physics.InterpolationSorting
+marker=Physics.Interpolation
+marker=Physics.FetchResults
+marker=Physics.RecreateDefaultSceneOnExitPlaymode
+marker=Physics.RecreateDefaultPhysicsSceneOnSceneLoad
+marker=Physics.BoxCastNonAlloc
+marker=Physics.CapsuleCastNonAlloc
+marker=Physics.RaycastNonAlloc
+marker=Physics.OverlapBoxNonAlloc
+marker=Physics.OverlapCapsuleNonAlloc
+marker=Physics.OverlapSphereNonAlloc
+marker=Physics.OverlapBoxUserCollect
+marker=Physics.OverlapBox
+marker=Physics.BoxCastAll
+marker=Physics.BoxCast
+marker=Physics.CheckBox
+marker=Physics.CapsuleCastAll
+marker=Physics.CapsuleCast
+marker=Physics.SphereCastNonAlloc
+marker=Physics.SphereCastAll
+marker=Physics.SphereCast
+marker=Physics.CheckSphere
+marker=Physics.OverlapCapsule
+marker=Physics.OverlapSphere
+marker=Physics.CheckCapsule
+marker=Physics.RaycastAll
+marker=Physics.Raycast
+marker=PhysicsCore2D.DrawWorld.CompileDrawResults
+marker=PhysicsCore2D.DrawWorld.UpdateLifetimes
+marker=PhysicsCore2D.DrawWorld
+marker=PhysicsCore2D.PhysicsWorld.PostSimulate
+marker=PhysicsCore2D.PhysicsWorld.PreSimulate
+marker=PhysicsCore2D.PhysicsWorld.AutoJointThresholdCallbacks
+marker=PhysicsCore2D.PhysicsWorld.AutoTriggerCallbacks
+marker=PhysicsCore2D.PhysicsWorld.AutoContactCallbacks
+marker=PhysicsCore2D.PhysicsWorld.AutoBodyUpdateCallbacks
+marker=PhysicsCore2D.PhysicsShape.PreSolveCallback
+marker=PhysicsCore2D.PhysicsShape.FilterContactCallback
+marker=PhysicsCore2D.PhysicsWorld.WriteTransformTweensSync
+marker=PhysicsCore2D.PhysicsWorld.WriteTransformTweens
+marker=PhysicsCore2D.PhysicsWorld.WriteTransforms.SetTransformAccessArray
+marker=PhysicsCore2D.PhysicsWorld.WriteTransforms.SortTransformWriteTeens
+marker=PhysicsCore2D.PhysicsWorld.WriteTransforms.CalculateWorldTransformWrite
+marker=PhysicsCore2D.PhysicsWorld.WriteTransforms
+marker=PhysicsCore2D.PhysicsWorld.FinishTask
+marker=PhysicsCore2D.PhysicsWorld.QueueTask
+marker=PhysicsCore2D.PhysicsSpace.CastShape
+marker=PhysicsCore2D.PhysicsSpace.CastRay
+marker=PhysicsCore2D.PhysicsSpace.OverlapAABB
+marker=PhysicsCore2D.PhysicsSpace.GetProxyUserHandle
+marker=PhysicsCore2D.PhysicsSpace.SetProxyUserHandle
+marker=PhysicsCore2D.PhysicsSpace.GetProxyCategories
+marker=PhysicsCore2D.PhysicsSpace.SetProxyCategories
+marker=PhysicsCore2D.PhysicsSpace.GetProxyAABB
+marker=PhysicsCore2D.PhysicsSpace.SetProxyAABB
+marker=PhysicsCore2D.PhysicsSpace.ClearProxies
+marker=PhysicsCore2D.PhysicsSpace.DestroyProxy
+marker=PhysicsCore2D.PhysicsSpace.CreateProxy
+marker=PhysicsCore2D.PhysicsSpace.Clone
+marker=PhysicsCore2D.PhysicsSpace.GetSpaces
+marker=PhysicsCore2D.PhysicsSpace.DestroyAll
+marker=PhysicsCore2D.PhysicsSpace.Destroy
+marker=PhysicsCore2D.PhysicsSpace.Create
+marker=PhysicsCore2D.PhysicsDestructor.Slice
+marker=PhysicsCore2D.PhysicsDestructor.FragmentMasked
+marker=PhysicsCore2D.PhysicsDestructor.Fragment
+marker=PhysicsCore2D.PhysicsWheelJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsWheelJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsWheelJoint.Create
+marker=PhysicsCore2D.PhysicsFixedJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsFixedJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsFixedJoint.Create
+marker=PhysicsCore2D.PhysicsHingeJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsHingeJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsHingeJoint.Create
+marker=PhysicsCore2D.PhysicsSliderJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsSliderJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsSliderJoint.Create
+marker=PhysicsCore2D.PhysicsIgnoreJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsIgnoreJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsIgnoreJoint.Create
+marker=PhysicsCore2D.PhysicsRelativeJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsRelativeJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsRelativeJoint.Create
+marker=PhysicsCore2D.PhysicsDistanceJoint.ReadDefinition
+marker=PhysicsCore2D.PhysicsDistanceJoint.WriteDefinition
+marker=PhysicsCore2D.PhysicsDistanceJoint.Create
+marker=PhysicsCore2D.PhysicsJoint.ownerUserData
+marker=PhysicsCore2D.PhysicsJoint.userData
+marker=PhysicsCore2D.PhysicsJoint.Draw
+marker=PhysicsCore2D.PhysicsJoint.DestroyBatch
+marker=PhysicsCore2D.PhysicsJoint.Destroy
+marker=PhysicsCore2D.PhysicsChain.ownerUserData
+marker=PhysicsCore2D.PhysicsChain.userData
+marker=PhysicsCore2D.PhysicsChain.UpdateVertices
+marker=PhysicsCore2D.PhysicsChain.Destroy
+marker=PhysicsCore2D.PhysicsChain.Create
+marker=PhysicsCore2D.PhysicsShape.ownerUserData
+marker=PhysicsCore2D.PhysicsShape.userData
+marker=PhysicsCore2D.PhysicsShape.Draw
+marker=PhysicsCore2D.PhysicsShape.GetTriggerVisitors
+marker=PhysicsCore2D.PhysicsShape.GetContacts
+marker=PhysicsCore2D.PhysicsShape.SetChainSegmentGeometry
+marker=PhysicsCore2D.PhysicsShape.SetSegmentGeometry
+marker=PhysicsCore2D.PhysicsShape.SetPolygonGeometry
+marker=PhysicsCore2D.PhysicsShape.SetCapsuleGeometry
+marker=PhysicsCore2D.PhysicsShape.SetCircleGeometry
+marker=PhysicsCore2D.PhysicsShape.CastShape
+marker=PhysicsCore2D.PhysicsShape.CastRay
+marker=PhysicsCore2D.PhysicsShape.ClosestPoint
+marker=PhysicsCore2D.PhysicsShape.OverlapPoint
+marker=PhysicsCore2D.PhysicsShape.SetContactFilter
+marker=PhysicsCore2D.PhysicsShape.SetDensity
+marker=PhysicsCore2D.PhysicsShape.ReadDefinition
+marker=PhysicsCore2D.PhysicsShape.WriteDefinition
+marker=PhysicsCore2D.PhysicsShape.ApplyWind
+marker=PhysicsCore2D.PhysicsShape.ApplyBuoyancy
+marker=PhysicsCore2D.PhysicsShape.DestroyBatch
+marker=PhysicsCore2D.PhysicsShape.Destroy
+marker=PhysicsCore2D.PhysicsShape.CreateShapeBatch
+marker=PhysicsCore2D.PhysicsShape.CreateChainSegment
+marker=PhysicsCore2D.PhysicsShape.CreateSegment
+marker=PhysicsCore2D.PhysicsShape.CreatePolygon
+marker=PhysicsCore2D.PhysicsShape.CreateCapsule
+marker=PhysicsCore2D.PhysicsShape.CreateCircle
+marker=PhysicsCore2D.ChainSegmentGeometry.CreateSegments
+marker=PhysicsCore2D.PolygonGeometry.CreatePolygons
+marker=PhysicsCore2D.PolygonGeometry.Create
+marker=PhysicsCore2D.PolygonGeometry.CreateBox
+marker=PhysicsCore2D.PhysicsBody.transformWriteMode
+marker=PhysicsCore2D.PhysicsBody.transformObject
+marker=PhysicsCore2D.PhysicsBody.ownerUserData
+marker=PhysicsCore2D.PhysicsBody.userData
+marker=PhysicsCore2D.PhysicsBody.Draw
+marker=PhysicsCore2D.PhysicsBody.GetContacts
+marker=PhysicsCore2D.PhysicsBody.GetJoints
+marker=PhysicsCore2D.PhysicsBody.GetShapes
+marker=PhysicsCore2D.PhysicsBody.SetHitEvents
+marker=PhysicsCore2D.PhysicsBody.SetContactEvents
+marker=PhysicsCore2D.PhysicsBody.SetFastCollisionsAllowed
+marker=PhysicsCore2D.PhysicsBody.SetFastRotationAllowed
+marker=PhysicsCore2D.PhysicsBody.SetEnabled
+marker=PhysicsCore2D.PhysicsBody.SetAwake
+marker=PhysicsCore2D.PhysicsBody.ApplyMassFromShapes
+marker=PhysicsCore2D.PhysicsBody.SetMassConfiguration
+marker=PhysicsCore2D.PhysicsBody.ApplyWindOverlap
+marker=PhysicsCore2D.PhysicsBody.ApplyWind
+marker=PhysicsCore2D.PhysicsBody.ApplyBuoyancyOverlap
+marker=PhysicsCore2D.PhysicsBody.ApplyBuoyancy
+marker=PhysicsCore2D.PhysicsBody.ApplyAngularImpulse
+marker=PhysicsCore2D.PhysicsBody.ApplyLinearImpulseToCenter
+marker=PhysicsCore2D.PhysicsBody.ApplyLinearImpulse
+marker=PhysicsCore2D.PhysicsBody.ApplyTorque
+marker=PhysicsCore2D.PhysicsBody.ApplyForceToCenter
+marker=PhysicsCore2D.PhysicsBody.ApplyForce
+marker=PhysicsCore2D.PhysicsBody.SetAngularVelocity
+marker=PhysicsCore2D.PhysicsBody.SetLinearVelocity
+marker=PhysicsCore2D.PhysicsBody.SetTransformTarget
+marker=PhysicsCore2D.PhysicsBody.SetTransform
+marker=PhysicsCore2D.PhysicsBody.SetRotation
+marker=PhysicsCore2D.PhysicsBody.SetPosition
+marker=PhysicsCore2D.PhysicsBody.SetBodyType
+marker=PhysicsCore2D.PhysicsBody.ReadDefinition
+marker=PhysicsCore2D.PhysicsBody.WriteDefinition
+marker=PhysicsCore2D.PhysicsBody.GetBatchVelocity,
+marker=PhysicsCore2D.PhysicsBody.GetBatchTransform,
+marker=PhysicsCore2D.PhysicsBody.SetBatchTransform,
+marker=PhysicsCore2D.PhysicsBody.SetBatchImpulse
+marker=PhysicsCore2D.PhysicsBody.SetBatchForce
+marker=PhysicsCore2D.PhysicsBody.SetBatchVelocity
+marker=PhysicsCore2D.PhysicsBody.DestroyBatch
+marker=PhysicsCore2D.PhysicsBody.Destroy
+marker=PhysicsCore2D.PhysicsBody.CreateBatch
+marker=PhysicsCore2D.PhysicsBody.Create
+marker=PhysicsCore2D.PhysicsWorld.DrawTransformAxis
+marker=PhysicsCore2D.PhysicsWorld.DrawLineStrip
+marker=PhysicsCore2D.PhysicsWorld.DrawLine
+marker=PhysicsCore2D.PhysicsWorld.DrawPoint
+marker=PhysicsCore2D.PhysicsWorld.DrawCapsule
+marker=PhysicsCore2D.PhysicsWorld.DrawCircle
+marker=PhysicsCore2D.PhysicsWorld.DrawBox
+marker=PhysicsCore2D.PhysicsWorld.DrawShapeProxy
+marker=PhysicsCore2D.PhysicsWorld.DrawQueryWorldCastResult
+marker=PhysicsCore2D.PhysicsWorld.DrawQueryCastResult
+marker=PhysicsCore2D.PhysicsWorld.DrawQueryShapeProxy
+marker=PhysicsCore2D.PhysicsWorld.DrawQueryCastRay
+marker=PhysicsCore2D.PhysicsWorld.DrawSegmentGeometry
+marker=PhysicsCore2D.PhysicsWorld.DrawPolygonGeometry
+marker=PhysicsCore2D.PhysicsWorld.DrawCapsuleGeometry
+marker=PhysicsCore2D.PhysicsWorld.DrawCircleGeometry
+marker=PhysicsCore2D.PhysicsWorld.CastMover
+marker=PhysicsCore2D.PhysicsWorld.CastShapeProxy
+marker=PhysicsCore2D.PhysicsWorld.CastShape
+marker=PhysicsCore2D.PhysicsWorld.CastRay
+marker=PhysicsCore2D.PhysicsWorld.OverlapChainSegmentGeometry
+marker=PhysicsCore2D.PhysicsWorld.OverlapSegmentGeometry
+marker=PhysicsCore2D.PhysicsWorld.OverlapPolygonGeometry
+marker=PhysicsCore2D.PhysicsWorld.OverlapCapsuleGeometry
+marker=PhysicsCore2D.PhysicsWorld.OverlapCircleGeometry
+marker=PhysicsCore2D.PhysicsWorld.OverlapPoint
+marker=PhysicsCore2D.PhysicsWorld.OverlapShapeProxy
+marker=PhysicsCore2D.PhysicsWorld.OverlapShape
+marker=PhysicsCore2D.PhysicsWorld.OverlapAABB
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapChainSegmentGeometry
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapSegmentGeometry
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapPolygonGeometry
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapCapsuleGeometry
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapCircleGeometry
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapPoint
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapShapeProxy
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapShape
+marker=PhysicsCore2D.PhysicsWorld.TestOverlapAABB
+marker=PhysicsCore2D.PhysicsWorld.Explode
+marker=PhysicsCore2D.PhysicsWorld.GetJointThresholdCallbackTargets
+marker=PhysicsCore2D.PhysicsWorld.GetContactCallbackTargets
+marker=PhysicsCore2D.PhysicsWorld.GetTriggerCallbackTargets
+marker=PhysicsCore2D.PhysicsWorld.GetBodyUpdateCallbackTargets
+marker=PhysicsCore2D.PhysicsWorld.GetBodyUpdateUserData
+marker=PhysicsCore2D.PhysicsWorld.SetTransformAccess
+marker=PhysicsCore2D.PhysicsWorld.SetTransform
+marker=PhysicsCore2D.PhysicsWorld.SetTransformWriteTweens
+marker=PhysicsCore2D.PhysicsWorld.SyncInterpolation
+marker=PhysicsCore2D.PhysicsWorld.ProcessTransformWriteTweens
+marker=PhysicsCore2D.PhysicsWorld.Simulate.StepWorlds
+marker=PhysicsCore2D.PhysicsWorld.SimulateBatch
+marker=PhysicsCore2D.PhysicsWorld.Simulate
+marker=PhysicsCore2D.PhysicsWorld.ReadDefinition
+marker=PhysicsCore2D.PhysicsWorld.WriteDefinition
+marker=PhysicsCore2D.PhysicsWorld.Destroy
+marker=PhysicsCore2D.PhysicsWorld.Create
+marker=PhysicsCore2D.TransformParentHierarchyChanged
+marker=PhysicsCore2D.TransformChanged
+marker=PhysicsCore2D.PhysicsComposer.Tessellation.ConstructPolygons
+marker=PhysicsCore2D.PhysicsComposer.Tessellation
+marker=PhysicsCore2D.PhysicsComposer.TessellationPaths
+marker=PhysicsCore2D.PhysicsComposer.CreateGeometryPaths
+marker=PhysicsCore2D.PhysicsComposer.CreateLayerPaths
+marker=PhysicsCore2D.PhysicsComposer.AddShapeGeometryPath
+marker=PhysicsCore2D.PhysicsComposer.AddRawGeometryPath
+marker=PhysicsCore2D.PhysicsComposer.AddPolygonGeometryPathWithRadius
+marker=PhysicsCore2D.PhysicsComposer.AddPolygonGeometryPath
+marker=PhysicsCore2D.PhysicsComposer.AddCapsuleGeometryPath
+marker=PhysicsCore2D.PhysicsComposer.AddCircleGeometryPath
+marker=PhysicsCore2D.PhysicsComposer.AddVertexGeometryPath
+marker=PhysicsCore2D.PhysicsComposer.GetGeometryIslands
+marker=PhysicsCore2D.PhysicsComposer.CreateChains
+marker=PhysicsCore2D.PhysicsComposer.CreateConvexHulls
+marker=PhysicsCore2D.PhysicsComposer.CreatePolygons
+marker=PhysicsCore2D.PhysicsComposer.GetComposers
+marker=PhysicsCore2D.PhysicsComposer.GetLayerHandles
+marker=PhysicsCore2D.PhysicsComposer.GetLayerCount
+marker=PhysicsCore2D.PhysicsComposer.ClearLayers
+marker=PhysicsCore2D.PhysicsComposer.RemoveLayer
+marker=PhysicsCore2D.PhysicsComposer.AddLayer
+marker=PhysicsCore2D.PhysicsComposer.DestroyAll
+marker=PhysicsCore2D.PhysicsComposer.Destroy
+marker=PhysicsCore2D.PhysicsComposer.Create
+marker=Physics2D.UpdateTriggerContactsFinalize
+marker=Physics2D.UpdateTriggerContactsJob
+marker=Physics2D.UpdateTriggerContactsTask
+marker=Physics2D.SynchronizeFixturesMove
+marker=Physics2D.SynchronizeFixturesCombineSortJob
+marker=Physics2D.SynchronizeFixturesJob
+marker=Physics2D.SynchronizeFixturesTask
+marker=Physics2D.SolveDiscreteIslandIntegratePosesJob
+marker=Physics2D.SolveDiscreteIslandBodySleepJob
+marker=Physics2D.FindNewContactsCreate
+marker=Physics2D.FindNewContactsCombineSortJob
+marker=Physics2D.FindNewContactsFindJob
+marker=Physics2D.FindNewContactsTask
+marker=Physics2D.SynchronizeContinuousFixturesMove
+marker=Physics2D.SynchronizeContinuousFixturesCombineSortJob
+marker=Physics2D.SynchronizeContinuousFixturesJob
+marker=Physics2D.SynchronizeContinuousFixturesTask
+marker=Physics2D.SolveDiscreteIslandPostSolveJob
+marker=Physics2D.SolveDiscreteIslandTraversalTask
+marker=Physics2D.SolveDiscreteIslandTask
+marker=Physics2D.SolveContinuousIslandIntegratePositionsJob
+marker=Physics2D.SolveContinuousIslandIntegratePositionsTask
+marker=Physics2D.PrepareDiscreteIslandJointIndexJob
+marker=Physics2D.PrepareDiscreteIslandBodyIndexJob
+marker=Physics2D.InitializeVelocityConstraintsJob
+marker=Physics2D.WarmStartContactSolverJob
+marker=Physics2D.StoreConstraintImpulsesJob
+marker=Physics2D.SolveVelocityConstraintsJob
+marker=Physics2D.SolvePositionConstraintsJob
+marker=Physics2D.SolveDiscreteIslandWritePosesJob
+marker=Physics2D.SolveDiscreteIslandVelocitiesJob
+marker=Physics2D.FindMinimumContinuousContactFinalize
+marker=Physics2D.FindMinimumContinuousContactJob
+marker=Physics2D.FindMinimumContinuousContactTask
+marker=Physics2D.SolveContinuousTraversalIslandTask
+marker=Physics2D.SolveContinuousIslandTask
+marker=Physics2D.ClearContinuousBodyIslandFlagsJob
+marker=Physics2D.ClearContinuousContactIslandFlagsJob
+marker=Physics2D.gPhysics2D_ClearContinuousIslandFlagsTask
+marker=Physics2D.PrepareDiscreteIslandContactIndexJob
+marker=Physics2D.InitializeVelocityJointConstraintsJob
+marker=Physics2D.InitializeContactSolverJob
+marker=Physics2D.ContactsCollideFinalize
+marker=Physics2D.ContactsCollideJob
+marker=Physics2D.ContactsCollideTask
+marker=Physics2D.ClearBodyIslandFlagsJob
+marker=Physics2D.ClearContactIslandFlagsJob
+marker=Physics2D.ClearIslandFlagsTask
+marker=Physics2D.ClearBodyForcesJob
+marker=Physics2D.ClearBodyForcesTask
+marker=Physics2D.RestoreBodyMoveStates
+marker=Physics2D.StoreBodyMoveStates
+marker=Physics2D.ClearBodyForces
+marker=Physics2D.TriggerContactsFinalUpdate
+marker=Physics2D.SynchronizeFixtures
+marker=Physics2D.ClearIslandFlags
+marker=Physics2D.FindMinimumContinuousContact
+marker=Physics2D.SolveContinuousSynchronizeFixtures
+marker=Physics2D.SolveContinuousTraversal
+marker=Physics2D.ClearContinuousIslandFlags
+marker=Physics2D.SolveContinuous
+marker=Physics2D.SolveDiscreteTraversal
+marker=Physics2D.SolveDiscrete
+marker=Physics2D.ContactsCollide
+marker=Physics2D.Step
+marker=Physics2D.SolveContinuousIslandPostSolve
+marker=Physics2D.SolveContinuousIslandIntegratePoses
+marker=Physics2D.SolveContinuousIslandVelocityConstraints
+marker=Physics2D.SolveContinuousIslandPositionConstraints
+marker=Physics2D.SolveContinuousIslandReadBodyState
+marker=Physics2D.SolveContinuousIsland
+marker=Physics2D.SolveDiscreteIslandBodySleep
+marker=Physics2D.SolveDiscreteIslandPostSolve
+marker=Physics2D.SolveDiscreteIslandWritePoses
+marker=Physics2D.SolveDiscreteIslandPositionConstraints
+marker=Physics2D.SolveDiscreteIslandIntegratePoses
+marker=Physics2D.SolveDiscreteIslandVelocityConstraints
+marker=Physics2D.SolveDiscreteIslandVelocities
+marker=Physics2D.SolveDiscreteIsland
+marker=Physics2D.FindNewContacts
+marker=Physics2D.Rigidbody2D.Slide_SolveOverlap
+marker=Physics2D.Rigidbody2D.Slide_FindContact
+marker=Physics2D.Rigidbody2D.Slide
+marker=Physics2D.Rigidbody2D.GetShapes
+marker=Physics2D.Rigidbody2D.RecalculateContacts
+marker=Physics2D.Rigidbody2D.LayerChanged
+marker=Physics2D.JointBreakLimits
+marker=Physics2D.EffectorFixedUpdate
+marker=Physics2D.EdgeColliderPrepareShapes
+marker=Physics2D.CustomCollider2D.ClearCustomShapes
+marker=Physics2D.CustomCollider2D.DeleteCustomShapes
+marker=Physics2D.CustomCollider2D.SetCustomShapesNative
+marker=Physics2D.CustomCollider2D.SetCustomShapes
+marker=Physics2D.CustomCollider2D.SetCustomShapesAll
+marker=Physics2D.CustomCollider2D.SetCustomShapesAllNative
+marker=Physics2D.CustomCollider2D.GetCustomShapesAllNative
+marker=Physics2D.CustomCollider2D.GetCustomShapes
+marker=Physics2D.CustomCollider2D.PrepareShapes
+marker=Physics2D.CompositeColliderRemoveFromComposite
+marker=Physics2D.CompositeColliderCleanupCompositePaths
+marker=Physics2D.CompositeColliderAddToComposite
+marker=Physics2D.CompositeColliderPrepareShapesDecomposition
+marker=Physics2D.CompositeColliderPrepareShapesOutline
+marker=Physics2D.CompositeColliderPrepareShapes
+marker=Physics2D.CapsuleColliderPrepareShapes
+marker=Physics2D.BoxColliderPrepareShapes
+marker=Physics2D.PolygonColliderPrepareShapesDecomposition
+marker=Physics2D.PolygonColliderPrepareCompositePaths
+marker=Physics2D.PolygonColliderPrepareShapes
+marker=Physics2D.DestroyContacts
+marker=Physics2D.FlagContactsForExit
+marker=Physics2D.FlagContactsForRecreation
+marker=Physics2D.SendCollisionContactCallbacks
+marker=Physics2D.SendTriggerContactCallbacks
+marker=Physics2D.SendContactCallbacks
+marker=Physics2D.CompileContactCallbacksJob
+marker=Physics2D.CompileContactCallbacks
+marker=Physics2D.EndContact
+marker=Physics2D.PostSolveContact
+marker=Physics2D.PreSolveContact
+marker=Physics2D.BeginContact
+marker=Physics2D.Collider2D.GetShapes
+marker=Physics2D.Collider2D.RecalculateContacts
+marker=Physics2D.Collider2D.LayerChanged
+marker=Physics2D.Collider2D.TransformParentChanged
+marker=Physics2D.Collider2D.TransformChanged
+marker=Physics2D.Collider2D.DestroyShapes
+marker=Physics2D.Collider2D.CreateShapes
+marker=Physics2D.CircleColliderPrepareShapes
+marker=Physics2D.CollectProfileInfo
+marker=Physics2D.ApplyParticleForces
+marker=Physics2D.SyncColliderTransformChanges
+marker=Physics2D.SyncRigidbodyTransformChanges
+marker=Physics2D.SyncTransformChanges
+marker=Physics2D.ConvertCollision2DForScript
+marker=Physics2D.InterpolatePoseWriting
+marker=Physics2D.InterpolatePoseSorting
+marker=Physics2D.InterpolatePoses
+marker=Physics2D.InterpolationPosesSetup
+marker=Physics2D.WriteTransforms
+marker=Physics2D.Simulate
+marker=Physics2D.ConvertContactPoint2DForScript
+marker=Physics2D.GetRigidbodyContacts
+marker=Physics2D.GetColliderContacts
+marker=Physics2D.IsTouchingLayers
+marker=Physics2D.IsTouching
+marker=Physics2D.ClosestPoint
+marker=Physics2D.ColliderDistance
+marker=Physics2D.FindParticleOverlaps
+marker=Physics2D.FindParticleIntersections
+marker=Physics2D.GetRayIntersectionAll
+marker=Physics2D.GetRayIntersection
+marker=Physics2D.OverlapCollider
+marker=Physics2D.OverlapBoxAll
+marker=Physics2D.OverlapBox
+marker=Physics2D.OverlapCircleAll
+marker=Physics2D.OverlapCircle
+marker=Physics2D.OverlapPointAll
+marker=Physics2D.OverlapPoint
+marker=Physics2D.ColliderCastAll
+marker=Physics2D.ColliderCast
+marker=Physics2D.CapsuleCastAll
+marker=Physics2D.CapsuleCast
+marker=Physics2D.BoxCastAll
+marker=Physics2D.BoxCast
+marker=Physics2D.CircleCastAll
+marker=Physics2D.CircleCast
+marker=Physics2D.RaycastAll
+marker=Physics2D.Raycast
+marker=Physics2D.LinecastAll
+marker=Physics2D.Linecast
+marker=TilemapCollider2D.CompositeFinal
+marker=TilemapCollider2D.CompositeChunkJob
+marker=Physics2D.TilemapColliderTileUpdate
+marker=Physics2D.TilemapColliderPreparePaths
+marker=Physics2D.TilemapColliderPrepareShapes
+marker=TransformColliders
+marker=Colliders
+marker=Physics2D.DrawGizmoRigidbody2D
+marker=Physics2D.DrawGizmoCustomCollider2D
+marker=Physics2D.DrawGizmoCompositeCollider2D
+marker=Physics2D.DrawGizmoPolygonCollider2D
+marker=Physics2D.DrawGizmoBoxCollider2D
+marker=Physics2D.DrawGizmoEdgeCollider2D
+marker=Physics2D.DrawGizmoCapsuleCollider2D
+marker=Physics2D.DrawGizmoCircleCollider2D
+marker=Physics2D.DrawGizmoTilemapCollider2D
+marker=Physics.TerrainCollider.CreateTreeCollidersFromPrototypeJob
+marker=Physics.TerrainCollider.CreateTrees
+marker=Physics.TerrainCollider.ForceRebuildCollisions
+marker=WheelCollider.Create
+marker=Physics.VisibleMeshes
+marker=Physics.RemoveDirtyActors
+marker=Physics.RecordShapeDraws
+marker=Physics.QueryWorld
+marker=Physics.IssueDraws
+marker=Physics.GetFrustum
+marker=Physics.DrawAllActors
+marker=Physics.DestroyMeshCache
+marker=Physics.CreateFrustumMesh
+marker=Gizmos.MeshCollider
+marker=Gizmos.ConvexCollider
+marker=Physics.ExtractPxGeometryData
+marker=Physics.CreatePhysXHeightFieldSamplesJob
+marker=Physics.CreatePhysXHeightField
+marker=Physics.BakePhysXCollisionMeshData
+marker=Physics.ProcessPhysXConstraintBreaksJob
+marker=Physics.ProcessPhysXTriggerPairsJob
+marker=Physics.StorePhysXContactsJob
+marker=Physics.SwapPhysXBuffersJob
+marker=Physics.PreparePhysXContactBuffersJob
+marker=Physics.CalculatePhysXContactBuffersSizeJob
+marker=Physics.FetchPhysXResults
+marker=AssemblyDataFrom Unity.Physics.Editor.ProjectSettingsBridge.dll
+marker=AssemblyDataFrom Unity.Physics.Editor.dll
+marker=AssemblyDataFrom Unity.Physics.Hybrid.dll
+marker=AssemblyDataFrom Unity.Physics.dll
+marker=CompanionGameObjectUpdateTransformSystem:CopyTransformJob
+marker=CompanionGameObjectUpdateTransformSystem:CopyTransformJob (Burst)
+marker=CompanionGameObjectUpdateTransformSystem:CopyTransformJob (Cleanup)
+marker=BaseShapeBakingSystem:ReferenceBakedColliderBlobsJob
+marker=BaseShapeBakingSystem:ReferenceBakedColliderBlobsJob (Burst)
+marker=BaseShapeBakingSystem:ReferenceBakedColliderBlobsJob (Cleanup)
+marker=BuildCompoundCollidersBakingSystem:ChildrenGatheringJob
+marker=BuildCompoundCollidersBakingSystem:ChildrenGatheringJob (Burst)
+marker=BuildCompoundCollidersBakingSystem:ChildrenGatheringJob (Cleanup)
+marker=BuildCompoundCollidersBakingSystem:AddColliderKeyEntityPairBufferJob
+marker=BuildCompoundCollidersBakingSystem:AddColliderKeyEntityPairBufferJob (Burst)
+marker=BuildCompoundCollidersBakingSystem:AddColliderKeyEntityPairBufferJob (Cleanup)
+marker=BuildCompoundCollidersBakingSystem:BlobCalculationJob
+marker=BuildCompoundCollidersBakingSystem:BlobCalculationJob (Burst)
+marker=BuildCompoundCollidersBakingSystem:BlobCalculationJob (Cleanup)
+marker=BuildCompoundCollidersBakingSystem:DeferredResolutionJob
+marker=BuildCompoundCollidersBakingSystem:DeferredResolutionJob (Burst)
+marker=BuildCompoundCollidersBakingSystem:DeferredResolutionJob (Cleanup)
+marker=DisplayColliderAabbsJob
+marker=DisplayColliderAabbsJob (Burst)
+marker=DisplayColliderAabbsJob (Cleanup)
+marker=BuildCompoundCollidersBakingSystem:BlobContextUpdateJob
+marker=BuildCompoundCollidersBakingSystem:BlobContextUpdateJob (Burst)
+marker=BuildCompoundCollidersBakingSystem:BlobContextUpdateJob (Cleanup)
+marker=DisplayColliderEdgesJob
+marker=DisplayColliderEdgesJob (Burst)
+marker=DisplayColliderEdgesJob (Cleanup)
+marker=DisplayColliderFacesJob
+marker=DisplayColliderFacesJob (Burst)
+marker=DisplayColliderFacesJob (Cleanup)
+marker=BrickMesherPerfTests:MesherJob
+marker=BrickMesherPerfTests:MesherJob (Burst)
+marker=BrickMesherPerfTests:MesherJob (Cleanup)
+marker=BrickPoolRendererTests:TransformBridge
+marker=BrickPoolRendererTests:TransformBridge (Burst)
+marker=BrickPoolRendererTests:TransformBridge (Cleanup)
+marker=BrickColliderPerfTests:Build
+marker=BrickColliderPerfTests:Build (Burst)
+marker=BrickColliderPerfTests:Build (Cleanup)
+marker=BrickPoolRendererTests:MeshReferenceBrick
+marker=BrickPoolRendererTests:MeshReferenceBrick (Burst)
+marker=BrickPoolRendererTests:MeshReferenceBrick (Cleanup)
+marker=ColliderPipelinePerfTests:HitJob
+marker=ColliderPipelinePerfTests:HitJob (Burst)
+marker=ColliderPipelinePerfTests:HitJob (Cleanup)
+marker=BrickLod1Tests:MeshJob
+marker=BrickLod1Tests:MeshJob (Burst)
+marker=BrickLod1Tests:MeshJob (Cleanup)
+marker=BrickMeshQueueTests:ProducerJob
+marker=BrickMeshQueueTests:ProducerJob (Burst)
+marker=BrickMeshQueueTests:ProducerJob (Cleanup)
+marker=BrickMesherTests:MeshJob
+marker=BrickMesherTests:MeshJob (Burst)
+marker=BrickMesherTests:MeshJob (Cleanup)
+marker=BrickLod1Tests:SourceRatioJob
+marker=BrickLod1Tests:SourceRatioJob (Burst)
+marker=BrickLod1Tests:SourceRatioJob (Cleanup)
+marker=BrickColliderBuilderTests:CoverageJob
+marker=BrickColliderBuilderTests:CoverageJob (Burst)
+marker=BrickColliderBuilderTests:CoverageJob (Cleanup)
+marker=BrickColliderBuilderTests:BuildJob
+marker=BrickColliderBuilderTests:BuildJob (Burst)
+marker=BrickColliderBuilderTests:BuildJob (Cleanup)
+marker=ColliderCleanupTests:DelayJob
+marker=ColliderCleanupTests:DelayJob (Burst)
+marker=ColliderCleanupTests:DelayJob (Cleanup)
+marker=ColliderDeadlineTests:DelayedBatch
+marker=ColliderDeadlineTests:DelayedBatch (Burst)
+marker=ColliderDeadlineTests:DelayedBatch (Cleanup)
+marker=ColliderDebugTests:CountersJob
+marker=ColliderDebugTests:CountersJob (Burst)
+marker=ColliderDebugTests:CountersJob (Cleanup)
+marker=ColliderPipelineDataTests:PendingBuildJob
+marker=ColliderPipelineDataTests:PendingBuildJob (Burst)
+marker=ColliderPipelineDataTests:PendingBuildJob (Cleanup)
+marker=ColliderSnapshotTests:WriteMaskJob
+marker=ColliderSnapshotTests:WriteMaskJob (Burst)
+marker=ColliderSnapshotTests:WriteMaskJob (Cleanup)
+marker=ColliderSwapTests:SlowJob
+marker=ColliderSwapTests:SlowJob (Burst)
+marker=ColliderSwapTests:SlowJob (Cleanup)
+marker=ColliderPipelineDataTests:FinalizeJob
+marker=ColliderPipelineDataTests:FinalizeJob (Burst)
+marker=ColliderPipelineDataTests:FinalizeJob (Cleanup)
+marker=GridColliderAssemblerTests:AssembleJob
+marker=GridColliderAssemblerTests:AssembleJob (Burst)
+marker=GridColliderAssemblerTests:AssembleJob (Cleanup)
+marker=IntegritySelectionTests:ProductionJob
+marker=IntegritySelectionTests:ProductionJob (Burst)
+marker=IntegritySelectionTests:ProductionJob (Cleanup)
+marker=LegacyIntegritySelectionJob
+marker=LegacyIntegritySelectionJob (Burst)
+marker=LegacyIntegritySelectionJob (Cleanup)
+marker=SpatialHashBuildTests:ReadJob
+marker=SpatialHashBuildTests:ReadJob (Burst)
+marker=SpatialHashBuildTests:ReadJob (Cleanup)
+marker=SpatialHashQueryTests:QueryJob
+marker=SpatialHashQueryTests:QueryJob (Burst)
+marker=SpatialHashQueryTests:QueryJob (Cleanup)
+marker=ColliderOverlayJob
+marker=ColliderOverlayJob (Burst)
+marker=ColliderOverlayJob (Cleanup)
+marker=SpatialHashOverlayJob
+marker=SpatialHashOverlayJob (Burst)
+marker=SpatialHashOverlayJob (Cleanup)
+marker=ProxyBucketJob
+marker=ProxyBucketJob (Burst)
+marker=ProxyBucketJob (Cleanup)
+marker=ProxySortJob
+marker=ProxySortJob (Burst)
+marker=ProxySortJob (Cleanup)
+marker=ProxyGatherJob
+marker=ProxyGatherJob (Burst)
+marker=ProxyGatherJob (Cleanup)
+marker=ZoneSystem:ZoneJob
+marker=ZoneSystem:ZoneJob (Burst)
+marker=ZoneSystem:ZoneJob (Cleanup)
+marker=EngineWashSystem:WashJob
+marker=EngineWashSystem:WashJob (Burst)
+marker=EngineWashSystem:WashJob (Cleanup)
+marker=PropulsionStatsSystem:StatsJob
+marker=PropulsionStatsSystem:StatsJob (Burst)
+marker=PropulsionStatsSystem:StatsJob (Cleanup)
+marker=PropulsionJob
+marker=PropulsionJob (Burst)
+marker=PropulsionJob (Cleanup)
+marker=AiThinkJob
+marker=AiThinkJob (Burst)
+marker=AiThinkJob (Cleanup)
+marker=ReplicaJobs:ChunkColliderJob
+marker=ReplicaJobs:ChunkColliderJob (Burst)
+marker=ReplicaJobs:ChunkColliderJob (Cleanup)
+marker=BrickCullJob
+marker=BrickCullJob (Burst)
+marker=BrickCullJob (Cleanup)
+marker=BrickMeshJob
+marker=BrickMeshJob (Burst)
+marker=BrickMeshJob (Cleanup)
+marker=BrickLodJob
+marker=BrickLodJob (Burst)
+marker=BrickLodJob (Cleanup)
+marker=BrickPoolRenderSystem:TransformJob
+marker=BrickPoolRenderSystem:TransformJob (Burst)
+marker=BrickPoolRenderSystem:TransformJob (Cleanup)
+marker=GridDormancyJob
+marker=GridDormancyJob (Burst)
+marker=GridDormancyJob (Cleanup)
+marker=GridMatrixJob
+marker=GridMatrixJob (Burst)
+marker=GridMatrixJob (Cleanup)
+marker=BrickColliderJob
+marker=BrickColliderJob (Burst)
+marker=BrickColliderJob (Cleanup)
+marker=LodEnqueueJob
+marker=LodEnqueueJob (Burst)
+marker=LodEnqueueJob (Cleanup)
+marker=ColliderCollectJob
+marker=ColliderCollectJob (Burst)
+marker=ColliderCollectJob (Cleanup)
+marker=ColliderInstallJob
+marker=ColliderFinalizeJob
+marker=ColliderInstallJob (Burst)
+marker=ColliderFinalizeJob (Burst)
+marker=ColliderInstallJob (Cleanup)
+marker=ColliderFinalizeJob (Cleanup)
+marker=PhysicsMassApplyJob
+marker=PhysicsMassApplyJob (Burst)
+marker=PhysicsMassApplyJob (Cleanup)
+marker=DamageResolveSystem:ClearRestoresJob
+marker=DamageResolveSystem:ClearRestoresJob (Burst)
+marker=DamageResolveSystem:ClearRestoresJob (Cleanup)
+marker=DamageResolveSystem:ClearEventsJob
+marker=DamageResolveSystem:ClearEventsJob (Burst)
+marker=DamageResolveSystem:ClearEventsJob (Cleanup)
+marker=IntegritySystem:FlattenIntegrityJob
+marker=IntegritySystem:FlattenIntegrityJob (Burst)
+marker=IntegritySystem:FlattenIntegrityJob (Cleanup)
+marker=SelectIntegrityGridsJob
+marker=SelectIntegrityGridsJob (Burst)
+marker=SelectIntegrityGridsJob (Cleanup)
+marker=IntegrityRaceJob
+marker=IntegrityRaceJob (Burst)
+marker=IntegrityRaceJob (Cleanup)
+marker=ResolveGridJob
+marker=ResolveGridJob (Burst)
+marker=ResolveGridJob (Cleanup)
+marker=UpdateLODGroupTransformJob
+marker=UpdateLODGroupTransformJob (Burst)
+marker=UpdateLODGroupTransformJob (Cleanup)
+marker=AnalyticsJobs:FinalizePhysicsWorldAnalyticsJob
+marker=AnalyticsJobs:FinalizePhysicsWorldAnalyticsJob (Burst)
+marker=AnalyticsJobs:FinalizePhysicsWorldAnalyticsJob (Cleanup)
+marker=ExportPhysicsWorld:CheckTotalBodyAndColliderIntegrity
+marker=ExportPhysicsWorld:CheckTotalBodyAndColliderIntegrity (Burst)
+marker=ExportPhysicsWorld:CheckTotalBodyAndColliderIntegrity (Cleanup)
+marker=PhysicsIntegrityCheckJobs:RecordDynamicBodyIntegrity
+marker=PhysicsIntegrityCheckJobs:RecordDynamicBodyIntegrity (Burst)
+marker=PhysicsIntegrityCheckJobs:RecordDynamicBodyIntegrity (Cleanup)
+marker=EnsureUniqueColliderSystem:MakeUniqueJob
+marker=EnsureUniqueColliderSystem:MakeUniqueJob (Burst)
+marker=EnsureUniqueColliderSystem:MakeUniqueJob (Cleanup)
+marker=ExportPhysicsWorld:CheckDynamicBodyIntegrity
+marker=ExportPhysicsWorld:CheckDynamicBodyIntegrity (Burst)
+marker=ExportPhysicsWorld:CheckDynamicBodyIntegrity (Cleanup)
+marker=LocalToWorldSystem:ComputeHierarchyLocalToWorldJob
+marker=LocalToWorldSystem:ComputeHierarchyLocalToWorldJob (Burst)
+marker=LocalToWorldSystem:ComputeHierarchyLocalToWorldJob (Cleanup)
+marker=SyncCustomPhysicsProxySystem:SyncCustomPhysicsProxy
+marker=SyncCustomPhysicsProxySystem:SyncCustomPhysicsProxy (Burst)
+marker=SyncCustomPhysicsProxySystem:SyncCustomPhysicsProxy (Cleanup)
+marker=CopyPhysicsVelocityToSmoothing:CopyPhysicsVelocityJob
+marker=CopyPhysicsVelocityToSmoothing:CopyPhysicsVelocityJob (Burst)
+marker=CopyPhysicsVelocityToSmoothing:CopyPhysicsVelocityJob (Cleanup)
+marker=PhysicsIntegrityCheckJobs:RecordColliderIntegrity
+marker=PhysicsIntegrityCheckJobs:RecordColliderIntegrity (Burst)
+marker=PhysicsIntegrityCheckJobs:RecordColliderIntegrity (Cleanup)
+marker=ExportPhysicsWorld:CheckColliderIntegrity
+marker=ExportPhysicsWorld:CheckColliderIntegrity (Burst)
+marker=ExportPhysicsWorld:CheckColliderIntegrity (Cleanup)
+marker=ColliderBlobCleanupSystem:ColliderBlobCleanupJob
+marker=ColliderBlobCleanupSystem:ColliderBlobCleanupJob (Burst)
+marker=ColliderBlobCleanupSystem:ColliderBlobCleanupJob (Cleanup)
+marker=PhysicsWorldExporter:ExportDynamicBodiesJob
+marker=PhysicsWorldExporter:ExportDynamicBodiesJob (Burst)
+marker=PhysicsWorldExporter:ExportDynamicBodiesJob (Cleanup)
+marker=LocalToWorldSystem:ComputeWorldSpaceLocalToWorldJob
+marker=LocalToWorldSystem:ComputeWorldSpaceLocalToWorldJob (Burst)
+marker=LocalToWorldSystem:ComputeWorldSpaceLocalToWorldJob (Cleanup)
+marker=ExportPhysicsWorld:DetermineTreeNodeCountJob
+marker=ExportPhysicsWorld:DetermineTreeNodeCountJob (Burst)
+marker=ExportPhysicsWorld:DetermineTreeNodeCountJob (Cleanup)
+marker=ExportPhysicsWorld:CheckIncrementalBroadphaseIntegrity
+marker=ExportPhysicsWorld:CheckIncrementalBroadphaseIntegrity (Burst)
+marker=ExportPhysicsWorld:CheckIncrementalBroadphaseIntegrity (Cleanup)
+marker=Physics2D.RegisterGizmos
+marker=Physics.RegisterPhysics
+marker=EarlyUpdate.PhysicsCore2DEarlyUpdate
+marker=PhysicsCore2D.DrawWorlds
+marker=PhysicsCore2D.DrawWorlds.ExecuteRenderCommands (BIRP)
+marker=PhysicsCore2D.DrawWorlds.ExecuteRenderCommands (SRP)
+marker=PhysicsCore2D.DrawWorlds.AddRenderCommands
+marker=PhysicsCore2D.DrawWorlds.WorldDrawEvent
+marker=PhysicsCore2D.DrawWorlds.PolygonCommand
+marker=PhysicsCore2D.DrawWorlds.CircleCommand
+marker=PhysicsCore2D.DrawWorlds.CapsuleCommand
+marker=PhysicsCore2D.DrawWorlds.LineCommand
+marker=PhysicsCore2D.DrawWorlds.PointCommand
+marker=EarlyUpdate.Physics2DEarlyUpdate
+marker=EarlyUpdate.PhysicsResetInterpolatedTransformPosition
+marker=FixedUpdate.PhysicsFixedUpdate
+marker=FixedUpdate.PhysicsCore2DFixedUpdate
+marker=FixedUpdate.Physics2DFixedUpdate
+marker=FixedUpdate.PhysicsClothFixedUpdate
+marker=FixedUpdate.DirectorFixedUpdatePostPhysics
+marker=PreUpdate.PhysicsUpdate
+marker=PreUpdate.PhysicsCore2DUpdate
+marker=PreUpdate.Physics2DUpdate
+marker=PreLateUpdate.PhysicsCore2DLateUpdate
+marker=PreLateUpdate.Physics2DLateUpdate
+marker=PreLateUpdate.PhysicsLateUpdate
+marker=PostLateUpdate.PhysicsSkinnedClothBeginUpdate
+marker=PostLateUpdate.PhysicsSkinnedClothFinishUpdate
+marker=Physics2D.ConvertLowLevelPhysicsSettings
+marker=Editor World Unity.Physics.Authoring.DisplayColliderAabbsSystem_Editor
+marker=Editor World Unity.Physics.Authoring.PhysicsDebugDisplayGroup_Editor
+marker=Editor World Unity.Physics.Authoring.PhysicsDebugDisplaySystem_Editor
+marker=Editor World Unity.Physics.Authoring.CleanPhysicsDebugDataSystem_Editor
+marker=Editor World Unity.Physics.Authoring.DisplayBodyColliderEdges_Editor
+marker=Editor World Unity.Transforms.LocalToWorldSystem
+marker=Editor World Unity.Physics.Authoring.DisplayBodyCollidersSystem_Editor
+marker=Editor World Unity.Physics.Authoring.DisplayJointsSystem_Editor
+marker=BrickMeshBuildSystem.Dequeue
+marker=BrickMeshBuildSystem.Snapshot
+marker=BrickMeshBuildSystem.Schedule
+marker=SpatialHashBuildSystem.Gather
+marker=SpatialHashBuildSystem.Sort
+marker=SpatialHashBuildSystem.Bucket
+marker=PropulsionSystem.Schedule
+marker=DamageResolveSystem.Gather
+marker=DamageResolveSystem.Sort
+marker=DamageResolveSystem.Plan
+marker=DamageResolveSystem.Resolve
+marker=DamageResolveSystem.Flatten
+marker=BrickColliderBuildSystem.Access
+marker=BrickColliderBuildSystem.Finalize
+marker=BrickColliderBuildSystem.Seal
+marker=BrickColliderBuildSystem.Plan
+marker=BrickColliderBuildSystem.Copy
+marker=BrickColliderBuildSystem.Schedule
+marker=BrickColliderBuildSystem.Deadline
+marker=ColliderCollectJob.Execute
+marker=ColliderFinalizeJob.Execute
+marker=ColliderInstallJob.Execute
+marker=ColliderSnapshotSystem.Collect
+marker=BrickColliderJob.Execute
+marker=ColliderSwapSystem.Install
+marker=GridColliderCleanupSystem.Sweep
+marker=GridColliderCleanupSystem.Retire
+marker=IntegritySystem.Select
+marker=IntegritySystem.Race
+marker=Physics.ContactEvent
+marker=Physics.InvokeOnCollisionEvents
+marker=EditorApplication.playModeStateChanged: Unity.Physics.Hybrid.SceneSimulationAnalytics.ModeChanged
+marker=Create ProbeBrickPool
+marker=Default World Game.Voxel.PhysicsBody.GridBodyInitSystem
+marker=Default World Game.Voxel.Damage.DamageResolveSystem
+marker=Default World Game.Voxel.PhysicsBody.BrickColliderBuildSystem
+marker=Default World Unity.Physics.Systems.InjectTemporalCoherenceDataSystem
+marker=Default World Unity.Physics.GraphicsIntegration.SmoothRigidBodiesGraphicalMotion
+marker=Default World Unity.Physics.Authoring.DisplayContactsSystem
+marker=Default World Unity.Physics.Systems.AfterPhysicsSystemGroup
+marker=Default World Game.Voxel.Damage.IntegritySystem
+marker=Default World Game.Voxel.PhysicsBody.ColliderSnapshotSystem
+marker=Default World Unity.Physics.Authoring.DisplayBodyCollidersSystem
+marker=Default World Unity.Physics.Authoring.DisplayIterativeSolverPhasesSystem
+marker=Default World Unity.Physics.Systems.PhysicsAnalyticsSystem
+marker=Default World Unity.Physics.Authoring.DisplayBroadphaseAabbsSystem
+marker=Default World Unity.Physics.Systems.SyncCustomPhysicsProxySystem
+marker=Default World Game.Simulation.Spatial.SpatialHashBuildSystem
+marker=Default World Game.Simulation.Flight.PropulsionStatsSystem
+marker=Default World Game.Voxel.Damage.ChunkColliderCleanupSystem
+marker=Default World Game.Voxel.Rendering.PropRenderSystem
+marker=Default World Game.Voxel.Rendering.BrickPoolRenderSystem
+marker=Default World Game.Voxel.PhysicsBody.SplitGraceContactSystem
+marker=Default World Game.Core.Systems.GameplayPostPhysicsGroup
+marker=Default World Unity.Physics.Systems.DummySimulationSystem
+marker=Default World Unity.Physics.Authoring.DisplayColliderAabbsSystem_Default
+marker=Default World Unity.Physics.Systems.PhysicsSimulationPickerSystem
+marker=Default World Unity.Physics.Systems.PhysicsCreateJacobiansGroup
+marker=Default World Game.Simulation.Hazards.MineSystem
+marker=Default World Unity.Physics.Authoring.DisplayCollisionEventsSystem
+marker=Default World Game.Simulation.Flight.PropulsionSystem
+marker=Default World Unity.Physics.Systems.ColliderBlobCleanupSystem
+marker=Default World Unity.Transforms.LocalToWorldSystem
+marker=Default World Game.Voxel.PhysicsBody.GridMassUpdateSystem
+marker=Default World Unity.Physics.Systems.InjectTemporalCoherenceDataLastResortSystem
+marker=Default World Unity.Physics.Systems.BuildPhysicsWorld
+marker=Default World Unity.Physics.Systems.IntegrityCheckSystem
+marker=Default World Unity.Physics.Systems.PhysicsSystemGroup
+marker=Default World Game.Voxel.PhysicsBody.GridSpawnBodyInitSystem
+marker=Default World Unity.Physics.Systems.EnsureUniqueColliderSystem
+marker=Default World Unity.Physics.Systems.PhysicsCreateBodyPairsGroup
+marker=Default World Game.Voxel.Rendering.BrickMeshApplySystem
+marker=Default World Game.Simulation.Hazards.EngineWashSystem
+marker=Default World Game.Voxel.Rendering.BrickMeshBuildSystem
+marker=Default World Unity.Physics.Systems.BuildPhysicsWorldDependencyResolver
+marker=Default World Unity.Physics.Systems.PhysicsInitializeGroupInternal
+marker=Default World Unity.Physics.Authoring.DisplayTriggerEventsSystem
+marker=Default World Unity.Physics.Systems.PhysicsSimulationGroup
+marker=Default World Game.Voxel.PhysicsBody.GridColliderCleanupSystem
+marker=Default World Unity.Physics.GraphicsIntegration.BufferInterpolatedRigidBodiesMotion
+marker=Default World Game.Voxel.PhysicsBody.ColliderSwapSystem
+marker=Default World Unity.Physics.GraphicsIntegration.RecordMostRecentFixedTime
+marker=Default World Unity.Physics.Authoring.DisplayBodyColliderEdges_Default
+marker=Default World Unity.Physics.Authoring.PhysicsDebugDisplayGroup
+marker=Default World Unity.Physics.Systems.PhysicsSolveAndIntegrateGroup
+marker=Default World Unity.Physics.Systems.ExportPhysicsWorld
+marker=Default World Unity.Physics.Authoring.PhysicsDebugDisplaySystem_Default
+marker=Default World Unity.Physics.Authoring.CleanPhysicsDebugDataSystem_Default
+marker=Default World Unity.Physics.Systems.PhysicsInitializeGroup
+marker=Default World Unity.Physics.Systems.SolveAndIntegrateSystem
+marker=Default World Unity.Physics.Systems.CreateJacobiansSystem
+marker=Default World Unity.Physics.Systems.NarrowphaseSystem
+marker=Default World Unity.Physics.Systems.BroadphaseSystem
+marker=Default World Unity.Physics.Authoring.DisplayDirectSolverIslandsSystem
+marker=Default World Unity.Physics.Systems.PhysicsBuildWorldGroup
+marker=Default World Unity.Physics.Systems.InvalidatedTemporalCoherenceCleanupSystem
+marker=Default World Unity.Physics.GraphicsIntegration.CopyPhysicsVelocityToSmoothing
+marker=Default World Unity.Physics.Authoring.DisplayMassPropertiesSystem
+marker=Default World Unity.Physics.Systems.BeforePhysicsSystemGroup
+marker=Default World Unity.Physics.Systems.PhysicsCreateContactsGroup
+marker=Default World Game.Core.Systems.GameplayPrePhysicsGroup
+marker=Default World Unity.Physics.Authoring.DisplayJointsSystem_Default
+marker=PropRenderSystem.Gather
+marker=PropRenderSystem.Matrices
+marker=PropRenderSystem.Draw
+marker=BrickMeshApplySystem.Register
+marker=BrickMeshApplySystem.Apply
+marker=BrickPoolRenderer.Cull
+marker=BrickPoolRenderer.Render
+marker=BrickPoolRenderer.Upload
+marker=BrickPoolRenderer.Transfer
+ticks=187..507; GPUFrameTimingEnabled=True; uniquePositiveGpuSamples=4
+productionCameraRenderedFrames=300/300; positiveDrawAndTriangleFrames=300/300
+after={"mainMs":17.1905707,"draws":1384,"triangles":3855869,"gcAllocBytes":10033,"systemMemoryBytes":3412333080,"entities":11582,"worldAvailable":true,"voxel":{"ships":15,"stations":140,"asteroids":44,"hulkGrids":5,"bricks":8110,"solidCells":3314236,"dirtyBricks":0,"meshDirty":0,"colliderDirty":0,"chunkBodies":0,"hulks":5},"combat":{"projectiles":0,"activeBeams":0,"fx":{"drained":0,"culled":0,"budgetDropped":0,"debrisLiveEstimate":3,"bound":true},"audio":{"drained":0,"started":0,"activeSfxVoices":0,"activeLoopVoices":0,"bound":true}}}
+Main Thread: median=15.320542 p95=32.727541 ms; availableFrames=300/300
+PlayerLoop: median=14.014312 p95=31.396167 ms; availableFrames=300/300
+Physics2D.GenerateBoxTilingShape: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.GenerateTilingArea: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PrepareTilingSegment: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.StoreInterpolationPoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SendJointBreakEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SendContactEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.TriggerStayCacheMaintenanceJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SendTriggerEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SendEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.ClearSceneBuffers: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Rigidbody.SetKinematic [Re-create non-convex MeshCollider for Rigidbody]: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SyncRigidbodyTransformBatchJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SyncColliderTransformBatchJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.WriteRigidbodyPoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.WriteColliderPoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CalculateChangedColliderTransforms: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CalculateChangedBodyTransforms: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CreateHeightField: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.BakeScaleIntoVertexData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Profiler.CollectPhysicsStats: median=0.003083 p95=0.004250 ms; availableFrames=300/300
+Physics.SyncBatchQueries: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.HandleArticulationHierarchyChanges: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.HandleBodyHierarchyChanges: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.HandleColliderHierarchyChanges: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.ReadTransforms: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SyncTransforms: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.PublishResultsStage: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RunSimulationStage: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.PrepareSimulationStage: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.UpdateVehicles: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.UpdateArticulations: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.UpdateRigidbodies: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.Simulate: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.InterpolationSorting: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.Interpolation: median=0.000500 p95=0.000792 ms; availableFrames=300/300
+Physics.FetchResults: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RecreateDefaultSceneOnExitPlaymode: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RecreateDefaultPhysicsSceneOnSceneLoad: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.BoxCastNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CapsuleCastNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RaycastNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapBoxNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapCapsuleNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapSphereNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapBoxUserCollect: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapBox: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.BoxCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.BoxCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CheckBox: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CapsuleCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CapsuleCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SphereCastNonAlloc: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SphereCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SphereCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CheckSphere: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapCapsule: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.OverlapSphere: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CheckCapsule: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RaycastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.Raycast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorld.CompileDrawResults: median=0.001000 p95=0.001417 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorld.UpdateLifetimes: median=0.000542 p95=0.000875 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorld: median=0.003250 p95=0.004459 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.PostSimulate: median=0.000333 p95=0.000542 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.PreSimulate: median=0.001083 p95=0.001500 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.AutoJointThresholdCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.AutoTriggerCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.AutoContactCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.AutoBodyUpdateCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.PreSolveCallback: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.FilterContactCallback: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteTransformTweensSync: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteTransformTweens: median=0.000167 p95=0.000292 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteTransforms.SetTransformAccessArray: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteTransforms.SortTransformWriteTeens: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteTransforms.CalculateWorldTransformWrite: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteTransforms: median=0.000333 p95=0.000584 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.FinishTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.QueueTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.CastShape: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.CastRay: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.OverlapAABB: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.GetProxyUserHandle: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.SetProxyUserHandle: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.GetProxyCategories: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.SetProxyCategories: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.GetProxyAABB: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.SetProxyAABB: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.ClearProxies: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.DestroyProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.CreateProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.Clone: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.GetSpaces: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.DestroyAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSpace.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsDestructor.Slice: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsDestructor.FragmentMasked: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsDestructor.Fragment: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWheelJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWheelJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWheelJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsFixedJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsFixedJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsFixedJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsHingeJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsHingeJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsHingeJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSliderJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSliderJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsSliderJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsIgnoreJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsIgnoreJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsIgnoreJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsRelativeJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsRelativeJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsRelativeJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsDistanceJoint.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsDistanceJoint.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsDistanceJoint.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsJoint.ownerUserData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsJoint.userData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsJoint.Draw: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsJoint.DestroyBatch: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsJoint.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsChain.ownerUserData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsChain.userData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsChain.UpdateVertices: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsChain.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsChain.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.ownerUserData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.userData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.Draw: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.GetTriggerVisitors: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.GetContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetChainSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetPolygonGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetCapsuleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetCircleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CastShape: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CastRay: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.ClosestPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.OverlapPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetContactFilter: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.SetDensity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.ApplyWind: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.ApplyBuoyancy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.DestroyBatch: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CreateShapeBatch: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CreateChainSegment: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CreateSegment: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CreatePolygon: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CreateCapsule: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsShape.CreateCircle: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.ChainSegmentGeometry.CreateSegments: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PolygonGeometry.CreatePolygons: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PolygonGeometry.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PolygonGeometry.CreateBox: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.transformWriteMode: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.transformObject: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ownerUserData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.userData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.Draw: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.GetContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.GetJoints: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.GetShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetHitEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetContactEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetFastCollisionsAllowed: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetFastRotationAllowed: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetEnabled: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetAwake: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyMassFromShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetMassConfiguration: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyWindOverlap: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyWind: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyBuoyancyOverlap: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyBuoyancy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyAngularImpulse: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyLinearImpulseToCenter: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyLinearImpulse: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyTorque: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyForceToCenter: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ApplyForce: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetAngularVelocity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetLinearVelocity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetTransformTarget: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetTransform: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetRotation: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetPosition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetBodyType: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.GetBatchVelocity,: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.GetBatchTransform,: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetBatchTransform,: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetBatchImpulse: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetBatchForce: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.SetBatchVelocity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.DestroyBatch: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.CreateBatch: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsBody.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawTransformAxis: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawLineStrip: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawLine: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawCapsule: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawCircle: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawBox: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawShapeProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawQueryWorldCastResult: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawQueryCastResult: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawQueryShapeProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawQueryCastRay: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawPolygonGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawCapsuleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.DrawCircleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.CastMover: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.CastShapeProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.CastShape: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.CastRay: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapChainSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapPolygonGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapCapsuleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapCircleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapShapeProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapShape: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.OverlapAABB: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapChainSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapSegmentGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapPolygonGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapCapsuleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapCircleGeometry: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapShapeProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapShape: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.TestOverlapAABB: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.Explode: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.GetJointThresholdCallbackTargets: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.GetContactCallbackTargets: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.GetTriggerCallbackTargets: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.GetBodyUpdateCallbackTargets: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.GetBodyUpdateUserData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.SetTransformAccess: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.SetTransform: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.SetTransformWriteTweens: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.SyncInterpolation: median=0.000833 p95=0.001166 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.ProcessTransformWriteTweens: median=0.000666 p95=0.000958 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.Simulate.StepWorlds: median=0.000041 p95=0.000124 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.SimulateBatch: median=0.003272 p95=0.004584 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.Simulate: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.ReadDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.WriteDefinition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsWorld.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.TransformParentHierarchyChanged: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.TransformChanged: median=0.000667 p95=0.001041 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.Tessellation.ConstructPolygons: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.Tessellation: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.TessellationPaths: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.CreateGeometryPaths: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.CreateLayerPaths: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddShapeGeometryPath: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddRawGeometryPath: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddPolygonGeometryPathWithRadius: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddPolygonGeometryPath: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddCapsuleGeometryPath: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddCircleGeometryPath: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddVertexGeometryPath: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.GetGeometryIslands: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.CreateChains: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.CreateConvexHulls: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.CreatePolygons: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.GetComposers: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.GetLayerHandles: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.GetLayerCount: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.ClearLayers: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.RemoveLayer: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.AddLayer: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.DestroyAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.Destroy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.PhysicsComposer.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.UpdateTriggerContactsFinalize: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.UpdateTriggerContactsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.UpdateTriggerContactsTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeFixturesMove: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeFixturesCombineSortJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeFixturesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeFixturesTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandIntegratePosesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandBodySleepJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindNewContactsCreate: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindNewContactsCombineSortJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindNewContactsFindJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindNewContactsTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeContinuousFixturesMove: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeContinuousFixturesCombineSortJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeContinuousFixturesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeContinuousFixturesTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandPostSolveJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandTraversalTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandIntegratePositionsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandIntegratePositionsTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PrepareDiscreteIslandJointIndexJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PrepareDiscreteIslandBodyIndexJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InitializeVelocityConstraintsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.WarmStartContactSolverJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.StoreConstraintImpulsesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveVelocityConstraintsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolvePositionConstraintsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandWritePosesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandVelocitiesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindMinimumContinuousContactFinalize: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindMinimumContinuousContactJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindMinimumContinuousContactTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousTraversalIslandTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearContinuousBodyIslandFlagsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearContinuousContactIslandFlagsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.gPhysics2D_ClearContinuousIslandFlagsTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PrepareDiscreteIslandContactIndexJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InitializeVelocityJointConstraintsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InitializeContactSolverJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ContactsCollideFinalize: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ContactsCollideJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ContactsCollideTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearBodyIslandFlagsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearContactIslandFlagsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearIslandFlagsTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearBodyForcesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearBodyForcesTask: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.RestoreBodyMoveStates: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.StoreBodyMoveStates: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearBodyForces: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.TriggerContactsFinalUpdate: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SynchronizeFixtures: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearIslandFlags: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindMinimumContinuousContact: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousSynchronizeFixtures: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousTraversal: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClearContinuousIslandFlags: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuous: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteTraversal: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscrete: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ContactsCollide: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Step: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandPostSolve: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandIntegratePoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandVelocityConstraints: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandPositionConstraints: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIslandReadBodyState: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveContinuousIsland: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandBodySleep: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandPostSolve: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandWritePoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandPositionConstraints: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandIntegratePoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandVelocityConstraints: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIslandVelocities: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SolveDiscreteIsland: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindNewContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Rigidbody2D.Slide_SolveOverlap: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Rigidbody2D.Slide_FindContact: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Rigidbody2D.Slide: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Rigidbody2D.GetShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Rigidbody2D.RecalculateContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Rigidbody2D.LayerChanged: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.JointBreakLimits: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.EffectorFixedUpdate: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.EdgeColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.ClearCustomShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.DeleteCustomShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.SetCustomShapesNative: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.SetCustomShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.SetCustomShapesAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.SetCustomShapesAllNative: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.GetCustomShapesAllNative: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.GetCustomShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CustomCollider2D.PrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompositeColliderRemoveFromComposite: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompositeColliderCleanupCompositePaths: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompositeColliderAddToComposite: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompositeColliderPrepareShapesDecomposition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompositeColliderPrepareShapesOutline: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompositeColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CapsuleColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.BoxColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PolygonColliderPrepareShapesDecomposition: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PolygonColliderPrepareCompositePaths: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PolygonColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DestroyContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FlagContactsForExit: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FlagContactsForRecreation: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SendCollisionContactCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SendTriggerContactCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SendContactCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompileContactCallbacksJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CompileContactCallbacks: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.EndContact: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PostSolveContact: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.PreSolveContact: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.BeginContact: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.GetShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.RecalculateContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.LayerChanged: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.TransformParentChanged: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.TransformChanged: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.DestroyShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Collider2D.CreateShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CircleColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CollectProfileInfo: median=0.000791 p95=0.001375 ms; availableFrames=300/300
+Physics2D.ApplyParticleForces: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.SyncColliderTransformChanges: median=0.000125 p95=0.000333 ms; availableFrames=300/300
+Physics2D.SyncRigidbodyTransformChanges: median=0.000125 p95=0.000292 ms; availableFrames=300/300
+Physics2D.SyncTransformChanges: median=0.000542 p95=0.000999 ms; availableFrames=300/300
+Physics2D.ConvertCollision2DForScript: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InterpolatePoseWriting: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InterpolatePoseSorting: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InterpolatePoses: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.InterpolationPosesSetup: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.WriteTransforms: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Simulate: median=0.001084 p95=0.001792 ms; availableFrames=300/300
+Physics2D.ConvertContactPoint2DForScript: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.GetRigidbodyContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.GetColliderContacts: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.IsTouchingLayers: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.IsTouching: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ClosestPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ColliderDistance: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindParticleOverlaps: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.FindParticleIntersections: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.GetRayIntersectionAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.GetRayIntersection: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapCollider: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapBoxAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapBox: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapCircleAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapCircle: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapPointAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.OverlapPoint: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ColliderCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.ColliderCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CapsuleCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CapsuleCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.BoxCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.BoxCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CircleCastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.CircleCast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.RaycastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Raycast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.LinecastAll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.Linecast: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+TilemapCollider2D.CompositeFinal: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+TilemapCollider2D.CompositeChunkJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.TilemapColliderTileUpdate: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.TilemapColliderPreparePaths: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.TilemapColliderPrepareShapes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+TransformColliders: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Colliders: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoRigidbody2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoCustomCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoCompositeCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoPolygonCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoBoxCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoEdgeCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoCapsuleCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoCircleCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics2D.DrawGizmoTilemapCollider2D: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.TerrainCollider.CreateTreeCollidersFromPrototypeJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.TerrainCollider.CreateTrees: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.TerrainCollider.ForceRebuildCollisions: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+WheelCollider.Create: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.VisibleMeshes: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RemoveDirtyActors: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RecordShapeDraws: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.QueryWorld: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.IssueDraws: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.GetFrustum: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.DrawAllActors: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.DestroyMeshCache: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CreateFrustumMesh: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Gizmos.MeshCollider: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Gizmos.ConvexCollider: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.ExtractPxGeometryData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CreatePhysXHeightFieldSamplesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CreatePhysXHeightField: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.BakePhysXCollisionMeshData: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.ProcessPhysXConstraintBreaksJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.ProcessPhysXTriggerPairsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.StorePhysXContactsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.SwapPhysXBuffersJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.PreparePhysXContactBuffersJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.CalculatePhysXContactBuffersSizeJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.FetchPhysXResults: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AssemblyDataFrom Unity.Physics.Editor.ProjectSettingsBridge.dll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AssemblyDataFrom Unity.Physics.Editor.dll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AssemblyDataFrom Unity.Physics.Hybrid.dll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AssemblyDataFrom Unity.Physics.dll: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+CompanionGameObjectUpdateTransformSystem:CopyTransformJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+CompanionGameObjectUpdateTransformSystem:CopyTransformJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+CompanionGameObjectUpdateTransformSystem:CopyTransformJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BaseShapeBakingSystem:ReferenceBakedColliderBlobsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BaseShapeBakingSystem:ReferenceBakedColliderBlobsJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BaseShapeBakingSystem:ReferenceBakedColliderBlobsJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:ChildrenGatheringJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:ChildrenGatheringJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:ChildrenGatheringJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:AddColliderKeyEntityPairBufferJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:AddColliderKeyEntityPairBufferJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:AddColliderKeyEntityPairBufferJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:BlobCalculationJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:BlobCalculationJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:BlobCalculationJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:DeferredResolutionJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:DeferredResolutionJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:DeferredResolutionJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderAabbsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderAabbsJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderAabbsJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:BlobContextUpdateJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:BlobContextUpdateJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BuildCompoundCollidersBakingSystem:BlobContextUpdateJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderEdgesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderEdgesJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderEdgesJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderFacesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderFacesJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DisplayColliderFacesJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMesherPerfTests:MesherJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMesherPerfTests:MesherJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMesherPerfTests:MesherJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRendererTests:TransformBridge: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRendererTests:TransformBridge (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRendererTests:TransformBridge (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderPerfTests:Build: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderPerfTests:Build (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderPerfTests:Build (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRendererTests:MeshReferenceBrick: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRendererTests:MeshReferenceBrick (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRendererTests:MeshReferenceBrick (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelinePerfTests:HitJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelinePerfTests:HitJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelinePerfTests:HitJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLod1Tests:MeshJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLod1Tests:MeshJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLod1Tests:MeshJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshQueueTests:ProducerJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshQueueTests:ProducerJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshQueueTests:ProducerJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMesherTests:MeshJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMesherTests:MeshJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMesherTests:MeshJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLod1Tests:SourceRatioJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLod1Tests:SourceRatioJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLod1Tests:SourceRatioJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuilderTests:CoverageJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuilderTests:CoverageJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuilderTests:CoverageJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuilderTests:BuildJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuilderTests:BuildJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuilderTests:BuildJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderCleanupTests:DelayJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderCleanupTests:DelayJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderCleanupTests:DelayJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderDeadlineTests:DelayedBatch: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderDeadlineTests:DelayedBatch (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderDeadlineTests:DelayedBatch (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderDebugTests:CountersJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderDebugTests:CountersJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderDebugTests:CountersJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelineDataTests:PendingBuildJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelineDataTests:PendingBuildJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelineDataTests:PendingBuildJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSnapshotTests:WriteMaskJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSnapshotTests:WriteMaskJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSnapshotTests:WriteMaskJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSwapTests:SlowJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSwapTests:SlowJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSwapTests:SlowJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelineDataTests:FinalizeJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelineDataTests:FinalizeJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderPipelineDataTests:FinalizeJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridColliderAssemblerTests:AssembleJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridColliderAssemblerTests:AssembleJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridColliderAssemblerTests:AssembleJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegritySelectionTests:ProductionJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegritySelectionTests:ProductionJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegritySelectionTests:ProductionJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LegacyIntegritySelectionJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LegacyIntegritySelectionJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LegacyIntegritySelectionJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashBuildTests:ReadJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashBuildTests:ReadJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashBuildTests:ReadJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashQueryTests:QueryJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashQueryTests:QueryJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashQueryTests:QueryJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderOverlayJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderOverlayJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderOverlayJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashOverlayJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashOverlayJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SpatialHashOverlayJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ProxyBucketJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ProxyBucketJob (Burst): median=0.090709 p95=0.190500 ms; availableFrames=300/300
+ProxyBucketJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ProxySortJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ProxySortJob (Burst): median=0.007458 p95=0.016292 ms; availableFrames=300/300
+ProxySortJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ProxyGatherJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ProxyGatherJob (Burst): median=0.055146 p95=0.130876 ms; availableFrames=300/300
+ProxyGatherJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ZoneSystem:ZoneJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ZoneSystem:ZoneJob (Burst): median=0.002958 p95=0.007167 ms; availableFrames=300/300
+ZoneSystem:ZoneJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EngineWashSystem:WashJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EngineWashSystem:WashJob (Burst): median=0.127188 p95=0.288584 ms; availableFrames=300/300
+EngineWashSystem:WashJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PropulsionStatsSystem:StatsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PropulsionStatsSystem:StatsJob (Burst): median=0.036585 p95=0.094167 ms; availableFrames=300/300
+PropulsionStatsSystem:StatsJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PropulsionJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PropulsionJob (Burst): median=0.244980 p95=0.515874 ms; availableFrames=300/300
+PropulsionJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AiThinkJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AiThinkJob (Burst): median=0.081708 p95=0.177501 ms; availableFrames=300/300
+AiThinkJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ReplicaJobs:ChunkColliderJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ReplicaJobs:ChunkColliderJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ReplicaJobs:ChunkColliderJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickCullJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickCullJob (Burst): median=0.155396 p95=0.181875 ms; availableFrames=300/300
+BrickCullJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshJob (Burst): median=0.000000 p95=0.039375 ms; availableFrames=300/300
+BrickMeshJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLodJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickLodJob (Burst): median=0.255042 p95=0.349207 ms; availableFrames=300/300
+BrickLodJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRenderSystem:TransformJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickPoolRenderSystem:TransformJob (Burst): median=0.144458 p95=0.205499 ms; availableFrames=300/300
+BrickPoolRenderSystem:TransformJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridDormancyJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridDormancyJob (Burst): median=0.025458 p95=0.038333 ms; availableFrames=300/300
+GridDormancyJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridMatrixJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridMatrixJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+GridMatrixJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LodEnqueueJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LodEnqueueJob (Burst): median=0.002167 p95=0.004333 ms; availableFrames=300/300
+LodEnqueueJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderCollectJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderCollectJob (Burst): median=0.001333 p95=0.003250 ms; availableFrames=300/300
+ColliderCollectJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderInstallJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderFinalizeJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderInstallJob (Burst): median=0.002313 p95=0.005750 ms; availableFrames=300/300
+ColliderFinalizeJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderInstallJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderFinalizeJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsMassApplyJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsMassApplyJob (Burst): median=0.001959 p95=0.005667 ms; availableFrames=300/300
+PhysicsMassApplyJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DamageResolveSystem:ClearRestoresJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DamageResolveSystem:ClearRestoresJob (Burst): median=0.001000 p95=0.002625 ms; availableFrames=300/300
+DamageResolveSystem:ClearRestoresJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DamageResolveSystem:ClearEventsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+DamageResolveSystem:ClearEventsJob (Burst): median=0.001000 p95=0.002792 ms; availableFrames=300/300
+DamageResolveSystem:ClearEventsJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegritySystem:FlattenIntegrityJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegritySystem:FlattenIntegrityJob (Burst): median=0.000792 p95=0.001917 ms; availableFrames=300/300
+IntegritySystem:FlattenIntegrityJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SelectIntegrityGridsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SelectIntegrityGridsJob (Burst): median=0.022646 p95=0.047876 ms; availableFrames=300/300
+SelectIntegrityGridsJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegrityRaceJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+IntegrityRaceJob (Burst): median=0.000041 p95=0.000209 ms; availableFrames=300/300
+IntegrityRaceJob (Cleanup): median=0.000167 p95=0.000542 ms; availableFrames=300/300
+ResolveGridJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ResolveGridJob (Burst): median=0.000042 p95=0.000292 ms; availableFrames=300/300
+ResolveGridJob (Cleanup): median=0.000167 p95=0.000750 ms; availableFrames=300/300
+UpdateLODGroupTransformJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+UpdateLODGroupTransformJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+UpdateLODGroupTransformJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AnalyticsJobs:FinalizePhysicsWorldAnalyticsJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+AnalyticsJobs:FinalizePhysicsWorldAnalyticsJob (Burst): median=0.001000 p95=0.002458 ms; availableFrames=300/300
+AnalyticsJobs:FinalizePhysicsWorldAnalyticsJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckTotalBodyAndColliderIntegrity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckTotalBodyAndColliderIntegrity (Burst): median=0.001958 p95=0.004208 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckTotalBodyAndColliderIntegrity (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsIntegrityCheckJobs:RecordDynamicBodyIntegrity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsIntegrityCheckJobs:RecordDynamicBodyIntegrity (Burst): median=0.002188 p95=0.005125 ms; availableFrames=300/300
+PhysicsIntegrityCheckJobs:RecordDynamicBodyIntegrity (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EnsureUniqueColliderSystem:MakeUniqueJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EnsureUniqueColliderSystem:MakeUniqueJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EnsureUniqueColliderSystem:MakeUniqueJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckDynamicBodyIntegrity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckDynamicBodyIntegrity (Burst): median=0.024980 p95=0.054250 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckDynamicBodyIntegrity (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LocalToWorldSystem:ComputeHierarchyLocalToWorldJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LocalToWorldSystem:ComputeHierarchyLocalToWorldJob (Burst): median=0.549377 p95=0.682002 ms; availableFrames=300/300
+LocalToWorldSystem:ComputeHierarchyLocalToWorldJob (Cleanup): median=0.000334 p95=0.000625 ms; availableFrames=300/300
+SyncCustomPhysicsProxySystem:SyncCustomPhysicsProxy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SyncCustomPhysicsProxySystem:SyncCustomPhysicsProxy (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+SyncCustomPhysicsProxySystem:SyncCustomPhysicsProxy (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+CopyPhysicsVelocityToSmoothing:CopyPhysicsVelocityJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+CopyPhysicsVelocityToSmoothing:CopyPhysicsVelocityJob (Burst): median=0.005896 p95=0.014874 ms; availableFrames=300/300
+CopyPhysicsVelocityToSmoothing:CopyPhysicsVelocityJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsIntegrityCheckJobs:RecordColliderIntegrity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsIntegrityCheckJobs:RecordColliderIntegrity (Burst): median=0.002000 p95=0.004416 ms; availableFrames=300/300
+PhysicsIntegrityCheckJobs:RecordColliderIntegrity (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckColliderIntegrity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckColliderIntegrity (Burst): median=0.404042 p95=0.769333 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckColliderIntegrity (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderBlobCleanupSystem:ColliderBlobCleanupJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderBlobCleanupSystem:ColliderBlobCleanupJob (Burst): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderBlobCleanupSystem:ColliderBlobCleanupJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsWorldExporter:ExportDynamicBodiesJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsWorldExporter:ExportDynamicBodiesJob (Burst): median=0.006896 p95=0.013750 ms; availableFrames=300/300
+PhysicsWorldExporter:ExportDynamicBodiesJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LocalToWorldSystem:ComputeWorldSpaceLocalToWorldJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+LocalToWorldSystem:ComputeWorldSpaceLocalToWorldJob (Burst): median=0.013064 p95=0.060044 ms; availableFrames=300/300
+LocalToWorldSystem:ComputeWorldSpaceLocalToWorldJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:DetermineTreeNodeCountJob: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:DetermineTreeNodeCountJob (Burst): median=0.000583 p95=0.001291 ms; availableFrames=300/300
+ExportPhysicsWorld:DetermineTreeNodeCountJob (Cleanup): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckIncrementalBroadphaseIntegrity: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckIncrementalBroadphaseIntegrity (Burst): median=0.014918 p95=0.037416 ms; availableFrames=300/300
+ExportPhysicsWorld:CheckIncrementalBroadphaseIntegrity (Cleanup): median=0.000084 p95=0.000375 ms; availableFrames=300/300
+Physics2D.RegisterGizmos: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.RegisterPhysics: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EarlyUpdate.PhysicsCore2DEarlyUpdate: median=0.002000 p95=0.003208 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds: median=0.007917 p95=0.011375 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.ExecuteRenderCommands (BIRP): median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.ExecuteRenderCommands (SRP): median=0.003125 p95=0.004833 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.AddRenderCommands: median=0.000042 p95=0.000167 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.WorldDrawEvent: median=0.000042 p95=0.000167 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.PolygonCommand: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.CircleCommand: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.CapsuleCommand: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.LineCommand: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PhysicsCore2D.DrawWorlds.PointCommand: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EarlyUpdate.Physics2DEarlyUpdate: median=0.000042 p95=0.000292 ms; availableFrames=300/300
+EarlyUpdate.PhysicsResetInterpolatedTransformPosition: median=0.003666 p95=0.005291 ms; availableFrames=300/300
+FixedUpdate.PhysicsFixedUpdate: median=0.000041 p95=0.000084 ms; availableFrames=300/300
+FixedUpdate.PhysicsCore2DFixedUpdate: median=0.004334 p95=0.006417 ms; availableFrames=300/300
+FixedUpdate.Physics2DFixedUpdate: median=0.002042 p95=0.003125 ms; availableFrames=300/300
+FixedUpdate.PhysicsClothFixedUpdate: median=0.000125 p95=0.000334 ms; availableFrames=300/300
+FixedUpdate.DirectorFixedUpdatePostPhysics: median=0.000042 p95=0.000126 ms; availableFrames=300/300
+PreUpdate.PhysicsUpdate: median=0.001291 p95=0.001792 ms; availableFrames=300/300
+PreUpdate.PhysicsCore2DUpdate: median=0.000480 p95=0.001375 ms; availableFrames=300/300
+PreUpdate.Physics2DUpdate: median=0.000250 p95=0.001125 ms; availableFrames=300/300
+PreLateUpdate.PhysicsCore2DLateUpdate: median=0.000833 p95=0.001334 ms; availableFrames=300/300
+PreLateUpdate.Physics2DLateUpdate: median=0.001333 p95=0.002375 ms; availableFrames=300/300
+PreLateUpdate.PhysicsLateUpdate: median=0.000041 p95=0.000042 ms; availableFrames=300/300
+PostLateUpdate.PhysicsSkinnedClothBeginUpdate: median=0.000625 p95=0.001250 ms; availableFrames=300/300
+PostLateUpdate.PhysicsSkinnedClothFinishUpdate: median=0.000125 p95=0.000250 ms; availableFrames=300/300
+Physics2D.ConvertLowLevelPhysicsSettings: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.DisplayColliderAabbsSystem_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.PhysicsDebugDisplayGroup_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.PhysicsDebugDisplaySystem_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.CleanPhysicsDebugDataSystem_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.DisplayBodyColliderEdges_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Transforms.LocalToWorldSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.DisplayBodyCollidersSystem_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Editor World Unity.Physics.Authoring.DisplayJointsSystem_Editor: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshBuildSystem.Dequeue: median=0.000000 p95=0.001209 ms; availableFrames=300/300
+BrickMeshBuildSystem.Snapshot: median=0.000000 p95=0.178625 ms; availableFrames=300/300
+BrickMeshBuildSystem.Schedule: median=0.000000 p95=0.000917 ms; availableFrames=300/300
+SpatialHashBuildSystem.Gather: median=0.003209 p95=0.008042 ms; availableFrames=300/300
+SpatialHashBuildSystem.Sort: median=0.000855 p95=0.002000 ms; availableFrames=300/300
+SpatialHashBuildSystem.Bucket: median=0.000834 p95=0.001875 ms; availableFrames=300/300
+PropulsionSystem.Schedule: median=0.007646 p95=0.018083 ms; availableFrames=300/300
+DamageResolveSystem.Gather: median=0.011500 p95=0.027374 ms; availableFrames=300/300
+DamageResolveSystem.Sort: median=0.000542 p95=0.001333 ms; availableFrames=300/300
+DamageResolveSystem.Plan: median=0.001334 p95=0.003167 ms; availableFrames=300/300
+DamageResolveSystem.Resolve: median=0.018771 p95=0.042250 ms; availableFrames=300/300
+DamageResolveSystem.Flatten: median=0.002500 p95=0.005625 ms; availableFrames=300/300
+BrickColliderBuildSystem.Access: median=0.000333 p95=0.001834 ms; availableFrames=300/300
+BrickColliderBuildSystem.Finalize: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuildSystem.Seal: median=0.000541 p95=0.000834 ms; availableFrames=300/300
+BrickColliderBuildSystem.Plan: median=0.002291 p95=0.003208 ms; availableFrames=300/300
+BrickColliderBuildSystem.Copy: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuildSystem.Schedule: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickColliderBuildSystem.Deadline: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderCollectJob.Execute: median=0.000083 p95=0.000375 ms; availableFrames=300/300
+ColliderFinalizeJob.Execute: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderInstallJob.Execute: median=0.001000 p95=0.002625 ms; availableFrames=300/300
+ColliderSnapshotSystem.Collect: median=0.002667 p95=0.006208 ms; availableFrames=300/300
+BrickColliderJob.Execute: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+ColliderSwapSystem.Install: median=0.003771 p95=0.008542 ms; availableFrames=300/300
+GridColliderCleanupSystem.Sweep: median=0.001000 p95=0.001417 ms; availableFrames=300/300
+GridColliderCleanupSystem.Retire: median=0.000167 p95=0.000333 ms; availableFrames=300/300
+IntegritySystem.Select: median=0.001709 p95=0.004042 ms; availableFrames=300/300
+IntegritySystem.Race: median=0.001375 p95=0.003542 ms; availableFrames=300/300
+Physics.ContactEvent: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Physics.InvokeOnCollisionEvents: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+EditorApplication.playModeStateChanged: Unity.Physics.Hybrid.SceneSimulationAnalytics.ModeChanged: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Create ProbeBrickPool: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.GridBodyInitSystem: median=0.001334 p95=0.003083 ms; availableFrames=300/300
+Default World Game.Voxel.Damage.DamageResolveSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.BrickColliderBuildSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.InjectTemporalCoherenceDataSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.GraphicsIntegration.SmoothRigidBodiesGraphicalMotion: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayContactsSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.AfterPhysicsSystemGroup: median=0.000167 p95=0.000458 ms; availableFrames=300/300
+Default World Game.Voxel.Damage.IntegritySystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.ColliderSnapshotSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayBodyCollidersSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayIterativeSolverPhasesSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsAnalyticsSystem: median=0.016458 p95=0.034501 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayBroadphaseAabbsSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.SyncCustomPhysicsProxySystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Simulation.Spatial.SpatialHashBuildSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Simulation.Flight.PropulsionStatsSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.Damage.ChunkColliderCleanupSystem: median=0.004875 p95=0.006750 ms; availableFrames=300/300
+Default World Game.Voxel.Rendering.PropRenderSystem: median=0.005292 p95=0.250375 ms; availableFrames=300/300
+Default World Game.Voxel.Rendering.BrickPoolRenderSystem: median=0.219771 p95=0.258709 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.SplitGraceContactSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Core.Systems.GameplayPostPhysicsGroup: median=0.692292 p95=1.607292 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.DummySimulationSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayColliderAabbsSystem_Default: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsSimulationPickerSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsCreateJacobiansGroup: median=0.015792 p95=0.035834 ms; availableFrames=300/300
+Default World Game.Simulation.Hazards.MineSystem: median=0.001417 p95=0.004334 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayCollisionEventsSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Simulation.Flight.PropulsionSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.ColliderBlobCleanupSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Transforms.LocalToWorldSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.GridMassUpdateSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.InjectTemporalCoherenceDataLastResortSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.BuildPhysicsWorld: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.IntegrityCheckSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsSystemGroup: median=1.193271 p95=2.356291 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.GridSpawnBodyInitSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.EnsureUniqueColliderSystem: median=0.000416 p95=0.001042 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsCreateBodyPairsGroup: median=0.070042 p95=0.151000 ms; availableFrames=300/300
+Default World Game.Voxel.Rendering.BrickMeshApplySystem: median=0.004021 p95=0.056125 ms; availableFrames=300/300
+Default World Game.Simulation.Hazards.EngineWashSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.Rendering.BrickMeshBuildSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.BuildPhysicsWorldDependencyResolver: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsInitializeGroupInternal: median=0.061251 p95=0.129833 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayTriggerEventsSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsSimulationGroup: median=0.243730 p95=0.522749 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.GridColliderCleanupSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.GraphicsIntegration.BufferInterpolatedRigidBodiesMotion: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Game.Voxel.PhysicsBody.ColliderSwapSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.GraphicsIntegration.RecordMostRecentFixedTime: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayBodyColliderEdges_Default: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.PhysicsDebugDisplayGroup: median=0.004000 p95=0.005375 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsSolveAndIntegrateGroup: median=0.139312 p95=0.307833 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.ExportPhysicsWorld: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.PhysicsDebugDisplaySystem_Default: median=0.000209 p95=0.000417 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.CleanPhysicsDebugDataSystem_Default: median=0.000459 p95=0.000791 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsInitializeGroup: median=0.062396 p95=0.132292 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.SolveAndIntegrateSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.CreateJacobiansSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.NarrowphaseSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.BroadphaseSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayDirectSolverIslandsSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsBuildWorldGroup: median=0.040833 p95=0.087875 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.InvalidatedTemporalCoherenceCleanupSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.GraphicsIntegration.CopyPhysicsVelocityToSmoothing: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayMassPropertiesSystem: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.BeforePhysicsSystemGroup: median=0.004375 p95=0.009666 ms; availableFrames=300/300
+Default World Unity.Physics.Systems.PhysicsCreateContactsGroup: median=0.014750 p95=0.032250 ms; availableFrames=300/300
+Default World Game.Core.Systems.GameplayPrePhysicsGroup: median=0.986354 p95=1.986666 ms; availableFrames=300/300
+Default World Unity.Physics.Authoring.DisplayJointsSystem_Default: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PropRenderSystem.Gather: median=0.000000 p95=0.243584 ms; availableFrames=300/300
+PropRenderSystem.Matrices: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+PropRenderSystem.Draw: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshApplySystem.Register: median=0.000000 p95=0.000000 ms; availableFrames=300/300
+BrickMeshApplySystem.Apply: median=0.000000 p95=0.048542 ms; availableFrames=300/300
+BrickPoolRenderer.Cull: median=0.160876 p95=0.188833 ms; availableFrames=300/300
+BrickPoolRenderer.Render: median=0.170729 p95=0.200667 ms; availableFrames=300/300
+BrickPoolRenderer.Upload: median=0.000000 p95=0.035833 ms; availableFrames=300/300
+BrickPoolRenderer.Transfer: median=0.000000 p95=0.104542 ms; availableFrames=300/300

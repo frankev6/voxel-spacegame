@@ -1,0 +1,13 @@
+{
+  "test": "DATA014.ContentImport.487",
+  "gate": null,
+  "utc": "2026-11-06T05:28:44Z",
+  "machine": "Mac17,8 / Apple M5 Pro",
+  "unity": "6000.6.5f1",
+  "stats": [
+    { "name": "FullScan", "unit": "ms", "median": 4.73745, "p95": 7.8726, "max": 12.3003, "mean": 5.1629816666666652, "samples": 300 },
+    { "name": "ImportedPath", "unit": "ms", "median": 2.32325, "p95": 2.8377, "max": 7.9927, "mean": 2.4277889999999989, "samples": 300 }
+  ],
+  "budget": { "median": null, "p95": null },
+  "pass": true
+}

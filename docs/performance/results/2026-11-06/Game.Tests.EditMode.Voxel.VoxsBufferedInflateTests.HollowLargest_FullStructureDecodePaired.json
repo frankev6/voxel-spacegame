@@ -1,0 +1,17 @@
+{
+  "test": "Game.Tests.EditMode.Voxel.VoxsBufferedInflateTests.HollowLargest_FullStructureDecodePaired",
+  "gate": null,
+  "utc": "2026-11-06T05:53:51Z",
+  "machine": "Mac17,8 / Apple M5 Pro",
+  "unity": "6000.6.5f1",
+  "stats": [
+    { "name": "LegacyDecodeMs", "unit": "ms", "median": 19.75335, "p95": 38.8033, "max": 97.452800000000011, "mean": 23.051622333333324, "samples": 300 },
+    { "name": "BufferedDecodeMs", "unit": "ms", "median": 6.2421500000000005, "p95": 17.2029, "max": 29.989600000000003, "mean": 7.9984203333333346, "samples": 300 },
+    { "name": "LegacyCodecMs", "unit": "ms", "median": 13.74775, "p95": 29.699900000000003, "max": 76.6756, "mean": 16.51196033333332, "samples": 300 },
+    { "name": "BufferedCodecMs", "unit": "ms", "median": 4.79265, "p95": 15.1186, "max": 26.886200000000002, "mean": 6.2920613333333355, "samples": 300 },
+    { "name": "LegacyStorageMs", "unit": "ms", "median": 5.79425, "p95": 11.988299999999999, "max": 22.866300000000003, "mean": 6.5255000000000019, "samples": 300 },
+    { "name": "BufferedStorageMs", "unit": "ms", "median": 1.4050000000000002, "p95": 3.0084, "max": 12.3962, "mean": 1.7032603333333329, "samples": 300 }
+  ],
+  "budget": { "median": null, "p95": null },
+  "pass": true
+}

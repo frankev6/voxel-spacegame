@@ -602,9 +602,9 @@ The game gates it owns are those listed in §5.7.
 - **Do:** Audit runtime, loading, authoring and developer tools with two Astra light workers and the lead. Record coverage, ranked hypotheses, reproducible baselines and quality invariants; create targeted tasks in owning specs. Seek at least 2x improvement in representative bottleneck workloads and measure integrated impact separately, without implying a microbenchmark is whole-game FPS.
 - **Files:** `docs/performance/2026-11-audit.md`, owning specs, ledger and handoff.
 - **Acceptance criteria:**
-  - [ ] All runtime modules and tool families have recorded audit coverage and actionable findings or bounded exclusions.
-  - [ ] Before/after evidence identifies machine, workload, settings, median/p95 and correctness checks; unavailable measurements remain explicit.
-  - [ ] Visual resolution, geometry, shading, physics fidelity, simulation rate and behavior are preserved.
+  - [x] All runtime modules and tool families have recorded audit coverage and actionable findings or bounded exclusions.
+  - [x] Before/after evidence identifies machine, workload, settings, median/p95 and correctness checks; unavailable measurements remain explicit.
+  - [x] Visual resolution, geometry, shading, physics fidelity, simulation rate and behavior are preserved.
 - **Tests:** Existing relevant functional suites and focused comparative workloads belonging to implementation tasks; no production quality reductions.
 
 ## 10. Open questions

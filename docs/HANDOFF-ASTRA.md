@@ -4,6 +4,8 @@ You led this repo until 2026-10-14. Claude (Opus) led it from 2026-10-14 to 2026
 
 `docs/HANDOFF.md` was brought up to date with this page on 2026-11-06. `docs/ORCHESTRATION.md` still stops at 2026-10-14, so trust this page, the ledger log (`docs/LEDGER.md` § Log, newest first) and the ADRs over it.
 
+**Latest update, 2026-11-06:** the requested three-worker performance round is complete locally. Full largest-Hollow blueprint reconstruction improved **3.16x**, catalog refresh **2.04x**, integrity selection **5.81–10.90x**, and box removal **1.81x**, preserving quality and behavior. Functional checks and compile pass. [Full audit and durable evidence](performance/2026-11-audit.md) distinguish these gains from whole-game FPS, which is not claimed doubled. Daniel's remote changes remain integrated; nothing pushed.
+
 ## 1. The project in one paragraph
 
 **Spaceship Game V2**: a Unity 6.6 DOTS game. You build ships from functional voxel blocks, fly between star systems uncovering a mystery, and watch huge voxel ships and stations break apart. Frank (the owner) plays builds and steers by playtest feedback. The current direction is an **exploration slice**: one star system (the Hollow system) that should feel like *Sid Meier's Pirates!* or *Starcom*. You hear a rumour in port, cross open space to something unknown, and come home with a clue that opens the way on.

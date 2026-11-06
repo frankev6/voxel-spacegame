@@ -1077,9 +1077,9 @@ Evidence retained locally in ignored `Logs/tools/vox003-{reference,thin-shell}.t
 - **Do:** Move synchronous mask/count and normalized destination-copy loops in dense brick ingestion to Burst direct calls. Keep allocation, replacement equality, revision, free-page and ownership behavior unchanged. Compare complete reconstruction against frozen original inflater and storage loops.
 - **Files:** `Assets/Game/Voxel/Model/VoxelStructure.cs`, internal ingestion helper, owning-module correctness and paired performance tests.
 - **Acceptance criteria:**
-  - [ ] Exact masks, cells, sparse/dense selection, revisions and replacement behavior match the original, including noncanonical air values.
-  - [ ] Existing codec/storage tests and focused differential tests pass with safety checks.
-  - [ ] Paired full reconstruction timings report median/p95 and unchanged workload; compile passes.
+  - [x] Exact masks, cells, sparse/dense selection, revisions and replacement behavior match the original, including noncanonical air values.
+  - [x] Existing codec/storage tests and focused differential tests pass with safety checks.
+  - [x] Paired full reconstruction timings report median/p95 and unchanged workload; compile passes.
 - **Tests:** Differential ingestion and original-versus-optimized full Hollow reconstruction.
 
 ## 10. Open questions
