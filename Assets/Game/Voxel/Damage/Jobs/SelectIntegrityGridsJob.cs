@@ -29,16 +29,22 @@ namespace Game.Voxel.Damage.Jobs
             ordered.Sort(new EntityOrder());
             foreach (var root in ordered)
             {
+                // Untouched grids have nothing to normalize or select. Retained seeds must still
+                // run even without new removals: they carry work deferred by earlier ticks.
+                var seeds = Seeds[root];
+                bool removed = false;
+                foreach (var range in Ranges)
+                    if (range.Grid == root && range.Count > 0) { removed = true; break; }
+                if (seeds.Length == 0 && !removed) continue;
                 using var positions = new NativeList<int3>(Allocator.Temp);
                 using var seen = new NativeHashSet<int3>(16, Allocator.Temp);
                 foreach (var range in Ranges)
                     if (range.Grid == root)
                         for (int i = range.Start; i < range.Start + range.Count; i++)
                         {
-                            var removed = Removed[i]; if (removed.Reason != CellRemovedReason.Destroyed) continue;
-                            for (int face = 0; face < 6; face++) Add(root, removed.Cell + BrickMath.FaceDirection((BlockFace)face), positions, seen);
+                            var cell = Removed[i]; if (cell.Reason != CellRemovedReason.Destroyed) continue;
+                            for (int face = 0; face < 6; face++) Add(root, cell.Cell + BrickMath.FaceDirection((BlockFace)face), positions, seen);
                         }
-                var seeds = Seeds[root];
                 foreach (var seed in seeds) Add(root, seed.Cell, positions, seen);
                 seeds.Clear(); foreach (var p in positions) seeds.Add(new IntegritySeed { Cell = p });
                 if (positions.Length == 0) continue;
