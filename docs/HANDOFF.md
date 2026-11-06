@@ -31,7 +31,13 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 ## 2. Where things stand (2026-11-06)
 
-- **Last work: 2026-10-21, exploration slice phase 1** (TRV-015 in-world cruise, ADR-0122; DEV-028 the Hollow system). Everything is merged to `main` and pushed (`084f8a17`, 2026-11-04). The newest LEDGER log entries have the detail.
+- **Last game work: 2026-11-04/05, by Daniel, the second developer** (pushed to `origin/main`):
+  - the control sheet (DEV-029) and its Flight configs panel (DEV-030);
+  - experimental 3D flight (FLT-016, ADR-0123; DEV-031 `flight3d`) and the `freeaim` camera (CAM-013);
+  - playground entry from any scene (DEV-032);
+  - grouped settings controls (HUD-021).
+- **Before that:** exploration slice phase 1 on 2026-10-21 (TRV-015 in-world cruise, ADR-0122; DEV-028 the Hollow system).
+- Fetch and merge `origin/main` before starting: Daniel pushes there. The newest LEDGER log entries have the detail.
 - **Since QA-001 (2026-10-14), all merged:**
   - QA-001 itself;
   - co-op (NET-001…019, ADR-0117);
@@ -46,6 +52,7 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Known issues:**
   - loading a save can fail with "No participant restore is active" (`GameSession.RestoreFrom`, `GameSession.cs:259`);
   - `tools/check-docs.py` reports DMG-020 undefined in any spec;
+  - EditMode tests already failing on `main`: `ConventionsTests`, `GamepadTests.AllFlightActionsBound`, `SettingsViewTests.Slider_PersistsImmediately`, `ThemeFilesTests` (toast.uss). [HANDOFF-ASTRA.md](HANDOFF-ASTRA.md) §5 has the details;
   - the heat zone does nothing until phase 6.
 - **Paused:** the three GPT-6.1-Sol workers in [ORCHESTRATION.md](ORCHESTRATION.md) (paused since 2026-10-14). That page is out of date.
 - **Uncommitted on purpose:** the URP global settings asset that Unity rewrites on open.

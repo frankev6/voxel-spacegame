@@ -1,6 +1,6 @@
 # Handoff for Astra: Voxel Spacegame (2026-11-06)
 
-You led this repo until 2026-10-14. Claude (Opus) led it from 2026-10-14 to 2026-10-21, and nothing has changed on the game since. This page covers what you need to pick it back up: the rules, what changed while you were away, where things stand, and what comes next.
+You led this repo until 2026-10-14. Claude (Opus) led it from 2026-10-14 to 2026-10-21. On 2026-11-04 and 11-05, Daniel, the second developer Frank races and plays co-op with, added control and flight tooling through Claude and pushed it (§4.0). This page covers what you need to pick it back up: the rules, what changed while you were away, where things stand, and what comes next.
 
 `docs/HANDOFF.md` was brought up to date with this page on 2026-11-06. `docs/ORCHESTRATION.md` still stops at 2026-10-14, so trust this page, the ledger log (`docs/LEDGER.md` § Log, newest first) and the ADRs over it.
 
@@ -13,7 +13,7 @@ You led this repo until 2026-10-14. Claude (Opus) led it from 2026-10-14 to 2026
 | What | Where |
 |---|---|
 | Main checkout | `/Users/frank/DEV/voxel-spacegame`, branch `main` |
-| Remote | `origin` = public GitHub `frankev6/voxel-spacegame`. Pushed 2026-11-04: `main` = `origin/main` = `084f8a17` |
+| Remote | `origin` = public GitHub `frankev6/voxel-spacegame`. Daniel pushes his work there (last: `209e0658`, 2026-11-05). Local `main` has merged it and is ahead by this handoff; fetch and merge `origin/main` before starting, since he may have pushed since |
 | Unity | 6000.6.5f1 at `/Applications/Unity/Hub/Editor/6000.6.5f1/Unity.app`. CLI at `~/.unity/bin/unity`, driving the open Editor through `com.unity.pipeline` |
 | Co-op worktree | `/Users/frank/DEV/spaceship-game-v2-coop`, on `task/TRV-015-exploration-slice` (merged into main; holds only three stray `_Test *.meta` files) |
 | Old Codex worker worktrees | `~/.codex/worktrees/{1369,5fab,6d4c,combat-hit-detection}`: DEV-021/EDT-022 branches from before 2026-10-14, all integrated. Stale; don't build on them |
@@ -39,9 +39,26 @@ Binding. Most are also in `AGENTS.md` §2 and `docs/HANDOFF.md` §1.
 - **Sequencing** (owner, 2026-10-14): finish and connect M1–M3 before further M4 depth. Since then he has directed the work himself, through the racing track, the playground hub, the Hollow and the exploration slice. Follow his current direction, and ask with options when it's unclear.
 - **Workers:** the three GPT-6.1-Sol worker threads in `ORCHESTRATION.md` are paused since 2026-10-14. Don't resume them without Frank.
 
-## 4. What changed since you left (2026-10-14 → 2026-10-21)
+## 4. What changed since you left (2026-10-14 → 2026-11-05)
 
-Every item has a ledger log entry with Frank's words, proof images and tests. Newest first:
+Every item has a ledger log entry with the owner's words, proof images and tests. Newest first:
+
+0. **Daniel's tooling and experimental 3D flight** (2026-11-04/05, all merged and pushed). In his ledger entries "Owner" quotes Daniel.
+   - **Control sheet** (DEV-029): `controls` in the console opens a localhost page (`http://127.0.0.1:47810/`) for a second monitor. It shows every action, live input state and probes; the page lives in `tools/controlsheet/`.
+   - **Flight configs panel** (DEV-030) on the same page: all 25 `FlightConfig` values, adjustable live (not saved).
+   - **Experimental 3D flight** (FLT-016, ADR-0123), player ship only:
+     - `flight3d on|off`, which DEV-031 added;
+     - Lift on Y/H;
+     - B makes the ship face where you aim, and P makes it face the selected target;
+     - cruise is refused in 3D;
+     - co-op `NetProtocol.Version` 9 carries Lift.
+   - **Free-aim chase camera** (CAM-013, preset `freeaim`): it switches in automatically in 3D with B on, and `camera tilt=` tunes the crosshair offset.
+   - **Enter playground from any scene** (DEV-032), except a Blueprint Lab outside the playground profile.
+   - **Settings controls** (HUD-021):
+     - sub-tabs by map, in two columns, one row per action;
+     - a keyboard/controller switch;
+     - Backspace/Delete unbinds;
+     - a bigger opaque panel and legible hover colours throughout the UI.
 
 1. **Exploration slice, phase 1** (TRV-015, DEV-028; ADR-0122). Plan: `docs/design/exploration/exploration-slice.md` (approved).
    - **In-world cruise replaces the old supercruise** (TRV-013 dropped). J toggles it. It spools 1 s, builds to 8 km/s, and slows by itself to arrive 1 km from anything. Mass lock from hostiles within 5 km, a 5 s lock after a hit, cruise zones cap it (the Scatter: 800 m/s). `CruiseSystem` is the sole writer of `Cruise` (ship edge 512).
@@ -76,7 +93,13 @@ Every item has a ledger log entry with Frank's words, proof images and tests. Ne
 
 ## 5. Where things stand
 
-- **Ledger summary:** M0 and M1 done. M2: 8 todo, 1 in progress. M3: 12 todo, 11 in progress. M4: 16 todo, 12 in progress. A1 asset production: 29 todo.
+- **Ledger summary:** M0 and M1 done. M2: 8 todo, 1 in progress. M3: 12 todo, 11 in progress. M4: 13 todo, 12 in progress. A1 asset production: 29 todo.
+- **Tests already failing on `main`** (each noted by the task that found them, none fixed):
+  - `ConventionsTests`: `Mouse.current` in `CameraTargetSyncSystem.cs` and `HudSyncSystem.cs`, and `Debug.LogWarning` in `HollowSystem.cs`;
+  - `GamepadTests.AllFlightActionsBound`: `Flight/SensorPing` has no gamepad binding;
+  - `SettingsViewTests.Slider_PersistsImmediately`;
+  - `ThemeFilesTests.ThemeUss_NoLiteralColorsOrFonts` on `toast.uss`;
+  - `StaticStateAuditTests` lists seven older statics.
 - **Known bug, unfixed:** loading a save can fail with `InvalidOperationException: No participant restore is active`. It's thrown from `SaveService.ReportRestoreWarning` via `GameSession.RestoreFrom` (`GameSession.cs:259`), then `SceneFlow.RecoverAsync`. Logged 2026-10-21 and seen again live on 2026-11-04. A good first fix.
 - **Docs check fails:** `tools/check-docs.py` reports 1 error. SPEC-24 ABL-006 depends on DMG-020, which is in the ledger but defined in no spec. Add DMG-020 to SPEC-13.
 - **Phase 1 leftovers:** the heat zone does nothing yet (it comes in phase 6), and bottom-edge marker labels can overlap.
@@ -140,5 +163,5 @@ tools/check-docs.py                               # after editing any doc
 1. `AGENTS.md` (unchanged rules and commands)
 2. `docs/LEDGER.md` § Log, the entries from 2026-10-14 to 2026-10-21
 3. `docs/design/exploration/exploration-slice.md` and `world-and-scale.md`
-4. ADR-0114 to ADR-0122
+4. ADR-0114 to ADR-0123
 5. `docs/07-implementation-traps.md`, then the spec for whatever you pick up
