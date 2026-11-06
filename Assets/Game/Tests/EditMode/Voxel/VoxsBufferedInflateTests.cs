@@ -86,6 +86,23 @@ namespace Game.Tests.EditMode.Voxel
             var (catalog, ships) = Hollow();
             foreach (var ship in ships) Compare(ship.Payload.ToArray(), catalog);
         }
+        [Test]
+        public void HollowLargest_StorageProducesIdenticalCanonicalBytes()
+        {
+            var (catalog, ships) = Hollow(); var ship = ships.OrderByDescending(s => s.Payload.Length).First();
+            Assert.IsTrue(VoxsCodec.TryDecode(ship.Payload, catalog, Allocator.TempJob, out var decoded, out var error), error);
+            using (decoded)
+            using (var legacy = VoxelStructureCodec.FromDecodedLegacyStorage(decoded))
+            using (var current = VoxelStructureCodec.FromDecoded(decoded))
+            {
+                var names = VoxsBlockNames.FromCatalog(catalog);
+                CollectionAssert.AreEqual(VoxelStructureCodec.Encode(legacy, names, VoxsEncodeOptions.ForSaveChunk),
+                    VoxelStructureCodec.Encode(current, names, VoxsEncodeOptions.ForSaveChunk));
+                Assert.AreEqual(legacy.Revision, current.Revision);
+                Assert.AreEqual(legacy.Data.FreePages.Length, current.Data.FreePages.Length);
+                Assert.AreEqual(legacy.Data.FreeSparsePages.Length, current.Data.FreeSparsePages.Length);
+            }
+        }
         [Test, Performance, Category("Performance")]
         public void HollowLargest_FullStructureDecodePaired()
         {
@@ -109,7 +126,7 @@ namespace Game.Tests.EditMode.Voxel
                     legacyStorage[i] = a.storage; bufferedStorage[i] = b.storage;
                 }
             }
-            TestContext.WriteLine($"{ship.IdString}: {bytes.Length} compressed bytes, {ship.CellCount} solid cells, {brickCount} bricks, {instanceCount} instances, {denseCells} dense cells; full decode+structure storage, disposal excluded; 60 warmup/300 paired samples");
+            TestContext.WriteLine($"{ship.IdString}: {bytes.Length} compressed bytes, {ship.CellCount} solid cells, {brickCount} bricks, {instanceCount} instances, {denseCells} dense cells; full decode+structure storage (legacy one-byte+managed storage versus buffered+Burst storage), disposal excluded; 60 warmup/300 paired samples");
             new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("LegacyDecodeMs", baseline)
                 .AddSamples("BufferedDecodeMs", buffered)
                 .AddSamples("LegacyCodecMs", legacyCodec).AddSamples("BufferedCodecMs", bufferedCodec)
@@ -125,7 +142,7 @@ namespace Game.Tests.EditMode.Voxel
                 {
                     Assert.IsTrue(ok, error);
                     double storageStart = timer.Elapsed.TotalMilliseconds;
-                    using var structure = VoxelStructureCodec.FromDecoded(decoded); timer.Stop();
+                    using var structure = legacy ? VoxelStructureCodec.FromDecodedLegacyStorage(decoded) : VoxelStructureCodec.FromDecoded(decoded); timer.Stop();
                     brickCount = decoded.BrickCoords.Length; instanceCount = decoded.Instances.Length; denseCells = decoded.Cells.Length;
                     Assert.AreEqual(ship.CellCount, structure.SolidCellCount);
                     return (timer.Elapsed.TotalMilliseconds, codecMs, timer.Elapsed.TotalMilliseconds - storageStart);

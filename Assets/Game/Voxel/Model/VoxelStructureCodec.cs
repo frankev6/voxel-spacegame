@@ -46,7 +46,9 @@ namespace Game.Voxel.Model
                 result = FromDecoded(decoded); return true;
             }
         }
-        public static VoxelStructure FromDecoded(VoxsDecoded decoded)
+        public static VoxelStructure FromDecoded(VoxsDecoded decoded) => FromDecoded(decoded, false);
+        internal static VoxelStructure FromDecodedLegacyStorage(VoxsDecoded decoded) => FromDecoded(decoded, true);
+        static VoxelStructure FromDecoded(VoxsDecoded decoded, bool legacyStorage)
         {
             if (decoded.Partial) throw new InvalidOperationException("Partial VOXS payloads must be applied by their owner");
             var structure = new VoxelStructure(decoded.CellSize);
@@ -58,7 +60,11 @@ namespace Game.Voxel.Model
                 data.Instances.AddRange(decoded.Instances.AsArray());
                 for (int i = 0; i < data.Instances.Length; i++) if (data.Instances[i].Block == 0) data.FreeInstances.Add(i);
                 for (int i = 0; i < decoded.BrickCoords.Length; i++)
-                    structure.SetBrickDense(decoded.BrickCoords[i], decoded.Cells.AsArray().GetSubArray(i * BrickMath.CellsPerBrick, BrickMath.CellsPerBrick));
+                {
+                    var cells = decoded.Cells.AsArray().GetSubArray(i * BrickMath.CellsPerBrick, BrickMath.CellsPerBrick);
+                    if (legacyStorage) structure.SetBrickDenseLegacy(decoded.BrickCoords[i], cells);
+                    else structure.SetBrickDense(decoded.BrickCoords[i], cells);
+                }
                 structure.OptimizeStorage(); return structure;
             }
             catch { structure.Dispose(); throw; }
