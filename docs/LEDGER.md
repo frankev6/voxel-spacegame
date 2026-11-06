@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 13 | 12 | 0 | 1 | 65 | 1 | 92 | 6 |
+| M4 | 13 | 12 | 0 | 0 | 66 | 1 | 92 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -514,7 +514,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | review | claude (claude-opus-5-5) | 2026-11-05 | 65c149cb | Tests pass; waiting on the owner's look in the game |
+| HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | done | claude (claude-opus-5-5) | 2026-11-05 | 851a6027 | Owner checked in the game: "The changes are good" |
 | CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
@@ -1313,6 +1313,9 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
   - Each action shows once, with one slot button per binding for that device (Fire primary: LMB and Space, or RT).
   - The model stays one entry per binding, so rebinding and the button names are unchanged.
   - The panel is now opaque; the pause menu showed through it in the owner's screenshot.
+- **Layout.** Owner: "put the keyboard & mouse and Controller buttons inline with the different control tabs, and on the right side of the panel": one bar now holds the group tabs and the device switch, which wraps under them when the panel is narrow.
+- **Axis halves.** Owner: "can you add the experimental flight3d binds to the controls? they're not there". The halves of each 1D axis are now listed and rebindable: Lift up/down (Y/H), and Thrust, Strafe and Turn (W/S, Q/E, A/D), via `RebindRowViewModel.RowKey`. Modifier combos stay out. The face toggles were already listed.
+- **Done.** Owner, after checking in the game: "The changes are good. send them in".
 - **Unbinding.** Owner: "there should be a way to unbind a bind completely"; they chose Backspace/Delete.
   - While a slot listens, those keys apply an empty override through the rebind operation's `OnApplyBinding`, so no new `InputService` entry point was needed.
   - The slot reads "Unbound", the change saves, and Reset restores the default.

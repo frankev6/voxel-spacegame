@@ -722,9 +722,9 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
   - **Unbinding** (owner: "there should be a way to unbind a bind completely"; chose Backspace/Delete): while a slot listens, Backspace or Delete applies an empty override (`InputService` `OnApplyBinding`, `IsUnbindKey`); the slot reads "Unbound", the override saves, and Reset restores it. Esc still cancels. Backspace and Delete can no longer be bound.
 - **Files:** `Assets/Game/UI/Views/{SettingsView.cs,Uxml/SettingsView.uxml,Uxml/RebindRow.uxml}`, `Assets/Game/UI/ViewModels/SettingsViewModel.cs`, `Assets/Game/UI/Views/Commands/ISettingsCommands.cs`, `Assets/Game/App/Presenters/SettingsPresenter.cs`, `Assets/Game/UI/Theme/{screens/settings.uss,components/list.uss}`, `Assets/Game/Tests/PlayMode/UI/Screens/SettingsViewTests.cs`.
 - **Acceptance criteria:**
-  - [ ] The Controls tab shows four sub-tabs and only the selected group's bindings, in two columns.
-  - [ ] The settings panel is larger and still passes the layout audit at every logical size.
-  - [ ] Hovered list rows and other default-themed controls keep legible text on a dark surface.
+  - [x] The Controls tab shows four sub-tabs and only the selected group's bindings, in two columns.
+  - [x] The settings panel is larger and still passes the layout audit at every logical size.
+  - [x] Hovered list rows and other default-themed controls keep legible text on a dark surface.
 - **Tests:** `SettingsViewTests.ControlsGroups_FilterRows`, `SettingsViewTests.Rebind_Backspace_Unbinds` (new); the existing rebind and layout cases, updated to select the group.
 
 ## 10. Open questions
