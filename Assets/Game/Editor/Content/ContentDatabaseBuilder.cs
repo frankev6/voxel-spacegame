@@ -12,6 +12,10 @@ namespace Game.Editor.Content
     {
         public const string ContentRoot = "Assets/Game/Content";
         public const string DatabasePath = ContentRoot + "/ContentDatabase.asset";
+        // Trust incremental membership only after a full scan in this editor domain. Reloads,
+        // database replacement and external list edits fall back to the canonical scan.
+        static ContentDatabase scannedDatabase;
+        static IReadOnlyList<ContentDefinition> scannedDefinitions;
 
         /// <summary>Loads every definition under the content root, sorts by ordinal ID (empty IDs last, then by path) and updates the database
         /// only if the list changed. Creates the database if it is missing.</summary>
@@ -28,6 +32,35 @@ namespace Game.Editor.Content
                 .Select(AssetDatabase.GUIDToAssetPath).Distinct()
                 .SelectMany(p => AssetDatabase.LoadAllAssetsAtPath(p).OfType<ContentDefinition>().Select(d => (Def: d, Path: p)))
                 .ToList();
+            Apply(database, found);
+            return database;
+        }
+
+        internal static ContentDatabase RebuildImported(IReadOnlyCollection<string> imported)
+        {
+            var database = AssetDatabase.LoadAssetAtPath<ContentDatabase>(DatabasePath);
+            if (database == null || database != scannedDatabase ||
+                !ReferenceEquals(database.Definitions, scannedDefinitions)) return Rebuild();
+            var paths = new HashSet<string>(imported, System.StringComparer.Ordinal);
+            var found = new List<(ContentDefinition Def, string Path)>(database.Definitions.Count);
+            foreach (var definition in database.Definitions)
+            {
+                // A removed subasset may already be a destroyed Unity object. Its former path
+                // is unavailable, so reconstruct instead of silently dropping unknown content.
+                if (definition == null) return Rebuild();
+                string path = AssetDatabase.GetAssetPath(definition);
+                if (string.IsNullOrEmpty(path) || !path.StartsWith(ContentRoot + "/", System.StringComparison.Ordinal)) return Rebuild();
+                if (!paths.Contains(path)) found.Add((definition, path));
+            }
+            foreach (string path in paths)
+                foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(path))
+                    if (asset is ContentDefinition definition) found.Add((definition, path));
+            Apply(database, found);
+            return database;
+        }
+
+        static void Apply(ContentDatabase database, List<(ContentDefinition Def, string Path)> found)
+        {
             found.Sort((a, b) =>
             {
                 bool ea = string.IsNullOrEmpty(a.Def.IdString), eb = string.IsNullOrEmpty(b.Def.IdString);
@@ -42,7 +75,8 @@ namespace Game.Editor.Content
                 EditorUtility.SetDirty(database);
                 AssetDatabase.SaveAssetIfDirty(database);
             }
-            return database;
+            scannedDatabase = database;
+            scannedDefinitions = database.Definitions;
         }
     }
 }

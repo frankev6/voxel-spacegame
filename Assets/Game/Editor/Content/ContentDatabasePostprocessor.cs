@@ -1,4 +1,4 @@
-using System.Linq;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace Game.Editor.Content
@@ -8,10 +8,19 @@ namespace Game.Editor.Content
     public sealed class ContentDatabasePostprocessor : AssetPostprocessor
     {
         static bool scheduled, pendingAfterPlay;
+        static bool fullScan;
+        static readonly HashSet<string> importedPaths = new(System.StringComparer.Ordinal);
 
         static void OnPostprocessAllAssets(string[] imported, string[] deleted, string[] moved, string[] movedFrom)
         {
-            if (!imported.Concat(deleted).Concat(moved).Concat(movedFrom).Any(IsContent)) return;
+            bool changed = false;
+            foreach (string path in imported) if (IsContent(path)) { importedPaths.Add(path); changed = true; }
+            // Deletes and moves can invalidate Unity object references before their old path
+            // can be recovered; keep the full scan for these less frequent operations.
+            foreach (string path in deleted) if (IsContent(path)) fullScan = changed = true;
+            foreach (string path in moved) if (IsContent(path)) fullScan = changed = true;
+            foreach (string path in movedFrom) if (IsContent(path)) fullScan = changed = true;
+            if (!changed) return;
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 if (!pendingAfterPlay) { pendingAfterPlay = true; EditorApplication.playModeStateChanged += AfterPlay; }
@@ -28,7 +37,23 @@ namespace Game.Editor.Content
         {
             if (scheduled) return;
             scheduled = true;
-            EditorApplication.delayCall += () => { scheduled = false; ContentDatabaseBuilder.Rebuild(); };
+            EditorApplication.delayCall += Flush;
+        }
+
+        static void Flush()
+        {
+            scheduled = false;
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                if (!pendingAfterPlay) { pendingAfterPlay = true; EditorApplication.playModeStateChanged += AfterPlay; }
+                return;
+            }
+            // Clear before saving: imports raised by SaveAssetIfDirty belong to a new batch.
+            var paths = new List<string>(importedPaths);
+            bool rebuild = fullScan;
+            importedPaths.Clear(); fullScan = false;
+            if (rebuild) ContentDatabaseBuilder.Rebuild();
+            else ContentDatabaseBuilder.RebuildImported(paths);
         }
 
         static void AfterPlay(PlayModeStateChange change)
