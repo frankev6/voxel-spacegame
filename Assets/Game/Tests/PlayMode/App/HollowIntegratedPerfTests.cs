@@ -92,6 +92,9 @@ namespace Game.Tests.PlayMode.App
             Assert.IsNotNull(pipeline); Assert.IsTrue(camera.enabled);
             int width = camera.pixelWidth, height = camera.pixelHeight, msaa = pipeline.msaaSampleCount;
             float scale = pipeline.renderScale, shadows = pipeline.shadowDistance;
+            Assert.AreEqual(1920, width, "Configure the interactive Game view to fixed 1920x1080; command-line screen size does not configure Editor Game view");
+            Assert.AreEqual(1080, height, "A lower-resolution capture cannot establish the reference rendering result");
+            Assert.IsNull(camera.targetTexture, "Use the production Game view including UI, not an offscreen replacement target");
             var metadata = new StringBuilder();
             metadata.AppendLine("utc=" + DateTime.UtcNow.ToString("O"));
             metadata.AppendLine($"screen={Screen.width}x{Screen.height}; camera={width}x{height}; pipeline={pipeline.name}; MSAA={msaa}; renderScale={scale}; shadowDistance={shadows}");
@@ -103,19 +106,32 @@ namespace Game.Tests.PlayMode.App
             var frame = new double[300]; var gpu = new List<double>(300); var timings = new FrameTiming[1];
             bool timingEnabled = FrameTimingManager.IsFeatureEnabled(); ulong previousTimestamp = 0;
             uint firstTick = 0;
+            using var draws = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count", 1);
+            using var triangles = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count", 1);
+            var drawSamples = new double[300]; var triangleSamples = new double[300];
+            int rendered = 0, sampledRendered = 0, renderedFrames = 0, positiveRenderFrames = 0;
+            void CameraRendered(ScriptableRenderContext context, Camera view) { if (view == camera) rendered++; }
+            RenderPipelineManager.endCameraRendering += CameraRendered;
             try
             {
+                Assert.IsTrue(draws.Valid && triangles.Valid, "Actual draw/triangle recorders are required for rendered performance evidence");
                 Assert.IsTrue(recordings.Exists(r => r.Name == "PlayerLoop" || r.Name == "Main Thread"), "No inclusive CPU timing handle available");
                 double deadline = Time.realtimeSinceStartupAsDouble + 90;
                 for (int i = 0; i < 60; i++) { if (Time.realtimeSinceStartupAsDouble >= deadline) Assert.Fail("Warmup deadline"); yield return null; }
                 firstTick = Tick(); // Read once and discard its frame before measuring.
                 yield return null;
+                sampledRendered = rendered;
                 for (int i = 0; i < 300; i++)
                 {
                     if (timingEnabled) FrameTimingManager.CaptureFrameTimings();
                     yield return null;
                     if (Time.realtimeSinceStartupAsDouble >= deadline) Assert.Fail("Capture deadline");
                     frame[i] = Time.unscaledDeltaTime * 1000.0;
+                    drawSamples[i] = draws.Count > 0 ? draws.LastValue : 0;
+                    triangleSamples[i] = triangles.Count > 0 ? triangles.LastValue : 0;
+                    if (rendered > sampledRendered) renderedFrames++;
+                    if (rendered > sampledRendered && drawSamples[i] > 0 && triangleSamples[i] > 0) positiveRenderFrames++;
+                    sampledRendered = rendered;
                     foreach (var recording in recordings)
                     {
                         if (recording.Recorder.Count == 0) continue;
@@ -131,8 +147,13 @@ namespace Game.Tests.PlayMode.App
                 Assert.AreEqual(width, camera.pixelWidth); Assert.AreEqual(height, camera.pixelHeight);
                 Assert.AreEqual(msaa, pipeline.msaaSampleCount); Assert.AreEqual(scale, pipeline.renderScale); Assert.AreEqual(shadows, pipeline.shadowDistance);
                 metadata.AppendLine($"ticks={firstTick}..{endTick}; GPUFrameTimingEnabled={timingEnabled}; uniquePositiveGpuSamples={gpu.Count}");
+                metadata.AppendLine($"productionCameraRenderedFrames={renderedFrames}/300; positiveDrawAndTriangleFrames={positiveRenderFrames}/300");
                 metadata.AppendLine("after=" + Snapshot());
-                var run = new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("RenderedFrameInterval", frame);
+                TestContext.WriteLine(metadata.ToString());
+                Assert.AreEqual(300, renderedFrames, "The production camera did not render every sampled frame; keep the fixed-resolution Game view visible");
+                Assert.AreEqual(300, positiveRenderFrames, "Zero or unavailable draw/triangle counters invalidate a rendered FPS comparison");
+                var run = new PerfRun(TestContext.CurrentContext.Test.FullName).AddSamples("RenderedFrameInterval", frame)
+                    .AddSamples("DrawCalls", drawSamples, "count").AddSamples("Triangles", triangleSamples, "count");
                 foreach (var recording in recordings)
                 {
                     if (recording.AvailableFrames == 0) { metadata.AppendLine("unavailable=" + recording.Name); continue; }
@@ -149,7 +170,7 @@ namespace Game.Tests.PlayMode.App
                 TestContext.WriteLine(metadata.ToString()); TestContext.WriteLine("Metadata: " + path);
                 TestContext.WriteLine("Includes real production traffic/rendering and Editor overhead. Marker times overlap and must not be summed into a frame estimate. No whole-game speedup is asserted by this capture.");
             }
-            finally { foreach (var recording in recordings) recording.Dispose(); }
+            finally { RenderPipelineManager.endCameraRendering -= CameraRendered; foreach (var recording in recordings) recording.Dispose(); }
         }
     }
 }
