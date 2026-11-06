@@ -82,11 +82,24 @@ namespace Game.App.Presenters
                         if (binding.isComposite || binding.isPartOfComposite || path.EndsWith("/position", StringComparison.Ordinal) ||
                             path.EndsWith("/delta", StringComparison.Ordinal) || path.EndsWith("/scroll", StringComparison.Ordinal)) continue;
                         bindings.Add((action, i));
-                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = map.name + "/" + action.name,
-                            DisplayName = map.name + " / " + action.name });
+                        // HUD-021: the sub-tab names the map, so the row shows the action alone ("Fire primary").
+                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = map.name + "/" + action.name, DisplayName = Humanize(action.name) });
                     }
             }
             RefreshBindings();
+        }
+        /// <summary>"FirePrimary" → "Fire primary", "Ability1" → "Ability 1", "DevConsole" → "Dev console".</summary>
+        internal static string Humanize(string name)
+        {
+            var text = new System.Text.StringBuilder(name.Length + 4);
+            for (int i = 0; i < name.Length; i++)
+            {
+                char c = name[i];
+                bool boundary = i > 0 && (char.IsUpper(c) && !char.IsUpper(name[i - 1]) || char.IsDigit(c) && !char.IsDigit(name[i - 1]));
+                if (boundary) text.Append(' ');
+                text.Append(i > 0 && boundary && char.IsUpper(c) ? char.ToLowerInvariant(c) : c);
+            }
+            return text.ToString();
         }
         void RefreshBindings()
         {
@@ -114,6 +127,11 @@ namespace Game.App.Presenters
             RefreshBindings();
         }
         public void SelectTab(int tab) { if (bound && !disposed && tab >= 0 && tab < 5 && tab != model.SelectedTab) { CancelRebind(); model.SelectedTab = tab; } }
+        public void SelectControlsGroup(int group)
+        {
+            if (bound && !disposed && group >= 0 && group < SettingsViewModel.ControlsGroupMaps.Length && group != model.ControlsGroup)
+            { CancelRebind(); model.ControlsGroup = group; }
+        }
         void Apply(GameSettings edited, SettingsSection section)
         {
             if (!bound || disposed) return;

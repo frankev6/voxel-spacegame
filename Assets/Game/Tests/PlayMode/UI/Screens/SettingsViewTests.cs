@@ -111,7 +111,7 @@ namespace Game.Tests.PlayMode.UI.Screens
         {
             using var window = new Window(keyboard); window.Presenter.SelectTab(2); yield return null;
             int row = window.InteractRow; Assert.GreaterOrEqual(row, 0);
-            var list = window.View.Root.Q<ListView>("settings-rebinds"); list.ScrollToItem(row); yield return null;
+            window.Presenter.SelectControlsGroup(1); yield return null;   // HUD-021: Interact is under the Flight sub-tab
             window.Click("settings-rebind-" + row); Assert.IsTrue(window.Input.IsRebinding);
             Assert.AreEqual("Press a key…", window.Model.Rebinds[row].BindingText);
             PressNow(keyboard.escapeKey); ReleaseNow(keyboard.escapeKey);
@@ -136,7 +136,7 @@ namespace Game.Tests.PlayMode.UI.Screens
         [UnityTest] public IEnumerator Rebind_Success_UpdatesRow()
         {
             using var window = new Window(keyboard); window.Presenter.SelectTab(2); yield return null;
-            int row = window.InteractRow; window.View.Root.Q<ListView>("settings-rebinds").ScrollToItem(row); yield return null;
+            int row = window.InteractRow; window.Presenter.SelectControlsGroup(1); yield return null;
             window.Click("settings-rebind-" + row); PressNow(keyboard.uKey); currentTime += .2; InputSystem.Update(); ReleaseNow(keyboard.uKey);
             Assert.IsFalse(window.Input.IsRebinding); Assert.AreEqual("U", window.Model.Rebinds[row].BindingText);
             yield return null;
@@ -145,6 +145,39 @@ namespace Game.Tests.PlayMode.UI.Screens
             using var restored = new InputService(loaded.Current.Controls); Assert.AreEqual("U", restored.GetBindingDisplay("Flight/Interact"));
             window.Click("settings-reset-bindings"); Assert.AreEqual("F", window.Model.Rebinds[row].BindingText);
             loaded.Load(); restored.ApplyBindingOverrides(loaded.Current.Controls.BindingOverridesJson); Assert.AreEqual("F", restored.GetBindingDisplay("Flight/Interact"));
+        }
+        /// <summary>HUD-021, owner: "put the controls into different tabs inside the controls tab, based on what they're for ... and can
+        /// divide the controls into two columns".</summary>
+        [UnityTest] public IEnumerator ControlsGroups_FilterRows()
+        {
+            using var window = new Window(keyboard, 1920, 1080); window.Presenter.SelectTab(2); yield return null;
+            var groupTabs = window.View.Root.Q<Game.UI.Controls.TabBar>("settings-controls-tabs");
+            Assert.NotNull(groupTabs);
+            CollectionAssert.AreEqual(new[] { "General", "Flight", "Ship editor", "Dialogue" }, SettingsViewModel.ControlsGroupLabels);
+            for (int group = 0; group < SettingsViewModel.ControlsGroupMaps.Length; group++)
+            {
+                groupTabs.SelectedIndex = group; yield return null;
+                Assert.AreEqual(group, window.Model.ControlsGroup);
+                string prefix = SettingsViewModel.ControlsGroupMaps[group] + "/";
+                var shown = new List<VisualElement>();
+                for (int i = 0; i < window.Model.Rebinds.Count; i++)
+                {
+                    var cell = window.View.Root.Q<Button>("settings-rebind-" + i).parent.parent;
+                    bool inGroup = window.Model.Rebinds[i].ActionPath.StartsWith(prefix, StringComparison.Ordinal);
+                    Assert.AreEqual(!inGroup, cell.ClassListContains(UIStyleClasses.IsHidden), window.Model.Rebinds[i].ActionPath);
+                    if (inGroup) shown.Add(cell);
+                }
+                Assert.Greater(shown.Count, 0, prefix + " has bindings");
+                if (shown.Count >= 2)
+                {
+                    // Two columns: the first two rows sit side by side.
+                    Assert.AreEqual(shown[0].worldBound.y, shown[1].worldBound.y, 1f, prefix + " rows share a line");
+                    Assert.Greater(shown[1].worldBound.x, shown[0].worldBound.x + shown[0].worldBound.width * .5f);
+                }
+            }
+            Assert.AreEqual("Fire primary", window.Model.Rebinds.Find(row => row.ActionPath == "Flight/FirePrimary").DisplayName, "Rows name the action without its map");
+            window.Presenter.SelectControlsGroup(2); window.Presenter.StartRebind(window.InteractRow); Assert.IsTrue(window.Input.IsRebinding);
+            window.Presenter.SelectControlsGroup(1); Assert.IsFalse(window.Input.IsRebinding, "Switching groups cancels a listening rebind, as switching tabs does");
         }
         [UnityTest] public IEnumerator RebindList_ExcludesPointerAndComposites()
         {

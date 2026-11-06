@@ -1,4 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:game="Game.UI.Controls">
+    <ui:Template name="RebindRow" src="RebindRow.uxml" />
     <Style src="../../Theme/screens/settings.uss" />
     <ui:VisualElement class="settings-screen" picking-mode="Ignore">
         <ui:VisualElement name="settings-panel" class="panel settings-panel">
@@ -20,7 +21,10 @@
                 <ui:VisualElement name="settings-page-controls" class="settings-page" picking-mode="Ignore">
                     <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Mouse sensitivity" class="settings-label" picking-mode="Ignore" /><ui:Slider name="settings-mouse-sensitivity" class="settings-control" low-value="0.1" high-value="5" /></ui:VisualElement>
                     <ui:VisualElement class="settings-row" picking-mode="Ignore"><ui:Label text="Invert orbit Y" class="settings-label" picking-mode="Ignore" /><ui:Toggle name="settings-invert-orbit-y" class="settings-control" /></ui:VisualElement>
-                    <ui:ListView name="settings-rebinds" class="list settings-rebinds" item-template="project://database/Assets/Game/UI/Views/Uxml/RebindRow.uxml?fileID=9197481963319205126&amp;guid=ebc4508b13ab4dbeaf0ad9350d2bb907&amp;type=3#RebindRow" fixed-item-height="64" virtualization-method="FixedHeight" selection-type="None" />
+                    <game:TabBar name="settings-controls-tabs" class="settings-controls-tabs" />
+                    <ui:VisualElement name="settings-rebinds" class="settings-rebinds" picking-mode="Ignore">
+                        <ui:Instance template="RebindRow" name="settings-rebind-template" />
+                    </ui:VisualElement>
                     <ui:Button name="settings-reset-bindings" text="Reset bindings" class="btn btn--secondary settings-reset" />
                 </ui:VisualElement>
                 <ui:VisualElement name="settings-page-gameplay" class="settings-page" picking-mode="Ignore">

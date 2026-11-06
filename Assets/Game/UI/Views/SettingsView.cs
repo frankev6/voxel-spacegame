@@ -7,7 +7,8 @@ using UnityEngine.UIElements;
 
 namespace Game.UI.Views
 {
-    /// <summary>SPEC-61 HUD-005: five authored tabs and virtualized binding rows.</summary>
+    /// <summary>SPEC-61 HUD-005: five authored tabs. HUD-021: the Controls page groups its binding rows under sub-tabs by action map and
+    /// lays them out in two columns (about sixty rows in all, so they are built once rather than virtualized).</summary>
     public sealed class SettingsView : UIScreen
     {
         readonly SettingsViewModel viewModel;
@@ -21,9 +22,11 @@ namespace Game.UI.Views
         readonly Slider[] sliders = new Slider[7];
         readonly Toggle[] toggles = new Toggle[3];
         readonly VisualElement[] pages = new VisualElement[5];
-        TabBar tabs;
+        TabBar tabs, controlsTabs;
         DropdownField resolution, fullscreen, quality, yaw, textScale;
-        ListView rebinds;
+        VisualElement rebinds;
+        VisualTreeAsset rowTemplate;
+        readonly System.Collections.Generic.List<TemplateContainer> rows = new System.Collections.Generic.List<TemplateContainer>(64);
         bool observing;
         public SettingsView(SettingsViewModel vm, ISettingsCommands commands)
         { viewModel = vm ?? throw new ArgumentNullException(nameof(vm)); this.commands = commands ?? throw new ArgumentNullException(nameof(commands)); }
@@ -52,27 +55,15 @@ namespace Game.UI.Views
             quality = Dropdown("quality", SettingKey.Quality);
             yaw = Dropdown("camera-yaw-mode", SettingKey.CameraYawMode); yaw.choices = new System.Collections.Generic.List<string> { "Follow heading", "Free orbit" };
             textScale = Dropdown("text-scale", SettingKey.TextScale); textScale.choices = new System.Collections.Generic.List<string> { "100%", "115%", "130%" };
-            rebinds = Q<ListView>("settings-rebinds");
-            var template = rebinds.itemTemplate ?? throw new InvalidOperationException("settings: missing rebind row template");
-            rebinds.itemTemplate = null;
-            rebinds.makeItem = () =>
-            {
-                var row = template.Instantiate();
-                row.Q<Button>("settings-rebind-button").clicked += () => { if (row.userData is int index) { if (index == viewModel.ListeningRow) commands.CancelRebind(); else commands.StartRebind(index); } };
-                return row;
-            };
-            rebinds.bindItem = (row, index) =>
-            {
-                row.userData = index; row.dataSource = viewModel.Rebinds[index];
-                var item = viewModel.Rebinds[index];
-                row.Q<Label>("settings-rebind-action").text = item.DisplayName;
-                row.Q<Label>("settings-rebind-binding").text = item.BindingText;
-                var button = row.Q<Button>(); button.name = "settings-rebind-" + index;
-                button.text = item.IsListening ? "Cancel" : "Rebind";
-                // One listener per pooled row, with the current row index read at activation.
-            };
-            rebinds.unbindItem = (row, _) => { row.userData = null; row.dataSource = null; };
-            rebinds.itemsSource = viewModel.Rebinds;
+            controlsTabs = Q<TabBar>("settings-controls-tabs");
+            var groupNames = new string[SettingsViewModel.ControlsGroupLabels.Length];
+            for (int i = 0; i < groupNames.Length; i++) groupNames[i] = "settings-controls-tab-" + SettingsViewModel.ControlsGroupMaps[i].ToLowerInvariant();
+            controlsTabs.SetTabs(SettingsViewModel.ControlsGroupLabels, groupNames); controlsTabs.SelectionChanged += commands.SelectControlsGroup;
+            rebinds = Q<VisualElement>("settings-rebinds");
+            // The UXML carries one RebindRow instance only to hand its template to code; rows are made from it per binding.
+            var carrier = Q<TemplateContainer>("settings-rebind-template");
+            rowTemplate = carrier.templateSource ?? throw new InvalidOperationException("settings: missing rebind row template");
+            carrier.RemoveFromHierarchy();
             Q<Button>("settings-reset-bindings").clicked += commands.ResetBindings;
             Q<Button>("settings-close").clicked += () => { commands.CancelRebind(); Close(); };
         }
@@ -91,6 +82,7 @@ namespace Game.UI.Views
         void Refresh()
         {
             tabs.SelectedIndex = viewModel.SelectedTab;
+            controlsTabs.SelectedIndex = viewModel.ControlsGroup;
             for (int i = 0; i < pages.Length; i++) pages[i].EnableInClassList(UIStyleClasses.IsHidden, i != viewModel.SelectedTab);
             sliders[0].SetValueWithoutNotify(viewModel.MasterVolume); sliders[1].SetValueWithoutNotify(viewModel.MusicVolume);
             sliders[2].SetValueWithoutNotify(viewModel.SfxVolume); sliders[3].SetValueWithoutNotify(viewModel.UiVolume);
@@ -100,7 +92,33 @@ namespace Game.UI.Views
             resolution.choices = viewModel.Resolutions; quality.choices = viewModel.QualityNames;
             SetIndex(resolution, viewModel.ResolutionIndex); SetIndex(fullscreen, viewModel.FullscreenModeIndex);
             SetIndex(quality, viewModel.QualityIndex); SetIndex(yaw, viewModel.CameraYawModeIndex); SetIndex(textScale, viewModel.TextScaleIndex);
-            rebinds.RefreshItems();
+            RefreshRows();
+        }
+
+        /// <summary>One row per binding, made once for the list's length; each keeps its global index (the button is
+        /// settings-rebind-&lt;index&gt;), and only the selected group's rows show.</summary>
+        void RefreshRows()
+        {
+            var items = viewModel.Rebinds;
+            while (rows.Count > items.Count) { rows[rows.Count - 1].RemoveFromHierarchy(); rows.RemoveAt(rows.Count - 1); }
+            while (rows.Count < items.Count)
+            {
+                var row = rowTemplate.Instantiate(); row.AddToClassList("settings-rebind-cell"); row.userData = rows.Count;
+                row.Q<Button>("settings-rebind-button").clicked += () =>
+                { if (row.userData is int index) { if (index == viewModel.ListeningRow) commands.CancelRebind(); else commands.StartRebind(index); } };
+                rows.Add(row); rebinds.Add(row);
+            }
+            int group = viewModel.ControlsGroup;
+            string prefix = group >= 0 && group < SettingsViewModel.ControlsGroupMaps.Length ? SettingsViewModel.ControlsGroupMaps[group] + "/" : "";
+            for (int i = 0; i < items.Count; i++)
+            {
+                var row = rows[i]; var item = items[i];
+                row.dataSource = item;
+                row.Q<Label>("settings-rebind-action").text = item.DisplayName;
+                row.Q<Label>("settings-rebind-binding").text = item.BindingText;
+                var button = row.Q<Button>(); button.name = "settings-rebind-" + i; button.text = item.IsListening ? "Cancel" : "Rebind";
+                row.EnableInClassList(UIStyleClasses.IsHidden, item.ActionPath == null || !item.ActionPath.StartsWith(prefix, StringComparison.Ordinal));
+            }
         }
         void SetIndex(DropdownField field, int index)
         { if (index >= 0 && index < field.choices.Count) field.SetValueWithoutNotify(field.choices[index]); }

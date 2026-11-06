@@ -4,6 +4,7 @@ namespace Game.UI.Views
     public interface ISettingsCommands
     {
         void SelectTab(int tab);
+        void SelectControlsGroup(int group);   // HUD-021: the Controls page's sub-tab
         void SetFloat(SettingKey key, float value);
         void SetBool(SettingKey key, bool value);
         void SetIndex(SettingKey key, int index);
