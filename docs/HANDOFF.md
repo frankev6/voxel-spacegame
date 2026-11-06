@@ -1,5 +1,8 @@
 # Handoff: start here if you're continuing the work
 
+
+**Active correction (2026-11-06):** Frank rejected closing the performance goal on subsystem benchmarks. TST-011 resumes actual average FPS and end-to-end game loading optimization; the previous round's measured gains remain valid, but the requested integrated outcome is not complete.
+
 **Status: living.** Read this first, then [AGENTS.md](../AGENTS.md). It covers the owner's standing rules, where the work stands and what comes next.
 
 - Whoever ends a working session updates *Where things stand* and *Next*. Keep each to a few lines and link to the ledger rather than repeating it.

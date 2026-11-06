@@ -1,5 +1,8 @@
 # Handoff for Astra: Voxel Spacegame (2026-11-06)
 
+
+**Active correction (2026-11-06):** Frank rejected closing the performance goal on subsystem benchmarks. TST-011 resumes actual average FPS and end-to-end game loading optimization; the previous round's measured gains remain valid, but the requested integrated outcome is not complete.
+
 You led this repo until 2026-10-14. Claude (Opus) led it from 2026-10-14 to 2026-10-21. On 2026-11-04 and 11-05, Daniel, the second developer Frank races and plays co-op with, added control and flight tooling through Claude and pushed it (§4.0). This page covers what you need to pick it back up: the rules, what changed while you were away, where things stand, and what comes next.
 
 `docs/HANDOFF.md` was brought up to date with this page on 2026-11-06. `docs/ORCHESTRATION.md` still stops at 2026-10-14, so trust this page, the ledger log (`docs/LEDGER.md` § Log, newest first) and the ADRs over it.

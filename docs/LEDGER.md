@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 13 | 12 | 0 | 0 | 73 | 1 | 99 | 6 |
+| M4 | 14 | 12 | 0 | 0 | 73 | 1 | 100 | 7 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -534,6 +534,7 @@
 | DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
 | DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | done | claude (claude-opus-5-5) | 2026-11-05 | 24efec2e | Owner: the button did nothing after Play in an empty scene |
 | TST-010 | Owner-directed performance audit and comparative evidence | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M4 | frontier | TST-001 | yes | done | lead (gpt-6-astra) | 2026-11-06 | ef1e4d5c | Parallel audit and raw evidence in docs/performance/2026-11-audit.md; rendered capture valid, no FPS speedup claim |
+| TST-011 | Integrated gameplay FPS and end-to-end loading optimization | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M4 | frontier | TST-010 | yes | in-progress | lead (gpt-6-astra) | 2026-11-06 |  | Owner correction: actual FPS/game load time; earlier subsystem wins insufficient |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1309,6 +1310,11 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-06 — TST-011: resume actual game speed and loading objective
+
+- Owner, verbatim: ""These gains do not mean whole-game FPS doubled." you didn't even test to improve average fps, game load time AS ASKED. please resume your goal and focus on game speed, optimizations for voxels, etc."
+- The earlier goal was closed prematurely on subsystem evidence. Those verified changes remain, but they do not complete the owner's requested integrated outcome. Goal active again: actual average FPS/frame distributions and full user-action-to-playable-rendered-world load latency, preserving quality/physics. Two Astra light workers resumed; lead owns integrated harness and implementation.
 
 ### 2026-11-06 — TST-010 performance round completed (lead + two Astra light workers)
 

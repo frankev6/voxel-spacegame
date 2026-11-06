@@ -607,6 +607,19 @@ The game gates it owns are those listed in §5.7.
   - [x] Visual resolution, geometry, shading, physics fidelity, simulation rate and behavior are preserved.
 - **Tests:** Existing relevant functional suites and focused comparative workloads belonging to implementation tasks; no production quality reductions.
 
+### TST-011 — Integrated gameplay FPS and end-to-end loading optimization
+- **Milestone:** M4
+- **Tier:** frontier — owner-directed integrated performance work
+- **Depends on:** `TST-010`
+- **Do:** Resume the owner's actual game-speed objective. Establish representative average FPS/frame-time and end-to-end load baselines; profile integrated voxel/rendering/loading work; implement measured bottleneck improvements through owning tasks; compare the same workloads/settings before and after. Subsystem benchmarks do not satisfy this task.
+- **Files:** Integrated gameplay/load harness, owning specs, performance evidence and handoff.
+- **Acceptance criteria:**
+  - [ ] Actual average FPS, frame-time distributions and action-to-playable-rendered-world load latency measured against repeatable baseline workloads.
+  - [ ] Target at least 2x integrated improvement, with honest outcome for each metric; no substitution of microbenchmark gains.
+  - [ ] Resolution, visual quality, geometry and physics fidelity preserved, with relevant regression and visual evidence.
+  - [ ] Final compile/checks and handoff reflect the actual integrated outcome.
+- **Tests:** Production Hollow/gameplay captures, end-to-end load trials, owning-module equivalence/safety tests.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
