@@ -177,7 +177,7 @@ namespace Game.Tests.EditMode.Voxel
             try
             {
                 using (var warmup = new VoxelStructure()) warmup.SetCell(default, Cell.Palette(1));
-                UnsafeUtility.CheckForLeaks();
+                NativeLeakBaseline.Capture();
                 var structure = new VoxelStructure();
                 structure.SetCell(default, Cell.Palette(1));
                 structure.SetBrickUniform(new int3(1), Cell.Palette(2));

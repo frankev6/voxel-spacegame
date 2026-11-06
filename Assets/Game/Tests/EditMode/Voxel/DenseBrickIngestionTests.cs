@@ -2,6 +2,8 @@ using Game.Voxel.Model;
 using NUnit.Framework;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.TestTools;
 using Unity.Mathematics;
 
 namespace Game.Tests.EditMode.Voxel
@@ -13,35 +15,43 @@ namespace Game.Tests.EditMode.Voxel
         {
             bool previous = BurstCompiler.Options.EnableBurstCompilation;
             bool synchronous = BurstCompiler.Options.EnableBurstCompileSynchronously;
+            var leakMode = NativeLeakDetection.Mode;
             try
             {
                 BurstCompiler.Options.EnableBurstCompilation = burst;
                 BurstCompiler.Options.EnableBurstCompileSynchronously = true;
-                using var expected = new VoxelStructure(); using var actual = new VoxelStructure();
-                using var ownedCells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
-                var cells = ownedCells; // Writable local view; ownedCells retains deterministic disposal.
-                int3 coord = new int3(-1, 2, 3);
-                foreach (int count in new[] { 0, 1, SparseCellStorage.Limit, 1, SparseCellStorage.Limit + 1, SparseCellStorage.Limit, 4096, 1, 0, 4096 })
+                NativeLeakDetection.Mode = NativeLeakDetectionMode.EnabledWithStackTrace;
+                NativeLeakBaseline.Capture();
                 {
-                    // Noncanonical air payload must be cleared; non-air HP/flags must remain exact.
-                    for (int i = 0; i < cells.Length; i++) cells[i] = i < count
-                        ? Cell.Palette(1, 37, 5) : new Cell { Hp = 99, Flags = 255 };
+                    using var expected = new VoxelStructure(); using var actual = new VoxelStructure();
+                    using var ownedCells = new NativeArray<Cell>(BrickMath.CellsPerBrick, Allocator.Temp);
+                    var cells = ownedCells;
+                    int3 coord = new int3(-1, 2, 3);
+                    foreach (int count in new[] { 0, 1, SparseCellStorage.Limit, 1, SparseCellStorage.Limit + 1, SparseCellStorage.Limit, 4096, 1, 0, 4096 })
+                    {
+                        // Noncanonical air payload must be cleared; non-air HP/flags must remain exact.
+                        for (int i = 0; i < cells.Length; i++) cells[i] = i < count
+                            ? Cell.Palette(1, 37, 5) : new Cell { Hp = 99, Flags = 255 };
+                        expected.SetBrickDenseLegacy(coord, cells); actual.SetBrickDense(coord, cells); Equal(expected, actual, coord);
+                        uint revision = actual.Revision;
+                        expected.SetBrickDenseLegacy(coord, cells); actual.SetBrickDense(coord, cells); Equal(expected, actual, coord);
+                        Assert.AreEqual(revision, actual.Revision, "Identical replacement must not change revision");
+                        expected.OptimizeStorage(); actual.OptimizeStorage(); Equal(expected, actual, coord);
+                    }
+                    // Replace an optimized uniform brick and then reuse retired dense/sparse pages at another coordinate.
+                    cells[17] = Cell.Palette(2, 19, 7);
                     expected.SetBrickDenseLegacy(coord, cells); actual.SetBrickDense(coord, cells); Equal(expected, actual, coord);
-                    uint revision = actual.Revision;
+                    coord = new int3(8, -2, 0);
                     expected.SetBrickDenseLegacy(coord, cells); actual.SetBrickDense(coord, cells); Equal(expected, actual, coord);
-                    Assert.AreEqual(revision, actual.Revision, "Identical replacement must not change revision");
-                    expected.OptimizeStorage(); actual.OptimizeStorage(); Equal(expected, actual, coord);
                 }
-                // Replace an optimized uniform brick and then reuse retired dense/sparse pages at another coordinate.
-                cells[17] = Cell.Palette(2, 19, 7);
-                expected.SetBrickDenseLegacy(coord, cells); actual.SetBrickDense(coord, cells); Equal(expected, actual, coord);
-                coord = new int3(8, -2, 0);
-                expected.SetBrickDenseLegacy(coord, cells); actual.SetBrickDense(coord, cells); Equal(expected, actual, coord);
+                Assert.AreEqual(0, UnsafeUtility.CheckForLeaks(), "All ingestion test-owned allocations must be released.");
+                LogAssert.NoUnexpectedReceived();
             }
             finally
             {
                 BurstCompiler.Options.EnableBurstCompilation = previous;
                 BurstCompiler.Options.EnableBurstCompileSynchronously = synchronous;
+                NativeLeakDetection.Mode = leakMode;
             }
         }
         static void Equal(VoxelStructure expected, VoxelStructure actual, int3 coord)

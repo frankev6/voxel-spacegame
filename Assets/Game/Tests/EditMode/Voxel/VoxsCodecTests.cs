@@ -200,7 +200,7 @@ namespace Game.Tests.EditMode.Voxel
             var c=Catalog();using var s=VoxsTestStructures.Random(c,17);byte[] expected=Encode(s.Source,c);
             using(var warm=Decode(expected,c)){}
             var old=NativeLeakDetection.Mode;NativeLeakDetection.Mode=NativeLeakDetectionMode.EnabledWithStackTrace;
-            UnsafeUtility.CheckForLeaks();bool enabled=BurstCompiler.Options.EnableBurstCompilation;
+            NativeLeakBaseline.Capture();bool enabled=BurstCompiler.Options.EnableBurstCompilation;
             try
             {
                 BurstCompiler.Options.EnableBurstCompilation=false;CollectionAssert.AreEqual(expected,Encode(s.Source,c));
