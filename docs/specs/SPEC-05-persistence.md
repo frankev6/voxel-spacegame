@@ -1046,6 +1046,18 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
   - [ ] Focused roundtrip, malformed-data, fuzz and compile checks pass.
 - **Tests:** Differential compressed-stream termination corpus and actual blueprint decoding benchmark; existing VOXS codec tests.
 
+### PERS-021 — Burst exact decoded cell validation and remapping
+- **Milestone:** M4
+- **Tier:** frontier — owner-directed second codec optimization pass with malformed-input parity
+- **Depends on:** `PERS-007`
+- **Do:** Execute existing integer cell-reference validation, HP initialization/validation, instance counting and remapping loops synchronously in Burst. Preserve all acceptance rules, error offsets, repairs and ordering. Keep original loops in the legacy differential path.
+- **Files:** `Assets/Game/Voxel/Data/VoxsCodec.cs`, internal bounded cell-loop helper, codec parity tests.
+- **Acceptance criteria:**
+  - [ ] Exact decoded fields, canonical reconstruction bytes and malformed acceptance match the original.
+  - [ ] Focused codec and disposal checks plus compile pass.
+  - [ ] Paired original-versus-optimized full reconstruction timings recorded with unchanged content.
+- **Tests:** Existing malformed corpus, all shipped Hollow payloads, codec roundtrip/drift/limits, paired largest-asset reconstruction.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |
