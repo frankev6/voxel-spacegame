@@ -76,18 +76,40 @@ namespace Game.App.Presenters
             {
                 if (map.name != "Global" && map.name != "Flight" && map.name != "Editor" && map.name != "Dialog") continue;
                 foreach (var action in map.actions)
+                {
+                    string composite = null;
                     for (int i = 0; i < action.bindings.Count; i++)
                     {
                         var binding = action.bindings[i]; string path = binding.path ?? "";
-                        if (binding.isComposite || binding.isPartOfComposite || path.EndsWith("/position", StringComparison.Ordinal) ||
+                        if (binding.isComposite) { composite = path; continue; }
+                        // HUD-021 (owner: the flight3d Lift keys were missing): each half of a 1D axis (W/S, A/D, Y/H...) is its own row.
+                        // Modifier combos (controller Select+..., editor Ctrl+...) stay out: one key press cannot rebind them.
+                        bool axisHalf = binding.isPartOfComposite && composite == "1DAxis";
+                        if (binding.isPartOfComposite && !axisHalf || path.EndsWith("/position", StringComparison.Ordinal) ||
                             path.EndsWith("/delta", StringComparison.Ordinal) || path.EndsWith("/scroll", StringComparison.Ordinal)) continue;
                         bindings.Add((action, i));
-                        // HUD-021: the sub-tab names the map, so the row shows the action alone ("Fire primary").
-                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = map.name + "/" + action.name, DisplayName = Humanize(action.name),
+                        string actionPath = map.name + "/" + action.name;
+                        // The sub-tab names the map, so the row shows the action alone ("Fire primary", "Lift up").
+                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = actionPath,
+                            DisplayName = axisHalf ? Humanize(action.name) + " " + AxisHalf(action.name, binding.name) : Humanize(action.name),
+                            RowKey = axisHalf ? actionPath + "#" + binding.name : actionPath,
                             Device = (binding.groups ?? "").Contains("Gamepad") ? 1 : 0 });
                     }
+                }
             }
             RefreshBindings();
+        }
+        /// <summary>HUD-021: the word for one half of a 1D axis ("Lift" + positive gives "up").</summary>
+        internal static string AxisHalf(string action, string part)
+        {
+            bool positive = part == "positive";
+            switch (action)
+            {
+                case "Thrust": return positive ? "forward" : "reverse";
+                case "Strafe": case "Turn": return positive ? "right" : "left";
+                case "Lift": return positive ? "up" : "down";
+                default: return positive ? "+" : "-";
+            }
         }
         /// <summary>"FirePrimary" → "Fire primary", "Ability1" → "Ability 1", "DevConsole" → "Dev console".</summary>
         internal static string Humanize(string name)

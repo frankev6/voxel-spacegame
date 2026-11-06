@@ -162,7 +162,7 @@ namespace Game.Tests.PlayMode.UI.Screens
                     deviceTabs.SelectedIndex = device; groupTabs.SelectedIndex = group; yield return null;
                     Assert.AreEqual(group, window.Model.ControlsGroup); Assert.AreEqual(device, window.Model.ControlsDevice);
                     string prefix = SettingsViewModel.ControlsGroupMaps[group] + "/";
-                    var expected = model.Where(r => r.Device == device && r.ActionPath.StartsWith(prefix, StringComparison.Ordinal)).Select(r => r.ActionPath).Distinct().ToList();
+                    var expected = model.Where(r => r.Device == device && r.ActionPath.StartsWith(prefix, StringComparison.Ordinal)).Select(r => r.RowKey).Distinct().ToList();
                     var shown = window.View.Root.Query<TemplateContainer>(className: "settings-rebind-cell").ToList()
                         .Where(row => !row.ClassListContains(UIStyleClasses.IsHidden)).ToList();
                     CollectionAssert.AreEqual(expected, shown.Select(row => (string)row.userData), prefix + " device " + device + ": each action once");
@@ -210,14 +210,26 @@ namespace Game.Tests.PlayMode.UI.Screens
             {
                 if (!new[] { "Global", "Flight", "Editor", "Dialog" }.Contains(map.name)) continue;
                 foreach (var action in map.actions)
+                {
+                    string composite = null;
                     foreach (var binding in action.bindings)
                     {
-                        if (binding.isComposite || binding.isPartOfComposite || binding.path == "<Mouse>/position" || binding.path == "<Mouse>/delta" || binding.path == "<Mouse>/scroll") continue;
+                        if (binding.isComposite) { composite = binding.path; continue; }
+                        // HUD-021: halves of a 1D axis are listed; modifier-combo parts are not.
+                        if (binding.isPartOfComposite && composite != "1DAxis" || binding.path == "<Mouse>/position" || binding.path == "<Mouse>/delta" || binding.path == "<Mouse>/scroll") continue;
                         expected.Add(map.name + "/" + action.name);
                     }
+                }
             }
             CollectionAssert.AreEqual(expected, window.Model.Rebinds.Select(row => row.ActionPath));
             Assert.IsTrue(window.Model.Rebinds.Any(row => row.ActionPath == "Flight/FirePrimary"));
+            // Owner: the experimental flight3d binds belong in the list: Lift's two keys and the two facing toggles.
+            var lift = window.Model.Rebinds.Where(row => row.ActionPath == "Flight/Lift").ToList();
+            CollectionAssert.AreEquivalent(new[] { "Lift up", "Lift down" }, lift.Select(row => row.DisplayName));
+            CollectionAssert.AreEquivalent(new[] { "Y", "H" }, lift.Select(row => row.BindingText));
+            Assert.IsTrue(window.Model.Rebinds.Any(row => row.ActionPath == "Flight/FaceAimToggle" && row.BindingText == "B"));
+            Assert.IsTrue(window.Model.Rebinds.Any(row => row.ActionPath == "Flight/FaceTargetToggle" && row.BindingText == "P"));
+            Assert.IsTrue(window.Model.Rebinds.Any(row => row.DisplayName == "Thrust forward" && row.BindingText == "W"), "Movement keys are rebindable too");
             Assert.IsFalse(window.Model.Rebinds.Any(row => row.ActionPath.StartsWith("UI/", StringComparison.Ordinal) || row.ActionPath.StartsWith("Menu/", StringComparison.Ordinal)));
         }
         [UnityTest] public IEnumerator Layout_AllTabs_AllLogicalSizes_NoIssues()

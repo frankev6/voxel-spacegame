@@ -120,11 +120,12 @@ namespace Game.UI.Views
                 if (show) RowOf(slot).EnableInClassList(UIStyleClasses.IsHidden, false);
             }
         }
+        static string KeyOf(RebindRowViewModel item) => item.RowKey ?? item.ActionPath;
         static TemplateContainer RowOf(Button slot) => slot.GetFirstAncestorOfType<TemplateContainer>();
         bool SameBindings(System.Collections.Generic.List<RebindRowViewModel> items)
         {
             if (builtPaths.Count != items.Count) return false;
-            for (int i = 0; i < items.Count; i++) if (builtPaths[i] != items[i].ActionPath) return false;
+            for (int i = 0; i < items.Count; i++) if (builtPaths[i] != KeyOf(items[i])) return false;
             return true;
         }
         void BuildRows(System.Collections.Generic.List<RebindRowViewModel> items)
@@ -134,12 +135,12 @@ namespace Game.UI.Views
             var byAction = new System.Collections.Generic.Dictionary<string, TemplateContainer>(StringComparer.Ordinal);
             for (int i = 0; i < items.Count; i++)
             {
-                var item = items[i]; builtPaths.Add(item.ActionPath);
-                if (!byAction.TryGetValue(item.ActionPath, out var row))
+                var item = items[i]; string key = KeyOf(item); builtPaths.Add(key);
+                if (!byAction.TryGetValue(key, out var row))
                 {
-                    row = rowTemplate.Instantiate(); row.AddToClassList("settings-rebind-cell"); row.userData = item.ActionPath;
+                    row = rowTemplate.Instantiate(); row.AddToClassList("settings-rebind-cell"); row.userData = key;
                     row.Q<Label>("settings-rebind-action").text = item.DisplayName;
-                    byAction.Add(item.ActionPath, row); rows.Add(row); rebinds.Add(row);
+                    byAction.Add(key, row); rows.Add(row); rebinds.Add(row);
                 }
                 int index = i;
                 var slot = new Button(() => { if (index == viewModel.ListeningRow) commands.CancelRebind(); else commands.StartRebind(index); })
