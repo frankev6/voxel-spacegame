@@ -765,6 +765,17 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [x] The new values are listed and editable on the Flight configs tab.
 - **Tests:** `Flight3DDevCommandTests.Toggle_EnablesAndDisables` (EditMode); `ControlSheetTests.FlightConfig_SetClampsAndResets` covers the new fields.
 
+### DEV-032 — Enter playground from any scene
+- **Milestone:** M4
+- **Tier:** standard — a precondition fix in the playground entry
+- **Depends on:** `DEV-021`
+- **Do:** Owner (2026-11-05): "why can't I jump into the playground from the button on the scene when I open the game in unity? currently I have to jump hoops to get to the playground (I have to go to sandbox and then playground)", with a screenshot of a black screen showing only the Console and Enter playground buttons. Play had been pressed in an empty scene: startup leaves non-game scenes alone (SPEC-01 Q9), and `DevPlayground.Enter` accepted only World and MainMenu, refusing with "Leave the current editor…". The sandbox transition loads World from any scene, so entry now refuses only a Blueprint Lab outside the playground profile, whose unsaved edits would be lost (`DevPlayground.CanEnterFrom`), with a message that says so.
+- **Files:** `Assets/Game/App/DevRuntime/Playground/DevPlayground.cs`; `Assets/Game/Tests/PlayMode/App/{PlaygroundButtonTests,ProductionSessionFixture}.cs`; `Assets/Game/Tests/EditMode/App/PlaygroundEntryTests.cs`.
+- **Acceptance criteria:**
+  - [x] One click on Enter playground enters it from the main menu and from a non-game scene.
+  - [x] A campaign's Blueprint Lab still refuses, with a message naming the reason.
+- **Tests:** `PlaygroundEntryTests.CanEnterFrom_AnySceneButLab` (EditMode); `PlaygroundButtonTests.MainMenuButton_EntersPlayground`, `PlaygroundButtonNonGameSceneTests.NonGameScene_ButtonEntersPlayground` (PlayMode, real boot, the button's own submit).
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

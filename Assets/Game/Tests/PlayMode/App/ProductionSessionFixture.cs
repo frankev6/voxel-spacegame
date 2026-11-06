@@ -27,6 +27,8 @@ namespace Game.Tests.PlayMode.App
     {
         /// <summary>Campaigns drop their automatic beats (the opening dialogue pauses the game); story cases opt out.</summary>
         protected virtual bool QuietCampaign => true;
+        /// <summary>False keeps the Test Runner's own scene after boot, like pressing Play in a scene that is not one of the game's.</summary>
+        protected virtual bool StartAtMainMenu => true;
         string directory;
         internal GameComposition Game => GameRoot.Instance.Composition;
         protected EntityManager EM => World.DefaultGameObjectInjectionWorld.EntityManager;
@@ -67,7 +69,7 @@ namespace Game.Tests.PlayMode.App
             yield return Until(() => !Game.Flow.IsTransitioning, "Startup completed");
             // Test Runner uses its own scene; Startup intentionally leaves non-game scenes alone (SPEC-01 Q9).
             if (Game.Session.HasActiveSession) yield return Run(Game.Session.QuitToMainMenuAsync(false));
-            else if (Game.Flow.CurrentScene != GameScene.MainMenu)
+            else if (StartAtMainMenu && Game.Flow.CurrentScene != GameScene.MainMenu)
                 yield return Run(Game.Flow.TransitionAsync(GameScene.MainMenu, SceneEntryReason.Startup));
             Game.Save.SetActiveProfile(Game.Save.CreateProfile("harness").Id);
         }
