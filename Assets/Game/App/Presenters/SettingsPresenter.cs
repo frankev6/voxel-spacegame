@@ -76,17 +76,53 @@ namespace Game.App.Presenters
             {
                 if (map.name != "Global" && map.name != "Flight" && map.name != "Editor" && map.name != "Dialog") continue;
                 foreach (var action in map.actions)
+                {
+                    string composite = null;
                     for (int i = 0; i < action.bindings.Count; i++)
                     {
                         var binding = action.bindings[i]; string path = binding.path ?? "";
-                        if (binding.isComposite || binding.isPartOfComposite || path.EndsWith("/position", StringComparison.Ordinal) ||
+                        if (binding.isComposite) { composite = path; continue; }
+                        // HUD-021 (owner: the flight3d Lift keys were missing): each half of a 1D axis (W/S, A/D, Y/H...) is its own row.
+                        // Modifier combos (controller Select+..., editor Ctrl+...) stay out: one key press cannot rebind them.
+                        bool axisHalf = binding.isPartOfComposite && composite == "1DAxis";
+                        if (binding.isPartOfComposite && !axisHalf || path.EndsWith("/position", StringComparison.Ordinal) ||
                             path.EndsWith("/delta", StringComparison.Ordinal) || path.EndsWith("/scroll", StringComparison.Ordinal)) continue;
                         bindings.Add((action, i));
-                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = map.name + "/" + action.name,
-                            DisplayName = map.name + " / " + action.name });
+                        string actionPath = map.name + "/" + action.name;
+                        // The sub-tab names the map, so the row shows the action alone ("Fire primary", "Lift up").
+                        model.Rebinds.Add(new RebindRowViewModel { ActionPath = actionPath,
+                            DisplayName = axisHalf ? Humanize(action.name) + " " + AxisHalf(action.name, binding.name) : Humanize(action.name),
+                            RowKey = axisHalf ? actionPath + "#" + binding.name : actionPath,
+                            Device = (binding.groups ?? "").Contains("Gamepad") ? 1 : 0 });
                     }
+                }
             }
             RefreshBindings();
+        }
+        /// <summary>HUD-021: the word for one half of a 1D axis ("Lift" + positive gives "up").</summary>
+        internal static string AxisHalf(string action, string part)
+        {
+            bool positive = part == "positive";
+            switch (action)
+            {
+                case "Thrust": return positive ? "forward" : "reverse";
+                case "Strafe": case "Turn": return positive ? "right" : "left";
+                case "Lift": return positive ? "up" : "down";
+                default: return positive ? "+" : "-";
+            }
+        }
+        /// <summary>"FirePrimary" → "Fire primary", "Ability1" → "Ability 1", "DevConsole" → "Dev console".</summary>
+        internal static string Humanize(string name)
+        {
+            var text = new System.Text.StringBuilder(name.Length + 4);
+            for (int i = 0; i < name.Length; i++)
+            {
+                char c = name[i];
+                bool boundary = i > 0 && (char.IsUpper(c) && !char.IsUpper(name[i - 1]) || char.IsDigit(c) && !char.IsDigit(name[i - 1]));
+                if (boundary) text.Append(' ');
+                text.Append(i > 0 && boundary && char.IsUpper(c) ? char.ToLowerInvariant(c) : c);
+            }
+            return text.ToString();
         }
         void RefreshBindings()
         {
@@ -94,7 +130,8 @@ namespace Game.App.Presenters
             {
                 var target = bindings[i]; var row = model.Rebinds[i];
                 row.IsListening = i == model.ListeningRow;
-                row.BindingText = row.IsListening ? "Press a key…" : target.action.GetBindingDisplayString(target.index);
+                string display = target.action.GetBindingDisplayString(target.index);
+                row.BindingText = row.IsListening ? "Press a key…" : string.IsNullOrEmpty(display) ? "Unbound" : display;   // HUD-021: Backspace/Delete unbinds
             }
             model.NotifyRebinds();
         }
@@ -114,6 +151,16 @@ namespace Game.App.Presenters
             RefreshBindings();
         }
         public void SelectTab(int tab) { if (bound && !disposed && tab >= 0 && tab < 5 && tab != model.SelectedTab) { CancelRebind(); model.SelectedTab = tab; } }
+        public void SelectControlsGroup(int group)
+        {
+            if (bound && !disposed && group >= 0 && group < SettingsViewModel.ControlsGroupMaps.Length && group != model.ControlsGroup)
+            { CancelRebind(); model.ControlsGroup = group; }
+        }
+        public void SelectControlsDevice(int device)
+        {
+            if (bound && !disposed && device >= 0 && device < SettingsViewModel.ControlsDeviceLabels.Length && device != model.ControlsDevice)
+            { CancelRebind(); model.ControlsDevice = device; }
+        }
         void Apply(GameSettings edited, SettingsSection section)
         {
             if (!bound || disposed) return;

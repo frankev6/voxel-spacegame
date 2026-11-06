@@ -1,14 +1,25 @@
 /* SPEC-61 HUD-005: geometry only; appearance uses the approved NOCTURNE theme. */
 .settings-screen { flex-grow: 1; align-items: center; justify-content: center; }
-.settings-panel { width: 960px; max-width: 90%; height: 720px; max-height: 90%; }
+/* HUD-021 (owner: "make the settings panel much bigger so it fits more information"). */
+.settings-panel { width: 1400px; max-width: 94%; height: 920px; max-height: 92%; }
+.panel.settings-panel { background-color: var(--color-surface-1); }   /* opaque: the pause menu showed through the rows (owner screenshot) */
 .settings-body { min-height: 0; flex-shrink: 1; flex-basis: 0; }
 .settings-page { flex-grow: 1; }
 .settings-row { flex-direction: row; align-items: center; min-height: 56px; }
 .settings-label { flex-grow: 1; min-width: 0; white-space: normal; margin-right: var(--space-4); }
 .settings-control { width: 280px; flex-shrink: 0; }
 .settings-note { white-space: normal; margin-top: var(--space-2); }
-.settings-rebinds { height: 300px; min-height: 160px; flex-shrink: 0; margin-top: var(--space-4); }
-.settings-rebind-row { height: 64px; flex-direction: row; align-items: center; }
-.settings-rebind-action { flex-grow: 1; min-width: 0; white-space: normal; }
-.settings-rebind-binding { width: 180px; white-space: normal; margin-right: var(--space-4); }
 .settings-reset { align-self: flex-end; margin-top: var(--space-4); }
+/* HUD-021: the bindings of one group (a sub-tab), two to a line so there is less scrolling. */
+/* Owner: the device switch inline with the group tabs, on the right. */
+.settings-controls-bar { flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-top: var(--space-4); }
+.settings-controls-tabs { flex-shrink: 1; }
+.settings-rebinds { flex-direction: row; flex-wrap: wrap; flex-shrink: 0; margin-top: var(--space-3); }
+.settings-rebind-cell { width: 50%; padding-right: var(--space-3); }
+.settings-rebind-row { height: 56px; flex-direction: row; align-items: center; padding: 0 var(--space-3); border-bottom-width: var(--border-thin); border-bottom-color: var(--color-border); }
+.settings-rebind-row:hover { background-color: var(--color-surface-3); border-left-width: var(--border-thick); border-left-color: var(--color-accent); }
+.settings-rebind-action { flex-grow: 1; min-width: 0; white-space: normal; }
+.settings-controls-device { flex-shrink: 0; }
+.settings-rebind-slots { flex-direction: row; flex-shrink: 0; }
+.settings-rebind-slot { min-width: 96px; margin-left: var(--space-2); }
+.settings-rebind-slot.is-listening { border-color: var(--color-accent); color: var(--color-accent-strong); }

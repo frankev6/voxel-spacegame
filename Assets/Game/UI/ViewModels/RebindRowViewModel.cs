@@ -25,5 +25,9 @@ namespace Game.UI.ViewModels
         static readonly BindablePropertyChangedEventArgs IsListeningChanged = new BindablePropertyChangedEventArgs(nameof(IsListening));
         bool isListening;
         [CreateProperty] public bool IsListening { get => isListening; set => Set(ref isListening, value, IsListeningChanged); }
+        /// <summary>HUD-021: 0 keyboard and mouse, 1 controller (the binding's control scheme); the settings view groups by it.</summary>
+        public int Device { get; set; }
+        /// <summary>HUD-021: the settings row this binding sits in: the action path, or the action path and axis half ("Flight/Lift#positive").</summary>
+        public string RowKey { get; set; }
     }
 }

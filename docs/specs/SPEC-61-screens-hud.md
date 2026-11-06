@@ -718,12 +718,14 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
   - **Two columns:** binding rows in a wrapping grid, two per line, built from `RebindRow.uxml`, one row per binding, with the global row index kept in each button's name. Row names drop the map prefix ("Fire primary").
   - **Bigger panel:** the panel grows to 1400 × 920 within 94% / 92% of the screen.
   - **Hover:** the theme overrides Unity's default hover and selection colours (list rows, dropdown items, buttons, sliders, scrollbars) with NOCTURNE surfaces, so light text stays readable.
+  - **One row per action** (owner: "consolidate it into only being mentioned once but being able to put different binds in"; chose a device switch with every bind as a slot): a Keyboard & mouse / Controller switch above the group tabs; each action shows once, with one slot button per binding of that device (`RebindRowViewModel.Device`), named `settings-rebind-<index>`. Controller bindings that need a held modifier stay out, as before. The panel is opaque.
+  - **Unbinding** (owner: "there should be a way to unbind a bind completely"; chose Backspace/Delete): while a slot listens, Backspace or Delete applies an empty override (`InputService` `OnApplyBinding`, `IsUnbindKey`); the slot reads "Unbound", the override saves, and Reset restores it. Esc still cancels. Backspace and Delete can no longer be bound.
 - **Files:** `Assets/Game/UI/Views/{SettingsView.cs,Uxml/SettingsView.uxml,Uxml/RebindRow.uxml}`, `Assets/Game/UI/ViewModels/SettingsViewModel.cs`, `Assets/Game/UI/Views/Commands/ISettingsCommands.cs`, `Assets/Game/App/Presenters/SettingsPresenter.cs`, `Assets/Game/UI/Theme/{screens/settings.uss,components/list.uss}`, `Assets/Game/Tests/PlayMode/UI/Screens/SettingsViewTests.cs`.
 - **Acceptance criteria:**
-  - [ ] The Controls tab shows four sub-tabs and only the selected group's bindings, in two columns.
-  - [ ] The settings panel is larger and still passes the layout audit at every logical size.
-  - [ ] Hovered list rows and other default-themed controls keep legible text on a dark surface.
-- **Tests:** `SettingsViewTests.ControlsGroups_FilterRows` (new); the existing rebind and layout cases, updated to select the group.
+  - [x] The Controls tab shows four sub-tabs and only the selected group's bindings, in two columns.
+  - [x] The settings panel is larger and still passes the layout audit at every logical size.
+  - [x] Hovered list rows and other default-themed controls keep legible text on a dark surface.
+- **Tests:** `SettingsViewTests.ControlsGroups_FilterRows`, `SettingsViewTests.Rebind_Backspace_Unbinds` (new); the existing rebind and layout cases, updated to select the group.
 
 ## 10. Open questions
 
