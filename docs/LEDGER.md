@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 12 | 0 | 0 | 64 | 1 | 91 | 7 |
+| M4 | 13 | 12 | 0 | 0 | 65 | 1 | 91 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -525,7 +525,7 @@
 | DEV-029 | Control sheet: every control on a second monitor | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-015 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 6a98a932 | Owner request 2026-11-04: controls on a second monitor, local web page; owner checked live: "It works great" |
 | DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
 | DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
-| DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | todo |  |  |  |  |
+| DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | done | claude (claude-opus-5-5) | 2026-11-05 | 24efec2e | Owner: the button did nothing after Play in an empty scene |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1301,6 +1301,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-05 — DEV-032: Enter playground from any scene (claude, claude-opus-5-5)
+- Owner: "why can't I jump into the playground from the button on the scene when I open the game in unity? … I have to go to sandbox and then playground", with a screenshot of a black screen and only the Console and Enter playground buttons.
+- Cause: Play was pressed in an empty scene (`Library/LastSceneManagerSetup.txt`: no scenes). Startup leaves non-game scenes alone (SPEC-01 Q9), and `DevPlayground.Enter` accepted only World and MainMenu; the Editor log shows its refusal three times ("Leave the current editor for World or MainMenu first…").
+- Fix: the sandbox transition already loads World from any scene, so entry now refuses only a Blueprint Lab outside the playground profile (unsaved edits), with a message that says so.
+- Tests: `PlaygroundEntryTests.CanEnterFrom_AnySceneButLab` (EditMode) and two PlayMode button cases (main menu; Test Runner scene, the owner's case) pass, with `PlaygroundTests.Enter_Interact_Reset` unchanged. spec-required: 3, extra: 0. `ProductionSessionFixture.StartAtMainMenu` lets a fixture keep the non-game scene.
 
 ### 2026-11-04 — DEV-031 and CAM-013: the `flight3d` toggle and the free-aim chase camera (claude, claude-opus-5-5)
 - **DEV-031:** `flight3d [on|off|status]` writes `Flight3DRequest` on the player ship (new SPEC-70 §5.4 row; solo only) and reports the mode and the keys. The five 3D values join the control sheet's Flight configs tab in their own group, with plain lower/higher text in `flight.json`; `sheet.json` notes the three new actions. `Flight3DDevCommandTests.Toggle_EnablesAndDisables` passes.
