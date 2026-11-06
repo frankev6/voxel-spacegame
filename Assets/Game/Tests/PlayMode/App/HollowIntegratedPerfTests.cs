@@ -66,7 +66,7 @@ namespace Game.Tests.PlayMode.App
                 var description = ProfilerRecorderHandle.GetDescription(handle);
                 if (!Wanted(description.Name) || !names.Add(description.Name)) continue;
                 // Time samples only: counters containing "Physics" must not be mislabelled as milliseconds.
-                if (description.UnitType != Unity.Profiling.LowLevel.ProfilerMarkerDataUnit.TimeNanoseconds) continue;
+                if (description.UnitType != ProfilerMarkerDataUnit.TimeNanoseconds) continue;
                 var recorder = new ProfilerRecorder(handle, 1, ProfilerRecorderOptions.Default | ProfilerRecorderOptions.StartImmediately);
                 if (!recorder.Valid) { recorder.Dispose(); continue; }
                 result.Add(new Recording { Name = description.Name, Recorder = recorder });
