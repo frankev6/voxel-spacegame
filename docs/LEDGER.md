@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 12 | 0 | 0 | 65 | 1 | 92 | 6 |
+| M4 | 13 | 12 | 0 | 1 | 65 | 1 | 92 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -514,7 +514,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | in-progress | claude (claude-opus-5-5) | 2026-11-05 | — | Owner request: grouped controls, bigger panel, legible hover |
+| HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | review | claude (claude-opus-5-5) | 2026-11-05 | 65c149cb | Tests pass; waiting on the owner's look in the game |
 | CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
@@ -1302,6 +1302,17 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-05 — HUD-021: settings controls in sub-tabs and two columns, a bigger panel, legible hover (claude, claude-opus-5-5)
+- Owner: "In the settings, can you put the controls into different tabs inside the controls tab, based on what they're for, similar to the controls website? editor, flight, etc. Also you can make the settings panel much bigger … (and can divide the controls into two columns so there's less scrolling through them). Plus change the cursor hover triggered color of the components in all UI to be more legible", with a screenshot of a pale grey hovered binding row.
+- **Sub-tabs:** the Controls page has a second `TabBar`: General, Flight, Ship editor and Dialogue (the Global, Flight, Editor and Dialog maps the rebind list covers). The selection is `SettingsViewModel.ControlsGroup`, set through `ISettingsCommands.SelectControlsGroup`, and switching cancels a listening rebind as tab switches do. Rows drop the map prefix ("Fire primary").
+- **Two columns:** the virtualized `ListView` became a wrapping two-column grid. The roughly 60 rows are built once from `RebindRow.uxml`, taken from a template instance in the UXML. Each button keeps its global index (`settings-rebind-<index>`).
+- **Bigger panel:** 1400 × 920, within 94% / 92% of the screen.
+- **Hover:** the pale grey was Unity's default theme, which the NOCTURNE theme never overrode. `list.uss` now points the default hover and selection colours (list rows, dropdown items, buttons, slider thumbs, scrollbars) at NOCTURNE surfaces, with explicit rules for collection rows and dropdown items. Binding rows hover in surface-3 with an accent edge.
+- **Tests:**
+  - `SettingsViewTests.ControlsGroups_FilterRows` (new), the updated rebind cases and the layout audit at every logical size pass, as do `ScreenTableTests`. spec-required: 1, extra: 0.
+  - Already failing on `main` before this change (checked with the change stashed): `SettingsViewTests.Slider_PersistsImmediately` ("Free orbit does not follow the ship heading", 90 vs 0) and `ThemeFilesTests.ThemeUss_NoLiteralColorsOrFonts` on `toast.uss`.
+  - `StaticStateAuditTests` lists only the seven older statics.
 
 ### 2026-11-05 — DEV-032: Enter playground from any scene (claude, claude-opus-5-5)
 - Owner: "why can't I jump into the playground from the button on the scene when I open the game in unity? … I have to go to sandbox and then playground", with a screenshot of a black screen and only the Console and Enter playground buttons.
