@@ -1034,6 +1034,18 @@ Scalable approach: capture cost is O(participants) + memcpy of structure arrays;
   - [ ] A tracked real Fighter Play/stop/Editor-exit no longer reports the four FleetSaveParticipant snapshot allocations.
 - **Tests:** `QuitSaveTests.DisposeDuringThumbnailWait_ReleasesImmediately`, `.DisposeDuringEncoding_WorkerOwnsSnapshot` plus the existing quit suite and live Editor reproduction.
 
+### PERS-020 — Buffer compressed blueprint input with exact stream validation
+- **Milestone:** M4
+- **Tier:** frontier — binary decoding and corruption rejection equivalence
+- **Depends on:** `PERS-007`
+- **Do:** Reduce byte-at-a-time Deflate input overhead while retaining exact compressed termination and truncation rejection. Prove parity against the legacy stream on valid, truncated, trailing and mutated payloads; measure real compressed Hollow blueprints.
+- **Files:** `Assets/Game/Voxel/Data/VoxsCodec.cs`, focused codec tests.
+- **Acceptance criteria:**
+  - [ ] Existing wire bytes, decoded cells and corruption rejection remain identical; no new dependency or public API.
+  - [ ] Paired full-decode baseline and optimized median/p95 timings with explicit workload.
+  - [ ] Focused roundtrip, malformed-data, fuzz and compile checks pass.
+- **Tests:** Differential compressed-stream termination corpus and actual blueprint decoding benchmark; existing VOXS codec tests.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

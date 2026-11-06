@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 17 | 12 | 0 | 0 | 66 | 1 | 96 | 10 |
+| M4 | 14 | 16 | 0 | 0 | 66 | 1 | 97 | 7 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -497,6 +497,7 @@
 | INP-008 | Gamepad scheme | [SPEC-03](specs/SPEC-03-input.md) | M4 | standard | INP-003 | yes | done | sol (gpt-6.1-sol) | 2026-10-13 | 33e24c3 | Gamepad bindings/device labels/aim; hardware feel untested; spec-required: 2, extra: 0 |
 | DATA-013 | Large hull blocks (ADR-0121) | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M4 | standard | DATA-012 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | b7d0c733 | DATA-E036 accepts full 2x2x2 and 3x3x3 cube boxes; block_hull_large_2 and _3; damage takes them apart cell by cell (exempt from the half-footprint collapse); the snapshot and mesher carry each cell place in its block so a large block shows one plate (docs/design/blocks/large_hull_blocks.jpg). Tests: LargeHullTests 3, LargeHullPanelTests 2. Not checked in the ship editor UI |
 | DATA-014 | Update imported content membership without rescanning all assets | [SPEC-04](specs/SPEC-04-content-and-blocks.md) | M4 | frontier | DATA-008 | yes | in-progress | lead (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
+| PERS-020 | Buffer compressed blueprint input with exact stream validation | [SPEC-05](specs/SPEC-05-persistence.md) | M4 | frontier | PERS-007 | yes | in-progress | loading (gpt-6-astra) | 2026-11-06 |  | Owner-directed loading optimization; exact termination parity required |
 | REN-015 | LOD2 grid proxies | [SPEC-11](specs/SPEC-11-voxel-rendering.md) | M4 | frontier | REN-012 | yes | todo |  |  |  |  |
 | PHY-021 | Region compounds for very large grids (only if PHY-019 shows assembly over budget) | [SPEC-12](specs/SPEC-12-voxel-physics.md) | M4 | frontier | PHY-019 | yes | todo |  |  |  |  |
 | DMG-018 | M4: per-brick component labels for >1M-cell stations | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | frontier | DMG-016 | no | todo |  |  |  |  |
@@ -516,7 +517,7 @@
 | DLG-013 | Line-ID export for localization | [SPEC-41](specs/SPEC-41-dialog.md) | M4 | standard | DLG-003 | yes | done | combat (gpt-6.1-sol high) | 2026-10-13 | ff17985b | Deterministic CSV including archived writing; required case passes0.012873s; spec-required: 1, extra: 0 |
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
-| EDT-027 | Batch draft connectivity removals without repeated relabels | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-008 | yes | in-progress | loading (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
+| EDT-027 | Batch box removal while preserving ordered connectivity | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-008 | yes | in-progress | loading (gpt-6-astra) | 2026-11-06 |  | Owner-directed 2x investigation; preserve quality; measurements pending |
 | HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | done | claude (claude-opus-5-5) | 2026-11-05 | 851a6027 | Owner checked in the game: "The changes are good" |
 | CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
