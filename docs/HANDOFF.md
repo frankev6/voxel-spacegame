@@ -29,28 +29,37 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Ship lines follow Starsector's depth without copying it.** Approved 2D silhouettes come before any 3D build. Form follows function. Use asymmetry with a reason, and refit variants. Human hulls are blocky, alien hulls smooth. Factions come from the existing lore in `Import/Legacy/content/Factions` and the DESIGN-GUIDE faction section.
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
-## 2. Where things stand (2026-10-14, QA-001)
+## 2. Where things stand (2026-11-06)
 
-- **QA-001 on `task/QA-001-owner-findings`** (local only, 25+ commits on top of DEV-021). Frank's plan, verbatim: "1. you fix everything mentioned in your findings and review 2. QA 3. I review 4. we start working on m4 when everything is solid here". Steps 1–2 are done; **step 3, Frank's review, is next**. See the newest LEDGER log entry.
-- Done:
-  - owner findings: flight feel (ADR-0114), salvage, radar, editor, modal order, shake, hits, shield, inventory, sounds and the boundary snap;
-  - review findings: coreless blueprints, the paused-opening test root cause, the external-pause blocker, stale TODOs and docs repair;
-  - the NOCTURNE visual pass: plating, machinery, team colours, post, UI skin and the menu backdrop;
-  - the second polish pass: the look book's plating baked to textures (`ArtSource/Bricks/bake_plating.py`; rerun it and Game/Art/Bake NOCTURNE Brick Look after changing `ld_plating.py`), ambient and reflections for pooled draws, §4.1 light azimuths, and a light rig in the Lab;
-  - Xeno grown hulls (ADR-0115: HUSK, BROODMOTHER, playground pad 15, campaign xeno encounters).
-- Workers stay paused. Owner QualitySettings and two untracked content metas remain intentionally uncommitted.
+- **Last work: 2026-10-21, exploration slice phase 1** (TRV-015 in-world cruise, ADR-0122; DEV-028 the Hollow system). Everything is merged to `main` and pushed (`084f8a17`, 2026-11-04). The newest LEDGER log entries have the detail.
+- **Since QA-001 (2026-10-14), all merged:**
+  - QA-001 itself;
+  - co-op (NET-001…019, ADR-0117);
+  - racing and hazards (SPEC-91, SPEC-92, ADR-0118–0121);
+  - the playground hub, then the Hollow as the playground;
+  - the Xeno swarm scenario;
+  - DMG-020 and ABL-006;
+  - the feel prototype (auto-aim, camera presets, VESHA);
+  - the HUD redesign;
+  - phase 1.
+  [HANDOFF-ASTRA.md](HANDOFF-ASTRA.md) summarises each.
+- **Known issues:**
+  - loading a save can fail with "No participant restore is active" (`GameSession.RestoreFrom`, `GameSession.cs:259`);
+  - `tools/check-docs.py` reports DMG-020 undefined in any spec;
+  - the heat zone does nothing until phase 6.
+- **Paused:** the three GPT-6.1-Sol workers in [ORCHESTRATION.md](ORCHESTRATION.md) (paused since 2026-10-14). That page is out of date.
+- **Uncommitted on purpose:** the URP global settings asset that Unity rewrites on open.
 
 ## 3. Next
 
-An independent reviewer still starts at [scope and access only](QA-REVIEWER-PROMPT.md).
-
-1. Frank reviews QA-001 in the playground: pads 01–16, with 15 for the aliens and 16 for the new NOCTURNE WRAITH frigate and REQUIEM cruiser; the main menu; a new campaign.
-2. Waiting on Frank:
+1. Show Frank where the slice stands, then build exploration slice phase 2: "?" contacts and the loud ping. Phases 3–7 follow in order ([exploration-slice.md](design/exploration/exploration-slice.md)), each proven by a playground scenario before the next.
+2. Fix the save-load error above.
+3. Still waiting on Frank:
    - art approval of the magnet block, the UI sounds and the baked plating and debris textures (`docs/design/asset-manifest.csv` status `review`);
-   - whether small debris chunks should drop scrap.
-   Switch the playground ship with `playground ship=<blueprint>` (`ship=starter` restores it).
-3. Not done yet:
-   - navigation strobes, which need per-grid hull anchors;
-   - GRAVID, LAMPREY and CRINOID (the builder supports them);
-   - per-faction team colours in the pooled path (currently material-wide ARK).
-4. Merge to local `main` after Frank's review. M4 starts only when Frank says the M1–M3 base is solid.
+   - whether small debris chunks drop scrap.
+4. Not done yet:
+   - navigation strobes (per-grid hull anchors);
+   - GRAVID, LAMPREY and CRINOID;
+   - per-faction team colours in the pooled path.
+
+An independent reviewer still starts at [scope and access only](QA-REVIEWER-PROMPT.md).
