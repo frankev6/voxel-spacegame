@@ -30,7 +30,7 @@ namespace Game.App.DevRuntime.Playground
     /// <summary>DEV-023 option E, the Hollow, in the playground (owner, 2026-10-18: "Lets build this latest version into the game"):
     /// the asteroid and its structures as static station grids, the four outlying forts turning on their rocks with their guns, the
     /// Maw's batteries and the edge guns as Clan turrets, moored ships, traffic on normal AI flight through the tunnels, the Clan's
-    /// gunships off the Maw, and its stations (the Market and the dens trade, the Docks rearm, the Quartermaster resets). While the
+    /// gunships off the Maw, and its stations (the Market and the dens trade, the Docks rearm, the Quartermaster refits). While the
     /// player is under the rock, the rock above the flight plane is hidden (the cutaway). Built the first time a pilot goes there.</summary>
     internal sealed class PlaygroundHollow : IDisposable
     {
@@ -102,7 +102,7 @@ namespace Game.App.DevRuntime.Playground
             ("ship_wreck_frigate_b", new float2(-640, -120), 5.2f),
         };
 
-        /// <summary>Spawns the whole Hollow. Safe to call again after <see cref="Clear"/> (the Quartermaster's reset).</summary>
+        /// <summary>Spawns the whole Hollow. Safe to call again after <see cref="Clear"/>.</summary>
         internal void Build()
         {
             if (built || !Ready(out var session, out var catalog, out var frame)) return;
@@ -381,9 +381,9 @@ namespace Game.App.DevRuntime.Playground
             var st = Stations[index];
             switch (st.Kind)
             {
-                case StationKind.Reset:
-                    Clear(); Build();
-                    return Missing != null ? DevCommandResult.Fail(Missing) : DevCommandResult.Ok("The Quartermaster sets the Hollow back as it was.");
+                case StationKind.Refit:
+                    // DEV-033: the refit bay is a scene change, which DevPlayground owns; leaving it rebuilds the Hollow
+                    return DevCommandResult.Fail("The Quartermaster's refit opens through the playground");
                 case StationKind.Rearm:
                     if (ctx.TryGetService<ContentService>(out var content) && content.Catalog.TryGet<ShipBlueprintDefinition>(new ContentId("ship_device_canister"), out var canister)
                         && Ready(out var session, out _, out var frame))

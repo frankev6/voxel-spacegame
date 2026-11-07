@@ -527,6 +527,7 @@
 | DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
 | DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
 | DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | done | claude (claude-opus-5-5) | 2026-11-05 | 24efec2e | Owner: the button did nothing after Play in an empty scene |
+| DEV-033 | The Quartermaster's refit bay and `give blocks` | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023, DEV-017 | yes | review | claude (claude-opus-5-5) | 2026-11-07 |  | Owner request 2026-11-07: a ship modification area in the playground, and 100 of each material in the editor; tests pass, waiting on the owner's check in the game |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
 | NET-002 | Game.Net module, transport and sessions | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-001 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | transport, handshake, net commands, dev build; spike worktree only |
 | NET-003 | Role policy and the replica boot path | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | NET-002 | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 02e53156 | RoleSystemPolicy + test, replica sandbox entry, KeepRunning pause; spike worktree only |
@@ -1302,6 +1303,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-07 — DEV-033: the Quartermaster's refit bay and `give blocks` (claude, claude-opus-5-5)
+- Owner, asked whether the playground has a ship modification area (it had none: the Quartermaster's "REFIT  RESET" sign only reset the Hollow): "add one yes, and can we add a console setting to add 100 of each material while in the editor?"
+- **Refit bay:** the Quartermaster's station kind is now `refit` (`hollow_export.py` and `hollow_layout.json`; `hollow_codegen.py` regenerates `HollowLayout.g.cs` to the same one-line change, the bin unchanged). F there, or `playground run=quartermaster`, opens the real fleet-ship editor on the flagship (`GameSession.EnterBlueprintLabAsync(FleetShip)`), not creative: blocks come from cargo. The campaign's docked-only gate is skipped; the Quartermaster stands in for the dock. On Exit the ship returns at its pose, and the playground rebuilds the Hollow at the same origin, so the old reset still happens.
+- **`give blocks=N`** (1–999): N of every non-placeholder block (the editor's materials are the blocks themselves) through `InventoryModel.Give`; stacks past capacity go to overflow slots (the 20-slot hold holds about 20 of the 54 kinds). The palette refreshes on the inventory change.
+- Tests: `StateCommandTests.GiveBlocks_StocksEveryBlock` (EditMode, the class 4/4) and `PlaygroundTests.Quartermaster_RefitsAndReturns` (PlayMode, the class 2/2) pass; compile clean. spec-required: 2, extra: 0.
 
 ### 2026-11-05 — HUD-021: settings controls in sub-tabs and two columns, a bigger panel, legible hover (claude, claude-opus-5-5)
 - Owner: "In the settings, can you put the controls into different tabs inside the controls tab, based on what they're for, similar to the controls website? editor, flight, etc. Also you can make the settings panel much bigger … (and can divide the controls into two columns so there's less scrolling through them). Plus change the cursor hover triggered color of the components in all UI to be more legible", with a screenshot of a pale grey hovered binding row.

@@ -223,5 +223,30 @@ namespace Game.Tests.PlayMode.App
             yield return null;
             StringAssert.Contains("Playground inactive", Host.Commands.Execute("playground status", Host.Context).Text);
         }
+        /// <summary>DEV-033: the Quartermaster opens the real fleet-ship editor (not creative) on the flagship; give blocks stocks it;
+        /// Exit brings the pilot back to the Quartermaster with the Hollow rebuilt at the same origin.</summary>
+        [UnityTest] public IEnumerator Quartermaster_RefitsAndReturns()
+        {
+            yield return RunCommand("playground");
+            var playground = Host.Playground; var origin = playground.Origin;
+            int quartermaster = System.Array.FindIndex(HollowLayout.Stations, s => s.Id == "quartermaster");
+            Assert.AreEqual(HollowLayout.StationKind.Refit, HollowLayout.Stations[quartermaster].Kind);
+            yield return RunCommand("playground run=quartermaster");
+            Assert.AreEqual(global::Game.Core.Flow.GameScene.BlueprintLab, Game.Session.CurrentScene);
+            Assert.IsTrue(Game.Session.IsSandbox, "The refit keeps the playground session");
+            Assert.IsTrue(playground.Refitting);
+            Assert.IsNotNull(UnityEngine.Object.FindAnyObjectByType<Game.App.EditorHost.ShipEditorHost>());
+            StringAssert.Contains("blocks ×100", Host.Commands.Execute("give blocks=100", Host.Context).Text);
+            Assert.AreEqual(100, Services.Get<EconomyService>().Inventory.CountOf(new ContentId("block_cargo_small")));
+            Services.Get<Game.App.EditorHost.EditorHostServices>().RequestLeave();
+            yield return Until(() => Game.Session.CurrentScene == global::Game.Core.Flow.GameScene.World && playground.Active, "Exit returns to the playground", 30);
+            Assert.IsFalse(playground.Refitting);
+            Assert.IsTrue(playground.Hollow.Built, "The Hollow is rebuilt round the returned ship");
+            Assert.AreEqual(origin, playground.Origin);
+            EM.CompleteAllTrackedJobs();
+            Assert.IsTrue(Host.Context.TryGetFrame(out var frame));
+            var ship = (Unity.Mathematics.double3)EM.GetComponentData<LocalTransform>(Root).Position + frame.OriginInStarSystem;
+            Assert.AreEqual(quartermaster, playground.Hollow.Nearest(playground.Hollow.Relative(ship)), "The pilot comes back at the Quartermaster");
+        }
     }
 }

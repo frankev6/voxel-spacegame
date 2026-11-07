@@ -1373,7 +1373,7 @@ class Exporter:
                        merchant="merchant_station_market"))
         lab = next(f for f in opt["fx"] if f["type"] == "lab")
         p = polar(180, 22, lab["c"])
-        st.append(dict(id="quartermaster", kind="reset", x=p[0], z=p[1], yaw=0.0, title="QUARTERMASTER", merchant=""))
+        st.append(dict(id="quartermaster", kind="refit", x=p[0], z=p[1], yaw=0.0, title="QUARTERMASTER", merchant=""))
         for d in self.dens:
             ship = min((s for s in opt["ships"] if s["state"] == "docked"), key=lambda s: math.dist(s["c"], d["c"]))
             bs = math.degrees(math.atan2(ship["c"][0] - d["c"][0], ship["c"][1] - d["c"][1]))
@@ -2521,7 +2521,7 @@ class Furnisher:
             f = int(self.fmap[i, k]) if self.inner[i, k] else -12 - occ.J0
             y = (f + occ.J0) * CELL + 1.0
             ring = [polar(b, STATION_R + 2, (s["x"], s["z"])) for b in range(0, 361, 15)]
-            self.strip(ring, y, "#22E6FF" if s["kind"] != "reset" else "#FF2E88")
+            self.strip(ring, y, "#22E6FF" if s["kind"] != "refit" else "#FF2E88")
             for b in range(0, 360, 90):
                 q = polar(b + 45, STATION_R + 3, (s["x"], s["z"]))
                 self.lights.append(dict(x=round(q[0], 1), y=round(y + 2, 1), z=round(q[1], 1), col="#DCEBFF", r=9.0, kind="lamp", _p=0))
