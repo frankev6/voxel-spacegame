@@ -15,11 +15,11 @@ MonoBehaviour:
   id: cue_weapon_lance_fire
   formerIds: []
   clips:
-  - {fileID: 8300000, guid: 04f0e5a8cbde6744bb2c524ca0fb832a, type: 3}
+  - {fileID: 8300000, guid: 15a3ca8ab0e24ca8b7e09bce0f3cb05a, type: 3}
   bus: 0
-  volume: 0.85
+  volume: 0.45
   volumeRandom: 0.1
-  pitch: 0.8
+  pitch: 0.88
   pitchRandom: 0.03
   maxVoices: 4
   priority: 100
