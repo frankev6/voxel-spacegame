@@ -50,6 +50,7 @@ namespace Game.App.DevRuntime.Playground
         double3 origin;
         bool active, entering;
         bool autoEnter;
+        bool refitting;   // DEV-033: in the Quartermaster's refit bay; the Hollow comes back round the ship when it returns to World
         bool toRace;   // the player flew through the race portal: open the race when they arrive at the track
         bool portalRace;   // the open race was entered through the Hollow's portal (Race.Open is synchronous)
         // Co-op: a guest shows the host's playground without running stations; the host sends its origin to every guest once it is in
@@ -92,7 +93,7 @@ namespace Game.App.DevRuntime.Playground
                 || !ctx.TryGetService<SceneFlow>(out var scenes)) return DevCommandResult.Fail("flow/save busy or unavailable");
             if (!CanEnterFrom(flow.CurrentScene, IsPlaygroundProfile(save)))
                 return DevCommandResult.Fail("Leave the Blueprint Lab first (its unsaved edits would be lost); direct Lab reset is limited to the playground profile");
-            entering = true;
+            entering = true; refitting = false;
             ClearPresentation(); active = false;
             var operation = new EntryOperation(this, Begin(flow, save, scenes));
             return DevCommandResult.Pending(host.AddOperation(operation), "resetting isolated playground");
@@ -272,6 +273,55 @@ namespace Game.App.DevRuntime.Playground
             var moved = GoTo(id);
             return moved.Kind == DevResultKind.Failed ? moved : Activate();
         }
+        /// <summary>DEV-033, owner (2026-11-07): "add one" (a ship modification area in the playground). The Quartermaster opens the real
+        /// fleet-ship editor on the flagship, not creative: blocks come from cargo and removed ones go back to it (give blocks=N stocks
+        /// it). The docked-only gate of Fleet → Edit is the campaign's rule; the Quartermaster stands in for the dock. Leaving the Lab
+        /// returns to World at the ship's pose (GameSession's lab return), and <see cref="Resume"/> rebuilds the Hollow there.</summary>
+        DevCommandResult Refit()
+        {
+            var ctx = host.Context;
+            if (!ctx.TryGetService<GameSession>(out var session) || !session.IsSandbox || session.IsTransitioning || session.Fleet.Flagship == null)
+                return DevCommandResult.Fail("The refit bay needs the playground's flagship");
+            ui?.Navigator.CloseAllAboveRoot();
+            refitting = true;
+            var flow = session.EnterBlueprintLabAsync(new BlueprintLabArgs(BlueprintLabMode.FleetShip, session.Fleet.Flagship.PersistentId, ContentId.None));
+            return DevCommandResult.Pending(host.AddOperation(new RefitOperation(this, flow)), "The Quartermaster opens the refit bay");
+        }
+        /// <summary>Back from the refit bay: the playground comes back round the returned ship, at the same origin. A fresh Hollow is
+        /// also the Quartermaster's old reset.</summary>
+        void Resume(DevContext ctx)
+        {
+            if (entering || !ctx.TryGetService<GameSession>(out var session) || session.IsTransitioning) return;
+            if (!session.IsSandbox || session.CurrentScene == GameScene.MainMenu) { refitting = false; return; }
+            if (session.CurrentScene != GameScene.World || !PlayerScenarioProbes.IsReady(ctx)) return;
+            refitting = false; active = true; pending = 0; hollowNearest = -2;
+            hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin);
+            hollow.Build();
+            BuildPresentation();
+            SetReport(hollow.Missing ?? "Back from the refit bay. The Quartermaster has set the Hollow back as it was.");
+        }
+        internal bool Refitting => refitting;
+        sealed class RefitOperation : IDevOperation
+        {
+            readonly DevPlayground owner;
+            readonly Awaitable<FlowResult> flow;
+            public DevOperationStatus Status { get; private set; }
+            public string Message { get; private set; } = "Opening the refit bay";
+            public double TimeoutSeconds => 20;
+            internal RefitOperation(DevPlayground owner, Awaitable<FlowResult> flow) { this.owner = owner; this.flow = flow; }
+            public void Tick(DevContext ctx)
+            {
+                if (Status != DevOperationStatus.Running) return;
+                var awaiter = flow.GetAwaiter();
+                if (!awaiter.IsCompleted) return;
+                var result = awaiter.GetResult();
+                if (result != FlowResult.Ok) { owner.refitting = false; Status = DevOperationStatus.Failed; Message = "Refit bay unavailable: " + result; return; }
+                if (!ctx.TryGetService<IGameFlow>(out var game) || game.IsTransitioning
+                    || !ctx.TryGetService<UIRoot>(out var ui) || !ui.Navigator.IsOpen<Game.UI.Views.ShipEditorView>()) return;
+                Status = DevOperationStatus.Succeeded;
+                Message = "Refit bay open on the flagship. Blocks come from cargo (F1: give blocks=100 for 100 of each); Exit returns to the Quartermaster.";
+            }
+        }
         DevCommandResult Report(DevCommandResult result)
         {
             pending = result.Kind == DevResultKind.Pending ? result.OperationId : 0;
@@ -324,7 +374,7 @@ namespace Game.App.DevRuntime.Playground
             if (hollow != null && hollow.Built && DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var shipAt))
             {
                 int there = hollow.Nearest(hollow.Relative(shipAt));
-                if (there >= 0) return Report(hollow.Activate(there));
+                if (there >= 0) return Report(HollowLayout.Stations[there].Kind == HollowLayout.StationKind.Refit ? Refit() : hollow.Activate(there));
             }
             return DevCommandResult.Fail("Fly into a station's circle first");
         }
@@ -379,6 +429,7 @@ namespace Game.App.DevRuntime.Playground
                 if (!coop) { guestView = false; ClearPresentation(); }
                 return;
             }
+            if (refitting && !active) Resume(ctx);
             if (!active) return;
             if (!ctx.TryGetService<GameSession>(out var session) || !session.IsSandbox || session.IsTransitioning)
             { active = false; ClearPresentation(); return; }

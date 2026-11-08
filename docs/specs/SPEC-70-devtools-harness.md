@@ -307,7 +307,7 @@ assert ecs.count("Brick") > 0 "voxels present"
 | `fire` | `group` (1..3, default 1), `seconds` (0.5) | Presses the first bound control of action `Flight/FirePrimary` (1), `Flight/FireSecondary` (2) or `Flight/FireTertiary` (3) (SPEC-03 §4.2) through `DevInputInjector` for `seconds` | Pending |
 | `interact` | `body` (optional query) | With `body`: teleport to `surfaceRadius + 0.5 × interactionRange` from the body (never closer than the rule allows, never beyond it). Then press `Flight/Interact` for 0.1 s. Never calls interaction code directly | Pending → target before/after |
 | `inv` | `max` (80) | One line per occupied slot `slot: id×count`, overflow slots (index ≥ `Capacity`) marked `[overflow]`; then `capacity N`, `credits C` (SPEC-50 §4.3) | Ok |
-| `give` | `item` + `count` (1), or `credits` | `InventoryModel.TryAdd(ContentId, int, out string reason)` (cargo only; refused when full) / `Wallet.Add(long)` (SPEC-50 §4.3–§4.4) | Ok or Fail with reason |
+| `give` | `item` + `count` (1), or `credits`, or `blocks` (1–999) | `InventoryModel.TryAdd(ContentId, int, out string reason)` (cargo only; refused when full) / `Wallet.Add(long)` (SPEC-50 §4.3–§4.4) / `blocks=N` (DEV-033): `InventoryModel.Give` of N of every non-placeholder `BlockDefinition`, the ship editor's materials, past capacity into overflow slots | Ok or Fail with reason |
 | `save` | `slot` (required) | `IGameFlow.SaveGameAsync(slot, SaveReason.Manual)` in the active profile; done on `GameSaved` | Pending |
 | `load` | `slot` (required) | `IGameFlow.LoadGameAsync(slot)`; done on `GameLoaded` and `player.ready` | Pending |
 | `jump` | `to` (StarSystemId number or authored name/ID) | `TravelService.RequestJump(id, JumpSource.Dev)` (SPEC-32 §4.4; Dev jumps skip the gate distance and fuel checks); refused → Fail with `JumpRequestResult.Reason`; done on `StarSystemEntered` for that id. Timeout 30 s | Pending |
@@ -775,6 +775,17 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
   - [x] One click on Enter playground enters it from the main menu and from a non-game scene.
   - [x] A campaign's Blueprint Lab still refuses, with a message naming the reason.
 - **Tests:** `PlaygroundEntryTests.CanEnterFrom_AnySceneButLab` (EditMode); `PlaygroundButtonTests.MainMenuButton_EntersPlayground`, `PlaygroundButtonNonGameSceneTests.NonGameScene_ButtonEntersPlayground` (PlayMode, real boot, the button's own submit).
+
+### DEV-033 — The Quartermaster's refit bay and `give blocks`
+- **Milestone:** M4
+- **Tier:** standard — composes the existing fleet-ship editor entry and the inventory owner from the playground
+- **Depends on:** `DEV-023`, `DEV-017`
+- **Do:** Owner (2026-11-07), asked whether the playground has a ship modification area: "add one yes, and can we add a console setting to add 100 of each material while in the editor?" The Quartermaster's station kind becomes `refit` (`hollow_export.py`, `hollow_layout.json`, regenerated `HollowLayout.g.cs`). F there opens the real fleet-ship editor on the flagship through `GameSession.EnterBlueprintLabAsync(FleetShip)`, not creative: blocks come from cargo and removed blocks go back. The campaign's docked-only gate on Fleet → Edit is not applied; the Quartermaster stands in for the dock. The playground clears itself on the scene change as before; on the return to World (GameSession's lab return pose) it rebuilds the Hollow at the same origin, which keeps the station's old reset. `give blocks=N` (1–999) gives N of every block, the editor's materials, through `InventoryModel.Give` (overflow slots past capacity); the editor palette follows the inventory change.
+- **Files:** `Assets/Game/App/DevRuntime/Playground/{DevPlayground,PlaygroundHollow,HollowLayout,HollowLayout.g}.cs`, `ArtSource/Hub/{hollow_export.py,hollow/hollow_layout.json}`, `Assets/Game/App/DevRuntime/Commands/GiveDevCommand.cs`, tests below.
+- **Acceptance criteria:**
+  - [x] F at the Quartermaster opens the non-creative editor on the playground flagship; Exit returns to the Quartermaster with the Hollow rebuilt and the playground active.
+  - [x] `give blocks=100` in the editor puts 100 of every block in cargo and the palette shows them.
+- **Tests:** `StateCommandTests.GiveBlocks_StocksEveryBlock` (EditMode); `PlaygroundTests.Quartermaster_RefitsAndReturns` (PlayMode).
 
 ## 10. Open questions
 

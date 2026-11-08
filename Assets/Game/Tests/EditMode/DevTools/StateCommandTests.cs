@@ -40,6 +40,8 @@ namespace Game.Tests.EditMode.DevTools
             {
                 var definitions = FactCatalogTests.BaseContent();
                 definitions.Add(TestContentFactory.Item("item_fuel", so => TestContentFactory.Set(so, "maxStack", 10)));
+                definitions.Add(TestContentFactory.Block("block_hull", Game.Data.Blocks.BlockKind.Structural));
+                definitions.Add(TestContentFactory.Block("block_plate", Game.Data.Blocks.BlockKind.Structural));
                 definitions.Add(FactCatalogTests.Facts("facts_dev",
                     new FactDeclaration { Name = "story_count", Kind = FactKind.Int, Min = -5, Max = 5, FormerNames = new[] { "story_old" } },
                     new FactDeclaration { Name = "story_flag", Kind = FactKind.Bool },
@@ -114,6 +116,18 @@ namespace Game.Tests.EditMode.DevTools
             StringAssert.Contains("credits 1000000000000", f.Ok("inv"));
         }
 
+        /// <summary>DEV-033: give blocks=N stocks every real block (not block_missing) for the ship editor, past capacity into overflow.</summary>
+        [Test] public void GiveBlocks_StocksEveryBlock()
+        {
+            var f = fixture; f.Economy.Inventory.SetCapacity(1);
+            StringAssert.Contains("2 blocks ×100", f.Ok("give blocks=100"));
+            Assert.AreEqual(100, f.Economy.Inventory.CountOf(new ContentId("block_hull")));
+            Assert.AreEqual(100, f.Economy.Inventory.CountOf(new ContentId("block_plate")));
+            Assert.AreEqual(0, f.Economy.Inventory.CountOf(new ContentId("block_missing")));
+            StringAssert.Contains("[overflow]", f.Ok("inv"));
+            f.Fail("give blocks=0"); f.Fail("give blocks=1000"); f.Fail("give blocks=5 count=2"); f.Fail("give blocks=5 item=item_fuel");
+            Assert.AreEqual(100, f.Economy.Inventory.CountOf(new ContentId("block_hull")));
+        }
         [Test] public void FactsSetGetEval()
         {
             var f = fixture; var changes = new List<FactChanged>(); EventBus<FactChanged>.Subscribe(changes.Add);

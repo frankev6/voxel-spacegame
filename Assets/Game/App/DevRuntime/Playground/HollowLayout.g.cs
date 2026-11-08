@@ -2851,7 +2851,7 @@ namespace Game.App.DevRuntime.Playground
         [Game.Core.StaticStateOk("generated layout")] internal static readonly Station[] Stations =
         {
             new Station("market", StationKind.Merchant, new float2(-194.80f, 42.30f), 2.09f, "THE MARKET", "merchant_station_market"),
-            new Station("quartermaster", StationKind.Reset, new float2(-330f, 98f), 0f, "QUARTERMASTER", ""),
+            new Station("quartermaster", StationKind.Refit, new float2(-330f, 98f), 0f, "QUARTERMASTER", ""),
             new Station("den_gunsmith", StationKind.Merchant, new float2(-597.50f, -123f), 5.12f, "GUNSMITH", "merchant_shady_trader"),
             new Station("den_parts", StationKind.Merchant, new float2(92.50f, 215.40f), 5.15f, "PARTS", "merchant_shady_trader"),
             new Station("den_salvage", StationKind.Merchant, new float2(130.30f, -40.70f), 0.81f, "SALVAGE", "merchant_shady_trader"),
