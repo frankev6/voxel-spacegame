@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 13 | 13 | 0 | 0 | 68 | 1 | 95 | 6 |
+| M4 | 13 | 12 | 0 | 1 | 68 | 1 | 95 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -504,7 +504,7 @@
 | FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 35104965 | ADR-0123 accepted by the owner 2026-11-04; live check comes with DEV-031 (the toggle) |
 | FLT-017 | Experimental 3D flight for every ship, on by default (ADR-0123 amendment 1) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-016, DEV-031 | yes | done | claude (claude-opus-5-5) | 2026-11-08 | e314fdb3 | Owner request 2026-11-08: AI flies in 3D too, `flight3d` on by default; owner checked live: "looks good send it in" |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
-| WPN-019 | Charge beam delivery (owner request 2026-11-08) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-007, WPN-009, WPN-018 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-08 |  | Owner request 2026-11-08; weapon `wpn_charge_lance` on block `weapon_charge_lance` |
+| WPN-019 | Charge beam delivery (owner request 2026-11-08) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-007, WPN-009, WPN-018 | yes | review | claude (claude-opus-5-5) | 2026-11-08 | 85d2f309 | Owner request 2026-11-08; weapon `wpn_charge_lance` on block `weapon_charge_lance`; 41/41 focused tests; waiting for the owner's live check |
 | ABL-006 | Emergency repairs | [SPEC-24](specs/SPEC-24-abilities.md) | M4 | frontier | ABL-005, DMG-019, DMG-020 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Engines first, 35% of what is missing, 150 E, 90 s, hull items for pilots; lost bricks and blocks rebuilt; scenarios `emergency_repair`, `emergency_repair_brick`. |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | dropped |  |  |  | Superseded by ADR-0122 (in-world cruise, TRV-015), owner 2026-10-21. |
