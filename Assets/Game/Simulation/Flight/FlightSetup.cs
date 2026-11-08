@@ -12,7 +12,10 @@ namespace Game.Simulation.Flight
         {
             ComponentType.ReadWrite<ShipCommand>(), ComponentType.ReadWrite<FlightState>(),
             ComponentType.ReadWrite<FlightThruster>(), ComponentType.ReadWrite<PropulsionStats>(),
-            ComponentType.ReadWrite<PlanarConstraint>(), ComponentType.ReadWrite<Cruise>()   // ADR-0122
+            ComponentType.ReadWrite<PlanarConstraint>(), ComponentType.ReadWrite<Cruise>(),  // ADR-0122
+            // ADR-0123 (amended 2026-11-08): every flying ship can fly in 3D. Flight3D is added enabled; Flight3DModeSystem disables it
+            // on the first tick while the world switch (Flight3DMode) is off.
+            ComponentType.ReadWrite<Flight3D>()
         });
 
         /// <summary>Appends flying profile types and the player-only tag, once from ThrusterInitSystem.OnCreate.</summary>
@@ -26,10 +29,6 @@ namespace Game.Simulation.Flight
                     registrations.Add(new RootComponentRegistration { Profile = profile, Type = types.GetComponentType(i) });
             }
             registrations.Add(new RootComponentRegistration { Profile = GridProfile.PlayerShip, Type = ComponentType.ReadWrite<PlayerShip>() });
-            // ADR-0123: experimental 3D flight is a player-ship mode. Flight3D is added enabled; Flight3DModeSystem disables it on the
-            // first tick because the request is off.
-            registrations.Add(new RootComponentRegistration { Profile = GridProfile.PlayerShip, Type = ComponentType.ReadWrite<Flight3D>() });
-            registrations.Add(new RootComponentRegistration { Profile = GridProfile.PlayerShip, Type = ComponentType.ReadWrite<Flight3DRequest>() });
         }
     }
 }

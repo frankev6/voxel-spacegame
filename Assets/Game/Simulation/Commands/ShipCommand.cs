@@ -14,6 +14,6 @@ namespace Game.Simulation.Commands
         public ShipCommandFlags Flags;
         public ShipCommandEdges Edges;   // valid only during the tick it was written (decision 8)
         public uint FireGroups;          // bit g = fire group g held
-        public float Lift;               // −1..1, + = up; experimental 3D flight only (ADR-0123), 0 for AI and on the plane
+        public float Lift;               // −1..1, + = up; experimental 3D flight only (ADR-0123), 0 on the plane
     }
 }

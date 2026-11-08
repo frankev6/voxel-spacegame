@@ -26,7 +26,6 @@ namespace Game.Simulation.Flight
         ComponentLookup<ShieldState> shields;
         ComponentLookup<Cruise> cruises;
         ComponentLookup<Flight3D> flight3D;   // ADR-0123
-        ComponentLookup<Flight3DRequest> flight3DRequests;
         ComponentLookup<Weapons.ShipTarget> targets;
         ComponentLookup<Unity.Transforms.LocalTransform> poses;
 
@@ -46,7 +45,7 @@ namespace Game.Simulation.Flight
             pushes = state.GetComponentLookup<Game.Voxel.Damage.ExternalPush>(true);
             shields = state.GetComponentLookup<ShieldState>(true);
             cruises = state.GetComponentLookup<Cruise>(true);
-            flight3D = state.GetComponentLookup<Flight3D>(true); flight3DRequests = state.GetComponentLookup<Flight3DRequest>(true);
+            flight3D = state.GetComponentLookup<Flight3D>(true);
             targets = state.GetComponentLookup<Weapons.ShipTarget>(true); poses = state.GetComponentLookup<Unity.Transforms.LocalTransform>(true);
         }
 
@@ -58,8 +57,10 @@ namespace Game.Simulation.Flight
             spawning.Update(ref state);
             thrusters.Update(ref state);
             powered.Update(ref state); multipliers.Update(ref state); pushes.Update(ref state); shields.Update(ref state); cruises.Update(ref state);
-            flight3D.Update(ref state); flight3DRequests.Update(ref state); targets.Update(ref state); poses.Update(ref state);
+            flight3D.Update(ref state); targets.Update(ref state); poses.Update(ref state);
             uint tick = SystemAPI.TryGetSingleton<SimClock>(out var clock) ? clock.Tick : 0;
+            bool flight3DOn = Flight3DMode.Wanted(SystemAPI.TryGetSingleton(out Flight3DMode mode), mode,
+                SystemAPI.TryGetSingleton(out Game.Core.Net.SimRole role) ? role.Value : Game.Core.Net.SimRoleKind.Solo);
             state.Dependency = new PropulsionJob
             {
                 Config = SystemAPI.GetSingleton<FlightConfig>(),
@@ -68,7 +69,7 @@ namespace Game.Simulation.Flight
                 Orientations = SystemAPI.GetSingleton<OrientationTablesRef>().Value,
                 Entities = entities, Spawning = spawning, Thrusters = thrusters, Powered = powered, Multipliers = multipliers,
                 Pushes = pushes, Shields = shields, Cruises = cruises, Tick = tick,
-                Flight3D = flight3D, Flight3DRequests = flight3DRequests, Targets = targets, Poses = poses
+                Flight3D = flight3D, Flight3DOn = flight3DOn, Targets = targets, Poses = poses
             }.ScheduleParallel(state.Dependency);
             state.Dependency = new ThrusterIdleJob { Thrusters = thrusters }.Schedule(state.Dependency);
         }

@@ -2,8 +2,8 @@ using Unity.Entities;
 
 namespace Game.Data.Components
 {
-    /// <summary>ADR-0123: enabled while this ship flies in experimental 3D (off the plane, pitching). Present on player ships only,
-    /// disabled by default. Only writer of the enabled bit: Flight3DModeSystem (SPEC-20 FLT-016). While enabled, the plane locks of
+    /// <summary>ADR-0123: enabled while this ship flies in experimental 3D (off the plane, pitching). Present on every flying ship
+    /// (amendment 1), following the world switch Flight3DMode. Only writer of the enabled bit: Flight3DModeSystem (SPEC-20 FLT-016). While enabled, the plane locks of
     /// <see cref="PlanarConstraint"/> and the planar inertia do not apply; <see cref="PlaneLock"/> answers that for every lock site.</summary>
     public struct Flight3D : IComponentData, IEnableableComponent { }
 

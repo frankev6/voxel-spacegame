@@ -701,6 +701,21 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
   - [ ] Ships without `Flight3D` fly exactly as before (existing flight tests pass unchanged).
 - **Tests:** `Flight3DTests.Lift_ReachesVerticalCap`, `Flight3DTests.FaceTarget_ConvergesWithoutFlip`, `Flight3DTests.Disable_LevelsAndReturnsToPlane`; existing `PropulsionTests`, `PlanarConstraintTests`.
 
+### FLT-017 — Experimental 3D flight for every ship, on by default (ADR-0123 amendment 1)
+- **Milestone:** M4
+- **Tier:** frontier — changes the switch's shape, every flying ship's composition and the AI command
+- **Depends on:** `FLT-016`, `DEV-031`
+- **Do:** ADR-0123 amendment 1. Owner (2026-11-08): "give the other ships 3d controls also when experimental flight3d is toggled on? also make flight3d toggled to on by default".
+  - **Switch:** the world singleton `Flight3DMode`, created on by `Flight3DModeSystem`, counted off in co-op; it replaces `Flight3DRequest`.
+  - **Ships:** `FlightSetup` adds `Flight3D` to every flying profile.
+  - **AI:** `AiSteerJob` writes Lift toward the target's height while engaging, else the goal's height.
+- **Files:** `Assets/Game/Simulation/Flight/{Flight3DMode,Flight3DModeSystem,FlightSetup,PropulsionJob,PropulsionSystem}.cs`; `Assets/Game/Simulation/Ai/{AiSteerJob,AiSteeringSystem}.cs`; `Assets/Game/App/DevRuntime/Commands/Flight3DDevCommand.cs`; tests.
+- **Acceptance criteria:**
+  - [x] A new game starts with 3D flight on for the player and AI ships; `flight3d off` returns every ship to the plane; co-op is planar.
+  - [x] An engaging AI ship climbs to its target's height without overshooting and keeps its nose level; off the target it returns to its goal's height.
+  - [ ] Owner's live check: AI ships follow the player off the plane in a fight.
+- **Tests:** `Flight3DDevCommandTests.Toggle_EnablesAndDisables`, `AiSteeringTests.Flight3D_LiftsToTargetHeight`, `AiSteeringTests.Flight3D_LiftClosesAndBrakes`; existing `Flight3DTests`, `AiSteeringTests`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider | Answer |

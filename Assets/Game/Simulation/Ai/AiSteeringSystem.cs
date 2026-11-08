@@ -36,6 +36,7 @@ namespace Game.Simulation.Ai
             job.Multipliers = state.GetComponentLookup<ShipStatMultipliers>(true);
             job.Shields = state.GetComponentLookup<ShieldState>(true);
             job.Thrusters = state.GetBufferLookup<FlightThruster>(true);
+            job.Flight3D = state.GetComponentLookup<Game.Data.Components.Flight3D>(true);
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
@@ -43,6 +44,7 @@ namespace Game.Simulation.Ai
             job.Members.Update(ref state); job.Flights.Update(ref state); job.Propulsion.Update(ref state); job.Targets.Update(ref state);
             job.Transforms.Update(ref state); job.Grids.Update(ref state); job.Hulks.Update(ref state); job.Spawning.Update(ref state);
             job.Velocities.Update(ref state); job.Multipliers.Update(ref state); job.Shields.Update(ref state); job.Thrusters.Update(ref state);
+            job.Flight3D.Update(ref state);
             job.FlightConfig = SystemAPI.GetSingleton<FlightConfig>();
             job.Config = SystemAPI.GetSingleton<AiConfig>(); job.Tick = SystemAPI.GetSingleton<SimClock>().Tick;
             state.Dependency = job.ScheduleParallel(state.Dependency);

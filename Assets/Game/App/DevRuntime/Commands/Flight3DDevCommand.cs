@@ -5,14 +5,15 @@ using Unity.Entities;
 
 namespace Game.App.DevRuntime.Commands
 {
-    /// <summary>DEV-031 (ADR-0123): switches experimental 3D flight for the player ship. Writes only Flight3DRequest (SPEC-70 §5.4);
-    /// Flight3DModeSystem does the rest. Solo only: co-op guests and the host would disagree about a ship off the plane.</summary>
+    /// <summary>DEV-031 (ADR-0123, amended 2026-11-08): switches experimental 3D flight for every ship. It is on by default. Writes only
+    /// the world switch Flight3DMode (SPEC-70 §5.4); Flight3DModeSystem does the rest. Solo only: co-op guests and the host would disagree
+    /// about ships off the plane, so the mode counts as off in co-op.</summary>
     public sealed class Flight3DDevCommand : IDevCommand
     {
         internal const string Keys = "Y/H up and down, B face the mouse, P face the target (pad: Select + D-pad)";
         public string Name => "flight3d";
         public string Usage => "flight3d [on|off|status]";
-        public string Summary => "Experimental 3D flight for your ship: up/down thrust and facing the mouse or the target";
+        public string Summary => "Experimental 3D flight for every ship (on by default): up/down thrust and facing the mouse or the target";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
             string error = DevCommandRegistry.UnknownArgument(args, Name);
@@ -27,17 +28,20 @@ namespace Game.App.DevRuntime.Commands
             return TryApply(world.EntityManager, ctx.PlayerShipRoot, on, out string text) ? DevCommandResult.Ok(text) : DevCommandResult.Fail(text);
         }
 
-        /// <summary>Sets the request (<paramref name="on"/> null only reports). Main thread, between world updates.</summary>
+        /// <summary>Sets the world switch (<paramref name="on"/> null only reports) and reports it, with the player ship's state when
+        /// there is one. Main thread, between world updates.</summary>
         internal static bool TryApply(EntityManager em, Entity player, bool? on, out string text)
         {
-            if (player == Entity.Null || !em.Exists(player) || !em.HasComponent<Flight3DRequest>(player) || !em.HasComponent<Flight3D>(player))
-            { text = "no player ship with experimental 3D flight"; return false; }
-            em.CompleteDependencyBeforeRW<Flight3DRequest>();
-            if (on.HasValue) em.SetComponentData(player, new Flight3DRequest { On = on.Value ? (byte)1 : (byte)0 });
+            using var query = em.CreateEntityQuery(ComponentType.ReadWrite<Flight3DMode>());
+            if (query.CalculateEntityCount() != 1) { text = "no experimental 3D flight switch in this world"; return false; }
+            em.CompleteDependencyBeforeRW<Flight3DMode>();
+            if (on.HasValue) query.SetSingleton(new Flight3DMode { On = on.Value ? (byte)1 : (byte)0 });
+            bool requested = query.GetSingleton<Flight3DMode>().On != 0;
+            bool hasShip = player != Entity.Null && em.Exists(player) && em.HasComponent<Flight3D>(player);
             em.CompleteDependencyBeforeRO<Flight3D>();
-            bool requested = em.GetComponentData<Flight3DRequest>(player).On != 0, active = em.IsComponentEnabled<Flight3D>(player);
-            text = requested ? (active ? "3D flight on: " : "3D flight starting: ") + Keys
-                : active ? "3D flight off: levelling, then back to the plane" : "3D flight off (planar flight)";
+            bool active = hasShip && em.IsComponentEnabled<Flight3D>(player);
+            text = requested ? (!hasShip || active ? "3D flight on for every ship: " : "3D flight starting for every ship: ") + Keys
+                : active ? "3D flight off: ships level, then go back to the plane" : "3D flight off (planar flight)";
             return true;
         }
     }
