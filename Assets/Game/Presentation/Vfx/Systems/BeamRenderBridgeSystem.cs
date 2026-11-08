@@ -29,6 +29,15 @@ namespace Game.Presentation.Vfx
             EntityManager.CompleteDependencyBeforeRO<BeamState>(); EntityManager.CompleteDependencyBeforeRO<FunctionalBlock>(); EntityManager.CompleteDependencyBeforeRO<LocalToWorld>();
             count.Value = 0; transforms.Update(this); frame++;
             using (Gather.Auto()) new BeamGatherJob { Output = batch.Data, Count = count, Cap = Rig.Budget.MaxBeams, Transforms = transforms, Slots = Rig.Slots, Hashes = Rig.SlotByHash, Impacts = Rig.PendingImpacts, DefaultSlot = Rig.DefaultSlotByKind[(int)FxKind.Beam], Frame = frame, Width = Rig.Config.BeamDefaultWidth }.Run();
+            // WPN-019: charge beams share the beam batch and budget, after the plain beams.
+            if (SystemAPI.TryGetSingleton<WeaponDefsRef>(out var weapons) && weapons.Value.IsCreated)
+            {
+                EntityManager.CompleteDependencyBeforeRO<ChargeBeamState>();
+                int slot = Rig.DefaultSlotByKind[(int)FxKind.Beam];
+                var fallback = slot >= 0 ? FxStateMath.Linear(Rig.Slots[slot].DefaultColorRgba8) : new Unity.Mathematics.float4(1);
+                using (Gather.Auto()) new ChargeBeamGatherJob { Output = batch.Data, Count = count, Cap = Rig.Budget.MaxBeams, Transforms = transforms,
+                    Weapons = weapons.Value, Impacts = Rig.PendingImpacts, Frame = frame, Time = (float)SystemAPI.Time.ElapsedTime, FallbackColor = fallback }.Run();
+            }
             batch.Count = count.Value; using (Draw.Auto()) batch.Draw(); Rig.Stats.BeamsDrawn = count.Value;
         }
         protected override void OnDestroy() { Dependency.Complete(); count.Dispose(); }

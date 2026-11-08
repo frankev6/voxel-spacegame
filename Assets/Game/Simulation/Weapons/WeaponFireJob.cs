@@ -40,6 +40,7 @@ namespace Game.Simulation.Weapons
         [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
         [ReadOnly] public ComponentLookup<Powered> Power;
         [ReadOnly] public ComponentLookup<BeamState> Beams;
+        [ReadOnly] public ComponentLookup<ChargeBeamState> ChargeBeams;
         [ReadOnly] public ComponentLookup<Hulk> Hulks;
         [ReadOnly] public ComponentLookup<Dormant> Dormant;
         [ReadOnly] public ComponentLookup<GridSpawning> Spawning;
@@ -77,7 +78,9 @@ namespace Game.Simulation.Weapons
                     Relations.IsHostile(Allegiances[root], Allegiances[target]);
                 bool wants = (held || automatic) && (aim.Aligned != 0 || (weapon.IsFixed != 0 && held));
                 bool powered = !Power.HasComponent(entity) || Power.IsComponentEnabled(entity);
-                bool beamActive = weapon.Delivery == WeaponDelivery.Beam && Beams.HasComponent(entity) && Beams[entity].Active != 0;
+                bool beamActive = weapon.Delivery == WeaponDelivery.Beam && Beams.HasComponent(entity) && Beams[entity].Active != 0
+                    // WPN-019: a charge beam's charge and firing run as one sequence; it never retriggers until both end.
+                    || weapon.Delivery == WeaponDelivery.ChargeBeam && ChargeBeams.HasComponent(entity) && ChargeBeams[entity].Phase != ChargeBeamPhase.Idle;
                 if (!wants || !powered || beamActive) state.CooldownRemainingTicks = math.max(0, state.CooldownRemainingTicks);
                 if (wants && powered && !beamActive && state.RoundsLeftInBurst == 0 && state.CooldownRemainingTicks <= 0)
                 {
@@ -95,7 +98,7 @@ namespace Game.Simulation.Weapons
                     uint shotId = ((uint)functional.InstanceIndex & 0xFFFF) << 16 | (state.ShotCounter & 0xFFFF);
                     float3 forward = aim.FireDirLocal, side = math.normalizesafe(math.cross(mount.UpLocal, forward), new float3(1,0,0));
                     float3 up = math.cross(forward, side);
-                    int pellets = weapon.Delivery == WeaponDelivery.Beam ? 1 : weapon.PelletsPerRound;
+                    int pellets = WeaponDeliveryKinds.IsBeam(weapon.Delivery) ? 1 : weapon.PelletsPerRound;
                     var flags = (Players.HasComponent(root) ? ProjectileFlags.PlayerSource : 0) |
                         (weapon.HomingTurnRateRad > 0 ? ProjectileFlags.Homing : 0) |
                         (weapon.ExplodeOnExpire != 0 ? ProjectileFlags.ExplodeOnExpire : 0);

@@ -71,6 +71,10 @@ namespace Game.Presentation.Audio
                 EntityManager.CompleteDependencyBeforeRO<BeamState>();
                 new BeamGatherJob { Output = beams, Transforms = transforms, Hulks = hulks,
                     Listener = Service.ListenerPosition, RadiusSquared = Service.BeamLoopRadius * Service.BeamLoopRadius }.Run();
+                // WPN-019: a firing charge beam hums like a beam pulse and competes for the same six voices.
+                EntityManager.CompleteDependencyBeforeRO<ChargeBeamState>();
+                new ChargeBeamGatherJob { Output = beams, Transforms = transforms, Hulks = hulks,
+                    Listener = Service.ListenerPosition, RadiusSquared = Service.BeamLoopRadius * Service.BeamLoopRadius }.Run();
             }
             // Lookups only: never let hash-map enumeration decide which free voice a newcomer receives.
             for (int i = 0; i < owners.Length; i++)
@@ -133,18 +137,36 @@ namespace Game.Presentation.Audio
                 float3 position = math.transform(Transforms[functional.Grid].Value, beam.MuzzleLocal);
                 float distance = math.distancesq(position, Listener);
                 if (!math.all(math.isfinite(position)) || !math.isfinite(distance) || distance > RadiusSquared) return;
-                var input = new BeamInput { Entity = entity, Position = position, DistanceSquared = distance };
+                Insert(Output, new BeamInput { Entity = entity, Position = position, DistanceSquared = distance });
+            }
+            internal static void Insert(NativeList<BeamInput> output, BeamInput input)
+            {
                 // A sorted six-element prefix is enough; candidate count never grows with the number of active beams.
-                if (Output.Length == 6 && Compare(input, Output[5]) >= 0) return;
-                if (Output.Length < 6) Output.Add(default);
-                int at = Output.Length - 1;
-                while (at > 0 && Compare(input, Output[at - 1]) < 0) { Output[at] = Output[at - 1]; at--; }
-                Output[at] = input;
+                if (output.Length == 6 && Compare(input, output[5]) >= 0) return;
+                if (output.Length < 6) output.Add(default);
+                int at = output.Length - 1;
+                while (at > 0 && Compare(input, output[at - 1]) < 0) { output[at] = output[at - 1]; at--; }
+                output[at] = input;
             }
             static int Compare(BeamInput a, BeamInput b)
             {
                 if (a.DistanceSquared < b.DistanceSquared) return -1; if (a.DistanceSquared > b.DistanceSquared) return 1;
                 int index = a.Entity.Index.CompareTo(b.Entity.Index); return index != 0 ? index : a.Entity.Version.CompareTo(b.Entity.Version);
+            }
+        }
+        [BurstCompile] partial struct ChargeBeamGatherJob : IJobEntity
+        {
+            public NativeList<BeamInput> Output;
+            [ReadOnly] public ComponentLookup<LocalToWorld> Transforms;
+            [ReadOnly] public ComponentLookup<Hulk> Hulks;
+            public float3 Listener; public float RadiusSquared;
+            void Execute(Entity entity, in FunctionalBlock functional, in ChargeBeamState beam)
+            {
+                if (beam.Phase != ChargeBeamPhase.Firing || !Transforms.HasComponent(functional.Grid) || Hulks.HasComponent(functional.Grid)) return;
+                float3 position = math.transform(Transforms[functional.Grid].Value, beam.MuzzleLocal);
+                float distance = math.distancesq(position, Listener);
+                if (!math.all(math.isfinite(position)) || !math.isfinite(distance) || distance > RadiusSquared) return;
+                BeamGatherJob.Insert(Output, new BeamInput { Entity = entity, Position = position, DistanceSquared = distance });
             }
         }
     }

@@ -38,10 +38,10 @@ namespace Game.Tests.EditMode.Simulation.Weapons
         {
             var catalog = Catalog();
             var definitions = catalog.All<WeaponDefinition>();
-            Assert.That(definitions.Count, Is.EqualTo(12));
+            Assert.That(definitions.Count, Is.EqualTo(13));
             using (var blob = WeaponContent.BuildBlob(catalog))
             {
-                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(13));
+                Assert.That(blob.Value.Weapons.Length, Is.EqualTo(14)); Assert.That(blob.Value.ChargeBeams.Length, Is.EqualTo(14));
                 for (int i = 0; i < definitions.Count; i++)
                 {
                     var d = definitions[i];
@@ -57,6 +57,15 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     Color32 color = d.TracerColor;
                     expected.TracerColor = (uint)(color.r | color.g << 8 | color.b << 16 | color.a << 24);
                     AssertRow(expected, blob.Value.Weapons[i + 1], d.IdString);
+                    // WPN-019: the charge beam's own row; every other weapon's is zero.
+                    var charge = blob.Value.ChargeBeams[i + 1];
+                    if (d.IdString == "wpn_charge_lance")
+                    {
+                        Assert.That(charge.ChargeTicks, Is.EqualTo(90u)); Assert.That(charge.TrackRateRad, Is.EqualTo(math.radians(30f)).Within(1e-5f));
+                        Assert.That(charge.ConvergeBeams, Is.EqualTo(6)); Assert.That(charge.ConvergeRadius, Is.EqualTo(8f));
+                        Assert.That(charge.ConvergeBeamWidth, Is.EqualTo(.15f).Within(1e-5f)); Assert.That(charge.ConvergedHoldFraction, Is.EqualTo(.2f).Within(1e-5f));
+                    }
+                    else Assert.That(charge.ChargeTicks, Is.Zero, d.IdString);
                     Assert.That(d.SustainedDps, Is.EqualTo(expected.SustainedDps).Within(.5f), d.IdString);
                     Assert.That(WeaponContent.ComputeSustainedDps(blob.Value.Weapons[i + 1]), Is.EqualTo(expected.SustainedDps).Within(.5f), d.IdString);
                 }
@@ -115,6 +124,15 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             var beam = Catalog().Get<WeaponDefinition>(new ContentId("wpn_small_beam_turret"));
             CheckInvalid(beam, "beamRange", 0f, "WPN-E003");
             CheckInvalid(beam, "beamPulseSeconds", 0f, "WPN-E003");
+            // WPN-019: a charge beam is a beam and needs its ChargeBeamData.
+            var chargeBeam = Catalog().Get<WeaponDefinition>(new ContentId("wpn_charge_lance"));
+            CheckInvalid(chargeBeam, "beamRange", 0f, "WPN-E003");
+            var bare = Copy(chargeBeam);
+            TestContentFactory.Edit(bare, so => so.FindProperty("deliveryData").managedReferenceValue = null);
+            string chargePath = AssetDatabase.GetAssetPath(chargeBeam);
+            var chargeReport = new ValidationReport("charge");
+            bare.Validate(chargeReport.For(chargePath), new ContentValidationContext(chargePath, true, _ => true));
+            AssertDiagnostic(chargeReport, chargePath, "deliveryData", "WPN-E003");
             CheckInvalid(projectile, "explosionRadius", 6.01f, "WPN-E004");
             CheckInvalid(projectile, "explosionRadius", float.PositiveInfinity, "WPN-E004");
             CheckInvalid(projectile, "lifetimeMax", 1f, "WPN-E005");
@@ -278,6 +296,12 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     if (id == "wpn_ark_lance_medium") { w.Damage = 900; w.PenetrationCells = 2; w.TriggerIntervalTicks = 600; w.BeamRange = w.Range = 900;
                         w.BeamPulseTicks = 60; w.BeamWidth = .6f; w.TraverseHalfArcRad = math.radians(35f); w.TraverseRateRad = math.radians(60f); w.PowerDraw = 10; }
                     break;
+                case "wpn_charge_lance":   // WPN-019: charge 1.5 s, burn 3 s, 1,800 damage over the burn
+                    w.Delivery = WeaponDelivery.ChargeBeam; w.Type = DamageType.Energy; w.Visual = ProjectileVisual.LaserBeam; w.DefaultFireGroups = 2;
+                    w.SpreadRad = w.ProjectileSpeed = 0; w.LifetimeMinTicks = w.LifetimeMaxTicks = 1;
+                    w.Damage = 1800; w.PenetrationCells = 2; w.TriggerIntervalTicks = 480; w.BeamRange = w.Range = 900; w.BeamPulseTicks = 180; w.BeamWidth = 1;
+                    w.TraverseHalfArcRad = math.radians(90f); w.TraverseRateRad = math.radians(30f); w.MaxElevationRad = math.radians(45f);
+                    w.FireConeRad = math.radians(10f); w.PowerDraw = 12; w.SustainedDps = 225; break;
                 case "wpn_railgun_medium":
                     w.Visual = ProjectileVisual.RailgunSlug; w.Damage = 250; w.PenetrationCells = 6; w.TriggerIntervalTicks = 200;
                     w.BurstCount = 4; w.BurstIntervalTicks = 6; w.SpreadRad = math.radians(.5f); w.ProjectileSpeed = 1200; w.LifetimeMinTicks = w.LifetimeMaxTicks = 60;
@@ -304,9 +328,9 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             // scale 1 and recoil scale 0.17 from config_weapons.
             float mass = id switch { "wpn_plasma_turret_small" or "wpn_plasma_turret_small_fixed" => 22.5f, "wpn_plasma_turret_medium" => 26.7f,
                 "wpn_railgun_medium" => 50, "wpn_siege_cannon_heavy" => 95, "wpn_xeno_acid" => 26.5f, "wpn_impact_driver" => 400, _ => 0 };
-            float force = id switch { "wpn_small_beam_turret" or "wpn_fixed_beam_turret_small" => 10000, "wpn_ark_lance_medium" => 40000, _ => 0 };
+            float force = id switch { "wpn_small_beam_turret" or "wpn_fixed_beam_turret_small" => 10000, "wpn_ark_lance_medium" => 40000, "wpn_charge_lance" => 8000, _ => 0 };
             w.HitMomentum = mass > 0 ? mass * w.ProjectileSpeed : force > 0 ? force * w.BeamPulseTicks / 60f : w.Damage * 2;
-            w.ImpulsePerHit = w.HitMomentum; w.RecoilMomentum = w.Delivery == WeaponDelivery.Beam ? 0 : w.HitMomentum * .17f;
+            w.ImpulsePerHit = w.HitMomentum; w.RecoilMomentum = WeaponDeliveryKinds.IsBeam(w.Delivery) ? 0 : w.HitMomentum * .17f;
             return w;
         }
     }

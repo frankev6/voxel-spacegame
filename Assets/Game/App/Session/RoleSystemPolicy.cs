@@ -73,6 +73,7 @@ namespace Game.App.Session
             ["WeaponFireSystem"] = SystemAuthority.Both,
             ["ProjectileShotHandlerSystem"] = SystemAuthority.Both,
             ["BeamShotHandlerSystem"] = SystemAuthority.Both,
+            ["ChargeBeamShotHandlerSystem"] = SystemAuthority.Both,      // WPN-019: as the beam handler
             ["AbilityTimerSystem"] = SystemAuthority.Both,               // ADR-0117 derivation: cooldowns, charges, boost expiry
             ["AbilitySlotApplySystem"] = SystemAuthority.Both,           // ADR-0117 applier: guests feed it the host's slot decisions
             ["AbilitySystem"] = SystemAuthority.AuthorityOnly,           // ADR-0117 decider: slot resync, power grants, presses
@@ -107,6 +108,7 @@ namespace Game.App.Session
             ["ImpactEventSystem"] = SystemAuthority.AuthorityOnly,
             ["ProjectileStepSystem"] = SystemAuthority.Both,             // guests: tracers and impact FX; their damage is drained
             ["BeamStepSystem"] = SystemAuthority.Both,
+            ["ChargeBeamStepSystem"] = SystemAuthority.Both,             // WPN-019: as BeamStepSystem; guests draw it, their damage is drained
             ["ExplosionSystem"] = SystemAuthority.Both,
             ["ShieldSystem"] = SystemAuthority.Both,                     // guests: hit flashes; HP is overwritten from snapshots
             ["DamageResolveSystem"] = SystemAuthority.AuthorityOnly,

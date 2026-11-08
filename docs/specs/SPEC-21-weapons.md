@@ -62,7 +62,7 @@ All types are **public contract** unless marked *internal*.
 ```csharp
 namespace Game.Data.Definitions
 {
-    public enum WeaponDelivery : byte { Projectile = 0, Beam = 1, Missile = 2 }               // add at end only
+    public enum WeaponDelivery : byte { Projectile = 0, Beam = 1, Missile = 2, ChargeBeam = 3 }   // add at end only; ChargeBeam: §4.6d (WPN-019)
     public enum ProjectileVisual : byte { StandardBullet = 0, RailgunSlug = 1, FlakShell = 2, Missile = 3, LaserBeam = 4 }
     [System.Flags] public enum WeaponFireGroups : byte { None = 0, Group1 = 1, Group2 = 2, Group3 = 4 }   // bit g = ShipCommand fire group g
 
@@ -149,7 +149,7 @@ namespace Game.Simulation.Weapons
         public uint TracerColor;             // sRGB RGBA8 packed R | G<<8 | B<<16 | A<<24
     }
 
-    public struct WeaponDefsBlob { public BlobArray<WeaponDef> Weapons; }    // [0] = none (all zero), [i] = IndexOf<WeaponDefinition>
+    public struct WeaponDefsBlob { public BlobArray<WeaponDef> Weapons; public BlobArray<ChargeBeamDef> ChargeBeams; }    // [0] = none (all zero), [i] = IndexOf<WeaponDefinition>; ChargeBeams parallel (§4.6d)
     public struct WeaponDefsRef : IComponentData { public BlobAssetReference<WeaponDefsBlob> Value; }   // boot singleton
 
     public struct WeaponTuning : IComponentData           // boot singleton from config_weapons (WeaponTuningDefinition, §4.7)
@@ -400,6 +400,55 @@ namespace Game.Data.Definitions
     [System.Serializable] public abstract class WeaponDeliveryData { public abstract WeaponDelivery Delivery { get; } }
 }
 ```
+
+### 4.6d Charge beam delivery (`ChargeBeam`, WPN-019)
+
+Owner request 2026-11-08: "a new weapon, of the laser type, which takes time to charge up, gives the target a visual prompt that they're being targetted, and then lasts for a certain amount of time, let's say 3 seconds, and the laser follows the user's mouse (with a specific max speed, making it lag behind where the mouse is aiming if the mouse is going too fast.) The laser should start off as multiple beams that are in a radious around where the cursor is aimed at, and they should converge into one beam, at which point the actual laser is fired, and it should be a thicker beam than the converged one".
+
+It is a new delivery as §4.6c describes: a `WeaponDelivery` value, `ChargeBeamData`, a handler and a step system. `WeaponFireSystem` stays delivery-agnostic except that it treats a running charge sequence like an active beam pulse (no retrigger) and fires one pellet.
+
+1. **Trigger.** A `ChargeBeam` shot on an idle weapon starts **Charging** for `ChargeTicks`, pointing along the shot. The sequence commits: releasing the trigger does not stop it (Q71). Shots while a sequence runs are ignored.
+2. **Tracking.** Every tick of both phases `ChargeBeamStepSystem` turns `ChargeBeamState.DirWorld` toward the weapon's aim (`WeaponAim.FireDirLocal` in world space, so the turret's arc and elevation still limit it) by at most `TrackRateRad × FixedTimestep`. A fast cursor leaves the beam behind. Without an aim (`HasAim == 0`) the beam holds its direction.
+3. **Charging** casts once per tick with the converging beams' width and records `EndWorld`, `HitSomething` and `Target` (the hull or shield first hit). It deals no damage. When it ends, **Firing** starts the next tick for `BeamPulseTicks`.
+4. **Firing** casts with `BeamWidth` and applies `Damage × WeaponDamage multiplier / BeamPulseTicks` to the first hit each tick, with the impulse and hit Fx of §5.7 (producer `Beam`, sequence = instance index). When it ends the weapon is Idle.
+5. **Cancellation** (as a beam pulse): power loss, hulk, a missing root, or a different weapon index on the mount ends the sequence at once.
+6. **Power.** `WeaponPowerDemandSystem` keeps requesting while a sequence runs, even after release.
+7. **Values.** `damage` is the total over the firing time; `SustainedDps = damage × fireRate`; `Range = beamRange`; momentum and recoil as a beam (§4.2, SPEC-91).
+8. **Look (SPEC-63, `BeamRenderBridgeSystem` → `ChargeBeamGatherJob`, beam batch and budget).** While charging, `ConvergeBeams` thin beams run from the muzzle to a ring of `ConvergeRadius` around `EndWorld`, turned a half-turn over the charge; the ring closes with smoothstep and is merged into one thin beam for the last `ConvergedHoldFraction`. When the beam is on something, a lock ring with four notches is drawn there, just outside the closing ring and pulsing from 3 Hz to 12 Hz as the charge completes: this is the target's warning. Firing draws the main beam (it swells from the converging width to `BeamWidth` in six ticks and fades over its last twelve) with a 2.4× halo. Colour = `tracerColor`. These segments use the beam shader's solid mode (negative intensity: no tail fade) so they land visibly on the hull. A firing charge beam also takes a beam audio-loop voice.
+
+```csharp
+namespace Game.Data.Definitions
+{
+    public static class WeaponDeliveryKinds { public static bool IsBeam(WeaponDelivery d); }   // Beam or ChargeBeam
+    [System.Serializable] public sealed class ChargeBeamData : WeaponDeliveryData   // Delivery = ChargeBeam; WPN-E003 checks
+    {
+        [SerializeField, Min(1f / 60f)] float chargeSeconds = 1.5f;       // trigger → main beam
+        [SerializeField, Min(0)] float trackRateDeg = 30;                 // most degrees per second the beam turns toward the aim
+        [SerializeField, Range(2, 12)] int convergeBeams = 6;
+        [SerializeField, Min(0)] float convergeRadius = 8;               // m, the ring the thin beams start on
+        [SerializeField, Min(0)] float convergeBeamWidth = 0.15f;        // m (the main beam is beamWidth)
+        [SerializeField, Range(0, 0.9f)] float convergedHoldFraction = 0.2f;
+    }
+}
+namespace Game.Simulation.Weapons
+{
+    public struct ChargeBeamDef { public uint ChargeTicks; public float TrackRateRad, ConvergeRadius, ConvergeBeamWidth, ConvergedHoldFraction; public int ConvergeBeams; }  // ChargeTicks 0 = not a charge beam
+    public enum ChargeBeamPhase : byte { Idle = 0, Charging = 1, Firing = 2 }
+    /// On every weapon entity (registered with WeaponState). Only writers: ChargeBeamShotHandlerSystem (start), ChargeBeamStepSystem.
+    public struct ChargeBeamState : IComponentData
+    {
+        public float3 DirWorld, MuzzleLocal, EndWorld; public Entity Target; public float Width;
+        public ushort TicksLeft, PhaseTicks; public ChargeBeamPhase Phase; public byte HitSomething; public ushort Weapon; public ContentHash Fx;
+    }
+}
+```
+
+| System | Group and order | Role (co-op) |
+|---|---|---|
+| `ChargeBeamShotHandlerSystem` | `GameplayPrePhysicsGroup`, after `WeaponFireSystem`, before `AbilityActivationGroup` | Both |
+| `ChargeBeamStepSystem` | `GameplayPostPhysicsGroup`, after `BeamStepSystem`, before `ExplosionSystem` (so `ShieldSystem` reads its shield hits the same tick) | Both |
+
+Content: `wpn_charge_lance` (Convergence Lance) on the block `weapon_charge_lance` (the Ark Lance hull and mesh): 1,800 energy damage over a 3 s burn, charge 1.5 s, fire rate 0.125/s (an 8 s cycle), range 900 m, beam width 1 m, track 30°/s, turret ±90° at 30°/s (the track rate, so the barrel stays with its beam), elevation 45°, 12 E/s, fire group 2, colour (1, 0.42, 0.22). Get it in the playground with `give item=weapon_charge_lance` and build it on in the ship editor.
 
 ### 4.6b `ShipDestroyed` (managed event, `Assets/Game/Core/Events/ShipDestroyed.cs`, namespace `Game.Core.Events`)
 
@@ -882,6 +931,20 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
   - [ ] `ship_fighter`: `WeaponStats.AliveWeaponCount == 14`, `SustainedDps` equals the sum from §4.9, `InitialWeaponCount == 14`; destroying one weapon recomputes once and lowers `SustainedDps`.
 - **Tests:** `WeaponPowerAndStatsTests.Init_SetsConsumer`, `.Demand_HeldGroup_SameTick`, `.Demand_Autofire`, `.Stats_Spawn`, `.Stats_WeaponDestroyed`.
 
+### WPN-019 — Charge beam delivery (owner request 2026-11-08)
+- **Milestone:** M4
+- **Tier:** frontier — a new delivery through the fire pipeline, a new weapon component and its presentation
+- **Depends on:** `WPN-007`, `WPN-009`, `WPN-018`
+- **Do:** Implement §4.6d: `WeaponDelivery.ChargeBeam`, `ChargeBeamData` and its validation, the `ChargeBeams` blob rows, `ChargeBeamState` registration, the handler and step systems, the fire and power-demand hooks, `RoleSystemPolicy` rows, the gather job in `BeamRenderBridgeSystem`, the beam shader's solid mode, the audio loop, and the `wpn_charge_lance` weapon and block.
+- **Files:** `Assets/Game/Data/Definitions/Weapons/{WeaponDelivery,ChargeBeamData,WeaponDefinition}.cs`; `Assets/Game/Simulation/Weapons/{ChargeBeamDef,ChargeBeamState,ChargeBeamShotHandlerSystem,ChargeBeamStepSystem,ChargeBeamStepJob,WeaponDefsBlob,WeaponContent,WeaponFireJob,WeaponFireSystem,WeaponInitSystem,WeaponPowerDemandSystem}.cs`; `Assets/Game/App/Session/RoleSystemPolicy.cs`; `Assets/Game/Presentation/Vfx/{Jobs/ChargeBeamGatherJob.cs,Systems/BeamRenderBridgeSystem.cs,Shaders/FxBeam.shader}`; `Assets/Game/Presentation/Audio/Systems/AudioLoopBridgeSystem.cs`; `Assets/Game/Content/{Weapons/wpn_charge_lance,Blocks/weapon_charge_lance,ContentDatabase}.asset`; `Assets/Game/Tests/EditMode/Simulation/Weapons/{ChargeBeamTests,WeaponContentTests}.cs`
+- **Acceptance criteria:**
+  - [ ] A shot starts a charge; charging never damages and marks the hull it is on; the burn lasts exactly `BeamPulseTicks` and its damage sums to `Damage`.
+  - [ ] The beam turns toward the aim at exactly the track rate, never overshoots, and holds without an aim.
+  - [ ] Power loss, hulk or a changed mount cancels the sequence; shots during a sequence do not restart it.
+  - [ ] `wpn_charge_lance` bakes to its §4.6d values and validates; a charge beam without `ChargeBeamData` is WPN-E003.
+  - [ ] In the playground: the converging beams close onto the cursor, the lock ring pulses on the target, the thick beam burns for 3 s and lags a fast cursor (owner's check).
+- **Tests:** `ChargeBeamTests.Sequence_MarksTargetThenBurns`, `.Tracking_LagsAtTrackRate`, `.Cancels_OnPowerHulkOrWeaponChange`, `.Handler_StartsOnlyIdleChargeBeams`; `WeaponContentTests.Bake_Table49_Values`, `.Validation_Codes`.
+
 ### WPN-016 — Per-instance fire groups (M4)
 - **Milestone:** M4
 - **Tier:** frontier — F1: adds per-instance data to the structure format and saves
@@ -937,6 +1000,7 @@ Complexity: O(candidates × (shield test + DDA over ≤ segment cells with empty
 | 69 | Explosion sphere query has bounded output and presentation defaults are abbreviated | Use the canonical sorted spatial sphere candidates. If their count exceeds the fixed output capacity, scan the sorted proxy list with the same broad sphere predicate before the shield/hull narrow phase; never silently drop blast targets. Preserve invalid-radius/position rejection. Emit one zero-velocity explosion FX and one unit-volume small/large cue per valid request, carrying player-source classification. Keep all queue/hash reader guards and dispose the temporary request list after its consumer. No public contract or tuning change. Four required tests and Unity validation pending. | Tech lead |
 | 68 | WPN-015 leaves the row identity/order, incomplete links, statistics access and SPEC-70 staging unspecified | WeaponDebug is Editor/development-only, with an immutable copied row containing the weapon Entity and the six stated values (cooldown is CooldownRemainingTicks). Snapshot clears/fills the caller list in BlockInstance order, verifies the exact FunctionalBlock Grid/InstanceIndex link, and skips tombstones, destroyed/stale/reparented/incomplete rows; inactive/uninitialized mounted entities remain inspectable. Complete the six read dependencies and use a read-only buffer; no state writes or fixed-step calls. TryGetProjectileStats copies the sole valid store's authoritative counters after its native guard completes; missing/ambiguous/uncreated store returns false/default. DEV-011 retains command registration and gh_perf formatting; these hooks require no command, binding contract, assembly or input/range changes. The one required fixture also checks safe lifecycle edges and a guarded asynchronous native stats writer. | Tech lead — WPN-015 default; lead Unity validation/central mirror pending |
 | 70 | WPN-012 broad spec dependencies include advisory performance or owner feel work | Replace the broad dependency with its explicit same-milestone functional prerequisites, excluding only DMG-016, PWR-009. Those tasks retain their full scope and tests but do not block this implementation. No runtime contract or functional prerequisite is removed; owner feel sign-off remains pending in its own task. Follows ADR-0042 and the owner instruction to build systems before tuning. | Tech lead |
+| 71 | WPN-019 charge beam: (a) does releasing the trigger cancel a charge? (b) should the targeted player also get a HUD warning and a sound, beyond the in-world lock ring and converging beams? (c) are the values right (1.5 s charge, 3 s burn, 30°/s track, 1,800 damage, 8 s cycle)? (d) should AI ships carry it? | (a) No: the sequence commits once triggered. (b) No: in-world telegraph only. (c) As §4.6d. (d) No ship carries it yet; it is a player refit. | Owner |
 
 ## 11. References
 

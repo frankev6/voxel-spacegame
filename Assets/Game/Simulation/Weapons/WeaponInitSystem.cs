@@ -27,7 +27,7 @@ namespace Game.Simulation.Weapons
             var registrations = SystemAPI.GetSingletonBuffer<FunctionalComponentRegistration>();
             PowerRegistration.RegisterConsumer(registrations, BlockModuleId.WeaponMount);
             var types = new ComponentTypeSet(ComponentType.ReadWrite<WeaponState>(), ComponentType.ReadWrite<WeaponMount>(),
-                ComponentType.ReadWrite<WeaponAim>(), ComponentType.ReadWrite<BeamState>());
+                ComponentType.ReadWrite<WeaponAim>(), ComponentType.ReadWrite<BeamState>(), ComponentType.ReadWrite<ChargeBeamState>());
             for (int i = 0; i < types.Length; i++)
                 registrations.Add(new FunctionalComponentRegistration { Module = BlockModuleId.WeaponMount, Type = types.GetComponentType(i) });
             job.Grids = state.GetComponentLookup<VoxelGrid>(true);

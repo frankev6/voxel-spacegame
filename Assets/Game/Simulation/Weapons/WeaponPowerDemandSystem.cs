@@ -20,10 +20,11 @@ namespace Game.Simulation.Weapons
             job.Commands = state.GetComponentLookup<ShipCommand>(true);
             job.Controls = state.GetComponentLookup<WeaponControl>(true);
             job.Targets = state.GetComponentLookup<ShipTarget>(true);
+            job.ChargeBeams = state.GetComponentLookup<ChargeBeamState>(true);
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
-            job.Commands.Update(ref state); job.Controls.Update(ref state); job.Targets.Update(ref state);
+            job.Commands.Update(ref state); job.Controls.Update(ref state); job.Targets.Update(ref state); job.ChargeBeams.Update(ref state);
             state.Dependency = job.ScheduleParallel(state.Dependency);
         }
         [BurstCompile] partial struct DemandJob : IJobEntity
@@ -31,14 +32,17 @@ namespace Game.Simulation.Weapons
             [ReadOnly] public ComponentLookup<ShipCommand> Commands;
             [ReadOnly] public ComponentLookup<WeaponControl> Controls;
             [ReadOnly] public ComponentLookup<ShipTarget> Targets;
-            void Execute(in FunctionalBlock functional, in WeaponMount mount, in WeaponState weapon, DynamicBuffer<PowerRequest> requests)
+            [ReadOnly] public ComponentLookup<ChargeBeamState> ChargeBeams;
+            void Execute(Entity entity, in FunctionalBlock functional, in WeaponMount mount, in WeaponState weapon, DynamicBuffer<PowerRequest> requests)
             {
                 Entity root = functional.Grid;
                 var command = Commands.HasComponent(root) ? Commands[root] : default;
                 bool held = (command.FireGroups & weapon.Group) != 0;
                 bool auto = Controls.HasComponent(root) && Controls[root].Autofire == 1 &&
                     Targets.HasComponent(root) && Targets[root].Value != Entity.Null;
-                PowerRegistration.SetRequesting(requests, BlockModuleId.WeaponMount, mount.WeaponIndex != 0 && (held || auto));
+                // WPN-019: a charge beam keeps drawing through its whole charge and firing, even after the trigger is released.
+                bool charging = ChargeBeams.HasComponent(entity) && ChargeBeams[entity].Phase != ChargeBeamPhase.Idle;
+                PowerRegistration.SetRequesting(requests, BlockModuleId.WeaponMount, mount.WeaponIndex != 0 && (held || auto || charging));
             }
         }
     }

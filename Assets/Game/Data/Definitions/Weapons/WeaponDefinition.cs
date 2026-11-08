@@ -10,7 +10,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private string displayName;
         [UnityEngine.SerializeField] private WeaponDelivery delivery;
         [UnityEngine.SerializeField] private Game.Data.Combat.DamageType damageType;    // Kinetic, Energy or Explosive (Ram is rejected, WPN-E008)
-        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float damage;              // per round (projectile/missile direct hit) or per pulse (beam)
+        [UnityEngine.SerializeField, UnityEngine.Min(0)] private float damage;              // per round (projectile/missile direct hit) or per pulse (beam, charge beam: over the firing time)
         [UnityEngine.SerializeField, UnityEngine.Min(1)] private float penetrationCells = 1; // point hits: max solid cells destroyed along the ray
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float explosionRadius;     // m; 0 = no explosion
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float explosionDamage;     // raw damage at the blast centre
@@ -41,7 +41,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField] private AudioCueDefinition fireCue;     // null = silent
         [UnityEngine.SerializeField] private FxDefinition muzzleFx;          // null = FxKind default (SPEC-63 Q8)
         [UnityEngine.SerializeField] private FxDefinition hitFx;             // null = FxKind default
-        [UnityEngine.SerializeReference] private WeaponDeliveryData deliveryData;  // §4.6c; null for Projectile/Beam/Missile
+        [UnityEngine.SerializeReference] private WeaponDeliveryData deliveryData;  // §4.6c; null for Projectile/Beam/Missile, ChargeBeamData for ChargeBeam (§4.6d)
         public string DisplayName => displayName;
         public WeaponDelivery Delivery => delivery;
         public Game.Data.Combat.DamageType DamageType => damageType;
@@ -79,7 +79,7 @@ namespace Game.Data.Definitions
         public FxDefinition HitFx => hitFx;
         public WeaponDeliveryData DeliveryData => deliveryData;
         /// §4.9 formula on the authored values (editor stats through SPEC-04 WeaponMountModule; WeaponContent.ComputeSustainedDps gives the same number).
-        public float SustainedDps => (delivery == WeaponDelivery.Beam ? damage : (damage + explosionDamage * .5f) * pelletsPerRound * burstCount) * fireRate;
+        public float SustainedDps => (WeaponDeliveryKinds.IsBeam(delivery) ? damage : (damage + explosionDamage * .5f) * pelletsPerRound * burstCount) * fireRate;
         public override void Validate(ValidationScope scope, ContentValidationContext context)
         {
             base.Validate(scope, context);
@@ -100,7 +100,7 @@ namespace Game.Data.Definitions
             Check(scope, "WPN-E002", nameof(projectileRadius), Nonnegative(projectileRadius), "Projectile radius must be finite and nonnegative.");
             Check(scope, "WPN-E002", nameof(homingTurnRateDeg), Nonnegative(homingTurnRateDeg), "Homing turn rate must be finite and nonnegative.");
             Check(scope, "WPN-E002", nameof(visual), System.Enum.IsDefined(typeof(ProjectileVisual), visual), "Unknown projectile visual.");
-            if (delivery == WeaponDelivery.Beam)
+            if (WeaponDeliveryKinds.IsBeam(delivery))
             {
                 Check(scope, "WPN-E003", nameof(beamRange), beamRange > 0 && float.IsFinite(beamRange), "Beam range must be finite and positive.");
                 Check(scope, "WPN-E003", nameof(beamPulseSeconds), beamPulseSeconds >= Game.Core.SimTime.FixedTimestep && float.IsFinite(beamPulseSeconds), "A beam pulse must last at least one fixed tick.");
@@ -113,6 +113,12 @@ namespace Game.Data.Definitions
             Check(scope, "WPN-E003", nameof(beamWidth), Nonnegative(beamWidth), "Beam width must be finite and nonnegative.");
             if (deliveryData != null)
                 Check(scope, "WPN-E003", nameof(deliveryData), deliveryData.Delivery == delivery, "Delivery data must match its weapon's delivery discriminator.");
+            if (delivery == WeaponDelivery.ChargeBeam)
+            {
+                // WPN-019: the charge beam needs its own timing and look (SPEC-21 §4.6d).
+                Check(scope, "WPN-E003", nameof(deliveryData), deliveryData is ChargeBeamData, "A charge beam needs ChargeBeamData.");
+                if (deliveryData is ChargeBeamData charge) charge.Validate(scope, nameof(deliveryData));
+            }
             // New delivery handlers may use shared fields without a data subclass (SPEC-21 §4.6c).
             Check(scope, "WPN-E004", nameof(explosionRadius), InRange(explosionRadius, 0, 6), "Explosion radius must be finite and in 0..6 metres.");
             Check(scope, "WPN-E005", nameof(lifetimeMin), Nonnegative(lifetimeMin) && (!projectile || lifetimeMin > 0), "Projectile/missile minimum life must be positive; unused life must be nonnegative.");

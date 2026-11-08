@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 12 | 0 | 0 | 67 | 1 | 94 | 7 |
+| M4 | 13 | 13 | 0 | 0 | 68 | 1 | 95 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -504,6 +504,7 @@
 | FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 35104965 | ADR-0123 accepted by the owner 2026-11-04; live check comes with DEV-031 (the toggle) |
 | FLT-017 | Experimental 3D flight for every ship, on by default (ADR-0123 amendment 1) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-016, DEV-031 | yes | done | claude (claude-opus-5-5) | 2026-11-08 | e314fdb3 | Owner request 2026-11-08: AI flies in 3D too, `flight3d` on by default; owner checked live: "looks good send it in" |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
+| WPN-019 | Charge beam delivery (owner request 2026-11-08) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-007, WPN-009, WPN-018 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-08 |  | Owner request 2026-11-08; weapon `wpn_charge_lance` on block `weapon_charge_lance` |
 | ABL-006 | Emergency repairs | [SPEC-24](specs/SPEC-24-abilities.md) | M4 | frontier | ABL-005, DMG-019, DMG-020 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Engines first, 35% of what is missing, 150 E, 90 s, hull items for pilots; lost bricks and blocks rebuilt; scenarios `emergency_repair`, `emergency_repair_brick`. |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
 | TRV-013 | Supercruise (in-system hop) | [SPEC-32](specs/SPEC-32-travel.md) | M4 | frontier | TRV-012, SPEC-23, SPEC-61 | no | dropped |  |  |  | Superseded by ADR-0122 (in-world cruise, TRV-015), owner 2026-10-21. |
@@ -1192,6 +1193,7 @@ Questions found while working. Use the *Default* until the *Decider* answers; th
 | 500 | SPEC-70 Q36: usable power, salvage and campaign trials | Resolved: prepare approved shield through editor/fleet owners before player spawn; normal ability input and real salvage transfer; same-profile campaign with no progress grants; console run shortcuts and isolated Lab reset. Details SPEC-70 Q36 and implementation 9805787b. | Tech lead |
 | 501 | 2026-10-16 | SPEC-91 §10 | Eight hit-force and hazard questions (feel targets, drift, who triggers mines, visibility, chain reactions, guest fire prediction, AI avoidance, debris pushes) | The defaults in SPEC-91 §10 | Owner (1–5), tech lead (6–8) | Owner approved the defaults, 2026-10-16 **Answered 2026-10-16:** the SPEC-91 §10 defaults. Q1 (feel targets): owner flew the hit force 2026-10-17, "feels right". |
 | 502 | 2026-10-16 | SPEC-92 §10 | Eight racing questions (planar crossings, respawn and hulks, weapons, laps and players, AI racers, names, track location, ramming) | The defaults in SPEC-92 §10 | Owner | Owner approved the defaults, 2026-10-16 **Answered 2026-10-16:** the SPEC-92 §10 defaults, except Q5 (AI racers), superseded 2026-10-17 by the owner asking for AI racers (RACE-017), and Q6, answered 2026-10-17: the track is **Battle Graveyard**. |
+| 503 | 2026-11-08 | SPEC-21 Q71, WPN-019 | Charge beam: does releasing the trigger cancel a charge; a HUD warning and sound for the targeted player; the values (1.5 s charge, 3 s burn, 30°/s track, 1,800 damage, 8 s cycle); should AI ships carry it? | Sequence commits once triggered; in-world lock ring only; values as SPEC-21 §4.6d; no AI ship carries it | Owner | |
 
 ## Measurements
 
@@ -1304,6 +1306,15 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-08 — WPN-019: the charge beam (claude, claude-opus-5-5)
+- Owner, 2026-11-08: "I want a new weapon, of the laser type, which takes time to charge up, gives the target a visual prompt that they're being targetted, and then lasts for a certain amount of time, let's say 3 seconds, and the laser follows the user's mouse (with a specific max speed, making it lag behind where the mouse is aiming if the mouse is going too fast.) The laser should start off as multiple beams that are in a radious around where the cursor is aimed at, and they should converge into one beam, at which point the actual laser is fired, and it should be a thicker beam than the converged one".
+- **Design (SPEC-21 §4.6d):** a new delivery `WeaponDelivery.ChargeBeam` through §4.6c's extension path: `ChargeBeamData`, baked into `WeaponDefsBlob.ChargeBeams` (parallel rows, same lifetime), `ChargeBeamState` on every weapon entity, `ChargeBeamShotHandlerSystem` and `ChargeBeamStepSystem`. A shot starts a 1.5 s charge (no damage, marks the hull it is on), then a 3 s burn applies `Damage / BeamPulseTicks` per tick. In both phases the beam turns toward the weapon's aim at most at the track rate (30°/s), so it lags a fast cursor; the turret also traverses at 30°/s so the barrel stays with its beam.
+- **Look:** `ChargeBeamGatherJob` in `BeamRenderBridgeSystem`: six thin beams to a ring of 8 m around the aim point that turns and closes (merged for the last 20%), a pulsing lock ring with four notches on the target (3 → 12 Hz), then a 1 m main beam with a halo. `FxBeam.shader` gained a solid mode (negative intensity, no tail fade) so these land visibly on the hull; existing beams are unchanged. A firing charge beam takes a beam audio-loop voice.
+- **Hooks:** `WeaponFireJob` does not retrigger during a sequence; `WeaponPowerDemandSystem` keeps requesting through it; `RoleSystemPolicy` classifies both new systems as Both.
+- **Content:** `wpn_charge_lance` (Convergence Lance: 1,800 energy damage per burn, 8 s cycle, 900 m) on the new block `weapon_charge_lance` (Ark Lance hull and mesh, no new art). In the playground: `give item=weapon_charge_lance`, build it on in the ship editor, fire group 2.
+- **Open:** SPEC-21 Q71 / ledger Q503 (Decider: Owner): trigger release, a HUD warning for the targeted player, the values, AI use.
+- **Checks:** compile clean; 41/41 focused EditMode tests pass (`ChargeBeamTests` ×4 new; `WeaponContentTests`, `BeamStepTests`, `WeaponFireTests`, `WeaponPowerAndStatsTests`, `WeaponInitTests`, `WeaponAimTests`, `WeaponContractTests`, `CombatGridSetupTests`, `RoleSystemPolicyTests`). Content-wide: 7/8; `ProjectContent_HasZeroValidationErrors` fails only on DLG-E013 (stale generated dialog tables), which this task does not touch. Not yet seen live; waiting for the owner's check.
 
 ### 2026-11-08 — FLT-017: experimental 3D flight for every ship, on by default (claude, claude-opus-5-5)
 - Owner, 2026-11-08: "give the other ships 3d controls also when experimental flight3d is toggled on? also make flight3d toggled to on by default". This reverses ADR-0123's player-only choice, so it is recorded as ADR-0123 amendment 1 on the owner's word.

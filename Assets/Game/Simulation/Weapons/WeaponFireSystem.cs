@@ -44,7 +44,7 @@ namespace Game.Simulation.Weapons
             job.Allegiances = state.GetComponentLookup<Allegiance>(true);
             job.Multipliers = state.GetComponentLookup<ShipStatMultipliers>(true);
             job.Power = state.GetComponentLookup<Powered>(true);
-            job.Beams = state.GetComponentLookup<BeamState>(true);
+            job.Beams = state.GetComponentLookup<BeamState>(true); job.ChargeBeams = state.GetComponentLookup<ChargeBeamState>(true);
             job.Hulks = state.GetComponentLookup<Hulk>(true);
             job.Dormant = state.GetComponentLookup<Dormant>(true);
             job.Spawning = state.GetComponentLookup<GridSpawning>(true);
@@ -73,7 +73,7 @@ namespace Game.Simulation.Weapons
             job.Allegiances.Update(ref state);
             job.Multipliers.Update(ref state);
             job.Power.Update(ref state);
-            job.Beams.Update(ref state);
+            job.Beams.Update(ref state); job.ChargeBeams.Update(ref state);
             job.Hulks.Update(ref state);
             job.Dormant.Update(ref state);
             job.Spawning.Update(ref state);

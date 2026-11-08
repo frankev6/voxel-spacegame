@@ -57,8 +57,8 @@ namespace Game.Simulation.Weapons
             }
         }
         static float Momentum(WeaponDefinition d)
-            => d.Delivery != WeaponDelivery.Beam && d.ProjectileMass > 0 ? d.ProjectileMass * d.ProjectileSpeed
-             : d.Delivery == WeaponDelivery.Beam && d.BeamForce > 0 ? d.BeamForce * d.BeamPulseSeconds : d.ImpulsePerHit;
+            => !WeaponDeliveryKinds.IsBeam(d.Delivery) && d.ProjectileMass > 0 ? d.ProjectileMass * d.ProjectileSpeed
+             : WeaponDeliveryKinds.IsBeam(d.Delivery) && d.BeamForce > 0 ? d.BeamForce * d.BeamPulseSeconds : d.ImpulsePerHit;
         public static BlobAssetReference<WeaponDefsBlob> BuildBlob(ContentCatalog catalog)
         {
             if (catalog == null) throw new ArgumentNullException(nameof(catalog));
@@ -67,6 +67,9 @@ namespace Game.Simulation.Weapons
             ref var root = ref builder.ConstructRoot<WeaponDefsBlob>();
             var weapons = builder.Allocate(ref root.Weapons, definitions.Count + 1);
             weapons[0] = default;
+            // WPN-019 (§4.6d): delivery data rows, parallel to the weapons; zero for every non-charge-beam weapon.
+            var charges = builder.Allocate(ref root.ChargeBeams, definitions.Count + 1);
+            charges[0] = default;
             // SPEC-91 §4.1 (HAZ-003): a shot's push is its momentum. Projectiles: projectileMass × projectileSpeed; beams: beamForce ×
             // pulse seconds; a weapon with neither keeps its authored impulsePerHit. The global scales come from config_weapons.
             float knockback = 1, recoil = 0;
@@ -92,7 +95,7 @@ namespace Game.Simulation.Weapons
                     ExplosionDamage = d.ExplosionDamage,
                     HitMomentum = Momentum(d),
                     ImpulsePerHit = Momentum(d) * knockback,
-                    RecoilMomentum = d.Delivery == WeaponDelivery.Beam ? 0 : Momentum(d) * recoil,
+                    RecoilMomentum = WeaponDeliveryKinds.IsBeam(d.Delivery) ? 0 : Momentum(d) * recoil,
                     BurstCount = d.BurstCount,
                     PelletsPerRound = d.PelletsPerRound,
                     ProjectileSpeed = d.ProjectileSpeed,
@@ -107,8 +110,14 @@ namespace Game.Simulation.Weapons
                     MaxElevationRad = math.radians(d.MaxElevationDeg),
                     FireConeRad = math.radians(d.FireConeDeg),
                 };
-                w.Range = w.Delivery == WeaponDelivery.Beam ? w.BeamRange : d.ProjectileSpeed * d.LifetimeMax;
+                w.Range = WeaponDeliveryKinds.IsBeam(w.Delivery) ? w.BeamRange : d.ProjectileSpeed * d.LifetimeMax;
                 w.SustainedDps = ComputeSustainedDps(w); weapons[i + 1] = w;
+                charges[i + 1] = d.Delivery == WeaponDelivery.ChargeBeam && d.DeliveryData is ChargeBeamData c ? new ChargeBeamDef
+                {
+                    ChargeTicks = math.max(1u, SimTime.SecondsToTicks(c.ChargeSeconds)), TrackRateRad = math.radians(c.TrackRateDeg),
+                    ConvergeRadius = c.ConvergeRadius, ConvergeBeamWidth = c.ConvergeBeamWidth,
+                    ConvergedHoldFraction = math.clamp(c.ConvergedHoldFraction, 0, .9f), ConvergeBeams = math.clamp(c.ConvergeBeams, 2, 12),
+                } : default;
             }
             return builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
         }
@@ -116,7 +125,7 @@ namespace Game.Simulation.Weapons
         {
             // Index zero is the all-zero "none" row, including its timing fields.
             if (!(w.TriggerIntervalTicks > 0) || !math.isfinite(w.TriggerIntervalTicks)) return 0;
-            return (w.Delivery == WeaponDelivery.Beam ? w.Damage :
+            return (WeaponDeliveryKinds.IsBeam(w.Delivery) ? w.Damage :
                 (w.Damage + w.ExplosionDamage * .5f) * w.PelletsPerRound * w.BurstCount) * (SimTime.TicksPerSecond / w.TriggerIntervalTicks);
         }
     }
