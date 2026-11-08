@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 12 | 0 | 0 | 67 | 1 | 94 | 7 |
+| M4 | 13 | 13 | 0 | 0 | 68 | 1 | 95 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -516,6 +516,7 @@
 | EDT-025 | Radial symmetry | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-013 | yes | todo |  |  |  |  |
 | EDT-026 | In-world edit when docked | [SPEC-51](specs/SPEC-51-ship-editor.md) | M4 | frontier | EDT-023, SPEC-10, SPEC-11 | no | todo |  |  |  |  |
 | HUD-021 | Settings: grouped controls in two columns, a bigger panel, legible hover | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-005 | no | done | claude (claude-opus-5-5) | 2026-11-05 | 851a6027 | Owner checked in the game: "The changes are good" |
+| HUD-022 | Markers after a kill: the locked reticle and the wreck tag | [SPEC-61](specs/SPEC-61-screens-hud.md) | M4 | standard | HUD-021 | yes | in-progress | claude (claude-opus-5-5) | 2026-11-08 |  | Owner bug report 2026-11-08: locked reticle stuck after a kill, wreck tag in the wrong place |
 | CAM-013 | Free-aim chase camera for experimental 3D flight (ADR-0123) | [SPEC-62](specs/SPEC-62-camera.md) | M4 | frontier | FLT-016, CAM-012 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | e0f27456 | ADR-0123 decision 6; owner checked live: "looks good" |
 | DEV-022 | The ARK Proving Grounds: a mechanics hub | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-021, HAZ-013, HAZ-021, RACE-016 | no | done | lead (claude-opus-5-5) | 2026-10-18 | 3664a444 | Retired 2026-10-18 (owner: superseded by the Hollow, DEV-023; the race kept). Owner request: a space hub instead of beacon circles. Plaza with hub station and a portal ring; nine districts, each with signs, F stations and a reset pad; return portals; lanes and traffic; dot-matrix floor and wall text. PlaygroundTests pass. |
 | DEV-023 | The capital hub: a vertical slice of a bustling space city | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | frontier | DEV-022 | yes | in-progress | lead (claude-opus-5-5) | 2026-10-18 | — | Owner chose E to build ("Lets build this latest version into the game"): first in-game build of the Hollow in the playground (`playground goto=hollow`). Still open: the capital (D) and the civilian ship classes (docs/design/hub/hub-options.md). |
@@ -1304,6 +1305,12 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-08 — HUD-022: markers after a kill (claude, claude-opus-5-5)
+- Owner, 2026-11-08: "there seems to be a bug with the HUDS where sometimes after an enemy ship is disabled/killed the orange marker stays and is tied to the player's cursor, and the salvage hud/marker shows up somewhere random, can you look and see if you find the bug?" Then: "sure do the fix on a separate branch".
+- **Orange marker:** the reticle's locked look (`HudViewModel.Locked`), set while `PlayerInputSampleSystem.AssistTarget` exists. The assist target was only recomputed on frames the mouse aim ran, so a frame without it (flight controls off under a menu or prompt, a gamepad, no camera) kept the old ship; and a dead ship keeps its entity as a hulk, so "exists" stayed true. Now the sampler clears the target at the start of every sample (the release radius uses last frame's target), and `HudSyncSystem` shows neither the locked reticle nor the lead pip for a `Hulk`. Not reproduced live; the stale path is the only one the code allows.
+- **Salvage tag:** `VoxelGrid.CellMin`/`CellMax` are spawn bounds and never shrink; a ship that died and blew apart kept the whole ship's box around its remnant, so the "Wreck · Salvage" tag hung over empty space as it tumbled. `WorldOverlaySystem` now boxes a hulk by its live cells (`LiveBounds` from `GridMass` moments, exact for a solid box, clipped to the spawn bounds); an empty hulk gets no tag.
+- **Checks:** compile clean; 25/25 EditMode (`PlayerInputSampleSystemTests` incl. the new `AssistTarget_DropsWreck_AndWhenMouseNotSampled`, the new `WorldOverlayLiveBoundsTests` ×4, `HudSyncSystemTests`, `AimAssistTests`). Waiting for the owner's check in a fight.
 
 ### 2026-11-08 — FLT-017: experimental 3D flight for every ship, on by default (claude, claude-opus-5-5)
 - Owner, 2026-11-08: "give the other ships 3d controls also when experimental flight3d is toggled on? also make flight3d toggled to on by default". This reverses ADR-0123's player-only choice, so it is recorded as ADR-0123 amendment 1 on the owner's word.

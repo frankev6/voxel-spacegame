@@ -25,6 +25,7 @@ namespace Game.Presentation.Input
         Entity commandEntity;
         EntityQuery players, cameras, physics, assistGrids, relations;
         Entity assistTarget;
+        Entity assistHeld;   // last frame's assist target: it keeps its wider release radius (Snap)
         /// <summary>Auto-aim (owner, 2026-10-21: "auto-aiming for players enabled by default"): a cursor within
         /// <see cref="AssistRadius"/> of a hostile ship aims at that ship, and the weapons lead it. Dev switch until Settings has it.</summary>
         [Game.Core.StaticStateOk("dev switch for auto-aim, main thread")]
@@ -84,6 +85,10 @@ namespace Game.Presentation.Input
             EntityManager.CompleteDependencyBeforeRW<PlayerCommand>();
             var previous = EntityManager.GetComponentData<PlayerCommand>(commandEntity);
             var command = new PlayerCommand { Edges = previous.Edges, AimWorld = previous.AimWorld, FrameIndex = (uint)UnityEngine.Time.frameCount };
+            // HUD-022: auto-aim holds a ship only while the mouse aim chooses it this frame. Without this, a frame the mouse is not
+            // sampled (flight controls off under a menu or prompt, a gamepad, no camera yet) kept the old ship, and the HUD showed
+            // the locked reticle on a ship that had since died.
+            assistHeld = assistTarget; assistTarget = Entity.Null;
             if (input != null && input.Controls.Flight.enabled)
             {
                 command.Thrust = math.clamp(new float2(strafe.ReadValue<float>(), thrust.ReadValue<float>()), -1, 1);
@@ -243,7 +248,7 @@ namespace Game.Presentation.Input
                 float radius = math.length((float3)(grid.CellMax + 1 - grid.CellMin)) * grid.CellSize * .5f;
                 float radiusPx = radius * .7f * camera.ScreenSizePx.y / (2 * depth * math.tan(math.radians(camera.VerticalFovDeg) * .5f));
                 float px = math.max(0, math.distance(screen, pointer) - radiusPx);
-                float limit = (entity == assistTarget ? AssistRelease : AssistRadius) * camera.ScreenSizePx.y;
+                float limit = (entity == assistHeld ? AssistRelease : AssistRadius) * camera.ScreenSizePx.y;
                 if (px > limit || px >= bestPx) continue;
                 best = entity; bestPx = px; bestPoint = center;
             }

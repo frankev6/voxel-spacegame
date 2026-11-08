@@ -727,6 +727,22 @@ Profiler markers: `HudSnapshotSystem.Ship`, `HudSnapshotSystem.Weapons`, `HudSna
   - [x] Hovered list rows and other default-themed controls keep legible text on a dark surface.
 - **Tests:** `SettingsViewTests.ControlsGroups_FilterRows`, `SettingsViewTests.Rebind_Backspace_Unbinds` (new); the existing rebind and layout cases, updated to select the group.
 
+### HUD-022 — Markers after a kill: the locked reticle and the wreck tag
+- **Milestone:** M4
+- **Tier:** standard — three small presentation fixes with tests
+- **Depends on:** `HUD-021`
+- **Do:** Owner (2026-11-08): "there seems to be a bug with the HUDS where sometimes after an enemy ship is disabled/killed the orange marker stays and is tied to the player's cursor, and the salvage hud/marker shows up somewhere random". The orange marker is the reticle's locked look (amber ring and spokes, `HudViewModel.Locked`); the salvage marker is `WorldOverlaySystem`'s "Wreck · Salvage" tag.
+  - **Auto-aim hold:** `PlayerInputSampleSystem` clears its assist target at the start of every sample, so only this frame's mouse aim can hold a ship. Before, a frame the mouse was not sampled (flight controls off under a menu or prompt, a gamepad, no camera yet) kept the old ship, and the locked reticle stayed on a ship that died meanwhile. The wider release radius still applies to last frame's target.
+  - **Locked reticle and lead pip:** `HudSyncSystem` shows the locked reticle only for a target that is not a `Hulk` (a dead ship keeps its entity), and draws no lead pip on a wreck.
+  - **Wreck tag:** a grid's `CellMin`/`CellMax` are its spawn bounds and never shrink, so a ship that died and blew apart kept the whole ship's box around the few cells left, and its tag hung over empty space as the remnant tumbled. A hulk's tag box is now the box of its live cells from `GridMass` (`WorldOverlaySystem.LiveBounds`: per axis centroid ± √(3σ² + s²/4), exact for a solid box, clipped to the spawn bounds); a hulk with no cells left gets no tag.
+- **Files:** `Assets/Game/Presentation/Input/PlayerInputSampleSystem.cs`, `Assets/Game/Presentation/Systems/{HudSyncSystem,WorldOverlaySystem}.cs`, `Assets/Game/Tests/EditMode/Input/PlayerInputSampleSystemTests.cs`, `Assets/Game/Tests/EditMode/Presentation/WorldOverlayLiveBoundsTests.cs`
+- **Acceptance criteria:**
+  - [ ] Auto-aim holds a hostile ship under the cursor, drops it when it becomes a wreck, and holds nothing while flight controls are off.
+  - [ ] The locked reticle and the lead pip never show for a wreck.
+  - [ ] A wreck's tag sits on the cells it has left; a solid box is tagged by its own box.
+  - [ ] In the game: after a kill the reticle turns white and the salvage tag sits on the wreck (owner's check).
+- **Tests:** `PlayerInputSampleSystemTests.AssistTarget_DropsWreck_AndWhenMouseNotSampled`; `WorldOverlayLiveBoundsTests.SolidBox_IsItsOwnBox`, `.Remnant_TagsOnlyWhatIsLeft`, `.TwoPieces_CoverBoth_WithinSpawnBounds`, `.NoCells_NoTag`.
+
 ## 10. Open questions
 
 | # | Question | Default if unanswered | Decider |

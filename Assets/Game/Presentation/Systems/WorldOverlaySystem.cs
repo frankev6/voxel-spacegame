@@ -185,6 +185,10 @@ namespace Game.Presentation.Systems
                     if (grid.Kind == GridKind.Station && em.HasComponent<GridSource>(entity) && names.IsTrackPart(em.GetComponentData<GridSource>(entity).Blueprint)) continue;
                     var ltw = em.GetComponentData<LocalToWorld>(entity).Value;
                     float3 min = (float3)grid.CellMin * grid.CellSize, max = ((float3)grid.CellMax + 1) * grid.CellSize;
+                    // HUD-022: a grid's bounds are its spawn bounds and never shrink. A ship that died and blew apart keeps the whole
+                    // ship's box around the few cells left, so its wreck tag hung over empty space; tag a wreck by the cells it has.
+                    if (grid.Kind == GridKind.Hulk && em.HasComponent<GridMass>(entity)
+                        && !LiveBounds(em.GetComponentData<GridMass>(entity).Data, grid.CellSize, min, max, out min, out max)) continue;
                     float distance = math.distance(origin, math.transform(ltw, (min + max) * .5f));
                     var why = Why.None;
                     if (entity == hover) why |= Why.Hover;
@@ -388,6 +392,20 @@ namespace Game.Presentation.Systems
         {
             if (builder.Length != value.Length) return false;
             for (int i = 0; i < value.Length; i++) if (builder[i] != value[i]) return false;
+            return true;
+        }
+        /// <summary>HUD-022: the box (grid-local metres) around a grid's live cells from its mass moments: per axis the centroid ±
+        /// √(3σ² + s²/4), exactly a solid box's half-width (n cells: σ² = s²(n²−1)/12), clipped to the spawn bounds. False when no cells are left.</summary>
+        internal static bool LiveBounds(in StructureMassData data, float cellSize, float3 spawnMin, float3 spawnMax, out float3 min, out float3 max)
+        {
+            min = spawnMin; max = spawnMax;
+            if (data.CellCount == 0 || !(data.Mass > 0)) return false;
+            double3 centroid = data.FirstMoment / data.Mass;
+            double3 variance = math.max(0, data.SecondDiag / data.Mass - centroid * centroid);
+            float3 centre = (float3)centroid, half = (float3)math.sqrt(3 * variance + .25 * cellSize * cellSize);
+            if (!math.all(math.isfinite(centre)) || !math.all(math.isfinite(half))) return true;   // keep the spawn box
+            min = math.clamp(centre - half, spawnMin, spawnMax); max = math.clamp(centre + half, spawnMin, spawnMax);
+            max = math.max(max, min);
             return true;
         }
         bool Project(float4x4 ltw, float3 min, float3 max, out Rect rect)

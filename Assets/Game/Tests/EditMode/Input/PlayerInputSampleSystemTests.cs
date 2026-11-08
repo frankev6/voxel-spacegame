@@ -138,6 +138,30 @@ namespace Game.Tests.EditMode.Input
             Assert.AreEqual(float2.zero, Command.Thrust); Assert.AreEqual(0, Command.Turn); Assert.AreEqual(0, Command.FireGroups);
             Assert.AreEqual(ShipCommandFlags.None, Command.Flags); Assert.AreEqual(0, Command.AimValid); Assert.AreEqual(1, Command.Edges.Interact);
         }
+        /// <summary>HUD-022: auto-aim drops a ship that became a wreck, and holds nothing on a frame the mouse is not sampled (the HUD
+        /// showed the locked reticle on a dead ship after flight controls were off for a frame).</summary>
+        [Test] public void AssistTarget_DropsWreck_AndWhenMouseNotSampled()
+        {
+            Camera(); var em = world.EntityManager;
+            var relations = Game.Simulation.FactionRelations.CreateDefault(Unity.Collections.Allocator.Persistent);
+            try
+            {
+                em.CreateSingleton(relations);
+                var player = em.CreateEntity(typeof(PlayerShip)); em.AddComponentData(player, Game.Simulation.Allegiance.Player);
+                var enemy = em.CreateEntity(typeof(Game.Voxel.Model.VoxelGrid), typeof(Unity.Transforms.LocalToWorld), typeof(Game.Simulation.Allegiance));
+                em.SetComponentData(enemy, new Game.Voxel.Model.VoxelGrid { CellMin = int3.zero, CellMax = new int3(3), CellSize = 1 });
+                em.SetComponentData(enemy, new Unity.Transforms.LocalToWorld { Value = float4x4.Translate(new float3(18, 0, 28)) });   // under the cursor
+                em.SetComponentData(enemy, new Game.Simulation.Allegiance { Faction = 1 });
+                Frame(); Assert.AreEqual(enemy, sampler.AssistTarget, "auto-aim holds the hostile ship under the cursor");
+                em.AddComponent<Game.Voxel.Damage.Hulk>(enemy); Frame();
+                Assert.AreEqual(Entity.Null, sampler.AssistTarget, "a wreck is not held");
+                em.RemoveComponent<Game.Voxel.Damage.Hulk>(enemy); Frame(); Assert.AreEqual(enemy, sampler.AssistTarget);
+                input.SetContext(InputContext.Menu); Frame();
+                Assert.AreEqual(Entity.Null, sampler.AssistTarget, "flight controls off: the mouse is not sampled, so nothing is held");
+                input.SetContext(InputContext.Flight); Frame(); Assert.AreEqual(enemy, sampler.AssistTarget, "back in flight it holds again");
+            }
+            finally { relations.Dispose(); }
+        }
         [Test] public void NoAlloc()
         {
             Camera(); Box(false); Frame(Key.W);

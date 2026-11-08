@@ -147,12 +147,15 @@ namespace Game.Presentation.Systems
             }
             var sampler = World.GetExistingSystemManaged<Game.Presentation.Input.PlayerInputSampleSystem>();
             Entity target = sampler != null ? sampler.AssistTarget : Entity.Null;
-            bool locked = ship && target != Entity.Null && EntityManager.Exists(target);
+            // HUD-022: a ship that died keeps its entity as a hulk; the locked reticle is only for a live ship
+            bool locked = ship && target != Entity.Null && EntityManager.Exists(target) && !EntityManager.HasComponent<Game.Voxel.Damage.Hulk>(target);
             if (!locked && ship && player != Entity.Null && EntityManager.HasComponent<Game.Simulation.Weapons.ShipTarget>(player))
             {
                 var held = EntityManager.GetComponentData<Game.Simulation.Weapons.ShipTarget>(player).Value;
-                if (held != Entity.Null && EntityManager.Exists(held) && value.TargetRelation == (byte)Game.Simulation.FactionStance.Hostile) target = held;
+                if (held != Entity.Null && EntityManager.Exists(held) && !EntityManager.HasComponent<Game.Voxel.Damage.Hulk>(held)
+                    && value.TargetRelation == (byte)Game.Simulation.FactionStance.Hostile) target = held;
             }
+            if (target != Entity.Null && EntityManager.Exists(target) && EntityManager.HasComponent<Game.Voxel.Damage.Hulk>(target)) target = Entity.Null;   // no lead pip on a wreck
             UnityEngine.Vector2 leadPoint = model.LeadPoint; bool showLead = false;
             if (ship && hasCamera && target != Entity.Null && EntityManager.Exists(target) && Lead(player, target, now, out float3 intercept) && Project(camera, intercept, out var leadScreen, out _))
             { leadPoint = leadScreen; showLead = true; }
