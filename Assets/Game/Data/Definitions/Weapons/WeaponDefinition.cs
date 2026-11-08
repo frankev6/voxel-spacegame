@@ -117,7 +117,8 @@ namespace Game.Data.Definitions
             {
                 // WPN-019: the charge beam needs its own timing and look (SPEC-21 §4.6d).
                 Check(scope, "WPN-E003", nameof(deliveryData), deliveryData is ChargeBeamData, "A charge beam needs ChargeBeamData.");
-                if (deliveryData is ChargeBeamData charge) charge.Validate(scope, nameof(deliveryData));
+                if (deliveryData is ChargeBeamData charge)
+                { charge.Validate(scope, nameof(deliveryData)); ValidateReference(scope, context, nameof(deliveryData), charge.FireCue); }
             }
             // New delivery handlers may use shared fields without a data subclass (SPEC-21 §4.6c).
             Check(scope, "WPN-E004", nameof(explosionRadius), InRange(explosionRadius, 0, 6), "Explosion radius must be finite and in 0..6 metres.");

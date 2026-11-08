@@ -64,6 +64,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                         Assert.That(charge.ChargeTicks, Is.EqualTo(90u)); Assert.That(charge.TrackRateRad, Is.EqualTo(math.radians(30f)).Within(1e-5f));
                         Assert.That(charge.ConvergeBeams, Is.EqualTo(6)); Assert.That(charge.ConvergeRadius, Is.EqualTo(8f));
                         Assert.That(charge.ConvergeBeamWidth, Is.EqualTo(.15f).Within(1e-5f)); Assert.That(charge.ConvergedHoldFraction, Is.EqualTo(.2f).Within(1e-5f));
+                        Assert.That(charge.FireCue, Is.EqualTo(catalog.Get<AudioCueDefinition>(new ContentId("cue_weapon_lance_fire")).Id.Hash), "the discharge sound");
                     }
                     else Assert.That(charge.ChargeTicks, Is.Zero, d.IdString);
                     Assert.That(d.SustainedDps, Is.EqualTo(expected.SustainedDps).Within(.5f), d.IdString);
@@ -296,12 +297,12 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                     if (id == "wpn_ark_lance_medium") { w.Damage = 900; w.PenetrationCells = 2; w.TriggerIntervalTicks = 600; w.BeamRange = w.Range = 900;
                         w.BeamPulseTicks = 60; w.BeamWidth = .6f; w.TraverseHalfArcRad = math.radians(35f); w.TraverseRateRad = math.radians(60f); w.PowerDraw = 10; }
                     break;
-                case "wpn_charge_lance":   // WPN-019: charge 1.5 s, burn 3 s, 1,800 damage over the burn
+                case "wpn_charge_lance":   // WPN-019: charge 1.5 s, burn 3 s, 36,000 damage over the burn (owner: 20× the first 1,800)
                     w.Delivery = WeaponDelivery.ChargeBeam; w.Type = DamageType.Energy; w.Visual = ProjectileVisual.LaserBeam; w.DefaultFireGroups = 2;
                     w.SpreadRad = w.ProjectileSpeed = 0; w.LifetimeMinTicks = w.LifetimeMaxTicks = 1;
-                    w.Damage = 1800; w.PenetrationCells = 2; w.TriggerIntervalTicks = 480; w.BeamRange = w.Range = 900; w.BeamPulseTicks = 180; w.BeamWidth = 1;
+                    w.Damage = 36000; w.PenetrationCells = 2; w.TriggerIntervalTicks = 480; w.BeamRange = w.Range = 900; w.BeamPulseTicks = 180; w.BeamWidth = 1;
                     w.TraverseHalfArcRad = math.radians(90f); w.TraverseRateRad = math.radians(30f); w.MaxElevationRad = math.radians(45f);
-                    w.FireConeRad = math.radians(10f); w.PowerDraw = 12; w.SustainedDps = 225; break;
+                    w.FireConeRad = math.radians(10f); w.PowerDraw = 12; w.SustainedDps = 4500; break;
                 case "wpn_railgun_medium":
                     w.Visual = ProjectileVisual.RailgunSlug; w.Damage = 250; w.PenetrationCells = 6; w.TriggerIntervalTicks = 200;
                     w.BurstCount = 4; w.BurstIntervalTicks = 6; w.SpreadRad = math.radians(.5f); w.ProjectileSpeed = 1200; w.LifetimeMinTicks = w.LifetimeMaxTicks = 60;

@@ -34,10 +34,11 @@ namespace Game.Tests.EditMode.Simulation.Weapons
             public readonly WeaponDef Definition = new WeaponDef { Index = 1, Delivery = WeaponDelivery.ChargeBeam, Type = DamageType.Energy,
                 Damage = 240, PenetrationCells = 2, ImpulsePerHit = 120, BeamRange = 20, BeamPulseTicks = PulseTicks, BeamWidth = 1, HitFx = new ContentHash(77) };
             public ChargeBeamDef Charge = new ChargeBeamDef { ChargeTicks = ChargeTicks, TrackRateRad = math.radians(60f), ConvergeRadius = 4,
-                ConvergeBeamWidth = .1f, ConvergedHoldFraction = .2f, ConvergeBeams = 6 };
+                ConvergeBeamWidth = .1f, ConvergedHoldFraction = .2f, ConvergeBeams = 6, FireCue = new ContentHash(555) };
             public readonly SpatialHash Hash = SpatialHash.Create(128);
             public readonly List<DamageEvent> Damage = new List<DamageEvent>();
             public readonly List<ShieldHit> Shields = new List<ShieldHit>();
+            public readonly List<SfxEvent> Sounds = new List<SfxEvent>();
             readonly BlobAssetReference<WeaponDefsBlob> definitions;
             readonly ShieldHitStreams shieldChannel;
             readonly DamageStreams streams;
@@ -60,6 +61,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 }
                 Em.CreateSingleton(new WeaponDefsRef { Value = definitions }); Em.CreateSingleton(Hash); clock = Em.CreateSingleton(new SimClock());
                 streamOwner = Grids.World.GetOrCreateSystem<DamageStreamsSystem>(); Grids.World.GetOrCreateSystem<FxEventQueueCreateSystem>();
+                Grids.World.GetOrCreateSystem<SfxEventQueueCreateSystem>();
                 shieldChannel = new ShieldHitStreams { Hits = SimEventChannel<ShieldHit>.Create("charge_test_shields") }; Em.CreateSingleton(shieldChannel);
                 using (var query = Em.CreateEntityQuery(typeof(DamageStreams))) streams = query.GetSingleton<DamageStreams>();
                 step = Grids.World.GetOrCreateSystem<ChargeBeamStepSystem>();
@@ -83,6 +85,8 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Capture(streams.Damage, Damage, ref state); Capture(shieldChannel.Hits, Shields, ref state);
                 using var query = Em.CreateEntityQuery(typeof(FxEventQueue)); var effects = query.GetSingleton<FxEventQueue>(); effects.Access.CompleteAccess();
                 while (effects.Queue.TryDequeue(out _)) { }
+                using var soundQuery = Em.CreateEntityQuery(typeof(SfxEventQueue)); var sounds = soundQuery.GetSingleton<SfxEventQueue>(); sounds.Access.CompleteAccess();
+                Sounds.Clear(); while (sounds.Queue.TryDequeue(out var sound)) Sounds.Add(sound);
             }
             static void Capture<T>(SimEventChannel<T> channel, List<T> output, ref SystemState state) where T : unmanaged
             {
@@ -102,12 +106,14 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                 Assert.AreEqual(0, f.Damage.Count, "charging never damages"); Assert.AreEqual(0, f.Shields.Count);
                 Assert.AreEqual(f.Target, f.State.Target, "the target is marked while charging"); Assert.AreEqual(1, f.State.HitSomething);
                 Assert.That(math.distance(new float3(0, .5f, .5f), f.State.EndWorld), Is.LessThan(.01f));
+                Assert.AreEqual(i == ChargeTicks - 1 ? 1 : 0, f.Sounds.Count, "the discharge sound plays once, as the main beam fires");
             }
+            Assert.AreEqual(f.Charge.FireCue, f.Sounds[0].Cue);
             Assert.AreEqual(ChargeBeamPhase.Firing, f.State.Phase); Assert.AreEqual(PulseTicks, f.State.TicksLeft); Assert.AreEqual(PulseTicks, f.State.PhaseTicks);
             float total = 0; float3 impulse = default;
             for (int i = 0; i < PulseTicks; i++)
             {
-                f.Step(); Assert.AreEqual(1, f.Damage.Count);
+                f.Step(); Assert.AreEqual(1, f.Damage.Count); Assert.AreEqual(0, f.Sounds.Count);
                 var hit = f.Damage[0]; total += hit.Amount; impulse += hit.WorldImpulse;
                 Assert.AreEqual(f.Target, hit.Grid); Assert.AreEqual(f.Source, hit.Source); Assert.AreEqual(ProducerKind.Beam, hit.Producer);
                 Assert.AreEqual(21u, hit.Sequence); Assert.AreEqual(2, hit.Penetration); Assert.AreEqual(DamageType.Energy, hit.Type);

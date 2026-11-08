@@ -1,3 +1,5 @@
+using Game.Core;
+
 namespace Game.Simulation.Weapons
 {
     /// <summary>SPEC-21 §4.6d (WPN-019): baked ChargeBeamData, one row per WeaponDef index in WeaponDefsBlob.ChargeBeams.
@@ -10,5 +12,6 @@ namespace Game.Simulation.Weapons
         public float ConvergeBeamWidth;      // m
         public float ConvergedHoldFraction;  // 0..0.9
         public int ConvergeBeams;            // 2..12
+        public ContentHash FireCue;          // played when the main beam fires; 0 = silent
     }
 }

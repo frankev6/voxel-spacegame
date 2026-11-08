@@ -13,6 +13,7 @@ namespace Game.Data.Definitions
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float convergeRadius = 8;
         [UnityEngine.SerializeField, UnityEngine.Min(0)] private float convergeBeamWidth = 0.15f;
         [UnityEngine.SerializeField, UnityEngine.Range(0, 0.9f)] private float convergedHoldFraction = 0.2f;
+        [UnityEngine.SerializeField] private AudioCueDefinition fireCue;   // null = silent; WeaponDefinition.fireCue plays at the trigger
 
         public override WeaponDelivery Delivery => WeaponDelivery.ChargeBeam;
         /// <summary>s from the trigger until the main beam fires.</summary>
@@ -27,6 +28,8 @@ namespace Game.Data.Definitions
         public float ConvergeBeamWidth => convergeBeamWidth;
         /// <summary>Last fraction of the charge the thin beams spend merged into one, before the main beam fires.</summary>
         public float ConvergedHoldFraction => convergedHoldFraction;
+        /// <summary>Sound when the main beam fires, after the charge (the weapon's own fireCue plays at the trigger). Null = silent.</summary>
+        public AudioCueDefinition FireCue => fireCue;
 
         public ChargeBeamData() { }
         public ChargeBeamData(float chargeSeconds, float trackRateDeg, int convergeBeams, float convergeRadius, float convergeBeamWidth, float convergedHoldFraction)

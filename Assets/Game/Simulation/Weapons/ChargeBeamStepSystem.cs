@@ -33,7 +33,7 @@ namespace Game.Simulation.Weapons
             job.Power = state.GetComponentLookup<Powered>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<WeaponDefsRef>();
             state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<ShieldHitStreams>(); state.RequireForUpdate<SpatialHash>();
-            state.RequireForUpdate<SimClock>(); state.RequireForUpdate<FxEventQueue>();
+            state.RequireForUpdate<SimClock>(); state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>();
         }
         [BurstCompile] public void OnUpdate(ref SystemState state)
         {
@@ -48,11 +48,12 @@ namespace Game.Simulation.Weapons
             int chunks = query.CalculateChunkCountWithoutFiltering();
             job.Damage = streams.Damage.BeginWrite(ref state, Game.Data.Combat.ProducerKind.Beam, chunks);
             job.Shields = shields.Hits.BeginWrite(ref state, Game.Data.Combat.ProducerKind.Beam, chunks);
-            job.Hash = hash.AsReadOnly(); job.Fx = fx.Queue.AsParallelWriter();
+            var sfx = SystemAPI.GetSingleton<SfxEventQueue>();
+            job.Hash = hash.AsReadOnly(); job.Fx = fx.Queue.AsParallelWriter(); job.Sfx = sfx.Queue.AsParallelWriter();
             job.MaxCandidates = SystemAPI.TryGetSingleton<WeaponTuning>(out var tuning) ? tuning.MaxCandidates : 32;
             job.Dt = Game.Core.SimTime.FixedTimestep;
-            state.Dependency = job.ScheduleParallel(query, fx.Access.BeginRead(hash.BeginRead(state.Dependency)));
-            hash.EndRead(state.Dependency); fx.Access.EndRead(state.Dependency);
+            state.Dependency = job.ScheduleParallel(query, sfx.Access.BeginRead(fx.Access.BeginRead(hash.BeginRead(state.Dependency))));
+            hash.EndRead(state.Dependency); fx.Access.EndRead(state.Dependency); sfx.Access.EndRead(state.Dependency);
             streams.Damage.EndWrite(state.Dependency); shields.Hits.EndWrite(state.Dependency);
         }
     }

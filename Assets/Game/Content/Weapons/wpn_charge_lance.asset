@@ -17,7 +17,7 @@ MonoBehaviour:
   displayName: Convergence Lance
   delivery: 3
   damageType: 1
-  damage: 1800
+  damage: 36000
   penetrationCells: 2
   explosionRadius: 0
   explosionDamage: 0
@@ -63,3 +63,4 @@ MonoBehaviour:
         convergeRadius: 8
         convergeBeamWidth: 0.15
         convergedHoldFraction: 0.2
+        fireCue: {fileID: 11400000, guid: 2530ffb2176a4ce88405c434d5e688c1, type: 2}

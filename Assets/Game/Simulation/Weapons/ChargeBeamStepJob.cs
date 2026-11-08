@@ -37,6 +37,7 @@ namespace Game.Simulation.Weapons
         [ReadOnly] public SpatialHashQueryData Hash;
         public NativeStream.Writer Damage, Shields;
         [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
+        [NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         public int MaxCandidates;
         public float Dt;
 
@@ -115,6 +116,13 @@ namespace Game.Simulation.Weapons
                         // Converged: the main beam fires from the next tick for the pulse length.
                         ushort ticks = (ushort)math.min(weapon.BeamPulseTicks, ushort.MaxValue);
                         beam.Phase = ChargeBeamPhase.Firing; beam.TicksLeft = ticks; beam.PhaseTicks = ticks;
+                        // The discharge: its own sound and a big muzzle flash (the weapon's fireCue already played at the trigger).
+                        bool player = Players.HasComponent(root);
+                        if (charge.FireCue.Value != 0) Sfx.Enqueue(SfxEvents.At(charge.FireCue, muzzle, 1, player));
+                        var flash = FxEvents.Muzzle(muzzle, current, Velocities.HasComponent(root) ? Velocities[root].Linear : default,
+                            1.5f + weapon.BeamWidth, weapon.TracerColor, weapon.MuzzleFx);
+                        if (player) flash.Flags |= FxEventFlags.PlayerSource;
+                        Fx.Enqueue(flash);
                     }
                 }
                 charges[i] = beam;

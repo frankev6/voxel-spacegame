@@ -117,6 +117,7 @@ namespace Game.Simulation.Weapons
                     ChargeTicks = math.max(1u, SimTime.SecondsToTicks(c.ChargeSeconds)), TrackRateRad = math.radians(c.TrackRateDeg),
                     ConvergeRadius = c.ConvergeRadius, ConvergeBeamWidth = c.ConvergeBeamWidth,
                     ConvergedHoldFraction = math.clamp(c.ConvergedHoldFraction, 0, .9f), ConvergeBeams = math.clamp(c.ConvergeBeams, 2, 12),
+                    FireCue = c.FireCue != null ? c.FireCue.Id.Hash : default,
                 } : default;
             }
             return builder.CreateBlobAssetReference<WeaponDefsBlob>(Allocator.Persistent);
