@@ -783,8 +783,8 @@ Overlays and the console are dev-only and excluded from the 06 frame budgets; pe
 - **Do:** Owner (2026-11-07), asked whether the playground has a ship modification area: "add one yes, and can we add a console setting to add 100 of each material while in the editor?" The Quartermaster's station kind becomes `refit` (`hollow_export.py`, `hollow_layout.json`, regenerated `HollowLayout.g.cs`). F there opens the real fleet-ship editor on the flagship through `GameSession.EnterBlueprintLabAsync(FleetShip)`, not creative: blocks come from cargo and removed blocks go back. The campaign's docked-only gate on Fleet → Edit is not applied; the Quartermaster stands in for the dock. The playground clears itself on the scene change as before; on the return to World (GameSession's lab return pose) it rebuilds the Hollow at the same origin, which keeps the station's old reset. `give blocks=N` (1–999) gives N of every block, the editor's materials, through `InventoryModel.Give` (overflow slots past capacity); the editor palette follows the inventory change.
 - **Files:** `Assets/Game/App/DevRuntime/Playground/{DevPlayground,PlaygroundHollow,HollowLayout,HollowLayout.g}.cs`, `ArtSource/Hub/{hollow_export.py,hollow/hollow_layout.json}`, `Assets/Game/App/DevRuntime/Commands/GiveDevCommand.cs`, tests below.
 - **Acceptance criteria:**
-  - [ ] F at the Quartermaster opens the non-creative editor on the playground flagship; Exit returns to the Quartermaster with the Hollow rebuilt and the playground active.
-  - [ ] `give blocks=100` in the editor puts 100 of every block in cargo and the palette shows them.
+  - [x] F at the Quartermaster opens the non-creative editor on the playground flagship; Exit returns to the Quartermaster with the Hollow rebuilt and the playground active.
+  - [x] `give blocks=100` in the editor puts 100 of every block in cargo and the palette shows them.
 - **Tests:** `StateCommandTests.GiveBlocks_StocksEveryBlock` (EditMode); `PlaygroundTests.Quartermaster_RefitsAndReturns` (PlayMode).
 
 ## 10. Open questions
