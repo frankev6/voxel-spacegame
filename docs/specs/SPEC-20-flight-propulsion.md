@@ -713,7 +713,7 @@ Complexity: O(1) per untouched ship, O(instances) when the revision changed.
 - **Acceptance criteria:**
   - [x] A new game starts with 3D flight on for the player and AI ships; `flight3d off` returns every ship to the plane; co-op is planar.
   - [x] An engaging AI ship climbs to its target's height without overshooting and keeps its nose level; off the target it returns to its goal's height.
-  - [ ] Owner's live check: AI ships follow the player off the plane in a fight.
+  - [x] Owner's live check: AI ships follow the player off the plane in a fight (2026-11-08: "looks good send it in").
 - **Tests:** `Flight3DDevCommandTests.Toggle_EnablesAndDisables`, `AiSteeringTests.Flight3D_LiftsToTargetHeight`, `AiSteeringTests.Flight3D_LiftClosesAndBrakes`; existing `Flight3DTests`, `AiSteeringTests`.
 
 ## 10. Open questions
