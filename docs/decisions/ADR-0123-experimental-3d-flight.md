@@ -2,6 +2,8 @@
 
 **Status:** Accepted (2026-11-04). Owner: "Accept as written", with open question 1 answered "Chase camera, flight-sim style". Amends ADR-0003 for an opt-in, dev-only mode; ADR-0003 stays the game's default.
 
+> **Amended 2026-11-08 (FLT-017).** Owner: "give the other ships 3d controls also when experimental flight3d is toggled on? also make flight3d toggled to on by default". See *Amendment 1* at the end; it replaces the player-only parts of decisions 1, 3 and 7.
+
 ## Context
 The owner asked (2026-11-04) for "an experimental mode, toggleable in console, which unlocks 3d travel": two buttons for up and down thrust, a toggle that makes the ship "freely rotate to look at the mouse" while it "maintain[s] the movement feel of the game, so perhaps there should be an adjustable lag metric", and a toggle that makes the ship face the selected target. The owner chose the player-only layer: only the player's ship leaves the plane; AI, hazards and radar stay planar.
 
@@ -82,7 +84,28 @@ The thruster allocator is 2D (local X force, local Z force, yaw torque). Thruste
 - **A dev-only kinematic hack** (set velocity and rotation directly): fastest, but breaks the impulse-only velocity rule (architecture §8) and loses the flight feel. Rejected by the owner.
 - **Full 6-DOF:** allocator over six axes with real thrusters, and 3D AI, hazards and radar. It is the eventual real version, but it changes the vision's scope and costs weeks. Rejected for now by the owner.
 
+## Amendment 1 (2026-11-08): every ship, on by default
+Owner, 2026-11-08: "give the other ships 3d controls also when experimental flight3d is toggled on? also make flight3d toggled to on by default".
+
+1. **One world switch.** `Flight3DMode { On }` (a singleton, `Game.Simulation.Flight`) replaces the per-ship `Flight3DRequest`.
+   - `Flight3DModeSystem` creates it **on**; after that its only writer is the dev command `flight3d` (SPEC-70 §5.4).
+   - It counts as off unless `SimRole` is Solo, so co-op stays planar (ADR-0003) whatever the switch says.
+   - `Flight3DModeSystem` is still the sole writer of each ship's `Flight3D` bit: on at once, off once that ship has levelled.
+   - Not saved. Release builds have no dev console, so there it stays on; returning ADR-0003's planar default to release builds is an owner call.
+2. **Every flying ship.** `FlightSetup` adds `Flight3D` to every flying profile (player, NPC, small craft, dummy), not only the player's. Stations stay planar.
+3. **AI uses Lift** (supersedes "AI writes `Lift = 0`"). `AiSteerJob` keeps its planar steering and keeps the nose level (no facing flags). With `Flight3D` enabled it sets Lift toward a height:
+   - while engaging with a valid aim, the target's height (the aim point's Y);
+   - otherwise its goal's height: 0 for patrol, return and flee (the brain's goals are on the plane), the leader's height plus 0 for formation members.
+   - Lift closes at the vertical speed cap and brakes in time at half `VerticalAccel` (`AiSteerJob.Lift`), within `HeightTolerance` (0.5 m).
+4. **Consequences.**
+   - Cruise is refused while the mode is on (decision 7), so with the default every ship flies without cruise until `flight3d off`.
+   - The radar, hazards and `WorldZone` stay planar (decision 7); AI ships now leave the plane to follow the player.
+   - Racers (`RacerPilotSystem`) write `Lift = 0`; the vertical assist holds them at their height.
+   - A hulk keeps the mode it died in; with the switch off, a tumbling hulk never levels and stays off the plane.
+   - AI turrets aim in 3D already; fixed forward guns on AI ships are not pitched toward the target (a later step).
+
 ## Open questions
 | # | Question | Default | Decider |
 |---|---|---|---|
+| 2 | Release builds have no console, so the on-by-default switch cannot be turned off there. Keep it on in release builds? | On everywhere while the mode is experimental | Owner |
 | 1 | The camera looks down at the ship from at least 20°. How does FaceAim get pitch from the mouse? | Pitch from what the cursor is on (alternatives: a chase camera; pitch from the cursor's screen height) | Owner — **answered 2026-11-04: "Chase camera, flight-sim style"** (decision 6) |

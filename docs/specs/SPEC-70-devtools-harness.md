@@ -190,7 +190,7 @@ flowchart LR
 | Inventory add, credits add | `InventoryModel` / `Wallet` public methods (owner methods, dev caller) | No direct field writes |
 | Fact set | `FactStore.SetBySlot(slot, value, FactWriteSource.Debugger)` (owner method, dev caller) | No direct field writes |
 | `PlayerCommand` during replay | SPEC-71 replay system | Specified by SPEC-71 |
-| `Flight3DRequest.On` on the player ship (DEV-031, `flight3d`) | `Flight3DDevCommand.TryApply` | Main thread between world updates, after completing the component's jobs; solo only; `Flight3DModeSystem` owns the resulting `Flight3D` state (ADR-0123) |
+| `Flight3DMode.On`, the world switch (DEV-031, `flight3d`; FLT-017) | `Flight3DDevCommand.TryApply` | Main thread between world updates, after completing the component's jobs; created on by `Flight3DModeSystem`, which counts it off in co-op and owns every ship's resulting `Flight3D` state (ADR-0123 amendment 1) |
 | `FlightConfig` singleton fields (DEV-030, control sheet *Flight configs*) | `DevFlightConfig.TrySet` / `Reset` | Main thread in `DevRuntimeHost.Update`, between world updates, after `CompleteAllTrackedJobs()`; each value clamped to its field range; never written to `config_flight`; the first read keeps the boot values for Reset |
 
 ## 6. Public API
@@ -318,7 +318,7 @@ assert ecs.count("Brick") > 0 "voxels present"
 | `record` | `start` \| `stop` \| `save name=<file>` | SPEC-71 `PlayerCommandRecorder` | Ok |
 | `replay` | `name=<file>` | SPEC-71 replay; done when the script ends | Pending |
 | `controls` | `open` (default) \| `close` \| `status`; `port` (47810; without it the next 9 ports are tried), `browser` (true) | Starts or stops the control sheet server (DEV-029) and opens its page with `Application.OpenURL`. Needs the bound `InputService` | Ok: the URL, `closed` or the status |
-| `flight3d` | `on` \| `off` \| `status` (default) | Sets `Flight3DRequest` on the player ship (DEV-031, ADR-0123): on unlocks up/down thrust and the facing toggles, off levels the ship and returns it to the plane. Solo only | Ok: the mode and the keys |
+| `flight3d` | `on` \| `off` \| `status` (default) | Sets the world switch `Flight3DMode` (DEV-031, ADR-0123 amendment 1), on by default: on unlocks 3D flight for every ship (up/down thrust and the facing toggles for the player; AI follows its target's height), off levels every ship and returns it to the plane. Solo only | Ok: the mode and the keys |
 | `key`, `mouse`, `click`, `ui` | as §6.1 | Runtime equivalents of the generic commands (for scenarios and the console) | Ok / Pending |
 
 CLI-only: `gh_scenario --file <path>` (starts a run, enters play mode first when needed; returns the run id), `gh_scenario_status --run <id>` (outcome, line, message, JSON path), `gh_scenario_stop --run <id>`, `gh_dev --cmd "<console line>"` (any registry command). Arguments of wrappers use the same names as the registry; ulong values are passed as strings.

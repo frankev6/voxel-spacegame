@@ -68,6 +68,7 @@ namespace Game.App.Session
             ["CruiseSystem"] = SystemAuthority.Both,                      // ADR-0122: guests cruise their own predicted ship
             ["CruiseDriveSystem"] = SystemAuthority.Both,                 // same: dynamic bodies only
             ["PlanarConstraintSystem"] = SystemAuthority.Both,            // same: dynamic bodies only
+            ["Flight3DModeSystem"] = SystemAuthority.Both,                // ADR-0123: counts the switch off outside Solo, so a guest's own ship levels and stays planar
             ["WeaponAimSystem"] = SystemAuthority.Both,
             ["WeaponFireSystem"] = SystemAuthority.Both,
             ["ProjectileShotHandlerSystem"] = SystemAuthority.Both,

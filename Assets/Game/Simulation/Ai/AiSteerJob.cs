@@ -1,6 +1,7 @@
 using Game.Core;
 using Game.Core.Components;
 using Game.Data.Combat;
+using Game.Data.Components;
 using Game.Data.Definitions;
 using Game.Simulation.Commands;
 using Game.Simulation.Flight;
@@ -19,7 +20,9 @@ namespace Game.Simulation.Ai
 {
     /// <summary>Arrival, heading and one-tick ability commands for an exclusive AI root (SPEC-23 §5.5). A ship with propulsion stats is
     /// flown by the shared pilot (PilotControl): its own way when it heads where it goes (drifting through turns), holding the brain's
-    /// heading otherwise (on a target, broadside, in formation). Without stats the closed form of §5.5 steps 2–4.</summary>
+    /// heading otherwise (on a target, broadside, in formation). Without stats the closed form of §5.5 steps 2–4. In experimental 3D
+    /// flight (ADR-0123, amended 2026-11-08) the ship stays level and Lift takes it to its target's height while engaging, else to
+    /// its goal's.</summary>
     [BurstCompile, WithNone(typeof(PlayerShip), typeof(Hulk))]
     public partial struct AiSteerJob : IJobEntity
     {
@@ -35,6 +38,7 @@ namespace Game.Simulation.Ai
         [ReadOnly] public ComponentLookup<ShipStatMultipliers> Multipliers;
         [ReadOnly] public ComponentLookup<ShieldState> Shields;
         [ReadOnly] public BufferLookup<FlightThruster> Thrusters;
+        [ReadOnly] public ComponentLookup<Flight3D> Flight3D;   // ADR-0123
         public AiConfig Config;
         public FlightConfig FlightConfig;
         public uint Tick;
@@ -95,7 +99,29 @@ namespace Game.Simulation.Ai
             }
             if (math.abs(cmd.Thrust.y) < .002f && math.abs(flight.LocalVelocity.y) > 1)
                 cmd.Thrust.y = -.002f * math.sign(flight.LocalVelocity.y);
+            if (Flight3D.HasComponent(entity) && Flight3D.IsComponentEnabled(entity))
+            {
+                // The brain's goals are on the plane; while engaging, the height to hold is the target's.
+                float goalHeight = brain.State == AiState.Engage && cmd.AimValid != 0 ? cmd.AimWorld.y : brain.GoalPosition.y;
+                var multipliers = Multipliers.HasComponent(entity) ? Multipliers[entity] : default;
+                float speedMultiplier = FlightMath.SpeedMultiplier(FlightConfig, multipliers.Get(StatId.MaxSpeed), Shields.HasComponent(entity) && Shields[entity].Active != 0);
+                cmd.Lift = Lift(FlightConfig, speedMultiplier, pose.Position.y, goalHeight);
+            }
             command = cmd;
+        }
+
+        /// <summary>m: within this of the height to hold, Lift is 0 and the vertical assist holds the ship there.</summary>
+        public const float HeightTolerance = .5f;
+
+        /// <summary>ADR-0123 (amended 2026-11-08): the Lift that closes on <paramref name="goalHeight"/> at the vertical speed cap and
+        /// brakes in time, at half the vertical assist's acceleration so a weak or shielded ship still stops on it.</summary>
+        public static float Lift(in FlightConfig config, float speedMultiplier, float height, float goalHeight)
+        {
+            float cap = config.MaxForwardSpeed * speedMultiplier * config.VerticalSpeedFraction;
+            float error = goalHeight - height;
+            if (cap <= 0 || !math.isfinite(error)) return 0;
+            float speed = math.sqrt(config.VerticalAccel * math.max(0, math.abs(error) - HeightTolerance));   // √(2 · accel/2 · d)
+            return math.clamp(math.sign(error) * math.min(cap, speed) / cap, -1, 1);
         }
 
         /// <summary>rad: a goal heading this close to the way to the goal counts as heading where it goes.</summary>
