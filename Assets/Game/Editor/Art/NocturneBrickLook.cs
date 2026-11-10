@@ -114,7 +114,7 @@ namespace Game.Editor.Art
         }
         static int LayerFor(string id)
         {
-            if (id == "block_missing") return -1;
+            if (id == "block_missing" || id.StartsWith("block_lantern_", StringComparison.Ordinal)) return -1;   // EXT-014: LanternLook owns those layers
             if (id.Contains("xeno")) return id == "block_xeno_tissue" || id == "block_xeno_sac" ? XenoTissue : XenoOrgan;
             if (id.StartsWith("block_rock", StringComparison.Ordinal)) return Rock;
             if (id.StartsWith("block_hull", StringComparison.Ordinal)) return Hull;

@@ -42,12 +42,14 @@ namespace Game.App.DevRuntime.Extraction
         readonly List<PersistentId> ships = new();
         readonly List<(PersistentId id, int route, float along)> traffic = new();
         readonly List<Entity> tanks = new();
+        readonly List<int> tankFull = new();   // each tank's solid cells when it first streamed in
         readonly Dictionary<ushort, List<Light>> lamps = new();
-        GameObject dressing; Light coreLight;
+        GameObject dressing; Light coreLight; LanternAtmosphere atmosphere; Entity grate;
         internal Entity Powerhouse, Core, Heist;
         internal PersistentId Patrol, Hauler, Cruiser;
         readonly List<PersistentId> cutters = new();
         internal byte AllianceIndex = 255, CivilIndex = 255;
+        bool grateLifted;
         internal bool Built, Shroud, DimmingNight, DriverLocked, ScansOn, InsideMan, HaulerLeaving;
         internal int DepotBlown;
         double builtAt, dimmingAt = -1, cuttersHomeAt = -1, steeredAt;
@@ -83,6 +85,7 @@ namespace Game.App.DevRuntime.Extraction
                 var root = kit.Grid(session, catalog, frame, Anchor, d.Blueprint, d.Closed, quaternion.identity, GridKind.Station, GridMotion.Kinematic);
                 if (root == Entity.Null) continue;
                 grids.Add(root);
+                if (d.Id == "grate") grate = root;
                 if (d.Id != "bigdoor" && d.Id != "hatch") em.AddComponent<DamageImmune>(root);
                 em.AddComponent<RamImmune>(root);   // only weapons break a door, never a bump
                 em.AddComponent<CameraSeeThrough>(root);
@@ -97,6 +100,7 @@ namespace Game.App.DevRuntime.Extraction
                 lamps[id] = new List<Light>();
             }
             Lamps();
+            atmosphere = new LanternAtmosphere(dressing.transform);
             // the core in the Cradle, held by six tethers on posts
             Core = kit.Grid(session, catalog, frame, Anchor, ExtractionIds.Core, LanternLayout.Core, quaternion.identity, GridKind.Asteroid, GridMotion.Dynamic);
             if (Core != Entity.Null)
@@ -129,6 +133,7 @@ namespace Game.App.DevRuntime.Extraction
                     var spot = ExtractionKit.Lamp(dressing.transform, (Vector3)w.At, new Color(1f, .95f, .8f), w.Range, 1.2f * w.Range * w.Range, LightType.Spot);
                     spot.spotAngle = w.HalfArcDeg * 2; spot.transform.rotation = Quaternion.LookRotation((Vector3)math.normalizesafe(w.Facing));
                     list.Add(spot);
+                    atmosphere.Searchlight(spot, w.At, w.Facing, math.radians(w.SweepDeg), w.SweepSeconds, (entities.Count - 1) * .17f, w.Range, w.HalfArcDeg, w.District);
                 }
             }
             foreach (var z in Zones)
@@ -214,6 +219,9 @@ namespace Game.App.DevRuntime.Extraction
             lamps[1].Add(ExtractionKit.Lamp(dressing.transform, (Vector3)Poi("long_wait"), new Color(1f, .8f, .5f), 120, 5000));
             lamps[1].Add(ExtractionKit.Lamp(dressing.transform, (Vector3)Poi("garrison"), new Color(.9f, 1f, .95f), 120, 5000));
             lamps[6].Add(ExtractionKit.Lamp(dressing.transform, (Vector3)Poi("queue"), new Color(.4f, .7f, 1f), 260, 9000));
+            // the Well's own glow: the lanterns rising up it light the gallery faces amber (EXT-014)
+            foreach (var y in new[] { -104f, -64f, -24f })
+                lamps[2].Add(ExtractionKit.Lamp(dressing.transform, new Vector3(0, y, 0), new Color(1f, .6f, .28f), 130, 3200));
         }
 
         // ---------------------------------------------------------------------------------------------------------- per frame
@@ -229,9 +237,10 @@ namespace Game.App.DevRuntime.Extraction
             {
                 coreLight.transform.position = em.GetComponentData<LocalToWorld>(Core).Position;
                 coreLight.enabled = !em.HasComponent<Stowed>(Core);
-                coreLight.intensity = em.HasComponent<Shrouded>(Core) ? 600 : 9000;
+                coreLight.intensity = (em.HasComponent<Shrouded>(Core) ? 600 : 9000) * (atmosphere?.Heartbeat ?? 1);
             }
             UpdateLamps(em);
+            Atmosphere(em);
             Signals(em, catalog, frame);
             Dimming(em, now);
             Machinery(em, frame, now);
@@ -245,8 +254,29 @@ namespace Game.App.DevRuntime.Extraction
             using var q = em.CreateEntityQuery(ComponentType.ReadOnly<District>());
             using var all = q.ToComponentDataArray<District>(Allocator.Temp);
             foreach (var d in all)
+            {
+                atmosphere?.SetLit(d.Id, d.Lit);
                 if (lamps.TryGetValue(d.Id, out var list))
                     foreach (var l in list) if (l != null) l.enabled = d.Lit;
+            }
+        }
+
+        /// <summary>EXT-014: feed the atmosphere the core (home in the Cradle? shown? shrouded?), the Grate's opening and the alarm.</summary>
+        void Atmosphere(EntityManager em)
+        {
+            if (atmosphere == null) return;
+            bool coreLive = Core != Entity.Null && em.Exists(Core) && em.HasComponent<LocalToWorld>(Core);
+            float3 core = coreLive ? em.GetComponentData<LocalToWorld>(Core).Position : Sim(LanternLayout.Core);
+            bool shown = coreLive && !em.HasComponent<Stowed>(Core);
+            bool home = shown && math.distance(core, Sim(LanternLayout.Core)) < 30;
+            bool shrouded = coreLive && em.HasComponent<Shrouded>(Core);
+            float open = 0;
+            if (grate != Entity.Null && em.Exists(grate) && em.HasComponent<LocalTransform>(grate))
+                foreach (var d in Doors)
+                    if (d.Id == "grate") open = math.distance(em.GetComponentData<LocalTransform>(grate).Position, Sim(d.Closed)) / math.max(1, math.length(d.Open));
+            bool alarmOn = Heist != Entity.Null && em.Exists(Heist) && em.HasComponent<HeistState>(Heist)
+                && em.GetComponentData<HeistState>(Heist).Phase is HeistPhase.Alarm or HeistPhase.Lockdown;
+            atmosphere.Tick(Time.deltaTime, kit.Tick / 60f, Camera.main, (Vector3)core, home, shown, shrouded, open, alarmOn);
         }
 
         void Signals(EntityManager em, Game.Data.Services.ContentCatalog catalog, in FrameOrigin frame)
@@ -316,7 +346,7 @@ namespace Game.App.DevRuntime.Extraction
         {
             if (!DimmingNight || dimmingAt < 0) return;
             double t = now - dimmingAt;
-            if (t > -60 && t < -59.5) { kit.Door(DoorGrate, true); Toast("The yard crane lifts the Grate's panel: the Lantern shines up the Well."); }
+            if (t > -60 && t < 0 && !grateLifted) { grateLifted = true; kit.Door(DoorGrate, true); Toast("The yard crane lifts the Grate's panel: the Lantern shines up the Well."); }
             bool dark = t >= 0 && t < 60;
             using var q = em.CreateEntityQuery(ComponentType.ReadWrite<District>());
             using var all = q.ToEntityArray(Allocator.Temp);
@@ -328,7 +358,7 @@ namespace Game.App.DevRuntime.Extraction
                 d.Dimmed = want; em.SetComponentData(e, d);
             }
             if (t >= 0 && t < .5) Toast("21:00 THE DIMMING: one minute of dark.");
-            if (t >= 60 && t < 60.5) { Toast("The lights come back."); kit.Door(DoorGrate, false); }
+            if (t >= 60 && grateLifted) { grateLifted = false; Toast("The lights come back."); kit.Door(DoorGrate, false); }
             if (t > 61) dimmingAt = -1;
         }
 
@@ -384,8 +414,18 @@ namespace Game.App.DevRuntime.Extraction
         /// <summary>The fuel depot: when a tank is broken, every cutter in town (and the fire tugs) goes east for two minutes.</summary>
         void DepotCheck(EntityManager em, Game.Data.Services.ContentCatalog catalog, in FrameOrigin frame, double now)
         {
+            // a tank is blown when it has lost 40% of its own cells (owner 2026-11-10: "den and station just exploding random blocks out of
+            // nowhere": a fixed 600-cell line counted the small tanks as blown at spawn and set the depot burning on arrival)
             int broken = 0;
-            foreach (var t in tanks) if (!em.Exists(t) || Game.Simulation.Extraction.CoreTetherSystem.SolidCells(em, t) < 600) broken++;
+            while (tankFull.Count < tanks.Count) tankFull.Add(0);
+            for (int i = 0; i < tanks.Count; i++)
+            {
+                var t = tanks[i];
+                if (!em.Exists(t)) { if (tankFull[i] > 0) broken++; continue; }
+                int cells = Game.Simulation.Extraction.CoreTetherSystem.SolidCells(em, t);
+                if (tankFull[i] == 0) { tankFull[i] = cells; continue; }
+                if (cells < tankFull[i] * .6f) broken++;
+            }
             if (broken > DepotBlown)
             {
                 DepotBlown = broken;
@@ -567,7 +607,8 @@ namespace Game.App.DevRuntime.Extraction
             foreach (var g in grids) if (em.Exists(g)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, g);
             foreach (var e in entities) if (em.Exists(e)) em.DestroyEntity(e);
             foreach (var id in ships) kit.Despawn(id);
-            grids.Clear(); entities.Clear(); ships.Clear(); traffic.Clear(); posts.Clear(); tanks.Clear(); cutters.Clear(); lamps.Clear();
+            grids.Clear(); entities.Clear(); ships.Clear(); traffic.Clear(); posts.Clear(); tanks.Clear(); tankFull.Clear(); cutters.Clear(); grateLifted = false; lamps.Clear();
+            atmosphere?.Dispose(); atmosphere = null; grate = Entity.Null;
             if (dressing != null) UnityEngine.Object.Destroy(dressing);
             dressing = null; coreLight = null; Built = false; Core = Powerhouse = Heist = Entity.Null;
             DriverLocked = ScansOn = DimmingNight = InsideMan = Shroud = HaulerLeaving = false; DepotBlown = 0; dimmingAt = -1; cuttersHomeAt = -1;

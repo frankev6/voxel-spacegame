@@ -46,6 +46,7 @@ namespace Game.Editor.Content
         {
             if (!File.Exists(Source)) throw new FileNotFoundException("Run python3 ArtSource/Places/lantern_export.py first", Source);
             EnsurePalette();
+            Game.Editor.Art.LanternLook.Bake();   // the town's own surfaces and their blocks, before the catalog is read
             AssetDatabase.SaveAssets();
             int pieces = 0, cells = 0;
             using (var service = new ContentService(ContentDatabaseBuilder.Rebuild()))
@@ -54,6 +55,21 @@ namespace Game.Editor.Content
                 var content = new VoxelContent { Blocks = service.BlockDefs, Orientations = service.Orientations };
                 ushort Block(string id) => catalog.GetBlockIndex(catalog.Get<BlockDefinition>(new ContentId(id)));
                 ushort hull = Block("block_hull"), rock = Block("block_rock"), rock2 = Block("block_rock_large_2");
+                // EXT-014: the town's own surfaces, chosen by the cell's colour (LanternLook bakes them)
+                ushort Skin(byte colour) => Block(Game.Editor.Art.LanternLook.BlockId(colour switch
+                {
+                    Ivory or Ivory2 => Game.Editor.Art.LanternLook.Surface.Tile,
+                    Jade => Game.Editor.Art.LanternLook.Surface.Jade,
+                    Brass => Game.Editor.Art.LanternLook.Surface.Lattice,
+                    Deck => Game.Editor.Art.LanternLook.Surface.Tread,
+                    Rust or Teal or Ochre => Game.Editor.Art.LanternLook.Surface.Corrugated,
+                    Glass => Game.Editor.Art.LanternLook.Surface.Glass,
+                    Glow => Game.Editor.Art.LanternLook.Surface.Conduit,
+                    Truss => Game.Editor.Art.LanternLook.Surface.Truss,
+                    Warm => Game.Editor.Art.LanternLook.Surface.Paper,
+                    _ => Game.Editor.Art.LanternLook.Surface.Plate,
+                }));
+                Put Skinned(Put put) => (block, origin, colour, orient) => put(block == hull ? Skin(colour) : block, origin, colour, orient);
                 using (var reader = new BinaryReader(File.OpenRead(Source)))
                 {
                     if (Encoding.ASCII.GetString(reader.ReadBytes(4)) != "LANT" || reader.ReadInt32() != 1) throw new InvalidDataException(Source);
@@ -65,30 +81,30 @@ namespace Game.Editor.Content
                         int blocks = reader.ReadInt32();
                         var list = new (short i, short j, short k, byte c, byte m)[blocks];
                         for (int b = 0; b < blocks; b++) list[b] = (reader.ReadInt16(), reader.ReadInt16(), reader.ReadInt16(), reader.ReadByte(), reader.ReadByte());
-                        cells += Make(service, content, id, name, cell, put => { foreach (var b in list) put(b.m == 2 ? rock : hull, new int3(b.i, b.j, b.k), b.c, 0); });
+                        cells += Make(service, content, id, name, cell, put => { foreach (var b in list) put(b.m == 2 ? rock : Skin(b.c), new int3(b.i, b.j, b.k), b.c, 0); });
                         pieces++;
                     }
                 }
                 // doors: slabs of 4 m cells centred on the grid origin (the layout's closed pose)
-                cells += Make(service, content, "ship_lantern_door_big", "Tollhouse Nine: the big door", 4, put => Slab(put, hull, 2, 12, 14, Armor, Red));
-                cells += Make(service, content, "ship_lantern_door_grate", "Tollhouse Nine: the Grate", 4, put => Grate(put, hull));
-                cells += Make(service, content, "ship_lantern_door_hatch", "Tollhouse Nine: the Cradle's floor hatch", 4, put => Slab(put, hull, 14, 1, 14, Armor, Brass));
-                cells += Make(service, content, "ship_lantern_door_staff", "Tollhouse Nine: the staff door", 4, put => Slab(put, hull, 1, 11, 7, Hull2, Warm));
-                cells += Make(service, content, "ship_lantern_door_crown", "Tollhouse Nine: the Crown's hangar door", 4, put => Slab(put, hull, 1, 6, 12, Ivory2, Jade));
+                cells += Make(service, content, "ship_lantern_door_big", "Tollhouse Nine: the big door", 4, put => Slab(Skinned(put), hull, 2, 12, 14, Armor, Red));
+                cells += Make(service, content, "ship_lantern_door_grate", "Tollhouse Nine: the Grate", 4, put => Grate(Skinned(put), hull));
+                cells += Make(service, content, "ship_lantern_door_hatch", "Tollhouse Nine: the Cradle's floor hatch", 4, put => Slab(Skinned(put), hull, 14, 1, 14, Armor, Brass));
+                cells += Make(service, content, "ship_lantern_door_staff", "Tollhouse Nine: the staff door", 4, put => Slab(Skinned(put), hull, 1, 11, 7, Hull2, Warm));
+                cells += Make(service, content, "ship_lantern_door_crown", "Tollhouse Nine: the Crown's hangar door", 4, put => Slab(Skinned(put), hull, 1, 6, 12, Ivory2, Jade));
                 // a tether post: a 6 × 10 × 6 m block of 2 m cells with a jade clamp on top (it breaks under fire: cutting by force)
                 cells += Make(service, content, Post, "Tollhouse Nine: a tether post", 2, put =>
                 {
-                    for (int x = -1; x <= 1; x++) for (int y = -2; y <= 2; y++) for (int z = -1; z <= 1; z++) put(hull, new int3(x, y, z), y == 2 ? Jade : Armor, 0);
+                    for (int x = -1; x <= 1; x++) for (int y = -2; y <= 2; y++) for (int z = -1; z <= 1; z++) put(Skin(y == 2 ? Jade : Armor), new int3(x, y, z), y == 2 ? Jade : Armor, 0);
                 });
                 // the depot's tanks: upright cylinders of 4 m cells, white with a red band
                 int[] radii = { 34, 29, 26 };
                 for (int t = 0; t < radii.Length; t++)
                 {
                     int r = radii[t];
-                    cells += Make(service, content, Tank + t, "Tollhouse Nine: fuel tank " + (t + 1), 4, put => Cylinder(put, hull, r / 4f, 15, TankWhite, Red));
+                    cells += Make(service, content, Tank + t, "Tollhouse Nine: fuel tank " + (t + 1), 4, put => Cylinder(Skinned(put), hull, r / 4f, 15, TankWhite, Red));
                 }
                 // the station core: a 40 m ball of 2 m cells, glowing jade-white
-                cells += Make(service, content, Core, "Station core", 2, put => Ball(put, hull, 10, Glow, Jade));
+                cells += Make(service, content, Core, "Station core", 2, put => Ball(Skinned(put), hull, 10, Glow, Jade));
                 cells += DenBuilder.Build(service, content, Block, Make);
             }
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
