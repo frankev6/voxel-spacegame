@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_lantern_door_grate
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_lantern_door_grate
+  formerIds: []
+  displayName: 'Tollhouse Nine: the Grate'
+  cellSize: 4
+  payloadVersion: 1
+  payload: 564f585301000100e594410ac2301045ff8f1544a537b05728f4028a171174235870e55ebaf530428f56dcd7ccd4bab18d037653cc22fc36cc9f374926c07553fbc1f93e3f1f4ebbe325cf27008835b1c58ca403cac46109382f81f8e7792109c4b74806728c952f156ef1cde861e5e3cbdc9644d5fcd0aee73fdfb19644169f30c3ffd552af344ad4d48cf6e8cecb66ad934c45453357c82694bee29f555151a3bdbe378fc7204d8ec65d7d6f433d1e4ef9b2963d35d718f5ef54d4bfc1f62608980452db5b79ecfc4582d78d08dcd9515432f693b0939472664fy
+  cellCount: 520
+  boundsMin: {x: -13, y: -1, z: -13}
+  boundsMax: {x: 12, y: 0, z: 12}

@@ -13,7 +13,7 @@ namespace Game.Simulation.Extraction
     /// that does not fit (dark, the wrong code for the zone it is in, towing a station core, or already wanted by the watcher's faction)
     /// and is in sight raises its Suspicion at the watcher's rate. A knock or snap the ship made, heard by a watcher within the noise's
     /// radius, adds a jump. Unseen for a while, suspicion fades. At 1 the ship is Wanted by the faction that saw it last (decision 7).
-    /// Light and Sensor watchers in a blacked-out district see nothing; Ship and Crowd watchers carry their own eyes.
+    /// Watchers in a dark district (blacked out or dimmed) see and hear nothing, except Ship watchers, which carry their own lights.
     /// Main thread: a place has tens of watchers and a crew has a few ships.</summary>
     [UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(CoreTetherSystem))]
     public partial struct WatchSystem : ISystem
@@ -64,7 +64,7 @@ namespace Game.Simulation.Extraction
                 if (em.HasComponent<TowLink>(ship))
                 {
                     var load = em.GetComponentData<TowLink>(ship).Load;
-                    carriesCore = load != Entity.Null && em.Exists(load) && em.HasComponent<StationCore>(load);
+                    carriesCore = load != Entity.Null && em.Exists(load) && em.HasComponent<StationCore>(load) && !em.HasComponent<Shrouded>(load);
                 }
                 bool misfit = t.On == 0 || !WatchRules.Fits(t.Code, needs) || carriesCore;
                 Entity towed = em.HasComponent<TowLink>(ship) ? em.GetComponentData<TowLink>(ship).Load : Entity.Null;
@@ -74,8 +74,8 @@ namespace Game.Simulation.Extraction
                 {
                     if (w == ship) continue;
                     var eye = em.GetComponentData<Watcher>(w);
-                    bool alone = eye.Kind == WatcherKind.Ship || eye.Kind == WatcherKind.Crowd;
-                    if (!alone && !Powered(power, eye.District)) continue;
+                    bool alone = eye.Kind == WatcherKind.Ship || eye.Kind == WatcherKind.Crowd;   // look all round
+                    if (eye.Kind != WatcherKind.Ship && !Powered(power, eye.District)) continue;   // only a ship carries its own lights
                     bool hunting = eye.Faction < 64 && (wanted & (1ul << eye.Faction)) != 0;
                     if (!misfit && !hunting) continue;
                     var pose = em.GetComponentData<LocalTransform>(w);
@@ -100,8 +100,7 @@ namespace Game.Simulation.Extraction
                         foreach (var w in eyes)
                         {
                             var eye = em.GetComponentData<Watcher>(w);
-                            bool alone = eye.Kind == WatcherKind.Ship || eye.Kind == WatcherKind.Crowd;
-                            if (!alone && !Powered(power, eye.District)) continue;
+                            if (eye.Kind != WatcherKind.Ship && !Powered(power, eye.District)) continue;
                             if (math.distance(em.GetComponentData<LocalTransform>(w).Position, n.Position) > n.Radius) continue;
                             raise += WatchRules.HeardJump; s.Heard = 1; faction = eye.Faction;
                             break;   // one jump per noise, however many heard it
@@ -128,7 +127,7 @@ namespace Game.Simulation.Extraction
         static bool Powered(NativeArray<District> power, ushort id)
         {
             if (id == 0) return true;
-            foreach (var d in power) if (d.Id == id) return d.Powered != 0;
+            foreach (var d in power) if (d.Id == id) return d.Lit;
             return true;
         }
 

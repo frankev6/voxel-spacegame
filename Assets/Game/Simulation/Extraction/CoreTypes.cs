@@ -35,14 +35,21 @@ namespace Game.Simulation.Extraction
         public uint CutTick;
     }
 
-    /// <summary>A district of a place: lamps, watchers, doors and turrets with its Id go dark when Powered is 0. Writer: CoreTetherSystem
-    /// (blackouts); the place setup creates them.</summary>
+    /// <summary>A district of a place: lamps, watchers, doors and turrets with its Id go dark when Powered is 0 or Dimmed is 1.
+    /// Writers: CoreTetherSystem (Powered: blackouts), the place runtime (Dimmed: a scheduled dark, the Lantern's Dimming); the place
+    /// setup creates them.</summary>
     public struct District : IComponentData
     {
         public ushort Id;
         public byte Powered;
         public uint ChangedTick;
+        public byte Dimmed;
+        public bool Lit => Powered != 0 && Dimmed == 0;
     }
+
+    /// <summary>On a station core whose glow is covered (a sailcloth shroud, a scrap housing): towing it does not give a ship away.
+    /// Writer: the place runtime.</summary>
+    public struct Shrouded : IComponentData { }
 
     /// <summary>On things that belong to a district (watchers, lamps, turrets, doors).</summary>
     public struct DistrictMember : IComponentData { public ushort District; }
@@ -57,7 +64,7 @@ namespace Game.Simulation.Extraction
         {
             if (id == 0) return true;
             using var all = districts.ToComponentDataArray<District>(Allocator.Temp);
-            foreach (var d in all) if (d.Id == id) return d.Powered != 0;
+            foreach (var d in all) if (d.Id == id) return d.Lit;
             return true;
         }
     }

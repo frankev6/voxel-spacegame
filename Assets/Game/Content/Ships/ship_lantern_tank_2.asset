@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_lantern_tank_2
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_lantern_tank_2
+  formerIds: []
+  displayName: 'Tollhouse Nine: fuel tank 3'
+  cellSize: 4
+  payloadVersion: 1
+  payload: 564f585301000100c594b10e82301086ffd308c6c105781f577d09135d4c24717277d3b760c48955275ec111265e057b9080789432a034a494de479bbf777f81cb2a578d163bffb43f6e0f67df9f02206c086bcc493520f50816d457dd3fa939a5daf2a38f491328fba83b3c343463452ce4e60a2129b5fdd4d0a95bd910aea0fb6050409c1a265fde84df4a992d060f125372c11ad26d191a89df70368a7401b9a3d798c9e39250ac3b5333f1c5450373211512a9ccfb1fad6030661d6e853212fec91d143569da78682b74415a636aaf2f8b1dc53af809462a7cb3257b393b915035b8ba4cb0486b9cc2d7725d96ec75c555834425126fy
+  cellCount: 716
+  boundsMin: {x: -6, y: -7, z: -6}
+  boundsMax: {x: 5, y: 7, z: 5}

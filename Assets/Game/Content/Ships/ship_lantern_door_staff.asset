@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_lantern_door_staff
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_lantern_door_staff
+  formerIds: []
+  displayName: 'Tollhouse Nine: the staff door'
+  cellSize: 4
+  payloadVersion: 1
+  payload: 564f5853010001006d8d310e40501044dff8346ec069e8dd414223f113955eedb26a1ad657206c3179d94cdec054ec764a1b3fb47ddd8dde3b4054a2244612ccb90cd94e8e704f5a0cac6eb9672281551171783e29282dd3afe14d36b36404e79fe7a66becac1ey
+  cellCount: 77
+  boundsMin: {x: 0, y: -5, z: -3}
+  boundsMax: {x: 0, y: 5, z: 3}

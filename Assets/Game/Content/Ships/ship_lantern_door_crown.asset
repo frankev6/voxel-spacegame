@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_lantern_door_crown
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_lantern_door_crown
+  formerIds: []
+  displayName: 'Tollhouse Nine: the Crown''s hangar door'
+  cellSize: 4
+  payloadVersion: 1
+  payload: 564f5853010001006d8c3d0e40401046df2c0a6e80b3103791d0486ca2d26b9d766bd59a5d8a4d9862f2f2fdc131783da926bbcdebb8ecd66680d00b1d392206ce4628e01201a362424e41e31a2abf6620edb9362e6ac6d7ef90dab19852f8983fe72985951by
+  cellCount: 72
+  boundsMin: {x: 0, y: -3, z: -6}
+  boundsMax: {x: 0, y: 2, z: 5}

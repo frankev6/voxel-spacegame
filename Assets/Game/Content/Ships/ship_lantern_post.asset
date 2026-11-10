@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: add22d44d6d994a539791a553e744f3c, type: 3}
+  m_Name: ship_lantern_post
+  m_EditorClassIdentifier: Game.Data::Game.Data.Definitions.ShipBlueprintDefinition
+  id: ship_lantern_post
+  formerIds: []
+  displayName: 'Tollhouse Nine: a tether post'
+  cellSize: 2
+  payloadVersion: 1
+  payload: 564f585301000100658d510ac2301044dfd41f117b034b6f22e24504fd2918f0cb5bf48a9213482f60a9bb8991a0fb316467276f80c362a3cd39dc2ed7d3700f610588a3d8b3960dccbdcc31d725e6a5cdea51b727771b3bb325fd87a5ab838deb430962b9291f67150c7538e953d512bb04f52695a6d7f735ee801fc6a7f0df32126fy
+  cellCount: 45
+  boundsMin: {x: -1, y: -2, z: -1}
+  boundsMax: {x: 1, y: 2, z: 1}

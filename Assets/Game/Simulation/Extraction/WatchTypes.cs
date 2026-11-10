@@ -26,7 +26,7 @@ namespace Game.Simulation.Extraction
 
     /// <summary>Something that looks: on its own entity at its LocalTransform (lights, sensors, crowds), or on an AI ship's root.
     /// Light and Sensor look along Facing (local) within an arc, swept by SweepRadians over SweepSeconds; Ship and Crowd look all round.
-    /// A Light or Sensor in a dark district sees nothing.</summary>
+    /// A watcher in a dark district sees nothing, except a Ship.</summary>
     public struct Watcher : IComponentData
     {
         public WatcherKind Kind;
