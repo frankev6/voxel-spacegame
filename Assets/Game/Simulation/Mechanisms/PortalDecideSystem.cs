@@ -11,7 +11,8 @@ namespace Game.Simulation.Mechanisms
     /// <summary>SPEC-91 HAZ-021 (ADR-0119 decision 3), on the authority. A ship that crosses an open portal's entry gate along its forward
     /// gets a PortalTransit to the paired exit, and the portal jams for its JamSeconds: a ship behind it within that time flies straight
     /// through. PortalJam mechanism actions close the portals of their group (Value seconds, or the portal's own JamSeconds when 0).
-    /// Only live ship grids transit; debris, devices and hulks never do (the gate effect affects ships only, and hulks are checked).</summary>
+    /// Only live ship grids transit; debris, devices and hulks never do (the gate effect affects ships only, and hulks are checked),
+    /// except a ship's towed load, which goes through with it when the hold can take it (SPEC-93 decision 4).</summary>
     [UpdateInGroup(typeof(GameplayPostPhysicsGroup)), UpdateAfter(typeof(ZoneSystem))]
     public partial struct PortalDecideSystem : ISystem
     {
@@ -65,7 +66,17 @@ namespace Game.Simulation.Mechanisms
                     if (zone.PersistentId != c.Zone) continue;
                     var link = em.GetComponentData<PortalLink>(e);
                     if (link.JammedUntilTick > tick || !IsShip(em, c.Body)) break;
+                    // SPEC-93 decision 4: the cargo rule. A ship whose towed load outweighs its hold's free tonnes is refused (no jam);
+                    // otherwise the load goes through with it, the same offset from the gate.
+                    if (!Extraction.StowApi.CanJump(em, c.Body, out float loadT, out float freeT))
+                    {
+                        var refused = new Extraction.CargoRefused { Tick = tick, LoadT = loadT, FreeT = freeT };
+                        if (em.HasComponent<Extraction.CargoRefused>(c.Body)) em.SetComponentData(c.Body, refused); else em.AddComponentData(c.Body, refused);
+                        break;
+                    }
                     transits.Pending.Add(new PortalTransit { Body = c.Body, From = zone.PersistentId, To = link.Other, Tick = tick });
+                    var load = Extraction.TowApi.Load(em, c.Body);
+                    if (load != Entity.Null && em.Exists(load)) transits.Pending.Add(new PortalTransit { Body = load, From = zone.PersistentId, To = link.Other, Tick = tick });
                     link.JammedUntilTick = tick + JamTicks(link.JamSeconds);
                     em.SetComponentData(e, link);
                     break;

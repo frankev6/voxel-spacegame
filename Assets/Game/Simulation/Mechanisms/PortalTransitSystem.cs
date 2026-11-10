@@ -65,6 +65,10 @@ namespace Game.Simulation.Mechanisms
                     if (em.HasComponent<PhysicsGraphicalInterpolationBuffer>(t.Body))
                         em.SetComponentData(t.Body, new PhysicsGraphicalInterpolationBuffer { PreviousTransform = new RigidTransform(pose.Rotation, pose.Position), PreviousVelocity = v });
                 }
+                if (em.HasComponent<Extraction.TowLoad>(t.Body))
+                {   // the turn is the gate's, not a knock (SPEC-93 decision 3)
+                    var towed = em.GetComponentData<Extraction.TowLoad>(t.Body); towed.ExpectedTick = 0; em.SetComponentData(t.Body, towed);
+                }
                 if (em.HasComponent<PhysicsGraphicalSmoothing>(t.Body))
                 {
                     var s = em.GetComponentData<PhysicsGraphicalSmoothing>(t.Body); s.ApplySmoothing = 0; em.SetComponentData(t.Body, s);

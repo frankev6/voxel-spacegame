@@ -159,7 +159,7 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 - **Depends on:** `EXT-002`
 - **Do:** Refuse portal transit for a ship whose load outweighs its cargo capacity; `Stow`/`Unstow` a load into a hold that can take it.
 - **Files:** `Assets/Game/Simulation/Mechanisms/PortalDecideSystem.cs`, `Assets/Game/Simulation/Extraction/*`.
-- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Extraction/CargoRuleTests.cs`
+- **Tests:** `Assets/Game/Tests/EditMode/Simulation/Extraction/CargoRuleTests.cs`, `Assets/Game/Tests/PlayMode/Simulation/Extraction/CargoGateTests.cs`
 - **Acceptance criteria:**
   - [ ] A ship towing a 600 t load without cargo blocks is refused at a gate; with enough capacity it passes, load and all.
 
