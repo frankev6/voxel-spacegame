@@ -97,6 +97,8 @@ namespace Game.App.Session
             ["PulseSystem"] = SystemAuthority.AuthorityOnly,             // HAZ-016: pulse damage and shield drain; one raycast per ship per pulse            // HAZ-019: who collects a canister; the grant and its despawn
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
+            ["CoreTetherSystem"] = SystemAuthority.AuthorityOnly,        // EXT-004: which tethers are cut, blackouts, the core freed
+            ["CoreHoldSystem"] = SystemAuthority.Both,                   // EXT-004: every machine holds a tethered core at its pose
             ["TowSystem"] = SystemAuthority.Both,                        // EXT-002: cable pulls on every machine (same poses, same pulls)
             ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
             ["MoverSystem"] = SystemAuthority.AuthorityOnly,
@@ -165,6 +167,7 @@ namespace Game.App.Session
             ["PulseSystem"] = "which ships a pulse reaches and what it does to them; cells in GridDelta, shields in snapshots",
             ["PickupSystem"] = "which ship collects each energy canister; its despawn (stored energy is the ship's own)",
             ["MoverSystem"] = "where each moving structure is; its pose in snapshots",
+            ["CoreTetherSystem"] = "which station-core tethers are cut, which districts go dark and when the core is free; CoreTether, District and StationCore",
             ["PortalDecideSystem"] = "which ship goes through a lane-gate portal and when the portal jams; PortalTransit records and PortalLink",
             ["MechanismSystem"] = "which mechanism rules fire and when their actions fall due; the owners' state in snapshots",
             ["DamageResolveSystem"] = "damage outcomes per cell; exact cell writes in GridDelta",
