@@ -69,7 +69,7 @@ namespace Game.App.DevRuntime.Extraction
             (-114.0f, new[] { new float2(34.0f, 0.0f), new float2(24.0f, -24.0f), new float2(0.0f, -34.0f), new float2(-24.0f, -24.0f), new float2(-34.0f, -0.0f), new float2(-24.0f, 24.0f), new float2(-0.0f, 34.0f), new float2(24.0f, 24.0f) }, true, 1),
             (-52.0f, new[] { new float2(31.5f, -12.7f), new float2(13.3f, -31.3f), new float2(-12.7f, -31.5f), new float2(-31.3f, -13.3f), new float2(-31.5f, 12.7f), new float2(-13.3f, 31.3f), new float2(12.7f, 31.5f), new float2(31.3f, 13.3f) }, true, 1),
             (76.0f, new[] { new float2(0.0f, -312.0f), new float2(0.0f, -160.0f), new float2(0.0f, -80.0f), new float2(40.0f, 0.0f), new float2(130.0f, 225.2f), new float2(306.4f, 257.1f) }, false, 4),
-            (-196.0f, new[] { new float2(-384.0f, 0.0f), new float2(-128.0f, 0.0f) }, true, 1),
+            (-200.0f, new[] { new float2(-352.0f, -208.0f), new float2(-128.0f, -208.0f) }, true, 1),
         };
         internal static readonly (string Id, float3 At)[] Pois =
         {

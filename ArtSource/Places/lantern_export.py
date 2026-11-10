@@ -403,7 +403,7 @@ def layout():
     for k, y in enumerate((-114, -52)):   # under and over the Stall Bridge (-92..-88), clear of the Grate (-136)
         routes.append((y, [P(a, 34) for a in range(k * 22, 360 + k * 22, 45)], True, 1))
     routes.append((76, [(0, Z(79)), (0, Z(60)), (0, Z(50)), (40, 0), (P(300, 260)), (P(320, 400))], False, 4))   # the toll queue and out north-east
-    routes.append((-196, [(X(4), Z(40)), (X(36), Z(40))], True, 1))   # freight docks: up and down the pier's open corridor, between the masts
+    routes.append((-200, [(X(8), Z(66)), (X(36), Z(66))], True, 1))   # freight docks: along the pier, outside the south masts (the corridor is narrower than a hull)
     pois = {
         "arrival": (0, 40, Z(84)), "queue": (0, 40, Z(66)), "well_mouth": (0, CROWN_DECK + 20, 0), "cradle": core,
         "core_road": (X(72), CORE_Y, Z(39.5)), "big_door_out": (X(92), CORE_Y, Z(39.5)), "yard_apron": (X(88), ay + 20, Z(40)),
