@@ -501,6 +501,104 @@ def render(sk, out_dir=OUT):
     return path
 
 
+def render_grid(key, tag, title, line, panels, cols, cs, footers=(), out_dir=OUT, text_w=None):
+    """A sheet of equal panels in a grid. panels: [(view, heading, [text lines], heading colour)]. footers: extra images
+    (timelines) pasted full width under the grid."""
+    os.makedirs(out_dir, exist_ok=True)
+    ims = [render_view(v, cs) for v, _, _, _ in panels]
+    pw = max(i.width for i in ims)
+    ph = max(i.height for i in ims)
+    fh, fb, fc = font(F_TITLE, 15), font(F_BODY, 14), font(F_BODY, 13)
+    wrap_n = text_w or max(40, int(pw / 7.2))
+    # text height per row
+    def text_h(lines):
+        return sum(19 * len(wrap(ln, wrap_n)) for ln in lines) + 8
+    rows = (len(panels) + cols - 1) // cols
+    row_h = []
+    for r in range(rows):
+        row_h.append(ph + 34 + max(text_h(p[2]) for p in panels[r * cols:(r + 1) * cols]) + 26)
+    W = 24 + cols * (pw + 28) + 20
+    for fim in footers:
+        W = max(W, fim.width + 48)
+    H = 130 + sum(row_h) + sum(fim.height + 24 for fim in footers) + 30
+    sheet = Image.new("RGB", (W, H), (10, 11, 13))
+    d = ImageDraw.Draw(sheet)
+    d.text((24, 22), tag.upper(), fill=COL["out"], font=font(F_BOLD, 16))
+    d.text((24, 46), title.upper(), fill=COL["text"], font=font(F_TITLE, 34))
+    d.text((24, 96), line, fill=COL["dim"], font=font(F_BODY, 16))
+    y = 130
+    for r in range(rows):
+        for c in range(cols):
+            i = r * cols + c
+            if i >= len(panels):
+                break
+            v, head, lines, hc = panels[i]
+            x = 24 + c * (pw + 28)
+            d.text((x, y), head.upper(), fill=hc or COL["out"], font=fh)
+            sheet.paste(ims[i], (x, y + 24))
+            ty = y + 24 + ims[i].height + 6
+            if v.caption:
+                d.text((x, ty), v.caption, fill=COL["dim"], font=fc)
+                ty += 20
+            for ln in lines:
+                for k, wl in enumerate(wrap(ln, wrap_n)):
+                    d.text((x + (0 if k == 0 else 12), ty), ("· " if k == 0 else "") + wl, fill=COL["text"], font=fb)
+                    ty += 19
+        y += row_h[r]
+    for fim in footers:
+        sheet.paste(fim, (24, y))
+        y += fim.height + 24
+    path = os.path.join(out_dir, f"{key}.png")
+    sheet.save(path)
+    return path
+
+
+def timeline(title, span, unit, rows, width=1900, marks=None, note=""):
+    """A strip chart: rows of (label, colour, [(start, end)] or [instant]) over 0..span."""
+    fb, fs, fh = font(F_BODY, 14), font(F_BODY, 12), font(F_TITLE, 15)
+    left, rh = 250, 26
+    H = 44 + rh * len(rows) + 46
+    im = Image.new("RGB", (width, H), (14, 16, 18))
+    d = ImageDraw.Draw(im, "RGBA")
+    d.text((12, 10), title.upper(), fill=COL["out"], font=fh)
+    if note:
+        d.text((12 + d.textlength(title.upper(), font=fh) + 20, 12), note, fill=COL["dim"], font=fs)
+    x0, x1 = left, width - 24
+
+    def X(t):
+        return x0 + (x1 - x0) * t / span
+    y = 40
+    for m, lab in (marks or []):
+        d.line([X(m), y, X(m), y + rh * len(rows)], fill=(70, 74, 70), width=1)
+        d.text((X(m), y + rh * len(rows) + 6), lab, fill=COL["dim"], font=fs, anchor="mt")
+    for label, colour, spans in rows:
+        d.text((12, y + rh / 2), label, fill=COL["text"], font=fb, anchor="lm")
+        d.line([x0, y + rh / 2, x1, y + rh / 2], fill=(34, 37, 36), width=1)
+        for sp in spans:
+            if isinstance(sp, tuple) and len(sp) == 3:
+                a, b, txt = sp
+            elif isinstance(sp, tuple):
+                (a, b), txt = sp, ""
+            else:
+                a, b, txt = sp, None, ""
+            if b is None:
+                d.ellipse([X(a) - 4, y + rh / 2 - 4, X(a) + 4, y + rh / 2 + 4], fill=colour)
+            else:
+                d.rectangle([X(a), y + 5, X(b), y + rh - 5], fill=colour + (200,))
+            if txt:
+                tx = X(a if b is None else b) + 8
+                tl = d.textlength(txt, font=fs)
+                if tx + tl <= x1:
+                    d.text((tx, y + rh / 2), txt, fill=colour, font=fs, anchor="lm")
+                elif b is not None and X(b) - X(a) > tl + 12:
+                    d.text((X(a) + 6, y + rh / 2), txt, fill=(12, 12, 12), font=fs, anchor="lm")
+                else:
+                    d.text((X(a) - 8, y + rh / 2), txt, fill=colour, font=fs, anchor="rm")
+        y += rh
+    d.text((x1, 12), unit, fill=COL["dim"], font=fs, anchor="rt")
+    return im
+
+
 def legend_icon(d, k, x, y):
     if k == "core":
         d.ellipse([x - 7, y - 7, x + 7, y + 7], fill=(30, 120, 140), outline=COL["core"], width=2)

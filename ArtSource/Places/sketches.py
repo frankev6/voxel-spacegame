@@ -585,14 +585,8 @@ LIV = {"tlax": (91, 227, 161), "vest": (200, 220, 240), "khu": (255, 122, 47), "
 STALL = [(255, 46, 136), (255, 174, 74), (46, 196, 182), (255, 241, 214)]
 
 
-def heist_lantern():
-    import random
-    rng = random.Random(31)
-    sk = Sketch("heist_lantern", "Heist", "·", "Tollhouse Nine, \"the Lantern\"",
-                "An Alliance toll town where three gate lanes meet. Its core hangs in plain sight at the foot of the market: "
-                "the town calls it the Lantern.")
-    v = sk.view("section", 108, 126, "Side section through the town (x across, height up). 1 cell = 8 m; the town is about 1 km tall.")
-
+def lantern_town(v, rng):
+    """The town's side section: structure, lights and traffic (no names, routes or numbers)."""
     # ------------------------------------------------------------------ Undertown: the old hand-built quarter
     v.disc(46, 18, 36, "shanty", noise=0.10, seed=5, sy=0.36)
     v.scatter(8, 3, 86, 34, "shanty2", 0.32, 4, only=("shanty",))
@@ -625,6 +619,7 @@ def heist_lantern():
     v.rect(44, 52, 46, 55, "air")                    # staff door: a ship fits, the core does not
     v.rect(58, 50, 82, 57, "air")                    # the core road to the Yards (the way the core came in)
     v.rect(64, 58, 78, 61, "air")                    # engineers' room
+    v.rect(34, 46, 37, 50, "air")                    # the dock service lift up into the turbine hall
     v.rect(44, 61, 60, 62, "truss")                  # the Grate
     v.rect(49, 61, 55, 62, "hull")                   # its lift-out panel
     # ------------------------------------------------------------------ the outfall: coolant trunk down through Undertown
@@ -741,6 +736,18 @@ def heist_lantern():
     v.ship((74, 103.5), 180, LIV["scav"], 1.8)
     for p, h, l in (((92, 96), 150, "civ"), ((100, 104), 150, "vest"), ((96, 60), 200, "civ"), ((6, 90), 330, "civ")):
         v.ship(p, h, LIV[l], 2.2)
+    return core, amber
+
+
+def heist_lantern():
+    import random
+    rng = random.Random(31)
+    sk = Sketch("heist_lantern", "Heist", "·", "Tollhouse Nine, \"the Lantern\"",
+                "An Alliance toll town where three gate lanes meet. Its core hangs in plain sight at the foot of the market: "
+                "the town calls it the Lantern.")
+    v = sk.view("section", 108, 126, "Side section through the town (x across, height up). 1 cell = 8 m; the town is about 1 km tall.")
+
+    core, amber = lantern_town(v, rng)
     # routes: only the main lines; the rest is in the notes
     v.route([(52, 126), (52, 115)], "lane", "")
     v.route([(0, 37), (9, 37)], "lane", "")
