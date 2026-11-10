@@ -62,6 +62,11 @@ namespace Game.App.DevRuntime.Extraction
         internal bool HoldsWork;
         internal Action<string> Report = _ => { };
         double installedAt = -1;
+        /// <summary>The board panel at the Table (owner, 2026-11-10: "im literally in front of the orb and pressing F, nothing happens"):
+        /// F opens it, Up/Down choose a job, Enter takes it, F again (or flying off) closes it.</summary>
+        internal bool BoardOpen { get; private set; }
+        int boardPick;
+        VisualElement board; Label boardList, boardBrief;
         uint refusedTick;
 
         internal ExtractionRuntime(DevContext ctx, double3 playgroundOrigin, UIRoot ui)
@@ -85,6 +90,27 @@ namespace Game.App.DevRuntime.Extraction
                 hud.style.translate = new Translate(new Length(-50, LengthUnit.Percent), 0);
                 hud.style.color = new Color(1f, .9f, .7f); hud.style.unityTextAlign = TextAnchor.UpperCenter;
                 ui.GetLayer(UILayer.Hud).Add(hud);
+            }
+            if (board == null && ui != null)
+            {
+                board = new VisualElement { name = "extraction-board", pickingMode = PickingMode.Ignore };
+                board.style.position = Position.Absolute; board.style.left = new Length(50, LengthUnit.Percent); board.style.top = new Length(18, LengthUnit.Percent);
+                board.style.translate = new Translate(new Length(-50, LengthUnit.Percent), 0);
+                board.style.width = 560; board.style.paddingLeft = board.style.paddingRight = 22; board.style.paddingTop = board.style.paddingBottom = 16;
+                board.style.backgroundColor = new Color(.04f, .05f, .06f, .88f);
+                board.style.borderTopWidth = board.style.borderBottomWidth = board.style.borderLeftWidth = board.style.borderRightWidth = 1;
+                board.style.borderTopColor = board.style.borderBottomColor = board.style.borderLeftColor = board.style.borderRightColor = new Color(.35f, .85f, 1f, .7f);
+                var title = new Label("THE BOARD  ·  the Table at the Rock") { pickingMode = PickingMode.Ignore };
+                title.AddToClassList("text-m"); title.style.color = new Color(.5f, .9f, 1f); title.style.marginBottom = 10;
+                boardList = new Label("") { pickingMode = PickingMode.Ignore }; boardList.AddToClassList("text-m");
+                boardList.style.color = new Color(1f, .92f, .78f); boardList.style.marginBottom = 10;
+                boardBrief = new Label("") { pickingMode = PickingMode.Ignore }; boardBrief.AddToClassList("text-s");
+                boardBrief.style.color = new Color(.85f, .85f, .85f); boardBrief.style.whiteSpace = WhiteSpace.Normal; boardBrief.style.marginBottom = 12;
+                var keys = new Label("UP / DOWN choose  ·  ENTER take the job  ·  F close") { pickingMode = PickingMode.Ignore };
+                keys.AddToClassList("text-s"); keys.style.color = new Color(.5f, .9f, 1f);
+                board.Add(title); board.Add(boardList); board.Add(boardBrief); board.Add(keys);
+                board.style.display = DisplayStyle.None;
+                ui.GetLayer(UILayer.Hud).Add(board);
             }
         }
 
@@ -177,6 +203,14 @@ namespace Game.App.DevRuntime.Extraction
             var kb = Keyboard.current;
             if (kb == null || player == Entity.Null || !em.Exists(player)) return;
             if (ctx.TryGetService<Game.Input.InputService>(out var input) && input.CurrentContext != Game.Core.InputContext.Flight) return;
+            if (BoardOpen)
+            {
+                if (math.distance(em.GetComponentData<LocalTransform>(player).Position, Den.Sim(DenPlace.Table)) > 80) BoardOpen = false;
+                else if (kb.upArrowKey.wasPressedThisFrame) boardPick = (boardPick + Jobs.Length - 1) % Jobs.Length;
+                else if (kb.downArrowKey.wasPressedThisFrame) boardPick = (boardPick + 1) % Jobs.Length;
+                else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) { BoardOpen = false; Say(Accept(Jobs[boardPick].Id)); }
+                DrawBoard();
+            }
             if (kb.uKey.wasPressedThisFrame) Say(Magnet(em, player));
             if (kb.oKey.wasPressedThisFrame) Say(CycleTransponder(em, player));
             if (kb.f2Key.wasPressedThisFrame) Say(Cut(em, player));
@@ -322,6 +356,18 @@ namespace Game.App.DevRuntime.Extraction
             return text.ToString();
         }
 
+        void DrawBoard()
+        {
+            if (board == null) return;
+            board.style.display = BoardOpen ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!BoardOpen) return;
+            var text = new System.Text.StringBuilder();
+            for (int i = 0; i < Jobs.Length; i++)
+                text.Append(i == boardPick ? "> " : "   ").Append(Jobs[i].Title).Append(Job == Jobs[i].Id && State != JobState.None ? "   (taken)" : "").Append(i < Jobs.Length - 1 ? "\n" : "");
+            boardList.text = text.ToString();
+            boardBrief.text = Jobs[boardPick].Brief;
+        }
+
         /// <summary>F at a place. Null when the ship is at none of them.</summary>
         internal string Interact()
         {
@@ -329,7 +375,7 @@ namespace Game.App.DevRuntime.Extraction
             if (ship == Entity.Null || !em.Exists(ship)) return null;
             float3 at = em.GetComponentData<LocalTransform>(ship).Position;
             bool Near(float3 local, float r) => Lantern.Built && math.distance(at, Lantern.Sim(local)) < r;
-            if (Den.Built && math.distance(at, Den.Sim(DenPlace.Table)) < 60) return Board();
+            if (Den.Built && math.distance(at, Den.Sim(DenPlace.Table)) < 60) { BoardOpen = !BoardOpen; DrawBoard(); return BoardOpen ? "The board is open: Up/Down choose, Enter takes the job, F closes." : ""; }
             if (!Lantern.Built) return null;
             if (Near(LanternLayout.Poi("cloth_row"), 70)) { Lantern.Shroud = true; return "Cloth Row: forty metres of black sailcloth, stitched into a shroud. Throw it over the core when you take it (it goes on with the magnet)."; }
             if (Near(LanternLayout.Poi("long_wait"), 80)) { Lantern.InsideMan = true; Lantern.OpenHatch(); return "The Long Wait: the night engineer's debt is paid. On his shift he logs tether maintenance, holds the outfall flush and opens the Cradle's floor hatch."; }
@@ -403,6 +449,7 @@ namespace Game.App.DevRuntime.Extraction
             if (ctx.HasGameplay) foreach (var z in gateZones) if (ctx.EntityManager.Exists(z)) HazardSpawn.DespawnGroup(ctx.EntityManager, GateGroup);
             gateZones.Clear(); gates = false;
             hud?.RemoveFromHierarchy(); hud = null;
+            board?.RemoveFromHierarchy(); board = null; BoardOpen = false;
         }
     }
 }
