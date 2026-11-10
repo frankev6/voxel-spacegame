@@ -12,7 +12,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class ExtractionDevCommand : IDevCommand
     {
         public string Name => "extraction";
-        public string Usage => "extraction status | goto=den|lantern|<poi>[@x,y,z] | job board|accept=<id> | transponder off|trader|work | hold t=<tonnes> | magnet | cut [n=<0-5>|all] | stow | dig | build plate|gun|lamp|socket | ore add=<n> | heist alarm|dimming|status | den attack | interact";
+        public string Usage => "extraction status | goto=den|lantern|<poi>[@x,y,z] | job board|accept=<id> | transponder off|trader|work | hold t=<tonnes> | routes | magnet | cut [n=<0-5>|all] | stow | dig | build plate|gun|lamp|socket | ore add=<n> | heist alarm|dimming|status | den attack | interact";
         public string Summary => "The extraction loop: the Rock (den), Tollhouse Nine (heist), the gate pair, jobs, the tow, tethers, digging and building";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
@@ -81,6 +81,7 @@ namespace Game.App.DevRuntime.Commands
                     }
                     return DevCommandResult.Ok(x.Cut(em, ship));
                 }
+                case "routes": return DevCommandResult.Ok(x.Lantern.CheckRoutes(em));
                 case "stow": return DevCommandResult.Ok(x.StowToggle(em, ship));
                 case "dig": return DevCommandResult.Ok(x.Den.Dig());
                 case "build": return DevCommandResult.Ok(x.Den.Place(args.Positional.Count > 1 ? args.Positional[1] : null));

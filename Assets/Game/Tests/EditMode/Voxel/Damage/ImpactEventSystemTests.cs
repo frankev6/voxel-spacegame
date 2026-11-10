@@ -106,6 +106,32 @@ namespace Game.Tests.EditMode.Voxel.Damage
             Assert.AreEqual(2, f.Capture.Events.Length);
             foreach (var e in f.Capture.Events) Assert.AreEqual(rammer, e.Instigator, e.Grid == rammer ? "the rammer's own damage" : "the rammed ship's damage");
         }
+        [Test] public void RamImmune_TakesNoCells_TheRammerDoes()
+        {
+            // SPEC-93: the den's stone and the station's walls lose nothing to a collision; the ship that hit them does
+            using var f = new Fixture(); var rammer = f.Body(new float3(-.5f,0,0), new float3(30,0,0)); var wall = f.Body(0, 0);
+            f.EM.AddComponent<RamImmune>(wall);
+            for (int tick = 0; tick < 3 && f.Capture.Events.Length == 0; tick++) f.Tick();
+            Assert.AreEqual(1, f.Capture.Events.Length);
+            Assert.AreEqual(rammer, f.Capture.Events[0].Grid);
+        }
+        [Test] public void Scrape_AgainstRamImmune_UnderScrapeSpeed_NoDamage()
+        {
+            // a slow touch (4 m/s, well over MinRamEnergyJ at 200 t) is a scrape against scenery, but still a ram between two ships
+            using (var f = new Fixture())
+            {
+                var ship = f.Body(new float3(-.5f,0,0), new float3(4,0,0), mass: 200000); var wall = f.Body(0, 0, mass: 200000);
+                f.EM.AddComponent<RamImmune>(wall);
+                for (int tick = 0; tick < 5; tick++) f.Tick();
+                Assert.AreEqual(0, f.Capture.Events.Length, "a scrape breaks nothing");
+            }
+            using (var f = new Fixture())
+            {
+                f.Body(new float3(-.5f,0,0), new float3(4,0,0), mass: 200000); f.Body(0, 0, mass: 200000);
+                for (int tick = 0; tick < 3 && f.Capture.Events.Length == 0; tick++) f.Tick();
+                Assert.AreEqual(2, f.Capture.Events.Length, "the same touch between two ships is a ram");
+            }
+        }
         [Test] public void RestingContact_NoDamage()
         {
             using var f = new Fixture(); var a = f.Body(new float3(-.5f,0,0), 0); var b = f.Body(0, 0);

@@ -58,8 +58,42 @@ namespace Game.App.DevRuntime.Extraction
         {
             if (!Ctx.TryGetService<ShipSpawnService>(out var spawner)) return default;
             if (!catalog.TryGet<ShipBlueprintDefinition>(new ContentId(blueprint), out _)) { if (!Missing.Contains(blueprint)) Missing.Add(blueprint); return default; }
-            return spawner.Spawn(new ShipSpawnArgs { Blueprint = new ContentId(blueprint), Position = Sim(anchor, local, frame), Rotation = quaternion.RotateY(yaw),
+            return spawner.Spawn(new ShipSpawnArgs { Blueprint = new ContentId(blueprint), Position = Clear(Sim(anchor, local, frame), ShipClearance), Rotation = quaternion.RotateY(yaw),
                 Allegiance = allegiance, WithAi = true, AiProfile = new ContentId(profile) });
+        }
+
+        /// <summary>Room a spawned ship needs (m): a WRAITH or VESPER is about 40 m long.</summary>
+        internal const float ShipClearance = 32;
+        readonly List<(float3 At, float Radius, double Time)> reserved = new();
+
+        /// <summary>A spawn point near `sim` where nothing is: no collider within `radius` (station, rock, ships) and no ship spawned here
+        /// in the last few seconds (a new ship has no collider until the spawn resolves). Tries the point, then above and around it.</summary>
+        internal float3 Clear(float3 sim, float radius)
+        {
+            double now = Time.timeAsDouble;
+            reserved.RemoveAll(r => now - r.Time > 5);
+            var em = Ctx.EntityManager;
+            using var q = em.CreateEntityQuery(ComponentType.ReadOnly<PhysicsWorldSingleton>());
+            bool physics = q.CalculateEntityCount() == 1;
+            if (physics) em.CompleteAllTrackedJobs();
+            var world = physics ? q.GetSingleton<PhysicsWorldSingleton>().CollisionWorld : default;
+            float3 best = sim;
+            for (int ring = 0; ring < 6; ring++)
+            {
+                int around = ring == 0 ? 1 : 8;
+                for (int k = 0; k < around; k++)
+                {
+                    float a = k * math.PI / 4, d = ring * radius * 1.6f;
+                    float3 p = sim + new float3(math.cos(a) * d, (ring % 2) * radius * .8f, math.sin(a) * d);
+                    bool free = !physics || !world.CheckSphere(p, radius, CollisionFilter.Default);
+                    if (free) foreach (var r in reserved) if (math.distance(r.At, p) < r.Radius + radius) { free = false; break; }
+                    if (!free) continue;
+                    reserved.Add((p, radius, now));
+                    return p;
+                }
+            }
+            reserved.Add((best, radius, now));
+            return best;
         }
 
         internal bool Root(PersistentId id, out Entity root)

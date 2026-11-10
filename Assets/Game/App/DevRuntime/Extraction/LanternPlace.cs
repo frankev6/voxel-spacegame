@@ -34,6 +34,7 @@ namespace Game.App.DevRuntime.Extraction
     {
         internal const string Alliance = "faction_tlaxcala", Civil = "faction_vestari";
         internal const float FlushPeriod = 60, FlushSeconds = 8, FlushAccel = 26, DriverPeriod = 30, DriverSpeed = 240, PodCatch = 1600;
+        internal const float PatrolRadius = 400, PatrolHeight = 70;   // above the Crown's guns (r 372, y 0) and its door
         internal const ushort DoorBig = 41, DoorGrate = 42, DoorHatch = 43, DoorStaff = 44, DoorCrown = 45, Group = 70;
         readonly ExtractionKit kit;
         internal readonly double3 Anchor;
@@ -72,7 +73,7 @@ namespace Game.App.DevRuntime.Extraction
             {
                 var root = kit.Grid(session, catalog, frame, Anchor, id, float3.zero, quaternion.identity, GridKind.Station, GridMotion.Static);
                 if (root == Entity.Null) continue;
-                em.AddComponent<SpatialScenery>(root); em.AddComponent<DamageImmune>(root); em.AddComponent<CameraSeeThrough>(root);
+                em.AddComponent<SpatialScenery>(root); em.AddComponent<DamageImmune>(root); em.AddComponent<RamImmune>(root); em.AddComponent<CameraSeeThrough>(root);
                 grids.Add(root);
                 if (id == "ship_lantern_powerhouse") Powerhouse = root;
             }
@@ -83,6 +84,7 @@ namespace Game.App.DevRuntime.Extraction
                 if (root == Entity.Null) continue;
                 grids.Add(root);
                 if (d.Id != "bigdoor" && d.Id != "hatch") em.AddComponent<DamageImmune>(root);
+                em.AddComponent<RamImmune>(root);   // only weapons break a door, never a bump
                 em.AddComponent<CameraSeeThrough>(root);
                 Span<MoverPoint> points = stackalloc MoverPoint[] { new MoverPoint { Pose = Sim(d.Closed) }, new MoverPoint { Pose = Sim(d.Closed + d.Open) } };
                 Game.Simulation.Hazards.HazardSpawn.AddMover(em, root, new Mover { Path = MoverPath.Toggle, Origin = Sim(d.Closed), Rate = 1 / 5f, StartTick = tick, Group = d.Group }, points);
@@ -99,7 +101,7 @@ namespace Game.App.DevRuntime.Extraction
             Core = kit.Grid(session, catalog, frame, Anchor, ExtractionIds.Core, LanternLayout.Core, quaternion.identity, GridKind.Asteroid, GridMotion.Dynamic);
             if (Core != Entity.Null)
             {
-                em.AddComponent<DamageImmune>(Core);
+                em.AddComponent<DamageImmune>(Core); em.AddComponent<RamImmune>(Core);
                 em.AddComponentData(Core, new StationCore { Holder = Powerhouse, HoldLocal = LanternLayout.Core, HoldRotation = quaternion.identity, Tethers = (byte)Tethers.Length });
                 grids.Add(Core);
                 coreLight = ExtractionKit.Lamp(dressing.transform, Vector3.zero, new Color(.55f, 1f, 1f), 160, 9000);
@@ -107,7 +109,7 @@ namespace Game.App.DevRuntime.Extraction
             foreach (var t in Tethers)
             {
                 var post = kit.Grid(session, catalog, frame, Anchor, ExtractionIds.Post, t.Post, quaternion.identity, GridKind.Station, GridMotion.Static);
-                if (post != Entity.Null) { grids.Add(post); posts.Add(post); }
+                if (post != Entity.Null) { grids.Add(post); posts.Add(post); em.AddComponent<RamImmune>(post); }
                 var e = em.CreateEntity(typeof(CoreTether));
                 em.SetComponentData(e, new CoreTether { Core = Core, Holder = Powerhouse, Anchor = t.Post, District = t.District, Post = post });
                 entities.Add(e);
@@ -150,7 +152,7 @@ namespace Game.App.DevRuntime.Extraction
             for (int i = 0; i < Depot.Length; i++)
             {
                 var root = kit.Grid(session, catalog, frame, Anchor, ExtractionIds.Tank + i, Depot[i].At, quaternion.identity, GridKind.Station, GridMotion.Static);
-                if (root != Entity.Null) { grids.Add(root); tanks.Add(root); }
+                if (root != Entity.Null) { grids.Add(root); tanks.Add(root); em.AddComponent<RamImmune>(root); }
             }
             // the heist: the alarm's timeline (SPEC-93 decision 8; lantern.py "When the last tether is cut")
             Heist = em.CreateEntity(typeof(HeistState), typeof(AlarmStep));
@@ -167,7 +169,7 @@ namespace Game.App.DevRuntime.Extraction
             steps.Add(new AlarmStep { AtSeconds = 360, Kind = AlarmStepKind.Cruiser });
             entities.Add(Heist);
             // the garrison cutter's loop round the town (a ship watcher), and the traffic
-            Patrol = kit.Ship(catalog, frame, Anchor, "ship_nocturne_wraith", new float3(0, 30, -320), 0, alliance, "ai_default");
+            Patrol = kit.Ship(catalog, frame, Anchor, "ship_nocturne_wraith", new float3(PatrolRadius, PatrolHeight, 0), 0, alliance, "ai_default");   // clear of the arrival and the Crown
             ships.Add(Patrol);
             var civil = new Allegiance { Faction = CivilIndex, Team = 5 };
             for (int r = 0; r < Routes.Length; r++)
@@ -187,7 +189,7 @@ namespace Game.App.DevRuntime.Extraction
             foreach (var m in Moorings)
             {
                 var root = kit.Grid(session, catalog, frame, Anchor, "ship_nocturne_vesper", m.At, quaternion.RotateY(math.radians(m.YawDeg)), GridKind.Station, GridMotion.Static);
-                if (root != Entity.Null) { em.AddComponent<DamageImmune>(root); grids.Add(root); }
+                if (root != Entity.Null) { em.AddComponent<DamageImmune>(root); em.AddComponent<RamImmune>(root); grids.Add(root); }
             }
         }
 
@@ -449,7 +451,7 @@ namespace Game.App.DevRuntime.Extraction
                 if (!route.Loop && along > total - 40)
                 {   // the queue: back to the start, out of sight
                     along = 0; var s = Along(r, 0);
-                    DevEcs.TeleportRoot(em, root, Sim(new float3(s.x, route.Y, s.y)), quaternion.RotateY(0));
+                    DevEcs.TeleportRoot(em, root, kit.Clear(Sim(new float3(s.x, route.Y, s.y)), ExtractionKit.ShipClearance), quaternion.RotateY(0));
                 }
                 traffic[i] = (id, r, along);
                 var goal = Along(r, along + 70);
@@ -464,7 +466,7 @@ namespace Game.App.DevRuntime.Extraction
                 if (!em.HasComponent<Watcher>(patrol)) em.AddComponentData(patrol, new Watcher { Kind = WatcherKind.Ship, Faction = AllianceIndex, Range = 260, CosHalfArc = -1, Rate = .5f });
                 float a = (float)(Time.timeAsDouble * .05 % (2 * math.PI));
                 var brain = em.GetComponentData<AiBrain>(patrol);
-                if (brain.Initialized != 0) { brain.Anchor = Sim(new float3(math.cos(a) * 330, 30, math.sin(a) * 330)); em.SetComponentData(patrol, brain); }
+                if (brain.Initialized != 0) { brain.Anchor = Sim(new float3(math.cos(a) * PatrolRadius, PatrolHeight, math.sin(a) * PatrolRadius)); em.SetComponentData(patrol, brain); }
             }
             foreach (var c in cutters)
                 if (kit.Root(c, out var root) && em.HasComponent<AiBrain>(root))
@@ -472,6 +474,35 @@ namespace Game.App.DevRuntime.Extraction
                     var brain = em.GetComponentData<AiBrain>(root);
                     if (brain.Initialized != 0) { brain.Anchor = Sim(cuttersPost); em.SetComponentData(root, brain); }
                 }
+        }
+
+        /// <summary>Sweeps a ship-sized sphere along every traffic leg against the town's grids: the legs that would put a hull into
+        /// the station (owner 2026-11-10: "avoid ... ships ... running into the station").</summary>
+        internal string CheckRoutes(EntityManager em, float radius = 14)
+        {
+            if (!Built || !kit.Ready(out _, out _, out var frame)) return "Tollhouse Nine: not built";
+            using var q = em.CreateEntityQuery(ComponentType.ReadOnly<PhysicsWorldSingleton>());
+            if (q.CalculateEntityCount() != 1) return "no physics";
+            em.CompleteAllTrackedJobs();
+            var world = q.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
+            var town = new HashSet<Entity>(grids);
+            var report = new System.Text.StringBuilder(); int legs = 0, blocked = 0;
+            for (int r = 0; r < Routes.Length; r++)
+            {
+                var route = Routes[r]; int n = route.Points.Length;
+                for (int k = 0; k < (route.Loop ? n : n - 1); k++)
+                {
+                    legs++;
+                    float3 a = Sim(new float3(route.Points[k].x, route.Y, route.Points[k].y)), b = Sim(new float3(route.Points[(k + 1) % n].x, route.Y, route.Points[(k + 1) % n].y));
+                    var hits = new NativeList<ColliderCastHit>(8, Allocator.Temp);
+                    var collector = new AllHitsCollector<ColliderCastHit>(1f, ref hits);
+                    world.SphereCastCustom(a, radius, math.normalizesafe(b - a), math.distance(a, b), ref collector, CollisionFilter.Default);
+                    foreach (var h in hits)
+                        if (town.Contains(h.Entity)) { blocked++; report.Append($" route {r} leg {k} hits at {DevEcs.Format(ExtractionKit.Local(Anchor, h.Position, frame))};"); break; }
+                    hits.Dispose();
+                }
+            }
+            return $"routes: {blocked}/{legs} legs blocked." + report;
         }
 
         internal string Status(EntityManager em)

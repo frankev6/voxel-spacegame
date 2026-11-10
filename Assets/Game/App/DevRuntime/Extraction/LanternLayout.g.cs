@@ -66,14 +66,10 @@ namespace Game.App.DevRuntime.Extraction
         };
         internal static readonly (float Y, float2[] Points, bool Loop, int Ships)[] Routes =
         {
-            (-119.0f, new[] { new float2(160.0f, 0.0f), new float2(138.6f, -80.0f), new float2(80.0f, -138.6f), new float2(0.0f, -160.0f), new float2(-80.0f, -138.6f), new float2(-138.6f, -80.0f), new float2(-160.0f, -0.0f), new float2(-138.6f, 80.0f), new float2(-80.0f, 138.6f), new float2(-0.0f, 160.0f), new float2(80.0f, 138.6f), new float2(138.6f, 80.0f) }, true, 2),
-            (-99.0f, new[] { new float2(154.5f, -41.4f), new float2(113.1f, -113.1f), new float2(41.4f, -154.5f), new float2(-41.4f, -154.5f), new float2(-113.1f, -113.1f), new float2(-154.5f, -41.4f), new float2(-154.5f, 41.4f), new float2(-113.1f, 113.1f), new float2(-41.4f, 154.5f), new float2(41.4f, 154.5f), new float2(113.1f, 113.1f), new float2(154.5f, 41.4f) }, true, 2),
-            (-79.0f, new[] { new float2(138.6f, -80.0f), new float2(80.0f, -138.6f), new float2(0.0f, -160.0f), new float2(-80.0f, -138.6f), new float2(-138.6f, -80.0f), new float2(-160.0f, -0.0f), new float2(-138.6f, 80.0f), new float2(-80.0f, 138.6f), new float2(-0.0f, 160.0f), new float2(80.0f, 138.6f), new float2(138.6f, 80.0f), new float2(160.0f, 0.0f) }, true, 2),
-            (-59.0f, new[] { new float2(113.1f, -113.1f), new float2(41.4f, -154.5f), new float2(-41.4f, -154.5f), new float2(-113.1f, -113.1f), new float2(-154.5f, -41.4f), new float2(-154.5f, 41.4f), new float2(-113.1f, 113.1f), new float2(-41.4f, 154.5f), new float2(41.4f, 154.5f), new float2(113.1f, 113.1f), new float2(154.5f, 41.4f), new float2(154.5f, -41.4f) }, true, 2),
-            (-39.0f, new[] { new float2(80.0f, -138.6f), new float2(0.0f, -160.0f), new float2(-80.0f, -138.6f), new float2(-138.6f, -80.0f), new float2(-160.0f, -0.0f), new float2(-138.6f, 80.0f), new float2(-80.0f, 138.6f), new float2(-0.0f, 160.0f), new float2(80.0f, 138.6f), new float2(138.6f, 80.0f), new float2(160.0f, 0.0f), new float2(138.6f, -80.0f) }, true, 2),
-            (-19.0f, new[] { new float2(41.4f, -154.5f), new float2(-41.4f, -154.5f), new float2(-113.1f, -113.1f), new float2(-154.5f, -41.4f), new float2(-154.5f, 41.4f), new float2(-113.1f, 113.1f), new float2(-41.4f, 154.5f), new float2(41.4f, 154.5f), new float2(113.1f, 113.1f), new float2(154.5f, 41.4f), new float2(154.5f, -41.4f), new float2(113.1f, -113.1f) }, true, 2),
-            (40.0f, new[] { new float2(0.0f, -312.0f), new float2(0.0f, -160.0f), new float2(0.0f, -80.0f), new float2(40.0f, 0.0f), new float2(130.0f, 225.2f), new float2(306.4f, 257.1f) }, false, 5),
-            (-200.0f, new[] { new float2(-400.0f, 0.0f), new float2(-128.0f, 0.0f), new float2(-128.0f, -48.0f), new float2(-400.0f, -48.0f) }, true, 2),
+            (-114.0f, new[] { new float2(34.0f, 0.0f), new float2(24.0f, -24.0f), new float2(0.0f, -34.0f), new float2(-24.0f, -24.0f), new float2(-34.0f, -0.0f), new float2(-24.0f, 24.0f), new float2(-0.0f, 34.0f), new float2(24.0f, 24.0f) }, true, 1),
+            (-52.0f, new[] { new float2(31.5f, -12.7f), new float2(13.3f, -31.3f), new float2(-12.7f, -31.5f), new float2(-31.3f, -13.3f), new float2(-31.5f, 12.7f), new float2(-13.3f, 31.3f), new float2(12.7f, 31.5f), new float2(31.3f, 13.3f) }, true, 1),
+            (76.0f, new[] { new float2(0.0f, -312.0f), new float2(0.0f, -160.0f), new float2(0.0f, -80.0f), new float2(40.0f, 0.0f), new float2(130.0f, 225.2f), new float2(306.4f, 257.1f) }, false, 4),
+            (-196.0f, new[] { new float2(-384.0f, 0.0f), new float2(-128.0f, 0.0f) }, true, 1),
         };
         internal static readonly (string Id, float3 At)[] Pois =
         {

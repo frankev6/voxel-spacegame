@@ -28,6 +28,7 @@ namespace Game.Voxel.Damage.Jobs
         [ReadOnly] public ComponentLookup<PhysicsMass> Masses;
         [ReadOnly] public ComponentLookup<PhysicsVelocity> Velocities;
         [ReadOnly] public ComponentLookup<OwnedBy> Owners;
+        [ReadOnly] public ComponentLookup<RamImmune> RamImmune;
         [ReadOnly] public BlobAssetReference<BlockDefsBlob> Blocks;
         public DamageConfig Config;
         public uint Tick;
@@ -36,6 +37,8 @@ namespace Game.Voxel.Damage.Jobs
         [NativeDisableContainerSafetyRestriction] public NativeQueue<FxEvent>.ParallelWriter Fx;
         [Unity.Collections.LowLevel.Unsafe.NativeDisableContainerSafetyRestriction] public NativeQueue<SfxEvent>.ParallelWriter Sfx;
         [NativeDisableUnsafePtrRestriction] public DamageStreamsData* Data;
+        /// <summary>Closing speed (m/s) under which a contact with RamImmune scenery is a harmless scrape.</summary>
+        public const float ScrapeSpeedMs = 6f;
         public void Execute()
         {
             Contacts.Sort(); Damage.BeginForEachIndex(0);
@@ -58,6 +61,11 @@ namespace Game.Voxel.Damage.Jobs
                 // whole Hollow hostile): each body's speed into the other along the normal (A to B); the body pushed away is not to
                 // blame for the damage it took. Near-equal (head-on) blames both.
                 float intoB = math.dot(Velocity(pair.A), normal), intoA = -math.dot(Velocity(pair.B), normal);
+                // SPEC-93: a scrape against ram-immune scenery (a station's walls, the den's stone) under ScrapeSpeedMs breaks nothing on
+                // either side; a ship flown into it faster still takes the hit (owner 2026-11-10: "avoid ... running into the station").
+                // Velocities here are already solved, so the closing speed comes from the contact impulse: J = μ (1 + e) v.
+                if ((RamImmune.HasComponent(pair.A) || RamImmune.HasComponent(pair.B))
+                    && impulse * (InverseMass(pair.A) + InverseMass(pair.B)) / math.sqrt(Config.RamRestitutionCorrection) < ScrapeSpeedMs) continue;
                 Emit(pair.A, pair.B, point, -normal, energy, Share(hardnessB, hardnessA), (uint)ordinal * 2, intoA >= intoB - RamBlameToleranceMs);
                 Emit(pair.B, pair.A, point, normal, energy, Share(hardnessA, hardnessB), (uint)ordinal * 2 + 1, intoB >= intoA - RamBlameToleranceMs);
                 Pairs[key] = Tick; Data->Current.RamEvents++;
@@ -96,7 +104,7 @@ namespace Game.Voxel.Damage.Jobs
         /// instigator; otherwise the damage is `grid`'s own doing and it is its own instigator (no provocation, no kill credit).</summary>
         void Emit(Entity grid, Entity other, float3 point, float3 into, float energy, float share, uint sequence, bool otherRammed)
         {
-            if (!Cells.Grids.HasComponent(grid) || !Transforms.HasComponent(grid)) return;
+            if (!Cells.Grids.HasComponent(grid) || !Transforms.HasComponent(grid) || RamImmune.HasComponent(grid)) return;
             var transform = Transforms[grid]; var size = Cells.Grids[grid].CellSize;
             Damage.Write(new DamageEvent { Grid = grid, LocalPoint = LocalPoint(grid, point, into),
                 LocalDir = math.rotate(math.inverse(transform.Rotation), into), Amount = energy * Config.RamHpPerJoule * share,

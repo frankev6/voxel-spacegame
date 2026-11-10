@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 14 | 0 | 0 | 85 | 1 | 114 | 7 |
+| M4 | 16 | 14 | 0 | 0 | 85 | 1 | 116 | 8 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -607,6 +607,8 @@
 | EXT-010 | Den defence | [SPEC-93](specs/SPEC-93-extraction.md) | M4 | standard | EXT-008 | yes | done | claude (claude-opus-5-5) | 2026-11-10 | 199f0834 | Owner 2026-11-10: "proceed with building it onto the game, write the systems first ... do not stop for choices I will be sleeping so be autonomous and test on your own as well". After a core is installed an Alliance wave of four comes 150 s later (`extraction den attack` at once); powered den guns engage; the relation returns to neutral when the wave is broken. |
 | EXT-011 | Scenarios and playtests | [SPEC-93](specs/SPEC-93-extraction.md) | M4 | standard | EXT-009, EXT-010 | yes | done | claude (claude-opus-5-5) | 2026-11-10 | cf7535c7 | Owner 2026-11-10: "proceed with building it onto the game, write the systems first ... do not stop for choices I will be sleeping so be autonomous and test on your own as well". ExtractionLoopTests (PlayMode): den builds and digs, gun placed, core cut free, alarm, magnet, socket powers the gun, job Installed, attack wave; passes live in the Editor. Fixes from the playtests: traffic steering before spawn, the Cradle goto, the hold override, CanJump with an empty cable, socket and Table clear of the core. |
 | EXT-012 | Co-op replication of extraction state | [SPEC-93](specs/SPEC-93-extraction.md) | M4 | frontier | EXT-011 | yes | todo |  |  |  |  |
+| EXT-013 | Collision safety in the places | [SPEC-93](specs/SPEC-93-extraction.md) | M4 | standard | EXT-009 | yes | todo |  |  |  |  |
+| EXT-014 | The Lantern's own look | [SPEC-93](specs/SPEC-93-extraction.md) | M4 | frontier | EXT-007 | no | todo |  |  |  |  |
 | DMG-020 | Core floor: ships wreck below 20% of their core's capacity; the core ladder | [SPEC-13](specs/SPEC-13-damage-destruction.md) | M4 | standard | DMG-013, SPEC-51 |  | done | lead (claude-opus-5-5) | 2026-10-18 | — | ORPHAN: not in any spec `CoreFloorJob`, `HulkCause.CoreMalfunction`, `OverCoreCapacity`/`UnderCoreFloor`, four new 1×1 cores, five blueprints refitted. |
 | ART-001 | Public contract types | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | DATA-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | 386ebf5 | SPEC-80 Q9 answered: yes |
 | ART-002 | Direction token sheets and the token checker | [SPEC-80](specs/SPEC-80-art-direction.md) | A0 | standard | ART-001 | yes | done | claude (claude-opus-5-5) | 2026-10-10 | c31fa16 | DRYDOCK `--color-hull` fixed to pass C4; sheets log 12 font-path import warnings until ART-008 |

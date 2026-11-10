@@ -32,7 +32,7 @@ namespace Game.Voxel.Damage
             contacts = new NativeList<RamContact>(64, Allocator.Persistent);
             emit.Cells = GridCellReader.Create(ref state); emit.Palettes = state.GetBufferLookup<PaletteEntry>(true); emit.Instances = state.GetBufferLookup<BlockInstance>(true);
             emit.Transforms = state.GetComponentLookup<LocalTransform>(true); emit.Masses = state.GetComponentLookup<PhysicsMass>(true);
-            emit.Velocities = state.GetComponentLookup<PhysicsVelocity>(true); emit.Owners = state.GetComponentLookup<OwnedBy>(true);
+            emit.Velocities = state.GetComponentLookup<PhysicsVelocity>(true); emit.Owners = state.GetComponentLookup<OwnedBy>(true); emit.RamImmune = state.GetComponentLookup<RamImmune>(true);
             state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<DamageStreams>(); state.RequireForUpdate<DamageConfig>(); state.RequireForUpdate<SimClock>();
             state.RequireForUpdate<PhysicsWorldSingleton>(); state.RequireForUpdate<SimulationSingleton>(); state.RequireForUpdate<BlockDefsRef>();
             state.RequireForUpdate<FxEventQueue>(); state.RequireForUpdate<SfxEventQueue>();
@@ -43,7 +43,7 @@ namespace Game.Voxel.Damage
             var streams = SystemAPI.GetSingleton<DamageStreams>(); var data = streams.Data; uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
             state.Dependency = data->AllJobs(state.Dependency);
             emit.Cells.Update(ref state); emit.Palettes.Update(ref state); emit.Instances.Update(ref state); emit.Transforms.Update(ref state);
-            emit.Masses.Update(ref state); emit.Velocities.Update(ref state); emit.Owners.Update(ref state);
+            emit.Masses.Update(ref state); emit.Velocities.Update(ref state); emit.Owners.Update(ref state); emit.RamImmune.Update(ref state);
             state.Dependency = new ClearContactsJob { Contacts = contacts }.Schedule(state.Dependency);
             using (Collect.Auto()) state.Dependency = new CollectRamContactsJob
             {

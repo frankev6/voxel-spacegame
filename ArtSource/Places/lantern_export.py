@@ -397,13 +397,13 @@ def layout():
         ("Work", ((X(64) + X(100)) / 2, ay + 24, (Z(30) + Z(50)) / 2), ((X(100) - X(64)) / 2, 30, (Z(30) - Z(50)) / 2)),
         ("Trader", ((X(4) + X(40)) / 2, -200, Z(40)), ((X(40) - X(4)) / 2, 30, 100)),
     ]
-    # traffic: planar loops at gallery heights; the toll queue above; boats rising and falling in the Well
+    # traffic: boats circling in the open Well (never in the galleries: a 40 m hull does not fit a 20 m floor with stalls in it,
+    # owner 2026-11-10: "avoid ... ships colliding ... running into the station"); the toll queue well above the Crown's roofs
     routes = []
-    for f_ in range(FLOORS):
-        y = MARKET_BOTTOM + (f_ + .45) * (MARKET_TOP - MARKET_BOTTOM) / FLOORS
-        routes.append((y, [P(a, 160) for a in range(0 + f_ * 15, 360 + f_ * 15, 30)], True, 2))
-    routes.append((40, [(0, Z(79)), (0, Z(60)), (0, Z(50)), (40, 0), (P(300, 260)), (P(320, 400))], False, 5))   # the toll queue and out north-east
-    routes.append((-200, [(X(2), Z(40)), (X(36), Z(40)), (X(36), Z(46)), (X(2), Z(46))], True, 2))                 # freight docks
+    for k, y in enumerate((-114, -52)):   # under and over the Stall Bridge (-92..-88), clear of the Grate (-136)
+        routes.append((y, [P(a, 34) for a in range(k * 22, 360 + k * 22, 45)], True, 1))
+    routes.append((76, [(0, Z(79)), (0, Z(60)), (0, Z(50)), (40, 0), (P(300, 260)), (P(320, 400))], False, 4))   # the toll queue and out north-east
+    routes.append((-196, [(X(4), Z(40)), (X(36), Z(40))], True, 1))   # freight docks: up and down the pier's open corridor, between the masts
     pois = {
         "arrival": (0, 40, Z(84)), "queue": (0, 40, Z(66)), "well_mouth": (0, CROWN_DECK + 20, 0), "cradle": core,
         "core_road": (X(72), CORE_Y, Z(39.5)), "big_door_out": (X(92), CORE_Y, Z(39.5)), "yard_apron": (X(88), ay + 20, Z(40)),

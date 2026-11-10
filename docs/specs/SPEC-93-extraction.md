@@ -254,6 +254,26 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 - **Acceptance criteria:**
   - [ ] `tools/playtest/coop-parity.sh` matches during a heist.
 
+### EXT-013 — Collision safety in the places
+- **Milestone:** M4
+- **Tier:** standard — owner correction 2026-11-10: "avoid all the issues that have happened in testing with ships colliding, spawning inside eachother, running into the station, den and station just exploding random blocks out of nowhere"
+- **Depends on:** `EXT-009`
+- **Do:** `RamImmune` (Voxel.Damage): collisions take no cells from the den's stone, the station's pieces, doors, posts, tanks and the core; under 6 m/s of closing speed a contact with ram-immune scenery is a scrape and hurts neither side. Spawn clearance for every extraction ship (`ExtractionKit.Clear`); traffic routes in open air (the Well, the toll queue above the roofs, the pier corridor), checked by `extraction routes`; the den's rock as spatial scenery so a gun on its face can fire.
+- **Files:** `Assets/Game/Voxel/Damage/RamImmune.cs`, `Assets/Game/Voxel/Damage/Jobs/EmitRamDamageJob.cs`, `Assets/Game/App/DevRuntime/Extraction/*`, `ArtSource/Places/lantern_export.py`.
+- **Tests:** `Assets/Game/Tests/EditMode/Voxel/Damage/ImpactEventSystemTests.cs` (RamImmune, scrape)
+- **Acceptance criteria:**
+  - [ ] `extraction routes` reports no blocked leg; no ship spawns inside another or the station; the den and the station lose no cells to collisions.
+
+### EXT-014 — The Lantern's own look
+- **Milestone:** M4
+- **Tier:** frontier — owner 2026-11-10: "add new textures instead of reusing the same stuff all the time, make it have its own voice, make the inside of the station feel truly spectacle in terms of atmosphere, lighting, it should feel iconic"
+- **Depends on:** `EXT-007`
+- **Do:** Procedural brick layers of its own (glazed tile, jade fret, pierced brass lattice, paper lantern panels, turbine plate, corrugated shanty sheet, deck tread, core conduit, glass, truss) in free slices of the brick arrays, new `block_lantern_*` blocks on them, and the town's interior lighting and atmosphere.
+- **Files:** `Assets/Game/Editor/Art/LanternLook.cs`, `Assets/Game/Editor/Content/LanternBuilder.cs`, `Assets/Game/App/DevRuntime/Extraction/*`.
+- **Tests:** screenshots (tools/playtest/shot.sh)
+- **Acceptance criteria:**
+  - [ ] The town reads as its own place in screenshots: no surface uses the ships' hull plate.
+
 ## 10. Open questions
 
 | # | Question | Default in use | Decider |

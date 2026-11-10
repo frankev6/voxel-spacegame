@@ -59,7 +59,9 @@ namespace Game.App.DevRuntime.Extraction
             // the rock and its shard: stone you can dig (not DamageImmune), held where they are
             Rock = kit.Grid(session, catalog, frame, Anchor, ExtractionIds.Rock, float3.zero, quaternion.identity, GridKind.Station, GridMotion.Static);
             Shard = kit.Grid(session, catalog, frame, Anchor, ExtractionIds.Shard, ShardCentre, quaternion.RotateY(.7f), GridKind.Station, GridMotion.Static);
-            foreach (var g in new[] { Rock, Shard }) if (g != Entity.Null) { grids.Add(g); em.AddComponent<CameraSeeThrough>(g); }
+            // scenery to the spatial hash: shots stop on the stone, but a gun on its face does not read the 130 m rock as an ally
+            // in its line of fire, and targeting skips it (it is still dug: damage reaches it)
+            foreach (var g in new[] { Rock, Shard }) if (g != Entity.Null) { grids.Add(g); em.AddComponent<CameraSeeThrough>(g); em.AddComponent<Game.Simulation.Spatial.SpatialScenery>(g); em.AddComponent<RamImmune>(g); }
             // the socket at the back of the cave: where a core gives the den its power
             Socket = em.CreateEntity(typeof(LocalTransform), typeof(CoreSocket));
             em.SetComponentData(Socket, LocalTransform.FromPosition(Sim(SocketStart)));
@@ -105,7 +107,7 @@ namespace Game.App.DevRuntime.Extraction
             if (!em.HasComponent<AiBrain>(root)) return;
             var brain = em.GetComponentData<AiBrain>(root);
             if (brain.Initialized == 0) return;
-            brain.Anchor = Sim(CaveMouth + new float3(40, 0, 0)); em.SetComponentData(root, brain);
+            brain.Anchor = Sim(CaveMouth + new float3(160, 0, 0)); em.SetComponentData(root, brain);   // off the mouth, not jammed into the rock
         }
 
         /// <summary>Where the ship's nose points at the den's stone, within Reach: the hit (sim frame), its normal and the grid.</summary>
