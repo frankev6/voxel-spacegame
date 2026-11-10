@@ -124,7 +124,10 @@ namespace Game.App.DevRuntime.Extraction
             float3 forward = math.mul(pose.Rotation, new float3(0, 0, 1));
             var hits = new NativeList<Unity.Physics.RaycastHit>(8, Allocator.Temp);
             var collector = new AllHitsCollector<Unity.Physics.RaycastHit>(1f, ref hits);
-            world.CastRay(new RaycastInput { Start = pose.Position, End = pose.Position + forward * Reach, Filter = CollisionFilter.Default }, ref collector);
+            // the reach is from the bow, so a long hull (the 53 m hauler, EXT-015) reaches as far as the Wraith
+            float bow = em.HasComponent<PhysicsCollider>(ship) && em.GetComponentData<PhysicsCollider>(ship).IsValid
+                ? math.max(0, em.GetComponentData<PhysicsCollider>(ship).Value.Value.CalculateAabb().Max.z) : 0;
+            world.CastRay(new RaycastInput { Start = pose.Position, End = pose.Position + forward * (bow + Reach), Filter = CollisionFilter.Default }, ref collector);
             float best = 2;
             foreach (var h in hits)
             {

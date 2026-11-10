@@ -5,7 +5,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class PlaygroundDevCommand : IDevCommand
     {
         public string Name => "playground";
-        public string Usage => "playground [reset|status|activate] | playground goto=<pad> | playground run=<pad|shield|boost|station> | playground ship=<blueprint|starter> | playground view=<x,y,z> (co-op guest, sent by the host)";
+        public string Usage => "playground [reset|status|activate] | playground goto=<pad> | playground run=<pad|shield|boost|station> | playground ship=<blueprint|starter|default> | playground view=<x,y,z> (co-op guest, sent by the host)";
         public string Summary => "Enter/reset the isolated interactive playground; fly to a pad and press F";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {

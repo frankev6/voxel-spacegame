@@ -35,8 +35,9 @@ namespace Game.App.DevRuntime.Commands
                     else if (where == "lantern") local = LanternLayout.Poi("arrival");
                     else if (where == "dengate") { place = "den"; local = new float3(ExtractionRuntime.DenGateLocal.x - 160, 0, ExtractionRuntime.DenGateLocal.y); yaw = math.PI / 2; }
                     else if (where == "table") { place = "den"; local = DenPlace.Table + new float3(30, 4, 0); yaw = -math.PI / 2; }
-                    // the Cradle: beside the core between its posts, facing it (the core's own centre would crush the ship)
-                    else if (where == "cradle") { local = LanternLayout.Core + new float3(32, -2, -32); yaw = -math.PI / 4; }
+                    // the Cradle: in the core road east of the core and clear of the Yards post (44, 0), facing it, within the magnet's 90 m (the Cradle itself is 96 m
+                    // square around a 40 m core: a 53 m hauler facing the core from inside it clipped the walls, EXT-015)
+                    else if (where == "cradle") { local = LanternLayout.Core + new float3(80, 0, 4); yaw = -math.PI / 2; }
                     else if (where.StartsWith("den@") || where.StartsWith("lantern@"))
                     {
                         place = where.StartsWith("den@") ? "den" : "lantern";

@@ -35,7 +35,8 @@ namespace Game.Tests.PlayMode.Extraction
             // the den: built on arrival, dug for ore, a gun on its face (dark until a core is socketed)
             Run("extraction goto=den@175,0,44,-90");
             yield return Until(() => x.Den.Built && x.Den.Rock != Entity.Null && EM.Exists(x.Den.Rock) && EM.HasComponent<VoxelGrid>(x.Den.Rock), "the Rock spawns", 30);
-            yield return new WaitForSeconds(1);
+            Run("extraction goto=den@175,0,44,-90");   // again: the hauler (EXT-015) is still streaming in when the first teleport lands
+            yield return new WaitForSeconds(2);
             StringAssert.StartsWith("digging", Run("extraction dig").Text);
             yield return Until(() => x.Den.Ore > 0, "a dig yields ore", 10);
             Run("extraction ore add=100");

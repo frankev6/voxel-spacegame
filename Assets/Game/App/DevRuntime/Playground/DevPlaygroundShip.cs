@@ -21,7 +21,19 @@ namespace Game.App.DevRuntime.Playground
         readonly DevContext context;
         readonly SceneFlow flow;
         bool disposed;
-        internal ContentId Override { get; private set; }
+        /// <summary>EXT-015 (owner, 2026-11-10: "we should use a bigger ship that can actually pull the 200t so we don't have to use a
+        /// command"): until a ship is chosen the playground flies the crew's hauler (the VESPER with a 200 t cargo refit, built by
+        /// Game/Content/Build Lantern and Den), so the extraction loop needs no hold command; `ship=starter` flies the start ship.</summary>
+        internal const string Hauler = "ship_vesper_hauler";
+        bool chosen;
+        ContentId choice;
+        internal ContentId Override => chosen ? choice : HaulerIfBuilt();
+
+        ContentId HaulerIfBuilt()
+        {
+            var id = new ContentId(Hauler);
+            return context.TryGetService<Game.Data.Services.ContentService>(out var content) && content.Catalog.TryGet<ShipBlueprintDefinition>(id, out _) ? id : ContentId.None;
+        }
 
         internal DevPlaygroundShip(DevContext context)
         {
@@ -33,7 +45,8 @@ namespace Game.App.DevRuntime.Playground
         /// <summary>Validates and stores the choice; the caller resets the playground to apply it.</summary>
         internal string Select(string id)
         {
-            if (string.IsNullOrWhiteSpace(id) || id == "starter" || id == "default") { Override = ContentId.None; return null; }
+            if (string.IsNullOrWhiteSpace(id) || id == "starter") { chosen = true; choice = ContentId.None; return null; }
+            if (id == "default") { chosen = false; return null; }
             if (!context.TryGetService<Game.Data.Services.ContentService>(out var content)) return "content unavailable";
             var ship = new ContentId(id);
             if (!content.Catalog.TryGet<ShipBlueprintDefinition>(ship, out _))
@@ -43,7 +56,7 @@ namespace Game.App.DevRuntime.Playground
                 ids.Sort(StringComparer.Ordinal);
                 return "unknown ship blueprint '" + id + "'. Ships: starter, " + string.Join(", ", ids);
             }
-            Override = ship; return null;
+            chosen = true; choice = ship; return null;
         }
 
         // Before the power trial (PlayerShip - 1) fits its shield, and before PlayerShipSpawner borrows the flagship.

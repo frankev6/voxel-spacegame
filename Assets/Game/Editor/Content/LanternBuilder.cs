@@ -106,6 +106,7 @@ namespace Game.Editor.Content
                 // the station core: a 40 m ball of 2 m cells, glowing jade-white
                 cells += Make(service, content, Core, "Station core", 2, put => Ball(Skinned(put), hull, 10, Glow, Jade));
                 cells += DenBuilder.Build(service, content, Block, Make);
+                cells += HaulerBuilder.Build(service);   // EXT-015: the crew's hauler
             }
             AssetDatabase.SaveAssets(); ContentDatabaseBuilder.Rebuild();
             GameLog.Info("Content", $"Built Tollhouse Nine and the Rock: {pieces} town pieces, {cells} cells.");
@@ -171,6 +172,12 @@ namespace Game.Editor.Content
                 if (structure.TryPlaceBlock(new BlockPlacement { Block = block, Origin = origin, Orient = orient, Color = colour }, content) != PlaceResult.Ok) failed++;
             });
             if (failed > 0) Debug.LogWarning($"{id}: {failed} blocks did not fit");
+            return Write(service, id, name, cell, structure);
+        }
+
+        /// <summary>Writes a structure as the ship blueprint asset `id` (created when missing). Returns its solid cells.</summary>
+        internal static int Write(ContentService service, string id, string name, float cell, VoxelStructure structure)
+        {
             string path = Ships + id + ".asset";
             var blueprint = AssetDatabase.LoadAssetAtPath<ShipBlueprintDefinition>(path);
             if (blueprint == null) { blueprint = ScriptableObject.CreateInstance<ShipBlueprintDefinition>(); AssetDatabase.CreateAsset(blueprint, path); }
