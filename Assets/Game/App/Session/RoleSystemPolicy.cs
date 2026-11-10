@@ -97,6 +97,7 @@ namespace Game.App.Session
             ["PulseSystem"] = SystemAuthority.AuthorityOnly,             // HAZ-016: pulse damage and shield drain; one raycast per ship per pulse            // HAZ-019: who collects a canister; the grant and its despawn
             ["MineAnchorSystem"] = SystemAuthority.Both,                 // SPEC-91: the anchor spring on every machine
             ["RaceSystem"] = SystemAuthority.AuthorityOnly,              // SPEC-92: phases, laps, places and respawns; RaceState to guests
+            ["TowSystem"] = SystemAuthority.Both,                        // EXT-002: cable pulls on every machine (same poses, same pulls)
             ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
             ["MoverSystem"] = SystemAuthority.AuthorityOnly,
             ["PortalDecideSystem"] = SystemAuthority.AuthorityOnly,      // HAZ-021: who transits a portal, and its jam

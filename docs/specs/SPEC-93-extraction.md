@@ -36,7 +36,7 @@ The game becomes a co-op extraction game (owner, 2026-11-10). A crew lives in a 
 
 1. **Places come first; jobs follow from them.** Every feature of a heist place has a reason to exist apart from the heist (owner: "make a proper lived in feeling world/scenario"). Ways in, cover and ways out are listed per place, never a single solution.
 2. **The tow is a cable, not a teleport.** `TowLink` joins two physics bodies with a one-sided spring (slack under its length, a spring and damper over it). Forces go through `DamageStreams.Impulses` (`ProducerKind.Tow`, appended), so the ship's flight assist carries them (SPEC-91) and mass shows in handling. The salvage collector (QA-001) stays for wrecks.
-3. **Knocks are noise.** A towed load whose contact speed with any other body exceeds `KnockSpeed` produces a `NoiseEvent` at the contact. Noise is heard by watchers within its radius; a heard knock raises suspicion of the ship towing the load.
+3. **Knocks are noise.** A towed load whose velocity changes in one tick by more than `KnockSpeed` beyond what the cable did (it hit something) produces a `NoiseEvent` at its leading side. Noise is heard by watchers within its radius; a heard knock raises suspicion of the ship towing the load.
 4. **The cargo rule is checked where a ship leaves**: a gate (portal) refuses a ship whose tow load's mass exceeds its cargo capacity in tonnes. A load stowed in a hold (`Stow`) leaves the world and travels as an item; it can only be stowed when the hold can take it.
 5. **A station core is a dynamic grid held by kinematic tethers.** Each `CoreTether` names a district. Cutting a tether (damage or the cut key) blacks out its district. When the last tether goes, the core is free and the station's alarm starts. Cutting is the only way to free a core; shots cannot break it (the core grid is `DamageImmune`).
 6. **The transponder is a disguise.** A ship's `Transponder` is `Off` or broadcasts one `AccessCode` (Trader, Work, Garrison). Codes open the matching `AccessZone`s without suspicion; a dark ship is noticed by any watcher that sees it.
@@ -58,11 +58,12 @@ public struct TowLink : IComponentData            // on the towing ship's root
     public Entity Load;                           // a root with PhysicsVelocity + PhysicsMass, or Null
     public float3 ShipAnchor, LoadAnchor;         // body-local attach points (m)
     public float Length;                          // slack length (m)
-    public float Stiffness, Damping;              // spring N/m per tonne of the lighter body, damping ratio
+    public float Frequency, DampingRatio;         // the taut cable as a spring on the pair's reduced mass (0 = defaults 1.1 Hz, 0.8)
     public float BreakForce;                      // N; over it the cable snaps (0 = unbreakable)
     public uint SinceTick;
+    public float Tension;                         // N, last tick
 }
-public struct TowLoad : IComponentData { public Entity Tower; public float MassT; }   // on a towed root
+public struct TowLoad : IComponentData { public Entity Tower; public float MassT; public float3 ExpectedVelocity; public uint ExpectedTick, LastKnockTick; }
 public enum AccessCode : byte { None = 0, Trader = 1, Work = 2, Garrison = 3 }
 public struct Transponder : IComponentData { public byte On; public AccessCode Code; }
 public struct Suspicion : IComponentData { public float Value; public uint LastSeenTick; public byte Seen; }   // 0..1
@@ -76,7 +77,8 @@ public struct Watcher : IComponentData
     public ushort District;                       // a blacked-out district's lights and sensors are dark
 }
 public struct AccessZone : IComponentData { public float3 Center, HalfExtents; public AccessCode Needs; public ushort District; }
-public struct NoiseEvent { public float3 Position; public float Radius; public Entity Source; }   // source = the towing ship
+public struct NoiseEvent { public float3 Position; public float Radius; public Entity Source; public byte Kind; }   // source = the ship it gives away; Kind: Knock, Snap, Cut, Blast
+public struct NoiseEvents : IComponentData { public NativeList<NoiseEvent> Current; public uint Tick; }   // singleton, this tick's noises
 public struct StationCore : IComponentData { public ulong Station; public byte Tethers, Freed; public float MassT; }
 public struct CoreTether : IComponentData { public Entity Core; public float3 Anchor; public ushort District; public float Hp; public byte Cut; }
 public struct District : IComponentData { public ushort Id; public byte Powered; }   // lamps, watchers and zones read it
@@ -93,8 +95,7 @@ Managed: `ExtractionService` (App, dev runtime): the places, the loop state (`Jo
 
 | System | Group | Role | Reads → writes |
 |---|---|---|---|
-| `TowSystem` | `GameplayPrePhysicsGroup` | every machine | `TowLink`, poses, velocities, masses → `ImpulseRequest`s (Tow), snaps the link over `BreakForce` |
-| `TowKnockSystem` | `GameplayPostPhysicsGroup` | every machine | collision events of `TowLoad` roots → `NoiseEvents` |
+| `TowSystem` | `GameplayPostPhysicsGroup`, before `ImpulseApplySystem` | every machine | `TowLink`, poses, velocities, masses → `ImpulseRequest`s (Tow); snaps the link over `BreakForce`; clears `NoiseEvents` and adds knocks (a load's unexplained velocity change) |
 | `CoreTetherSystem` | `GameplayPostPhysicsGroup` | authority decides cuts; every machine holds the core | damage on tether posts, cut requests → `CoreTether.Cut`, `District.Powered`, `StationCore.Freed`, the core's motion |
 | `WatchSystem` | `GameplayPostPhysicsGroup` | authority | watchers, ships, `Transponder`, `AccessZone`, `NoiseEvents`, line of sight → `Suspicion`, `Wanted` |
 | `HeistDirector` | `GameplayPostPhysicsGroup` | authority | `StationCore.Freed`, `AlarmStep`s, clock → `HeistState`, `MechanismActions` (via a request list) |
@@ -144,7 +145,7 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 - **Milestone:** M4
 - **Tier:** frontier — new physics coupling between bodies
 - **Depends on:** `EXT-001`
-- **Do:** §4 tow types; `TowSystem`, `TowKnockSystem`, `TowApi`; the cable drawn as a line; console `tow`.
+- **Do:** §4 tow types; `TowSystem` (with knocks), `TowApi`; the cable drawn as a line; console `tow`.
 - **Files:** `Assets/Game/Simulation/Extraction/*`, `Assets/Game/Presentation/Extraction/*`, `Assets/Game/App/DevRuntime/Commands/*`.
 - **Tests:** `Assets/Game/Tests/EditMode/Simulation/Extraction/TowTests.cs`
 - **Acceptance criteria:**
