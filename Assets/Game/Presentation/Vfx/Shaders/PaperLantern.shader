@@ -51,7 +51,14 @@ Shader "Game/Vfx/PaperLantern"
                 float3 origin = TransformObjectToWorld(float3(0, 0, 0));
                 float3 ax = TransformObjectToWorldDir(float3(1, 0, 0));
                 float seed = frac(atan2(ax.z, ax.x) * 0.15915494 + 0.5);
-                o.seedLit = float2(seed, _Lit * smoothstep(_DarkBelow - 4, _DarkBelow + 4, origin.y));
+                // the blackout's edge is ragged: each lantern goes out at its own height around the line (±10 m), one in twelve hangs on
+                // 36 m longer, and in the eight metres above its own line a lantern sputters before it dies (owner, 2026-11-10: "a
+                // gradient where not all lights turn off at the same time")
+                float own = (frac(seed * 13.7) - 0.5) * 20 + (frac(seed * 29.3) < 0.085 ? 36 : 0);
+                float edge = origin.y - (_DarkBelow + own);
+                float sputter = frac(sin(floor(_Time.y * 13 + seed * 50) * 12.9898) * 43758.5453);
+                float lit = edge <= 0 ? 0 : edge < 8 ? (sputter > (1 - edge / 8) * 0.9 ? 1 : 0.06) : 1;
+                o.seedLit = float2(seed, _Lit * lit);
                 return o;
             }
             half4 Frag(Varyings input) : SV_Target

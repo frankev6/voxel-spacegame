@@ -29,7 +29,7 @@ namespace Game.App.DevRuntime.Extraction
         sealed class Beam { public Light Light; public float3 At, Facing; public float Sweep, Period, Phase, Range, HalfArc; public ushort District; }
 
         readonly Transform parent;
-        readonly Material paper, beam, column, halo;
+        readonly Material paper, beam, column, halo, bulb;
         readonly Mesh lantern, spotCone, wideCone, ball;
         readonly Matrix4x4[] batch = new Matrix4x4[1023];
         readonly float[] radius = new float[Lanterns], angle = new float[Lanterns], start = new float[Lanterns], rate = new float[Lanterns],
@@ -37,12 +37,15 @@ namespace Game.App.DevRuntime.Extraction
         readonly List<Matrix4x4> beads = new();
         readonly List<Beam> searchlights = new();
         readonly List<Light> strobes = new();
+        readonly List<Vector3> strobeAt = new();
         readonly bool[] lit = new bool[8];
         readonly GameObject volumeObject;
         readonly VolumeProfile profile;
         readonly Volume volume;
         readonly ColorAdjustments grade; readonly Bloom bloom; readonly Vignette vignette; readonly SplitToning split;
-        float darkLine = float.NegativeInfinity, inside, dark, alarm, column01;
+        float darkLine = float.NegativeInfinity, inside, dark, alarm, column01, red, flash, lineTopAt = -1, redAt = -1;
+        bool redOn;
+        const float LineSpeed = 32, LineTop = RiseTop + 50;   // the line climbs past the top so the stragglers (up to +46 m) go out too
         static readonly int DarkBelowId = Shader.PropertyToID("_DarkBelow"), LitId = Shader.PropertyToID("_Lit"), IntensityId = Shader.PropertyToID("_Intensity");
 
         /// <summary>The core's beat, 0.75..1.35, for its lamp.</summary>
@@ -55,6 +58,7 @@ namespace Game.App.DevRuntime.Extraction
             beam = Make("Game/Vfx/LightShaft", "searchlight beam"); beam?.SetColor("_Color", new Color(2.0f, 1.8f, 1.45f)); beam?.SetFloat("_NearFade", 18);
             column = Make("Game/Vfx/LightShaft", "the Lantern's column"); column?.SetColor("_Color", new Color(.7f, 2.4f, 2.7f)); column?.SetFloat("_Dust", .7f);
             halo = Make("Game/Vfx/LightShaft", "the Lantern's halo"); halo?.SetColor("_Color", new Color(.5f, 1.4f, 1.5f)); halo?.SetFloat("_Dust", .35f); halo?.SetFloat("_NearFade", 6);
+            bulb = Make("Game/Vfx/LightShaft", "alarm bulb"); bulb?.SetColor("_Color", new Color(3.2f, .25f, .15f)); bulb?.SetFloat("_Dust", 0); bulb?.SetFloat("_NearFade", 4);
             lantern = Lathe("paper lantern", 22, 16, t =>
             {
                 float r = t < .06f ? math.lerp(0, .2f, t / .06f) : t > .94f ? math.lerp(.2f, 0, (t - .94f) / .06f) : .2f + .3f * math.pow(math.sin(math.PI * (t - .06f) / .88f), .7f);
@@ -90,23 +94,28 @@ namespace Game.App.DevRuntime.Extraction
                     }
                 }
             }
-            // emergency strobes: battery lamps, on through a blackout, only on the alarm
+            // emergency strobes: battery lamps, on through a blackout, only on the alarm, along every way out: the Well's galleries, the
+            // Cradle, the Grate, the Well's mouth and the toll lane north
+            void Strobe(float3 at, float range) { strobeAt.Add((Vector3)at); strobes.Add(ExtractionKit.Lamp(parent, (Vector3)at, new Color(1, .1f, .06f), range, 0)); }
             for (int i = 0; i < 8; i++)
             {
-                float a = math.radians(i * 45 + 22.5f), y = i % 2 == 0 ? -100 : -40;
-                strobes.Add(ExtractionKit.Lamp(parent, new Vector3(math.cos(a) * (WellRadius + 6), y, math.sin(a) * (WellRadius + 6)), new Color(1, .12f, .08f), 110, 0));
+                float a = math.radians(i * 45 + 22.5f);
+                Strobe(new float3(math.cos(a) * (WellRadius + 6), i % 2 == 0 ? -100 : -40, math.sin(a) * (WellRadius + 6)), 110);
             }
             for (int i = 0; i < 4; i++)
             {
                 float a = math.radians(i * 90 + 45);
-                strobes.Add(ExtractionKit.Lamp(parent, (Vector3)(LanternLayout.Core + new float3(math.cos(a) * 52, 14, math.sin(a) * 52)), new Color(1, .12f, .08f), 90, 0));
+                Strobe(LanternLayout.Core + new float3(math.cos(a) * 52, 14, math.sin(a) * 52), 90);
+                Strobe(new float3(math.cos(a + .4f) * 46, PowerTop + 2, math.sin(a + .4f) * 46), 80);   // the Grate
+                Strobe(new float3(math.cos(a) * (WellRadius + 8), CrownDeck + 14, math.sin(a) * (WellRadius + 8)), 120);   // the Well's mouth
+                Strobe(new float3(i % 2 == 0 ? -34 : 34, 34, -110 - i * 55), 140);   // the toll lane
             }
             foreach (var s in strobes) s.enabled = false;
 
             profile = ScriptableObject.CreateInstance<VolumeProfile>(); profile.name = "Tollhouse Nine";
             grade = profile.Add<ColorAdjustments>(); grade.postExposure.Override(0); grade.contrast.Override(12); grade.saturation.Override(8); grade.colorFilter.Override(Color.white);
             bloom = profile.Add<Bloom>(); bloom.intensity.Override(1.1f); bloom.threshold.Override(1f); bloom.scatter.Override(.74f); bloom.tint.Override(new Color(1, .87f, .74f));
-            vignette = profile.Add<Vignette>(); vignette.intensity.Override(.28f); vignette.smoothness.Override(.5f);
+            vignette = profile.Add<Vignette>(); vignette.intensity.Override(.28f); vignette.smoothness.Override(.5f); vignette.color.Override(Color.black);
             split = profile.Add<SplitToning>(); split.shadows.Override(new Color(.32f, .55f, .58f)); split.highlights.Override(new Color(.95f, .74f, .5f)); split.balance.Override(-18);
             volumeObject = new GameObject("Tollhouse Nine volume"); volumeObject.transform.SetParent(parent, false);
             volume = volumeObject.AddComponent<Volume>(); volume.isGlobal = true; volume.priority = 60; volume.weight = 0; volume.sharedProfile = profile;
@@ -170,8 +179,29 @@ namespace Game.App.DevRuntime.Extraction
             int on = 0; for (ushort d = 1; d <= 6; d++) if (lit[d]) on++;
             dark = Approach(dark, 1 - on / 6f, dt * .8f);
             alarm = Approach(alarm, alarmOn ? 1 : 0, dt * 1.5f);
-            if (!lit[2]) darkLine = math.min(RiseTop + 20, (float.IsNegativeInfinity(darkLine) ? RiseBottom - 10 : darkLine) + 24 * dt);
-            else if (!float.IsNegativeInfinity(darkLine)) { darkLine = math.min(darkLine, RiseTop + 20) - 45 * dt; if (darkLine < RiseBottom - 12) darkLine = float.NegativeInfinity; }
+            if (!lit[2])
+            {
+                darkLine = math.min(LineTop, (float.IsNegativeInfinity(darkLine) ? RiseBottom - 30 : darkLine) + LineSpeed * dt);
+                if (darkLine >= LineTop && lineTopAt < 0) lineTopAt = t;
+            }
+            else
+            {
+                lineTopAt = -1;
+                if (!float.IsNegativeInfinity(darkLine)) { darkLine = math.min(darkLine, LineTop) - 45 * dt; if (darkLine < RiseBottom - 60) darkLine = float.NegativeInfinity; }
+            }
+
+            // the red (Frank 2026-11-10: "red alarm lights should kick in after to give it a tense escape feeling"): with the market lit
+            // it comes with the alarm; in a blackout it waits for the last lantern and a beat of dark, then lands as one hard flash
+            bool redWanted = alarmOn && (lit[2] || lineTopAt >= 0 && t - lineTopAt > 1.5f);
+            if (redWanted && !redOn) { redOn = true; redAt = t; flash = 1; }
+            if (!alarmOn) { redOn = false; redAt = -1; }
+            red = redOn ? 1 : Approach(red, 0, dt * .8f);
+            flash = math.max(0, flash - dt * 1.4f);
+            // the red's pulse quickens as the escape runs on: 0.9 Hz at the flash, 1.7 Hz a minute later (a heartbeat, lub-dub)
+            float hurry = redAt >= 0 ? math.saturate((t - redAt) / 60) : 0, pace = math.lerp(.9f, 1.7f, hurry);
+            float pulsePhase = (t - math.max(0, redAt)) * pace % 1;
+            float pulse = math.exp(-math.pow((pulsePhase - .1f) / .07f, 2)) + .55f * math.exp(-math.pow((pulsePhase - .32f) / .08f, 2));
+            float breath = math.lerp(.55f, 1, math.saturate(pulse)) * math.lerp(.85f, 1.15f, hurry);
 
             if (paper != null)
             {
@@ -238,8 +268,15 @@ namespace Game.App.DevRuntime.Extraction
             for (int i = 0; i < strobes.Count; i++)
             {
                 var s = strobes[i]; if (s == null) continue;
-                s.enabled = alarm > .02f;
-                s.intensity = 5200 * alarm * math.pow(math.abs(math.sin(t * math.PI * .9f + i * .8f)), 6);
+                s.enabled = red > .02f;
+                s.intensity = 7000 * red * (.28f + math.pow(math.abs(math.sin(t * math.PI * pace + i * .8f)), 6) * breath + flash * 1.6f);
+            }
+            if (bulb != null && red > .02f)
+            {
+                bulb.SetFloat(IntensityId, red * (.35f + .65f * breath + 2 * flash));
+                int n = 0;
+                foreach (var at in strobeAt) batch[n++] = Matrix4x4.TRS(origin + at, Quaternion.identity, Vector3.one * 7);
+                Graphics.RenderMeshInstanced(new RenderParams(bulb) { worldBounds = new Bounds(origin, Vector3.one * 1400), shadowCastingMode = ShadowCastingMode.Off }, ball, 0, batch, n);
             }
 
             // the grade, while the camera is in the town
@@ -250,19 +287,24 @@ namespace Game.App.DevRuntime.Extraction
                 inside = Approach(inside, within ? 1 : 0, dt * 1.2f);
             }
             volume.weight = inside;
-            grade.postExposure.value = math.lerp(-.35f, -1.4f, dark);
-            grade.saturation.value = math.lerp(8, -30, dark);
-            grade.contrast.value = math.lerp(12, 24, dark);
-            grade.colorFilter.value = Color.Lerp(Color.Lerp(new Color(1, .96f, .9f), new Color(.76f, .85f, 1), dark), new Color(1, .74f, .72f), alarm * .55f);
-            bloom.intensity.value = math.lerp(.75f, 1.5f, dark);
-            vignette.intensity.value = math.lerp(.28f, .44f, math.max(dark, alarm * .6f));
+            // red and black: the red takes the grade over and breathes with the pulse
+            float redGrade = red * breath;
+            grade.postExposure.value = math.lerp(-.35f, -1.4f, dark) + red * .35f + flash * .9f;
+            grade.saturation.value = math.lerp(math.lerp(8, -30, dark), 18, red);
+            grade.contrast.value = math.lerp(12, 24, math.max(dark, red));
+            grade.colorFilter.value = Color.Lerp(Color.Lerp(new Color(1, .96f, .9f), new Color(.76f, .85f, 1), dark), new Color(1, .34f, .3f), math.saturate(red * (.7f + .3f * breath)));
+            split.shadows.value = Color.Lerp(new Color(.32f, .55f, .58f), new Color(.5f, .1f, .08f), red);
+            split.highlights.value = Color.Lerp(new Color(.95f, .74f, .5f), new Color(1, .42f, .32f), red);
+            bloom.intensity.value = math.lerp(.75f, 1.5f, dark) + red * .5f;
+            vignette.intensity.value = math.lerp(.28f, .44f, dark) + redGrade * .12f;
+            vignette.color.value = Color.Lerp(Color.black, new Color(.45f, 0, 0), redGrade);
         }
 
         static float Approach(float from, float to, float step) => from < to ? math.min(to, from + step) : math.max(to, from - step);
 
         public void Dispose()
         {
-            foreach (var o in new UnityEngine.Object[] { paper, beam, column, halo, lantern, spotCone, wideCone, ball, profile, volumeObject })
+            foreach (var o in new UnityEngine.Object[] { paper, beam, column, halo, bulb, lantern, spotCone, wideCone, ball, profile, volumeObject })
                 if (o != null) UnityEngine.Object.Destroy(o);
         }
     }
