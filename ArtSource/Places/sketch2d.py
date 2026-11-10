@@ -45,11 +45,21 @@ MAT = {
     "rock2": ((110, 100, 84), (84, 76, 64)),
     "wreck": ((120, 84, 60), (90, 62, 44)),  # broken, twisted: passable only where carved
     "glass": ((40, 70, 80), (30, 52, 60)),
+    "ivory": ((196, 190, 172), (150, 145, 130)),   # Alliance ivory
+    "jade": ((40, 120, 86), (28, 86, 62)),          # Alliance green
+    "shanty": ((132, 96, 66), (100, 72, 50)),       # patched, hand-built
+    "shanty2": ((100, 94, 88), (76, 72, 67)),
+    "truss": ((74, 80, 86), None),                  # scaffolding, girders, cranes
+    "tank": ((176, 140, 60), (130, 102, 44)),       # fuel
+    "ore": ((170, 132, 70), (128, 98, 52)),
 }
+MAT_TEXT = {"armor": "armour: only explosives cut it", "hull": "plate: cut slowly, loudly", "air": "inside: flyable", "rock": "rock: dig it",
+            "wreck": "wreckage", "ivory": "Alliance buildings", "shanty": "hand-built town", "truss": "girders, scaffolds", "tank": "fuel",
+            "ore": "ore vein", "glass": "glass"}
 COL = {"in": (184, 156, 255), "out": (255, 174, 74), "loud": (255, 70, 60), "eject": (157, 255, 60), "patrol": (255, 70, 60),
        "home": (255, 241, 214), "tow": (255, 106, 42), "core": (90, 240, 255), "danger": (255, 70, 60), "door": (255, 179, 71),
        "shutter": (255, 106, 42), "lamp": (255, 174, 74), "text": (226, 228, 220), "dim": (150, 154, 144), "slot": (157, 255, 60),
-       "power": (90, 240, 255), "spin": (220, 235, 255), "fly": (184, 156, 255), "cyan": (46, 196, 182), "pink": (255, 46, 136), "white": (220, 235, 255)}
+       "power": (90, 240, 255), "spin": (220, 235, 255), "lane": (124, 255, 154), "friend": (46, 196, 182), "fly": (184, 156, 255), "cyan": (46, 196, 182), "pink": (255, 46, 136), "white": (220, 235, 255)}
 
 
 class View:
@@ -125,8 +135,8 @@ class View:
     def core(self, c, r=2.5, label="core", dead=False):
         self.over.append(("core", dict(c=c, r=r, label=label, dead=dead)))
 
-    def tether(self, a, b):
-        self.over.append(("tether", dict(a=a, b=b)))
+    def tether(self, a, b, colour=(200, 230, 240)):
+        self.over.append(("tether", dict(a=a, b=b, colour=colour)))
 
     def shutter(self, a, b, label=""):
         """A blast shutter: open now, slams shut on the alarm."""
@@ -141,9 +151,24 @@ class View:
     def turret(self, c, facing=0):
         self.over.append(("turret", dict(c=c, facing=facing)))
 
-    def eye(self, c, facing, reach=10, arc=50):
-        """A searchlight or sensor cone (degrees, 0 = +x, counter-clockwise)."""
-        self.over.append(("eye", dict(c=c, facing=facing, reach=reach, arc=arc)))
+    def eye(self, c, facing, reach=10, arc=50, colour=(255, 230, 160)):
+        """A searchlight, sensor cone or gun arc (degrees, 0 = +x, counter-clockwise)."""
+        self.over.append(("eye", dict(c=c, facing=facing, reach=reach, arc=arc, colour=colour)))
+
+    def dot(self, c, colour=COL["lamp"], r=2):
+        """A small light: a stall, a window, a mine."""
+        self.over.append(("dot", dict(c=c, colour=colour, r=r)))
+
+    def bar(self, a, b, colour, label="", width=3):
+        self.over.append(("bar", dict(a=a, b=b, colour=colour, label=label, width=width)))
+
+    def ghost(self, x0, y0, x1, y1, label="place"):
+        """Editor preview: blocks about to be placed."""
+        self.over.append(("ghost", dict(r=(x0, y0, x1, y1), label=label)))
+
+    def dig(self, x0, y0, x1, y1, label="dig"):
+        """Editor preview: cells marked to dig out."""
+        self.over.append(("dig", dict(r=(x0, y0, x1, y1), label=label)))
 
     def charge(self, c, label="charge"):
         self.over.append(("charge", dict(c=c, label=label)))
@@ -161,8 +186,8 @@ class View:
     def label(self, c, text, colour=COL["dim"], anchor="mm", size=13):
         self.over.append(("label", dict(c=c, text=text, colour=colour, anchor=anchor, size=size)))
 
-    def poi(self, n, c):
-        self.over.append(("poi", dict(n=n, c=c)))
+    def poi(self, n, c, colour=(255, 255, 255)):
+        self.over.append(("poi", dict(n=n, c=c, colour=colour)))
 
     def nope(self, c, text=""):
         """A red cross: the core does not fit here."""
@@ -233,7 +258,7 @@ def render_view(v, cs):
     f_s, f_b = font(F_BODY, 12), font(F_BOLD, 13)
     for kind, o in v.over:
         if kind == "tether":
-            d.line([P(*o["a"]), P(*o["b"])], fill=(200, 230, 240, 200), width=2)
+            d.line([P(*o["a"]), P(*o["b"])], fill=tuple(o["colour"]) + (210,), width=2)
     for kind, o in v.over:
         if kind == "core":
             cx, cy = P(*o["c"])
@@ -273,8 +298,28 @@ def render_view(v, cs):
             cx, cy = P(*o["c"])
             r = o["reach"] * cs
             a0, a1 = -o["facing"] - o["arc"] / 2, -o["facing"] + o["arc"] / 2
-            d.pieslice([cx - r, cy - r, cx + r, cy + r], a0, a1, fill=(255, 230, 160, 34), outline=(255, 230, 160, 70))
-            d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=(255, 230, 160))
+            d.pieslice([cx - r, cy - r, cx + r, cy + r], a0, a1, fill=o["colour"] + (30,), outline=o["colour"] + (80,))
+            d.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=o["colour"])
+        elif kind == "dot":
+            cx, cy = P(*o["c"])
+            r = o["r"]
+            d.ellipse([cx - r * 2.2, cy - r * 2.2, cx + r * 2.2, cy + r * 2.2], fill=o["colour"] + (46,))
+            d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=o["colour"])
+        elif kind == "bar":
+            a, b = P(*o["a"]), P(*o["b"])
+            dash(d, [a, b], o["colour"], o["width"], 7, 4)
+            if o["label"]:
+                d.text(((a[0] + b[0]) / 2, min(a[1], b[1]) - 4), o["label"], fill=o["colour"], font=f_s, anchor="mb")
+        elif kind in ("ghost", "dig"):
+            x0, y0, x1, y1 = o["r"]
+            a, b = P(x0, y1), P(x1, y0)
+            col = (124, 255, 154) if kind == "ghost" else (255, 90, 70)
+            d.rectangle([a, b], fill=col + (70,), outline=col, width=2)
+            for gx in range(int(x0) + 1, int(x1)):
+                d.line([P(gx, y0), P(gx, y1)], fill=col + (120,), width=1)
+            for gy in range(int(y0) + 1, int(y1)):
+                d.line([P(x0, gy), P(x1, gy)], fill=col + (120,), width=1)
+            d.text(((a[0] + b[0]) / 2, a[1] - 3), o["label"], fill=col, font=f_b, anchor="mb")
         elif kind == "turret":
             cx, cy = P(*o["c"])
             a = math.radians(o["facing"])
@@ -341,8 +386,8 @@ def render_view(v, cs):
             d.text((cx, cy), o["text"], fill=o["colour"], font=font(F_BODY, o["size"]), anchor=o["anchor"])
         elif kind == "poi":
             cx, cy = P(*o["c"])
-            d.ellipse([cx - 10, cy - 10, cx + 10, cy + 10], fill=(10, 10, 10), outline=(255, 255, 255), width=2)
-            d.text((cx, cy + 1), str(o["n"]), fill=(255, 255, 255), font=f_b, anchor="mm")
+            d.ellipse([cx - 10, cy - 10, cx + 10, cy + 10], fill=(10, 10, 10), outline=o["colour"], width=2)
+            d.text((cx, cy + 1), str(o["n"]), fill=o["colour"], font=f_b, anchor="mm")
     # scale bar: 100 m
     n = 100 / CELL_M * cs
     d.line([12, H - 14, 12 + n, H - 14], fill=COL["text"], width=2)
@@ -378,9 +423,9 @@ LEGEND = [("armor", "armour: only explosives cut it"), ("hull", "plate: cut slow
           ("rock", "rock"), ("wreck", "wreckage")]
 LEGEND_O = [("core", "station core"), ("shutter", "blast shutter: slams on the alarm"), ("door", "door"),
             ("fan", "fan / crusher (timed)"), ("eye", "searchlight / sensor"), ("turret", "turret"),
-            ("charge", "charge point"), ("slot", "growth slot")]
+            ("charge", "charge point"), ("slot", "growth slot"), ("ghost", "place blocks (den editor)"), ("dig", "dig (den editor)")]
 ROUTE_KEY = [("in", "way in (quiet)"), ("out", "way out (quiet)"), ("loud", "way out (loud)"), ("eject", "way out (co-op)"),
-             ("patrol", "patrol / response"), ("spin", "the station turns"), ("fly", "flying inside"), ("home", "home run"), ("tow", "tow run")]
+             ("patrol", "patrol / response"), ("spin", "the station turns"), ("fly", "flying inside"), ("lane", "traffic lane (transponder on)"), ("home", "home run"), ("tow", "tow run")]
 
 
 def render(sk, out_dir=OUT):
@@ -393,7 +438,7 @@ def render(sk, out_dir=OUT):
     side_w = 760
     W = imgs[0].width + side_w + 72
     body_h = max(imgs[0].height + 40, sum(i.height + 40 for i in imgs[1:]) + 440)
-    H = 130 + body_h + 1200
+    H = 130 + body_h + 2600
     sheet = Image.new("RGB", (W, H), (10, 11, 13))
     d = ImageDraw.Draw(sheet)
     tag = f"{sk.group} {sk.letter}" + ("  ·  recommended" if sk.recommended else "")
@@ -423,10 +468,13 @@ def render(sk, out_dir=OUT):
     # legend along the bottom of the main view
     lx, ly = 24, y + imgs[0].height + 34
     f_s = font(F_BODY, 13)
-    for m, t in LEGEND:
+    mats_used = {c for v in sk.views for row in v.g for c in row}
+    for m, t in [(m, t) for m, t in MAT_TEXT.items() if m in mats_used]:
         d.rectangle([lx, ly, lx + 14, ly + 14], fill=MAT[m][0], outline=MAT[m][1])
         d.text((lx + 20, ly + 7), t, fill=COL["dim"], font=f_s, anchor="lm")
         lx += 26 + d.textlength(t, font=f_s) + 18
+        if lx > imgs[0].width - 180:
+            lx, ly = 24, ly + 24
     lx, ly = 24, ly + 26
     used = {k for v in sk.views for k, _ in v.over} | {"core"}
     for k, t in LEGEND_O:
@@ -469,6 +517,9 @@ def legend_icon(d, k, x, y):
         d.rectangle([x - 5, y - 5, x + 5, y + 5], fill=(70, 30, 26), outline=COL["danger"])
     elif k == "charge":
         d.ellipse([x - 6, y - 6, x + 6, y + 6], fill=COL["loud"])
+    elif k in ("ghost", "dig"):
+        col = (124, 255, 154) if k == "ghost" else (255, 90, 70)
+        d.rectangle([x - 7, y - 7, x + 7, y + 7], fill=tuple(c // 3 for c in col), outline=col)
     elif k == "slot":
         dash(d, [(x - 7, y - 7), (x + 7, y - 7), (x + 7, y + 7), (x - 7, y + 7), (x - 7, y - 7)], COL["slot"], 2, 4, 3)
 
