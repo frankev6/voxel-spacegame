@@ -32,7 +32,12 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 - **Ship lines follow Starsector's depth without copying it.** Approved 2D silhouettes come before any 3D build. Form follows function. Use asymmetry with a reason, and refit variants. Human hulls are blocky, alien hulls smooth. Factions come from the existing lore in `Import/Legacy/content/Factions` and the DESIGN-GUIDE faction section.
 - **Look-book ships are concepts, not final designs**, and the 2D ship lines are not approved yet.
 
-## 2. Where things stand (2026-11-06)
+## 2. Where things stand (2026-11-10)
+
+- **Latest: the extraction loop (SPEC-93, ADR-0124), built overnight 2026-11-10 on Frank's word** ("proceed with building it onto the game, write the systems first ... be autonomous and test on your own as well"). Local commits only, on `task/EXT-008-den`, merged to local `main`:
+  - the systems (EXT-002–006, 008): the magnet tow, the cargo rule and stowing, the station core on tethers with district blackouts, transponders, watchers, suspicion and Wanted, the alarm director, the den's socket and power;
+  - the places in the playground (EXT-007–010): Tollhouse Nine at (+9 km, −7 km) and the Rock at (−6.5 km, +5.5 km), joined by a lane-gate pair; the board's six jobs; dig, build and the den attack. `extraction status`, `goto=den|lantern|table|cradle|<poi>`, `tools/build-extraction.sh` rebuilds the content;
+  - verified live: dig, plate, gun, cut, alarm, tow, stow, gate, socket, Installed; `ExtractionLoopTests` (PlayMode) passes. Open defaults are SPEC-93 §10 questions 6–11.
 
 - **Latest: owner-directed performance round completed locally.** Lead + two Astra light workers audited runtime/loading/authoring/tooling. Largest Hollow blueprint reconstruction is **3.16x faster** (19.75 → 6.24 ms median), catalog refresh 2.04x, integrity selection 5.81–10.90x, box removal 1.81x. Quality and physics settings unchanged. Combined 52 tests and final overlapping 32 codec tests pass; compile clean. [Audit, evidence and limitations](performance/2026-11-audit.md). No claim of doubled whole-game FPS; no push.
 
@@ -66,12 +71,13 @@ Frank (the owner) set these for every worker. AGENTS.md §2 makes the git and ar
 
 Performance follow-ups are ranked in the [audit](performance/2026-11-audit.md). Further runtime tuning needs a focused integrated capture (render/presentation waits and sampler overhead); codec has used two initial passes. Continue the gameplay priorities below unless Frank directs more optimization.
 
-1. Show Frank where the slice stands, then build exploration slice phase 2: "?" contacts and the loud ping. Phases 3–7 follow in order ([exploration-slice.md](design/exploration/exploration-slice.md)), each proven by a playground scenario before the next.
-2. Fix the save-load error above.
-3. Still waiting on Frank:
+1. Extraction: fly each job's route out of Tollhouse Nine (EXT-007 acceptance asks for four of six), then co-op replication (EXT-012); Frank answers SPEC-93 §10 questions 6–11.
+2. (Superseded by the extraction pivot, 2026-11-10) Exploration slice phase 2: "?" contacts and the loud ping. Phases 3–7 follow in order ([exploration-slice.md](design/exploration/exploration-slice.md)), each proven by a playground scenario before the next.
+3. Fix the save-load error above.
+4. Still waiting on Frank:
    - art approval of the magnet block, the UI sounds and the baked plating and debris textures (`docs/design/asset-manifest.csv` status `review`);
    - whether small debris chunks drop scrap.
-4. Not done yet:
+5. Not done yet:
    - navigation strobes (per-grid hull anchors);
    - GRAVID, LAMPREY and CRINOID;
    - per-faction team colours in the pooled path.
