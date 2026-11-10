@@ -12,7 +12,7 @@ namespace Game.App.DevRuntime.Commands
     public sealed class ExtractionDevCommand : IDevCommand
     {
         public string Name => "extraction";
-        public string Usage => "extraction status | goto=den|lantern|<poi>[@x,y,z] | job board|accept=<id> | transponder off|trader|work | magnet | cut [n=<0-5>|all] | stow | dig | build plate|gun|lamp|socket | ore add=<n> | heist alarm|dimming|status | den attack | interact";
+        public string Usage => "extraction status | goto=den|lantern|<poi>[@x,y,z] | job board|accept=<id> | transponder off|trader|work | hold t=<tonnes> | magnet | cut [n=<0-5>|all] | stow | dig | build plate|gun|lamp|socket | ore add=<n> | heist alarm|dimming|status | den attack | interact";
         public string Summary => "The extraction loop: the Rock (den), Tollhouse Nine (heist), the gate pair, jobs, the tow, tethers, digging and building";
         public DevCommandResult Execute(DevArgs args, DevContext ctx)
         {
@@ -35,6 +35,8 @@ namespace Game.App.DevRuntime.Commands
                     else if (where == "lantern") local = LanternLayout.Poi("arrival");
                     else if (where == "dengate") { place = "den"; local = new float3(ExtractionRuntime.DenGateLocal.x - 160, 0, ExtractionRuntime.DenGateLocal.y); yaw = math.PI / 2; }
                     else if (where == "table") { place = "den"; local = DenPlace.Table + new float3(30, 4, 0); yaw = -math.PI / 2; }
+                    // the Cradle: beside the core between its posts, facing it (the core's own centre would crush the ship)
+                    else if (where == "cradle") { local = LanternLayout.Core + new float3(32, -2, -32); yaw = -math.PI / 4; }
                     else if (where.StartsWith("den@") || where.StartsWith("lantern@"))
                     {
                         place = where.StartsWith("den@") ? "den" : "lantern";
@@ -83,6 +85,12 @@ namespace Game.App.DevRuntime.Commands
                 case "dig": return DevCommandResult.Ok(x.Den.Dig());
                 case "build": return DevCommandResult.Ok(x.Den.Place(args.Positional.Count > 1 ? args.Positional[1] : null));
                 case "ore": x.Den.Ore += (int)args.GetDouble("add", 50); return DevCommandResult.Ok("ore " + x.Den.Ore);
+                case "hold":
+                {   // test lever: rate the crew ship's hold (t) without a refit; the real rating comes from its cargo blocks
+                    x.HoldOverride = (float)args.GetDouble("t", 200); x.Crew();
+                    var hold = em.HasComponent<CargoHold>(ship) ? em.GetComponentData<CargoHold>(ship) : default;
+                    return DevCommandResult.Ok($"hold {hold.CapacityT:0} t ({hold.StowedT:0} t stowed)");
+                }
                 case "interact": return DevCommandResult.Ok(x.Interact() ?? "nothing here");
                 case "heist":
                 {

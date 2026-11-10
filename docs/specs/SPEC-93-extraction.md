@@ -260,9 +260,15 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 |---|---|---|---|
 | 1 | Which jobs must work first? | The Dimming, the Trojan, the Depot Fire and Pod Seven; the Scrap Run and the Inside Man through simple stand-ins | Owner |
 | 2 | How does the den grow after the first core? | Cores give power (more cores, more powered modules); hauls give blocks and ore | Owner |
-| 3 | Can a den-sized rock be dug in play? | Yes, at 2 m cells; measured in EXT-008 | Lead |
+| 3 | Can a den-sized rock be dug in play? | Yes, at 4 m cells (the Rock is 133k cells; a 2 m rock would be about 1M); a dig takes about 15 cells (EXT-008 playtest) | Lead |
 | 4 | Is the tow a salvage magnet block or any ship? | Any ship with a salvage magnet; the playground's ships get one | Owner |
 | 5 | Co-op heists are planar until 3D flight works in co-op (ADR-0123) | Accepted | Owner |
+| 6 | Does the starter crew ship carry a hold? The core is about 109 t; a small cargo pod holds 50 t (1 t per cargo unit), and the starter ship has none, so the gate refuses the core on its cable | No: refit at the Quartermaster, or take the Trojan's hauler; `extraction hold t=` is a test lever | Owner |
+| 7 | The Trojan's hauler | A WRAITH flown by AI with a work code and a 100,000 t hold stands in until a hauler hull exists | Owner |
+| 8 | The town's clock | Compressed: the Dimming three minutes after the job is taken, the flush every minute, the driver every 30 s | Owner |
+| 9 | How fast do watchers identify a misfit? | A sensor adds 0.45 a second at close range, a searchlight 0.9: about 2 to 5 s in view | Owner |
+| 10 | A blackout cuts the districts' lamps and blinds their watchers, but the station's lit windows and ambient light stay on | Accepted for the slice | Owner |
+| 11 | `playground reset` re-centres the playground on the ship, height included, so a reset taken inside the Lantern moves the whole playground there | Reset from the Hollow | Lead |
 
 ## 11. References
 

@@ -23,6 +23,14 @@ namespace Game.Tests.EditMode.Simulation.Extraction
             Assert.That(StowApi.CanJump(EM, ship, out _, out _), Is.True);
         }
 
+        [Test] public void NothingOnTheCable_Jumps_EvenWithAnOverfullHold()
+        {
+            var ship = Body(new float2(0, 0), float2.zero);
+            EM.AddComponentData(ship, new CargoHold { CapacityT = 0, StowedT = 106 });
+            Assert.That(StowApi.CanJump(EM, ship, out float loadT, out _), Is.True, "only a towed load is weighed at the gate");
+            Assert.That(loadT, Is.EqualTo(0));
+        }
+
         [Test] public void Stow_NeedsRoom_AndUnstowPutsItBehind()
         {
             var ship = Body(new float2(0, 0), new float2(0, 3)); var load = Body(new float2(0, -20), float2.zero, 40000);

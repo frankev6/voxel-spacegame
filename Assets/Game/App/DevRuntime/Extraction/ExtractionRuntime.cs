@@ -61,7 +61,7 @@ namespace Game.App.DevRuntime.Extraction
         internal string Job;
         internal bool HoldsWork;
         internal Action<string> Report = _ => { };
-        double lastRefused = -1, installedAt = -1;
+        double installedAt = -1;
         uint refusedTick;
 
         internal ExtractionRuntime(DevContext ctx, double3 playgroundOrigin, UIRoot ui)
@@ -101,13 +101,16 @@ namespace Game.App.DevRuntime.Extraction
             gates = true;
         }
 
-        /// <summary>The crew's ship: a transponder (on, trader) and a hold rated from its cargo blocks.</summary>
-        void Crew()
+        /// <summary>A test lever (`extraction hold t=`): the hold's rating in tonnes instead of the ship's cargo blocks; negative = none.</summary>
+        internal float HoldOverride = -1;
+
+        /// <summary>The crew's ship: a transponder (on, trader) and a hold rated from its cargo blocks (or the test override).</summary>
+        internal void Crew()
         {
             var em = ctx.EntityManager; var ship = ctx.PlayerShipRoot;
             if (ship == Entity.Null || !em.Exists(ship)) return;
             if (!em.HasComponent<Transponder>(ship)) TransponderApi.Set(em, ship, true, AccessCode.Trader);
-            float t = HoldTonnes();
+            float t = HoldOverride >= 0 ? HoldOverride : HoldTonnes();
             var hold = em.HasComponent<CargoHold>(ship) ? em.GetComponentData<CargoHold>(ship) : default;
             hold.CapacityT = t;
             if (em.HasComponent<CargoHold>(ship)) em.SetComponentData(ship, hold); else em.AddComponentData(ship, hold);

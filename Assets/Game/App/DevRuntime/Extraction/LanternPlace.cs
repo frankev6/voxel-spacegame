@@ -438,7 +438,7 @@ namespace Game.App.DevRuntime.Extraction
             for (int i = 0; i < traffic.Count; i++)
             {
                 var (id, r, along) = traffic[i];
-                if (!kit.Root(id, out var root) || !em.HasComponent<AiBrain>(root)) continue;
+                if (!kit.Root(id, out var root) || !em.HasComponent<AiBrain>(root) || !em.HasComponent<LocalTransform>(root)) continue;   // spawned next frame
                 var route = Routes[r];
                 float3 pos = ExtractionKit.Local(Anchor, em.GetComponentData<LocalTransform>(root).Position, frame);
                 // progress: the nearest route point ahead of the last one

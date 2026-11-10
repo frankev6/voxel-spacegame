@@ -16,7 +16,8 @@ namespace Game.Simulation.Extraction
             loadT = 0;
             var load = TowApi.Load(em, ship);
             if (load != Entity.Null && em.Exists(load) && em.HasComponent<TowLoad>(load)) loadT = em.GetComponentData<TowLoad>(load).MassT;
-            return CargoRule.Allows(loadT, freeT);
+            // nothing on the cable: nothing to check (a hold already over its rating, after a refit, still jumps with what it carries)
+            return loadT <= 0 || CargoRule.Allows(loadT, freeT);
         }
 
         public static bool Stow(EntityManager em, Entity ship, out string reason) => StowInto(em, ship, ship, out reason);

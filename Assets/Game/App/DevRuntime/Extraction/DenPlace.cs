@@ -32,7 +32,7 @@ namespace Game.App.DevRuntime.Extraction
         internal const ushort DenId = 1;
         internal const float DigRadius = 7, Reach = 90, GunCost = 40, PlateCost = 1, LampCost = 2;
         internal static readonly float3 CaveMouth = new float3(118, 0, 6), CaveCentre = new float3(92, 0, 4), ShardCentre = new float3(240, 10, 30);
-        internal static readonly float3 SocketStart = new float3(70, -6, 4), Table = new float3(96, -10, 18);
+        internal static readonly float3 SocketStart = new float3(86, -2, 4), Table = new float3(100, -18, 20);   // clear of a 40 m core in the socket
         internal static readonly string[] Kinds = { "plate", "gun", "lamp", "socket" };
         readonly ExtractionKit kit;
         internal readonly double3 Anchor;
