@@ -4,7 +4,7 @@ Start with `Assets/Game/Scenes/World.unity` and Play, or run `tools/playtest/pla
 
 ## The Hollow (DEV-023)
 
-The playground is the Hollow, the Khuchad Clan's haven in an asteroid (the ARK Proving Grounds were retired on 2026-10-18). You spawn at its entrance, outside the Maw. The Ring and the side tunnels lead to the stations; the light strips along the walls take the colour of the next station that way. F in a station's circle activates it: the Market and the dens trade, the Docks put out energy canisters, the Quartermaster resets the Hollow. The race portal in an alcove off the Ring south-east of the Maw junction (TRACK 01 · RACE PORTAL) opens the race on Track 01; `race end` brings you back.
+The playground is the Hollow, the Khuchad Clan's haven in an asteroid (the ARK Proving Grounds were retired on 2026-10-18). You spawn at its entrance, outside the Maw. The Ring and the side tunnels lead to the stations; the light strips along the walls take the colour of the next station that way. F in a station's circle activates it: the Market and the dens trade, the Docks put out energy canisters, the Quartermaster opens the refit bay (the real ship editor on your ship, building from cargo: `give blocks=100` in the console stocks 100 of every block; Exit returns you there with the Hollow reset). The race portal in an alcove off the Ring south-east of the Maw junction (TRACK 01 · RACE PORTAL) opens the race on Track 01; `race end` brings you back.
 
 ## Entry, navigation and reset
 

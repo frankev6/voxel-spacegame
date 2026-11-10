@@ -193,6 +193,38 @@ namespace Game.Tests.EditMode.Simulation.Ai
             f.Tick(); Assert.AreEqual(default(ShipCommand), f.Command(turret), "Pending spawn commands are cleared without thrust.");
         }
 
+        /// <summary>ADR-0123 (amended 2026-11-08): in 3D flight an engaging AI ship climbs to its target's height and holds it, level;
+        /// back on patrol it returns to the plane's height.</summary>
+        [Test] public void Flight3D_LiftsToTargetHeight()
+        {
+            using var f = new Fixture(physics: true, flight3D: true);
+            var ship = f.PhysicalShip(flight3D: true); var target = f.Grid(new float3(0, 60, 400), 1);
+            f.Em.SetComponentData(ship, new ShipTarget { Value = target });
+            var brain = f.Brain(ship); brain.State = AiState.Engage; brain.GoalPosition = new float3(0, 0, 200); f.Em.SetComponentData(ship, brain);
+            float maxHeight = 0;
+            for (int tick = 0; tick < 600; tick++) { f.Tick(); maxHeight = math.max(maxHeight, f.Em.GetComponentData<LocalTransform>(ship).Position.y); }
+            var pose = f.Em.GetComponentData<LocalTransform>(ship);
+            Assert.AreEqual(59.5f, pose.Position.y, 1.5f, "It climbs to the target's height.");
+            Assert.Less(maxHeight, 63f, "It brakes in time instead of overshooting.");
+            Assert.AreEqual(0, f.Em.GetComponentData<PhysicsVelocity>(ship).Linear.y, .5f);
+            Assert.Less(math.abs(math.rotate(pose.Rotation, new float3(0, 0, 1)).y), .01f, "The AI keeps its nose level.");
+
+            brain = f.Brain(ship); brain.State = AiState.Patrol; f.Em.SetComponentData(ship, brain);
+            for (int tick = 0; tick < 600; tick++) f.Tick();
+            Assert.AreEqual(0, f.Em.GetComponentData<LocalTransform>(ship).Position.y, 1.5f, "Off the target, it goes back to its goal's height.");
+        }
+
+        [Test] public void Flight3D_LiftClosesAndBrakes()
+        {
+            var config = FlightConfig.Default;
+            Assert.AreEqual(1, AiSteerJob.Lift(config, 1, 0, 1000), 1e-5f, "Far below: full up.");
+            Assert.AreEqual(-1, AiSteerJob.Lift(config, 1, 1000, 0), 1e-5f, "Far above: full down.");
+            Assert.AreEqual(0, AiSteerJob.Lift(config, 1, 10, 10 + AiSteerJob.HeightTolerance * .9f), "Within the tolerance it holds.");
+            float near = AiSteerJob.Lift(config, 1, 0, 5), far = AiSteerJob.Lift(config, 1, 0, 50);
+            Assert.That(near, Is.GreaterThan(0).And.LessThan(far), "It slows as it closes.");
+            Assert.AreEqual(0, AiSteerJob.Lift(config, 0, 0, 100), "No speed cap, no Lift.");
+        }
+
         internal sealed class Fixture : IDisposable
         {
             public const float Arrival = 40;
@@ -201,7 +233,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
             readonly FactionRelations factions;
             readonly VoxelTestContent content;
             public EntityManager Em => world.EntityManager;
-            public Fixture(bool decisions = false, bool physics = false, bool fleet = false)
+            public Fixture(bool decisions = false, bool physics = false, bool fleet = false, bool flight3D = false)
             {
                 using var builder = new BlobBuilder(Allocator.Temp);
                 ref var blob = ref builder.ConstructRoot<AiProfilesBlob>(); var rows = builder.Allocate(ref blob.Profiles, 2);
@@ -225,6 +257,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 {
                     var systems = new List<Type> { typeof(AiSteeringSystem) };
                     if (fleet) systems.Add(typeof(FleetSystem));
+                    if (flight3D) systems.Add(typeof(Flight3DModeSystem));
                     if (decisions) { systems.Add(typeof(AiDecisionSystem)); systems.Add(typeof(SpatialHashBuildSystem)); }
                     if (physics)
                     {
@@ -262,7 +295,7 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 if (flight) Em.AddComponentData(root, new FlightState { ForwardCap = 100, ReverseCap = 40, StrafeCap = 50, YawRateCap = 2 });
                 return root;
             }
-            public Entity PhysicalShip()
+            public Entity PhysicalShip(bool flight3D = false)
             {
                 var root = Ship(); Em.SetComponentData(root, default(FlightState));
                 Em.SetComponentData(root, new VoxelGrid { CellSize = .5f, Revision = 1 });
@@ -270,7 +303,8 @@ namespace Game.Tests.EditMode.Simulation.Ai
                 Em.AddComponentData(root, default(PropulsionStats)); Em.AddComponent<PlanarConstraint>(root);
                 Em.AddComponent<LocalToWorld>(root); Em.AddSharedComponent(root, new PhysicsWorldIndex(0));
                 Em.AddComponentData(root, new PhysicsMass { Transform = new RigidTransform(quaternion.identity, new float3(.25f)),
-                    InverseMass = 1f / 400, InverseInertia = new float3(0, .01f, 0) });
+                    InverseMass = 1f / 400, InverseInertia = flight3D ? new float3(.01f) : new float3(0, .01f, 0) });
+                if (flight3D) Em.AddComponent<Flight3D>(root);
                 Em.AddComponentData(root, default(PhysicsVelocity)); Em.AddBuffer<FlightThruster>(root); Em.AddBuffer<BlockInstance>(root);
                 // Actual module definitions/orientations, four force lines through the centre of mass; no injected velocity or position updates.
                 for (int i = 0; i < 4; i++)

@@ -36,9 +36,9 @@ namespace Game.Simulation.Flight
         [ReadOnly] public ComponentLookup<ExternalPush> Pushes;   // SPEC-91 §5.1 step 4: last tick's pushes become carry
         [ReadOnly] public ComponentLookup<ShieldState> Shields;   // a raised shield slows the ship (FlightConfig.ShieldSpeedFraction)
         [ReadOnly] public ComponentLookup<Cruise> Cruises;        // ADR-0122: a cruising ship is driven by CruiseDriveSystem
-        // ADR-0123 experimental 3D flight: the mode, its switch, and what FaceTarget points at.
+        // ADR-0123 experimental 3D flight: the mode, the world switch (Flight3DMode), and what FaceTarget points at.
         [ReadOnly] public ComponentLookup<Flight3D> Flight3D;
-        [ReadOnly] public ComponentLookup<Flight3DRequest> Flight3DRequests;
+        public bool Flight3DOn;
         [ReadOnly] public ComponentLookup<Weapons.ShipTarget> Targets;
         [ReadOnly] public ComponentLookup<LocalTransform> Poses;
         public uint Tick;
@@ -187,8 +187,8 @@ namespace Game.Simulation.Flight
             in LocalTransform transform, ref PhysicsVelocity velocity, in PhysicsMass mass)
         {
             const float dt = SimTime.FixedTimestep;
-            // Requested off: the ship is levelling before Flight3DModeSystem hands it back to the plane, so Lift and facing stop.
-            bool requested = Flight3DRequests.HasComponent(entity) && Flight3DRequests[entity].On != 0;
+            // Switched off: the ship is levelling before Flight3DModeSystem hands it back to the plane, so Lift and facing stop.
+            bool requested = Flight3DOn;
             float bodyMass = 1f / mass.InverseMass;
             quaternion rotation = transform.Rotation;
             quaternion inertiaRotation = math.mul(rotation, mass.InertiaOrientation);

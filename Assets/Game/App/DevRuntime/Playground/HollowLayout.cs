@@ -25,7 +25,7 @@ namespace Game.App.DevRuntime.Playground
         internal const float RacePortalYaw = 0, RacePortalWidth = 40;
 
         internal enum Layer : byte { Low, High, Struct, Fort }
-        internal enum StationKind : byte { Merchant, Rearm, Reset }
+        internal enum StationKind : byte { Merchant, Rearm, Refit }   // DEV-033: the Quartermaster refits (and the Hollow resets on return)
 
         /// <summary>A blueprint whose grid origin (cell (0,0,0)'s corner) spawns at `Origin`, unrotated. High pieces are the rock above
         /// +24 m, hidden while the player is inside; a Fort piece spins about its origin.</summary>

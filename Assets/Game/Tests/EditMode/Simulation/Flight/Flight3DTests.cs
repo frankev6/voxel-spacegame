@@ -46,11 +46,7 @@ namespace Game.Tests.EditMode.Simulation.Flight
             EM.SetComponentData(root, LocalTransform.FromPositionRotation(position, rotation.Equals(default) ? quaternion.identity : rotation));
             EM.SetComponentData(root, new PhysicsMass { Transform = new RigidTransform(quaternion.identity, new float3(.25f)),
                 InverseMass = 1 / Mass, InverseInertia = flight3D ? new float3(.01f) : new float3(0, .01f, 0) });
-            if (flight3D)
-            {
-                EM.AddComponent<Flight3D>(root);
-                EM.AddComponentData(root, new Flight3DRequest { On = 1 });
-            }
+            if (flight3D) EM.AddComponent<Flight3D>(root);
             EM.AddBuffer<FlightThruster>(root);
             EM.AddBuffer<BlockInstance>(root);
             for (int i = 0; i < 4; i++)
@@ -162,9 +158,9 @@ namespace Game.Tests.EditMode.Simulation.Flight
             var tilted = math.mul(quaternion.RotateY(.4f), math.mul(quaternion.RotateX(-.5f), quaternion.RotateZ(.2f)));
             var ship = Ship(true, tilted, new float3(0, 40, 0));
             Tick(1, ship);
-            Assert.IsTrue(EM.IsComponentEnabled<Flight3D>(ship), "Requested on: in 3D.");
+            Assert.IsTrue(EM.IsComponentEnabled<Flight3D>(ship), "The world switch is on by default: in 3D.");
 
-            EM.SetComponentData(ship, new Flight3DRequest { On = 0 });
+            using (var query = EM.CreateEntityQuery(typeof(Flight3DMode))) query.SetSingleton(new Flight3DMode { On = 0 });
             Command(ship, lift: 1, flags: ShipCommandFlags.FaceAim);   // ignored while levelling
             int ticks = 0;
             while (EM.IsComponentEnabled<Flight3D>(ship) && ticks < 900) { Tick(1, ship); ticks++; }

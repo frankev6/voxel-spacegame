@@ -17,7 +17,7 @@
 | M1 | 0 | 0 | 0 | 0 | 109 | 0 | 109 | 0 |
 | M2 | 8 | 1 | 0 | 0 | 83 | 0 | 92 | 6 |
 | M3 | 12 | 11 | 0 | 0 | 159 | 0 | 182 | 3 |
-| M4 | 14 | 12 | 0 | 0 | 73 | 1 | 100 | 7 |
+| M4 | 13 | 13 | 0 | 0 | 75 | 1 | 102 | 6 |
 | A0 | 4 | 1 | 0 | 0 | 11 | 0 | 16 | 0 |
 | A1 | 29 | 1 | 0 | 0 | 0 | 0 | 30 | 0 |
 | A2 | 3 | 0 | 0 | 0 | 0 | 0 | 3 | 0 |
@@ -507,6 +507,7 @@
 | FLT-014 | Engine spool and per-engine boost ceiling (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-007, FLT-013 | yes | done | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | ThrusterParams spool up/down and boost ceiling; allocator bounds per tick; two propulsion tests |
 | FLT-015 | The engine line content (ADR-0120) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | standard | FLT-014 | yes | in-progress | claude (claude-opus-5-5) | 2026-10-17 | 61f4df97 | Vernier, sprint S/M, torch L/XL with lathed nozzles; Standard spool on the old rows; racers measured. Waiting for owner play Owner 2026-10-17: not flown yet. Renders of the five engine blocks (docs/design/racing/img/engine_line.jpg) shown; owner: "engines look good". Still waiting for owner play. Render fixes from the review (332ae4d9): Sprint bodies closed (no see-through seam), nozzles bare heat-dark metal with no plating lights and a throttle glow inside, Torch XL its own design (radiator fins, six ribs, eight struts, banded bell); sheet revised. |
 | FLT-016 | Experimental 3D flight for the player ship (ADR-0123) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-014 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 35104965 | ADR-0123 accepted by the owner 2026-11-04; live check comes with DEV-031 (the toggle) |
+| FLT-017 | Experimental 3D flight for every ship, on by default (ADR-0123 amendment 1) | [SPEC-20](specs/SPEC-20-flight-propulsion.md) | M4 | frontier | FLT-016, DEV-031 | yes | done | claude (claude-opus-5-5) | 2026-11-08 | e314fdb3 | Owner request 2026-11-08: AI flies in 3D too, `flight3d` on by default; owner checked live: "looks good send it in" |
 | WPN-016 | Per-instance fire groups (M4) | [SPEC-21](specs/SPEC-21-weapons.md) | M4 | frontier | WPN-011 | yes | todo |  |  |  |  |
 | ABL-006 | Emergency repairs | [SPEC-24](specs/SPEC-24-abilities.md) | M4 | frontier | ABL-005, DMG-019, DMG-020 | yes | done | lead (claude-opus-5-5) | 2026-10-18 | — | Engines first, 35% of what is missing, 150 E, 90 s, hull items for pilots; lost bricks and blocks rebuilt; scenarios `emergency_repair`, `emergency_repair_brick`. |
 | GAL-014 | Brick-level structure diffs | [SPEC-30](specs/SPEC-30-galaxy-generation.md) | M4 | frontier | GAL-010 | yes | todo |  |  |  |  |
@@ -533,6 +534,7 @@
 | DEV-030 | Control sheet: the Flight configs panel | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-029 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 32b570f7 | Owner request 2026-11-04: Flight configs panel, runtime-only edits; owner checked live: "looks good" |
 | DEV-031 | `flight3d`: the experimental 3D flight toggle (ADR-0123) | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | FLT-016, DEV-030 | yes | done | claude (claude-opus-5-5) | 2026-11-04 | 729b75f8 | ADR-0123; owner checked live: "looks good" |
 | DEV-032 | Enter playground from any scene | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-021 | yes | done | claude (claude-opus-5-5) | 2026-11-05 | 24efec2e | Owner: the button did nothing after Play in an empty scene |
+| DEV-033 | The Quartermaster's refit bay and `give blocks` | [SPEC-70](specs/SPEC-70-devtools-harness.md) | M4 | standard | DEV-023, DEV-017 | no | done | claude (claude-opus-5-5) | 2026-11-08 | b207807a | Owner request 2026-11-07: a ship modification area in the playground, and 100 of each material in the editor; owner: "push it, its good" |
 | TST-010 | Owner-directed performance audit and comparative evidence | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M4 | frontier | TST-001 | yes | done | lead (gpt-6-astra) | 2026-11-06 | ef1e4d5c | Parallel audit and raw evidence in docs/performance/2026-11-audit.md; rendered capture valid, no FPS speedup claim |
 | TST-011 | Integrated gameplay FPS and end-to-end loading optimization | [SPEC-71](specs/SPEC-71-testing-perf-gates.md) | M4 | frontier | TST-010 | yes | in-progress | lead (gpt-6-astra) | 2026-11-06 |  | Owner correction: actual FPS/game load time; earlier subsystem wins insufficient |
 | NET-001 | Spike setup, ADR and plan | [SPEC-90](specs/SPEC-90-coop-prototype.md) | M4 | frontier | — | yes | done | lead (claude-opus-5-5) | 2026-10-15 | 68c80533 | spike worktree only |
@@ -1310,6 +1312,23 @@ Medium/large class tuning and the choice of a flyable starter remain unvalidated
 
 
 ## Log
+
+### 2026-11-08 — FLT-017: experimental 3D flight for every ship, on by default (claude, claude-opus-5-5)
+- Owner, 2026-11-08: "give the other ships 3d controls also when experimental flight3d is toggled on? also make flight3d toggled to on by default". This reverses ADR-0123's player-only choice, so it is recorded as ADR-0123 amendment 1 on the owner's word.
+- **Switch:** the per-ship `Flight3DRequest` is replaced by the world singleton `Flight3DMode`. `Flight3DModeSystem` creates it on and counts it off unless `SimRole` is Solo (co-op stays planar). `flight3d on|off|status` writes it; the status text says "for every ship".
+- **Ships:** `FlightSetup` adds `Flight3D` to every flying profile (player, NPC, small craft, dummy); stations stay planar. `PropulsionJob` takes the switch as a job field.
+- **AI:** `AiSteerJob` keeps its planar steering and a level nose, and writes Lift toward the target's height while engaging (else its goal's height: the plane, or the leader's height in formation). `AiSteerJob.Lift` closes at the vertical cap and brakes at half `VerticalAccel`.
+- **Known consequences (ADR-0123 amendment 1 §4):** cruise is refused while the mode is on, so with the default nobody cruises until `flight3d off`; release builds cannot switch it off (new ADR open question 2, Decider: Owner); AI fixed forward guns do not pitch toward a target.
+- **Checks:** compile clean; 43/43 focused EditMode tests pass (`Flight3DDevCommandTests`, `AiSteeringTests` incl. the new `Flight3D_LiftsToTargetHeight` and `Flight3D_LiftClosesAndBrakes`, `Flight3DTests`, `PropulsionTests`, `PlanarConstraintTests`, `GridMassUpdateTests`, `PlayerInputSampleSystemTests`). `RoleSystemPolicy` now classifies `Flight3DModeSystem` as Both (it was missing since FLT-016; the guest's own ship stays planar because the switch counts off outside Solo).
+- **Full EditMode suite:** 1948/1973 passed, 23 failed. The failures are in content validation, audio, UI theme, narrative, conventions, static-state audit and a `python3` perf test, none touched here. The five that could have been flight- or AI-related (`PowerInitSystemTests`, `PlayerControlLockTests`, `AiContentTests`, `NarrativeServicePerfTests`, `RoleSystemPolicyTests`) fail identically on `main`; `RoleSystemPolicyTests` now passes.
+- **Done.** Owner, 2026-11-08, after playing it: "looks good send it in".
+
+### 2026-11-07 — DEV-033: the Quartermaster's refit bay and `give blocks` (claude, claude-opus-5-5)
+- Owner, asked whether the playground has a ship modification area (it had none: the Quartermaster's "REFIT  RESET" sign only reset the Hollow): "add one yes, and can we add a console setting to add 100 of each material while in the editor?"
+- **Refit bay:** the Quartermaster's station kind is now `refit` (`hollow_export.py` and `hollow_layout.json`; `hollow_codegen.py` regenerates `HollowLayout.g.cs` to the same one-line change, the bin unchanged). F there, or `playground run=quartermaster`, opens the real fleet-ship editor on the flagship (`GameSession.EnterBlueprintLabAsync(FleetShip)`), not creative: blocks come from cargo. The campaign's docked-only gate is skipped; the Quartermaster stands in for the dock. On Exit the ship returns at its pose, and the playground rebuilds the Hollow at the same origin, so the old reset still happens.
+- **`give blocks=N`** (1–999): N of every non-placeholder block (the editor's materials are the blocks themselves) through `InventoryModel.Give`; stacks past capacity go to overflow slots (the 20-slot hold holds about 20 of the 54 kinds). The palette refreshes on the inventory change.
+- **Done.** Owner, 2026-11-08: "push it, its good".
+- Tests: `StateCommandTests.GiveBlocks_StocksEveryBlock` (EditMode, the class 4/4) and `PlaygroundTests.Quartermaster_RefitsAndReturns` (PlayMode, the class 2/2) pass; compile clean. spec-required: 2, extra: 0.
 
 ### 2026-11-06 — TST-011: resume actual game speed and loading objective
 
