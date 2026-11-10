@@ -7,11 +7,11 @@ namespace Game.App.DevRuntime.Extraction
     /// <summary>Tollhouse Nine's layout in its own frame (m; y up, 0 = the arrival plane). See ArtSource/Places/lantern_export.py.</summary>
     internal static class LanternLayout
     {
-        internal static readonly string[] Pieces = { "ship_lantern_crown", "ship_lantern_market", "ship_lantern_powerhouse", "ship_lantern_docks", "ship_lantern_under" };
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly string[] Pieces = { "ship_lantern_crown", "ship_lantern_market", "ship_lantern_powerhouse", "ship_lantern_docks", "ship_lantern_under" };
         internal static readonly float3 Core = new float3(0.0f, -160.0f, 0.0f);
         internal const float CoreRadius = 20f, WellRadius = 64f, TrunkRadius = 24f, TownRadius = 248f;
         internal const float CrownDeck = -8f, MarketBottom = -128f, PowerTop = -136f, PowerBottom = -184f, UnderBottom = -300f;
-        internal static readonly (float3 Post, ushort District, string Name)[] Tethers =
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (float3 Post, ushort District, string Name)[] Tethers =
         {
             (new float3(-44.0f, -160.0f, 0.0f), 3, "docks"),
             (new float3(44.0f, -160.0f, 0.0f), 4, "Yards"),
@@ -20,8 +20,8 @@ namespace Game.App.DevRuntime.Extraction
             (new float3(30.8f, -146.0f, 30.8f), 1, "the Crown"),
             (new float3(-30.8f, -178.0f, -30.8f), 5, "Undertown"),
         };
-        internal static readonly (ushort Id, string Name)[] Districts = { (1, "the Crown"), (2, "the market"), (3, "the docks"), (4, "the Yards"), (5, "Undertown"), (6, "the gate beacons") };
-        internal static readonly (string Id, string Blueprint, float3 Closed, float3 Open, ushort Group)[] Doors =
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (ushort Id, string Name)[] Districts = { (1, "the Crown"), (2, "the market"), (3, "the docks"), (4, "the Yards"), (5, "Undertown"), (6, "the gate beacons") };
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (string Id, string Blueprint, float3 Closed, float3 Open, ushort Group)[] Doors =
         {
             ("bigdoor", "ship_lantern_door_big", new float3(270.0f, -160.0f, 4.0f), new float3(0.0f, 0.0f, 64.0f), 41),
             ("grate", "ship_lantern_door_grate", new float3(0.0f, -140.0f, 0.0f), new float3(104.0f, 0.0f, 0.0f), 42),
@@ -29,7 +29,7 @@ namespace Game.App.DevRuntime.Extraction
             ("staff", "ship_lantern_door_staff", new float3(-64.0f, -172.0f, 4.0f), new float3(0.0f, 0.0f, 24.0f), 44),
             ("crown", "ship_lantern_door_crown", new float3(-346.0f, 4.0f, 56.0f), new float3(0.0f, 0.0f, 52.0f), 45),
         };
-        internal static readonly (string Kind, float3 At, float3 Facing, float Range, float HalfArcDeg, float SweepDeg, float SweepSeconds, ushort District)[] Watchers =
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (string Kind, float3 At, float3 Facing, float Range, float HalfArcDeg, float SweepDeg, float SweepSeconds, ushort District)[] Watchers =
         {
             ("Light", new float3(68.0f, -2.0f, 0.0f), new float3(-27.2f, -1.0f, -0.0f), 260.0f, 22.0f, 35.0f, 9.0f, 1),
             ("Light", new float3(0.0f, -2.0f, -68.0f), new float3(-0.0f, -1.0f, 27.2f), 260.0f, 22.0f, 35.0f, 10.0f, 1),
@@ -56,7 +56,7 @@ namespace Game.App.DevRuntime.Extraction
             ("Light", new float3(304.0f, -158.0f, 0.0f), new float3(-0.2f, -0.4f, -1.0f), 200.0f, 40.0f, 30.0f, 10.0f, 4),
             ("Light", new float3(-256.0f, -190.0f, 0.0f), new float3(0.0f, -0.5f, -1.0f), 200.0f, 40.0f, 30.0f, 12.0f, 3),
         };
-        internal static readonly (string Needs, float3 Centre, float3 Half)[] Zones =
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (string Needs, float3 Centre, float3 Half)[] Zones =
         {
             ("Trader", new float3(0.0f, -60.0f, 0.0f), new float3(248.0f, 72.0f, 248.0f)),
             ("Garrison", new float3(-216.0f, 8.0f, 0.0f), new float3(136.0f, 24.0f, 112.0f)),
@@ -64,14 +64,14 @@ namespace Game.App.DevRuntime.Extraction
             ("Work", new float3(240.0f, -164.0f, 0.0f), new float3(144.0f, 30.0f, 80.0f)),
             ("Trader", new float3(-240.0f, -200.0f, 0.0f), new float3(144.0f, 30.0f, 100.0f)),
         };
-        internal static readonly (float Y, float2[] Points, bool Loop, int Ships)[] Routes =
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (float Y, float2[] Points, bool Loop, int Ships)[] Routes =
         {
             (-114.0f, new[] { new float2(34.0f, 0.0f), new float2(24.0f, -24.0f), new float2(0.0f, -34.0f), new float2(-24.0f, -24.0f), new float2(-34.0f, -0.0f), new float2(-24.0f, 24.0f), new float2(-0.0f, 34.0f), new float2(24.0f, 24.0f) }, true, 1),
             (-52.0f, new[] { new float2(31.5f, -12.7f), new float2(13.3f, -31.3f), new float2(-12.7f, -31.5f), new float2(-31.3f, -13.3f), new float2(-31.5f, 12.7f), new float2(-13.3f, 31.3f), new float2(12.7f, 31.5f), new float2(31.3f, 13.3f) }, true, 1),
             (76.0f, new[] { new float2(0.0f, -312.0f), new float2(0.0f, -160.0f), new float2(0.0f, -80.0f), new float2(40.0f, 0.0f), new float2(130.0f, 225.2f), new float2(306.4f, 257.1f) }, false, 4),
             (-200.0f, new[] { new float2(-352.0f, -208.0f), new float2(-128.0f, -208.0f) }, true, 1),
         };
-        internal static readonly (string Id, float3 At)[] Pois =
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (string Id, float3 At)[] Pois =
         {
             ("arrival", new float3(0.0f, 40.0f, -352.0f)),
             ("queue", new float3(0.0f, 40.0f, -208.0f)),
@@ -96,9 +96,9 @@ namespace Game.App.DevRuntime.Extraction
             ("garrison", new float3(-272.0f, 2.0f, 56.0f)),
             ("engineers", new float3(152.0f, -160.0f, -72.0f)),
         };
-        internal static readonly (float3 At, float Radius)[] Depot = { (new float3(288.0f, -200.0f, 224.0f), 34.0f), (new float3(368.0f, -200.0f, 208.0f), 29.0f), (new float3(320.0f, -200.0f, 144.0f), 26.0f) };
-        internal static readonly float3[] Turrets = { new float3(-352.0f, 0.0f, -120.0f), new float3(-72.0f, 0.0f, -136.0f), new float3(-352.0f, 0.0f, 120.0f), new float3(288.0f, 0.0f, -8.0f), new float3(-400.0f, -210.0f, -176.0f), new float3(400.0f, -210.0f, 96.0f) };
-        internal static readonly (string Blueprint, float3 At, float YawDeg)[] Moorings = { ("ship_hauler_heavy", new float3(-320.0f, -200.0f, 96.0f), 90.0f), ("ship_hauler_heavy", new float3(-320.0f, -200.0f, -96.0f), 270.0f), ("ship_freighter_medium", new float3(-192.0f, -200.0f, -80.0f), 270.0f) };
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (float3 At, float Radius)[] Depot = { (new float3(288.0f, -200.0f, 224.0f), 34.0f), (new float3(368.0f, -200.0f, 208.0f), 29.0f), (new float3(320.0f, -200.0f, 144.0f), 26.0f) };
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly float3[] Turrets = { new float3(-352.0f, 0.0f, -120.0f), new float3(-72.0f, 0.0f, -136.0f), new float3(-352.0f, 0.0f, 120.0f), new float3(288.0f, 0.0f, -8.0f), new float3(-400.0f, -210.0f, -176.0f), new float3(400.0f, -210.0f, 96.0f) };
+        [Game.Core.StaticStateOk("generated layout table, never written")] internal static readonly (string Blueprint, float3 At, float YawDeg)[] Moorings = { ("ship_hauler_heavy", new float3(-320.0f, -200.0f, 96.0f), 90.0f), ("ship_hauler_heavy", new float3(-320.0f, -200.0f, -96.0f), 270.0f), ("ship_freighter_medium", new float3(-192.0f, -200.0f, -80.0f), 270.0f) };
 
         internal static float3 Poi(string id) { foreach (var p in Pois) if (p.Id == id) return p.At; return float3.zero; }
     }
