@@ -19,17 +19,21 @@ namespace Game.Simulation.Extraction
             return CargoRule.Allows(loadT, freeT);
         }
 
-        public static bool Stow(EntityManager em, Entity ship, out string reason)
+        public static bool Stow(EntityManager em, Entity ship, out string reason) => StowInto(em, ship, ship, out reason);
+
+        /// <summary>Stows the load on `tower`'s cable into `hold`'s hold (its own, or another ship's alongside: a hauler taking a core).</summary>
+        public static bool StowInto(EntityManager em, Entity tower, Entity hold, out string reason)
         {
-            var load = TowApi.Load(em, ship);
+            var load = TowApi.Load(em, tower);
             if (load == Entity.Null) { reason = "nothing on the cable"; return false; }
+            if (!em.Exists(hold)) { reason = "no hold"; return false; }
             float massT = em.GetComponentData<TowLoad>(load).MassT;
-            var hold = em.HasComponent<CargoHold>(ship) ? em.GetComponentData<CargoHold>(ship) : default;
-            if (!CargoRule.Allows(massT, hold.FreeT)) { reason = $"the hold takes {hold.FreeT:0} t, the load is {massT:0} t"; return false; }
-            TowApi.Release(em, ship);
-            hold.StowedT += massT;
-            if (em.HasComponent<CargoHold>(ship)) em.SetComponentData(ship, hold); else em.AddComponentData(ship, hold);
-            em.AddComponentData(load, new Stowed { Ship = ship, MassT = massT });
+            var cargo = em.HasComponent<CargoHold>(hold) ? em.GetComponentData<CargoHold>(hold) : default;
+            if (!CargoRule.Allows(massT, cargo.FreeT)) { reason = $"the hold takes {cargo.FreeT:0} t, the load is {massT:0} t"; return false; }
+            TowApi.Release(em, tower);
+            cargo.StowedT += massT;
+            if (em.HasComponent<CargoHold>(hold)) em.SetComponentData(hold, cargo); else em.AddComponentData(hold, cargo);
+            em.AddComponentData(load, new Stowed { Ship = hold, MassT = massT });
             if (em.HasComponent<PhysicsVelocity>(load)) em.SetComponentData(load, new PhysicsVelocity());
             em.AddComponent<Disabled>(load);
             reason = null; return true;

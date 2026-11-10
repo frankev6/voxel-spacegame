@@ -45,6 +45,8 @@ namespace Game.App.DevRuntime.Playground
         Label heading, detail, outcome;
         Button enterButton;
         PlaygroundHollow hollow;
+        Game.App.DevRuntime.Extraction.ExtractionRuntime extraction;   // SPEC-93: the den, the Lantern and the gates (ADR-0124)
+        internal Game.App.DevRuntime.Extraction.ExtractionRuntime Extraction => extraction;
         readonly HollowSystem system = new();   // DEV-028: the Hollow's star system round the playground
         int hollowNearest = -2;
         double3 origin;
@@ -180,6 +182,7 @@ namespace Game.App.DevRuntime.Playground
             hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin);
             hollow.Build();
             if (hollow.Missing != null) { report = hollow.Missing; GameLog.Warn(LogCategories.Dev, hollow.Missing); }
+            extraction?.Dispose(); extraction = new Game.App.DevRuntime.Extraction.ExtractionRuntime(ctx, origin, ui) { Report = SetReport };
             BuildPresentation();
             Place(HollowLayout.Offset + HollowLayout.Entrance, HollowLayout.EntranceYaw);
         }
@@ -297,6 +300,7 @@ namespace Game.App.DevRuntime.Playground
             refitting = false; active = true; pending = 0; hollowNearest = -2;
             hollow?.Dispose(); hollow = new PlaygroundHollow(ctx, origin);
             hollow.Build();
+            extraction?.Dispose(); extraction = new Game.App.DevRuntime.Extraction.ExtractionRuntime(ctx, origin, ui) { Report = SetReport };
             BuildPresentation();
             SetReport(hollow.Missing ?? "Back from the refit bay. The Quartermaster has set the Hollow back as it was.");
         }
@@ -371,6 +375,8 @@ namespace Game.App.DevRuntime.Playground
             if (Race != null && Race.IsOpen && (Race.InLobby || Race.IsFinished)) { var started = Race.Start(); SetReport(started.Text); return started; }
             if (pending != 0 && host.TryGetOperation(pending, out var operation) && operation.Status == DevOperationStatus.Running)
                 return DevCommandResult.Fail("Previous station operation is still running");
+            var place = extraction?.Interact();
+            if (place != null) { SetReport(place); return DevCommandResult.Ok(place); }
             if (hollow != null && hollow.Built && DevEcs.TryGetUniversePosition(host.Context, host.Context.PlayerShipRoot, out var shipAt))
             {
                 int there = hollow.Nearest(hollow.Relative(shipAt));
@@ -439,6 +445,7 @@ namespace Game.App.DevRuntime.Playground
             float2 at = located ? (float2)(ship3.xz - origin.xz) - HollowLayout.Offset : new float2(float.MaxValue, float.MaxValue);
             if (located && !hollow.Built && HollowLayout.Near(at, 1500)) hollow.Build();
             hollow.Tick(located, ship3);
+            extraction?.Tick(located, ship3);
             // DEV-028: the star system's bodies, the Scatter's cruise zone and edge markers for the bodies and the gate
             if (!system.Built) system.Build();
             if (ctx.TryGetFrame(out var frameNow))
@@ -524,6 +531,7 @@ namespace Game.App.DevRuntime.Playground
             shownTo.Clear();
             panel = null; heading = detail = outcome = null;
             hollow?.Dispose();
+            extraction?.Dispose(); extraction = null;
             system.Dispose(host.Context.HasGameplay ? host.Context.EntityManager : null);
             World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>()?.SetMarkers(default, default);
         }
