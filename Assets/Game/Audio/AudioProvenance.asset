@@ -83,11 +83,6 @@ MonoBehaviour:
     licence: commercial licence (owner purchase)
     status: 1
     note: Owner confirmed 2026-10-17 (AUD-011) - "all of these are licensed i bought them"
-  - clip: {fileID: 8300000, guid: 15a3ca8ab0e24ca8b7e09bce0f3cb05a, type: 3}
-    source: reversed copy of the first 1.2 s of Projectile_EXPLOSION-Bit Bomb_HY_PC-001.wav (the laser fire clip), made for WPN-019
-    licence: commercial licence (owner purchase), as the source clip
-    status: 1
-    note: Owner asked 2026-11-08 (WPN-019) - "can we do something very similar to the chargeup sound, but flipped? and a little tiny bit deeper of a noise?"
   - clip: {fileID: 8300000, guid: 2709695e6ba319b4a93f0cdf4ae3064c, type: 3}
     source: carried over from the prototype; purchased by the owner
     licence: commercial licence (owner purchase)

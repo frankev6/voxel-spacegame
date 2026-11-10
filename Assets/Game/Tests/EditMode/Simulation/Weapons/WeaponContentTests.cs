@@ -64,7 +64,7 @@ namespace Game.Tests.EditMode.Simulation.Weapons
                         Assert.That(charge.ChargeTicks, Is.EqualTo(90u)); Assert.That(charge.TrackRateRad, Is.EqualTo(math.radians(30f)).Within(1e-5f));
                         Assert.That(charge.ConvergeBeams, Is.EqualTo(6)); Assert.That(charge.ConvergeRadius, Is.EqualTo(8f));
                         Assert.That(charge.ConvergeBeamWidth, Is.EqualTo(.15f).Within(1e-5f)); Assert.That(charge.ConvergedHoldFraction, Is.EqualTo(.2f).Within(1e-5f));
-                        Assert.That(charge.FireCue, Is.EqualTo(catalog.Get<AudioCueDefinition>(new ContentId("cue_weapon_lance_fire")).Id.Hash), "the discharge sound");
+                        Assert.That(charge.FireCue, Is.EqualTo(default(ContentHash)), "the main beam fires silently for now (owner, 2026-11-09)");
                     }
                     else Assert.That(charge.ChargeTicks, Is.Zero, d.IdString);
                     Assert.That(d.SustainedDps, Is.EqualTo(expected.SustainedDps).Within(.5f), d.IdString);

@@ -63,4 +63,4 @@ MonoBehaviour:
         convergeRadius: 8
         convergeBeamWidth: 0.15
         convergedHoldFraction: 0.2
-        fireCue: {fileID: 11400000, guid: 2530ffb2176a4ce88405c434d5e688c1, type: 2}
+        fireCue: {fileID: 0}
