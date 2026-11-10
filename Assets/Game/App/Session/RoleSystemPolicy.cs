@@ -100,6 +100,7 @@ namespace Game.App.Session
             ["CoreTetherSystem"] = SystemAuthority.AuthorityOnly,        // EXT-004: which tethers are cut, blackouts, the core freed
             ["CoreHoldSystem"] = SystemAuthority.Both,                   // EXT-004: every machine holds a tethered core at its pose
             ["WatchSystem"] = SystemAuthority.AuthorityOnly,             // EXT-005: suspicion and who is wanted
+            ["HeistDirector"] = SystemAuthority.AuthorityOnly,           // EXT-006: the alarm timeline and outcomes
             ["TowSystem"] = SystemAuthority.Both,                        // EXT-002: cable pulls on every machine (same poses, same pulls)
             ["EngineWashSystem"] = SystemAuthority.Both,                 // HAZ-017: wash pushes on every machine; heat damage on the authority
             ["MoverSystem"] = SystemAuthority.AuthorityOnly,
@@ -168,6 +169,7 @@ namespace Game.App.Session
             ["PulseSystem"] = "which ships a pulse reaches and what it does to them; cells in GridDelta, shields in snapshots",
             ["PickupSystem"] = "which ship collects each energy canister; its despawn (stored energy is the ship's own)",
             ["MoverSystem"] = "where each moving structure is; its pose in snapshots",
+            ["HeistDirector"] = "each heist place's phase, alarm steps and outcome; HeistState",
             ["WatchSystem"] = "how suspicious each crew ship is and which factions want it; Suspicion and Wanted",
             ["CoreTetherSystem"] = "which station-core tethers are cut, which districts go dark and when the core is free; CoreTether, District and StationCore",
             ["PortalDecideSystem"] = "which ship goes through a lane-gate portal and when the portal jams; PortalTransit records and PortalLink",

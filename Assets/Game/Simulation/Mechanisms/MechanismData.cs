@@ -34,6 +34,10 @@ namespace Game.Simulation.Mechanisms
 
     /// <summary>Singleton owned by MechanismSystem (authority). Current holds the actions due this tick; their owners (MoverSystem,
     /// ZoneSystem, ...) read them on their next update, which is the following tick, and apply what they own. Main thread only.</summary>
+    /// <summary>Singleton inbox: actions other deciders ask for (the heist alarm, SPEC-93 decision 8). Authority, main thread; appended
+    /// before MechanismSystem, which releases them into Current on its next update and empties the list.</summary>
+    public struct MechanismRequests : IComponentData { public NativeList<MechanismAction> Pending; }
+
     public struct MechanismActions : IComponentData
     {
         public NativeList<MechanismAction> Current;

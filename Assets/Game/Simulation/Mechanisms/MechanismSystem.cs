@@ -38,16 +38,17 @@ namespace Game.Simulation.Mechanisms
 
         public void OnCreate(ref SystemState state)
         {
-            actionsEntity = state.EntityManager.CreateEntity(typeof(MechanismActions), typeof(RaceLapSignal));
+            actionsEntity = state.EntityManager.CreateEntity(typeof(MechanismActions), typeof(RaceLapSignal), typeof(MechanismRequests));
             state.EntityManager.SetName(actionsEntity, "MechanismActions");
             state.EntityManager.SetComponentData(actionsEntity, new MechanismActions { Current = new NativeList<MechanismAction>(8, Allocator.Persistent) });
+            state.EntityManager.SetComponentData(actionsEntity, new MechanismRequests { Pending = new NativeList<MechanismAction>(4, Allocator.Persistent) });
             pending = new NativeList<Pending>(16, Allocator.Persistent);
             switchHp = new NativeHashMap<ulong, float>(32, Allocator.Persistent);
             destroyed = new NativeHashSet<ulong>(32, Allocator.Persistent);
             insideBounds = new NativeHashSet<ulong>(32, Allocator.Persistent);
             mechanisms = SystemAPI.QueryBuilder().WithAll<Mechanism, MechanismRule, MechanismRuleAction>().Build();
             groups = SystemAPI.QueryBuilder().WithAll<MechanismGroup, BlockInstance>().Build();
-            state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<SimClock>(); state.RequireForUpdate(mechanisms);
+            state.RequireForUpdate<GameplayActive>(); state.RequireForUpdate<SimClock>();
         }
 
         public void OnDestroy(ref SystemState state)
@@ -57,6 +58,8 @@ namespace Game.Simulation.Mechanisms
             {
                 var a = state.EntityManager.GetComponentData<MechanismActions>(actionsEntity);
                 if (a.Current.IsCreated) a.Current.Dispose();
+                var r = state.EntityManager.GetComponentData<MechanismRequests>(actionsEntity);
+                if (r.Pending.IsCreated) r.Pending.Dispose();
             }
             if (pending.IsCreated) pending.Dispose(); if (switchHp.IsCreated) switchHp.Dispose();
             if (destroyed.IsCreated) destroyed.Dispose(); if (insideBounds.IsCreated) insideBounds.Dispose();
@@ -65,8 +68,11 @@ namespace Game.Simulation.Mechanisms
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            // Only where a mechanism is placed or another decider asked for actions (SPEC-93: the heist alarm).
+            var requests = state.EntityManager.GetComponentData<MechanismRequests>(actionsEntity);
+            if (mechanisms.IsEmpty && requests.Pending.Length == 0) return;
             // ZoneContacts and instance HP are written by jobs that do not declare them to this system (lists inside components,
-            // the damage writer's buffers): wait for every job. This only runs where a mechanism is placed.
+            // the damage writer's buffers): wait for every job.
             state.EntityManager.CompleteAllTrackedJobs();
             var em = state.EntityManager;
             uint tick = SystemAPI.GetSingleton<SimClock>().Tick;
@@ -163,6 +169,8 @@ namespace Game.Simulation.Mechanisms
             int done = 0;
             while (done < pending.Length && pending[done].Due <= tick) { actions.Current.Add(pending[done].Action); done++; }
             if (done > 0) pending.RemoveRange(0, done);
+            for (int i = 0; i < requests.Pending.Length; i++) actions.Current.Add(requests.Pending[i]);
+            requests.Pending.Clear();
             em.SetComponentData(actionsEntity, actions);
         }
 
