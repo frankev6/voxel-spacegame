@@ -101,6 +101,23 @@ namespace Game.App.DevRuntime.Extraction
             gates = true;
         }
 
+        readonly double3[] markerAt = new double3[16];
+        readonly string[] markerName = new string[16];
+        /// <summary>The HUD's edge markers: the playground's own, plus the den's Table and socket within 3 km of the Rock (owner
+        /// 2026-11-10: "i can't find this Table in the den").</summary>
+        internal int Markers(double3 ship, ReadOnlySpan<double3> at, ReadOnlySpan<string> names, out ReadOnlySpan<double3> allAt, out ReadOnlySpan<string> allNames)
+        {
+            int n = 0;
+            for (int i = 0; i < at.Length && n < markerAt.Length - 2; i++) { markerAt[n] = at[i]; markerName[n++] = i < names.Length ? names[i] : null; }
+            if (Den.Built && math.distance(ship, Den.Anchor) < 3000)
+            {
+                markerAt[n] = Den.Anchor + (double3)DenPlace.Table; markerName[n++] = "THE TABLE (F)";
+                markerAt[n] = Den.Anchor + (double3)DenPlace.SocketStart; markerName[n++] = "SOCKET";
+            }
+            allAt = markerAt.AsSpan(0, n); allNames = markerName.AsSpan(0, n);
+            return n;
+        }
+
         /// <summary>A test lever (`extraction hold t=`): the hold's rating in tonnes instead of the ship's cargo blocks; negative = none.</summary>
         internal float HoldOverride = -1;
 

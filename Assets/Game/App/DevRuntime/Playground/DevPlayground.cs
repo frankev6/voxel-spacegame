@@ -454,7 +454,12 @@ namespace Game.App.DevRuntime.Playground
                 system.SpawnZones(ctx.EntityManager, hollow.Origin, frameNow);
             }
             var hudSync = World.DefaultGameObjectInjectionWorld?.GetExistingSystemManaged<Game.Presentation.Systems.HudSyncSystem>();
-            if (hudSync != null && located) { system.Markers(hollow.Origin, at, out var markerAt, out var markerNames); hudSync.SetMarkers(markerAt, markerNames); }
+            if (hudSync != null && located)
+            {
+                system.Markers(hollow.Origin, at, out var markerAt, out var markerNames);
+                if (extraction != null) extraction.Markers(ship3, markerAt, markerNames, out markerAt, out markerNames);   // the den's Table and socket
+                hudSync.SetMarkers(markerAt, markerNames);
+            }
             // the race portal (owner: "inside the hollow there should be a portal to the race") lands the pilot off the track; the race
             // opens and puts them on its grid
             bool racing = Race != null && Race.IsOpen;

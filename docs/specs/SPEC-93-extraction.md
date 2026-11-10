@@ -278,11 +278,11 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 - **Milestone:** M4
 - **Tier:** standard — owner 2026-11-10: "we should use a bigger ship that can actually pull the 200t so we don't have to use a command"
 - **Depends on:** `EXT-009`
-- **Do:** `ship_vesper_hauler`: the VESPER with a cargo refit (four cargo blocks deep in the hull, a 200 t hold, its silhouette unchanged), built by `HaulerBuilder` with the Lantern build; the playground flies it by default (`playground ship=starter` for the Wraith, `ship=default` back). The den's reach is measured from the bow; `goto=cradle` stands in the core road clear of the Yards post.
+- **Do:** `ship_vesper_hauler`: the VESPER with a cargo refit (four cargo blocks deep in the hull, a 200 t hold, its silhouette unchanged), built by `HaulerBuilder` with the Lantern build. It was the playground default until the owner turned it back (2026-11-10: "the ship replacement you picked was too unwieldy lets go back to the one we had before and ill just do the 200t command"): the Wraith flies by default, `extraction hold t=200` rates its hold, and the hauler stays a choice (`playground ship=ship_vesper_hauler`). The den's reach is measured from the bow; `goto=cradle` stands in the core road clear of the Yards post.
 - **Files:** `Assets/Game/Editor/Content/HaulerBuilder.cs`, `Assets/Game/App/DevRuntime/Playground/DevPlaygroundShip.cs`, `Assets/Game/App/DevRuntime/Extraction/DenPlace.cs`, `Assets/Game/App/DevRuntime/Commands/ExtractionDevCommand.cs`.
 - **Tests:** `ExtractionLoopTests` and `PlaygroundTests` in the hauler.
 - **Acceptance criteria:**
-  - [x] A fresh playground rates the hold at 200 t with no command; the core tows and stows.
+  - [x] The hauler rates its hold at 200 t with no command; the core tows and stows (superseded as the default by the owner's call).
 
 ## 10. Open questions
 

@@ -39,6 +39,8 @@ namespace Game.App.DevRuntime.Extraction
         readonly List<Entity> grids = new(), entities = new(), guns = new();
         readonly List<PersistentId> wave = new();
         readonly List<Light> lamps = new();
+        UnityEngine.Material beacon;
+        readonly List<Light> floods = new();   // their own level: a fill for the shadowed face, not a lamp (the lamps' scale bleached the stone)
         GameObject dressing;
         internal Entity Rock, Shard, Socket;
         internal bool Built, Attacking;
@@ -72,6 +74,22 @@ namespace Game.App.DevRuntime.Extraction
             lamps.Add(ExtractionKit.Lamp(dressing.transform, (Vector3)(CaveCentre + new float3(10, 14, 0)), new Color(1f, .8f, .55f), 70, 2200));
             lamps.Add(ExtractionKit.Lamp(dressing.transform, (Vector3)Table, new Color(.3f, .95f, 1f), 30, 900));
             lamps.Add(ExtractionKit.Lamp(dressing.transform, (Vector3)SocketStart, new Color(.6f, .7f, 1f), 50, 900));
+            // floodlights on the approach (owner 2026-11-10: "lighting is weird, it changes depending on camera angle"): the sun is behind
+            // the Rock as you come in from its gate, so the face you see was in its own shadow, lit only on the tops of its 4 m steps
+            // (stripes), while the far side was bright. Three floods on the cave side light it like a home; brighter once powered.
+            foreach (var p in new[] { new float3(330, 90, -150), new float3(330, 90, 160), new float3(210, 250, 0) })
+                floods.Add(ExtractionKit.Lamp(dressing.transform, (Vector3)p, new Color(1f, .9f, .78f), 520, 0));
+            // the Table's beacon (owner: "i can't find this Table in the den"): a glowing cyan orb over it, and a HUD marker
+            var orb = GameObject.CreatePrimitive(PrimitiveType.Sphere); orb.name = "the Table's beacon";
+            UnityEngine.Object.Destroy(orb.GetComponent<UnityEngine.Collider>());
+            orb.transform.SetParent(dressing.transform, false); orb.transform.localPosition = (Vector3)(Table + new float3(0, 8, 0)); orb.transform.localScale = Vector3.one * 9;
+            var shader = Shader.Find("Game/Vfx/LightShaft");
+            if (shader != null)
+            {
+                beacon = new UnityEngine.Material(shader) { name = "the Table's beacon" }; beacon.SetColor("_Color", new Color(.5f, 2.2f, 2.6f)); beacon.SetFloat("_Dust", .2f); beacon.SetFloat("_NearFade", 4);
+                var r = orb.GetComponent<MeshRenderer>(); r.sharedMaterial = beacon; r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off; r.receiveShadows = false;
+            }
+            else UnityEngine.Object.Destroy(orb);
         }
 
         internal void Tick(double now)
@@ -79,6 +97,7 @@ namespace Game.App.DevRuntime.Extraction
             if (!Built || !kit.Ready(out _, out var catalog, out var frame)) return;
             var em = kit.Ctx.EntityManager;
             if (dressing != null) dressing.transform.position = (Vector3)(float3)(Anchor - frame.OriginInStarSystem);
+            if (beacon != null) beacon.SetFloat("_Intensity", 1.1f + .5f * math.sin((float)now * 3));
             // ore: what the last dig took out, counted once the damage has resolved
             if (measuring != Entity.Null && before >= 0 && em.Exists(measuring))
             {
@@ -88,6 +107,7 @@ namespace Game.App.DevRuntime.Extraction
             }
             bool powered = CoreSocketSystem.DenHasPower(em, DenId);
             for (int i = 0; i < lamps.Count; i++) if (lamps[i] != null) lamps[i].intensity = powered ? lamps[i].range * lamps[i].range * 1.4f : lamps[i].range * lamps[i].range * .45f;
+            foreach (var f in floods) if (f != null) f.intensity = f.range * f.range * (powered ? .16f : .12f);
             if (attackAt > 0 && now > attackAt) { attackAt = -1; Attack(catalog, frame); }
             if (Attacking)
             {
@@ -254,9 +274,10 @@ namespace Game.App.DevRuntime.Extraction
             foreach (var g in grids) if (em.Exists(g)) Game.Voxel.Grid.GridSpawnApi.RequestDespawn(em, g);
             foreach (var e in entities) if (em.Exists(e)) em.DestroyEntity(e);
             foreach (var id in wave) kit.Despawn(id);
-            grids.Clear(); entities.Clear(); guns.Clear(); wave.Clear(); lamps.Clear();
+            grids.Clear(); entities.Clear(); guns.Clear(); wave.Clear(); lamps.Clear(); floods.Clear();
             if (dressing != null) UnityEngine.Object.Destroy(dressing);
-            dressing = null; Built = Attacking = false; Rock = Shard = Socket = Entity.Null; attackAt = -1;
+            if (beacon != null) UnityEngine.Object.Destroy(beacon);
+            dressing = null; beacon = null; Built = Attacking = false; Rock = Shard = Socket = Entity.Null; attackAt = -1;
         }
 
         public void Dispose() => Clear();
