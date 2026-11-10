@@ -35,6 +35,7 @@ namespace Game.Simulation.Ai
         ComponentLookup<Game.Simulation.Mechanisms.TargetOverride> overrides;
         NativeHashMap<Entity, FleetLeaderDecision> leaders;
         ComponentLookup<Allegiance> allegiances;
+        ComponentLookup<Game.Simulation.Extraction.Wanted> wanted;
         CollisionWorld noCollision;   // stands in for the physics world where there is none (decision tests); never cast against
         internal int SphereQueryCount => overflow[2];
 
@@ -60,6 +61,7 @@ namespace Game.Simulation.Ai
             overrides = state.GetComponentLookup<Game.Simulation.Mechanisms.TargetOverride>(true);
             leaders = new NativeHashMap<Entity, FleetLeaderDecision>(128, Allocator.Persistent);
             allegiances = state.GetComponentLookup<Allegiance>(true);
+            wanted = state.GetComponentLookup<Game.Simulation.Extraction.Wanted>(true);
             noCollision = new CollisionWorld(0, 0);
         }
 
@@ -78,7 +80,7 @@ namespace Game.Simulation.Ai
             entities.Update(ref state); hulks.Update(ref state); spawning.Update(ref state);
             dormant.Update(ref state); shipStats.Update(ref state); weaponStats.Update(ref state);
             shields.Update(ref state); shieldControls.Update(ref state); abilities.Update(ref state);
-            members.Update(ref state); overrides.Update(ref state); allegiances.Update(ref state);
+            members.Update(ref state); overrides.Update(ref state); allegiances.Update(ref state); wanted.Update(ref state);
             bool physics = SystemAPI.TryGetSingleton<PhysicsWorldSingleton>(out var world);
             var hash = SystemAPI.GetSingleton<SpatialHash>();
             var think = new AiThinkJob
@@ -88,7 +90,7 @@ namespace Game.Simulation.Ai
                 Entities = entities, Hulks = hulks, Spawning = spawning, Dormant = dormant,
                 ShipStats = shipStats, WeaponStats = weaponStats, Shields = shields,
                 ShieldControls = shieldControls, Abilities = abilities, Overflow = overflow,
-                Members = members, Leaders = leaders, MemberPass = 0, Overrides = overrides, Allegiances = allegiances,
+                Members = members, Leaders = leaders, MemberPass = 0, Overrides = overrides, Allegiances = allegiances, Wanted = wanted,
                 Collision = physics ? world.CollisionWorld : noCollision, HasCollision = (byte)(physics ? 1 : 0),
             };
             var handle = think.ScheduleParallel(hash.BeginRead(state.Dependency));

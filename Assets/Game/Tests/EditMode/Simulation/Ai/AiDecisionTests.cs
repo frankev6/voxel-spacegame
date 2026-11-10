@@ -196,6 +196,19 @@ namespace Game.Tests.EditMode.Simulation.Ai
             Assert.AreEqual(0, shifted.y);
         }
 
+        /// <summary>EXT-005 (SPEC-93 decision 7): a neutral ship becomes a target once the AI's faction wants it, and only that faction's.</summary>
+        [Test] public void Target_WantedNeutral()
+        {
+            using var f = new Fixture();
+            var ship = f.Ship();
+            var crew = f.Grid(new float3(100, 0, 0), 2);
+            f.Step(10); Assert.AreEqual(Entity.Null, f.Target(ship).Value, "neutral: left alone");
+            f.Em.AddComponentData(crew, new Game.Simulation.Extraction.Wanted { FactionMask = 1ul << 1 });
+            f.Step(20); Assert.AreEqual(Entity.Null, f.Target(ship).Value, "wanted by another faction: still left alone");
+            f.Em.SetComponentData(crew, new Game.Simulation.Extraction.Wanted { FactionMask = 1ul << 0 });
+            f.Step(30); Assert.AreEqual(crew, f.Target(ship).Value, "wanted by this faction: a target");
+        }
+
         sealed class Fixture : IDisposable
         {
             readonly World world = new World("AiDecisionTests");

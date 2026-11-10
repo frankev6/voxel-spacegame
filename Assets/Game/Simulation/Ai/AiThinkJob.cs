@@ -40,6 +40,7 @@ namespace Game.Simulation.Ai
         [ReadOnly] public ComponentLookup<FleetMember> Members;
         [ReadOnly] public ComponentLookup<Game.Simulation.Mechanisms.TargetOverride> Overrides;
         [ReadOnly] public ComponentLookup<Allegiance> Allegiances;
+        [ReadOnly] public ComponentLookup<Game.Simulation.Extraction.Wanted> Wanted;   // SPEC-93 decision 7
         // Grid colliders for the line-of-fire check (§5.4 step 9). HasCollision = 0: no physics world (tests), nothing obstructs.
         [ReadOnly] public CollisionWorld Collision;
         public byte HasCollision;
@@ -152,7 +153,10 @@ namespace Game.Simulation.Ai
         bool Hostile(in SpatialProxy proxy, Entity self, in Allegiance allegiance) =>
             proxy.Entity != self && Entities.Exists(proxy.Entity) && !Hulks.HasComponent(proxy.Entity)
             && (proxy.Kind == ProxyKind.Ship || proxy.Kind == ProxyKind.Station)
-            && Relations.IsHostile(allegiance, proxy.Allegiance);
+            && (Relations.IsHostile(allegiance, proxy.Allegiance) || WantedBy(proxy.Entity, allegiance.Faction));
+
+        /// <summary>SPEC-93 decision 7 (ADR-0124): a ship identified by this faction is hostile to it whatever the stance.</summary>
+        bool WantedBy(Entity e, byte faction) => faction < 64 && Wanted.HasComponent(e) && (Wanted[e].FactionMask & (1ul << faction)) != 0;
 
         /// QA-001 (owner: "enemies fight so far away i literally can't see them in the map and im always chasing them, like
         /// they are shy"): the preferred distance (a fraction of the longest gun's range, at least MinEngageRange) is capped
