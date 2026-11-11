@@ -340,6 +340,7 @@ namespace Game.App.DevRuntime.Extraction
 
         /// <summary>Lantern Night (the Dimming job): at 21:00 town time, a minute after the crane lifts the Grate's panel, every light in
         /// town goes out for sixty seconds. The town's clock is compressed: the night comes three minutes after the job is set.</summary>
+        internal double DimmingAt => dimmingAt;
         internal void ScheduleDimming(double now) { DimmingNight = true; dimmingAt = now + 180; Toast("Lantern Night: the Dimming at 21:00, in three minutes. The crane lifts the Grate's panel a minute before."); }
 
         void Dimming(EntityManager em, double now)

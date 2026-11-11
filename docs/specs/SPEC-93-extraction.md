@@ -284,6 +284,16 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 - **Acceptance criteria:**
   - [x] The hauler rates its hold at 200 t with no command; the core tows and stows (superseded as the default by the owner's call).
 
+### EXT-016 — One job, a planning board of leads
+- **Milestone:** M4
+- **Tier:** standard — owner 2026-11-10: "techinally there should be just one job for the lantern"; "you pick a job and then get to see which options are available to you based on leads/rumours, but you end up deciding and preparing yourself. also similar to how gta 5 prepared heists on a board as well"
+- **Depends on:** `EXT-009`
+- **Do:** The board at the Table offers one job, the Lantern. Taken, it becomes the job's planning board: the six approaches (the Dimming, the Trojan, the Depot Fire, Pod Seven, the Scrap Run, the Inside Man) are leads, each a rumour and a prep list ticked from the world's state (sailcloth bought, berth booked, depot blown, work code held, debt cleared, tethers cut, out). Nothing is chosen and the leads mix; Enter tracks one, and its stops still to do go on the HUD as markers. Lantern Night (the Dimming) is scheduled when the crew arrives at the Lantern, three minutes out, whatever lead they work. `extraction job accept=lantern|<lead>` takes the job (and tracks a lead).
+- **Files:** `Assets/Game/App/DevRuntime/Extraction/ExtractionRuntime.cs`, `Assets/Game/App/DevRuntime/Extraction/LanternPlace.cs`, `Assets/Game/App/DevRuntime/Commands/ExtractionDevCommand.cs`.
+- **Tests:** `ExtractionLoopTests` (the Scrap Run, through `job accept=scrap`).
+- **Acceptance criteria:**
+  - [x] F at the Table, Enter takes the Lantern; the planning board lists six leads with prep progress; Enter tracks one; the HUD marks its stops and arriving schedules Lantern Night (checked live).
+
 ## 10. Open questions
 
 | # | Question | Default in use | Decider |
@@ -295,7 +305,7 @@ Advisory (ADR-0042). Tow and knocks: O(links); watch: O(watchers × nearby ships
 | 5 | Co-op heists are planar until 3D flight works in co-op (ADR-0123) | Accepted | Owner |
 | 6 | Does the starter crew ship carry a hold? The core is about 109 t; a small cargo pod holds 50 t (1 t per cargo unit), and the starter ship has none, so the gate refuses the core on its cable | No: refit at the Quartermaster, or take the Trojan's hauler; `extraction hold t=` is a test lever | Owner |
 | 7 | The Trojan's hauler | A WRAITH flown by AI with a work code and a 100,000 t hold stands in until a hauler hull exists | Owner |
-| 8 | The town's clock | Compressed: the Dimming three minutes after the job is taken, the flush every minute, the driver every 30 s | Owner |
+| 8 | The town's clock | Compressed: the Dimming three minutes after the crew arrives at the Lantern, the flush every minute, the driver every 30 s | Owner |
 | 9 | How fast do watchers identify a misfit? | A sensor adds 0.45 a second at close range, a searchlight 0.9: about 2 to 5 s in view | Owner |
 | 10 | A blackout cuts the districts' lamps and blinds their watchers, but the station's lit windows and ambient light stay on | Accepted for the slice | Owner |
 | 11 | `playground reset` re-centres the playground on the ship, height included, so a reset taken inside the Lantern moves the whole playground there | Reset from the Hollow | Lead |

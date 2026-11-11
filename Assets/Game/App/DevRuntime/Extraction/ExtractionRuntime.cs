@@ -37,16 +37,60 @@ namespace Game.App.DevRuntime.Extraction
         internal static readonly float2 DenGateLocal = new float2(420, -40), LanternArrivalLocal = new float2(0, -820), LanternGateLocal = new float2(720, 160), DenArrivalLocal = new float2(760, 40);
         internal const ushort GateGroup = 71;
         internal enum JobState : byte { None, Accepted, OnSite, CoreTaken, Escaped, Home, Installed }
-        [StaticStateOk("constant job table")]
-        internal static readonly (string Id, string Title, string Brief)[] Jobs =
+        /// <summary>One job on the board: the Lantern (owner, 2026-11-10: "techinally there should be just one job for the lantern"; "you pick
+        /// a job and then get to see which options are available to you based on leads/rumours, but you end up deciding and preparing yourself.
+        /// also similar to how gta 5 prepared heists on a board as well"). The six approaches are leads on the planning board: rumours with a
+        /// prep list each. Nothing is chosen; every lead stays open and they mix. Tracking one puts its next stops on the HUD.</summary>
+        internal const string JobId = "lantern", JobTitle = "The Lantern",
+            JobBrief = "Take the core out of Tollhouse Nine and bring it home to the socket. How is up to you: the crew has heard things.";
+        [StaticStateOk("constant lead table")]
+        internal static readonly (string Id, string Title, string Rumour, (string Poi, string Text, string Check)[] Steps)[] Leads =
         {
-            ("dimming", "The Dimming", "Lantern Night: buy sailcloth at Cloth Row (F), and in the minute of dark cut the tethers and tow the core up the Well."),
-            ("trojan", "The Trojan", "Book a freight berth at the pier (F): a hauler waits at the yard apron. Into the Powerhouse by the dock lift, cut, out the big door, the core into the hauler's hold (F)."),
-            ("depot", "The Depot Fire", "Blow the fuel depot (north-east) to draw the cutters, blow the Cradle's floor hatch from below, cut, out down the trunk and the Wound."),
-            ("pod", "Pod Seven", "Take a yard job in the engineers' room (F): the big door opens for the crane-tug. Cut, tow the core into the mass driver's breech, and it fires."),
-            ("scrap", "The Scrap Run", "Winch Square (F): the fixer forges a work order and a scrap housing. Your work code opens the big door; the housing hides the core."),
-            ("inside", "The Inside Man", "The Long Wait (F): clear the night engineer's debt. He opens the Cradle's floor hatch and holds the outfall flush."),
+            ("dimming", "The Dimming", "Lantern Night is on when you get there: a few minutes after you arrive the whole town puts its lights out for a minute. Cloth Row sells black sailcloth by the forty metres.", new[]
+            {
+                ("cloth_row", "Black sailcloth for a shroud: Cloth Row (F)", "shroud"),
+                ((string)null, "Lantern Night: the Dimming", "night"),
+                ("cradle", "In the dark minute, cut the six tethers in the Cradle (F2)", "tethers"),
+                ("well_mouth", "Magnet on (U) and tow the core up the Well", "escaped"),
+            }),
+            ("trojan", "The Trojan", "Haulers book freight berths at the pier and load at the yard apron with work codes, and nobody checks a hold on the way out.", new[]
+            {
+                ("pier", "Book a freight berth at the pier (F)", "hauler"),
+                ("lift", "The dock lift into the turbine hall: the staff door is open for the shift change", "none"),
+                ("cradle", "Cut the six tethers in the Cradle (F2), magnet on (U)", "tethers"),
+                ("yard_apron", "Out the big door; beside the hauler, the core into its hold (F3)", "haulerhold"),
+            }),
+            ("depot", "The Depot Fire", "The cutters scramble for any fire at the fuel depot, north-east of the core. The Cradle's floor hatch is thin plate from below.", new[]
+            {
+                ("depot", "Blow the fuel depot (shoot it)", "depot"),
+                ("trunk", "Up the trunk: blow the Cradle's floor hatch from below", "none"),
+                ("cradle", "Cut the six tethers (F2), magnet on (U)", "tethers"),
+                ("wound", "Out down the trunk and the Wound", "escaped"),
+            }),
+            ("pod", "Pod Seven", "The yard is short a crane-tug tonight: the engineers' room hires anyone. The mass driver throws pods out of the Lantern all night.", new[]
+            {
+                ("engineers", "Take a yard job in the engineers' room (F): the big door opens", "work"),
+                ("cradle", "Cut the six tethers (F2), magnet on (U)", "tethers"),
+                ("breech", "Tow the core into the mass driver's breech: it fires", "escaped"),
+            }),
+            ("scrap", "The Scrap Run", "A fixer in Winch Square forges work orders, and has a scrap reactor housing that would fit over a core.", new[]
+            {
+                ("winch_square", "Work order and scrap housing: Winch Square (F)", "work"),
+                ((string)null, "Work code on (O until XPDR WORK)", "workcode"),
+                ("big_door_out", "At the big door, F: the scheduled part goes in", "none"),
+                ("cradle", "Cut the six tethers (F2), magnet on (U)", "tethers"),
+                ("big_door_out", "Out the big door with the part, home through the Lantern's gate", "escaped"),
+            }),
+            ("inside", "The Inside Man", "The night engineer owes money at the Long Wait. Clear his debt and he works for you on his shift.", new[]
+            {
+                ("long_wait", "Clear the night engineer's debt: the Long Wait (F)", "inside"),
+                ("trunk", "Up to the Cradle's floor hatch: he opens it", "none"),
+                ("cradle", "Cut the six tethers (F2), magnet on (U)", "tethers"),
+                ("outfall", "Out through the outfall: he holds the flush", "escaped"),
+            }),
         };
+        /// <summary>The lead tracked on the HUD, or -1.</summary>
+        internal int Tracked = -1;
 
         readonly DevContext ctx;
         readonly ExtractionKit kit;
@@ -66,7 +110,7 @@ namespace Game.App.DevRuntime.Extraction
         /// F opens it, Up/Down choose a job, Enter takes it, F again (or flying off) closes it.</summary>
         internal bool BoardOpen { get; private set; }
         int boardPick;
-        VisualElement board; Label boardList, boardBrief;
+        VisualElement board; Label boardTitle, boardList, boardBrief, boardKeys;
         uint refusedTick;
 
         internal ExtractionRuntime(DevContext ctx, double3 playgroundOrigin, UIRoot ui)
@@ -100,13 +144,13 @@ namespace Game.App.DevRuntime.Extraction
                 board.style.backgroundColor = new Color(.04f, .05f, .06f, .88f);
                 board.style.borderTopWidth = board.style.borderBottomWidth = board.style.borderLeftWidth = board.style.borderRightWidth = 1;
                 board.style.borderTopColor = board.style.borderBottomColor = board.style.borderLeftColor = board.style.borderRightColor = new Color(.35f, .85f, 1f, .7f);
-                var title = new Label("THE BOARD  ·  the Table at the Rock") { pickingMode = PickingMode.Ignore };
+                var title = boardTitle = new Label("") { pickingMode = PickingMode.Ignore };
                 title.AddToClassList("text-m"); title.style.color = new Color(.5f, .9f, 1f); title.style.marginBottom = 10;
                 boardList = new Label("") { pickingMode = PickingMode.Ignore }; boardList.AddToClassList("text-m");
                 boardList.style.color = new Color(1f, .92f, .78f); boardList.style.marginBottom = 10;
                 boardBrief = new Label("") { pickingMode = PickingMode.Ignore }; boardBrief.AddToClassList("text-s");
                 boardBrief.style.color = new Color(.85f, .85f, .85f); boardBrief.style.whiteSpace = WhiteSpace.Normal; boardBrief.style.marginBottom = 12;
-                var keys = new Label("UP / DOWN choose  ·  ENTER take the job  ·  F close") { pickingMode = PickingMode.Ignore };
+                var keys = boardKeys = new Label("") { pickingMode = PickingMode.Ignore };
                 keys.AddToClassList("text-s"); keys.style.color = new Color(.5f, .9f, 1f);
                 board.Add(title); board.Add(boardList); board.Add(boardBrief); board.Add(keys);
                 board.style.display = DisplayStyle.None;
@@ -127,18 +171,31 @@ namespace Game.App.DevRuntime.Extraction
             gates = true;
         }
 
-        readonly double3[] markerAt = new double3[16];
-        readonly string[] markerName = new string[16];
+        readonly double3[] markerAt = new double3[24];
+        readonly string[] markerName = new string[24];
         /// <summary>The HUD's edge markers: the playground's own, plus the den's Table and socket within 3 km of the Rock (owner
         /// 2026-11-10: "i can't find this Table in the den").</summary>
         internal int Markers(double3 ship, ReadOnlySpan<double3> at, ReadOnlySpan<string> names, out ReadOnlySpan<double3> allAt, out ReadOnlySpan<string> allNames)
         {
             int n = 0;
-            for (int i = 0; i < at.Length && n < markerAt.Length - 2; i++) { markerAt[n] = at[i]; markerName[n++] = i < names.Length ? names[i] : null; }
+            for (int i = 0; i < at.Length && n < markerAt.Length - 8; i++) { markerAt[n] = at[i]; markerName[n++] = i < names.Length ? names[i] : null; }
             if (Den.Built && math.distance(ship, Den.Anchor) < 3000)
             {
                 markerAt[n] = Den.Anchor + (double3)DenPlace.Table; markerName[n++] = "THE TABLE (F)";
                 markerAt[n] = Den.Anchor + (double3)DenPlace.SocketStart; markerName[n++] = "SOCKET";
+            }
+            // the tracked lead's stops still to do, in the Lantern
+            if (Tracked >= 0 && Lantern.Built && State != JobState.None && State < JobState.Escaped)
+            {
+                var steps = Leads[Tracked].Steps; var done = Done(ctx.EntityManager, Tracked);
+                for (int i = 0; i < steps.Length && n < markerAt.Length; i++)
+                {
+                    if (done[i] || steps[i].Poi == null) continue;
+                    bool dup = false; for (int j = 0; j < i; j++) if (!done[j] && steps[j].Poi == steps[i].Poi) dup = true;
+                    if (dup) continue;
+                    markerAt[n] = Lantern.Anchor + (double3)LanternLayout.Poi(steps[i].Poi);
+                    markerName[n++] = (steps[i].Poi == "big_door_out" ? "big door" : steps[i].Poi.Replace('_', ' ')).ToUpperInvariant();
+                }
             }
             allAt = markerAt.AsSpan(0, n); allNames = markerName.AsSpan(0, n);
             return n;
@@ -206,9 +263,13 @@ namespace Game.App.DevRuntime.Extraction
             if (BoardOpen)
             {
                 if (math.distance(em.GetComponentData<LocalTransform>(player).Position, Den.Sim(DenPlace.Table)) > 80) BoardOpen = false;
-                else if (kb.upArrowKey.wasPressedThisFrame) boardPick = (boardPick + Jobs.Length - 1) % Jobs.Length;
-                else if (kb.downArrowKey.wasPressedThisFrame) boardPick = (boardPick + 1) % Jobs.Length;
-                else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) { BoardOpen = false; Say(Accept(Jobs[boardPick].Id)); }
+                else if (kb.upArrowKey.wasPressedThisFrame) boardPick = (boardPick + Leads.Length - 1) % Leads.Length;
+                else if (kb.downArrowKey.wasPressedThisFrame) boardPick = (boardPick + 1) % Leads.Length;
+                else if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
+                {
+                    if (State == JobState.None) Say(Accept(JobId));
+                    else { Tracked = Tracked == boardPick ? -1 : boardPick; Say(Tracked < 0 ? "Not tracking a lead." : "Tracking " + Leads[Tracked].Title + ": its next stops are on the HUD."); }
+                }
                 DrawBoard();
             }
             if (kb.uKey.wasPressedThisFrame) Say(Magnet(em, player));
@@ -283,7 +344,7 @@ namespace Game.App.DevRuntime.Extraction
         void Loop(EntityManager em, bool located, double3 ship, double now)
         {
             var core = Lantern.Core != Entity.Null && em.Exists(Lantern.Core) && em.HasComponent<StationCore>(Lantern.Core) ? em.GetComponentData<StationCore>(Lantern.Core) : default;
-            if (State == JobState.Accepted && located && math.distance(ship.xz, Lantern.Anchor.xz) < 1500) { State = JobState.OnSite; Say("Tollhouse Nine. The toll queue is ahead; the arch scans everyone. Job: " + Title(Job)); }
+            if (State == JobState.Accepted && located && math.distance(ship.xz, Lantern.Anchor.xz) < 1500) { State = JobState.OnSite; if (!Lantern.DimmingNight) Lantern.ScheduleDimming(now); Say("Tollhouse Nine. The toll queue is ahead; the arch scans everyone. Job: " + Title(Job)); }
             if ((State == JobState.OnSite || State == JobState.Accepted) && core.Freed != 0) State = JobState.CoreTaken;
             if (State == JobState.CoreTaken && Lantern.Heist != Entity.Null && em.GetComponentData<HeistState>(Lantern.Heist).Outcome == HeistOutcome.Escaped) State = JobState.Escaped;
             if (State is JobState.CoreTaken or JobState.Escaped && Lantern.Core != Entity.Null && em.Exists(Lantern.Core))
@@ -335,24 +396,63 @@ namespace Game.App.DevRuntime.Extraction
             }
         }
 
+        /// <summary>Take the job (`lantern`), or take it and track a lead (a lead's id).</summary>
         internal string Accept(string id)
         {
-            foreach (var j in Jobs)
-            {
-                if (j.Id != id) continue;
-                Job = id; State = JobState.Accepted;
-                if (id == "dimming") Lantern.ScheduleDimming(Time.timeAsDouble + 120);
-                return $"Job taken: {j.Title}. {j.Brief} Out through the den's gate, east of the cave.";
-            }
-            return "job accept=" + string.Join("|", Array.ConvertAll(Jobs, j => j.Id));
+            int lead = Array.FindIndex(Leads, l => l.Id == id);
+            if (id != JobId && lead < 0) return "job accept=" + JobId + "|" + string.Join("|", Array.ConvertAll(Leads, l => l.Id));
+            bool fresh = State == JobState.None;
+            if (fresh) { Job = JobId; State = JobState.Accepted; }
+            if (lead >= 0) Tracked = lead;
+            return (fresh ? $"Job taken: {JobTitle}. {JobBrief} The leads are on the board (F). Out through the den's gate, east of the cave." : "")
+                 + (lead >= 0 ? $" Tracking {Leads[lead].Title}." : "");
         }
 
-        static string Title(string id) { foreach (var j in Jobs) if (j.Id == id) return j.Title; return "none"; }
+        static string Title(string id) => id == JobId ? JobTitle : "none";
+
+        StationCore CoreNow(EntityManager em) =>
+            Lantern.Core != Entity.Null && em.Exists(Lantern.Core) && em.HasComponent<StationCore>(Lantern.Core) ? em.GetComponentData<StationCore>(Lantern.Core) : default;
+
+        bool Check(EntityManager em, string check)
+        {
+            var ship = ctx.PlayerShipRoot;
+            switch (check)
+            {
+                case "shroud": return Lantern.Shroud;
+                case "night": return Lantern.DimmingNight;
+                case "tethers": return Lantern.Core != Entity.Null && CoreNow(em).Tethers == 0;
+                case "hauler": return !Lantern.Hauler.IsNone;
+                case "haulerhold": return Lantern.HaulerLeaving;
+                case "depot": return Lantern.DepotBlown > 0;
+                case "work": return HoldsWork;
+                case "inside": return Lantern.InsideMan;
+                case "workcode":
+                    if (ship == Entity.Null || !em.Exists(ship) || !em.HasComponent<Transponder>(ship)) return false;
+                    var t = em.GetComponentData<Transponder>(ship); return t.On != 0 && t.Code == AccessCode.Work;
+                case "escaped": return State >= JobState.Escaped;
+                default: return false;
+            }
+        }
+
+        /// <summary>Which of a lead's steps are done: its own check, or any later step done (you were past it).</summary>
+        bool[] Done(EntityManager em, int lead)
+        {
+            var steps = Leads[lead].Steps; var done = new bool[steps.Length]; bool later = false;
+            for (int i = steps.Length - 1; i >= 0; i--) { done[i] = later || Check(em, steps[i].Check); later |= done[i]; }
+            return done;
+        }
+
+        static int Count(bool[] done) { int n = 0; foreach (var d in done) if (d) n++; return n; }
 
         internal string Board()
         {
-            var text = new System.Text.StringBuilder("THE BOARD (the Table at the Rock). job accept=<id>:\n");
-            foreach (var j in Jobs) text.Append("  ").Append(j.Id).Append(": ").Append(j.Title).Append(". ").Append(j.Brief).Append('\n');
+            var em = ctx.EntityManager;
+            var text = new System.Text.StringBuilder($"THE BOARD (the Table at the Rock): {JobTitle}. {JobBrief} job={(State == JobState.None ? "open (job accept=" + JobId + ")" : State.ToString())}\n");
+            for (int i = 0; i < Leads.Length; i++)
+            {
+                var done = Done(em, i);
+                text.Append("  ").Append(Leads[i].Id).Append(": ").Append(Leads[i].Title).Append($" {Count(done)}/{done.Length}").Append(i == Tracked ? " (tracked)" : "").Append(". ").Append(Leads[i].Rumour).Append('\n');
+            }
             return text.ToString();
         }
 
@@ -361,11 +461,36 @@ namespace Game.App.DevRuntime.Extraction
             if (board == null) return;
             board.style.display = BoardOpen ? DisplayStyle.Flex : DisplayStyle.None;
             if (!BoardOpen) return;
-            var text = new System.Text.StringBuilder();
-            for (int i = 0; i < Jobs.Length; i++)
-                text.Append(i == boardPick ? "> " : "   ").Append(Jobs[i].Title).Append(Job == Jobs[i].Id && State != JobState.None ? "   (taken)" : "").Append(i < Jobs.Length - 1 ? "\n" : "");
-            boardList.text = text.ToString();
-            boardBrief.text = Jobs[boardPick].Brief;
+            var em = ctx.EntityManager;
+            if (State == JobState.None)
+            {
+                boardTitle.text = "THE BOARD  ·  the Table at the Rock";
+                boardList.text = "> " + JobTitle + "  ·  Tollhouse Nine's core";
+                boardBrief.text = JobBrief;
+                boardKeys.text = "ENTER take the job  ·  F close";
+                return;
+            }
+            boardTitle.text = JobTitle.ToUpperInvariant() + "  ·  PLANNING  ·  " + State.ToString().ToUpperInvariant();
+            var list = new System.Text.StringBuilder();
+            for (int i = 0; i < Leads.Length; i++)
+            {
+                var done = Done(em, i);
+                list.Append(i == boardPick ? "> " : "   ").Append(Leads[i].Title).Append($"  {Count(done)}/{done.Length}").Append(i == Tracked ? "  · TRACKED" : "").Append(i < Leads.Length - 1 ? "\n" : "");
+            }
+            boardList.text = list.ToString();
+            var lead = Leads[boardPick]; var doneSel = Done(em, boardPick);
+            var brief = new System.Text.StringBuilder(lead.Rumour).Append("\n");
+            for (int i = 0; i < lead.Steps.Length; i++)
+            {
+                brief.Append('\n').Append(doneSel[i] ? "[x] " : "[  ] ").Append(lead.Steps[i].Text);
+                if (lead.Steps[i].Check == "night" && Lantern.DimmingAt > 0)
+                {
+                    double left = Lantern.DimmingAt - Time.timeAsDouble;
+                    if (left > 0) brief.Append($" in {(int)left / 60}:{(int)left % 60:00}");
+                }
+            }
+            boardBrief.text = brief.ToString();
+            boardKeys.text = "UP / DOWN leads  ·  ENTER " + (boardPick == Tracked ? "stop tracking" : "track on the HUD") + "  ·  F close";
         }
 
         /// <summary>F at a place. Null when the ship is at none of them.</summary>
@@ -375,7 +500,7 @@ namespace Game.App.DevRuntime.Extraction
             if (ship == Entity.Null || !em.Exists(ship)) return null;
             float3 at = em.GetComponentData<LocalTransform>(ship).Position;
             bool Near(float3 local, float r) => Lantern.Built && math.distance(at, Lantern.Sim(local)) < r;
-            if (Den.Built && math.distance(at, Den.Sim(DenPlace.Table)) < 60) { BoardOpen = !BoardOpen; DrawBoard(); return BoardOpen ? "The board is open: Up/Down choose, Enter takes the job, F closes." : ""; }
+            if (Den.Built && math.distance(at, Den.Sim(DenPlace.Table)) < 60) { BoardOpen = !BoardOpen; DrawBoard(); return ""; }
             if (!Lantern.Built) return null;
             if (Near(LanternLayout.Poi("cloth_row"), 70)) { Lantern.Shroud = true; return "Cloth Row: forty metres of black sailcloth, stitched into a shroud. Throw it over the core when you take it (it goes on with the magnet)."; }
             if (Near(LanternLayout.Poi("long_wait"), 80)) { Lantern.InsideMan = true; Lantern.OpenHatch(); return "The Long Wait: the night engineer's debt is paid. On his shift he logs tether maintenance, holds the outfall flush and opens the Cradle's floor hatch."; }
@@ -424,6 +549,7 @@ namespace Game.App.DevRuntime.Extraction
             if (Den.Built && math.distance(em.GetComponentData<LocalTransform>(player).Position, Den.Sim(DenPlace.CaveCentre)) < 900)
                 parts.Add($"ORE {Den.Ore} · BUILD {Den.KindName.ToUpperInvariant()} (F6, F7)");
             if (State != JobState.None) parts.Add("JOB " + Title(Job).ToUpperInvariant() + " · " + State.ToString().ToUpperInvariant());
+            if (State != JobState.None && Tracked >= 0) { var d = Done(em, Tracked); parts.Add($"LEAD {Leads[Tracked].Title.ToUpperInvariant()} {Count(d)}/{d.Length}"); }
             hud.text = string.Join("   ", parts);
         }
 
